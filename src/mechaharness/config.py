@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     api_key: str | None = None
     base_url: str | None = None
     system_prompt: str | None = None
+    max_turns: int = 8
+    temperature: float | None = None
+    max_tokens: int | None = None
     host: str = "127.0.0.1"
     port: int = 8080
 

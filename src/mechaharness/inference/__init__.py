@@ -1,15 +1,11 @@
 """Inference backends (Strategy pattern)."""
 
+from mechaharness.inference.anthropic import AnthropicStrategy
 from mechaharness.inference.base import InferenceStrategy
-from mechaharness.inference.registry import (
-    create_inference,
-    list_inference_backends,
-    register_inference,
-)
+from mechaharness.inference.openai_compat import OpenAICompatStrategy
 
 __all__ = [
+    "AnthropicStrategy",
     "InferenceStrategy",
-    "create_inference",
-    "list_inference_backends",
-    "register_inference",
+    "OpenAICompatStrategy",
 ]
