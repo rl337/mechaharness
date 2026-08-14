@@ -6,6 +6,7 @@ from typing import Any
 
 import httpx
 
+from mechaharness.config import Settings
 from mechaharness.core.exceptions import InferenceError
 from mechaharness.core.types import (
     ChatMessage,
@@ -17,7 +18,6 @@ from mechaharness.core.types import (
     Usage,
 )
 from mechaharness.inference.base import InferenceStrategy
-from mechaharness.inference.registry import register_inference
 
 
 def _split_system(messages: list[ChatMessage]) -> tuple[str | None, list[dict[str, Any]]]:
@@ -88,24 +88,18 @@ def _tools_to_anthropic(tools: list[ToolDefinition] | None) -> list[dict[str, An
 class AnthropicStrategy(InferenceStrategy):
     name = "anthropic"
 
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://api.anthropic.com",
-        default_model: str = "claude-sonnet-4-5",
-        api_version: str = "2023-06-01",
-        timeout: float = 120.0,
-    ) -> None:
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
-        self.default_model = default_model
+    def __init__(self, settings: Settings, *, timeout: float = 120.0) -> None:
+        if not settings.api_key:
+            raise InferenceError("Anthropic requires an API key (MECHA_API_KEY)")
+        self.api_key = settings.api_key
+        self.base_url = (settings.base_url or "https://api.anthropic.com").rstrip("/")
+        self.default_model = settings.model
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
             timeout=timeout,
             headers={
-                "x-api-key": api_key,
-                "anthropic-version": api_version,
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
                 "content-type": "application/json",
             },
         )
@@ -180,19 +174,3 @@ class AnthropicStrategy(InferenceStrategy):
 
     async def aclose(self) -> None:
         await self._client.aclose()
-
-
-@register_inference("anthropic")
-def _factory_anthropic(
-    *,
-    api_key: str,
-    base_url: str = "https://api.anthropic.com",
-    default_model: str = "claude-sonnet-4-5",
-    **kwargs: Any,
-) -> InferenceStrategy:
-    return AnthropicStrategy(
-        api_key=api_key,
-        base_url=base_url,
-        default_model=default_model,
-        **kwargs,
-    )

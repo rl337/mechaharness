@@ -1,7 +1,6 @@
 """Command-line interface."""
 
 import asyncio
-import json
 from typing import Optional
 
 import typer
@@ -10,11 +9,11 @@ from rich.markdown import Markdown
 from rich.table import Table
 
 from mechaharness import __version__
-from mechaharness.config import get_settings
-from mechaharness.factory import build_harness, build_inference
-from mechaharness.harness.registry import list_harness_families
-from mechaharness.inference.registry import list_inference_backends
-from mechaharness.tools.base import ToolRegistry
+from mechaharness.config import Settings, get_settings
+from mechaharness.core.contract import RunRequest
+from mechaharness.di import list_harness_families, list_inference_backends
+from mechaharness.factory import describe
+from mechaharness.factory import run as run_harness
 
 app = typer.Typer(
     name="mechaharness",
@@ -22,37 +21,6 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 console = Console()
-
-
-def _default_tools() -> ToolRegistry:
-    tools = ToolRegistry()
-
-    @tools.tool(
-        description="Echo text back. Useful as a smoke-test tool.",
-        parameters={
-            "type": "object",
-            "properties": {"text": {"type": "string"}},
-            "required": ["text"],
-        },
-    )
-    def echo(text: str) -> str:
-        return text
-
-    @tools.tool(
-        description="Add two numbers.",
-        parameters={
-            "type": "object",
-            "properties": {
-                "a": {"type": "number"},
-                "b": {"type": "number"},
-            },
-            "required": ["a", "b"],
-        },
-    )
-    def add(a: float, b: float) -> str:
-        return str(a + b)
-
-    return tools
 
 
 @app.command("version")
@@ -63,7 +31,7 @@ def version() -> None:
 
 @app.command("backends")
 def backends() -> None:
-    """List registered inference backends."""
+    """List configured inference backends."""
     table = Table(title="Inference backends")
     table.add_column("Name")
     for name in list_inference_backends():
@@ -73,7 +41,7 @@ def backends() -> None:
 
 @app.command("families")
 def families() -> None:
-    """List registered harness families."""
+    """List configured harness families."""
     table = Table(title="Harness families")
     table.add_column("Name")
     for name in list_harness_families():
@@ -94,41 +62,27 @@ def run(
     json_out: bool = typer.Option(False, "--json", help="Emit machine-readable JSON"),
 ) -> None:
     """Run a single prompt through the configured harness."""
-    settings = get_settings()
-    backend_name = backend or settings.inference_backend
-    family_name = family or settings.harness_family
-    model_name = model or settings.model
-    key = api_key if api_key is not None else settings.api_key
-    url = base_url if base_url is not None else settings.base_url
-    sys_prompt = system_prompt if system_prompt is not None else settings.system_prompt
-
-    inference_kwargs: dict = {}
-    if key is not None:
-        inference_kwargs["api_key"] = key
-    if url is not None:
-        inference_kwargs["base_url"] = url
+    request = RunRequest(
+        prompt=prompt,
+        backend=backend,
+        family=family,
+        model=model,
+        api_key=api_key,
+        base_url=base_url,
+        system_prompt=system_prompt,
+        max_turns=max_turns,
+    )
 
     async def _run() -> None:
-        inference = build_inference(backend_name, model=model_name, **inference_kwargs)
-        try:
-            harness = build_harness(
-                family_name,
-                inference=inference,
-                model=model_name,
-                tools=_default_tools(),
-                system_prompt=sys_prompt,
-                max_turns=max_turns,
-            )
-            result = await harness.run(prompt)
-        finally:
-            await inference.aclose()
-
+        result = await run_harness(request)
         if json_out:
             console.print_json(data=result.model_dump())
         else:
             console.print(Markdown(result.final_text or ""))
             console.print(
-                f"\n[dim]turns={result.turns} family={family_name} backend={backend_name}[/dim]"
+                f"\n[dim]turns={result.turns} family="
+                f"{request.family or get_settings().harness_family} "
+                f"backend={request.backend or get_settings().inference_backend}[/dim]"
             )
 
     asyncio.run(_run())
@@ -153,22 +107,24 @@ def serve(
 
 
 @app.command("describe")
-def describe(
+def describe_cmd(
     backend: str = typer.Argument(..., help="Backend name to instantiate and describe"),
     api_key: Optional[str] = typer.Option(None, "--api-key", envvar="MECHA_API_KEY"),
     base_url: Optional[str] = typer.Option(None, "--base-url"),
     model: Optional[str] = typer.Option(None, "--model", "-m"),
 ) -> None:
     """Show metadata for a configured inference backend."""
-    kwargs: dict = {}
-    if api_key is not None:
-        kwargs["api_key"] = api_key
-    if base_url is not None:
-        kwargs["base_url"] = base_url
-    if model is not None:
-        kwargs["model"] = model
-    strategy = build_inference(backend, **kwargs)
-    console.print(json.dumps(strategy.describe(), indent=2))
+    import json
+
+    env = get_settings()
+    settings = Settings(
+        inference_backend=backend,
+        api_key=api_key if api_key is not None else env.api_key,
+        base_url=base_url if base_url is not None else env.base_url,
+        model=model or env.model,
+    )
+    meta = asyncio.run(describe(settings))
+    console.print(json.dumps(meta, indent=2))
 
 
 if __name__ == "__main__":

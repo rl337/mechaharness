@@ -1,15 +1,16 @@
 # HTTP API reference
 
 App: `mechaharness.api.app:app`  
-Stability: evolving (v1)
+Stability: evolving (v1)  
+Python helper: `mechaharness.factory.run` uses the same `RunRequest` / `RunResponse` (`mechaharness.core.contract`).
 
 ## Routes
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/health` | Liveness + version |
-| `GET` | `/backends` | Registered inference backends |
-| `GET` | `/families` | Registered harness families |
+| `GET` | `/backends` | Configured inference backends |
+| `GET` | `/families` | Configured harness families |
 | `POST` | `/v1/run` | Run a prompt through a harness |
 
 ## `POST /v1/run`
