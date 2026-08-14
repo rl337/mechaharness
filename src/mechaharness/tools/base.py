@@ -1,0 +1,101 @@
+"""Tool protocol and in-process tool registry."""
+
+from __future__ import annotations
+
+import inspect
+from collections.abc import Awaitable, Callable
+from typing import Any, Union
+
+from mechaharness.core.types import ToolDefinition, ToolResult
+
+ToolHandler = Callable[..., Union[str, Awaitable[str]]]
+
+
+class Tool:
+    """A named callable exposed to harnesses as a ToolDefinition."""
+
+    def __init__(
+        self,
+        name: str,
+        handler: ToolHandler,
+        *,
+        description: str = "",
+        parameters: dict[str, Any] | None = None,
+    ) -> None:
+        self.name = name
+        self.handler = handler
+        self.description = description
+        self.parameters = parameters or {"type": "object", "properties": {}}
+
+    def definition(self) -> ToolDefinition:
+        return ToolDefinition(
+            name=self.name,
+            description=self.description,
+            parameters=self.parameters,
+        )
+
+    async def invoke(self, arguments: dict[str, Any], tool_call_id: str) -> ToolResult:
+        try:
+            result = self.handler(**arguments)
+            if inspect.isawaitable(result):
+                result = await result
+            return ToolResult(tool_call_id=tool_call_id, content=str(result))
+        except TypeError as exc:
+            return ToolResult(
+                tool_call_id=tool_call_id,
+                content=f"Invalid arguments for tool {self.name}: {exc}",
+                is_error=True,
+            )
+        except Exception as exc:  # noqa: BLE001 - surface tool failures to the model
+            return ToolResult(
+                tool_call_id=tool_call_id,
+                content=f"Tool {self.name} failed: {exc}",
+                is_error=True,
+            )
+
+
+class ToolRegistry:
+    def __init__(self) -> None:
+        self._tools: dict[str, Tool] = {}
+
+    def register(self, tool: Tool) -> None:
+        self._tools[tool.name] = tool
+
+    def tool(
+        self,
+        name: str | None = None,
+        *,
+        description: str = "",
+        parameters: dict[str, Any] | None = None,
+    ) -> Callable[[ToolHandler], ToolHandler]:
+        def decorator(fn: ToolHandler) -> ToolHandler:
+            tool_name = name or fn.__name__
+            self.register(
+                Tool(
+                    tool_name,
+                    fn,
+                    description=description or (fn.__doc__ or "").strip(),
+                    parameters=parameters,
+                )
+            )
+            return fn
+
+        return decorator
+
+    def definitions(self) -> list[ToolDefinition]:
+        return [t.definition() for t in self._tools.values()]
+
+    def get(self, name: str) -> Tool:
+        try:
+            return self._tools[name]
+        except KeyError as exc:
+            raise KeyError(f"Unknown tool: {name}") from exc
+
+    async def execute(self, name: str, arguments: dict[str, Any], tool_call_id: str) -> ToolResult:
+        return await self.get(name).invoke(arguments, tool_call_id)
+
+    def __contains__(self, name: str) -> bool:
+        return name in self._tools
+
+    def __len__(self) -> int:
+        return len(self._tools)
