@@ -1,14 +1,17 @@
-"""Harness architectures (class hierarchy + family registry)."""
+"""Harness architectures (class hierarchy)."""
 
 from mechaharness.harness.base import AbstractHarness, HarnessConfig, HarnessEvent, HarnessResult
-from mechaharness.harness.registry import create_harness, list_harness_families, register_harness
+from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
+from mechaharness.harness.react import ReactHarness
+from mechaharness.harness.tool_loop import ToolLoopHarness
 
 __all__ = [
     "AbstractHarness",
+    "AnthropicToolsHarness",
     "HarnessConfig",
     "HarnessEvent",
     "HarnessResult",
-    "create_harness",
-    "list_harness_families",
-    "register_harness",
+    "OpenAIToolsHarness",
+    "ReactHarness",
+    "ToolLoopHarness",
 ]

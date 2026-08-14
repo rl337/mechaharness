@@ -5,9 +5,10 @@ from __future__ import annotations
 import pytest
 
 from mechaharness.core.types import ChatMessage, Role, ToolCall
+from mechaharness.di import list_harness_families
 from mechaharness.harness.base import HarnessConfig
+from mechaharness.harness.families import OpenAIToolsHarness
 from mechaharness.harness.react import ReactHarness
-from mechaharness.harness.registry import create_harness, list_harness_families
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
@@ -31,7 +32,7 @@ def tools() -> ToolRegistry:
     return registry
 
 
-def test_harness_families_registered() -> None:
+def test_harness_families_configured() -> None:
     families = list_harness_families()
     assert "tool_loop" in families
     assert "react" in families
@@ -62,12 +63,9 @@ async def test_tool_loop_executes_then_stops(tools: ToolRegistry) -> None:
 
 
 @pytest.mark.asyncio
-async def test_create_harness_factory(tools: ToolRegistry) -> None:
-    inference = ScriptedInference(
-        [ChatMessage(role=Role.ASSISTANT, content="hello")]
-    )
-    harness = create_harness(
-        "openai_tools",
+async def test_openai_tools_family(tools: ToolRegistry) -> None:
+    inference = ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="hello")])
+    harness = OpenAIToolsHarness(
         inference=inference,
         tools=tools,
         config=HarnessConfig(model="m"),

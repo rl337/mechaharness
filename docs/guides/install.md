@@ -15,6 +15,11 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
+Install pulls **pyiv** from GitHub SSH (`git@github.com:rl337/pyiv.git`, pinned in
+`pyproject.toml`). You need SSH access to GitHub. If CI cannot use SSH, clone
+pyiv over HTTPS locally and install that checkout — keep a single URL in
+`pyproject.toml`.
+
 List what is registered:
 
 ```bash
@@ -48,7 +53,7 @@ curl -s http://127.0.0.1:8080/health
 ## Verify
 
 - `mechaharness version` prints `0.1.0` (or current)
-- `pytest` passes from the repo root
+- `./run_checks.sh` passes from the repo root
 - `/health` returns `{"status":"ok",...}`
 
 ## Next

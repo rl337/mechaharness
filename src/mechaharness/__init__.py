@@ -1,5 +1,6 @@
 """MechaHarness: agentic harness with pluggable inference and harness families."""
 
+from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.types import (
     ChatMessage,
     CompletionRequest,
@@ -9,9 +10,10 @@ from mechaharness.core.types import (
     ToolDefinition,
     ToolResult,
 )
+from mechaharness.di import MechaHarnessConfig, SettingsConfig, list_inference_backends
+from mechaharness.factory import run
 from mechaharness.harness.base import AbstractHarness, HarnessConfig, HarnessResult
 from mechaharness.inference.base import InferenceStrategy
-from mechaharness.inference.registry import create_inference, list_inference_backends
 
 __all__ = [
     "AbstractHarness",
@@ -21,12 +23,16 @@ __all__ = [
     "HarnessConfig",
     "HarnessResult",
     "InferenceStrategy",
+    "MechaHarnessConfig",
     "Role",
+    "RunRequest",
+    "RunResponse",
+    "SettingsConfig",
     "ToolCall",
     "ToolDefinition",
     "ToolResult",
-    "create_inference",
     "list_inference_backends",
+    "run",
 ]
 
 __version__ = "0.1.0"
