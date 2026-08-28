@@ -6,6 +6,7 @@ Python agentic harness that separates **how you call models** from **how you run
 
 - **Inference Strategy** — swap OpenAI, Anthropic, LM Studio, vLLM, Ollama, or any OpenAI-compatible server
 - **Harness hierarchy** — model-family architectures (tool-calling loops, ReAct, …) share one base loop
+- **DI-first** — pyiv `MechaHarnessConfig` wires the graph; OpenAPI `RunRequest` / `run()` is the non-DI facade
 - **Frontends** — Typer CLI and FastAPI HTTP API (stable shapes for future language bindings)
 
 Full documentation lives in [`docs/`](docs/index.md).
@@ -19,23 +20,16 @@ Full documentation lives in [`docs/`](docs/index.md).
        │                   │
        └─────────┬─────────┘
                  ▼
-        ┌────────────────┐
-        │ AbstractHarness │  ← class hierarchy / template method
-        │  tool_loop      │
-        │  react          │
-        │  openai_tools   │
-        │  anthropic_tools│
-        └────────┬───────┘
-                 │ uses
+          RunRequest / run()
+                 │
                  ▼
-        ┌────────────────────┐
-        │ InferenceStrategy  │  ← strategy pattern
-        │  openai_compat     │     (openai, lmstudio, vllm, ollama)
-        │  anthropic         │
-        └────────────────────┘
+        MechaHarnessConfig (pyiv)
+                 │
+                 ▼
+        AbstractHarness  →  InferenceStrategy
 ```
 
-Harnesses never import a provider SDK. They call `InferenceStrategy.complete()` with normalized `CompletionRequest` / `CompletionResponse` types (`src/mechaharness/core/types.py`). Those Pydantic models are the portable contract for other languages later (OpenAPI today; FFI/IPC later).
+Harnesses never import a provider SDK. They call `InferenceStrategy.complete()` with normalized `CompletionRequest` / `CompletionResponse` types (`src/mechaharness/core/types.py`). Design details: [`docs/architecture.md`](docs/architecture.md).
 
 ## Quick start
 
@@ -67,76 +61,60 @@ Environment variables use the `MECHA_` prefix (`MECHA_API_KEY`, `MECHA_INFERENCE
 
 ## Library usage
 
+Non-DI (OpenAPI-shaped):
+
 ```python
 import asyncio
-from mechaharness.factory import build_harness, build_inference
-from mechaharness.tools import ToolRegistry
-
-tools = ToolRegistry()
-
-@tools.tool(
-    description="Add two numbers",
-    parameters={
-        "type": "object",
-        "properties": {
-            "a": {"type": "number"},
-            "b": {"type": "number"},
-        },
-        "required": ["a", "b"],
-    },
-)
-def add(a: float, b: float) -> str:
-    return str(a + b)
+from mechaharness import RunRequest, run
 
 async def main() -> None:
-    inference = build_inference("lmstudio", model="local-model")
-    harness = build_harness(
-        "tool_loop",
-        inference=inference,
-        model="local-model",
-        tools=tools,
-        system_prompt="You are a careful assistant that uses tools when needed.",
-    )
-    result = await harness.run("What is 19 + 23?")
+    result = await run(RunRequest(prompt="What is 19 + 23?", backend="lmstudio"))
     print(result.final_text)
-    await inference.aclose()
 
 asyncio.run(main())
 ```
 
-## Extending
-
-### New inference backend (Strategy)
+DI (pyiv Config hooks):
 
 ```python
-from mechaharness.inference.base import InferenceStrategy
-from mechaharness.inference.registry import register_inference
+from pyiv import get_injector
 
-class MyStrategy(InferenceStrategy):
-    name = "my_provider"
-    async def complete(self, request):
-        ...
+from mechaharness.di import MechaHarnessConfig
+from mechaharness.harness.base import AbstractHarness
+from mechaharness.harness.tool_loop import ToolLoopHarness
+from mechaharness.inference.openai_compat import OpenAICompatStrategy
 
-@register_inference("my_provider")
-def _factory(**kwargs) -> InferenceStrategy:
-    return MyStrategy(**kwargs)
+
+class MyConfig(MechaHarnessConfig):
+    def get_inference_class(self):
+        return OpenAICompatStrategy
+
+    def get_harness_class(self):
+        return ToolLoopHarness
+
+
+injector = get_injector(MyConfig)
+harness = injector.inject(AbstractHarness)
 ```
 
-### New harness family (Hierarchy)
+See [`docs/guides/dependency-injection.md`](docs/guides/dependency-injection.md).
 
-Subclass `AbstractHarness` and override `should_stop` (and optionally `build_request` / `tool_result_message`), then `register_harness("my_family", MyHarness)`.
+## Extending
+
+Subclass `InferenceStrategy` (constructor takes `Settings`) and return it from `get_inference_class()`, or merge it into `SettingsConfig.inference_classes()`. Subclass `AbstractHarness` and return it from `get_harness_class()`.
 
 ## Layout
 
 ```text
 src/mechaharness/
-  core/           # shared types + errors (public contract)
-  inference/      # Strategy implementations + registry
+  core/           # shared types, errors, OpenAPI RunRequest/RunResponse
+  di.py           # MechaHarnessConfig / SettingsConfig (pyiv)
+  inference/      # Strategy implementations
   harness/        # AbstractHarness hierarchy + families
   tools/          # ToolRegistry
   cli/            # Typer entrypoint
   api/            # FastAPI app
-  factory.py      # CLI/API wiring helpers
+  factory.py      # non-DI run() helper
   config.py       # pydantic-settings
 ```
 
@@ -144,15 +122,17 @@ src/mechaharness/
 
 ```bash
 pip install -e ".[dev]"
-pytest
-ruff check src tests
+./run_checks.sh
 ```
+
+`run_checks.sh` is what CI runs: ruff, mypy, pytest, and CLI smoke (`version` / `backends` / `families`).
 
 ## Design notes
 
 | Concern | Pattern | Why |
 |--------|---------|-----|
-| Provider I/O | Strategy + registry | Swap cloud/local without touching agent logic |
+| Wiring | pyiv Config hooks | DI-first; hosts inject MechaHarness types |
+| Provider I/O | Strategy | Swap cloud/local without touching agent logic |
 | Agent loop | Template method hierarchy | Share turn accounting; specialize stop/tool rules per model family |
-| Frontends | Thin adapters over factory | Same wiring for CLI and API |
+| Frontends | OpenAPI `RunRequest` / `run()` | Same contract for CLI, HTTP, and non-DI Python |
 | Bindings later | Pydantic + OpenAPI | Types stay serializable; API is the first non-Python client surface |
