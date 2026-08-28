@@ -11,7 +11,7 @@ import re
 from typing import Any
 
 from mechaharness.core.types import ChatMessage, CompletionRequest, Role, ToolCall
-from mechaharness.harness.base import AbstractHarness, HarnessResult
+from mechaharness.harness.base import AbstractHarness, HarnessEvent, HarnessResult
 
 _ACTION_RE = re.compile(
     r"Action\s*:\s*(?P<name>[A-Za-z0-9_\-]+)\s*\n"
@@ -68,7 +68,7 @@ class ReactHarness(AbstractHarness):
     ) -> HarnessResult:
         # Override lightly: parse Action blocks into synthetic tool calls.
         messages = self._bootstrap_messages(user_input, history)
-        events = []
+        events: list[HarnessEvent] = []
         turns = 0
 
         while turns < self.config.max_turns:

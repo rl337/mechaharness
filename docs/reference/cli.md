@@ -7,8 +7,8 @@ Entrypoint: `mechaharness` (`mechaharness.cli.main:app`)
 | Command | Purpose |
 |---------|---------|
 | `version` | Print package version |
-| `backends` | List registered inference backends |
-| `families` | List registered harness families |
+| `backends` | List configured inference backends |
+| `families` | List configured harness families |
 | `run` | Run one prompt through a harness |
 | `serve` | Start the FastAPI server |
 | `describe` | Show metadata for a configured backend |

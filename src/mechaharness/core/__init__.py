@@ -1,5 +1,6 @@
 """Core package: shared types and exceptions."""
 
+from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.exceptions import (
     HarnessError,
     InferenceError,
@@ -25,6 +26,8 @@ __all__ = [
     "InferenceError",
     "MechaHarnessError",
     "Role",
+    "RunRequest",
+    "RunResponse",
     "ToolCall",
     "ToolDefinition",
     "ToolExecutionError",

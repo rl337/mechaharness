@@ -76,9 +76,10 @@ routes change, update in this order:
 ## Writing rules
 
 - Lead with what the reader can do, then how.
-- Use real module paths (`mechaharness.inference.registry`, etc.).
-- Document extension points: `register_inference`, `register_harness`,
-  subclassing `AbstractHarness` / `InferenceStrategy`.
+- Use real module paths (`mechaharness.di`, `mechaharness.inference.openai_compat`, etc.).
+- Document extension points: `MechaHarnessConfig.get_inference_class` /
+  `get_harness_class`, `SettingsConfig.inference_classes()`, subclassing
+  `AbstractHarness` / `InferenceStrategy`.
 - Call out the separation of concerns explicitly:
   - **Inference Strategy** = provider I/O
   - **Harness hierarchy** = agent loop policy
