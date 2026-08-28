@@ -12,6 +12,7 @@ from typing import Any
 
 import httpx
 
+from mechaharness.config import Settings
 from mechaharness.core.exceptions import InferenceError
 from mechaharness.core.types import (
     ChatMessage,
@@ -23,7 +24,6 @@ from mechaharness.core.types import (
     Usage,
 )
 from mechaharness.inference.base import InferenceStrategy
-from mechaharness.inference.registry import register_inference
 
 
 def _messages_to_openai(messages: list[ChatMessage]) -> list[dict[str, Any]]:
@@ -97,22 +97,14 @@ class OpenAICompatStrategy(InferenceStrategy):
 
     name = "openai_compat"
 
-    def __init__(
-        self,
-        *,
-        base_url: str = "https://api.openai.com/v1",
-        api_key: str | None = None,
-        default_model: str = "gpt-4o-mini",
-        timeout: float = 120.0,
-        extra_headers: dict[str, str] | None = None,
-    ) -> None:
-        self.base_url = base_url.rstrip("/")
-        self.api_key = api_key
-        self.default_model = default_model
+    def __init__(self, settings: Settings, *, timeout: float = 120.0) -> None:
+        self.base_url = (settings.base_url or "https://api.openai.com/v1").rstrip("/")
+        self.api_key = settings.api_key
+        self.default_model = settings.model
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
             timeout=timeout,
-            headers=self._build_headers(extra_headers),
+            headers=self._build_headers(None),
         )
 
     def _build_headers(self, extra: dict[str, str] | None) -> dict[str, str]:
@@ -205,68 +197,3 @@ class OpenAICompatStrategy(InferenceStrategy):
 
     async def aclose(self) -> None:
         await self._client.aclose()
-
-
-@register_inference("openai")
-@register_inference("openai_compat")
-def _factory_openai(
-    *,
-    base_url: str = "https://api.openai.com/v1",
-    api_key: str | None = None,
-    default_model: str = "gpt-4o-mini",
-    **kwargs: Any,
-) -> InferenceStrategy:
-    return OpenAICompatStrategy(
-        base_url=base_url,
-        api_key=api_key,
-        default_model=default_model,
-        **kwargs,
-    )
-
-
-@register_inference("lmstudio")
-def _factory_lmstudio(
-    *,
-    base_url: str = "http://localhost:1234/v1",
-    api_key: str | None = "lm-studio",
-    default_model: str = "local-model",
-    **kwargs: Any,
-) -> InferenceStrategy:
-    return OpenAICompatStrategy(
-        base_url=base_url,
-        api_key=api_key,
-        default_model=default_model,
-        **kwargs,
-    )
-
-
-@register_inference("vllm")
-def _factory_vllm(
-    *,
-    base_url: str = "http://localhost:8000/v1",
-    api_key: str | None = None,
-    default_model: str = "default",
-    **kwargs: Any,
-) -> InferenceStrategy:
-    return OpenAICompatStrategy(
-        base_url=base_url,
-        api_key=api_key,
-        default_model=default_model,
-        **kwargs,
-    )
-
-
-@register_inference("ollama")
-def _factory_ollama(
-    *,
-    base_url: str = "http://localhost:11434/v1",
-    api_key: str | None = "ollama",
-    default_model: str = "llama3.2",
-    **kwargs: Any,
-) -> InferenceStrategy:
-    return OpenAICompatStrategy(
-        base_url=base_url,
-        api_key=api_key,
-        default_model=default_model,
-        **kwargs,
-    )

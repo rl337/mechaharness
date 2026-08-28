@@ -1,0 +1,34 @@
+---
+description: MechaHarness is a pyiv dependency-injection-first project
+alwaysApply: true
+---
+
+# DI-first (pyiv)
+
+Default path is **pyiv**. New services, backends, harness families, and CLI/API
+wiring go through `MechaHarnessConfig` and constructor injection. Do not add
+string registries, service locators, or a global injector.
+
+Extend by **subclassing Config**. Override `get_inference_class()` /
+`get_harness_class()` (and maps like `inference_classes()`). Host apps subclass
+`MechaHarnessConfig` and call `super().configure()`.
+
+Constructors take types pyiv can inject (`InferenceStrategy`, `Settings`,
+`HarnessConfig`, `ToolRegistry`), not `str`/`dict` bags the injector cannot resolve.
+
+OpenAPI is the **non-DI facade**, not a second architecture. `RunRequest` / `run()`
+may hide the injector; they must still construct a Config and inject. Do not grow
+`factory.py` back into a registry.
+
+Only `mechaharness.di` and `mechaharness.factory.run` import pyiv. Domain types
+stay injector-agnostic so host apps can inject them.
+
+```python
+# BAD — new global registry
+register_inference("my_backend")(factory)
+
+# GOOD — Config hook
+class MyConfig(MechaHarnessConfig):
+    def get_inference_class(self):
+        return MyStrategy
+```
