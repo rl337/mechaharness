@@ -150,3 +150,29 @@ def test_unknown_namespaced_string_is_valid() -> None:
 def test_bare_event_type_is_rejected() -> None:
     with pytest.raises(ValueError, match="namespace:name"):
         Event(type="run_start", agent_id="a", run_id="run-1")
+
+
+def _walk_event_types(base: type[EventType] = EventType) -> list[type[EventType]]:
+    found: list[type[EventType]] = []
+    stack = list(base.__subclasses__())
+    while stack:
+        cls = stack.pop()
+        found.append(cls)
+        stack.extend(cls.__subclasses__())
+    return found
+
+
+def test_event_type_namespace_and_name_are_unique() -> None:
+    concrete = [cls for cls in _walk_event_types() if cls.namespace and cls.name]
+    assert concrete, "expected concrete EventType subclasses"
+    by_key: dict[str, str] = {}
+    collisions: list[str] = []
+    for cls in concrete:
+        key = f"{cls.namespace}:{cls.name}"
+        other = by_key.get(key)
+        if other is not None:
+            collisions.append(f"{key} used by {other} and {cls.__name__}")
+        else:
+            by_key[key] = cls.__name__
+        assert cls.key() == key
+    assert not collisions, "; ".join(collisions)
