@@ -3,6 +3,7 @@
 from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.events import (
     AgentRef,
+    CoreEvent,
     Event,
     EventLog,
     EventType,
@@ -30,6 +31,7 @@ from mechaharness.core.types import (
 __all__ = [
     "AgentRef",
     "ChatMessage",
+    "CoreEvent",
     "CompletionRequest",
     "CompletionResponse",
     "Event",

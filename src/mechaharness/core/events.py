@@ -12,37 +12,140 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from datetime import datetime, timezone
-from enum import Enum
-from typing import Any
+from typing import Any, ClassVar, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 LOGGER_NAME = "mechaharness.events"
 
 
-class EventType(str, Enum):
-    AGENT_START = "agent_start"
-    AGENT_END = "agent_end"
-    RUN_START = "run_start"
-    RUN_END = "run_end"
-    TURN_START = "turn_start"
-    INFERENCE = "inference"
-    TOOL_CALL = "tool_call"
-    TOOL_RESULT = "tool_result"
-    MAX_TURNS = "max_turns"
-    COST = "cost"
-    ACCESS_CHECK = "access_check"
+class EventType:
+    """Namespaced event identity.
+
+    Subclass to add types. The wire form is ``namespace:name`` (for example
+    ``core:agent_start``). Intermediate classes set ``namespace``; leaves set
+    ``name``.
+    """
+
+    namespace: ClassVar[str] = ""
+    name: ClassVar[str] = ""
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if not cls.name:
+            return
+        if not cls.namespace:
+            raise TypeError(f"{cls.__name__} must set namespace (via a base class)")
+        if ":" in cls.namespace or ":" in cls.name:
+            raise ValueError("namespace and name must not contain ':'")
+        key = cls.key()
+        existing = _EVENT_TYPES.get(key)
+        if existing is not None and existing is not cls:
+            raise ValueError(f"duplicate event type {key!r} ({existing.__name__})")
+        _EVENT_TYPES[key] = cls
+
+    @classmethod
+    def key(cls) -> str:
+        if not cls.namespace or not cls.name:
+            raise TypeError(f"{cls.__name__} is not a concrete event type")
+        return f"{cls.namespace}:{cls.name}"
+
+    @classmethod
+    def parse(cls, value: str) -> type[EventType]:
+        """Return the class registered for ``namespace:name``."""
+        _require_namespaced(value)
+        try:
+            return _EVENT_TYPES[value]
+        except KeyError as exc:
+            raise KeyError(f"unknown event type {value!r}") from exc
+
+
+_EVENT_TYPES: dict[str, type[EventType]] = {}
+EventTypeRef = Union[str, type[EventType]]
+
+
+class CoreEvent(EventType):
+    """Built-in MechaHarness events (``core:*``)."""
+
+    namespace = "core"
+
+
+class AgentStart(CoreEvent):
+    name = "agent_start"
+
+
+class AgentEnd(CoreEvent):
+    name = "agent_end"
+
+
+class RunStart(CoreEvent):
+    name = "run_start"
+
+
+class RunEnd(CoreEvent):
+    name = "run_end"
+
+
+class TurnStart(CoreEvent):
+    name = "turn_start"
+
+
+class Inference(CoreEvent):
+    name = "inference"
+
+
+class ToolCall(CoreEvent):
+    name = "tool_call"
+
+
+class ToolResult(CoreEvent):
+    name = "tool_result"
+
+
+class MaxTurns(CoreEvent):
+    name = "max_turns"
+
+
+class Cost(CoreEvent):
+    name = "cost"
+
+
+class AccessCheck(CoreEvent):
+    name = "access_check"
+
+
+def event_type_key(value: object) -> str:
+    """Normalize a class or ``namespace:name`` string to the wire key."""
+    if isinstance(value, str):
+        _require_namespaced(value)
+        return value
+    if isinstance(value, type) and issubclass(value, EventType):
+        return value.key()
+    raise TypeError(f"event type must be EventType subclass or str, got {value!r}")
+
+
+def _require_namespaced(value: str) -> None:
+    namespace, sep, name = value.partition(":")
+    if not sep or not namespace or not name:
+        raise ValueError(f"event type must be namespace:name, got {value!r}")
+    if ":" in name:
+        raise ValueError(f"event type must be namespace:name, got {value!r}")
 
 
 class Event(BaseModel):
     """One structured log record."""
 
     ts: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    type: EventType
+    type: str
     agent_id: str
     run_id: str
     parent_agent_id: str | None = None
     payload: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("type", mode="before")
+    @classmethod
+    def _coerce_type(cls, value: object) -> str:
+        return event_type_key(value)
 
 
 class AgentRef(BaseModel):
@@ -69,7 +172,7 @@ class EventLog(ABC):
         agent_id: str | None = None,
         run_id: str | None = None,
         descendants: bool = False,
-        types: Sequence[EventType] | None = None,
+        types: Sequence[EventTypeRef] | None = None,
     ) -> list[Event]:
         """Return matching events in emit order."""
 
@@ -93,9 +196,9 @@ class InMemoryEventLog(EventLog):
         agent_id: str | None = None,
         run_id: str | None = None,
         descendants: bool = False,
-        types: Sequence[EventType] | None = None,
+        types: Sequence[EventTypeRef] | None = None,
     ) -> list[Event]:
-        type_set = set(types) if types is not None else None
+        type_set = {event_type_key(item) for item in types} if types is not None else None
         agent_ids: set[str] | None = None
         if agent_id is not None:
             agent_ids = self._descendant_ids(agent_id) if descendants else {agent_id}
@@ -169,7 +272,7 @@ class LoggingEventLog(EventLog):
         agent_id: str | None = None,
         run_id: str | None = None,
         descendants: bool = False,
-        types: Sequence[EventType] | None = None,
+        types: Sequence[EventTypeRef] | None = None,
     ) -> list[Event]:
         return []
 
@@ -199,7 +302,7 @@ class FanoutEventLog(EventLog):
         agent_id: str | None = None,
         run_id: str | None = None,
         descendants: bool = False,
-        types: Sequence[EventType] | None = None,
+        types: Sequence[EventTypeRef] | None = None,
     ) -> list[Event]:
         return self._store.query(
             agent_id=agent_id,
