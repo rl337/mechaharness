@@ -1,0 +1,53 @@
+---
+description: Hosts must extend MechaHarness by composing, not by editing this repo
+alwaysApply: true
+---
+
+# Host-extendable
+
+MechaHarness is a library. A third party must get **full capability** by
+subclassing and composing — never by forking this repo or patching our
+enums, maps, or `match` lists.
+
+If a feature requires changing `src/mechaharness` to add a host type, the
+design is wrong. DI (`MechaHarnessConfig`) is necessary but not sufficient;
+closed identity still blocks hosts (the old `EventType` enum).
+
+## Open identity
+
+- Types hosts will add are **classes** (ABCs / hierarchies), not a closed
+  `Enum` or `Literal[...]` of names.
+- Wire identity is a `str`. When we own the vocabulary, namespace it
+  (`core:agent_start`, `acme:widget`).
+- Unknown namespaced values must round-trip. Do not require a central
+  registry to emit or store them.
+- Protocol vocabularies shared with model APIs (e.g. chat `Role`) may stay
+  closed. Identity of *our* concepts (events, backends, families, tools,
+  policies) must not.
+
+```python
+# BAD — host cannot add a type without a PR
+class EventType(str, Enum):
+    AGENT_START = "agent_start"
+
+# GOOD — host subclasses; wire form is namespaced
+class AgentStart(CoreEvent):
+    name = "agent_start"
+
+class WidgetDone(EventType):
+    namespace = "acme"
+    name = "widget"
+```
+
+## Hooks, not edits
+
+- Bind new backends, families, tools, logs, and policies through Config
+  hooks, constructor injection, or subclassing. Default maps in this package
+  (`inference_classes()`, `harness_classes()`) are conveniences; hosts merge
+  via `super()` and extra keys.
+- Do not `if family == "react"` (or equivalent) in shared code. Put behavior
+  on the subclass.
+- Keep `payload` / `extra` dicts open. Do not `extra="forbid"` on types
+  hosts must annotate.
+- Exhaustive switches over a closed set of concretes belong only behind a
+  host-replaceable strategy, never in core control flow.

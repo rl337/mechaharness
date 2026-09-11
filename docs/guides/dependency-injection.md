@@ -77,6 +77,6 @@ the caller.
 
 ## Next
 
-- [Architecture](../architecture.md)
+- [Architecture](../architecture.md) (including host extension)
 - [Install](./install.md)
 - ADR: [0001 pyiv Config](../adr/0001-pyiv-config.md)
