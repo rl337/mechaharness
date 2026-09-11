@@ -125,7 +125,11 @@ pip install -e ".[dev]"
 ./run_checks.sh
 ```
 
-`run_checks.sh` is what CI runs: ruff, mypy, pytest, and CLI smoke (`version` / `backends` / `families`).
+`run_checks.sh` is what CI runs: ruff, mypy, pytest, and CLI smoke (`version` / `backends` / `families`). To run that suite in an Ubuntu 24.04 + Python 3.12 image (same as GitHub Actions):
+
+```bash
+./containers/run-ci.sh
+```
 
 ## Design notes
 

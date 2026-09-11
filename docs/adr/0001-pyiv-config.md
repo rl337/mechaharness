@@ -26,4 +26,4 @@ build a Config and inject.
 - Strategy constructors take `Settings` so pyiv can construct them
 - Domain types stay pyiv-free and injectable into host apps
 - Callers who do not want DI use the same OpenAPI models as HTTP
-- pyiv is a hard git dependency; the HTTP/Python `run()` path hides it
+- pyiv is a PyPI dependency (`pyiv>=0.3.0`); the HTTP/Python `run()` path hides it

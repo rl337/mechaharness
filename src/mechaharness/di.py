@@ -44,7 +44,7 @@ def apply_backend_defaults(settings: Settings) -> Settings:
     return settings.model_copy(update=updates) if updates else settings
 
 
-class MechaHarnessConfig(Config):  # type: ignore[misc]
+class MechaHarnessConfig(Config):
     """Template-method pyiv Config. Override the ``get_*_class`` hooks."""
 
     def configure(self) -> None:
@@ -128,7 +128,7 @@ class SettingsConfig(MechaHarnessConfig):
         self._provided_settings = settings
         self._provided_tools = tools
         self._resolved_settings: Settings | None = None
-        super().__init__()
+        super().__init__()  # type: ignore[no-untyped-call]
 
     def get_settings(self) -> Settings:
         if self._resolved_settings is None:
