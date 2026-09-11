@@ -13,6 +13,7 @@ Python agentic harness that separates **how you call models** from **how you run
 | [Dependency injection](./guides/dependency-injection.md) | Config hooks vs OpenAPI `run()` |
 | [CLI reference](./reference/cli.md) | `mechaharness` commands |
 | [HTTP API reference](./reference/api.md) | FastAPI routes |
+| [Event log](./reference/events.md) | Structured `EventLog` emit / query |
 | [ADR 0001](./adr/0001-pyiv-config.md) | Why Config hooks replaced string registries |
 
 ## Mental model
