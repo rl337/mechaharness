@@ -1,6 +1,16 @@
 """Core package: shared types and exceptions."""
 
 from mechaharness.core.contract import RunRequest, RunResponse
+from mechaharness.core.events import (
+    AgentRef,
+    CoreEvent,
+    Event,
+    EventLog,
+    EventType,
+    FanoutEventLog,
+    InMemoryEventLog,
+    LoggingEventLog,
+)
 from mechaharness.core.exceptions import (
     HarnessError,
     InferenceError,
@@ -19,11 +29,19 @@ from mechaharness.core.types import (
 )
 
 __all__ = [
+    "AgentRef",
     "ChatMessage",
+    "CoreEvent",
     "CompletionRequest",
     "CompletionResponse",
+    "Event",
+    "EventLog",
+    "EventType",
+    "FanoutEventLog",
     "HarnessError",
+    "InMemoryEventLog",
     "InferenceError",
+    "LoggingEventLog",
     "MechaHarnessError",
     "Role",
     "RunRequest",

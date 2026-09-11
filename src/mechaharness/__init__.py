@@ -1,6 +1,7 @@
 """MechaHarness: agentic harness with pluggable inference and harness families."""
 
 from mechaharness.core.contract import RunRequest, RunResponse
+from mechaharness.core.events import Event, EventLog, EventType
 from mechaharness.core.types import (
     ChatMessage,
     CompletionRequest,
@@ -20,6 +21,9 @@ __all__ = [
     "ChatMessage",
     "CompletionRequest",
     "CompletionResponse",
+    "Event",
+    "EventLog",
+    "EventType",
     "HarnessConfig",
     "HarnessResult",
     "InferenceStrategy",

@@ -55,6 +55,21 @@ who pick backends by name.
 
 Do not add string registries or a global injector. Domain types stay pyiv-free.
 
+## Host extension
+
+**Pattern:** Open identity + Config hooks  
+**Code:** `.cursor/rules/host-extend.mdc`, `mechaharness.core.events`
+
+A host app must add backends, harness families, tools, event types, and
+policies **without editing this repository**. That means class hierarchies and
+namespaced strings (`core:agent_start`, `acme:widget`), not closed enums or
+`Literal` unions of names we own. Unknown namespaced values round-trip on the
+wire. Default name maps in `SettingsConfig` are mergeable conveniences, not a
+registry hosts must PR into.
+
+Protocol vocabularies shared with model APIs (chat `Role`) may stay closed.
+Identity of MechaHarness concepts must not.
+
 ## Inference Strategy
 
 **Pattern:** Strategy  
