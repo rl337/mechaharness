@@ -15,10 +15,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-Install pulls **pyiv** from GitHub SSH (`git@github.com:rl337/pyiv.git`, pinned in
-`pyproject.toml`). You need SSH access to GitHub. If CI cannot use SSH, clone
-pyiv over HTTPS locally and install that checkout — keep a single URL in
-`pyproject.toml`.
+Install pulls **pyiv** from PyPI (`pyiv>=0.3.0`).
 
 List what is registered:
 
@@ -54,7 +51,21 @@ curl -s http://127.0.0.1:8080/health
 
 - `mechaharness version` prints `0.1.0` (or current)
 - `./run_checks.sh` passes from the repo root
+- `./containers/run-ci.sh` passes in an Ubuntu 24.04 + Python 3.12 image (same as GitHub Actions)
 - `/health` returns `{"status":"ok",...}`
+
+## CI-like container
+
+`containers/` holds an Ubuntu 24.04 + Python 3.12 image that matches
+`.github/workflows/ci.yml`. It installs the checkout (`pip install -e ".[dev]"`,
+including **pyiv** from PyPI) and runs `./run_checks.sh`.
+
+```bash
+./containers/run-ci.sh
+```
+
+Pass extra arguments to run a command in that environment after install
+(`./containers/run-ci.sh pytest -q tests/test_di.py`).
 
 ## Next
 
