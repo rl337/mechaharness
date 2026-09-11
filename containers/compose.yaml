@@ -1,0 +1,13 @@
+name: mechaharness
+
+services:
+  ci:
+    image: mechaharness-ci
+    build:
+      context: ./ci
+      dockerfile: Dockerfile
+    working_dir: /src
+    volumes:
+      - ..:/src
+      # Hide a host .venv so run_checks.sh uses the image Python, not Darwin binaries.
+      - /src/.venv
