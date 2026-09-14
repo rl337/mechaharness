@@ -35,6 +35,7 @@ def tools() -> ToolRegistry:
 def test_harness_families_configured() -> None:
     families = list_harness_families()
     assert "tool_loop" in families
+    assert "pass_through" in families
     assert "react" in families
     assert "openai_tools" in families
 

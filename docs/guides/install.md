@@ -17,6 +17,31 @@ pip install -e ".[dev]"
 
 Install pulls **pyiv** from PyPI (`pyiv>=0.3.0`).
 
+### Mock (no network)
+
+```bash
+mechaharness run "What is 2+2?" --backend mock --family pass_through --model mock
+```
+
+The mock backend echoes `mock reply: <prompt>`. Use this to verify EventLog +
+cost without a GPU.
+
+### Local LM Studio / Qwen
+
+```bash
+mechaharness run "Reply with the single word ok." \
+  --backend lmstudio \
+  --family pass_through \
+  --model qwen/qwen3.6-35b-a3b
+```
+
+Default live pytest model is ``qwen/qwen3.6-35b-a3b``. Override with
+``MECHA_MODEL`` if your server exposes a different id:
+
+```bash
+MECHA_LIVE_QWEN=1 pytest -q tests/test_live_qwen.py
+```
+
 List what is registered:
 
 ```bash

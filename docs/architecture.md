@@ -22,6 +22,7 @@ the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
                  ▼
         ┌────────────────┐
         │ AbstractHarness │  ← class hierarchy / template method
+        │  pass_through   │
         │  tool_loop      │
         │  react          │
         │  openai_tools   │
@@ -33,6 +34,7 @@ the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
         │ InferenceStrategy  │  ← strategy pattern
         │  openai_compat     │     (openai, lmstudio, vllm, ollama)
         │  anthropic         │
+        │  mock              │
         └────────────────────┘
 ```
 
@@ -42,7 +44,7 @@ the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
 **Code:** `mechaharness.di`
 
 `MechaHarnessConfig.configure()` binds `InferenceStrategy`, `AbstractHarness`,
-`Settings`, `HarnessConfig`, and `ToolRegistry`. Subclasses override
+`Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`, and `CostAccountant`. Subclasses override
 `get_inference_class()` and `get_harness_class()` (called from the Config
 constructor). Host apps subclass `MechaHarnessConfig`, call `super().configure()`,
 and `injector.inject(AbstractHarness)` — or inject those types into their own
@@ -89,13 +91,14 @@ OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different defaul
 **Pattern:** Template method  
 **Code:** `mechaharness.harness`
 
-`AbstractHarness.run()` owns turn accounting, tool execution, and event
-collection. Subclasses override `should_stop` (and optionally `build_request` /
+`AbstractHarness.run()` owns turn accounting, EventLog emits, cost pricing, and
+tool execution. Subclasses override `should_stop` (and optionally `build_request` /
 `tool_result_message`) for model-family behavior. Bind the family with
 `get_harness_class()`.
 
 | Family | Role |
 |--------|------|
+| `pass_through` | One inference call, then stop (no tools) |
 | `tool_loop` | Native tool-calls until the model returns plain text |
 | `react` | Textual Thought/Action/Observation loop |
 | `openai_tools` | OpenAI-style tool-calling specialization |

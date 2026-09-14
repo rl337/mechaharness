@@ -1,8 +1,9 @@
 # Event log
 
 Queryable structured events for agents. Module: `mechaharness.core.events`.
-Stability: evolving. Hosts construct a log and call `emit` / `query` directly.
-The harness does not emit on this log yet.
+Stability: evolving. `AbstractHarness.run()` (including `pass_through` and
+`tool_loop`) emits lifecycle, inference, and cost records. Hosts can also
+`emit` / `query` directly.
 
 ## Surface
 
@@ -49,7 +50,7 @@ long as they are namespaced. Bare names (`run_start`) are rejected.
 | `Cost` | `core:cost` |
 | `AccessCheck` | `core:access_check` |
 
-Later harness and policy PRs fill those payloads. Hosts add types by
+Later policy work fills remaining payloads. Hosts add types by
 subclassing without editing this module:
 
 ```python
