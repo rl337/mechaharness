@@ -19,7 +19,7 @@ Entrypoint: `mechaharness` (`mechaharness.cli.main:app`)
 |------|---------------|-------------|
 | `PROMPT` (arg) | — | User prompt |
 | `--backend` / `-b` | `MECHA_INFERENCE_BACKEND` (`openai`) | Inference backend name |
-| `--family` / `-f` | `MECHA_HARNESS_FAMILY` (`tool_loop`) | Harness family |
+| `--family` / `-f` | `MECHA_HARNESS_FAMILY` (`tool_loop`) | Harness family (`pass_through`, `tool_loop`, …) |
 | `--model` / `-m` | `MECHA_MODEL` | Model id |
 | `--api-key` | `MECHA_API_KEY` | Provider API key |
 | `--base-url` | `MECHA_BASE_URL` | Override endpoint |

@@ -42,8 +42,8 @@ async def run(request: RunRequest, *, tools: ToolRegistry | None = None) -> RunR
         return RunResponse(
             final_text=result.final_text,
             turns=result.turns,
-            messages=[m.model_dump() for m in result.messages],
-            events=[e.model_dump() for e in result.events],
+            messages=[m.model_dump(mode="json") for m in result.messages],
+            events=[e.model_dump(mode="json") for e in result.events],
         )
     finally:
         await inference.aclose()

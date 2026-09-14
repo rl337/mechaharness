@@ -14,12 +14,16 @@ from pyiv import Config, get_injector
 from pyiv.injector import Injector
 
 from mechaharness.config import Settings
+from mechaharness.core.access import CostAccountant, InMemoryCostAccountant
+from mechaharness.core.events import EventLog, default_event_log
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
+from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.react import ReactHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.anthropic import AnthropicStrategy
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.tools.base import ToolRegistry
 
@@ -51,11 +55,27 @@ class MechaHarnessConfig(Config):
         self.register_instance(Settings, self.get_settings())
         self.register_instance(HarnessConfig, self.get_harness_config())
         self.register_instance(ToolRegistry, self.get_tools())
+        self.register_instance(EventLog, self.get_event_log())
+        self.register_instance(CostAccountant, self.get_cost_accountant())
         self._bind_inference()
         self._bind_harness()
 
     def get_settings(self) -> Settings:
         return Settings()
+
+    def get_event_log(self) -> EventLog:
+        existing = getattr(self, "_event_log", None)
+        if existing is None:
+            existing = default_event_log()
+            self._event_log = existing
+        return existing
+
+    def get_cost_accountant(self) -> CostAccountant:
+        existing = getattr(self, "_cost_accountant", None)
+        if existing is None:
+            existing = InMemoryCostAccountant(event_log=self.get_event_log())
+            self._cost_accountant = existing
+        return existing
 
     def get_inference_class(self) -> type[InferenceStrategy]:
         """Required override: class bound to ``InferenceStrategy``."""
@@ -86,10 +106,12 @@ class MechaHarnessConfig(Config):
             "vllm": OpenAICompatStrategy,
             "ollama": OpenAICompatStrategy,
             "anthropic": AnthropicStrategy,
+            "mock": MockInferenceStrategy,
         }
 
     def harness_classes(self) -> dict[str, type[AbstractHarness]]:
         return {
+            "pass_through": PassThroughHarness,
             "tool_loop": ToolLoopHarness,
             "react": ReactHarness,
             "openai_tools": OpenAIToolsHarness,
@@ -112,6 +134,8 @@ class MechaHarnessConfig(Config):
                 inference=injector.inject(InferenceStrategy),
                 tools=self.get_tools(),
                 config=self.get_harness_config(),
+                event_log=injector.inject(EventLog),
+                cost=injector.inject(CostAccountant),
             )
 
         self.register(AbstractHarness, make_harness)

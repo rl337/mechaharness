@@ -76,7 +76,7 @@ def run(
     async def _run() -> None:
         result = await run_harness(request)
         if json_out:
-            console.print_json(data=result.model_dump())
+            console.print_json(data=result.model_dump(mode="json"))
         else:
             console.print(Markdown(result.final_text or ""))
             console.print(
