@@ -12,7 +12,7 @@ from mechaharness.inference.base import InferenceStrategy
 
 def test_builtin_backends_mapped() -> None:
     backends = list_inference_backends()
-    for name in ("openai", "openai_compat", "anthropic", "lmstudio", "vllm", "ollama"):
+    for name in ("openai", "openai_compat", "anthropic", "lmstudio", "vllm", "ollama", "mock"):
         assert name in backends
 
 

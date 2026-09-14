@@ -14,12 +14,13 @@ Python agentic harness that separates **how you call models** from **how you run
 | [CLI reference](./reference/cli.md) | `mechaharness` commands |
 | [HTTP API reference](./reference/api.md) | FastAPI routes |
 | [Event log](./reference/events.md) | Structured `EventLog` emit / query |
+| [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
 | [ADR 0001](./adr/0001-pyiv-config.md) | Why Config hooks replaced string registries |
 
 ## Mental model
 
 1. **Inference Strategy** — pluggable backends (`openai`, `anthropic`, `lmstudio`, `vllm`, `ollama`, …)
-2. **Harness family** — agent-loop policy (`tool_loop`, `react`, `openai_tools`, `anthropic_tools`)
+2. **Harness family** — agent-loop policy (`pass_through`, `tool_loop`, `react`, `openai_tools`, `anthropic_tools`)
 3. **Frontends** — Typer CLI and FastAPI share `RunRequest` / `mechaharness.factory.run`
 4. **DI** — `MechaHarnessConfig` binds interfaces; see [Dependency injection](./guides/dependency-injection.md)
 

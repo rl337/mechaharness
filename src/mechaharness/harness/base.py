@@ -1,8 +1,9 @@
 """Harness architecture hierarchy.
 
-``AbstractHarness`` owns the agent loop (template method). Families specialize
-prompting, tool-call interpretation, and termination for particular model styles.
-Inference is injected via Strategy — harnesses never talk to providers directly.
+``AbstractHarness`` is an agent: one ``run()`` is a finite lifecycle of
+inference calls. Families specialize prompting, tool-call interpretation, and
+termination. Inference is injected via Strategy — harnesses never talk to
+providers directly.
 """
 
 from __future__ import annotations
@@ -10,9 +11,31 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
 from typing import Any
+from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
+from mechaharness.core.access import (
+    CapabilityProfile,
+    CostAccountant,
+    CostReport,
+    InMemoryCostAccountant,
+    default_capability_profile,
+)
+from mechaharness.core.events import (
+    AgentEnd,
+    AgentStart,
+    Event,
+    EventLog,
+    EventType,
+    Inference,
+    MaxTurns,
+    RunEnd,
+    RunStart,
+    TurnStart,
+    default_event_log,
+    event_type_key,
+)
 from mechaharness.core.exceptions import HarnessError
 from mechaharness.core.types import ChatMessage, CompletionRequest, Role, ToolCall, ToolResult
 from mechaharness.inference.base import InferenceStrategy
@@ -28,18 +51,12 @@ class HarnessConfig(BaseModel):
     extra: dict[str, Any] = Field(default_factory=dict)
 
 
-class HarnessEvent(BaseModel):
-    """Streaming / observability event emitted during a run."""
-
-    type: str
-    data: dict[str, Any] = Field(default_factory=dict)
-
-
 class HarnessResult(BaseModel):
     final_text: str | None
     messages: list[ChatMessage]
     turns: int
-    events: list[HarnessEvent] = Field(default_factory=list)
+    events: list[Event] = Field(default_factory=list)
+    cost: CostReport = Field(default_factory=CostReport)
 
 
 class AbstractHarness(ABC):
@@ -53,35 +70,123 @@ class AbstractHarness(ABC):
         tools: ToolRegistry | None = None,
         *,
         config: HarnessConfig,
+        event_log: EventLog | None = None,
+        cost: CostAccountant | None = None,
+        agent_id: str | None = None,
+        parent_agent_id: str | None = None,
     ) -> None:
         self.inference = inference
         self.tools = tools or ToolRegistry()
         self.config = config
+        self.event_log = event_log or default_event_log()
+        self.agent_id = agent_id or str(uuid4())
+        self.parent_agent_id = parent_agent_id
+        self.cost = cost or InMemoryCostAccountant(event_log=self.event_log)
+
+    def capability_profile(self) -> CapabilityProfile:
+        profile = getattr(self.inference, "capability_profile", None)
+        if callable(profile):
+            result = profile()
+            if isinstance(result, CapabilityProfile):
+                return result
+        return default_capability_profile()
+
+    def _emit(self, event_type: type[EventType], payload: dict[str, Any], run_id: str) -> None:
+        self.event_log.emit(
+            Event(
+                type=event_type_key(event_type),
+                agent_id=self.agent_id,
+                parent_agent_id=self.parent_agent_id,
+                run_id=run_id,
+                payload=payload,
+            )
+        )
+
+    def _completer_name(self) -> str:
+        return str(getattr(self.inference, "name", None) or self.family)
 
     async def run(
         self, user_input: str, *, history: list[ChatMessage] | None = None
     ) -> HarnessResult:
+        run_id = str(uuid4())
+        run_cost = CostReport()
+        self._emit(
+            AgentStart,
+            {
+                "family": self.family,
+                "label": self.family,
+                "model": self.config.model,
+                "tools": [item.name for item in self.tools.definitions()],
+                "parent_agent_id": self.parent_agent_id,
+            },
+            run_id,
+        )
+        self._emit(RunStart, {"prompt_chars": len(user_input)}, run_id)
+        try:
+            result = await self._run_loop(user_input, history, run_id, run_cost)
+        except HarnessError:
+            self._emit(MaxTurns, {"max_turns": self.config.max_turns}, run_id)
+            self._emit(
+                RunEnd,
+                {
+                    "status": "max_turns",
+                    "turns": self.config.max_turns,
+                    "has_final_text": False,
+                },
+                run_id,
+            )
+            self._emit(AgentEnd, {"status": "max_turns"}, run_id)
+            raise
+        self._emit(
+            RunEnd,
+            {
+                "status": "ok",
+                "turns": result.turns,
+                "has_final_text": result.final_text is not None,
+            },
+            run_id,
+        )
+        self._emit(AgentEnd, {"status": "ok"}, run_id)
+        result.events = self.event_log.query(run_id=run_id)
+        result.cost = run_cost
+        return result
+
+    async def _run_loop(
+        self,
+        user_input: str,
+        history: list[ChatMessage] | None,
+        run_id: str,
+        cost: CostReport,
+    ) -> HarnessResult:
         messages = self._bootstrap_messages(user_input, history)
-        events: list[HarnessEvent] = []
         turns = 0
 
         while turns < self.config.max_turns:
             turns += 1
-            events.append(HarnessEvent(type="turn_start", data={"turn": turns}))
+            self._emit(TurnStart, {"turn": turns}, run_id)
 
             request = self.build_request(messages)
             response = await self.inference.complete(request)
+            entry = self.cost.price_inference(
+                self._completer_name(),
+                self.capability_profile(),
+                agent_id=self.agent_id,
+                run_id=run_id,
+                parent_agent_id=self.parent_agent_id,
+            )
+            cost.add(entry)
             assistant = response.message
             messages.append(assistant)
-            events.append(
-                HarnessEvent(
-                    type="model_response",
-                    data={
-                        "content": assistant.content,
-                        "tool_calls": [tc.model_dump() for tc in (assistant.tool_calls or [])],
-                        "finish_reason": response.finish_reason,
-                    },
-                )
+            self._emit(
+                Inference,
+                {
+                    "completer": self._completer_name(),
+                    "model": request.model,
+                    "finish_reason": response.finish_reason,
+                    "content": assistant.content,
+                    "tool_calls": [tc.model_dump() for tc in (assistant.tool_calls or [])],
+                },
+                run_id,
             )
 
             if self.should_stop(assistant, response.finish_reason):
@@ -89,40 +194,29 @@ class AbstractHarness(ABC):
                     final_text=assistant.content,
                     messages=messages,
                     turns=turns,
-                    events=events,
+                    cost=cost,
                 )
 
             tool_results = await self.execute_tools(assistant.tool_calls or [])
             for result in tool_results:
                 messages.append(self.tool_result_message(result))
-                events.append(
-                    HarnessEvent(
-                        type="tool_result",
-                        data=result.model_dump(),
-                    )
-                )
 
             if not tool_results and not self.should_continue_without_tools(assistant):
                 return HarnessResult(
                     final_text=assistant.content,
                     messages=messages,
                     turns=turns,
-                    events=events,
+                    cost=cost,
                 )
 
         raise HarnessError(f"Exceeded max_turns={self.config.max_turns}")
 
     async def stream_events(
         self, user_input: str, *, history: list[ChatMessage] | None = None
-    ) -> AsyncIterator[HarnessEvent]:
-        """Convenience wrapper that yields events then a final result event."""
+    ) -> AsyncIterator[Event]:
         result = await self.run(user_input, history=history)
         for event in result.events:
             yield event
-        yield HarnessEvent(
-            type="final",
-            data={"final_text": result.final_text, "turns": result.turns},
-        )
 
     def _bootstrap_messages(
         self, user_input: str, history: list[ChatMessage] | None
