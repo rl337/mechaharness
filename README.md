@@ -131,6 +131,12 @@ pip install -e ".[dev]"
 ./containers/run-ci.sh
 ```
 
+EventLog + cost without a GPU:
+
+```bash
+mechaharness run "What is 2+2?" --backend mock --family pass_through --model mock --json
+```
+
 ## Design notes
 
 | Concern | Pattern | Why |
