@@ -44,11 +44,12 @@ the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
 **Code:** `mechaharness.di`
 
 `MechaHarnessConfig.configure()` binds `InferenceStrategy`, `AbstractHarness`,
-`Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`, and `CostAccountant`. Subclasses override
-`get_inference_class()` and `get_harness_class()` (called from the Config
-constructor). Host apps subclass `MechaHarnessConfig`, call `super().configure()`,
-and `injector.inject(AbstractHarness)` — or inject those types into their own
-services.
+`Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`, `AccessControl`, and
+`CostAccountant`. Subclasses override `get_inference_class()` and
+`get_harness_class()` (called from the Config constructor). Host apps subclass
+`MechaHarnessConfig`, call `super().configure()`, and
+`injector.inject(AbstractHarness)` — or inject those types into their own
+services. Override `get_grants()` for the deny-by-default tool grant list.
 
 `SettingsConfig` implements the hooks via overridable `inference_classes()` /
 `harness_classes()` maps plus `Settings.inference_backend` /
@@ -62,9 +63,9 @@ Do not add string registries or a global injector. Domain types stay pyiv-free.
 **Pattern:** Open identity + Config hooks  
 **Code:** `.cursor/rules/host-extend.mdc`, `mechaharness.core.events`
 
-A host app must add backends, harness families, tools, event types, and
+A host app must add backends, harness families, tools, event types, grants, and
 policies **without editing this repository**. That means class hierarchies and
-namespaced strings (`core:agent_start`, `acme:widget`), not closed enums or
+namespaced strings (`core:agent_start`, `core:fs.write`, `acme:widget`), not closed enums or
 `Literal` unions of names we own. Unknown namespaced values round-trip on the
 wire. Default name maps in `SettingsConfig` are mergeable conveniences, not a
 registry hosts must PR into.
@@ -91,9 +92,10 @@ OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different defaul
 **Pattern:** Template method  
 **Code:** `mechaharness.harness`
 
-`AbstractHarness.run()` owns turn accounting, EventLog emits, cost pricing, and
-tool execution. Subclasses override `should_stop` (and optionally `build_request` /
-`tool_result_message`) for model-family behavior. Bind the family with
+`AbstractHarness.run()` owns turn accounting, EventLog emits, cost pricing,
+access checks, and tool execution. Subclasses override `should_stop` (and
+optionally `build_request` / `interpret_tool_calls` / `tool_result_message` /
+`final_text`) for model-family behavior. Bind the family with
 `get_harness_class()`.
 
 | Family | Role |

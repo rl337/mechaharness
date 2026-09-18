@@ -69,6 +69,9 @@ print(result.final_text)
 `run()` still constructs a `SettingsConfig` and injects; it only hides pyiv from
 the caller.
 
+Override `get_grants()` (or `get_access_control()`) to inject a deny-by-default
+tool grant list. See [Access control](../reference/access.md).
+
 ## Verify
 
 - `injector.inject(AbstractHarness)` returns your harness family

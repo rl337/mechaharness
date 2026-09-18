@@ -1,7 +1,9 @@
 """Classic ReAct-style harness using textual Thought/Action/Observation turns.
 
 Useful for models without reliable native tool-calling, or for teaching /
-debugging agent loops with transparent traces.
+debugging agent loops with transparent traces. The shared ``AbstractHarness``
+loop owns EventLog, cost, and access; this family only parses Action blocks
+and Observation messages.
 """
 
 from __future__ import annotations
@@ -10,8 +12,8 @@ import json
 import re
 from typing import Any
 
-from mechaharness.core.types import ChatMessage, CompletionRequest, Role, ToolCall
-from mechaharness.harness.base import AbstractHarness, HarnessResult
+from mechaharness.core.types import ChatMessage, CompletionRequest, Role, ToolCall, ToolResult
+from mechaharness.harness.base import AbstractHarness
 
 _ACTION_RE = re.compile(
     r"Action\s*:\s*(?P<name>[A-Za-z0-9_\-]+)\s*\n"
@@ -57,61 +59,32 @@ class ReactHarness(AbstractHarness):
         )
 
     def should_stop(self, message: ChatMessage, finish_reason: str | None) -> bool:
+        del finish_reason
         text = message.content or ""
-        return bool(_FINAL_RE.search(text))
+        return not bool(_ACTION_RE.search(text))
 
-    def should_continue_without_tools(self, message: ChatMessage) -> bool:
-        return True
+    def final_text(self, message: ChatMessage) -> str | None:
+        text = message.content or ""
+        final = _FINAL_RE.search(text)
+        if final and not _ACTION_RE.search(text):
+            return final.group("answer").strip()
+        return text
 
-    async def run(
-        self, user_input: str, *, history: list[ChatMessage] | None = None
-    ) -> HarnessResult:
-        # Override lightly: parse Action blocks into synthetic tool calls.
-        messages = self._bootstrap_messages(user_input, history)
-        turns = 0
+    def interpret_tool_calls(self, message: ChatMessage, *, turn: int) -> list[ToolCall]:
+        match = _ACTION_RE.search(message.content or "")
+        if not match:
+            return []
+        raw_input = match.group("input").strip()
+        try:
+            arguments = json.loads(raw_input)
+            if not isinstance(arguments, dict):
+                arguments = {"value": arguments}
+        except json.JSONDecodeError:
+            arguments = {"input": raw_input}
+        return [ToolCall(id=f"react-{turn}", name=match.group("name"), arguments=arguments)]
 
-        while turns < self.config.max_turns:
-            turns += 1
-            request = self.build_request(messages)
-            response = await self.inference.complete(request)
-            assistant = response.message
-            messages.append(assistant)
-
-            text = assistant.content or ""
-            final = _FINAL_RE.search(text)
-            if final and not _ACTION_RE.search(text):
-                return HarnessResult(
-                    final_text=final.group("answer").strip(),
-                    messages=messages,
-                    turns=turns,
-                )
-
-            match = _ACTION_RE.search(text)
-            if not match:
-                return HarnessResult(
-                    final_text=text,
-                    messages=messages,
-                    turns=turns,
-                )
-
-            raw_input = match.group("input").strip()
-            try:
-                arguments = json.loads(raw_input)
-                if not isinstance(arguments, dict):
-                    arguments = {"value": arguments}
-            except json.JSONDecodeError:
-                arguments = {"input": raw_input}
-
-            call = ToolCall(id=f"react-{turns}", name=match.group("name"), arguments=arguments)
-            results = await self.execute_tools([call])
-            observation = results[0].content if results else ""
-            messages.append(
-                ChatMessage(
-                    role=Role.USER,
-                    content=f"Observation: {observation}",
-                )
-            )
-
-        from mechaharness.core.exceptions import HarnessError
-
-        raise HarnessError(f"Exceeded max_turns={self.config.max_turns}")
+    def tool_result_message(self, result: ToolResult) -> ChatMessage:
+        return ChatMessage(
+            role=Role.USER,
+            content=f"Observation: {result.content}",
+        )
