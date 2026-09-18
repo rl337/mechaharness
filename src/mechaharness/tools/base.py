@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from typing import Any, Union
 
+from mechaharness.core.access import Ability, grant_key
 from mechaharness.core.types import ToolDefinition, ToolResult
 
 ToolHandler = Callable[..., Union[str, Awaitable[str]]]
@@ -21,11 +22,15 @@ class Tool:
         *,
         description: str = "",
         parameters: dict[str, Any] | None = None,
+        grants: Sequence[object] | None = None,
+        ability: Ability = Ability.SIMPLE,
     ) -> None:
         self.name = name
         self.handler = handler
         self.description = description
         self.parameters = parameters or {"type": "object", "properties": {}}
+        self.grants = [grant_key(item) for item in (grants or [])]
+        self.ability = ability
 
     def definition(self) -> ToolDefinition:
         return ToolDefinition(
@@ -67,6 +72,8 @@ class ToolRegistry:
         *,
         description: str = "",
         parameters: dict[str, Any] | None = None,
+        grants: Sequence[object] | None = None,
+        ability: Ability = Ability.SIMPLE,
     ) -> Callable[[ToolHandler], ToolHandler]:
         def decorator(fn: ToolHandler) -> ToolHandler:
             tool_name = name or fn.__name__
@@ -76,6 +83,8 @@ class ToolRegistry:
                     fn,
                     description=description or (fn.__doc__ or "").strip(),
                     parameters=parameters,
+                    grants=grants,
+                    ability=ability,
                 )
             )
             return fn

@@ -14,7 +14,12 @@ from pyiv import Config, get_injector
 from pyiv.injector import Injector
 
 from mechaharness.config import Settings
-from mechaharness.core.access import CostAccountant, InMemoryCostAccountant
+from mechaharness.core.access import (
+    AccessControl,
+    CostAccountant,
+    InMemoryAccessControl,
+    InMemoryCostAccountant,
+)
 from mechaharness.core.events import EventLog, default_event_log
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
@@ -56,6 +61,7 @@ class MechaHarnessConfig(Config):
         self.register_instance(HarnessConfig, self.get_harness_config())
         self.register_instance(ToolRegistry, self.get_tools())
         self.register_instance(EventLog, self.get_event_log())
+        self.register_instance(AccessControl, self.get_access_control())
         self.register_instance(CostAccountant, self.get_cost_accountant())
         self._bind_inference()
         self._bind_harness()
@@ -69,6 +75,20 @@ class MechaHarnessConfig(Config):
             existing = default_event_log()
             self._event_log = existing
         return existing
+
+    def get_access_control(self) -> AccessControl:
+        existing = getattr(self, "_access_control", None)
+        if existing is None:
+            existing = InMemoryAccessControl(
+                event_log=self.get_event_log(),
+                grants=self.get_grants(),
+            )
+            self._access_control = existing
+        return existing
+
+    def get_grants(self) -> list[object]:
+        """Deny-by-default grant list. Hosts override; unknown namespaced keys ok."""
+        return []
 
     def get_cost_accountant(self) -> CostAccountant:
         existing = getattr(self, "_cost_accountant", None)
@@ -135,6 +155,7 @@ class MechaHarnessConfig(Config):
                 tools=self.get_tools(),
                 config=self.get_harness_config(),
                 event_log=injector.inject(EventLog),
+                access=injector.inject(AccessControl),
                 cost=injector.inject(CostAccountant),
             )
 

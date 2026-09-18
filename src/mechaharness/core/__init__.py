@@ -2,13 +2,20 @@
 
 from mechaharness.core.access import (
     Ability,
+    AccessControl,
+    AccessPolicy,
     Capability,
     CapabilityKind,
     CapabilityProfile,
     CostAccountant,
     CostEntry,
     CostReport,
+    FsRead,
+    FsWrite,
+    Grant,
+    InMemoryAccessControl,
     InMemoryCostAccountant,
+    NetHttp,
 )
 from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.events import (
@@ -40,6 +47,8 @@ from mechaharness.core.types import (
 
 __all__ = [
     "Ability",
+    "AccessControl",
+    "AccessPolicy",
     "AgentRef",
     "Capability",
     "CapabilityKind",
@@ -55,12 +64,17 @@ __all__ = [
     "EventLog",
     "EventType",
     "FanoutEventLog",
+    "FsRead",
+    "FsWrite",
+    "Grant",
     "HarnessError",
+    "InMemoryAccessControl",
     "InMemoryCostAccountant",
     "InMemoryEventLog",
     "InferenceError",
     "LoggingEventLog",
     "MechaHarnessError",
+    "NetHttp",
     "Role",
     "RunRequest",
     "RunResponse",
