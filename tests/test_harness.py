@@ -101,3 +101,8 @@ async def test_react_harness_parses_action(tools: ToolRegistry) -> None:
     result = await harness.run("2+3?")
     assert result.final_text == "5"
     assert any("Observation: 5" in (m.content or "") for m in result.messages)
+    types = [event.type for event in result.events]
+    assert "core:cost" in types
+    assert "core:tool_call" in types
+    assert "core:access_check" in types
+    assert result.cost.units >= 2
