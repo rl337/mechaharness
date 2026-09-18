@@ -2,7 +2,8 @@
 
 ``AbstractHarness`` is an agent: one ``run()`` is a finite lifecycle of
 inference calls. Families specialize prompting, tool-call interpretation, and
-termination. Inference is injected via Strategy — harnesses never talk to
+termination. The shared loop emits EventLog records, prices cost, and checks
+tool grants. Inference is injected via Strategy — harnesses never talk to
 providers directly.
 """
 
@@ -15,10 +16,14 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
+from mechaharness.core import events as core_events
 from mechaharness.core.access import (
+    AccessControl,
+    AccessPolicy,
     CapabilityProfile,
     CostAccountant,
     CostReport,
+    InMemoryAccessControl,
     InMemoryCostAccountant,
     default_capability_profile,
 )
@@ -71,6 +76,7 @@ class AbstractHarness(ABC):
         *,
         config: HarnessConfig,
         event_log: EventLog | None = None,
+        access: AccessControl | AccessPolicy | None = None,
         cost: CostAccountant | None = None,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
@@ -81,6 +87,9 @@ class AbstractHarness(ABC):
         self.event_log = event_log or default_event_log()
         self.agent_id = agent_id or str(uuid4())
         self.parent_agent_id = parent_agent_id
+        if isinstance(access, AccessPolicy):
+            access = InMemoryAccessControl(event_log=self.event_log, policy=access)
+        self.access = access or InMemoryAccessControl(event_log=self.event_log)
         self.cost = cost or InMemoryCostAccountant(event_log=self.event_log)
 
     def capability_profile(self) -> CapabilityProfile:
@@ -191,19 +200,20 @@ class AbstractHarness(ABC):
 
             if self.should_stop(assistant, response.finish_reason):
                 return HarnessResult(
-                    final_text=assistant.content,
+                    final_text=self.final_text(assistant),
                     messages=messages,
                     turns=turns,
                     cost=cost,
                 )
 
-            tool_results = await self.execute_tools(assistant.tool_calls or [])
+            tool_calls = self.interpret_tool_calls(assistant, turn=turns)
+            tool_results = await self.execute_tools(tool_calls, cost=cost, run_id=run_id)
             for result in tool_results:
                 messages.append(self.tool_result_message(result))
 
             if not tool_results and not self.should_continue_without_tools(assistant):
                 return HarnessResult(
-                    final_text=assistant.content,
+                    final_text=self.final_text(assistant),
                     messages=messages,
                     turns=turns,
                     cost=cost,
@@ -247,20 +257,80 @@ class AbstractHarness(ABC):
     def should_continue_without_tools(self, message: ChatMessage) -> bool:
         return False
 
-    async def execute_tools(self, tool_calls: list[ToolCall]) -> list[ToolResult]:
+    def final_text(self, message: ChatMessage) -> str | None:
+        """Hook: families may extract a shorter answer from the last message."""
+        return message.content
+
+    def interpret_tool_calls(self, message: ChatMessage, *, turn: int) -> list[ToolCall]:
+        """Hook: families may parse tool calls from free-form text."""
+        del turn
+        return list(message.tool_calls or [])
+
+    async def execute_tools(
+        self,
+        tool_calls: list[ToolCall],
+        *,
+        run_id: str,
+        cost: CostReport,
+    ) -> list[ToolResult]:
         results: list[ToolResult] = []
         for call in tool_calls:
+            self._emit(
+                core_events.ToolCall,
+                {"name": call.name, "tool_call_id": call.id, "arguments": call.arguments},
+                run_id,
+            )
             if call.name not in self.tools:
-                results.append(
-                    ToolResult(
-                        tool_call_id=call.id,
-                        content=f"Unknown tool: {call.name}",
-                        is_error=True,
-                    )
+                result = ToolResult(
+                    tool_call_id=call.id,
+                    content=f"Unknown tool: {call.name}",
+                    is_error=True,
                 )
+                results.append(result)
+                self._emit_tool_result(result, run_id, name=call.name)
                 continue
-            results.append(await self.tools.execute(call.name, call.arguments, call.id))
+            tool = self.tools.get(call.name)
+            if not self.access.allows(
+                tool.grants,
+                tool_name=tool.name,
+                agent_id=self.agent_id,
+                run_id=run_id,
+                parent_agent_id=self.parent_agent_id,
+            ):
+                needed = ", ".join(tool.grants) or "(none)"
+                result = ToolResult(
+                    tool_call_id=call.id,
+                    content=f"Permission denied for {tool.name}: requires {needed}",
+                    is_error=True,
+                )
+                results.append(result)
+                self._emit_tool_result(result, run_id, name=tool.name)
+                continue
+            result = await self.tools.execute(call.name, call.arguments, call.id)
+            cost.add(
+                self.cost.price_tool(
+                    tool.name,
+                    tool.ability,
+                    agent_id=self.agent_id,
+                    run_id=run_id,
+                    parent_agent_id=self.parent_agent_id,
+                )
+            )
+            results.append(result)
+            self._emit_tool_result(result, run_id, name=tool.name)
         return results
+
+    def _emit_tool_result(self, result: ToolResult, run_id: str, *, name: str) -> None:
+        self._emit(
+            core_events.ToolResult,
+            {
+                "name": name,
+                "tool_call_id": result.tool_call_id,
+                "is_error": result.is_error,
+                "content": result.content,
+            },
+            run_id,
+        )
 
     def tool_result_message(self, result: ToolResult) -> ChatMessage:
         """Hook: families may encode tool results differently."""

@@ -15,6 +15,7 @@ Python agentic harness that separates **how you call models** from **how you run
 | [HTTP API reference](./reference/api.md) | FastAPI routes |
 | [Event log](./reference/events.md) | Structured `EventLog` emit / query |
 | [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
+| [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, `core:access_check` |
 | [ADR 0001](./adr/0001-pyiv-config.md) | Why Config hooks replaced string registries |
 
 ## Mental model
