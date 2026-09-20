@@ -19,14 +19,18 @@ profile counts as simple / 1). Tool cost is that tool's `ability.units`.
 
 `InMemoryCostAccountant.price_inference()` / `price_tool()` append a
 `CostEntry`, update the ledger, and emit `core:cost` when `agent_id` and
-`run_id` are set.
+`run_id` are set. When a completer returns OpenAI-style `usage`, those
+token counts are stored on the entry and on the run `CostReport` (local
+Spark/$0 pricing can still use Ability units while tracking tokens).
 
 ## Harness
 
 `AbstractHarness` injects `CostAccountant` (default `InMemoryCostAccountant` on
-the same `EventLog`). Each inference turn is priced after `complete()`. Each
-successful tool run is priced after invoke. Denied or unknown tools are not
-priced. `HarnessResult.cost` is the ledger for that run.
+the same `EventLog`). Each inference turn is priced after `complete()` and
+passes through `CompletionResponse.usage`. Each successful tool run is priced
+after invoke. Denied or unknown tools are not priced. `HarnessResult.cost` is
+the ledger for that run. Thinking-model `reasoning_content` is kept on
+`ChatMessage` and recorded on `core:inference`.
 
 ```python
 from mechaharness.core.access import InMemoryCostAccountant

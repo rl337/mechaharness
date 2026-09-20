@@ -157,11 +157,17 @@ class OpenAICompatStrategy(InferenceStrategy):
             raise InferenceError(f"Malformed OpenAI-compat response: {data!r}") from exc
 
         usage_raw = data.get("usage") or {}
+        reasoning = message.get("reasoning_content")
+        if reasoning is None:
+            reasoning = message.get("reasoning")
+        if isinstance(reasoning, dict):
+            reasoning = reasoning.get("content") or reasoning.get("text") or str(reasoning)
         return CompletionResponse(
             message=ChatMessage(
                 role=Role.ASSISTANT,
                 content=message.get("content"),
                 tool_calls=_parse_tool_calls(message.get("tool_calls")),
+                reasoning_content=str(reasoning) if reasoning else None,
             ),
             finish_reason=choice.get("finish_reason"),
             usage=Usage(

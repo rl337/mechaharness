@@ -20,6 +20,8 @@ from mechaharness.core.access import (
     InMemoryAccessControl,
     InMemoryCostAccountant,
 )
+from mechaharness.core.completer import Completer
+from mechaharness.core.environment import InferenceEnvironment, NoOpInferenceEnvironment
 from mechaharness.core.events import EventLog, default_event_log
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
@@ -37,6 +39,10 @@ _INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai_compat": {"base_url": "https://api.openai.com/v1"},
     "lmstudio": {"base_url": "http://localhost:1234/v1", "api_key": "lm-studio"},
     "vllm": {"base_url": "http://localhost:8000/v1"},
+    "junespark": {
+        "base_url": "http://192.168.1.21:8000/v1",
+        "api_key": "junespark",
+    },
     "ollama": {"base_url": "http://localhost:11434/v1", "api_key": "ollama"},
     "anthropic": {"base_url": "https://api.anthropic.com"},
 }
@@ -63,6 +69,7 @@ class MechaHarnessConfig(Config):
         self.register_instance(EventLog, self.get_event_log())
         self.register_instance(AccessControl, self.get_access_control())
         self.register_instance(CostAccountant, self.get_cost_accountant())
+        self.register_instance(InferenceEnvironment, self.get_inference_environment())
         self._bind_inference()
         self._bind_harness()
 
@@ -89,6 +96,17 @@ class MechaHarnessConfig(Config):
     def get_grants(self) -> list[object]:
         """Deny-by-default grant list. Hosts override; unknown namespaced keys ok."""
         return []
+
+    def get_inference_environment(self) -> InferenceEnvironment:
+        existing = getattr(self, "_inference_environment", None)
+        if existing is None:
+            existing = NoOpInferenceEnvironment()
+            self._inference_environment = existing
+        return existing
+
+    def include_subagent_tools(self) -> bool:
+        """When True, parent harnesses get list_subagents / get_subagent_events."""
+        return False
 
     def get_cost_accountant(self) -> CostAccountant:
         existing = getattr(self, "_cost_accountant", None)
@@ -124,6 +142,7 @@ class MechaHarnessConfig(Config):
             "openai_compat": OpenAICompatStrategy,
             "lmstudio": OpenAICompatStrategy,
             "vllm": OpenAICompatStrategy,
+            "junespark": OpenAICompatStrategy,
             "ollama": OpenAICompatStrategy,
             "anthropic": AnthropicStrategy,
             "mock": MockInferenceStrategy,
@@ -146,17 +165,25 @@ class MechaHarnessConfig(Config):
 
         self.register(InferenceStrategy, make_inference)
 
+        def make_completer(injector: Injector) -> Completer:
+            strategy = injector.inject(InferenceStrategy)
+            assert isinstance(strategy, Completer)
+            return strategy
+
+        self.register(Completer, make_completer)
+
     def _bind_harness(self) -> None:
         harness_cls = self.get_harness_class()
 
         def make_harness(injector: Injector) -> AbstractHarness:
             return harness_cls(
-                inference=injector.inject(InferenceStrategy),
+                inference=injector.inject(Completer),
                 tools=self.get_tools(),
                 config=self.get_harness_config(),
                 event_log=injector.inject(EventLog),
                 access=injector.inject(AccessControl),
                 cost=injector.inject(CostAccountant),
+                subagent_tools=self.include_subagent_tools(),
             )
 
         self.register(AbstractHarness, make_harness)
