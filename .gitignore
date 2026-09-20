@@ -220,3 +220,7 @@ __marimo__/
 # OS / editor clutter
 .DS_Store
 Thumbs.db
+
+# Local host contracts (do not publish)
+REQUIREMENTS.md
+.agents/
