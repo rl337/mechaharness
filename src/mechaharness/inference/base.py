@@ -6,17 +6,22 @@ Concrete strategies adapt OpenAI, Anthropic, LM Studio, vLLM, etc.
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections.abc import AsyncIterator
 from typing import Any
 
+from mechaharness.core.access import CapabilityProfile, default_capability_profile
+from mechaharness.core.completer import Completer
 from mechaharness.core.types import CompletionRequest, CompletionResponse
 
 
-class InferenceStrategy(ABC):
+class InferenceStrategy(Completer):
     """Strategy interface for talking to an inference engine."""
 
     name: str = "base"
+
+    def capability_profile(self) -> CapabilityProfile:
+        return default_capability_profile()
 
     @abstractmethod
     async def complete(self, request: CompletionRequest) -> CompletionResponse:

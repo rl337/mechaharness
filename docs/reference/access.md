@@ -17,8 +17,9 @@ Stability: evolving.
 `namespace`; leaves set `name`. The wire form is `namespace:name`. Unknown
 namespaced keys round-trip; bare names (`fs.write`) are rejected.
 
-Built-in `CoreGrant` leaves (`FsRead`, `FsWrite`, `NetHttp`) are conveniences.
-Hosts add types without editing this package:
+Built-in `CoreGrant` leaves (`FsRead`, `FsWrite`, `NetHttp`, `MediaImage`,
+`MediaVideo`, `MediaAudio`) are conveniences. Hosts add types without editing
+this package:
 
 ```python
 from mechaharness.core.access import Grant

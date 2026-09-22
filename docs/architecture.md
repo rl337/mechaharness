@@ -43,13 +43,15 @@ the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
 **Pattern:** Template-method pyiv `Config` + constructor injection  
 **Code:** `mechaharness.di`
 
-`MechaHarnessConfig.configure()` binds `InferenceStrategy`, `AbstractHarness`,
-`Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`, `AccessControl`, and
-`CostAccountant`. Subclasses override `get_inference_class()` and
-`get_harness_class()` (called from the Config constructor). Host apps subclass
-`MechaHarnessConfig`, call `super().configure()`, and
-`injector.inject(AbstractHarness)` — or inject those types into their own
-services. Override `get_grants()` for the deny-by-default tool grant list.
+`MechaHarnessConfig.configure()` binds `InferenceStrategy`, `Completer`,
+`AbstractHarness`, `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
+`AccessControl`, `CostAccountant`, and `InferenceEnvironment`. Subclasses
+override `get_inference_class()` and `get_harness_class()` (called from the
+Config constructor). Host apps subclass `MechaHarnessConfig`, call
+`super().configure()`, and `injector.inject(AbstractHarness)` — or inject those
+types into their own services. Override `get_grants()` for the deny-by-default
+tool grant list. Override `include_subagent_tools()` to opt in parent EventLog
+query tools. Override `get_inference_environment()` for host profile probes.
 
 `SettingsConfig` implements the hooks via overridable `inference_classes()` /
 `harness_classes()` maps plus `Settings.inference_backend` /
@@ -85,7 +87,9 @@ by subclassing `InferenceStrategy` and returning it from `get_inference_class()`
 
 OpenAI-compatible HTTP covers many local servers (LM Studio, vLLM, Ollama’s
 OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different default
-`base_url`s applied by `SettingsConfig`.
+`base_url`s applied by `SettingsConfig`. Provider JSON is modeled in
+`mechaharness.inference.openai_wire`; portable domain types stay in
+`mechaharness.core.types`.
 
 ## Harness hierarchy
 
@@ -93,10 +97,11 @@ OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different defaul
 **Code:** `mechaharness.harness`
 
 `AbstractHarness.run()` owns turn accounting, EventLog emits, cost pricing,
-access checks, and tool execution. Subclasses override `should_stop` (and
-optionally `build_request` / `interpret_tool_calls` / `tool_result_message` /
-`final_text`) for model-family behavior. Bind the family with
-`get_harness_class()`.
+access checks, and tool execution. A harness is also a `Completer`: nested
+harnesses share an `EventLog` and set `parent_agent_id`. Subclasses override
+`should_stop` (and optionally `build_request` / `interpret_tool_calls` /
+`tool_result_message` / `final_text`) for model-family behavior. Bind the
+family with `get_harness_class()`.
 
 | Family | Role |
 |--------|------|

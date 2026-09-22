@@ -10,6 +10,7 @@ Python agentic harness that separates **how you call models** from **how you run
 |------|-------------|
 | [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, pyiv Config |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
+| [Junespark](./guides/junespark.md) | Named OpenAI-compat LAN backend + live tests |
 | [Dependency injection](./guides/dependency-injection.md) | Config hooks vs OpenAPI `run()` |
 | [CLI reference](./reference/cli.md) | `mechaharness` commands |
 | [HTTP API reference](./reference/api.md) | FastAPI routes |

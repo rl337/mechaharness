@@ -15,9 +15,18 @@ from mechaharness.core.access import (
     Grant,
     InMemoryAccessControl,
     InMemoryCostAccountant,
+    MediaAudio,
+    MediaImage,
+    MediaVideo,
     NetHttp,
 )
+from mechaharness.core.completer import Completer
 from mechaharness.core.contract import RunRequest, RunResponse
+from mechaharness.core.environment import (
+    InferenceEnvironment,
+    InferenceEnvironmentError,
+    NoOpInferenceEnvironment,
+)
 from mechaharness.core.events import (
     AgentRef,
     CoreEvent,
@@ -54,6 +63,7 @@ __all__ = [
     "CapabilityKind",
     "CapabilityProfile",
     "ChatMessage",
+    "Completer",
     "CoreEvent",
     "CostAccountant",
     "CostEntry",
@@ -71,10 +81,16 @@ __all__ = [
     "InMemoryAccessControl",
     "InMemoryCostAccountant",
     "InMemoryEventLog",
+    "InferenceEnvironment",
+    "InferenceEnvironmentError",
     "InferenceError",
     "LoggingEventLog",
     "MechaHarnessError",
+    "MediaAudio",
+    "MediaImage",
+    "MediaVideo",
     "NetHttp",
+    "NoOpInferenceEnvironment",
     "Role",
     "RunRequest",
     "RunResponse",
