@@ -87,7 +87,9 @@ by subclassing `InferenceStrategy` and returning it from `get_inference_class()`
 
 OpenAI-compatible HTTP covers many local servers (LM Studio, vLLM, Ollama’s
 OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different default
-`base_url`s applied by `SettingsConfig`.
+`base_url`s applied by `SettingsConfig`. Provider JSON is modeled in
+`mechaharness.inference.openai_wire`; portable domain types stay in
+`mechaharness.core.types`.
 
 ## Harness hierarchy
 
