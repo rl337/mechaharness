@@ -2,6 +2,9 @@
 
 Covers OpenAI, Azure OpenAI (compat endpoints), Groq, Together, Fireworks,
 LM Studio, vLLM, Ollama (OpenAI mode), and most local OpenAI-shaped servers.
+
+HTTP JSON is modeled in ``mechaharness.inference.openai_wire``. Portable domain
+types stay in ``mechaharness.core.types``; this strategy maps between them.
 """
 
 from __future__ import annotations
@@ -24,72 +27,135 @@ from mechaharness.core.types import (
     Usage,
 )
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.inference.openai_wire import (
+    OpenAIChatCompletionChunk,
+    OpenAIChatCompletionRequest,
+    OpenAIChatCompletionResponse,
+    OpenAIChatMessage,
+    OpenAIFunction,
+    OpenAIFunctionDef,
+    OpenAIResponseMessage,
+    OpenAIToolCall,
+    OpenAIToolDef,
+    OpenAIUsage,
+    decode_tool_arguments,
+)
 
 
-def _messages_to_openai(messages: list[ChatMessage]) -> list[dict[str, Any]]:
-    payload: list[dict[str, Any]] = []
+def _domain_tool_calls_to_wire(calls: list[ToolCall] | None) -> list[OpenAIToolCall] | None:
+    if not calls:
+        return None
+    return [
+        OpenAIToolCall(
+            id=tc.id,
+            type="function",
+            function=OpenAIFunction(
+                name=tc.name,
+                arguments=json.dumps(tc.arguments),
+            ),
+        )
+        for tc in calls
+    ]
+
+
+def _domain_messages_to_wire(messages: list[ChatMessage]) -> list[OpenAIChatMessage]:
+    wire: list[OpenAIChatMessage] = []
     for msg in messages:
-        item: dict[str, Any] = {"role": msg.role.value}
-        if msg.content is not None:
-            item["content"] = msg.content
-        if msg.name is not None:
-            item["name"] = msg.name
-        if msg.tool_call_id is not None:
-            item["tool_call_id"] = msg.tool_call_id
-        if msg.tool_calls:
-            item["tool_calls"] = [
-                {
-                    "id": tc.id,
-                    "type": "function",
-                    "function": {
-                        "name": tc.name,
-                        "arguments": json.dumps(tc.arguments),
-                    },
-                }
-                for tc in msg.tool_calls
-            ]
-        payload.append(item)
-    return payload
+        wire.append(
+            OpenAIChatMessage(
+                role=msg.role.value,
+                content=msg.content,
+                name=msg.name,
+                tool_call_id=msg.tool_call_id,
+                tool_calls=_domain_tool_calls_to_wire(msg.tool_calls),
+                reasoning_content=msg.reasoning_content,
+            )
+        )
+    return wire
 
 
-def _tools_to_openai(tools: list[ToolDefinition] | None) -> list[dict[str, Any]] | None:
+def _domain_tools_to_wire(tools: list[ToolDefinition] | None) -> list[OpenAIToolDef] | None:
     if not tools:
         return None
     return [
-        {
-            "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description,
-                "parameters": tool.parameters or {"type": "object", "properties": {}},
-            },
-        }
+        OpenAIToolDef(
+            type="function",
+            function=OpenAIFunctionDef(
+                name=tool.name,
+                description=tool.description,
+                parameters=tool.parameters or {"type": "object", "properties": {}},
+            ),
+        )
         for tool in tools
     ]
 
 
-def _parse_tool_calls(raw_calls: list[dict[str, Any]] | None) -> list[ToolCall] | None:
-    if not raw_calls:
+def _wire_tool_calls_to_domain(calls: list[OpenAIToolCall] | None) -> list[ToolCall] | None:
+    if not calls:
         return None
-    parsed: list[ToolCall] = []
-    for call in raw_calls:
-        fn = call.get("function") or {}
-        arguments = fn.get("arguments") or "{}"
-        if isinstance(arguments, str):
-            try:
-                args_obj = json.loads(arguments) if arguments else {}
-            except json.JSONDecodeError:
-                args_obj = {"_raw": arguments}
-        else:
-            args_obj = arguments
-        parsed.append(
-            ToolCall(
-                id=str(call.get("id") or ""),
-                name=str(fn.get("name") or ""),
-                arguments=args_obj if isinstance(args_obj, dict) else {"value": args_obj},
-            )
+    return [
+        ToolCall(
+            id=call.id,
+            name=call.function.name,
+            arguments=decode_tool_arguments(call.function.arguments),
         )
-    return parsed
+        for call in calls
+    ]
+
+
+def _wire_usage_to_domain(usage: OpenAIUsage | None) -> Usage:
+    """Always return a Usage object (matches prior strategy behavior)."""
+    if usage is None:
+        return Usage()
+    return Usage(
+        prompt_tokens=usage.prompt_tokens,
+        completion_tokens=usage.completion_tokens,
+        total_tokens=usage.total_tokens,
+    )
+
+
+def _wire_message_to_domain(message: OpenAIResponseMessage) -> ChatMessage:
+    try:
+        role = Role(message.role)
+    except ValueError:
+        role = Role.ASSISTANT
+    return ChatMessage(
+        role=role,
+        content=message.content,
+        name=message.name,
+        tool_call_id=message.tool_call_id,
+        tool_calls=_wire_tool_calls_to_domain(message.tool_calls),
+        reasoning_content=message.resolved_reasoning_content,
+    )
+
+
+def domain_request_to_wire(
+    request: CompletionRequest,
+    *,
+    default_model: str,
+    stream: bool | None = None,
+) -> OpenAIChatCompletionRequest:
+    return OpenAIChatCompletionRequest(
+        model=request.model or default_model,
+        messages=_domain_messages_to_wire(request.messages),
+        tools=_domain_tools_to_wire(request.tools),
+        temperature=request.temperature,
+        max_tokens=request.max_tokens,
+        stop=request.stop,
+        stream=stream,
+    )
+
+
+def wire_response_to_domain(wire: OpenAIChatCompletionResponse) -> CompletionResponse:
+    if not wire.choices:
+        raise InferenceError(f"Malformed OpenAI-compat response: no choices in {wire!r}")
+    choice = wire.choices[0]
+    return CompletionResponse(
+        message=_wire_message_to_domain(choice.message),
+        finish_reason=choice.finish_reason,
+        usage=_wire_usage_to_domain(wire.usage),
+        raw=wire.model_dump(mode="json"),
+    )
 
 
 class OpenAICompatStrategy(InferenceStrategy):
@@ -123,20 +189,13 @@ class OpenAICompatStrategy(InferenceStrategy):
             "auth": "api_key" if self.api_key else "none",
         }
 
-    def _build_body(self, request: CompletionRequest) -> dict[str, Any]:
-        body: dict[str, Any] = {
-            "model": request.model or self.default_model,
-            "messages": _messages_to_openai(request.messages),
-        }
-        tools = _tools_to_openai(request.tools)
-        if tools:
-            body["tools"] = tools
-        if request.temperature is not None:
-            body["temperature"] = request.temperature
-        if request.max_tokens is not None:
-            body["max_tokens"] = request.max_tokens
-        if request.stop:
-            body["stop"] = request.stop
+    def _build_body(
+        self, request: CompletionRequest, *, stream: bool | None = None
+    ) -> dict[str, Any]:
+        wire = domain_request_to_wire(
+            request, default_model=self.default_model, stream=stream
+        )
+        body = wire.model_dump(mode="json", exclude_none=True)
         if request.extra:
             body.update(request.extra)
         return body
@@ -149,32 +208,18 @@ class OpenAICompatStrategy(InferenceStrategy):
         except httpx.HTTPError as exc:
             raise InferenceError(f"OpenAI-compat request failed: {exc}") from exc
 
-        data = resp.json()
         try:
-            choice = data["choices"][0]
-            message = choice["message"]
-        except (KeyError, IndexError, TypeError) as exc:
-            raise InferenceError(f"Malformed OpenAI-compat response: {data!r}") from exc
-
-        usage_raw = data.get("usage") or {}
-        return CompletionResponse(
-            message=ChatMessage(
-                role=Role.ASSISTANT,
-                content=message.get("content"),
-                tool_calls=_parse_tool_calls(message.get("tool_calls")),
-            ),
-            finish_reason=choice.get("finish_reason"),
-            usage=Usage(
-                prompt_tokens=usage_raw.get("prompt_tokens"),
-                completion_tokens=usage_raw.get("completion_tokens"),
-                total_tokens=usage_raw.get("total_tokens"),
-            ),
-            raw=data,
-        )
+            wire = OpenAIChatCompletionResponse.model_validate(resp.json())
+            return wire_response_to_domain(wire)
+        except InferenceError:
+            raise
+        except Exception as exc:
+            raise InferenceError(
+                f"Malformed OpenAI-compat response: {resp.text!r}"
+            ) from exc
 
     async def stream(self, request: CompletionRequest) -> AsyncIterator[str]:
-        body = self._build_body(request)
-        body["stream"] = True
+        body = self._build_body(request, stream=True)
         try:
             async with self._client.stream("POST", "/chat/completions", json=body) as resp:
                 resp.raise_for_status()
@@ -185,13 +230,14 @@ class OpenAICompatStrategy(InferenceStrategy):
                     if payload == "[DONE]":
                         break
                     try:
-                        chunk = json.loads(payload)
-                        delta = chunk["choices"][0].get("delta") or {}
-                        text = delta.get("content")
-                        if text:
-                            yield text
-                    except (json.JSONDecodeError, KeyError, IndexError, TypeError):
+                        chunk = OpenAIChatCompletionChunk.model_validate_json(payload)
+                    except Exception:
                         continue
+                    if not chunk.choices:
+                        continue
+                    text = chunk.choices[0].delta.content
+                    if text:
+                        yield text
         except httpx.HTTPError as exc:
             raise InferenceError(f"OpenAI-compat stream failed: {exc}") from exc
 

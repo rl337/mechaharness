@@ -63,6 +63,7 @@ testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
   "live_qwen: hits a local Qwen OpenAI-compat server (set MECHA_LIVE_QWEN=1)",
+  "live_junespark: hits junespark vLLM (set MECHA_LIVE_JUNESPARK=1)",
 ]
 
 [tool.ruff]
