@@ -9,7 +9,7 @@ providers directly.
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections.abc import AsyncIterator
 from typing import Any
 from uuid import uuid4
@@ -25,8 +25,8 @@ from mechaharness.core.access import (
     CostReport,
     InMemoryAccessControl,
     InMemoryCostAccountant,
-    default_capability_profile,
 )
+from mechaharness.core.completer import Completer
 from mechaharness.core.events import (
     AgentEnd,
     AgentStart,
@@ -42,9 +42,16 @@ from mechaharness.core.events import (
     event_type_key,
 )
 from mechaharness.core.exceptions import HarnessError
-from mechaharness.core.types import ChatMessage, CompletionRequest, Role, ToolCall, ToolResult
-from mechaharness.inference.base import InferenceStrategy
+from mechaharness.core.types import (
+    ChatMessage,
+    CompletionRequest,
+    CompletionResponse,
+    Role,
+    ToolCall,
+    ToolResult,
+)
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.tools.subagents import install_subagent_tools
 
 
 class HarnessConfig(BaseModel):
@@ -64,14 +71,14 @@ class HarnessResult(BaseModel):
     cost: CostReport = Field(default_factory=CostReport)
 
 
-class AbstractHarness(ABC):
-    """Base harness: inject inference + tools, subclasses define the loop policy."""
+class AbstractHarness(Completer):
+    """Base harness: inject a completer + tools, subclasses define the loop policy."""
 
     family: str = "abstract"
 
     def __init__(
         self,
-        inference: InferenceStrategy,
+        inference: Completer,
         tools: ToolRegistry | None = None,
         *,
         config: HarnessConfig,
@@ -80,6 +87,7 @@ class AbstractHarness(ABC):
         cost: CostAccountant | None = None,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
+        subagent_tools: bool = False,
     ) -> None:
         self.inference = inference
         self.tools = tools or ToolRegistry()
@@ -91,14 +99,17 @@ class AbstractHarness(ABC):
             access = InMemoryAccessControl(event_log=self.event_log, policy=access)
         self.access = access or InMemoryAccessControl(event_log=self.event_log)
         self.cost = cost or InMemoryCostAccountant(event_log=self.event_log)
+        if subagent_tools:
+            install_subagent_tools(self.tools, self.event_log, self.agent_id)
 
     def capability_profile(self) -> CapabilityProfile:
-        profile = getattr(self.inference, "capability_profile", None)
-        if callable(profile):
-            result = profile()
-            if isinstance(result, CapabilityProfile):
-                return result
-        return default_capability_profile()
+        return self.inference.capability_profile()
+
+    def access_policy(self) -> AccessPolicy:
+        table = getattr(self.access, "policy", None)
+        if table is not None:
+            return AccessPolicy(grants=list(table.grants))
+        return AccessPolicy()
 
     def _emit(self, event_type: type[EventType], payload: dict[str, Any], run_id: str) -> None:
         self.event_log.emit(
@@ -112,11 +123,42 @@ class AbstractHarness(ABC):
         )
 
     def _completer_name(self) -> str:
-        return str(getattr(self.inference, "name", None) or self.family)
+        return str(
+            getattr(self.inference, "name", None)
+            or getattr(self.inference, "family", None)
+            or self.family
+        )
+
+    def _link_child_completer(self) -> None:
+        child = self.inference
+        if not isinstance(child, AbstractHarness):
+            return
+        if child.parent_agent_id is None:
+            child.parent_agent_id = self.agent_id
+        if child.event_log is not self.event_log:
+            child.event_log = self.event_log
+
+    async def complete(self, request: CompletionRequest) -> CompletionResponse:
+        """Treat this harness as a completer (same shape as a raw model)."""
+        user_indices = [i for i, msg in enumerate(request.messages) if msg.role == Role.USER]
+        if user_indices:
+            last = user_indices[-1]
+            user_input = request.messages[last].content or ""
+            history = request.messages[:last]
+        else:
+            user_input = ""
+            history = list(request.messages)
+        result = await self.run(user_input, history=history or None)
+        return CompletionResponse(
+            message=ChatMessage(role=Role.ASSISTANT, content=result.final_text),
+            finish_reason="stop",
+            cost=result.cost,
+        )
 
     async def run(
         self, user_input: str, *, history: list[ChatMessage] | None = None
     ) -> HarnessResult:
+        self._link_child_completer()
         run_id = str(uuid4())
         run_cost = CostReport()
         self._emit(
@@ -176,27 +218,34 @@ class AbstractHarness(ABC):
 
             request = self.build_request(messages)
             response = await self.inference.complete(request)
-            entry = self.cost.price_inference(
-                self._completer_name(),
-                self.capability_profile(),
-                agent_id=self.agent_id,
-                run_id=run_id,
-                parent_agent_id=self.parent_agent_id,
-            )
-            cost.add(entry)
+            nested_cost = response.cost
+            if nested_cost is not None and getattr(nested_cost, "entries", None):
+                for nested_entry in nested_cost.entries:
+                    cost.add(nested_entry)
+            else:
+                entry = self.cost.price_inference(
+                    self._completer_name(),
+                    self.capability_profile(),
+                    agent_id=self.agent_id,
+                    run_id=run_id,
+                    parent_agent_id=self.parent_agent_id,
+                    usage=response.usage,
+                )
+                cost.add(entry)
             assistant = response.message
             messages.append(assistant)
-            self._emit(
-                Inference,
-                {
-                    "completer": self._completer_name(),
-                    "model": request.model,
-                    "finish_reason": response.finish_reason,
-                    "content": assistant.content,
-                    "tool_calls": [tc.model_dump() for tc in (assistant.tool_calls or [])],
-                },
-                run_id,
-            )
+            inference_payload: dict[str, Any] = {
+                "completer": self._completer_name(),
+                "model": request.model,
+                "finish_reason": response.finish_reason,
+                "content": assistant.content,
+                "tool_calls": [tc.model_dump() for tc in (assistant.tool_calls or [])],
+            }
+            if assistant.reasoning_content:
+                inference_payload["reasoning_content"] = assistant.reasoning_content
+            if response.usage is not None:
+                inference_payload["usage"] = response.usage.model_dump()
+            self._emit(Inference, inference_payload, run_id)
 
             if self.should_stop(assistant, response.finish_reason):
                 return HarnessResult(

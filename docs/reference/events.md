@@ -50,7 +50,9 @@ long as they are namespaced. Bare names (`run_start`) are rejected.
 | `Cost` | `core:cost` |
 | `AccessCheck` | `core:access_check` |
 
-`core:access_check` payload: `tool`, `required`, `granted`, `allowed`. Hosts add types by
+`core:access_check` payload: `tool`, `required`, `granted`, `allowed`.
+`core:cost` may include `prompt_tokens` / `completion_tokens` / `total_tokens`.
+`core:inference` may include `reasoning_content` and `usage`. Hosts add types by
 subclassing without editing this module:
 
 ```python

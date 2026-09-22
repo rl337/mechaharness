@@ -45,6 +45,8 @@ class ChatMessage(BaseModel):
     name: str | None = None
     tool_calls: list[ToolCall] | None = None
     tool_call_id: str | None = None
+    reasoning_content: str | None = None
+    extra: dict[str, Any] = Field(default_factory=dict)
 
 
 class CompletionRequest(BaseModel):
@@ -72,3 +74,5 @@ class CompletionResponse(BaseModel):
     finish_reason: str | None = None
     usage: Usage | None = None
     raw: dict[str, Any] | None = None
+    # Nested Completer rollup: ``mechaharness.core.access.CostReport`` when set.
+    cost: Any | None = None

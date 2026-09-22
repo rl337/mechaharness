@@ -16,6 +16,7 @@ from typing import Any, ClassVar, Union
 from pydantic import BaseModel, Field, field_validator
 
 from mechaharness.core.events import AccessCheck, Cost, Event, EventLog, EventType, event_type_key
+from mechaharness.core.types import Usage
 
 
 class Ability(str, Enum):
@@ -131,6 +132,18 @@ class NetHttp(CoreGrant):
     name = "net.http"
 
 
+class MediaImage(CoreGrant):
+    name = "media.image"
+
+
+class MediaVideo(CoreGrant):
+    name = "media.video"
+
+
+class MediaAudio(CoreGrant):
+    name = "media.audio"
+
+
 def grant_key(value: object) -> str:
     """Normalize a class or ``namespace:name`` string to the wire key."""
     if isinstance(value, str):
@@ -174,23 +187,43 @@ class CostEntry(BaseModel):
     name: str
     units: int
     capabilities: list[Capability] = Field(default_factory=list)
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
 
 
 class CostReport(BaseModel):
     units: int = 0
     entries: list[CostEntry] = Field(default_factory=list)
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
 
     def add(self, entry: CostEntry) -> None:
         self.entries.append(entry)
         self.units += entry.units
+        if entry.prompt_tokens is not None:
+            self.prompt_tokens += entry.prompt_tokens
+        if entry.completion_tokens is not None:
+            self.completion_tokens += entry.completion_tokens
+        if entry.total_tokens is not None:
+            self.total_tokens += entry.total_tokens
 
 
-def inference_cost_entry(name: str, profile: CapabilityProfile) -> CostEntry:
+def inference_cost_entry(
+    name: str,
+    profile: CapabilityProfile,
+    *,
+    usage: Usage | None = None,
+) -> CostEntry:
     return CostEntry(
         kind="inference",
         name=name,
         units=profile.units(),
         capabilities=list(profile.capabilities),
+        prompt_tokens=usage.prompt_tokens if usage else None,
+        completion_tokens=usage.completion_tokens if usage else None,
+        total_tokens=usage.total_tokens if usage else None,
     )
 
 
@@ -226,6 +259,7 @@ class CostAccountant(ABC):
         agent_id: str = "",
         run_id: str = "",
         parent_agent_id: str | None = None,
+        usage: Usage | None = None,
     ) -> CostEntry:
         """Units for one completer call."""
 
@@ -333,8 +367,14 @@ class InMemoryCostAccountant(CostAccountant):
         agent_id: str = "",
         run_id: str = "",
         parent_agent_id: str | None = None,
+        usage: Usage | None = None,
     ) -> CostEntry:
-        return self._record(inference_cost_entry(name, profile), agent_id, run_id, parent_agent_id)
+        return self._record(
+            inference_cost_entry(name, profile, usage=usage),
+            agent_id,
+            run_id,
+            parent_agent_id,
+        )
 
     def price_tool(
         self,
@@ -358,10 +398,21 @@ class InMemoryCostAccountant(CostAccountant):
         parent_agent_id: str | None,
     ) -> CostEntry:
         self._report.add(entry)
+        payload: dict[str, Any] = {
+            "kind": entry.kind,
+            "name": entry.name,
+            "units": entry.units,
+        }
+        if entry.prompt_tokens is not None:
+            payload["prompt_tokens"] = entry.prompt_tokens
+        if entry.completion_tokens is not None:
+            payload["completion_tokens"] = entry.completion_tokens
+        if entry.total_tokens is not None:
+            payload["total_tokens"] = entry.total_tokens
         _emit_policy_event(
             self._event_log,
             Cost,
-            {"kind": entry.kind, "name": entry.name, "units": entry.units},
+            payload,
             agent_id=agent_id,
             run_id=run_id,
             parent_agent_id=parent_agent_id,
