@@ -224,3 +224,6 @@ Thumbs.db
 # Local host contracts (do not publish)
 REQUIREMENTS.md
 .agents/
+
+# Local docs tooling install (sandbox-friendly target dir)
+.docs-venv/

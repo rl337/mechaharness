@@ -1,0 +1,229 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "src/mechaharness/**"
+      - "docs/**"
+      - "CHANGELOG.md"
+      - "pyproject.toml"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main, master]
+    paths:
+      - "src/mechaharness/**"
+      - "docs/**"
+      - "CHANGELOG.md"
+      - "pyproject.toml"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: documentation-site
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  pull-requests: write
+
+env:
+  PREVIEW_DIR: branch
+  SITE_URL: https://rl337.org/mechaharness
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        if: github.event.action != 'closed'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip packages
+        if: github.event.action != 'closed'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.12-docs-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.12-docs-
+            ${{ runner.os }}-pip-3.12-
+
+      - name: Install documentation dependencies
+        if: github.event.action != 'closed'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[docs]"
+
+      - name: Build documentation with Sphinx
+        if: github.event.action != 'closed'
+        run: sphinx-build -b html docs docs/_build/html
+
+      - name: Upload Sphinx artifact
+        if: github.event.action != 'closed'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mechaharness-documentation
+          path: docs/_build/html
+          if-no-files-found: error
+
+      - name: Checkout published site tree
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: published
+
+      - name: Assemble production root and branch previews
+        id: preview
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          GIT_REF: ${{ github.ref }}
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p published
+          rm -rf published/.git
+
+          python3 <<'PY'
+          import os, re, shutil
+          from pathlib import Path
+
+          published = Path("published")
+          published.mkdir(exist_ok=True)
+          preview_root = published / os.environ["PREVIEW_DIR"]
+          sphinx = Path("docs/_build/html")
+          event = os.environ["EVENT_NAME"]
+          action = os.environ.get("EVENT_ACTION") or ""
+          git_ref = os.environ["GIT_REF"]
+          head_ref = os.environ["HEAD_REF"]
+          parts = [
+              re.sub(r"[^A-Za-z0-9._-]", "-", p)
+              for p in head_ref.split("/")
+              if p not in ("", ".", "..")
+          ]
+          safe = "/".join(parts) or "unnamed"
+          is_prod = git_ref in ("refs/heads/main", "refs/heads/master") and event != "pull_request"
+          preview_url = f"{os.environ['SITE_URL']}/{os.environ['PREVIEW_DIR']}/{safe}/"
+
+          def copy_tree(src: Path, dest: Path) -> None:
+              dest.mkdir(parents=True, exist_ok=True)
+              for item in src.iterdir():
+                  target = dest / item.name
+                  if item.is_dir():
+                      shutil.copytree(item, target, dirs_exist_ok=True)
+                  else:
+                      shutil.copy2(item, target)
+
+          if event == "pull_request" and action == "closed":
+              shutil.rmtree(preview_root / safe, ignore_errors=True)
+          elif is_prod:
+              saved = Path("/tmp/mecha-preview-branch")
+              if preview_root.exists():
+                  if saved.exists():
+                      shutil.rmtree(saved)
+                  shutil.copytree(preview_root, saved)
+              for child in list(published.iterdir()):
+                  if child.name == os.environ["PREVIEW_DIR"]:
+                      continue
+                  if child.is_dir():
+                      shutil.rmtree(child)
+                  else:
+                      child.unlink()
+              copy_tree(sphinx, published)
+              if saved.exists():
+                  if preview_root.exists():
+                      shutil.rmtree(preview_root)
+                  shutil.copytree(saved, preview_root)
+          else:
+              dest = preview_root / safe
+              if dest.exists():
+                  shutil.rmtree(dest)
+              if sphinx.exists():
+                  copy_tree(sphinx, dest)
+
+          (published / ".nojekyll").write_text("")
+          github_output = Path(os.environ["GITHUB_OUTPUT"])
+          with github_output.open("a") as fh:
+              fh.write(f"safe={safe}\n")
+              fh.write(f"url={preview_url}\n")
+              fh.write(f"is_prod={'true' if is_prod else 'false'}\n")
+              fh.write(f"has_root={'true' if (published / 'index.html').is_file() else 'false'}\n")
+          PY
+
+      - name: Publish site tree to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: published
+          branch: gh-pages
+          clean: true
+
+      - name: Setup Pages
+        if: steps.preview.outputs.has_root == 'true'
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        if: steps.preview.outputs.has_root == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: published
+
+      - name: Deploy to GitHub Pages
+        if: steps.preview.outputs.has_root == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
+
+      - name: Comment preview URL on the pull request
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+          HAS_ROOT: ${{ steps.preview.outputs.has_root }}
+          CLOSED: ${{ github.event.action == 'closed' }}
+        with:
+          script: |
+            const marker = '<!-- mechaharness-docs-preview -->';
+            const closed = process.env.CLOSED === 'true';
+            const live = process.env.HAS_ROOT === 'true';
+            const url = process.env.PREVIEW_URL;
+            let body;
+            if (closed) {
+              body = `${marker}\nPreview removed from the docs site. Production is unchanged at ${process.env.SITE_URL}/.`;
+            } else if (live) {
+              body = `${marker}\nDocs preview: ${url}\n\nProduction stays at ${process.env.SITE_URL}/ (main only). This preview updates on each push.`;
+            } else {
+              body = `${marker}\nDocs preview will be at ${url} after the next **main** deploy (the production tree is not on \`gh-pages\` yet, so this PR will not publish over the live homepage).`;
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
