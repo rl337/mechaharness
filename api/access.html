@@ -1,0 +1,598 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mechaharness.core.access &mdash; MechaHarness 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mechaharness.core.environment" href="environment.html" />
+    <link rel="prev" title="mechaharness.core.events" href="events.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">mechaharness.tools.base</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mechaharness.core.access</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/api/access.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mechaharness.core.access">
+<span id="mechaharness-core-access"></span><h1>mechaharness.core.access<a class="headerlink" href="#module-mechaharness.core.access" title="Link to this heading"></a></h1>
+<p>Cost units and deny-by-default tool grants.</p>
+<p>Ability is a five-step scale; higher ability costs more. Grants are open
+identity: a class hierarchy with wire form <code class="docutils literal notranslate"><span class="pre">namespace:name</span></code> (for example
+<code class="docutils literal notranslate"><span class="pre">core:fs.read</span></code>, <code class="docutils literal notranslate"><span class="pre">acme:widget</span></code>). Unknown namespaced keys round-trip; bare
+names are rejected.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.Ability">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">Ability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#Ability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.Ability" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>How capable a completer or tool is at a given kind of work.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Ability.ADVANCED">
+<span class="sig-name descname"><span class="pre">ADVANCED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'advanced'</span></span><a class="headerlink" href="#mechaharness.core.access.Ability.ADVANCED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Ability.BASIC">
+<span class="sig-name descname"><span class="pre">BASIC</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'basic'</span></span><a class="headerlink" href="#mechaharness.core.access.Ability.BASIC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Ability.INTERMEDIATE">
+<span class="sig-name descname"><span class="pre">INTERMEDIATE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'intermediate'</span></span><a class="headerlink" href="#mechaharness.core.access.Ability.INTERMEDIATE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Ability.PROFICIENT">
+<span class="sig-name descname"><span class="pre">PROFICIENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'proficient'</span></span><a class="headerlink" href="#mechaharness.core.access.Ability.PROFICIENT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Ability.SIMPLE">
+<span class="sig-name descname"><span class="pre">SIMPLE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'simple'</span></span><a class="headerlink" href="#mechaharness.core.access.Ability.SIMPLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mechaharness.core.access.Ability.rank">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">rank</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#mechaharness.core.access.Ability.rank" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mechaharness.core.access.Ability.units">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#mechaharness.core.access.Ability.units" title="Link to this definition"></a></dt>
+<dd><p>1, 2, 4, 8, 16.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cost units</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.AccessControl">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">AccessControl</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#AccessControl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.AccessControl" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Whether a tool may run. Deny-by-default unless a grant covers it.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.AccessControl.allows">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">allows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#AccessControl.allows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.AccessControl.allows" title="Link to this definition"></a></dt>
+<dd><p>Return True if every required grant is held.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.AccessPolicy">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">AccessPolicy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#AccessPolicy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.AccessPolicy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Deny-by-default grant list for a harness.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.AccessPolicy.allows">
+<span class="sig-name descname"><span class="pre">allows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#AccessPolicy.allows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.AccessPolicy.allows" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.AccessPolicy.grants">
+<span class="sig-name descname"><span class="pre">grants</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#mechaharness.core.access.AccessPolicy.grants" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.AccessPolicy.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#mechaharness.core.access.AccessPolicy.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.Capability">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">Capability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.CapabilityKind" title="mechaharness.core.access.CapabilityKind"><span class="pre">CapabilityKind</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.Ability" title="mechaharness.core.access.Ability"><span class="pre">Ability</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#Capability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.Capability" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Capability.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mechaharness.core.access.CapabilityKind" title="mechaharness.core.access.CapabilityKind"><span class="pre">CapabilityKind</span></a></span><a class="headerlink" href="#mechaharness.core.access.Capability.kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Capability.level">
+<span class="sig-name descname"><span class="pre">level</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mechaharness.core.access.Ability" title="mechaharness.core.access.Ability"><span class="pre">Ability</span></a></span><a class="headerlink" href="#mechaharness.core.access.Capability.level" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Capability.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#mechaharness.core.access.Capability.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.CapabilityKind">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">CapabilityKind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CapabilityKind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CapabilityKind" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Kinds of work a completer can perform (aligned with model skills).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CapabilityKind.CODE">
+<span class="sig-name descname"><span class="pre">CODE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'code'</span></span><a class="headerlink" href="#mechaharness.core.access.CapabilityKind.CODE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CapabilityKind.REASONING">
+<span class="sig-name descname"><span class="pre">REASONING</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'reasoning'</span></span><a class="headerlink" href="#mechaharness.core.access.CapabilityKind.REASONING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CapabilityKind.TOOL_USE">
+<span class="sig-name descname"><span class="pre">TOOL_USE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tool_use'</span></span><a class="headerlink" href="#mechaharness.core.access.CapabilityKind.TOOL_USE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.CapabilityProfile">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">CapabilityProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capabilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mechaharness.core.access.Capability" title="mechaharness.core.access.Capability"><span class="pre">Capability</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CapabilityProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CapabilityProfile" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Declared skills of a completer. Cost is the sum of each capability’s units.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CapabilityProfile.capabilities">
+<span class="sig-name descname"><span class="pre">capabilities</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mechaharness.core.access.Capability" title="mechaharness.core.access.Capability"><span class="pre">Capability</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#mechaharness.core.access.CapabilityProfile.capabilities" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CapabilityProfile.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#mechaharness.core.access.CapabilityProfile.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.CapabilityProfile.units">
+<span class="sig-name descname"><span class="pre">units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CapabilityProfile.units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CapabilityProfile.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.CoreGrant">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">CoreGrant</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CoreGrant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CoreGrant" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.Grant" title="mechaharness.core.access.Grant"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grant</span></code></a></p>
+<p>Built-in MechaHarness grants (<code class="docutils literal notranslate"><span class="pre">core:*</span></code>). Conveniences, not a closed set.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CoreGrant.namespace">
+<span class="sig-name descname"><span class="pre">namespace</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'core'</span></span><a class="headerlink" href="#mechaharness.core.access.CoreGrant.namespace" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostAccountant">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">CostAccountant</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CostAccountant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CostAccountant" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Price one inference call or tool invocation and keep a ledger.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostAccountant.price_inference">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">price_inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.CapabilityProfile" title="mechaharness.core.access.CapabilityProfile"><span class="pre">CapabilityProfile</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#mechaharness.core.types.Usage" title="mechaharness.core.types.Usage"><span class="pre">Usage</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CostAccountant.price_inference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CostAccountant.price_inference" title="Link to this definition"></a></dt>
+<dd><p>Units for one completer call.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostAccountant.price_tool">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">price_tool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.Ability" title="mechaharness.core.access.Ability"><span class="pre">Ability</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CostAccountant.price_tool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CostAccountant.price_tool" title="Link to this definition"></a></dt>
+<dd><p>Units for one successful tool run.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostAccountant.report">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CostReport" title="mechaharness.core.access.CostReport"><span class="pre">CostReport</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CostAccountant.report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CostAccountant.report" title="Link to this definition"></a></dt>
+<dd><p>Accumulated ledger for this accountant instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">CostEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">capabilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mechaharness.core.access.Capability" title="mechaharness.core.access.Capability"><span class="pre">Capability</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CostEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CostEntry" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry.capabilities">
+<span class="sig-name descname"><span class="pre">capabilities</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mechaharness.core.access.Capability" title="mechaharness.core.access.Capability"><span class="pre">Capability</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#mechaharness.core.access.CostEntry.capabilities" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry.completion_tokens">
+<span class="sig-name descname"><span class="pre">completion_tokens</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostEntry.completion_tokens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostEntry.kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#mechaharness.core.access.CostEntry.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostEntry.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry.prompt_tokens">
+<span class="sig-name descname"><span class="pre">prompt_tokens</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostEntry.prompt_tokens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry.total_tokens">
+<span class="sig-name descname"><span class="pre">total_tokens</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostEntry.total_tokens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostEntry.units">
+<span class="sig-name descname"><span class="pre">units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostEntry.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostReport">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">CostReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CostReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CostReport" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostReport.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#CostReport.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.CostReport.add" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostReport.completion_tokens">
+<span class="sig-name descname"><span class="pre">completion_tokens</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostReport.completion_tokens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostReport.entries">
+<span class="sig-name descname"><span class="pre">entries</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#mechaharness.core.access.CostReport.entries" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostReport.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#mechaharness.core.access.CostReport.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostReport.prompt_tokens">
+<span class="sig-name descname"><span class="pre">prompt_tokens</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostReport.prompt_tokens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostReport.total_tokens">
+<span class="sig-name descname"><span class="pre">total_tokens</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostReport.total_tokens" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.CostReport.units">
+<span class="sig-name descname"><span class="pre">units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#mechaharness.core.access.CostReport.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.FsRead">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">FsRead</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#FsRead"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.FsRead" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.FsRead.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fs.read'</span></span><a class="headerlink" href="#mechaharness.core.access.FsRead.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.FsWrite">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">FsWrite</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#FsWrite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.FsWrite" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.FsWrite.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fs.write'</span></span><a class="headerlink" href="#mechaharness.core.access.FsWrite.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.Grant">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">Grant</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#Grant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.Grant" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Namespaced grant identity.</p>
+<p>Subclass to add grants. The wire form is <code class="docutils literal notranslate"><span class="pre">namespace:name</span></code> (for example
+<code class="docutils literal notranslate"><span class="pre">core:fs.read</span></code>). Intermediate classes set <code class="docutils literal notranslate"><span class="pre">namespace</span></code>; leaves set
+<code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.Grant.key">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#Grant.key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.Grant.key" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Grant.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></span><a class="headerlink" href="#mechaharness.core.access.Grant.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.Grant.namespace">
+<span class="sig-name descname"><span class="pre">namespace</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></span><a class="headerlink" href="#mechaharness.core.access.Grant.namespace" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.Grant.parse">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="events.html#mechaharness.core.events.Event.type" title="mechaharness.core.events.Event.type"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mechaharness.core.access.Grant" title="mechaharness.core.access.Grant"><span class="pre">Grant</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#Grant.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.Grant.parse" title="Link to this definition"></a></dt>
+<dd><p>Return the class registered for <code class="docutils literal notranslate"><span class="pre">namespace:name</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryAccessControl">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">InMemoryAccessControl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="events.html#mechaharness.core.events.EventLog" title="mechaharness.core.events.EventLog"><span class="pre">EventLog</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.AccessPolicy" title="mechaharness.core.access.AccessPolicy"><span class="pre">AccessPolicy</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#InMemoryAccessControl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.InMemoryAccessControl" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.AccessControl" title="mechaharness.core.access.AccessControl"><code class="xref py py-class docutils literal notranslate"><span class="pre">AccessControl</span></code></a></p>
+<p>Deny-by-default grant list; records and emits every check.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryAccessControl.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="events.html#mechaharness.core.events.EventLog" title="mechaharness.core.events.EventLog"><span class="pre">EventLog</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.AccessPolicy" title="mechaharness.core.access.AccessPolicy"><span class="pre">AccessPolicy</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#InMemoryAccessControl.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.InMemoryAccessControl.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryAccessControl.allows">
+<span class="sig-name descname"><span class="pre">allows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#InMemoryAccessControl.allows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.InMemoryAccessControl.allows" title="Link to this definition"></a></dt>
+<dd><p>Return True if every required grant is held.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryAccessControl.checks">
+<span class="sig-name descname"><span class="pre">checks</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#mechaharness.core.access.InMemoryAccessControl.checks" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryAccessControl.grants">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">grants</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#mechaharness.core.access.InMemoryAccessControl.grants" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryCostAccountant">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">InMemoryCostAccountant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="events.html#mechaharness.core.events.EventLog" title="mechaharness.core.events.EventLog"><span class="pre">EventLog</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mechaharness/core/access.html#InMemoryCostAccountant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.InMemoryCostAccountant" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CostAccountant" title="mechaharness.core.access.CostAccountant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CostAccountant</span></code></a></p>
+<p>Prices from the capability profile and tool ability; emits <code class="docutils literal notranslate"><span class="pre">core:cost</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryCostAccountant.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="events.html#mechaharness.core.events.EventLog" title="mechaharness.core.events.EventLog"><span class="pre">EventLog</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#InMemoryCostAccountant.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.InMemoryCostAccountant.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryCostAccountant.price_inference">
+<span class="sig-name descname"><span class="pre">price_inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.CapabilityProfile" title="mechaharness.core.access.CapabilityProfile"><span class="pre">CapabilityProfile</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#mechaharness.core.types.Usage" title="mechaharness.core.types.Usage"><span class="pre">Usage</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#InMemoryCostAccountant.price_inference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.InMemoryCostAccountant.price_inference" title="Link to this definition"></a></dt>
+<dd><p>Units for one completer call.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryCostAccountant.price_tool">
+<span class="sig-name descname"><span class="pre">price_tool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.Ability" title="mechaharness.core.access.Ability"><span class="pre">Ability</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_agent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#InMemoryCostAccountant.price_tool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.InMemoryCostAccountant.price_tool" title="Link to this definition"></a></dt>
+<dd><p>Units for one successful tool run.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.access.InMemoryCostAccountant.report">
+<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CostReport" title="mechaharness.core.access.CostReport"><span class="pre">CostReport</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#InMemoryCostAccountant.report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.InMemoryCostAccountant.report" title="Link to this definition"></a></dt>
+<dd><p>Accumulated ledger for this accountant instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.MediaAudio">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">MediaAudio</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#MediaAudio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.MediaAudio" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.MediaAudio.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'media.audio'</span></span><a class="headerlink" href="#mechaharness.core.access.MediaAudio.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.MediaImage">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">MediaImage</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#MediaImage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.MediaImage" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.MediaImage.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'media.image'</span></span><a class="headerlink" href="#mechaharness.core.access.MediaImage.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.MediaVideo">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">MediaVideo</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#MediaVideo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.MediaVideo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.MediaVideo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'media.video'</span></span><a class="headerlink" href="#mechaharness.core.access.MediaVideo.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.NetHttp">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">NetHttp</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#NetHttp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.NetHttp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.NetHttp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'net.http'</span></span><a class="headerlink" href="#mechaharness.core.access.NetHttp.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mechaharness.core.access.default_capability_profile">
+<span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">default_capability_profile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CapabilityProfile" title="mechaharness.core.access.CapabilityProfile"><span class="pre">CapabilityProfile</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#default_capability_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.default_capability_profile" title="Link to this definition"></a></dt>
+<dd><p>Pass-through / unknown completer: simple reasoning only.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mechaharness.core.access.grant_key">
+<span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">grant_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#grant_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.grant_key" title="Link to this definition"></a></dt>
+<dd><p>Normalize a class or <code class="docutils literal notranslate"><span class="pre">namespace:name</span></code> string to the wire key.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mechaharness.core.access.inference_cost_entry">
+<span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">inference_cost_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.CapabilityProfile" title="mechaharness.core.access.CapabilityProfile"><span class="pre">CapabilityProfile</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">usage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#mechaharness.core.types.Usage" title="mechaharness.core.types.Usage"><span class="pre">Usage</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#inference_cost_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.inference_cost_entry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mechaharness.core.access.tool_cost_entry">
+<span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">tool_cost_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mechaharness.core.access.Ability" title="mechaharness.core.access.Ability"><span class="pre">Ability</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mechaharness.core.access.CostEntry" title="mechaharness.core.access.CostEntry"><span class="pre">CostEntry</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#tool_cost_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.tool_cost_entry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="events.html" class="btn btn-neutral float-left" title="mechaharness.core.events" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="environment.html" class="btn btn-neutral float-right" title="mechaharness.core.environment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
