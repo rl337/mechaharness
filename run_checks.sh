@@ -49,6 +49,13 @@ run_check "Ruff lint" "$RUFF" check src tests
 run_check "Mypy type checking" "$MYPY"
 run_check "Pytest" "$PYTEST" -q
 
+if "$PYTHON" -c "import sphinx" 2>/dev/null; then
+  run_check "Sphinx docs" "$PYTHON" -m sphinx -b html -q docs docs/_build/html
+else
+  echo ""
+  echo -e "${YELLOW}⚠ sphinx not installed; skipping docs build (pip install -e '.[docs]')${NC}"
+fi
+
 if command -v "$MECHA" >/dev/null 2>&1 || [ -x "$MECHA" ]; then
   run_check "CLI version" "$MECHA" version
   run_check "CLI backends" "$MECHA" backends

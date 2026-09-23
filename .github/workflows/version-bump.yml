@@ -1,0 +1,142 @@
+name: Auto Version Bump
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [main, master]
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'master')
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check if merge commit
+        id: check_merge
+        run: |
+          COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
+          IS_MERGE=$(git log -1 --format="%P" $COMMIT_SHA | wc -w)
+
+          if [ "$IS_MERGE" -gt 1 ]; then
+            echo "is_merge=true" >> $GITHUB_OUTPUT
+            echo "Version bump type: minor (merge commit)"
+          else
+            echo "is_merge=false" >> $GITHUB_OUTPUT
+            echo "Version bump type: patch (regular commit)"
+          fi
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(grep -E '^version = ' pyproject.toml | sed -E "s/^version = [\"'](.*)[\"']/\1/")
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Skip if version is already ahead of the latest tag
+        id: skip_ahead
+        run: |
+          CURRENT="${{ steps.current_version.outputs.current }}"
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          COMMIT_MSG=$(git log -1 --format=%s "${{ github.event.workflow_run.head_sha }}")
+          if echo "$COMMIT_MSG" | grep -q '\[skip bump\]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping auto-bump: commit contains [skip bump]"
+            exit 0
+          fi
+          if [ -z "$LAST_TAG" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping auto-bump: no git tags yet (first release is hand-managed)"
+            exit 0
+          fi
+          LAST="${LAST_TAG#v}"
+          AHEAD=$(printf '%s\n%s\n' "$LAST" "$CURRENT" | sort -V | tail -1)
+          if [ "$CURRENT" != "$LAST" ] && [ "$AHEAD" = "$CURRENT" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping auto-bump: pyproject $CURRENT is already ahead of $LAST_TAG"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Calculate new version
+        id: new_version
+        if: steps.skip_ahead.outputs.skip != 'true'
+        run: |
+          CURRENT="${{ steps.current_version.outputs.current }}"
+          IS_MERGE="${{ steps.check_merge.outputs.is_merge }}"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          if [ "$IS_MERGE" = "true" ]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+            BUMP_TYPE="minor"
+          else
+            PATCH=$((PATCH + 1))
+            BUMP_TYPE="patch"
+          fi
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION (bump type: $BUMP_TYPE)"
+
+      - name: Check if version already updated
+        id: check_updated
+        if: steps.skip_ahead.outputs.skip != 'true'
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+          CURRENT_VERSION="${{ steps.current_version.outputs.current }}"
+
+          if [ "$NEW_VERSION" = "$CURRENT_VERSION" ]; then
+            echo "already_updated=true" >> $GITHUB_OUTPUT
+            echo "Version already at $NEW_VERSION, skipping update"
+          else
+            echo "already_updated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update version in pyproject.toml
+        if: steps.skip_ahead.outputs.skip != 'true' && steps.check_updated.outputs.already_updated == 'false'
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+          sed -i "s/^version = \".*\"/version = \"${NEW_VERSION}\"/" pyproject.toml
+          echo "Updated pyproject.toml version to ${NEW_VERSION}"
+
+      - name: Update version in __init__.py
+        if: steps.skip_ahead.outputs.skip != 'true' && steps.check_updated.outputs.already_updated == 'false'
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+          sed -i "s/^__version__ = \".*\"/__version__ = \"${NEW_VERSION}\"/" src/mechaharness/__init__.py
+          echo "Updated src/mechaharness/__init__.py version to ${NEW_VERSION}"
+
+      - name: Commit and push version bump
+        if: steps.skip_ahead.outputs.skip != 'true' && steps.check_updated.outputs.already_updated == 'false'
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+          BUMP_TYPE="${{ steps.new_version.outputs.bump_type }}"
+
+          git add pyproject.toml src/mechaharness/__init__.py
+          git commit -m "chore: auto-bump version to ${NEW_VERSION} (${BUMP_TYPE}) [skip ci]"
+          git push origin ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
