@@ -6,22 +6,29 @@ app — MechaHarness only issues chat completions.
 
 ## Backend
 
+Set the server URL and served model id explicitly (the library does not ship a
+private LAN default):
+
 ```bash
+export MECHA_BASE_URL=http://127.0.0.1:8000/v1   # or your host's OpenAI-compat URL
+export MECHA_API_KEY=junespark                   # placeholder is fine for local vLLM
+export MECHA_MODEL=<served-model-id>
+
 mechaharness run "Reply with ok." \
   --backend junespark \
   --family pass_through \
-  --model <served-model-id>
+  --model "$MECHA_MODEL"
 ```
 
-Default base URL is `http://192.168.1.21:8000/v1` with a placeholder API key.
-Override with `MECHA_BASE_URL` / `MECHA_MODEL` / `MECHA_API_KEY` as needed.
 Use the **served model id** your server advertises on `/v1/models`, not a
 Hugging Face repo id.
 
 Live pytest (skipped in CI):
 
 ```bash
-MECHA_LIVE_JUNESPARK=1 MECHA_MODEL=<served-model-id> \
+MECHA_LIVE_JUNESPARK=1 \
+  MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
+  MECHA_MODEL=<served-model-id> \
   pytest -q tests/test_live_junespark.py
 ```
 

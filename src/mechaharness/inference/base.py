@@ -21,6 +21,7 @@ class InferenceStrategy(Completer):
     name: str = "base"
 
     def capability_profile(self) -> CapabilityProfile:
+        """Declared skills used for cost pricing of this backend."""
         return default_capability_profile()
 
     @abstractmethod

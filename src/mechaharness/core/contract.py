@@ -12,6 +12,12 @@ from pydantic import BaseModel, Field
 
 
 class RunRequest(BaseModel):
+    """OpenAPI-shaped input for ``mechaharness.factory.run`` / CLI / HTTP.
+
+    String fields map onto ``Settings`` when present; omitted fields keep
+    environment defaults.
+    """
+
     prompt: str
     backend: str | None = None
     family: str | None = None
@@ -24,6 +30,8 @@ class RunRequest(BaseModel):
 
 
 class RunResponse(BaseModel):
+    """Serializable result of a harness run (messages and events as JSON dicts)."""
+
     final_text: str | None
     turns: int
     messages: list[dict[str, Any]]

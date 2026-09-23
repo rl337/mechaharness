@@ -1,7 +1,7 @@
 """Live pass-through against the ``junespark`` OpenAI-compat backend.
 
-Skipped unless ``MECHA_LIVE_JUNESPARK=1``. Set ``MECHA_BASE_URL`` and
-``MECHA_MODEL`` to the running server's served model id.
+Skipped unless ``MECHA_LIVE_JUNESPARK=1``. Requires ``MECHA_BASE_URL`` and
+typically ``MECHA_MODEL`` for the running server's served model id.
 """
 
 from __future__ import annotations
@@ -24,11 +24,14 @@ LIVE = os.environ.get("MECHA_LIVE_JUNESPARK") == "1"
 @pytest.mark.skipif(not LIVE, reason="set MECHA_LIVE_JUNESPARK=1 to hit junespark")
 @pytest.mark.asyncio
 async def test_pass_through_junespark_emits_events_and_usage() -> None:
+    base_url = os.environ.get("MECHA_BASE_URL")
+    if not base_url:
+        pytest.fail("MECHA_BASE_URL is required when MECHA_LIVE_JUNESPARK=1")
     settings = Settings(
         inference_backend="junespark",
         harness_family="pass_through",
         model=os.environ.get("MECHA_MODEL", "qwen3-30b-thinking"),
-        base_url=os.environ.get("MECHA_BASE_URL", "http://192.168.1.21:8000/v1"),
+        base_url=base_url,
         api_key=os.environ.get("MECHA_API_KEY", "junespark"),
         max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "256")),
     )

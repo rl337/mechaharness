@@ -6,6 +6,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Runtime settings loaded from environment / ``.env`` (``MECHA_`` prefix).
+
+    Used by the CLI, HTTP API, and ``SettingsConfig``. Hosts that construct
+    strategies directly may pass a ``Settings`` instance into constructors.
+    """
+
     model_config = SettingsConfigDict(env_prefix="MECHA_", env_file=".env", extra="ignore")
 
     inference_backend: str = "openai"
@@ -22,4 +28,5 @@ class Settings(BaseSettings):
 
 
 def get_settings() -> Settings:
+    """Load ``Settings`` from the current process environment."""
     return Settings()

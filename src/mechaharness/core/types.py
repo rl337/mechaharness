@@ -28,18 +28,24 @@ class ToolDefinition(BaseModel):
 
 
 class ToolCall(BaseModel):
+    """Model-requested tool invocation (id, name, decoded arguments)."""
+
     id: str
     name: str
     arguments: dict[str, Any] = Field(default_factory=dict)
 
 
 class ToolResult(BaseModel):
+    """Result of executing a tool, fed back as a tool-role message."""
+
     tool_call_id: str
     content: str
     is_error: bool = False
 
 
 class ChatMessage(BaseModel):
+    """One turn in a chat transcript (portable across providers)."""
+
     role: Role
     content: str | None = None
     name: str | None = None
@@ -62,6 +68,8 @@ class CompletionRequest(BaseModel):
 
 
 class Usage(BaseModel):
+    """Token usage reported by a provider (fields may be unset)."""
+
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
     total_tokens: int | None = None
