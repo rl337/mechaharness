@@ -55,6 +55,8 @@ from mechaharness.tools.subagents import install_subagent_tools
 
 
 class HarnessConfig(BaseModel):
+    """Per-run knobs for a harness (model, turn budget, sampling)."""
+
     model: str
     system_prompt: str | None = None
     max_turns: int = 8
@@ -64,6 +66,8 @@ class HarnessConfig(BaseModel):
 
 
 class HarnessResult(BaseModel):
+    """Outcome of ``AbstractHarness.run``: final text, transcript, events, cost."""
+
     final_text: str | None
     messages: list[ChatMessage]
     turns: int
@@ -158,6 +162,11 @@ class AbstractHarness(Completer):
     async def run(
         self, user_input: str, *, history: list[ChatMessage] | None = None
     ) -> HarnessResult:
+        """Run one agent lifecycle for ``user_input`` and return the result.
+
+        Emits EventLog records, prices inference/tools via ``CostAccountant``,
+        and enforces tool grants through ``AccessControl``.
+        """
         self._link_child_completer()
         run_id = str(uuid4())
         run_cost = CostReport()

@@ -9,13 +9,21 @@ Get a local environment running and issue a first harness run.
 
 ## Steps
 
+From PyPI:
+
+```bash
+pip install mechaharness
+```
+
+Editable checkout:
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e ".[dev,docs]"
 ```
 
-Install pulls **pyiv** from PyPI (`pyiv>=0.3.0`).
+Install pulls **pyiv** from PyPI (`pyiv>=0.3.0`). Docs: https://rl337.org/mechaharness/
 
 ### Mock (no network)
 
