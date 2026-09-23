@@ -37,6 +37,19 @@ async def test_lmstudio_defaults() -> None:
         await strategy.aclose()
 
 
+@pytest.mark.asyncio
+async def test_junespark_has_no_lan_base_url_default() -> None:
+    config = SettingsConfig(Settings(inference_backend="junespark"))
+    strategy = get_injector(config).inject(InferenceStrategy)
+    try:
+        meta = strategy.describe()
+        assert meta["name"] == "openai_compat"
+        # Hosts must set MECHA_BASE_URL; library must not ship a private LAN IP.
+        assert "192.168." not in str(meta.get("base_url") or "")
+    finally:
+        await strategy.aclose()
+
+
 def test_unknown_backend() -> None:
     with pytest.raises(KeyError, match="Unknown inference backend"):
         SettingsConfig(Settings(inference_backend="not-a-real-backend"))

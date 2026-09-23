@@ -40,7 +40,7 @@ _INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "lmstudio": {"base_url": "http://localhost:1234/v1", "api_key": "lm-studio"},
     "vllm": {"base_url": "http://localhost:8000/v1"},
     "junespark": {
-        "base_url": "http://192.168.1.21:8000/v1",
+        # Hosts set MECHA_BASE_URL / Settings.base_url; no LAN default in the library.
         "api_key": "junespark",
     },
     "ollama": {"base_url": "http://localhost:11434/v1", "api_key": "ollama"},
@@ -74,9 +74,11 @@ class MechaHarnessConfig(Config):
         self._bind_harness()
 
     def get_settings(self) -> Settings:
+        """Settings instance registered for this config (override to customize)."""
         return Settings()
 
     def get_event_log(self) -> EventLog:
+        """Shared ``EventLog`` for harnesses and access/cost policies."""
         existing = getattr(self, "_event_log", None)
         if existing is None:
             existing = default_event_log()
@@ -84,6 +86,7 @@ class MechaHarnessConfig(Config):
         return existing
 
     def get_access_control(self) -> AccessControl:
+        """Deny-by-default access control bound into harnesses."""
         existing = getattr(self, "_access_control", None)
         if existing is None:
             existing = InMemoryAccessControl(
@@ -98,6 +101,7 @@ class MechaHarnessConfig(Config):
         return []
 
     def get_inference_environment(self) -> InferenceEnvironment:
+        """Host probe for the active inference profile (default: no-op)."""
         existing = getattr(self, "_inference_environment", None)
         if existing is None:
             existing = NoOpInferenceEnvironment()
@@ -109,6 +113,7 @@ class MechaHarnessConfig(Config):
         return False
 
     def get_cost_accountant(self) -> CostAccountant:
+        """Ledger used to price inference and tool invocations."""
         existing = getattr(self, "_cost_accountant", None)
         if existing is None:
             existing = InMemoryCostAccountant(event_log=self.get_event_log())
@@ -124,6 +129,7 @@ class MechaHarnessConfig(Config):
         raise NotImplementedError
 
     def get_harness_config(self) -> HarnessConfig:
+        """Build ``HarnessConfig`` from ``get_settings()``."""
         settings = self.get_settings()
         return HarnessConfig(
             model=settings.model,
@@ -134,9 +140,11 @@ class MechaHarnessConfig(Config):
         )
 
     def get_tools(self) -> ToolRegistry:
+        """Tools available to the harness (default: empty registry)."""
         return ToolRegistry()
 
     def inference_classes(self) -> dict[str, type[InferenceStrategy]]:
+        """Named backend map. Hosts merge via ``super().inference_classes()``."""
         return {
             "openai": OpenAICompatStrategy,
             "openai_compat": OpenAICompatStrategy,
@@ -149,6 +157,7 @@ class MechaHarnessConfig(Config):
         }
 
     def harness_classes(self) -> dict[str, type[AbstractHarness]]:
+        """Named harness family map. Hosts merge via ``super().harness_classes()``."""
         return {
             "pass_through": PassThroughHarness,
             "tool_loop": ToolLoopHarness,
@@ -265,10 +274,12 @@ def _demo_tools() -> ToolRegistry:
 
 
 def list_inference_backends() -> list[str]:
+    """Sorted names from the default ``SettingsConfig.inference_classes()`` map."""
     return sorted(SettingsConfig().inference_classes())
 
 
 def list_harness_families() -> list[str]:
+    """Sorted names from the default ``SettingsConfig.harness_classes()`` map."""
     return sorted(SettingsConfig().harness_classes())
 
 
@@ -276,4 +287,5 @@ def build_injector(
     settings: Settings | None = None,
     tools: ToolRegistry | None = None,
 ) -> Injector:
+    """Build a pyiv injector from ``SettingsConfig`` (CLI/API/non-DI path)."""
     return get_injector(SettingsConfig(settings=settings, tools=tools))

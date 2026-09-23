@@ -9,35 +9,23 @@ Python agentic harness that separates **how you call models** from **how you run
 - **DI-first** — pyiv `MechaHarnessConfig` wires the graph; OpenAPI `RunRequest` / `run()` is the non-DI facade
 - **Frontends** — Typer CLI and FastAPI HTTP API (stable shapes for future language bindings)
 
-Full documentation lives in [`docs/`](docs/index.md).
+Documentation: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness/)
 
-## Architecture
+## Install
 
-```text
-┌─────────────┐     ┌─────────────┐
-│  CLI (Typer)│     │ API (FastAPI)│
-└──────┬──────┘     └──────┬──────┘
-       │                   │
-       └─────────┬─────────┘
-                 ▼
-          RunRequest / run()
-                 │
-                 ▼
-        MechaHarnessConfig (pyiv)
-                 │
-                 ▼
-        AbstractHarness  →  InferenceStrategy
+```bash
+pip install mechaharness
 ```
 
-Harnesses never import a provider SDK. They call `InferenceStrategy.complete()` with normalized `CompletionRequest` / `CompletionResponse` types (`src/mechaharness/core/types.py`). Design details: [`docs/architecture.md`](docs/architecture.md).
+Requires Python 3.9+. Unreleased `main`:
+
+```bash
+pip install git+https://github.com/rl337/mechaharness.git
+```
 
 ## Quick start
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-
 # List backends / harness families
 mechaharness backends
 mechaharness families
@@ -97,41 +85,22 @@ injector = get_injector(MyConfig)
 harness = injector.inject(AbstractHarness)
 ```
 
-See [`docs/guides/dependency-injection.md`](docs/guides/dependency-injection.md).
+See [Dependency injection](https://rl337.org/mechaharness/guides/dependency-injection.html).
 
 ## Extending
 
 Subclass `InferenceStrategy` (constructor takes `Settings`) and return it from `get_inference_class()`, or merge it into `SettingsConfig.inference_classes()`. Subclass `AbstractHarness` and return it from `get_harness_class()`.
 
-## Layout
-
-```text
-src/mechaharness/
-  core/           # shared types, errors, OpenAPI RunRequest/RunResponse
-  di.py           # MechaHarnessConfig / SettingsConfig (pyiv)
-  inference/      # Strategy implementations
-  harness/        # AbstractHarness hierarchy + families
-  tools/          # ToolRegistry
-  cli/            # Typer entrypoint
-  api/            # FastAPI app
-  factory.py      # non-DI run() helper
-  config.py       # pydantic-settings
-```
-
 ## Development
 
 ```bash
-pip install -e ".[dev]"
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev,docs]"
 ./run_checks.sh
 ```
 
-`run_checks.sh` is what CI runs: ruff, mypy, pytest, and CLI smoke (`version` / `backends` / `families`). To run that suite in an Ubuntu 24.04 + Python 3.12 image (same as GitHub Actions):
-
-```bash
-./containers/run-ci.sh
-```
-
-EventLog + cost without a GPU:
+`run_checks.sh` is what CI runs: ruff, mypy, pytest, Sphinx, and CLI smoke. EventLog + cost without a GPU:
 
 ```bash
 mechaharness run "What is 2+2?" --backend mock --family pass_through --model mock --json

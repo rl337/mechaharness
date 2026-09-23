@@ -60,10 +60,13 @@ class Tool:
 
 
 class ToolRegistry:
+    """In-process map of tool name → ``Tool`` for harness tool calling."""
+
     def __init__(self) -> None:
         self._tools: dict[str, Tool] = {}
 
     def register(self, tool: Tool) -> None:
+        """Add or replace a tool by name."""
         self._tools[tool.name] = tool
 
     def tool(
@@ -75,6 +78,8 @@ class ToolRegistry:
         grants: Sequence[object] | None = None,
         ability: Ability = Ability.SIMPLE,
     ) -> Callable[[ToolHandler], ToolHandler]:
+        """Decorator that registers the wrapped function as a tool."""
+
         def decorator(fn: ToolHandler) -> ToolHandler:
             tool_name = name or fn.__name__
             self.register(
@@ -92,9 +97,11 @@ class ToolRegistry:
         return decorator
 
     def definitions(self) -> list[ToolDefinition]:
+        """Provider-agnostic schemas for the current tool set."""
         return [t.definition() for t in self._tools.values()]
 
     def get(self, name: str) -> Tool:
+        """Return a registered tool or raise ``KeyError``."""
         try:
             return self._tools[name]
         except KeyError as exc:

@@ -4,6 +4,8 @@
 
 Python agentic harness that separates **how you call models** from **how you run agent loops**.
 
+Published site: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness/)
+
 ## Contents
 
 | Page | Description |
