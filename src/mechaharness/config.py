@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     model: str = "gpt-4o-mini"
     api_key: str | None = None
     base_url: str | None = None
+    decide_base_url: str | None = None
+    decide_model: str | None = None
     system_prompt: str | None = None
     max_turns: int = 8
     temperature: float | None = None

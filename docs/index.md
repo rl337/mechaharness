@@ -19,6 +19,7 @@ Published site: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness
 | [Event log](./reference/events.md) | Structured `EventLog` emit / query |
 | [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
 | [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, `core:access_check` |
+| [Judge / decide](./reference/judge.md) | `judge()`, System One, policy verdicts, lanes |
 | [ADR 0001](./adr/0001-pyiv-config.md) | Why Config hooks replaced string registries |
 
 ## Mental model

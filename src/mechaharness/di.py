@@ -192,6 +192,7 @@ class MechaHarnessConfig(Config):
                 event_log=injector.inject(EventLog),
                 access=injector.inject(AccessControl),
                 cost=injector.inject(CostAccountant),
+                environment=injector.inject(InferenceEnvironment),
                 subagent_tools=self.include_subagent_tools(),
             )
 

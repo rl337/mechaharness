@@ -23,6 +23,10 @@ from mechaharness.core.access import (
 from mechaharness.core.completer import Completer
 from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.environment import (
+    DEFAULT_LANE_LOAD_HINTS,
+    LANE_DECIDE,
+    LANE_MEDIA,
+    LANE_REASON,
     InferenceEnvironment,
     InferenceEnvironmentError,
     NoOpInferenceEnvironment,
@@ -70,6 +74,7 @@ __all__ = [
     "CostReport",
     "CompletionRequest",
     "CompletionResponse",
+    "DEFAULT_LANE_LOAD_HINTS",
     "Event",
     "EventLog",
     "EventType",
@@ -84,6 +89,9 @@ __all__ = [
     "InferenceEnvironment",
     "InferenceEnvironmentError",
     "InferenceError",
+    "LANE_DECIDE",
+    "LANE_MEDIA",
+    "LANE_REASON",
     "LoggingEventLog",
     "MechaHarnessError",
     "MediaAudio",

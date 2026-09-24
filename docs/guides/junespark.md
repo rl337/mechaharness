@@ -34,7 +34,25 @@ MECHA_LIVE_JUNESPARK=1 \
 
 ## Host Config
 
-Discover which profile is loaded, map grants, and attach media tools in a host
+Discover which profile is loaded, map grants/lane, and attach tools in a host
 `MechaHarnessConfig` subclass. Use
-`InferenceEnvironment.assert_compatible(require_media=True)` (or required
-grants) to refuse media work while a reason-only profile is active.
+`InferenceEnvironment.assert_compatible(require_media=True)`,
+`require_lane="decide"`, or required grants to refuse mismatched work.
+
+### Decide lane (`MECHA_DECIDE_*`)
+
+Decide is not OpenAI chat. Point the library at the System One server:
+
+```bash
+export MECHA_DECIDE_BASE_URL=http://127.0.0.1:8009
+export MECHA_DECIDE_MODEL=laya
+
+MECHA_LIVE_DECIDE=1 pytest -q tests/test_judge.py -k live_systemone
+```
+
+Host apps typically load `decide-fast` / `decide-api`, then expose
+`decide_route` / `decide_escalate` / `decide_score` tools that call `judge()`
+with typed answers (no prose re-parse). See [Judge reference](../reference/judge.md).
+
+Reason-only profiles must fail decide tools with a clear `infer load decide-fast`
+hint.

@@ -91,6 +91,26 @@ OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different defaul
 `mechaharness.inference.openai_wire`; portable domain types stay in
 `mechaharness.core.types`.
 
+## Judge / decide
+
+**Pattern:** Strategy adapter over typed questions  
+**Code:** `mechaharness.inference.judge`, `mechaharness.inference.systemone`
+
+Chat completions are not the only inference path. `judge()` evaluates closed-world
+questions (`noul` / `choice` / `score`) and returns calibrated signals. The System
+One HTTP adapter maps host `/v1/systemone` onto those types. Pure
+`mechaharness.policy.decide(...)` turns signals into allow/deny/ask-human verdicts —
+models never grant permission. See [Judge reference](./reference/judge.md).
+
+## Capability lanes
+
+**Code:** `mechaharness.core.environment`
+
+Hosts implement `InferenceEnvironment` with `active_lane()` (`reason`, `decide`,
+`media`, or a host namespace). `AbstractHarness` calls `assert_compatible` before
+tools that need grants or media. Wrong-lane errors name the operator load hint
+(for example `infer load decide-fast`).
+
 ## Harness hierarchy
 
 **Pattern:** Template method  
