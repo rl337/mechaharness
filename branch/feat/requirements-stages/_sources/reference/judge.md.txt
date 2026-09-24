@@ -1,4 +1,4 @@
-# Judge / decide (`judge()`)
+# Judge (`judge()`)
 
 Provider-neutral decision inference distinct from chat completions. Models
 evaluate supplied `state` against typed questions and return a **Judgement**
@@ -10,7 +10,7 @@ grant permission. Tool grants stay on `AccessPolicy`.
 | Kind | Type | Module |
 |------|------|--------|
 | Generative chat / tools | `Completion` (= `CompletionResponse`) | `mechaharness.core.outcomes` |
-| Decide / System One | `Judgement` | `mechaharness.inference.judge` |
+| Judge / System One | `Judgement` | `mechaharness.inference.judge` |
 | Media / artifacts | `Generation` | `mechaharness.core.outcomes` |
 
 ## Types
@@ -24,6 +24,24 @@ grant permission. Tool grants stay on `AccessPolicy`.
 A `Judgement` carries validated `answers`, per-question `errors` (missing ≠ zero
 risk), provenance, and usage (`latencyMs`, `physicalCalls`). (`JudgeResult` is a
 deprecated alias of `Judgement`.)
+
+## Connection (`APIConnectionConfig`)
+
+Judge HTTP reachability is an injectable `APIConnectionConfig` (default:
+`SimpleHttpConnectionConfig`). Path is configurable — not hardcoded forever.
+
+| Setting / env | Purpose |
+|---------------|---------|
+| `MECHA_JUDGE_BASE_URL` | Origin only (e.g. `http://host:8009`) |
+| `MECHA_JUDGE_PATH` | Path joined to base (default `/v1/systemone`) |
+| `MECHA_JUDGE_URL` | Full endpoint override (ignores base+path) |
+| `MECHA_JUDGE_MODEL` | Model id in JSON body |
+| `MECHA_JUDGE_API_KEY` | Optional Bearer token |
+| `MECHA_JUDGE_TIMEOUT_SECONDS` | HTTP timeout |
+
+Legacy `MECHA_DECIDE_BASE_URL` / `MECHA_DECIDE_MODEL` still populate judge fields
+when the `MECHA_JUDGE_*` values are unset. Hosts override
+`MechaHarnessConfig.get_judge_connection()` for OAuth or other schemes later.
 
 ## API
 
@@ -69,32 +87,21 @@ verdict = decide(
 )
 ```
 
-## System One adapter
-
-`SystemOneJudgeProvider` posts to `{MECHA_DECIDE_BASE_URL}/v1/systemone`.
-Settings (no LAN defaults in the library):
-
-| Setting / env | Purpose |
-|---------------|---------|
-| `MECHA_DECIDE_BASE_URL` / `Settings.decide_base_url` | Decide server root (no `/v1`) |
-| `MECHA_DECIDE_MODEL` / `Settings.decide_model` | Served model id (`laya`, `kev-0.5b`, …) |
-
 ```bash
-MECHA_LIVE_DECIDE=1 pytest -q tests/test_judge.py -k live_systemone
+export MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009
+export MECHA_JUDGE_MODEL=laya
+MECHA_LIVE_JUDGE=1 pytest -q tests/test_judge.py -k live_systemone
 ```
-
-Offline contract coverage uses `FixtureJudgeProvider` and mocked HTTP in
-`tests/test_judge.py`. Versioned story cassettes are a follow-on testing layer.
 
 ## JudgementPolicy
 
 `mechaharness.policy.decide(facts, judgement, policy) -> Verdict` is pure and
 fail-closed (unknown signals deny). Persist with `mechaharness.decisions.DecisionLog`
-(`core:decision` + optional `decisions.jsonl`) and replay offline via
-`replay_verdict` without tool execution.
+and replay offline via `replay_verdict` without tool execution.
 
 ## Lanes
 
-Hosts expose `InferenceEnvironment.active_lane()` (`reason` / `decide` /
-`media`). Call `assert_compatible(require_lane="decide")` before judge tools;
-wrong lane raises `InferenceEnvironmentError` naming `infer load decide-fast`.
+Hosts expose `InferenceEnvironment.active_lane()` (`reason` / `judge` /
+`media`). Call `assert_compatible(require_lane="judge")` before judge tools;
+wrong lane raises `InferenceEnvironmentError` naming the host load hint
+(e.g. `infer load decide-fast` while profile filenames catch up).

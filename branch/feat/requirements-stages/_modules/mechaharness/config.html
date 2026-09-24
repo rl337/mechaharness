@@ -53,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../reference/events.html">Event log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/access.html">Access control</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/judge.html">Judge / decide (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
 </ul>
 <ul>
@@ -104,6 +104,9 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">model_validator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSettings</span><span class="p">,</span> <span class="n">SettingsConfigDict</span>
 
 
@@ -114,6 +117,9 @@
 
 <span class="sd">    Used by the CLI, HTTP API, and ``SettingsConfig``. Hosts that construct</span>
 <span class="sd">    strategies directly may pass a ``Settings`` instance into constructors.</span>
+
+<span class="sd">    Judge-lane connection: prefer ``MECHA_JUDGE_*``. Legacy ``MECHA_DECIDE_*``</span>
+<span class="sd">    names are accepted as aliases for one migration window.</span>
 <span class="sd">    """</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">SettingsConfigDict</span><span class="p">(</span><span class="n">env_prefix</span><span class="o">=</span><span class="s2">"MECHA_"</span><span class="p">,</span> <span class="n">env_file</span><span class="o">=</span><span class="s2">".env"</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">)</span>
@@ -123,6 +129,14 @@
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"gpt-4o-mini"</span>
     <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Judge lane (System One / future hosted judge APIs)</span>
+    <span class="n">judge_base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">judge_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">judge_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"/v1/systemone"</span>
+    <span class="n">judge_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">judge_api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">judge_timeout_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span>
+    <span class="c1"># Legacy env aliases (MECHA_DECIDE_*) — copied into judge_* when unset</span>
     <span class="n">decide_base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">decide_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">system_prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -130,7 +144,19 @@
     <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">max_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"127.0.0.1"</span>
-    <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8080</span></div>
+    <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8080</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"before"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_migrate_decide_aliases</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"judge_base_url"</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="ow">and</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"decide_base_url"</span><span class="p">):</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"judge_base_url"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">"decide_base_url"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"judge_model"</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="ow">and</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"decide_model"</span><span class="p">):</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"judge_model"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">"decide_model"</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">out</span></div>
 
 
 
