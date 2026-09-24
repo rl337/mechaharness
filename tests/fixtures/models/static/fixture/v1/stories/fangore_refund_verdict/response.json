@@ -1,0 +1,15 @@
+{
+  "answers": {
+    "route": {
+      "selected": "billing",
+      "probabilities": {
+        "billing": 0.92,
+        "technical": 0.05,
+        "other": 0.03
+      }
+    },
+    "escalate": {
+      "p_true": 0.18
+    }
+  }
+}

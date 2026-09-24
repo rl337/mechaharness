@@ -1,0 +1,16 @@
+{
+  "model": "laya",
+  "answers": {
+    "route": {
+      "choice": "billing",
+      "probabilities": {
+        "billing": 0.92,
+        "technical": 0.05,
+        "other": 0.03
+      }
+    },
+    "escalate": {
+      "noul": 0.18
+    }
+  }
+}

@@ -23,13 +23,22 @@ mechaharness run "Reply with ok." \
 Use the **served model id** your server advertises on `/v1/models`, not a
 Hugging Face repo id.
 
-Live pytest (skipped in CI):
+Live pytest prefers the dual-mode **user story** suite (see
+[User stories](./user-stories.md)). Legacy alias:
 
 ```bash
 MECHA_LIVE_JUNESPARK=1 \
   MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
   MECHA_MODEL=<served-model-id> \
   pytest -q tests/test_live_junespark.py
+```
+
+Or explicitly:
+
+```bash
+MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen3-30b-thinking \
+  MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
+  pytest -q tests/stories -k nubble_run_cost
 ```
 
 ## Host Config

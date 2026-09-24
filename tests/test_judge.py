@@ -168,31 +168,22 @@ async def test_systemone_adapter_maps_wire(httpx_mock: object | None = None) -> 
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(
-    os.environ.get("MECHA_LIVE_JUDGE", os.environ.get("MECHA_LIVE_DECIDE")) != "1",
-    reason="set MECHA_LIVE_JUDGE=1 for live System One",
-)
+@pytest.mark.live_judge
 async def test_live_systemone() -> None:
-    provider = SystemOneJudgeProvider()
-    result = await judge(
-        JudgeRequest(
-            state="Customer was charged twice and wants a refund.",
-            state_hash=hash_state("Customer was charged twice and wants a refund."),
-            questions=[
-                ChoiceQuestion(
-                    id="route",
-                    instructions="Which team should own this?",
-                    options=[
-                        ChoiceOption(id="billing", description="Payments, invoices, refunds"),
-                        ChoiceOption(id="technical", description="Bugs and outages"),
-                        ChoiceOption(id="other", description="Everything else"),
-                    ],
-                ),
-                NoulQuestion(id="escalate", instructions="Needs urgent human attention?"),
-            ],
-            question_set_version="live-v1",
-        ),
-        provider=provider,
-    )
-    assert result.answers
-    assert result.usage.physical_calls >= 1
+    """Legacy alias — prefer ``docs/guides/user-stories.md`` dual-mode suite."""
+    if os.environ.get("MECHA_LIVE_JUDGE", os.environ.get("MECHA_LIVE_DECIDE")) != "1":
+        pytest.skip("set MECHA_LIVE_JUDGE=1 for live System One")
+    os.environ.setdefault("MECHA_STORY_BACKEND", "live")
+    os.environ.setdefault("MECHA_STORY_MODEL", "systemone/laya")
+    from tests.stories.backend import resolve_story_backend
+    from tests.stories.catalog import iter_story_cases
+    from tests.stories.runners import run_story
+
+    backend = resolve_story_backend()
+    cases = [
+        c
+        for c in iter_story_cases(model_filter=backend.model_filter)
+        if c.story_id in ("fangore_refund_verdict", "taloneth_systemone_cassette")
+    ]
+    assert cases, "missing systemone refund/cassette stories"
+    await run_story(cases[0], backend)

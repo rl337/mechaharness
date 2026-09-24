@@ -1,0 +1,8 @@
+{
+  "family": "openai_compat",
+  "model": "qwen3-30b-thinking",
+  "version": "v1",
+  "adapter": "openai_compat",
+  "schemaVersion": 1,
+  "description": "junespark-style OpenAI-compat (cassette seed)"
+}
