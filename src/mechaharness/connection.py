@@ -4,14 +4,16 @@
 (endpoint + credentials + timeout). Wire shape stays on ``JudgeProvider`` /
 ``InferenceStrategy``. Hosts swap implementations (simple HTTP, later OAuth)
 via Config hooks without proliferating URL-only and auth-only types.
+
+Judge-lane env knobs (``MECHA_JUDGE_*``) bind here via ``from_env`` — not on
+``Settings``.
 """
 
 from __future__ import annotations
 
+import os
 from abc import ABC, abstractmethod
 from typing import Any
-
-from mechaharness.config import Settings
 
 DEFAULT_JUDGE_PATH = "/v1/systemone"
 
@@ -64,15 +66,66 @@ class SimpleHttpConnectionConfig(APIConnectionConfig):
         self._header_value_template = header_value_template
 
     @classmethod
-    def for_judge(cls, settings: Settings) -> SimpleHttpConnectionConfig:
-        """Build a judge-lane connection from ``Settings`` / ``MECHA_JUDGE_*``."""
+    def from_env(
+        cls,
+        *,
+        prefix: str = "MECHA_JUDGE",
+        legacy_prefix: str | None = "MECHA_DECIDE",
+        default_path: str = DEFAULT_JUDGE_PATH,
+        fallback_api_key_env: str = "MECHA_API_KEY",
+    ) -> SimpleHttpConnectionConfig:
+        """Bind connection knobs from the process environment.
+
+        Reads ``{prefix}_BASE_URL``, ``_PATH``, ``_URL``, ``_MODEL``,
+        ``_API_KEY``, ``_TIMEOUT_SECONDS``. When ``legacy_prefix`` is set,
+        falls back for base URL / model (judge migration window).
+        """
+
+        def _get(*keys: str) -> str | None:
+            for key in keys:
+                value = os.environ.get(key)
+                if value is not None and value != "":
+                    return value
+            return None
+
+        base = _get(f"{prefix}_BASE_URL")
+        model = _get(f"{prefix}_MODEL")
+        if legacy_prefix:
+            if base is None:
+                base = _get(f"{legacy_prefix}_BASE_URL")
+            if model is None:
+                model = _get(f"{legacy_prefix}_MODEL")
+        path = _get(f"{prefix}_PATH") or default_path
+        url = _get(f"{prefix}_URL")
+        api_key = _get(f"{prefix}_API_KEY", fallback_api_key_env)
+        timeout_raw = _get(f"{prefix}_TIMEOUT_SECONDS")
+        timeout = float(timeout_raw) if timeout_raw else 60.0
         return cls(
-            base_url=settings.judge_base_url,
-            path=settings.judge_path or DEFAULT_JUDGE_PATH,
-            url=settings.judge_url,
-            api_key=settings.judge_api_key or settings.api_key,
-            model=settings.judge_model,
-            timeout=float(settings.judge_timeout_seconds),
+            base_url=base,
+            path=path,
+            url=url,
+            api_key=api_key,
+            model=model,
+            timeout=timeout,
+        )
+
+    @classmethod
+    def for_judge(cls, **overrides: Any) -> SimpleHttpConnectionConfig:
+        """Judge-lane connection from env, with optional constructor overrides."""
+        conn = cls.from_env()
+        if not overrides:
+            return conn
+        return cls(
+            base_url=overrides.get("base_url", conn._base_url or None),
+            path=overrides.get("path", conn._path),
+            url=overrides.get("url", conn._url),
+            api_key=overrides.get("api_key", conn._api_key),
+            model=overrides.get("model", conn._model),
+            timeout=float(overrides.get("timeout", conn._timeout)),
+            header_name=overrides.get("header_name", conn._header_name),
+            header_value_template=overrides.get(
+                "header_value_template", conn._header_value_template
+            ),
         )
 
     def endpoint_url(self) -> str:
@@ -80,7 +133,7 @@ class SimpleHttpConnectionConfig(APIConnectionConfig):
             return self._url
         if not self._base_url:
             raise ValueError(
-                "judge_base_url / MECHA_JUDGE_BASE_URL is required when judge_url is unset"
+                "MECHA_JUDGE_BASE_URL is required when MECHA_JUDGE_URL is unset"
             )
         return f"{self._base_url}{self._path}"
 

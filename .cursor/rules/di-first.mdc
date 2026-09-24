@@ -14,7 +14,8 @@ Extend by **subclassing Config**. Override `get_inference_class()` /
 `MechaHarnessConfig` and call `super().configure()`.
 
 Constructors take types pyiv can inject (`InferenceStrategy`, `Settings`,
-`HarnessConfig`, `ToolRegistry`), not `str`/`dict` bags the injector cannot resolve.
+`HarnessConfig`, `ToolRegistry`, `APIConnectionConfig`, `JudgeProvider`), not
+`str`/`dict` bags the injector cannot resolve.
 
 OpenAPI is the **non-DI facade**, not a second architecture. `RunRequest` / `run()`
 may hide the injector; they must still construct a Config and inject. Do not grow
@@ -23,12 +24,42 @@ may hide the injector; they must still construct a Config and inject. Do not gro
 Only `mechaharness.di` and `mechaharness.factory.run` import pyiv. Domain types
 stay injector-agnostic so host apps can inject them.
 
+## Config ownership (all lanes)
+
+Injectables that need configuration **own** it (constructor args, a nested
+config type, or `from_env()` on that type). Do **not** grow `Settings` with
+fields that only one injectable or one lane understands.
+
+| Owns | Examples |
+|------|----------|
+| `APIConnectionConfig` | `MECHA_JUDGE_*` HTTP reachability |
+| `JudgeProvider` / `InferenceStrategy` | Wire adapters; Config hooks |
+| Host media tools (until a media provider) | Comfy base URL — not Settings |
+| `Settings` | Shared run surface only (reason `base_url`/`api_key`/`model` are transitional debt) |
+
+Providers (`JudgeProvider`, completion strategy, future media providers) are
+**Config DI injectables**, never attributes on `Settings`. Env vars may exist
+for operators; bind them on the owning type. Hosts override via Config hooks
+(`get_judge_connection()`, `get_judge_provider()`, later lane config) — not by
+stuffing Settings bags.
+
+When adding a backend or lane, follow `.cursor/skills/di-config-ownership/SKILL.md`.
+
 ```python
 # BAD — new global registry
 register_inference("my_backend")(factory)
 
-# GOOD — Config hook
+# BAD — Settings as provider / lane grab-bag
+class Settings(BaseSettings):
+    judge_base_url: str | None = None
+    media_comfy_url: str | None = None
+    judge_provider: object  # never
+
+# GOOD — Config hook + owning injectable
 class MyConfig(MechaHarnessConfig):
     def get_inference_class(self):
         return MyStrategy
+
+    def get_judge_connection(self):
+        return SimpleHttpConnectionConfig.from_env()
 ```

@@ -117,7 +117,7 @@ class MechaHarnessConfig(Config):
         """HTTP connection for the judge lane (override for OAuth, etc.)."""
         existing = getattr(self, "_judge_connection", None)
         if existing is None:
-            existing = SimpleHttpConnectionConfig.for_judge(self.get_settings())
+            existing = SimpleHttpConnectionConfig.for_judge()
             self._judge_connection = existing
         return existing
 
@@ -125,10 +125,7 @@ class MechaHarnessConfig(Config):
         """Judge backend (default: System One over ``get_judge_connection()``)."""
         existing = getattr(self, "_judge_provider", None)
         if existing is None:
-            existing = SystemOneJudgeProvider(
-                self.get_settings(),
-                connection=self.get_judge_connection(),
-            )
+            existing = SystemOneJudgeProvider(connection=self.get_judge_connection())
             self._judge_provider = existing
         return existing
 

@@ -45,13 +45,21 @@ the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
 
 `MechaHarnessConfig.configure()` binds `InferenceStrategy`, `Completer`,
 `AbstractHarness`, `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
-`AccessControl`, `CostAccountant`, and `InferenceEnvironment`. Subclasses
-override `get_inference_class()` and `get_harness_class()` (called from the
+`AccessControl`, `CostAccountant`, `InferenceEnvironment`,
+`APIConnectionConfig` (judge), and `JudgeProvider`. Subclasses override
+`get_inference_class()` and `get_harness_class()` (called from the
 Config constructor). Host apps subclass `MechaHarnessConfig`, call
 `super().configure()`, and `injector.inject(AbstractHarness)` — or inject those
 types into their own services. Override `get_grants()` for the deny-by-default
 tool grant list. Override `include_subagent_tools()` to opt in parent EventLog
 query tools. Override `get_inference_environment()` for host profile probes.
+Override `get_judge_connection()` / `get_judge_provider()` for judge HTTP and
+wire adapters.
+
+**Config ownership:** lane- and provider-specific knobs belong on the owning
+injectable (e.g. `SimpleHttpConnectionConfig.from_env` for `MECHA_JUDGE_*`), not
+as a growing pile of fields on `Settings`. Providers are never attributes of
+`Settings`. See `.cursor/rules/di-first.mdc` and the `di-config-ownership` skill.
 
 `SettingsConfig` implements the hooks via overridable `inference_classes()` /
 `harness_classes()` maps plus `Settings.inference_backend` /

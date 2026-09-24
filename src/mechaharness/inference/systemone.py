@@ -8,7 +8,6 @@ from typing import Any
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
-from mechaharness.config import Settings
 from mechaharness.connection import (
     APIConnectionConfig,
     SimpleHttpConnectionConfig,
@@ -142,33 +141,31 @@ class SystemOneJudgeProvider(JudgeProvider):
 
     def __init__(
         self,
-        settings: Settings | None = None,
-        *,
         connection: APIConnectionConfig | None = None,
+        *,
         base_url: str | None = None,
         model: str | None = None,
         path: str | None = None,
         timeout: float | None = None,
         client: httpx.AsyncClient | None = None,
     ) -> None:
-        self._settings = settings or Settings()
         if connection is not None:
             self._connection = connection
-        else:
-            self._connection = SimpleHttpConnectionConfig(
-                base_url=base_url if base_url is not None else self._settings.judge_base_url,
-                path=path
-                if path is not None
-                else (self._settings.judge_path or "/v1/systemone"),
-                url=self._settings.judge_url,
-                api_key=self._settings.judge_api_key or self._settings.api_key,
-                model=model if model is not None else self._settings.judge_model,
-                timeout=float(
-                    timeout
-                    if timeout is not None
-                    else self._settings.judge_timeout_seconds
-                ),
+        elif any(v is not None for v in (base_url, model, path, timeout)):
+            self._connection = SimpleHttpConnectionConfig.for_judge(
+                **{
+                    k: v
+                    for k, v in {
+                        "base_url": base_url,
+                        "model": model,
+                        "path": path,
+                        "timeout": timeout,
+                    }.items()
+                    if v is not None
+                }
             )
+        else:
+            self._connection = SimpleHttpConnectionConfig.for_judge()
         self._client = client
 
     async def judge(self, request: JudgeRequest) -> Judgement:

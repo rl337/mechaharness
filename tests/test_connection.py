@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 
-from mechaharness.config import Settings
 from mechaharness.connection import SimpleHttpConnectionConfig
 
 
@@ -34,25 +33,35 @@ def test_custom_path() -> None:
     assert conn.endpoint_url() == "http://localhost:8009/v1/custom"
 
 
-def test_for_judge_from_settings() -> None:
-    settings = Settings(
-        judge_base_url="http://j:8009",
-        judge_path="/v1/systemone",
-        judge_model="laya",
-        judge_api_key="secret",
-    )
-    conn = SimpleHttpConnectionConfig.for_judge(settings)
+def test_from_env_judge(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MECHA_JUDGE_BASE_URL", "http://j:8009")
+    monkeypatch.setenv("MECHA_JUDGE_PATH", "/v1/systemone")
+    monkeypatch.setenv("MECHA_JUDGE_MODEL", "laya")
+    monkeypatch.setenv("MECHA_JUDGE_API_KEY", "secret")
+    conn = SimpleHttpConnectionConfig.from_env()
     assert conn.endpoint_url() == "http://j:8009/v1/systemone"
     assert conn.headers()["Authorization"] == "Bearer secret"
+    assert conn.model_id() == "laya"
 
 
-def test_legacy_decide_env_aliases() -> None:
-    settings = Settings(decide_base_url="http://legacy:8009", decide_model="kev")
-    assert settings.judge_base_url == "http://legacy:8009"
-    assert settings.judge_model == "kev"
+def test_from_env_legacy_decide_aliases(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("MECHA_JUDGE_BASE_URL", raising=False)
+    monkeypatch.delenv("MECHA_JUDGE_MODEL", raising=False)
+    monkeypatch.setenv("MECHA_DECIDE_BASE_URL", "http://legacy:8009")
+    monkeypatch.setenv("MECHA_DECIDE_MODEL", "kev")
+    conn = SimpleHttpConnectionConfig.for_judge()
+    assert conn.endpoint_url() == "http://legacy:8009/v1/systemone"
+    assert conn.model_id() == "kev"
+
+
+def test_for_judge_overrides_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MECHA_JUDGE_BASE_URL", "http://env:8009")
+    conn = SimpleHttpConnectionConfig.for_judge(base_url="http://override:9", model="x")
+    assert conn.endpoint_url() == "http://override:9/v1/systemone"
+    assert conn.model_id() == "x"
 
 
 def test_missing_base_raises() -> None:
     conn = SimpleHttpConnectionConfig(base_url=None)
-    with pytest.raises(ValueError, match="judge_base_url"):
+    with pytest.raises(ValueError, match="MECHA_JUDGE_BASE_URL"):
         conn.endpoint_url()
