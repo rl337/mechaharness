@@ -197,7 +197,7 @@ OpenAI mode) through one strategy (<code class="docutils literal notranslate"><s
 <h2>Judge<a class="headerlink" href="#judge" title="Link to this heading"></a></h2>
 <p><strong>Pattern:</strong> Strategy adapter over typed questions + injectable connection<br />
 <strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.systemone</span></code>,
-<code class="docutils literal notranslate"><span class="pre">mechaharness.connection</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">mechaharness.api_connection</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.judgement_policy</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">judge()</span></code> evaluates closed-world questions (<code class="docutils literal notranslate"><span class="pre">noul</span></code> / <code class="docutils literal notranslate"><span class="pre">choice</span></code> / <code class="docutils literal notranslate"><span class="pre">score</span></code>) and
 returns a <strong>Judgement</strong>. HTTP reachability uses <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> (default
 <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig</span></code> from <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>). Pure <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> /

@@ -57,7 +57,7 @@ from mechaharness.inference.judge import (
     hash_state,
     judge,
 )
-from mechaharness.policy import JudgementFacts, JudgementPolicy, JudgementThreshold, decide
+from mechaharness.judgement_policy import JudgementFacts, JudgementPolicy, JudgementThreshold, decide
 
 state = {"ticket": "double charge"}
 judgement = await judge(
@@ -98,8 +98,8 @@ MECHA_LIVE_JUDGE=1 pytest -q tests/test_judge.py -k live_systemone
 
 ## JudgementPolicy
 
-`mechaharness.policy.decide(facts, judgement, policy) -> Verdict` is pure and
-fail-closed (unknown signals deny). Persist with `mechaharness.decisions.DecisionLog`
+`mechaharness.judgement_policy.decide(facts, judgement, policy) -> Verdict` is pure and
+fail-closed (unknown signals deny). Persist with `mechaharness.decision_log.DecisionLog`
 and replay offline via `replay_verdict` without tool execution.
 
 ## Lanes

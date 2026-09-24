@@ -209,7 +209,7 @@ never fields on <code class="docutils literal notranslate"><span class="pre">Set
     <span class="n">hash_state</span><span class="p">,</span>
     <span class="n">judge</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">JudgementFacts</span><span class="p">,</span> <span class="n">JudgementPolicy</span><span class="p">,</span> <span class="n">JudgementThreshold</span><span class="p">,</span> <span class="n">decide</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.judgement_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">JudgementFacts</span><span class="p">,</span> <span class="n">JudgementPolicy</span><span class="p">,</span> <span class="n">JudgementThreshold</span><span class="p">,</span> <span class="n">decide</span>
 
 <span class="n">state</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"ticket"</span><span class="p">:</span> <span class="s2">"double charge"</span><span class="p">}</span>
 <span class="n">judgement</span> <span class="o">=</span> <span class="k">await</span> <span class="n">judge</span><span class="p">(</span>
@@ -250,8 +250,8 @@ never fields on <code class="docutils literal notranslate"><span class="pre">Set
 </section>
 <section id="judgementpolicy">
 <h2>JudgementPolicy<a class="headerlink" href="#judgementpolicy" title="Link to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">mechaharness.policy.decide(facts,</span> <span class="pre">judgement,</span> <span class="pre">policy)</span> <span class="pre">-&gt;</span> <span class="pre">Verdict</span></code> is pure and
-fail-closed (unknown signals deny). Persist with <code class="docutils literal notranslate"><span class="pre">mechaharness.decisions.DecisionLog</span></code>
+<p><code class="docutils literal notranslate"><span class="pre">mechaharness.judgement_policy.decide(facts,</span> <span class="pre">judgement,</span> <span class="pre">policy)</span> <span class="pre">-&gt;</span> <span class="pre">Verdict</span></code> is pure and
+fail-closed (unknown signals deny). Persist with <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log.DecisionLog</span></code>
 and replay offline via <code class="docutils literal notranslate"><span class="pre">replay_verdict</span></code> without tool execution.</p>
 </section>
 <section id="lanes">
