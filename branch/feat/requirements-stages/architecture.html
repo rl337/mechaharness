@@ -191,10 +191,12 @@ OpenAI mode) through one strategy (<code class="docutils literal notranslate"><s
 <p><strong>Pattern:</strong> Strategy adapter over typed questions<br />
 <strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.systemone</span></code></p>
 <p>Chat completions are not the only inference path. <code class="docutils literal notranslate"><span class="pre">judge()</span></code> evaluates closed-world
-questions (<code class="docutils literal notranslate"><span class="pre">noul</span></code> / <code class="docutils literal notranslate"><span class="pre">choice</span></code> / <code class="docutils literal notranslate"><span class="pre">score</span></code>) and returns calibrated signals. The System
-One HTTP adapter maps host <code class="docutils literal notranslate"><span class="pre">/v1/systemone</span></code> onto those types. Pure
-<code class="docutils literal notranslate"><span class="pre">mechaharness.policy.decide(...)</span></code> turns signals into allow/deny/ask-human verdicts —
-models never grant permission. See <a class="reference internal" href="reference/judge.html"><span class="std std-doc">Judge reference</span></a>.</p>
+questions (<code class="docutils literal notranslate"><span class="pre">noul</span></code> / <code class="docutils literal notranslate"><span class="pre">choice</span></code> / <code class="docutils literal notranslate"><span class="pre">score</span></code>) and returns a <strong>Judgement</strong> (signals).
+The System One HTTP adapter maps host <code class="docutils literal notranslate"><span class="pre">/v1/systemone</span></code> onto those types. Pure
+<code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">decide(...)</span></code> turns a Judgement into allow/deny/ask-human
+verdicts — models never grant permission. Generative calls yield a <strong>Completion</strong>;
+media yields a <strong>Generation</strong> (<code class="docutils literal notranslate"><span class="pre">mechaharness.core.outcomes</span></code>). Tool grants remain
+<code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code>. See <a class="reference internal" href="reference/judge.html"><span class="std std-doc">Judge reference</span></a>.</p>
 </section>
 <section id="capability-lanes">
 <h2>Capability lanes<a class="headerlink" href="#capability-lanes" title="Link to this heading"></a></h2>
