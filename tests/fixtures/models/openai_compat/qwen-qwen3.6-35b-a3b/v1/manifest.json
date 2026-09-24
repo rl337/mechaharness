@@ -1,0 +1,8 @@
+{
+  "family": "openai_compat",
+  "model": "qwen-qwen3.6-35b-a3b",
+  "version": "v1",
+  "adapter": "openai_compat",
+  "schemaVersion": 1,
+  "description": "LM Studio-style Qwen (cassette seed)"
+}

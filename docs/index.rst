@@ -38,6 +38,7 @@ Guides
    guides/install
    guides/dependency-injection
    guides/junespark
+   guides/user-stories
 
 Reference
 ---------
