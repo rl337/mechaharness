@@ -10,6 +10,10 @@ from tests.stories.runners import run_story
 
 _BACKEND = resolve_story_backend()
 _CASES = iter_story_cases(model_filter=_BACKEND.model_filter)
+if _BACKEND.mode == "live":
+    # Live has no endpoint for the in-process static fixture; keep CI at zero skips
+    # by only collecting cassette-backed adapters when live.
+    _CASES = [c for c in _CASES if c.adapter != "in_process"]
 
 
 def _case_id(case: StoryCase) -> str:

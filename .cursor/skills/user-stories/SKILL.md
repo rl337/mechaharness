@@ -59,7 +59,11 @@ adapters):
 3. Update guide + fixture `narrative` together.
 4. Mention the story id(s) in the PR summary.
 
-Do not add new `MECHA_LIVE_*` skipif modules; use dual-mode stories instead.
+Do **not** add skipif live modules. Offline CI must run the story suite with
+**zero skips**; live is the same parametrized tests with `MECHA_STORY_BACKEND=live`.
+
+`MECHA_LIVE_JUNESPARK` / `MECHA_LIVE_QWEN` / `MECHA_LIVE_JUDGE` only select live
++ a model filter for `tests/stories/` — they are not separate test files.
 
 ## Layout
 

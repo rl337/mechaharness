@@ -145,7 +145,9 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
     meta = case.load_json("story.json")
     kind = meta["kind"]
     if backend.mode == "live" and case.adapter == "in_process":
-        pytest.skip("in_process static fixture has no live endpoint")
+        raise AssertionError(
+            f"{case.label}: in_process stories must not be collected in live mode"
+        )
     runners = {
         "pass_through": _run_pass_through,
         "route_refund": _run_route_refund,
