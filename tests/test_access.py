@@ -7,10 +7,14 @@ from pyiv import get_injector
 
 from mechaharness.core.access import (
     Ability,
+    AccessControl,
     AccessPolicy,
+    CompoundPolicy,
+    FsRead,
     FsWrite,
     Grant,
     InMemoryAccessControl,
+    MediaImage,
     grant_key,
 )
 from mechaharness.core.events import AccessCheck, Cost, InMemoryEventLog
@@ -90,6 +94,58 @@ def test_access_policy_requires_all_grants() -> None:
     assert policy.allows([FsWrite])
     assert policy.allows(["acme:widget"])
     assert not policy.allows([FsWrite, "core:fs.read"])
+
+
+def test_compound_policy_unions_layers() -> None:
+    read_only = AccessPolicy(grants=[FsRead])
+    media = AccessPolicy(grants=[MediaImage, FsRead])  # overlap ok
+    compound = CompoundPolicy.of(read_only, media)
+    assert compound.grants == ["core:fs.read", "core:media.image"]
+    assert compound.allows([FsRead, MediaImage])
+    assert not compound.allows([FsWrite])
+    flat = compound.flatten()
+    assert flat.grants == compound.grants
+    assert flat.allows([FsRead])
+
+
+def test_inmemory_access_accepts_compound_policy() -> None:
+    control = InMemoryAccessControl(
+        policy=CompoundPolicy.of(
+            AccessPolicy(grants=[FsWrite]),
+            AccessPolicy(grants=[WidgetGrant]),
+        )
+    )
+    assert control.allows([FsWrite])
+    assert control.allows([WidgetGrant])
+    assert not control.allows(["core:fs.read"])
+
+
+def test_config_get_access_policy_compound() -> None:
+    class CompoundGrantConfig(MechaHarnessConfig):
+        def __init__(self) -> None:
+            self._inference = ScriptedInference([])
+            super().__init__()  # type: ignore[no-untyped-call]
+
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            return type(self._inference)
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_access_policy(self):
+            return CompoundPolicy.of(
+                AccessPolicy(grants=[FsWrite]),
+                AccessPolicy(grants=[WidgetGrant]),
+            )
+
+        def configure(self) -> None:
+            super().configure()
+            self.register_instance(InferenceStrategy, self._inference)
+
+    control = get_injector(CompoundGrantConfig()).inject(AccessControl)
+    assert isinstance(control, InMemoryAccessControl)
+    assert control.allows([FsWrite, WidgetGrant])
+    assert not control.allows([FsRead])
 
 
 def test_host_grant_subclass() -> None:

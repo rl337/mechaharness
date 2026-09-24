@@ -182,6 +182,42 @@ class AccessPolicy(BaseModel):
         return needed <= granted
 
 
+class CompoundPolicy(BaseModel):
+    """Union of :class:`AccessPolicy` layers (still deny-by-default).
+
+    Compose reusable grant sets (e.g. read-only + media) without rewriting
+    lists. Overlaps are idempotent — there is no deny grant, only allow-list
+    membership. Not related to :class:`~mechaharness.judgement_policy.JudgementPolicy`.
+    """
+
+    policies: list[AccessPolicy] = Field(default_factory=list)
+
+    @classmethod
+    def of(cls, *policies: AccessPolicy) -> CompoundPolicy:
+        """Build from one or more access policies."""
+        return cls(policies=list(policies))
+
+    @property
+    def grants(self) -> list[str]:
+        """Flattened unique grants in first-seen order across ``policies``."""
+        seen: list[str] = []
+        for policy in self.policies:
+            for key in policy.grants:
+                if key not in seen:
+                    seen.append(key)
+        return seen
+
+    def allows(self, required: Sequence[object]) -> bool:
+        return AccessPolicy(grants=self.grants).allows(required)
+
+    def flatten(self) -> AccessPolicy:
+        """Single :class:`AccessPolicy` with the unioned grant list."""
+        return AccessPolicy(grants=self.grants)
+
+
+GrantPolicyLike = Union[AccessPolicy, CompoundPolicy]
+
+
 class CostEntry(BaseModel):
     kind: str
     name: str
@@ -309,7 +345,7 @@ class InMemoryAccessControl(AccessControl):
         self,
         event_log: EventLog | None = None,
         grants: Sequence[object] | None = None,
-        policy: AccessPolicy | None = None,
+        policy: GrantPolicyLike | None = None,
     ) -> None:
         if policy is not None:
             keys = list(policy.grants)
