@@ -4,7 +4,7 @@ Hosts (for example junespark) implement this to refuse runs that need
 capabilities the loaded profile does not provide. The library default is a
 no-op so CLI/mock paths stay unchanged.
 
-Lanes are open ``str`` identity (``reason``, ``decide``, ``media``, or a host
+Lanes are open ``str`` identity (``reason``, ``judge``, ``media``, or a host
 namespace). Unknown lanes round-trip; hosts supply load hints.
 """
 
@@ -18,12 +18,15 @@ from mechaharness.core.exceptions import MechaHarnessError
 
 # Well-known lane names (conveniences — hosts may add more).
 LANE_REASON = "reason"
-LANE_DECIDE = "decide"
+LANE_JUDGE = "judge"
 LANE_MEDIA = "media"
+# Deprecated alias — same string as LANE_JUDGE after rename.
+LANE_DECIDE = LANE_JUDGE
 
 DEFAULT_LANE_LOAD_HINTS: Mapping[str, str] = {
     LANE_REASON: "infer load reason-fast",
-    LANE_DECIDE: "infer load decide-fast",
+    # Host profile filenames may still be decide-* until operators rename them.
+    LANE_JUDGE: "infer load decide-fast",
     LANE_MEDIA: "infer load media",
 }
 
@@ -46,7 +49,7 @@ class InferenceEnvironment(ABC):
     def active_lane(self) -> str | None:
         """Capability lane derived from the active profile, or None if unknown.
 
-        Well-known values: ``reason``, ``decide``, ``media``. Hosts may return
+        Well-known values: ``reason``, ``judge``, ``media``. Hosts may return
         other namespaced lanes.
         """
         return None

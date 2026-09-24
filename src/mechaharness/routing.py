@@ -8,7 +8,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from mechaharness.core.environment import LANE_DECIDE, LANE_MEDIA, LANE_REASON
+from mechaharness.core.environment import LANE_JUDGE, LANE_MEDIA, LANE_REASON
 from mechaharness.inference.judge import JudgeProvider, JudgeRequest, Judgement, judge
 from mechaharness.policy import JudgementFacts, JudgementPolicy, Verdict, decide
 
@@ -73,16 +73,16 @@ def route_at_boundary(
     prefer: Lane | None = None,
 ) -> RouteDecision:
     """Deterministic routing at task/phase boundaries (RTE-01/03)."""
-    available = list(available_lanes or [LANE_REASON, LANE_DECIDE, LANE_MEDIA])
+    available = list(available_lanes or [LANE_REASON, LANE_JUDGE, LANE_MEDIA])
     hints = {
         LANE_REASON: "infer load reason-fast",
-        LANE_DECIDE: "infer load decide-fast",
+        LANE_JUDGE: "infer load decide-fast",
         LANE_MEDIA: "infer load media",
     }
     preferred_by_kind = {
         "chat": LANE_REASON,
-        "judge": LANE_DECIDE,
-        "decide": LANE_DECIDE,
+        "judge": LANE_JUDGE,
+        "decide": LANE_JUDGE,  # legacy task_kind alias
         "media": LANE_MEDIA,
         "tool": LANE_REASON,
     }

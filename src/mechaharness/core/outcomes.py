@@ -3,7 +3,7 @@
 | Kind | Type | Typical producer |
 |------|------|------------------|
 | Generative chat / tools | ``Completion`` | ``InferenceStrategy.complete`` |
-| Decide / System One | ``Judgement`` | ``judge()`` |
+| Judge / System One | ``Judgement`` | ``judge()`` |
 | Media / artifacts | ``Generation`` | host Comfy (and future media adapters) |
 
 ``AccessPolicy`` gates tools and lanes. ``JudgementPolicy`` maps a ``Judgement``

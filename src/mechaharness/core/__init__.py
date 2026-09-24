@@ -25,6 +25,7 @@ from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.environment import (
     DEFAULT_LANE_LOAD_HINTS,
     LANE_DECIDE,
+    LANE_JUDGE,
     LANE_MEDIA,
     LANE_REASON,
     InferenceEnvironment,
@@ -93,6 +94,7 @@ __all__ = [
     "InferenceEnvironmentError",
     "InferenceError",
     "LANE_DECIDE",
+    "LANE_JUDGE",
     "LANE_MEDIA",
     "LANE_REASON",
     "LoggingEventLog",

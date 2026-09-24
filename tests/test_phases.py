@@ -48,7 +48,7 @@ async def test_shadow_judge_does_not_require_activation() -> None:
 
 def test_route_at_boundary_logs_candidates() -> None:
     decision = route_at_boundary(boundary="task_entry", task_kind="judge")
-    assert decision.selected.lane == "decide"
+    assert decision.selected.lane == "judge"
     assert len(decision.candidates) >= 2
     assert any(c.lane == "reason" for c in decision.candidates)
 

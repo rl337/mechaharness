@@ -1,4 +1,4 @@
-"""System One / Laya-Kev decide adapter (``POST /v1/systemone``)."""
+"""System One / Laya-Kev judge adapter (configurable HTTP path)."""
 
 from __future__ import annotations
 
@@ -9,6 +9,10 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.config import Settings
+from mechaharness.connection import (
+    APIConnectionConfig,
+    SimpleHttpConnectionConfig,
+)
 from mechaharness.core.exceptions import InferenceError
 from mechaharness.inference.judge import (
     ADAPTER_VERSION,
@@ -77,7 +81,6 @@ def question_to_wire(question: Question) -> SystemOneQuestionWire:
             instructions=question.instructions,
             criteria={opt.id: opt.description for opt in question.options},
         )
-    # score: ordered array of anchor labels (host contract)
     criteria: list[str]
     if question.anchors:
         criteria = [a.description or str(a.value) for a in question.anchors]
@@ -135,44 +138,60 @@ def _parse_answer(question: Question, raw: Any) -> Signal | None:
 
 
 class SystemOneJudgeProvider(JudgeProvider):
-    """HTTP adapter for host ``/v1/systemone`` (Laya or Kev)."""
+    """HTTP adapter for System One-shaped ``POST`` endpoints (Laya / Kev)."""
 
     def __init__(
         self,
         settings: Settings | None = None,
         *,
+        connection: APIConnectionConfig | None = None,
         base_url: str | None = None,
         model: str | None = None,
-        timeout: float = 60.0,
+        path: str | None = None,
+        timeout: float | None = None,
         client: httpx.AsyncClient | None = None,
     ) -> None:
         self._settings = settings or Settings()
-        self._base_url = (base_url or self._settings.decide_base_url or "").rstrip("/")
-        self._model = model or self._settings.decide_model
-        self._timeout = timeout
+        if connection is not None:
+            self._connection = connection
+        else:
+            self._connection = SimpleHttpConnectionConfig(
+                base_url=base_url if base_url is not None else self._settings.judge_base_url,
+                path=path
+                if path is not None
+                else (self._settings.judge_path or "/v1/systemone"),
+                url=self._settings.judge_url,
+                api_key=self._settings.judge_api_key or self._settings.api_key,
+                model=model if model is not None else self._settings.judge_model,
+                timeout=float(
+                    timeout
+                    if timeout is not None
+                    else self._settings.judge_timeout_seconds
+                ),
+            )
         self._client = client
 
     async def judge(self, request: JudgeRequest) -> Judgement:
-        if not self._base_url:
-            raise JudgeError(
-                "MECHA_DECIDE_BASE_URL / decide_base_url is required for System One"
-            )
-        wire_questions = {
-            q.id: question_to_wire(q) for q in request.questions
-        }
+        try:
+            url = self._connection.endpoint_url()
+        except ValueError as exc:
+            raise JudgeError(str(exc)) from exc
+        wire_questions = {q.id: question_to_wire(q) for q in request.questions}
         body = SystemOneRequestWire(
-            model=self._model,
+            model=self._connection.model_id(),
             state=request.state,
             questions=wire_questions,
         )
-        url = f"{self._base_url}/v1/systemone"
         started = time.perf_counter()
         owns_client = self._client is None
-        client = self._client or httpx.AsyncClient(timeout=self._timeout)
+        client = self._client or httpx.AsyncClient(
+            timeout=self._connection.timeout_seconds()
+        )
         try:
             response = await client.post(
                 url,
                 json=body.model_dump(mode="json", exclude_none=True),
+                headers=self._connection.headers(),
             )
             response.raise_for_status()
             payload = response.json()
@@ -203,7 +222,9 @@ class SystemOneJudgeProvider(JudgeProvider):
             errors=errors,
             provenance=JudgeProvenance(
                 provider="systemone",
-                model_revision=parsed.model or self._model or "unknown",
+                model_revision=parsed.model
+                or self._connection.model_id()
+                or "unknown",
                 adapter_version=ADAPTER_VERSION,
                 inference_mode="batch",
                 calibration_status="uncalibrated",

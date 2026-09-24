@@ -14,6 +14,7 @@ from pyiv import Config, get_injector
 from pyiv.injector import Injector
 
 from mechaharness.config import Settings
+from mechaharness.connection import APIConnectionConfig, SimpleHttpConnectionConfig
 from mechaharness.core.access import (
     AccessControl,
     CostAccountant,
@@ -30,8 +31,10 @@ from mechaharness.harness.react import ReactHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.anthropic import AnthropicStrategy
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
+from mechaharness.inference.systemone import SystemOneJudgeProvider
 from mechaharness.tools.base import ToolRegistry
 
 _INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
@@ -70,6 +73,8 @@ class MechaHarnessConfig(Config):
         self.register_instance(AccessControl, self.get_access_control())
         self.register_instance(CostAccountant, self.get_cost_accountant())
         self.register_instance(InferenceEnvironment, self.get_inference_environment())
+        self.register_instance(APIConnectionConfig, self.get_judge_connection())
+        self.register_instance(JudgeProvider, self.get_judge_provider())
         self._bind_inference()
         self._bind_harness()
 
@@ -106,6 +111,25 @@ class MechaHarnessConfig(Config):
         if existing is None:
             existing = NoOpInferenceEnvironment()
             self._inference_environment = existing
+        return existing
+
+    def get_judge_connection(self) -> APIConnectionConfig:
+        """HTTP connection for the judge lane (override for OAuth, etc.)."""
+        existing = getattr(self, "_judge_connection", None)
+        if existing is None:
+            existing = SimpleHttpConnectionConfig.for_judge(self.get_settings())
+            self._judge_connection = existing
+        return existing
+
+    def get_judge_provider(self) -> JudgeProvider:
+        """Judge backend (default: System One over ``get_judge_connection()``)."""
+        existing = getattr(self, "_judge_provider", None)
+        if existing is None:
+            existing = SystemOneJudgeProvider(
+                self.get_settings(),
+                connection=self.get_judge_connection(),
+            )
+            self._judge_provider = existing
         return existing
 
     def include_subagent_tools(self) -> bool:

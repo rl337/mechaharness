@@ -1,4 +1,4 @@
-"""Provider-neutral judge / decide types and validation (JDG-*).
+"""Provider-neutral judge types and validation (JDG-*).
 
 Adapters (System One, fixtures) map wire JSON onto these types. Models produce
 signals only — policy authority lives in ``mechaharness.policy``.

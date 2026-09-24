@@ -169,8 +169,8 @@ async def test_systemone_adapter_maps_wire(httpx_mock: object | None = None) -> 
 
 @pytest.mark.asyncio
 @pytest.mark.skipif(
-    os.environ.get("MECHA_LIVE_DECIDE") != "1",
-    reason="set MECHA_LIVE_DECIDE=1 for live System One",
+    os.environ.get("MECHA_LIVE_JUDGE", os.environ.get("MECHA_LIVE_DECIDE")) != "1",
+    reason="set MECHA_LIVE_JUDGE=1 for live System One",
 )
 async def test_live_systemone() -> None:
     provider = SystemOneJudgeProvider()

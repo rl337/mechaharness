@@ -6,7 +6,7 @@ import pytest
 
 from mechaharness.core.access import CapabilityProfile, MediaImage
 from mechaharness.core.environment import (
-    LANE_DECIDE,
+    LANE_JUDGE,
     LANE_MEDIA,
     LANE_REASON,
     InferenceEnvironment,
@@ -29,7 +29,7 @@ class ReasonOnlyEnv(InferenceEnvironment):
         return []
 
 
-class DecideEnv(InferenceEnvironment):
+class JudgeEnv(InferenceEnvironment):
     def active_profile(self) -> str | None:
         return "decide-fast"
 
@@ -37,7 +37,7 @@ class DecideEnv(InferenceEnvironment):
         return CapabilityProfile()
 
     def active_lane(self) -> str | None:
-        return LANE_DECIDE
+        return LANE_JUDGE
 
     def active_grants(self) -> list[str]:
         return []
@@ -47,7 +47,7 @@ def test_noop_environment_never_raises() -> None:
     NoOpInferenceEnvironment().assert_compatible(
         required_grants=[MediaImage],
         require_media=True,
-        require_lane=LANE_DECIDE,
+        require_lane=LANE_JUDGE,
     )
 
 
@@ -59,14 +59,14 @@ def test_reason_profile_rejects_media() -> None:
         env.assert_compatible(required_grants=[MediaImage])
 
 
-def test_reason_profile_rejects_decide_lane() -> None:
+def test_reason_profile_rejects_judge_lane() -> None:
     env = ReasonOnlyEnv()
     with pytest.raises(InferenceEnvironmentError, match="decide-fast"):
-        env.assert_compatible(require_lane=LANE_DECIDE)
+        env.assert_compatible(require_lane=LANE_JUDGE)
 
 
-def test_decide_lane_accepts_decide() -> None:
-    DecideEnv().assert_compatible(require_lane=LANE_DECIDE)
+def test_judge_lane_accepts_judge() -> None:
+    JudgeEnv().assert_compatible(require_lane=LANE_JUDGE)
 
 
 def test_require_lane_media_hint() -> None:
