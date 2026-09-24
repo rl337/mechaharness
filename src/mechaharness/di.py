@@ -17,7 +17,9 @@ from mechaharness.config import Settings
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
 from mechaharness.core.access import (
     AccessControl,
+    AccessPolicy,
     CostAccountant,
+    GrantPolicyLike,
     InMemoryAccessControl,
     InMemoryCostAccountant,
 )
@@ -96,10 +98,19 @@ class MechaHarnessConfig(Config):
         if existing is None:
             existing = InMemoryAccessControl(
                 event_log=self.get_event_log(),
-                grants=self.get_grants(),
+                policy=self.get_access_policy(),
             )
             self._access_control = existing
         return existing
+
+    def get_access_policy(self) -> GrantPolicyLike:
+        """Grant policy for harness tool gates.
+
+        Default wraps :meth:`get_grants` in an :class:`AccessPolicy`. Hosts
+        override to return a :class:`CompoundPolicy` of reusable grant sets.
+        Not :class:`~mechaharness.judgement_policy.JudgementPolicy`.
+        """
+        return AccessPolicy(grants=self.get_grants())
 
     def get_grants(self) -> list[object]:
         """Deny-by-default grant list. Hosts override; unknown namespaced keys ok."""
