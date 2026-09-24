@@ -134,16 +134,25 @@ when the forge is warm.</p>
 </section>
 <section id="running-the-suite">
 <h2>Running the suite<a class="headerlink" href="#running-the-suite" title="Link to this heading"></a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># CI default — static fixture + cassette replay</span>
+<p>Default CI runs <strong>every</strong> story offline (static fixture + cassettes) — no skips.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># CI / offline — all stories, zero skips</span>
 pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories
 
-<span class="c1"># Live OpenAI-compat (junespark)</span>
+<span class="c1"># Full suite (unit + stories)</span>
+pytest<span class="w"> </span>-q
+
+<span class="c1"># Live OpenAI-compat (junespark) — same tests, real HTTP</span>
 <span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_STORY_MODEL</span><span class="o">=</span>openai_compat/qwen3-30b-thinking<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
 
-<span class="c1"># Legacy aliases still select live + a model</span>
-<span class="nv">MECHA_LIVE_JUNESPARK</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/test_live_junespark.py
-<span class="nv">MECHA_LIVE_JUDGE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>refund_verdict
+<span class="c1"># Live System One</span>
+<span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_STORY_MODEL</span><span class="o">=</span>systemone/laya<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="nv">MECHA_JUDGE_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8009<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>refund_verdict
+
+<span class="c1"># Shorthand aliases (still dual-mode stories, not separate skipif modules)</span>
+<span class="nv">MECHA_LIVE_JUNESPARK</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>…<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
+<span class="nv">MECHA_LIVE_QWEN</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>…<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
+<span class="nv">MECHA_LIVE_JUDGE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span><span class="s1">'refund_verdict or systemone_cassette'</span>
 </pre></div>
 </div>
 <table class="docutils align-default">

@@ -43,11 +43,14 @@ mechaharness run "Reply with the single word ok." \
   --model qwen/qwen3.6-35b-a3b
 ```
 
-Default live pytest model is ``qwen/qwen3.6-35b-a3b``. Override with
-``MECHA_MODEL`` if your server exposes a different id:
+Default live story model for LM Studio-style Qwen is
+``openai_compat/qwen-qwen3.6-35b-a3b``. Offline CI uses the same story via
+cassette (no skip). Live:
 
 ```bash
-MECHA_LIVE_QWEN=1 pytest -q tests/test_live_qwen.py
+MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen-qwen3.6-35b-a3b \
+  MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
+  pytest -q tests/stories -k nubble_run_cost
 ```
 
 List what is registered:

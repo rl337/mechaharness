@@ -245,9 +245,12 @@ never fields on <code class="docutils literal notranslate"><span class="pre">Set
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8009
 <span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_MODEL</span><span class="o">=</span>laya
-<span class="nv">MECHA_LIVE_JUDGE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/test_judge.py<span class="w"> </span>-k<span class="w"> </span>live_systemone
+<span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_STORY_MODEL</span><span class="o">=</span>systemone/laya<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span><span class="s1">'refund_verdict or systemone_cassette'</span>
 </pre></div>
 </div>
+<p>Offline CI replays the System One cassette for the same stories (no skip).
+See <a class="reference internal" href="../guides/user-stories.html"><span class="std std-doc">User stories</span></a>.</p>
 </section>
 <section id="judgementpolicy">
 <h2>JudgementPolicy<a class="headerlink" href="#judgementpolicy" title="Link to this heading"></a></h2>

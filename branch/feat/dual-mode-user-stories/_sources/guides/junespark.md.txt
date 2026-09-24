@@ -23,21 +23,17 @@ mechaharness run "Reply with ok." \
 Use the **served model id** your server advertises on `/v1/models`, not a
 Hugging Face repo id.
 
-Live pytest prefers the dual-mode **user story** suite (see
-[User stories](./user-stories.md)). Legacy alias:
-
-```bash
-MECHA_LIVE_JUNESPARK=1 \
-  MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
-  MECHA_MODEL=<served-model-id> \
-  pytest -q tests/test_live_junespark.py
-```
-
-Or explicitly:
+Live and offline pytest use the dual-mode **user story** suite (see
+[User stories](./user-stories.md)). Offline CI always runs cassettes; live is
+the same tests with real HTTP:
 
 ```bash
 MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen3-30b-thinking \
   MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
+  pytest -q tests/stories -k nubble_run_cost
+
+# shorthand
+MECHA_LIVE_JUNESPARK=1 MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
   pytest -q tests/stories -k nubble_run_cost
 ```
 
@@ -58,7 +54,8 @@ export MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009
 export MECHA_JUDGE_PATH=/v1/systemone   # default; override if needed
 export MECHA_JUDGE_MODEL=laya
 
-MECHA_LIVE_JUDGE=1 pytest -q tests/test_judge.py -k live_systemone
+MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
+  pytest -q tests/stories -k 'refund_verdict or systemone_cassette'
 ```
 
 Legacy `MECHA_DECIDE_*` env names still work as aliases. Host apps typically load
