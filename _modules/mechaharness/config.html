@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../reference/events.html">Event log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
 </ul>
 <ul>
@@ -99,7 +100,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mechaharness.config</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Settings loaded from environment / .env for CLI and API."""</span>
+<span></span><span class="sd">"""Settings loaded from environment / .env for CLI and API.</span>
+
+<span class="sd">Shared run surface only. Lane- and provider-specific knobs belong on the</span>
+<span class="sd">owning injectable (e.g. ``APIConnectionConfig.from_env`` for judge HTTP) —</span>
+<span class="sd">do not grow this class into a provider bag. See ``.cursor/rules/di-first.mdc``.</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -109,10 +115,10 @@
 <div class="viewcode-block" id="Settings">
 <a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.config.Settings">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Settings</span><span class="p">(</span><span class="n">BaseSettings</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Runtime settings loaded from environment / ``.env`` (``MECHA_`` prefix).</span>
+<span class="w">    </span><span class="sd">"""Runtime settings for CLI / HTTP / reason-lane OpenAI-compat (transitional).</span>
 
-<span class="sd">    Used by the CLI, HTTP API, and ``SettingsConfig``. Hosts that construct</span>
-<span class="sd">    strategies directly may pass a ``Settings`` instance into constructors.</span>
+<span class="sd">    Reason ``base_url`` / ``api_key`` / ``model`` here are known debt to migrate</span>
+<span class="sd">    onto connection config later. Do not add judge/media/OAuth fields.</span>
 <span class="sd">    """</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">SettingsConfigDict</span><span class="p">(</span><span class="n">env_prefix</span><span class="o">=</span><span class="s2">"MECHA_"</span><span class="p">,</span> <span class="n">env_file</span><span class="o">=</span><span class="s2">".env"</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">)</span>

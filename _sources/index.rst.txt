@@ -50,6 +50,7 @@ Reference
    reference/events
    reference/cost
    reference/access
+   reference/judge
    adr/0001-pyiv-config
 
 API
