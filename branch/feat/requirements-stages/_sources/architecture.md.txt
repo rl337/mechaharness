@@ -103,7 +103,7 @@ OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different defaul
 
 **Pattern:** Strategy adapter over typed questions + injectable connection  
 **Code:** `mechaharness.inference.judge`, `mechaharness.inference.systemone`,
-`mechaharness.connection`
+`mechaharness.api_connection`, `mechaharness.judgement_policy`
 
 `judge()` evaluates closed-world questions (`noul` / `choice` / `score`) and
 returns a **Judgement**. HTTP reachability uses `APIConnectionConfig` (default
