@@ -1,0 +1,7 @@
+{
+  "id": "taloneth_fixture_judge_batch",
+  "persona": "taloneth",
+  "title": "Lab bench without the forge",
+  "kind": "fixture_judge_batch",
+  "narrative": "Taloneth is iterating on question sets \u2014 noul, choice, and score in one batch \u2014\nand cannot wait on a GPU forge for every tweak. He drives `FixtureJudgeProvider`\nwith known answers and checks that validation accepts clean signals and reports\nerrors when answers are missing. The lab bench is offline, deterministic, and\nfast; he relates to this whenever contract tests must not depend on a served\nmodel."
+}

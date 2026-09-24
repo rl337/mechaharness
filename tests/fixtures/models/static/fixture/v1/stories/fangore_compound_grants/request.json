@@ -1,0 +1,9 @@
+{
+  "prompt": "Write a.txt",
+  "read_grants": [
+    "core:fs.read"
+  ],
+  "write_grants": [
+    "core:fs.write"
+  ]
+}

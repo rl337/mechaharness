@@ -1,0 +1,7 @@
+{
+  "id": "taloneth_systemone_cassette",
+  "persona": "taloneth",
+  "title": "Pinning Laya\u2019s handwriting",
+  "kind": "systemone_cassette",
+  "narrative": "A new Laya build changes confidence fields in the System One JSON. Taloneth\nkeeps a **versioned cassette** of the wire response under `systemone/laya/v1`\nand replays it through `SystemOneJudgeProvider`. If mapping breaks, the story\nfails before silent drift ships. He relates to this whenever adapter code must\nstay pinned to a known model handwriting."
+}

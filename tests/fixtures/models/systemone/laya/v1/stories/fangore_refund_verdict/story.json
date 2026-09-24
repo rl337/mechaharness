@@ -1,0 +1,7 @@
+{
+  "id": "fangore_refund_verdict",
+  "persona": "fangore",
+  "title": "Billing owns the double-charge",
+  "kind": "route_refund",
+  "narrative": "A customer was charged twice. Fangore\u2019s product rule is simple: only the billing\nteam may own that ticket \u2014 the model may *suggest*, but it must not grant\npermission. He runs the judge over the ticket text, then `JudgementPolicy`\ndecides ALLOW only when the route signal is billing. If the model picks\ntechnical, policy denies. He relates to this whenever business authority must\nstay in code, not in prompt vibes."
+}

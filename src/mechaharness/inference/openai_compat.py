@@ -163,11 +163,18 @@ class OpenAICompatStrategy(InferenceStrategy):
 
     name = "openai_compat"
 
-    def __init__(self, settings: Settings, *, timeout: float = 120.0) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        *,
+        timeout: float = 120.0,
+        client: httpx.AsyncClient | None = None,
+    ) -> None:
         self.base_url = (settings.base_url or "https://api.openai.com/v1").rstrip("/")
         self.api_key = settings.api_key
         self.default_model = settings.model
-        self._client = httpx.AsyncClient(
+        self._owns_client = client is None
+        self._client = client or httpx.AsyncClient(
             base_url=self.base_url,
             timeout=timeout,
             headers=self._build_headers(None),
@@ -242,4 +249,5 @@ class OpenAICompatStrategy(InferenceStrategy):
             raise InferenceError(f"OpenAI-compat stream failed: {exc}") from exc
 
     async def aclose(self) -> None:
-        await self._client.aclose()
+        if self._owns_client:
+            await self._client.aclose()

@@ -1,0 +1,9 @@
+{
+  "route_selected_in": [
+    "billing"
+  ],
+  "verdict_in": [
+    "ALLOW"
+  ],
+  "min_answer_count": 2
+}

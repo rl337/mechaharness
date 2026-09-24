@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import os
-
 import httpx
 import pytest
 
@@ -165,34 +163,3 @@ async def test_systemone_adapter_maps_wire(httpx_mock: object | None = None) -> 
         )
     assert result.provenance.provider == "systemone"
     assert {a.id for a in result.answers} == {"escalate", "route"}
-
-
-@pytest.mark.asyncio
-@pytest.mark.skipif(
-    os.environ.get("MECHA_LIVE_JUDGE", os.environ.get("MECHA_LIVE_DECIDE")) != "1",
-    reason="set MECHA_LIVE_JUDGE=1 for live System One",
-)
-async def test_live_systemone() -> None:
-    provider = SystemOneJudgeProvider()
-    result = await judge(
-        JudgeRequest(
-            state="Customer was charged twice and wants a refund.",
-            state_hash=hash_state("Customer was charged twice and wants a refund."),
-            questions=[
-                ChoiceQuestion(
-                    id="route",
-                    instructions="Which team should own this?",
-                    options=[
-                        ChoiceOption(id="billing", description="Payments, invoices, refunds"),
-                        ChoiceOption(id="technical", description="Bugs and outages"),
-                        ChoiceOption(id="other", description="Everything else"),
-                    ],
-                ),
-                NoulQuestion(id="escalate", instructions="Needs urgent human attention?"),
-            ],
-            question_set_version="live-v1",
-        ),
-        provider=provider,
-    )
-    assert result.answers
-    assert result.usage.physical_calls >= 1
