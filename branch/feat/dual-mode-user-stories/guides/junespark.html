@@ -124,17 +124,15 @@ mechaharness<span class="w"> </span>run<span class="w"> </span><span class="s2">
 </div>
 <p>Use the <strong>served model id</strong> your server advertises on <code class="docutils literal notranslate"><span class="pre">/v1/models</span></code>, not a
 Hugging Face repo id.</p>
-<p>Live pytest prefers the dual-mode <strong>user story</strong> suite (see
-<a class="reference internal" href="user-stories.html"><span class="std std-doc">User stories</span></a>). Legacy alias:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MECHA_LIVE_JUNESPARK</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="nv">MECHA_MODEL</span><span class="o">=</span>&lt;served-model-id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/test_live_junespark.py
-</pre></div>
-</div>
-<p>Or explicitly:</p>
+<p>Live and offline pytest use the dual-mode <strong>user story</strong> suite (see
+<a class="reference internal" href="user-stories.html"><span class="std std-doc">User stories</span></a>). Offline CI always runs cassettes; live is
+the same tests with real HTTP:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_STORY_MODEL</span><span class="o">=</span>openai_compat/qwen3-30b-thinking<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
+
+<span class="c1"># shorthand</span>
+<span class="nv">MECHA_LIVE_JUNESPARK</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
 </pre></div>
 </div>
@@ -153,7 +151,8 @@ Hugging Face repo id.</p>
 <span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_PATH</span><span class="o">=</span>/v1/systemone<span class="w">   </span><span class="c1"># default; override if needed</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_MODEL</span><span class="o">=</span>laya
 
-<span class="nv">MECHA_LIVE_JUDGE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/test_judge.py<span class="w"> </span>-k<span class="w"> </span>live_systemone
+<span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_STORY_MODEL</span><span class="o">=</span>systemone/laya<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span><span class="s1">'refund_verdict or systemone_cassette'</span>
 </pre></div>
 </div>
 <p>Legacy <code class="docutils literal notranslate"><span class="pre">MECHA_DECIDE_*</span></code> env names still work as aliases. Host apps typically load
