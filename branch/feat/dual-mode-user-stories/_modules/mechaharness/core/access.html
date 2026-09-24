@@ -1,0 +1,722 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mechaharness.core.access &mdash; MechaHarness 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/user-stories.html">User stories</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/tools.html">mechaharness.tools.base</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mechaharness.core.access</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mechaharness.core.access</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Cost units and deny-by-default tool grants.</span>
+
+<span class="sd">Ability is a five-step scale; higher ability costs more. Grants are open</span>
+<span class="sd">identity: a class hierarchy with wire form ``namespace:name`` (for example</span>
+<span class="sd">``core:fs.read``, ``acme:widget``). Unknown namespaced keys round-trip; bare</span>
+<span class="sd">names are rejected.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessCheck</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">EventLog</span><span class="p">,</span> <span class="n">EventType</span><span class="p">,</span> <span class="n">event_type_key</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Usage</span>
+
+
+<div class="viewcode-block" id="Ability">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.Ability">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Ability</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""How capable a completer or tool is at a given kind of work."""</span>
+
+    <span class="n">SIMPLE</span> <span class="o">=</span> <span class="s2">"simple"</span>
+    <span class="n">BASIC</span> <span class="o">=</span> <span class="s2">"basic"</span>
+    <span class="n">INTERMEDIATE</span> <span class="o">=</span> <span class="s2">"intermediate"</span>
+    <span class="n">PROFICIENT</span> <span class="o">=</span> <span class="s2">"proficient"</span>
+    <span class="n">ADVANCED</span> <span class="o">=</span> <span class="s2">"advanced"</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rank</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">Ability</span><span class="o">.</span><span class="n">SIMPLE</span><span class="p">,</span>
+            <span class="n">Ability</span><span class="o">.</span><span class="n">BASIC</span><span class="p">,</span>
+            <span class="n">Ability</span><span class="o">.</span><span class="n">INTERMEDIATE</span><span class="p">,</span>
+            <span class="n">Ability</span><span class="o">.</span><span class="n">PROFICIENT</span><span class="p">,</span>
+            <span class="n">Ability</span><span class="o">.</span><span class="n">ADVANCED</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">order</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Cost units: 1, 2, 4, 8, 16."""</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="CapabilityKind">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CapabilityKind">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CapabilityKind</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Kinds of work a completer can perform (aligned with model skills)."""</span>
+
+    <span class="n">CODE</span> <span class="o">=</span> <span class="s2">"code"</span>
+    <span class="n">REASONING</span> <span class="o">=</span> <span class="s2">"reasoning"</span>
+    <span class="n">TOOL_USE</span> <span class="o">=</span> <span class="s2">"tool_use"</span></div>
+
+
+
+<div class="viewcode-block" id="Capability">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.Capability">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Capability</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">CapabilityKind</span>
+    <span class="n">level</span><span class="p">:</span> <span class="n">Ability</span></div>
+
+
+
+<div class="viewcode-block" id="CapabilityProfile">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CapabilityProfile">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CapabilityProfile</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Declared skills of a completer. Cost is the sum of each capability's units."""</span>
+
+    <span class="n">capabilities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Capability</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CapabilityProfile.units">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CapabilityProfile.units">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">capabilities</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Ability</span><span class="o">.</span><span class="n">SIMPLE</span><span class="o">.</span><span class="n">units</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">level</span><span class="o">.</span><span class="n">units</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">capabilities</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Grant">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.Grant">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Grant</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Namespaced grant identity.</span>
+
+<span class="sd">    Subclass to add grants. The wire form is ``namespace:name`` (for example</span>
+<span class="sd">    ``core:fs.read``). Intermediate classes set ``namespace``; leaves set</span>
+<span class="sd">    ``name``.</span>
+<span class="sd">    """</span>
+
+    <span class="n">namespace</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">namespace</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> must set namespace (via a base class)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">namespace</span> <span class="ow">or</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"namespace and name must not contain ':'"</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">key</span><span class="p">()</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">_GRANTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">existing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"duplicate grant </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">existing</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="n">_GRANTS</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+
+<div class="viewcode-block" id="Grant.key">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.Grant.key">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">key</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">namespace</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> is not a concrete grant"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">namespace</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span></div>
+
+
+<div class="viewcode-block" id="Grant.parse">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.Grant.parse">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">Grant</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return the class registered for ``namespace:name``."""</span>
+        <span class="n">_require_namespaced_grant</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_GRANTS</span><span class="p">[</span><span class="n">value</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown grant </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span></div>
+</div>
+
+
+
+<span class="n">_GRANTS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">Grant</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">GrantRef</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">Grant</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="CoreGrant">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CoreGrant">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CoreGrant</span><span class="p">(</span><span class="n">Grant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Built-in MechaHarness grants (``core:*``). Conveniences, not a closed set."""</span>
+
+    <span class="n">namespace</span> <span class="o">=</span> <span class="s2">"core"</span></div>
+
+
+
+<div class="viewcode-block" id="FsRead">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.FsRead">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FsRead</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"fs.read"</span></div>
+
+
+
+<div class="viewcode-block" id="FsWrite">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.FsWrite">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FsWrite</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"fs.write"</span></div>
+
+
+
+<div class="viewcode-block" id="NetHttp">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.NetHttp">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NetHttp</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"net.http"</span></div>
+
+
+
+<div class="viewcode-block" id="MediaImage">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.MediaImage">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MediaImage</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"media.image"</span></div>
+
+
+
+<div class="viewcode-block" id="MediaVideo">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.MediaVideo">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MediaVideo</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"media.video"</span></div>
+
+
+
+<div class="viewcode-block" id="MediaAudio">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.MediaAudio">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MediaAudio</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"media.audio"</span></div>
+
+
+
+<div class="viewcode-block" id="grant_key">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.grant_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">grant_key</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Normalize a class or ``namespace:name`` string to the wire key."""</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">_require_namespaced_grant</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Grant</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">key</span><span class="p">()</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"grant must be Grant subclass or str, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_require_namespaced_grant</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">namespace</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sep</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">namespace</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"grant must be namespace:name, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"grant must be namespace:name, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AccessPolicy">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.AccessPolicy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AccessPolicy</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Deny-by-default grant list for a harness."""</span>
+
+    <span class="n">grants</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"grants"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"before"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_coerce_grants</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"grants must be a sequence"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">grant_key</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+
+<div class="viewcode-block" id="AccessPolicy.allows">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.AccessPolicy.allows">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">allows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">granted</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span>
+        <span class="n">needed</span> <span class="o">=</span> <span class="p">{</span><span class="n">grant_key</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">required</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">needed</span> <span class="o">&lt;=</span> <span class="n">granted</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CompoundPolicy">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CompoundPolicy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CompoundPolicy</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Union of :class:`AccessPolicy` layers (still deny-by-default).</span>
+
+<span class="sd">    Compose reusable grant sets (e.g. read-only + media) without rewriting</span>
+<span class="sd">    lists. Overlaps are idempotent — there is no deny grant, only allow-list</span>
+<span class="sd">    membership. Not related to :class:`~mechaharness.judgement_policy.JudgementPolicy`.</span>
+<span class="sd">    """</span>
+
+    <span class="n">policies</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AccessPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompoundPolicy.of">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CompoundPolicy.of">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">of</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">policies</span><span class="p">:</span> <span class="n">AccessPolicy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompoundPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build from one or more access policies."""</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">policies</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">policies</span><span class="p">))</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">grants</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Flattened unique grants in first-seen order across ``policies``."""</span>
+        <span class="n">seen</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">policies</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">policy</span><span class="o">.</span><span class="n">grants</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                    <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">seen</span>
+
+<div class="viewcode-block" id="CompoundPolicy.allows">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CompoundPolicy.allows">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">allows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span><span class="o">.</span><span class="n">allows</span><span class="p">(</span><span class="n">required</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompoundPolicy.flatten">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CompoundPolicy.flatten">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Single :class:`AccessPolicy` with the unioned grant list."""</span>
+        <span class="k">return</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="n">GrantPolicyLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">AccessPolicy</span><span class="p">,</span> <span class="n">CompoundPolicy</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="CostEntry">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CostEntry">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CostEntry</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">capabilities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Capability</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">prompt_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">completion_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">total_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="CostReport">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CostReport">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CostReport</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CostEntry</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">prompt_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">completion_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="CostReport.add">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CostReport.add">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry</span><span class="p">:</span> <span class="n">CostEntry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">+=</span> <span class="n">entry</span><span class="o">.</span><span class="n">units</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">prompt_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prompt_tokens</span> <span class="o">+=</span> <span class="n">entry</span><span class="o">.</span><span class="n">prompt_tokens</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">completion_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">completion_tokens</span> <span class="o">+=</span> <span class="n">entry</span><span class="o">.</span><span class="n">completion_tokens</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">total_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_tokens</span> <span class="o">+=</span> <span class="n">entry</span><span class="o">.</span><span class="n">total_tokens</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="inference_cost_entry">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.inference_cost_entry">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inference_cost_entry</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">profile</span><span class="p">:</span> <span class="n">CapabilityProfile</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">usage</span><span class="p">:</span> <span class="n">Usage</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostEntry</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">CostEntry</span><span class="p">(</span>
+        <span class="n">kind</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">units</span><span class="o">=</span><span class="n">profile</span><span class="o">.</span><span class="n">units</span><span class="p">(),</span>
+        <span class="n">capabilities</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">capabilities</span><span class="p">),</span>
+        <span class="n">prompt_tokens</span><span class="o">=</span><span class="n">usage</span><span class="o">.</span><span class="n">prompt_tokens</span> <span class="k">if</span> <span class="n">usage</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">completion_tokens</span><span class="o">=</span><span class="n">usage</span><span class="o">.</span><span class="n">completion_tokens</span> <span class="k">if</span> <span class="n">usage</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">total_tokens</span><span class="o">=</span><span class="n">usage</span><span class="o">.</span><span class="n">total_tokens</span> <span class="k">if</span> <span class="n">usage</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tool_cost_entry">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.tool_cost_entry">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tool_cost_entry</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ability</span><span class="p">:</span> <span class="n">Ability</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostEntry</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">CostEntry</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"tool"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">ability</span><span class="o">.</span><span class="n">units</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="AccessControl">
+<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.AccessControl">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AccessControl</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Whether a tool may run. Deny-by-default unless a grant covers it."""</span>
+
+<div class="viewcode-block" id="AccessControl.allows">
+<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.AccessControl.allows">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">allows</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">required</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return True if every required grant is held."""</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CostAccountant">
+<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.CostAccountant">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CostAccountant</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Price one inference call or tool invocation and keep a ledger."""</span>
+
+<div class="viewcode-block" id="CostAccountant.price_inference">
+<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.CostAccountant.price_inference">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">price_inference</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">profile</span><span class="p">:</span> <span class="n">CapabilityProfile</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">usage</span><span class="p">:</span> <span class="n">Usage</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostEntry</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Units for one completer call."""</span></div>
+
+
+<div class="viewcode-block" id="CostAccountant.price_tool">
+<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.CostAccountant.price_tool">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">price_tool</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ability</span><span class="p">:</span> <span class="n">Ability</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostEntry</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Units for one successful tool run."""</span></div>
+
+
+<div class="viewcode-block" id="CostAccountant.report">
+<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.CostAccountant.report">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostReport</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Accumulated ledger for this accountant instance."""</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_emit_policy_event</span><span class="p">(</span>
+    <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">event_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">EventType</span><span class="p">],</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">event_log</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">agent_id</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">run_id</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">event_log</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+        <span class="n">Event</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">event_type_key</span><span class="p">(</span><span class="n">event_type</span><span class="p">),</span>
+            <span class="n">agent_id</span><span class="o">=</span><span class="n">agent_id</span><span class="p">,</span>
+            <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+            <span class="n">parent_agent_id</span><span class="o">=</span><span class="n">parent_agent_id</span><span class="p">,</span>
+            <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="InMemoryAccessControl">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryAccessControl">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InMemoryAccessControl</span><span class="p">(</span><span class="n">AccessControl</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Deny-by-default grant list; records and emits every check."""</span>
+
+<div class="viewcode-block" id="InMemoryAccessControl.__init__">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryAccessControl.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grants</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">policy</span><span class="p">:</span> <span class="n">GrantPolicyLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">policy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">grant_key</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">(</span><span class="n">grants</span> <span class="ow">or</span> <span class="p">[])]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">policy</span> <span class="o">=</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="n">keys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span> <span class="o">=</span> <span class="n">event_log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">grants</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InMemoryAccessControl.allows">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryAccessControl.allows">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">allows</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">required</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">needed</span> <span class="o">=</span> <span class="p">[</span><span class="n">grant_key</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">required</span><span class="p">]</span>
+        <span class="n">allowed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">allows</span><span class="p">(</span><span class="n">needed</span><span class="p">)</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"tool"</span><span class="p">:</span> <span class="n">tool_name</span><span class="p">,</span>
+            <span class="s2">"required"</span><span class="p">:</span> <span class="n">needed</span><span class="p">,</span>
+            <span class="s2">"granted"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy</span><span class="o">.</span><span class="n">grants</span><span class="p">),</span>
+            <span class="s2">"allowed"</span><span class="p">:</span> <span class="n">allowed</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+        <span class="n">_emit_policy_event</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span><span class="p">,</span>
+            <span class="n">AccessCheck</span><span class="p">,</span>
+            <span class="n">record</span><span class="p">,</span>
+            <span class="n">agent_id</span><span class="o">=</span><span class="n">agent_id</span><span class="p">,</span>
+            <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+            <span class="n">parent_agent_id</span><span class="o">=</span><span class="n">parent_agent_id</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">allowed</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InMemoryCostAccountant">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryCostAccountant">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InMemoryCostAccountant</span><span class="p">(</span><span class="n">CostAccountant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Prices from the capability profile and tool ability; emits ``core:cost``."""</span>
+
+<div class="viewcode-block" id="InMemoryCostAccountant.__init__">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryCostAccountant.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span> <span class="o">=</span> <span class="n">event_log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_report</span> <span class="o">=</span> <span class="n">CostReport</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="InMemoryCostAccountant.price_inference">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryCostAccountant.price_inference">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">price_inference</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">profile</span><span class="p">:</span> <span class="n">CapabilityProfile</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">usage</span><span class="p">:</span> <span class="n">Usage</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostEntry</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span>
+            <span class="n">inference_cost_entry</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">profile</span><span class="p">,</span> <span class="n">usage</span><span class="o">=</span><span class="n">usage</span><span class="p">),</span>
+            <span class="n">agent_id</span><span class="p">,</span>
+            <span class="n">run_id</span><span class="p">,</span>
+            <span class="n">parent_agent_id</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InMemoryCostAccountant.price_tool">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryCostAccountant.price_tool">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">price_tool</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ability</span><span class="p">:</span> <span class="n">Ability</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostEntry</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span><span class="n">tool_cost_entry</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ability</span><span class="p">),</span> <span class="n">agent_id</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">parent_agent_id</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InMemoryCostAccountant.report">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryCostAccountant.report">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostReport</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_report</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_record</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">entry</span><span class="p">:</span> <span class="n">CostEntry</span><span class="p">,</span>
+        <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostEntry</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_report</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"kind"</span><span class="p">:</span> <span class="n">entry</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">"units"</span><span class="p">:</span> <span class="n">entry</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">prompt_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">"prompt_tokens"</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">prompt_tokens</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">completion_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">"completion_tokens"</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">completion_tokens</span>
+        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">total_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">"total_tokens"</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">total_tokens</span>
+        <span class="n">_emit_policy_event</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span><span class="p">,</span>
+            <span class="n">Cost</span><span class="p">,</span>
+            <span class="n">payload</span><span class="p">,</span>
+            <span class="n">agent_id</span><span class="o">=</span><span class="n">agent_id</span><span class="p">,</span>
+            <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+            <span class="n">parent_agent_id</span><span class="o">=</span><span class="n">parent_agent_id</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">entry</span></div>
+
+
+
+<div class="viewcode-block" id="default_capability_profile">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.default_capability_profile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_capability_profile</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">CapabilityProfile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Pass-through / unknown completer: simple reasoning only."""</span>
+    <span class="k">return</span> <span class="n">CapabilityProfile</span><span class="p">(</span>
+        <span class="n">capabilities</span><span class="o">=</span><span class="p">[</span><span class="n">Capability</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="n">CapabilityKind</span><span class="o">.</span><span class="n">REASONING</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">Ability</span><span class="o">.</span><span class="n">SIMPLE</span><span class="p">)]</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
