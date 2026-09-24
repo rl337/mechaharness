@@ -1,0 +1,53 @@
+{
+  "state": {
+    "ticket": "double charge"
+  },
+  "question_set_version": "lab-v1",
+  "questions": [
+    {
+      "kind": "noul",
+      "id": "escalate",
+      "instructions": "Needs human?"
+    },
+    {
+      "kind": "choice",
+      "id": "route",
+      "instructions": "Which team?",
+      "options": [
+        {
+          "id": "billing",
+          "description": "Payments"
+        },
+        {
+          "id": "technical",
+          "description": "Bugs"
+        },
+        {
+          "id": "other",
+          "description": "Else"
+        }
+      ]
+    },
+    {
+      "kind": "score",
+      "id": "urgency",
+      "instructions": "How urgent?",
+      "min": 0.0,
+      "max": 2.0,
+      "anchors": [
+        {
+          "value": 0.0,
+          "description": "not urgent"
+        },
+        {
+          "value": 1.0,
+          "description": "soon"
+        },
+        {
+          "value": 2.0,
+          "description": "blocking"
+        }
+      ]
+    }
+  ]
+}

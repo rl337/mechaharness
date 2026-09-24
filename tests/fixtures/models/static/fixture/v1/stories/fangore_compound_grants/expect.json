@@ -1,0 +1,4 @@
+{
+  "denied_without_write_grant": true,
+  "allowed_with_compound": true
+}

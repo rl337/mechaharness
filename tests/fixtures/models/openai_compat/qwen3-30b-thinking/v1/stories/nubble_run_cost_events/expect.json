@@ -1,0 +1,9 @@
+{
+  "final_text_nonempty": true,
+  "turns": 1,
+  "min_cost_units": 1,
+  "event_types_include": [
+    "core:cost",
+    "core:inference"
+  ]
+}

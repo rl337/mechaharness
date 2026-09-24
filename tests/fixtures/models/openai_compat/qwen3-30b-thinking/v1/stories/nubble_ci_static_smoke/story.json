@@ -1,0 +1,7 @@
+{
+  "id": "nubble_ci_static_smoke",
+  "persona": "nubble",
+  "title": "Merge night without the mountain",
+  "kind": "pass_through",
+  "narrative": "It is late; the DGX Spark is offline for maintenance, and a PR still needs\ngreen CI. Nubble refuses to block merges on LAN reachability. He wants the\nOpenAI-compat path proven from a **cassette** \u2014 a recorded reply replayed\nthrough the real HTTP client \u2014 so the pipeline stays honest about wire shape\nwithout waking the mountain. When static CI is green, he sleeps; when someone\nbreaks the adapter, CI fails before production."
+}
