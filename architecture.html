@@ -56,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="reference/events.html">Event log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
 </ul>
 <ul>
@@ -145,13 +146,20 @@ the non-DI facade, not a second architecture. See <code class="docutils literal 
 <strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.di</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.configure()</span></code> binds <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, <code class="docutils literal notranslate"><span class="pre">Completer</span></code>,
 <code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code>, <code class="docutils literal notranslate"><span class="pre">Settings</span></code>, <code class="docutils literal notranslate"><span class="pre">HarnessConfig</span></code>, <code class="docutils literal notranslate"><span class="pre">ToolRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>,
-<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, and <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code>. Subclasses
-override <code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called from the
+<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code>,
+<code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> (judge), and <code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code>. Subclasses override
+<code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called from the
 Config constructor). Host apps subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code>, call
 <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code>, and <code class="docutils literal notranslate"><span class="pre">injector.inject(AbstractHarness)</span></code> — or inject those
 types into their own services. Override <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> for the deny-by-default
 tool grant list. Override <code class="docutils literal notranslate"><span class="pre">include_subagent_tools()</span></code> to opt in parent EventLog
-query tools. Override <code class="docutils literal notranslate"><span class="pre">get_inference_environment()</span></code> for host profile probes.</p>
+query tools. Override <code class="docutils literal notranslate"><span class="pre">get_inference_environment()</span></code> for host profile probes.
+Override <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> for judge HTTP and
+wire adapters.</p>
+<p><strong>Config ownership:</strong> lane- and provider-specific knobs belong on the owning
+injectable (e.g. <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> for <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>), not
+as a growing pile of fields on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Providers are never attributes of
+<code class="docutils literal notranslate"><span class="pre">Settings</span></code>. See <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code> and the <code class="docutils literal notranslate"><span class="pre">di-config-ownership</span></code> skill.</p>
 <p><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> implements the hooks via overridable <code class="docutils literal notranslate"><span class="pre">inference_classes()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">harness_classes()</span></code> maps plus <code class="docutils literal notranslate"><span class="pre">Settings.inference_backend</span></code> /
 <code class="docutils literal notranslate"><span class="pre">Settings.harness_family</span></code>. That is the configuration path for CLI/HTTP callers
@@ -184,6 +192,26 @@ OpenAI mode) through one strategy (<code class="docutils literal notranslate"><s
 <code class="docutils literal notranslate"><span class="pre">base_url</span></code>s applied by <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code>. Provider JSON is modeled in
 <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.openai_wire</span></code>; portable domain types stay in
 <code class="docutils literal notranslate"><span class="pre">mechaharness.core.types</span></code>.</p>
+</section>
+<section id="judge">
+<h2>Judge<a class="headerlink" href="#judge" title="Link to this heading"></a></h2>
+<p><strong>Pattern:</strong> Strategy adapter over typed questions + injectable connection<br />
+<strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.systemone</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mechaharness.api_connection</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.judgement_policy</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">judge()</span></code> evaluates closed-world questions (<code class="docutils literal notranslate"><span class="pre">noul</span></code> / <code class="docutils literal notranslate"><span class="pre">choice</span></code> / <code class="docutils literal notranslate"><span class="pre">score</span></code>) and
+returns a <strong>Judgement</strong>. HTTP reachability uses <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> (default
+<code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig</span></code> from <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>). Pure <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> /
+<code class="docutils literal notranslate"><span class="pre">decide(...)</span></code> turns a Judgement into allow/deny/ask-human verdicts — models never
+grant permission. Generative calls yield a <strong>Completion</strong>; media yields a
+<strong>Generation</strong>. Tool grants remain <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code>. See
+<a class="reference internal" href="reference/judge.html"><span class="std std-doc">Judge reference</span></a>.</p>
+</section>
+<section id="capability-lanes">
+<h2>Capability lanes<a class="headerlink" href="#capability-lanes" title="Link to this heading"></a></h2>
+<p><strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.core.environment</span></code></p>
+<p>Hosts implement <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code> with <code class="docutils literal notranslate"><span class="pre">active_lane()</span></code> (<code class="docutils literal notranslate"><span class="pre">reason</span></code>, <code class="docutils literal notranslate"><span class="pre">judge</span></code>,
+<code class="docutils literal notranslate"><span class="pre">media</span></code>, or a host namespace). <code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code> calls <code class="docutils literal notranslate"><span class="pre">assert_compatible</span></code> before
+tools that need grants or media. Wrong-lane errors name the operator load hint.</p>
 </section>
 <section id="harness-hierarchy">
 <h2>Harness hierarchy<a class="headerlink" href="#harness-hierarchy" title="Link to this heading"></a></h2>

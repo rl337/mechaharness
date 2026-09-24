@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/events.html">Event log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
 </ul>
 <ul>
@@ -104,15 +105,32 @@
 <span class="sd">Hosts (for example junespark) implement this to refuse runs that need</span>
 <span class="sd">capabilities the loaded profile does not provide. The library default is a</span>
 <span class="sd">no-op so CLI/mock paths stay unchanged.</span>
+
+<span class="sd">Lanes are open ``str`` identity (``reason``, ``judge``, ``media``, or a host</span>
+<span class="sd">namespace). Unknown lanes round-trip; hosts supply load hints.</span>
 <span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapabilityProfile</span><span class="p">,</span> <span class="n">grant_key</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessError</span>
+
+<span class="c1"># Well-known lane names (conveniences — hosts may add more).</span>
+<span class="n">LANE_REASON</span> <span class="o">=</span> <span class="s2">"reason"</span>
+<span class="n">LANE_JUDGE</span> <span class="o">=</span> <span class="s2">"judge"</span>
+<span class="n">LANE_MEDIA</span> <span class="o">=</span> <span class="s2">"media"</span>
+<span class="c1"># Deprecated alias — same string as LANE_JUDGE after rename.</span>
+<span class="n">LANE_DECIDE</span> <span class="o">=</span> <span class="n">LANE_JUDGE</span>
+
+<span class="n">DEFAULT_LANE_LOAD_HINTS</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">LANE_REASON</span><span class="p">:</span> <span class="s2">"infer load reason-fast"</span><span class="p">,</span>
+    <span class="c1"># Host profile filenames may still be decide-* until operators rename them.</span>
+    <span class="n">LANE_JUDGE</span><span class="p">:</span> <span class="s2">"infer load decide-fast"</span><span class="p">,</span>
+    <span class="n">LANE_MEDIA</span><span class="p">:</span> <span class="s2">"infer load media"</span><span class="p">,</span>
+<span class="p">}</span>
 
 
 <div class="viewcode-block" id="InferenceEnvironmentError">
@@ -141,11 +159,29 @@
 <span class="w">        </span><span class="sd">"""Capability set of the loaded environment."""</span></div>
 
 
+<div class="viewcode-block" id="InferenceEnvironment.active_lane">
+<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.active_lane">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">active_lane</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Capability lane derived from the active profile, or None if unknown.</span>
+
+<span class="sd">        Well-known values: ``reason``, ``judge``, ``media``. Hosts may return</span>
+<span class="sd">        other namespaced lanes.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
 <div class="viewcode-block" id="InferenceEnvironment.active_grants">
 <a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.active_grants">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">active_grants</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Grants the environment is willing to honor (default: none)."""</span>
         <span class="k">return</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="InferenceEnvironment.lane_load_hint">
+<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.lane_load_hint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lane_load_hint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lane</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Operator hint naming how to load a profile for ``lane``."""</span>
+        <span class="k">return</span> <span class="n">DEFAULT_LANE_LOAD_HINTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lane</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"infer load &lt;profile-for-</span><span class="si">{</span><span class="n">lane</span><span class="si">}</span><span class="s2">&gt;"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="InferenceEnvironment.assert_compatible">
@@ -155,19 +191,29 @@
         <span class="o">*</span><span class="p">,</span>
         <span class="n">required_grants</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">require_media</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">require_lane</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Raise if the active environment cannot satisfy the request."""</span>
         <span class="n">held</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_grants</span><span class="p">())</span>
         <span class="n">needed</span> <span class="o">=</span> <span class="p">{</span><span class="n">grant_key</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">(</span><span class="n">required_grants</span> <span class="ow">or</span> <span class="p">[])}</span>
         <span class="n">missing</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">needed</span> <span class="o">-</span> <span class="n">held</span><span class="p">)</span>
         <span class="n">profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_profile</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">"unknown"</span>
+        <span class="n">lane</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_lane</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">require_lane</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lane</span> <span class="o">!=</span> <span class="n">require_lane</span><span class="p">:</span>
+            <span class="n">hint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lane_load_hint</span><span class="p">(</span><span class="n">require_lane</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InferenceEnvironmentError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"active profile </span><span class="si">{</span><span class="n">profile</span><span class="si">!r}</span><span class="s2"> lane=</span><span class="si">{</span><span class="n">lane</span><span class="si">!r}</span><span class="s2"> cannot satisfy "</span>
+                <span class="sa">f</span><span class="s2">"require_lane=</span><span class="si">{</span><span class="n">require_lane</span><span class="si">!r}</span><span class="s2">; try `</span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">`"</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">InferenceEnvironmentError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">"active profile </span><span class="si">{</span><span class="n">profile</span><span class="si">!r}</span><span class="s2"> lacks grants: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">require_media</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"core:media."</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">held</span><span class="p">):</span>
+            <span class="n">hint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lane_load_hint</span><span class="p">(</span><span class="n">LANE_MEDIA</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">InferenceEnvironmentError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">"active profile </span><span class="si">{</span><span class="n">profile</span><span class="si">!r}</span><span class="s2"> does not provide media capabilities"</span>
+                <span class="sa">f</span><span class="s2">"active profile </span><span class="si">{</span><span class="n">profile</span><span class="si">!r}</span><span class="s2"> does not provide media capabilities; "</span>
+                <span class="sa">f</span><span class="s2">"try `</span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">`"</span>
             <span class="p">)</span></div>
 </div>
 
@@ -190,6 +236,12 @@
         <span class="k">return</span> <span class="n">CapabilityProfile</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="NoOpInferenceEnvironment.active_lane">
+<a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment.active_lane">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">active_lane</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
 <div class="viewcode-block" id="NoOpInferenceEnvironment.assert_compatible">
 <a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment.assert_compatible">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">assert_compatible</span><span class="p">(</span>
@@ -197,8 +249,9 @@
         <span class="o">*</span><span class="p">,</span>
         <span class="n">required_grants</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">require_media</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">require_lane</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">del</span> <span class="n">required_grants</span><span class="p">,</span> <span class="n">require_media</span></div>
+        <span class="k">del</span> <span class="n">required_grants</span><span class="p">,</span> <span class="n">require_media</span><span class="p">,</span> <span class="n">require_lane</span></div>
 </div>
 
 </pre></div>

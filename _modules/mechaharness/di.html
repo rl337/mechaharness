@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../reference/events.html">Event log</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
 </ul>
 <ul>
@@ -115,6 +116,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.injector</span><span class="w"> </span><span class="kn">import</span> <span class="n">Injector</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.api_connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="n">SimpleHttpConnectionConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AccessControl</span><span class="p">,</span>
     <span class="n">CostAccountant</span><span class="p">,</span>
@@ -131,8 +133,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.tool_loop</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolLoopHarness</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.anthropic</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnthropicStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceStrategy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.judge</span><span class="w"> </span><span class="kn">import</span> <span class="n">JudgeProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MockInferenceStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.openai_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAICompatStrategy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.systemone</span><span class="w"> </span><span class="kn">import</span> <span class="n">SystemOneJudgeProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.tools.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolRegistry</span>
 
 <span class="n">_INFERENCE_DEFAULTS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
@@ -178,6 +182,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">AccessControl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_access_control</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CostAccountant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cost_accountant</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">InferenceEnvironment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_environment</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_judge_connection</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">JudgeProvider</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_judge_provider</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bind_inference</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bind_harness</span><span class="p">()</span></div>
 
@@ -229,6 +235,28 @@
         <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">existing</span> <span class="o">=</span> <span class="n">NoOpInferenceEnvironment</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_inference_environment</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_judge_connection">
+<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_judge_connection">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIConnectionConfig</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""HTTP connection for the judge lane (override for OAuth, etc.)."""</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_judge_connection"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">SimpleHttpConnectionConfig</span><span class="o">.</span><span class="n">for_judge</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_judge_connection</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_judge_provider">
+<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_judge_provider">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JudgeProvider</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Judge backend (default: System One over ``get_judge_connection()``)."""</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_judge_provider"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">SystemOneJudgeProvider</span><span class="p">(</span><span class="n">connection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_judge_connection</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_judge_provider</span> <span class="o">=</span> <span class="n">existing</span>
         <span class="k">return</span> <span class="n">existing</span></div>
 
 
@@ -340,6 +368,7 @@
                 <span class="n">event_log</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">EventLog</span><span class="p">),</span>
                 <span class="n">access</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">AccessControl</span><span class="p">),</span>
                 <span class="n">cost</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">CostAccountant</span><span class="p">),</span>
+                <span class="n">environment</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">InferenceEnvironment</span><span class="p">),</span>
                 <span class="n">subagent_tools</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">include_subagent_tools</span><span class="p">(),</span>
             <span class="p">)</span>
 

@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Judge (judge()) &mdash; MechaHarness 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="0001. pyiv Config instead of string registries" href="../adr/0001-pyiv-config.html" />
+    <link rel="prev" title="Access control" href="access.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/reference/judge.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="judge-judge">
+<h1>Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)<a class="headerlink" href="#judge-judge" title="Link to this heading"></a></h1>
+<p>Provider-neutral decision inference distinct from chat completions. Models
+evaluate supplied <code class="docutils literal notranslate"><span class="pre">state</span></code> against typed questions and return a <strong>Judgement</strong>
+(calibrated <strong>signals</strong>). Authority stays in <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> — models never
+grant permission. Tool grants stay on <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code>.</p>
+<section id="inference-outcomes">
+<h2>Inference outcomes<a class="headerlink" href="#inference-outcomes" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kind</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Module</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Generative chat / tools</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Completion</span></code> (= <code class="docutils literal notranslate"><span class="pre">CompletionResponse</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.core.outcomes</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Judge / System One</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Judgement</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Media / artifacts</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Generation</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.core.outcomes</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="types">
+<h2>Types<a class="headerlink" href="#types" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kind</p></th>
+<th class="head"><p>Question</p></th>
+<th class="head"><p>Signal</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">noul</span></code></p></td>
+<td><p>yes/no with true/false criteria</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">p_true</span></code> ∈ [0, 1]</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">choice</span></code></p></td>
+<td><p>options with descriptions</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">selected</span></code> + <code class="docutils literal notranslate"><span class="pre">probabilities</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">score</span></code></p></td>
+<td><p>min/max + anchors</p></td>
+<td><p>bounded <code class="docutils literal notranslate"><span class="pre">value</span></code> (+ optional distribution)</p></td>
+</tr>
+</tbody>
+</table>
+<p>A <code class="docutils literal notranslate"><span class="pre">Judgement</span></code> carries validated <code class="docutils literal notranslate"><span class="pre">answers</span></code>, per-question <code class="docutils literal notranslate"><span class="pre">errors</span></code> (missing ≠ zero
+risk), provenance, and usage (<code class="docutils literal notranslate"><span class="pre">latencyMs</span></code>, <code class="docutils literal notranslate"><span class="pre">physicalCalls</span></code>). (<code class="docutils literal notranslate"><span class="pre">JudgeResult</span></code> is a
+deprecated alias of <code class="docutils literal notranslate"><span class="pre">Judgement</span></code>.)</p>
+</section>
+<section id="connection-apiconnectionconfig">
+<h2>Connection (<code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code>)<a class="headerlink" href="#connection-apiconnectionconfig" title="Link to this heading"></a></h2>
+<p>Judge HTTP reachability is an injectable <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> (default:
+<code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig</span></code>). Env knobs bind on the connection via
+<code class="docutils literal notranslate"><span class="pre">from_env()</span></code> / <code class="docutils literal notranslate"><span class="pre">for_judge()</span></code> — <strong>not</strong> on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Env</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_BASE_URL</span></code></p></td>
+<td><p>Origin only (e.g. <code class="docutils literal notranslate"><span class="pre">http://host:8009</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_PATH</span></code></p></td>
+<td><p>Path joined to base (default <code class="docutils literal notranslate"><span class="pre">/v1/systemone</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_URL</span></code></p></td>
+<td><p>Full endpoint override (ignores base+path)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_MODEL</span></code></p></td>
+<td><p>Model id in JSON body</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_API_KEY</span></code></p></td>
+<td><p>Optional Bearer token</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_TIMEOUT_SECONDS</span></code></p></td>
+<td><p>HTTP timeout</p></td>
+</tr>
+</tbody>
+</table>
+<p>Legacy <code class="docutils literal notranslate"><span class="pre">MECHA_DECIDE_BASE_URL</span></code> / <code class="docutils literal notranslate"><span class="pre">MECHA_DECIDE_MODEL</span></code> still apply when the
+<code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code> values are unset. Hosts override
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_judge_connection()</span></code> for OAuth or other schemes later.
+Providers (<code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code>, <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, …) are Config DI injectables —
+never fields on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>.</p>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.judge</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ChoiceOption</span><span class="p">,</span>
+    <span class="n">ChoiceQuestion</span><span class="p">,</span>
+    <span class="n">FixtureJudgeProvider</span><span class="p">,</span>
+    <span class="n">JudgeRequest</span><span class="p">,</span>
+    <span class="n">hash_state</span><span class="p">,</span>
+    <span class="n">judge</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.judgement_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">JudgementFacts</span><span class="p">,</span> <span class="n">JudgementPolicy</span><span class="p">,</span> <span class="n">JudgementThreshold</span><span class="p">,</span> <span class="n">decide</span>
+
+<span class="n">state</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"ticket"</span><span class="p">:</span> <span class="s2">"double charge"</span><span class="p">}</span>
+<span class="n">judgement</span> <span class="o">=</span> <span class="k">await</span> <span class="n">judge</span><span class="p">(</span>
+    <span class="n">JudgeRequest</span><span class="p">(</span>
+        <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+        <span class="n">stateHash</span><span class="o">=</span><span class="n">hash_state</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
+        <span class="n">questions</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">ChoiceQuestion</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="s2">"route"</span><span class="p">,</span>
+                <span class="n">instructions</span><span class="o">=</span><span class="s2">"Which team?"</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="p">[</span>
+                    <span class="n">ChoiceOption</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"billing"</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"Payments"</span><span class="p">),</span>
+                    <span class="n">ChoiceOption</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"other"</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"Else"</span><span class="p">),</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">questionSetVersion</span><span class="o">=</span><span class="s2">"gate-v1"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">provider</span><span class="o">=</span><span class="n">FixtureJudgeProvider</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">"route"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"selected"</span><span class="p">:</span> <span class="s2">"billing"</span><span class="p">,</span> <span class="s2">"probabilities"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"billing"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"other"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}}}</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="n">verdict</span> <span class="o">=</span> <span class="n">decide</span><span class="p">(</span>
+    <span class="n">JudgementFacts</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s2">"route"</span><span class="p">),</span>
+    <span class="n">judgement</span><span class="p">,</span>
+    <span class="n">JudgementPolicy</span><span class="p">(</span>
+        <span class="n">version</span><span class="o">=</span><span class="s2">"gate-v1"</span><span class="p">,</span>
+        <span class="n">thresholds</span><span class="o">=</span><span class="p">[</span><span class="n">JudgementThreshold</span><span class="p">(</span><span class="n">signal_id</span><span class="o">=</span><span class="s2">"route"</span><span class="p">,</span> <span class="n">allow_choices</span><span class="o">=</span><span class="p">[</span><span class="s2">"billing"</span><span class="p">,</span> <span class="s2">"other"</span><span class="p">])],</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8009
+<span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_MODEL</span><span class="o">=</span>laya
+<span class="nv">MECHA_LIVE_JUDGE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/test_judge.py<span class="w"> </span>-k<span class="w"> </span>live_systemone
+</pre></div>
+</div>
+</section>
+<section id="judgementpolicy">
+<h2>JudgementPolicy<a class="headerlink" href="#judgementpolicy" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mechaharness.judgement_policy.decide(facts,</span> <span class="pre">judgement,</span> <span class="pre">policy)</span> <span class="pre">-&gt;</span> <span class="pre">Verdict</span></code> is pure and
+fail-closed (unknown signals deny). Persist with <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log.DecisionLog</span></code>
+and replay offline via <code class="docutils literal notranslate"><span class="pre">replay_verdict</span></code> without tool execution.</p>
+</section>
+<section id="lanes">
+<h2>Lanes<a class="headerlink" href="#lanes" title="Link to this heading"></a></h2>
+<p>Hosts expose <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment.active_lane()</span></code> (<code class="docutils literal notranslate"><span class="pre">reason</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> /
+<code class="docutils literal notranslate"><span class="pre">media</span></code>). Call <code class="docutils literal notranslate"><span class="pre">assert_compatible(require_lane=&quot;judge&quot;)</span></code> before judge tools;
+wrong lane raises <code class="docutils literal notranslate"><span class="pre">InferenceEnvironmentError</span></code> naming the host load hint
+(e.g. <code class="docutils literal notranslate"><span class="pre">infer</span> <span class="pre">load</span> <span class="pre">decide-fast</span></code> while profile filenames catch up).</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="access.html" class="btn btn-neutral float-left" title="Access control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../adr/0001-pyiv-config.html" class="btn btn-neutral float-right" title="0001. pyiv Config instead of string registries" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
