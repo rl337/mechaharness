@@ -1,9 +1,17 @@
 # Judge / decide (`judge()`)
 
 Provider-neutral decision inference distinct from chat completions. Models
-evaluate supplied `state` against typed questions and return calibrated
-**signals**. Policy authority stays in `mechaharness.policy` — models never
-grant permission.
+evaluate supplied `state` against typed questions and return a **Judgement**
+(calibrated **signals**). Authority stays in `JudgementPolicy` — models never
+grant permission. Tool grants stay on `AccessPolicy`.
+
+## Inference outcomes
+
+| Kind | Type | Module |
+|------|------|--------|
+| Generative chat / tools | `Completion` (= `CompletionResponse`) | `mechaharness.core.outcomes` |
+| Decide / System One | `Judgement` | `mechaharness.inference.judge` |
+| Media / artifacts | `Generation` | `mechaharness.core.outcomes` |
 
 ## Types
 
@@ -13,8 +21,9 @@ grant permission.
 | `choice` | options with descriptions | `selected` + `probabilities` |
 | `score` | min/max + anchors | bounded `value` (+ optional distribution) |
 
-`JudgeResult` carries validated `answers`, per-question `errors` (missing ≠ zero
-risk), provenance, and usage (`latencyMs`, `physicalCalls`).
+A `Judgement` carries validated `answers`, per-question `errors` (missing ≠ zero
+risk), provenance, and usage (`latencyMs`, `physicalCalls`). (`JudgeResult` is a
+deprecated alias of `Judgement`.)
 
 ## API
 
@@ -27,9 +36,10 @@ from mechaharness.inference.judge import (
     hash_state,
     judge,
 )
+from mechaharness.policy import JudgementFacts, JudgementPolicy, JudgementThreshold, decide
 
 state = {"ticket": "double charge"}
-result = await judge(
+judgement = await judge(
     JudgeRequest(
         state=state,
         stateHash=hash_state(state),
@@ -47,6 +57,14 @@ result = await judge(
     ),
     provider=FixtureJudgeProvider(
         {"route": {"selected": "billing", "probabilities": {"billing": 1.0, "other": 0.0}}}
+    ),
+)
+verdict = decide(
+    JudgementFacts(action="route"),
+    judgement,
+    JudgementPolicy(
+        version="gate-v1",
+        thresholds=[JudgementThreshold(signal_id="route", allow_choices=["billing", "other"])],
     ),
 )
 ```
@@ -68,9 +86,9 @@ MECHA_LIVE_DECIDE=1 pytest -q tests/test_judge.py -k live_systemone
 Offline contract coverage uses `FixtureJudgeProvider` and mocked HTTP in
 `tests/test_judge.py`. Versioned story cassettes are a follow-on testing layer.
 
-## Policy
+## JudgementPolicy
 
-`mechaharness.policy.decide(facts, signals, policy) -> Verdict` is pure and
+`mechaharness.policy.decide(facts, judgement, policy) -> Verdict` is pure and
 fail-closed (unknown signals deny). Persist with `mechaharness.decisions.DecisionLog`
 (`core:decision` + optional `decisions.jsonl`) and replay offline via
 `replay_verdict` without tool execution.

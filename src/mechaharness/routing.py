@@ -9,8 +9,8 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.core.environment import LANE_DECIDE, LANE_MEDIA, LANE_REASON
-from mechaharness.inference.judge import JudgeProvider, JudgeRequest, JudgeResult, judge
-from mechaharness.policy import Policy, PolicyFacts, Verdict, decide
+from mechaharness.inference.judge import JudgeProvider, JudgeRequest, Judgement, judge
+from mechaharness.policy import JudgementFacts, JudgementPolicy, Verdict, decide
 
 Lane = str
 
@@ -38,7 +38,7 @@ class ShadowJudgeLog:
 
     entries: list[dict[str, Any]] = field(default_factory=list)
 
-    def append(self, *, request: JudgeRequest, result: JudgeResult, activated: bool) -> None:
+    def append(self, *, request: JudgeRequest, result: Judgement, activated: bool) -> None:
         self.entries.append(
             {
                 "trace_id": request.trace_id,
@@ -58,7 +58,7 @@ async def shadow_judge(
     provider: JudgeProvider,
     log: ShadowJudgeLog,
     activate: bool = False,
-) -> JudgeResult:
+) -> Judgement:
     """Run judge in shadow mode; production action change only when ``activate``."""
     result = await judge(request, provider=provider)
     log.append(request=request, result=result, activated=activate)
@@ -110,12 +110,12 @@ def route_at_boundary(
 
 def activate_scoped_policy(
     *,
-    facts: PolicyFacts | Mapping[str, Any],
+    facts: JudgementFacts | Mapping[str, Any],
     signals: Sequence[Any],
-    policy: Policy | Mapping[str, Any],
+    policy: JudgementPolicy | Mapping[str, Any],
     calibrated: bool,
 ) -> Verdict | None:
-    """Activate policy only when declared calibration criteria are met."""
+    """Activate judgement policy only when declared calibration criteria are met."""
     if not calibrated:
         return None
     return decide(facts, signals, policy)

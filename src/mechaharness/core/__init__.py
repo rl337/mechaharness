@@ -41,6 +41,7 @@ from mechaharness.core.events import (
     InMemoryEventLog,
     LoggingEventLog,
 )
+from mechaharness.core.outcomes import Completion, Generation
 from mechaharness.core.exceptions import (
     HarnessError,
     InferenceError,
@@ -72,6 +73,7 @@ __all__ = [
     "CostAccountant",
     "CostEntry",
     "CostReport",
+    "Completion",
     "CompletionRequest",
     "CompletionResponse",
     "DEFAULT_LANE_LOAD_HINTS",
@@ -81,6 +83,7 @@ __all__ = [
     "FanoutEventLog",
     "FsRead",
     "FsWrite",
+    "Generation",
     "Grant",
     "HarnessError",
     "InMemoryAccessControl",

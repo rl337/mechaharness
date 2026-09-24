@@ -129,7 +129,12 @@ class JudgeUsage(BaseModel):
     physical_calls: int = Field(default=1, alias="physicalCalls")
 
 
-class JudgeResult(BaseModel):
+class Judgement(BaseModel):
+    """Decide-lane outcome: validated signals for a question set (JDG-*).
+
+    Distinct from generative ``Completion`` and media ``Generation``.
+    """
+
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
     schema_version: str = Field(default=JUDGE_SCHEMA_VERSION, alias="schemaVersion")
@@ -141,6 +146,10 @@ class JudgeResult(BaseModel):
     provenance: JudgeProvenance
     usage: JudgeUsage
     raw: dict[str, Any] = Field(default_factory=dict)
+
+
+# Backward-compatible alias (REQUIREMENTS / older call sites).
+JudgeResult = Judgement
 
 
 class JudgeRequest(BaseModel):
@@ -231,8 +240,8 @@ def validate_judge_result(
     usage: JudgeUsage,
     raw: Mapping[str, Any] | None = None,
     request_id: str | None = None,
-) -> JudgeResult:
-    """Build a validated ``JudgeResult`` (missing answers → error, not zero risk)."""
+) -> Judgement:
+    """Build a validated ``Judgement`` (missing answers → error, not zero risk)."""
     by_id = {a.id: a for a in answers}
     if len(by_id) != len(answers):
         raise JudgeError("duplicate answer ids")
@@ -255,7 +264,7 @@ def validate_judge_result(
             )
     for extra_id in set(by_id) - {q.id for q in request.questions}:
         err_list.append(JudgeErrorItem(question_id=extra_id, code="unsupported"))
-    return JudgeResult(
+    return Judgement(
         request_id=request_id or request.trace_id,
         state_hash=request.state_hash,
         question_set_version=request.question_set_version,
@@ -271,8 +280,8 @@ class JudgeProvider(ABC):
     """Backend that answers a judge request."""
 
     @abstractmethod
-    async def judge(self, request: JudgeRequest) -> JudgeResult:
-        """Return validated signals for ``request``."""
+    async def judge(self, request: JudgeRequest) -> Judgement:
+        """Return a validated ``Judgement`` for ``request``."""
 
 
 class FixtureJudgeProvider(JudgeProvider):
@@ -291,7 +300,7 @@ class FixtureJudgeProvider(JudgeProvider):
         self._fail_ids = set(fail_ids or [])
         self._latency_ms = latency_ms
 
-    async def judge(self, request: JudgeRequest) -> JudgeResult:
+    async def judge(self, request: JudgeRequest) -> Judgement:
         started = time.perf_counter()
         signals: list[Signal] = []
         errors: list[JudgeErrorItem] = []
@@ -352,7 +361,7 @@ async def judge(
     request: JudgeRequest | Mapping[str, Any],
     *,
     provider: JudgeProvider,
-) -> JudgeResult:
+) -> Judgement:
     """Run a validated judge call through ``provider`` (JDG-01/02/03)."""
     req = (
         request

@@ -7,25 +7,25 @@ from pathlib import Path
 from mechaharness.decisions import DecisionLog, DecisionRecord, replay_verdict
 from mechaharness.inference.judge import NoulSignal
 from mechaharness.operations import UnsupportedOperation, default_operations
-from mechaharness.policy import Policy, PolicyFacts, PolicyThreshold, decide
+from mechaharness.policy import JudgementFacts, JudgementPolicy, JudgementThreshold, decide
 
 
 def test_deny_precedence_and_unknown_signal() -> None:
-    policy = Policy(
+    policy = JudgementPolicy(
         version="gate-fixture-v1",
         thresholds=[
-            PolicyThreshold(signal_id="destructive", deny_below=0.3, allow_above=0.8, ask_below=0.8),
+            JudgementThreshold(signal_id="destructive", deny_below=0.3, allow_above=0.8, ask_below=0.8),
         ],
     )
     deny = decide(
-        PolicyFacts(action="delete"),
+        JudgementFacts(action="delete"),
         [NoulSignal(id="destructive", p_true=0.1)],
         policy,
     )
     assert deny.kind == "DENY"
 
     unknown = decide(
-        PolicyFacts(action="delete"),
+        JudgementFacts(action="delete"),
         [NoulSignal(id="other", p_true=0.9)],
         policy,
     )
@@ -34,22 +34,22 @@ def test_deny_precedence_and_unknown_signal() -> None:
 
 
 def test_ask_human_band_and_approval_reuse() -> None:
-    policy = Policy(
+    policy = JudgementPolicy(
         version="gate-fixture-v1",
         require_approval_for=["mutate"],
         thresholds=[
-            PolicyThreshold(signal_id="destructive", allow_above=0.9, ask_below=0.9),
+            JudgementThreshold(signal_id="destructive", allow_above=0.9, ask_below=0.9),
         ],
     )
     ask = decide(
-        PolicyFacts(action="noop"),
+        JudgementFacts(action="noop"),
         [NoulSignal(id="destructive", p_true=0.52)],
         policy,
     )
     assert ask.kind == "ASK_HUMAN"
 
     missing = decide(
-        PolicyFacts(action="mutate", action_digest="sha256:abc"),
+        JudgementFacts(action="mutate", action_digest="sha256:abc"),
         [NoulSignal(id="destructive", p_true=0.95)],
         policy,
     )
@@ -57,7 +57,7 @@ def test_ask_human_band_and_approval_reuse() -> None:
     assert "MISSING_APPROVAL" in missing.reason_codes
 
     ok = decide(
-        PolicyFacts(
+        JudgementFacts(
             action="mutate",
             action_digest="sha256:abc",
             approvals={"sha256:abc": "approved-1"},
@@ -71,12 +71,12 @@ def test_ask_human_band_and_approval_reuse() -> None:
 def test_decisions_jsonl_and_replay(tmp_path: Path) -> None:
     path = tmp_path / "decisions.jsonl"
     log = DecisionLog(jsonl_path=path)
-    policy = Policy(
+    policy = JudgementPolicy(
         version="gate-fixture-v1",
-        thresholds=[PolicyThreshold(signal_id="destructive", allow_above=0.5)],
+        thresholds=[JudgementThreshold(signal_id="destructive", allow_above=0.5)],
     )
     signals = [NoulSignal(id="destructive", p_true=0.52)]
-    verdict = decide(PolicyFacts(action="x"), signals, policy)
+    verdict = decide(JudgementFacts(action="x"), signals, policy)
     log.record(
         DecisionRecord(
             event_id="d17",
@@ -91,7 +91,7 @@ def test_decisions_jsonl_and_replay(tmp_path: Path) -> None:
     rows = list(log.iter_jsonl())
     assert len(rows) == 1
     assert rows[0].verdict == verdict.kind
-    replayed = replay_verdict(facts=PolicyFacts(action="x"), signals=signals, policy=policy)
+    replayed = replay_verdict(facts=JudgementFacts(action="x"), signals=signals, policy=policy)
     assert replayed.kind == verdict.kind
     assert replayed.reason_codes == verdict.reason_codes
 

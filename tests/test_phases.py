@@ -27,7 +27,7 @@ from mechaharness.inference.judge import (
 )
 from mechaharness.research import EvalProtocol, ResearchLab, run_bounded_search
 from mechaharness.routing import ShadowJudgeLog, activate_scoped_policy, route_at_boundary, shadow_judge
-from mechaharness.policy import Policy, PolicyFacts, PolicyThreshold
+from mechaharness.policy import JudgementFacts, JudgementPolicy, JudgementThreshold
 from mechaharness.inference.judge import NoulSignal
 
 
@@ -54,13 +54,13 @@ def test_route_at_boundary_logs_candidates() -> None:
 
 
 def test_activate_scoped_policy_requires_calibration() -> None:
-    policy = Policy(
+    policy = JudgementPolicy(
         version="v1",
-        thresholds=[PolicyThreshold(signal_id="e", allow_above=0.5)],
+        thresholds=[JudgementThreshold(signal_id="e", allow_above=0.5)],
     )
     assert (
         activate_scoped_policy(
-            facts=PolicyFacts(),
+            facts=JudgementFacts(),
             signals=[NoulSignal(id="e", p_true=0.9)],
             policy=policy,
             calibrated=False,
@@ -68,7 +68,7 @@ def test_activate_scoped_policy_requires_calibration() -> None:
         is None
     )
     verdict = activate_scoped_policy(
-        facts=PolicyFacts(),
+        facts=JudgementFacts(),
         signals=[NoulSignal(id="e", p_true=0.9)],
         policy=policy,
         calibrated=True,

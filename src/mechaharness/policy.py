@@ -1,18 +1,20 @@
-"""Pure policy verdicts over judge signals (POL-*).
+"""Pure judgement-policy verdicts over judge signals (POL-*).
 
-``judge()`` produces observations. ``decide()`` here is deterministic authority:
-models never grant permission.
+``judge()`` produces a ``Judgement`` (observations). ``decide()`` is
+deterministic authority: models never grant permission. Distinct from
+``AccessPolicy`` (tool grants).
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, Literal
+from typing import Any, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.inference.judge import (
     ChoiceSignal,
+    Judgement,
     NoulSignal,
     ScoreSignal,
     Signal,
@@ -21,7 +23,7 @@ from mechaharness.inference.judge import (
 VerdictKind = Literal["ALLOW", "DENY", "ASK_HUMAN", "ABSTAIN"]
 
 
-class PolicyThreshold(BaseModel):
+class JudgementThreshold(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     signal_id: str
@@ -37,18 +39,18 @@ class PolicyThreshold(BaseModel):
     deny_max: float | None = None
 
 
-class Policy(BaseModel):
+class JudgementPolicy(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     version: str
     # Unknown signals → DENY (fail-closed) unless listed here as ignorable
     ignore_unknown_signals: bool = False
-    thresholds: list[PolicyThreshold] = Field(default_factory=list)
+    thresholds: list[JudgementThreshold] = Field(default_factory=list)
     # Mutations require prior approval token matching digest
     require_approval_for: list[str] = Field(default_factory=list)
 
 
-class PolicyFacts(BaseModel):
+class JudgementFacts(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     action: str = "noop"
@@ -66,19 +68,37 @@ class Verdict(BaseModel):
     signals_used: list[str] = Field(default_factory=list, alias="signalsUsed")
 
 
+JudgementLike = Union[Judgement, Sequence[Signal], Mapping[str, Signal]]
+
+
+def _signals_from(judgement: JudgementLike) -> dict[str, Signal]:
+    if isinstance(judgement, Judgement):
+        return {s.id: s for s in judgement.answers}
+    if isinstance(judgement, Mapping):
+        return dict(judgement)
+    return {s.id: s for s in judgement}
+
+
 def decide(
-    facts: PolicyFacts | Mapping[str, Any],
-    signals: Sequence[Signal] | Mapping[str, Signal],
-    policy: Policy | Mapping[str, Any],
+    facts: JudgementFacts | Mapping[str, Any],
+    judgement: JudgementLike,
+    policy: JudgementPolicy | Mapping[str, Any],
 ) -> Verdict:
-    """Pure ``decide(facts, signals, policy) -> verdict`` (POL-01/02/04)."""
-    pol = policy if isinstance(policy, Policy) else Policy.model_validate(policy)
-    fact = facts if isinstance(facts, PolicyFacts) else PolicyFacts.model_validate(facts)
-    by_id: dict[str, Signal]
-    if isinstance(signals, Mapping):
-        by_id = dict(signals)
-    else:
-        by_id = {s.id: s for s in signals}
+    """Pure ``decide(facts, judgement, policy) -> verdict`` (POL-01/02/04).
+
+    ``judgement`` may be a ``Judgement`` or a bare signal map/list (tests).
+    """
+    pol = (
+        policy
+        if isinstance(policy, JudgementPolicy)
+        else JudgementPolicy.model_validate(policy)
+    )
+    fact = (
+        facts
+        if isinstance(facts, JudgementFacts)
+        else JudgementFacts.model_validate(facts)
+    )
+    by_id = _signals_from(judgement)
 
     reasons: list[str] = []
     used: list[str] = []
@@ -160,7 +180,7 @@ def decide(
     )
 
 
-def _evaluate_threshold(thresh: PolicyThreshold, signal: Signal) -> VerdictKind:
+def _evaluate_threshold(thresh: JudgementThreshold, signal: Signal) -> VerdictKind:
     if isinstance(signal, NoulSignal):
         p = signal.p_true
         if thresh.deny_below is not None and p < thresh.deny_below:
@@ -189,3 +209,9 @@ def _evaluate_threshold(thresh: PolicyThreshold, signal: Signal) -> VerdictKind:
             return "ASK_HUMAN"
         return "ALLOW"
     return "ABSTAIN"
+
+
+# Temporary aliases — remove after callers migrate.
+Policy = JudgementPolicy
+PolicyThreshold = JudgementThreshold
+PolicyFacts = JudgementFacts

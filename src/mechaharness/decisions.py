@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.core.events import CoreEvent, Event, EventLog, InMemoryEventLog, event_type_key
 from mechaharness.inference.judge import Signal
-from mechaharness.policy import Policy, PolicyFacts, Verdict, decide
+from mechaharness.policy import JudgementFacts, JudgementPolicy, Verdict, decide
 
 
 class DecisionRecorded(CoreEvent):
@@ -99,9 +99,9 @@ class DecisionLog:
 
 def replay_verdict(
     *,
-    facts: PolicyFacts | Mapping[str, Any],
+    facts: JudgementFacts | Mapping[str, Any],
     signals: Sequence[Signal] | Mapping[str, Signal],
-    policy: Policy | Mapping[str, Any],
+    policy: JudgementPolicy | Mapping[str, Any],
 ) -> Verdict:
-    """Deterministic policy replay without tool execution (OBS-03)."""
+    """Deterministic judgement-policy replay without tool execution (OBS-03)."""
     return decide(facts, signals, policy)

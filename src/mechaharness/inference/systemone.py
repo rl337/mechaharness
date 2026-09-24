@@ -19,7 +19,7 @@ from mechaharness.inference.judge import (
     JudgeProvider,
     JudgeProvenance,
     JudgeRequest,
-    JudgeResult,
+    Judgement,
     JudgeUsage,
     NoulQuestion,
     NoulSignal,
@@ -152,7 +152,7 @@ class SystemOneJudgeProvider(JudgeProvider):
         self._timeout = timeout
         self._client = client
 
-    async def judge(self, request: JudgeRequest) -> JudgeResult:
+    async def judge(self, request: JudgeRequest) -> Judgement:
         if not self._base_url:
             raise JudgeError(
                 "MECHA_DECIDE_BASE_URL / decide_base_url is required for System One"
