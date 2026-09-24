@@ -45,13 +45,21 @@ the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
 
 `MechaHarnessConfig.configure()` binds `InferenceStrategy`, `Completer`,
 `AbstractHarness`, `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
-`AccessControl`, `CostAccountant`, and `InferenceEnvironment`. Subclasses
-override `get_inference_class()` and `get_harness_class()` (called from the
+`AccessControl`, `CostAccountant`, `InferenceEnvironment`,
+`APIConnectionConfig` (judge), and `JudgeProvider`. Subclasses override
+`get_inference_class()` and `get_harness_class()` (called from the
 Config constructor). Host apps subclass `MechaHarnessConfig`, call
 `super().configure()`, and `injector.inject(AbstractHarness)` — or inject those
 types into their own services. Override `get_grants()` for the deny-by-default
 tool grant list. Override `include_subagent_tools()` to opt in parent EventLog
 query tools. Override `get_inference_environment()` for host profile probes.
+Override `get_judge_connection()` / `get_judge_provider()` for judge HTTP and
+wire adapters.
+
+**Config ownership:** lane- and provider-specific knobs belong on the owning
+injectable (e.g. `SimpleHttpConnectionConfig.from_env` for `MECHA_JUDGE_*`), not
+as a growing pile of fields on `Settings`. Providers are never attributes of
+`Settings`. See `.cursor/rules/di-first.mdc` and the `di-config-ownership` skill.
 
 `SettingsConfig` implements the hooks via overridable `inference_classes()` /
 `harness_classes()` maps plus `Settings.inference_backend` /
@@ -90,6 +98,28 @@ OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different defaul
 `base_url`s applied by `SettingsConfig`. Provider JSON is modeled in
 `mechaharness.inference.openai_wire`; portable domain types stay in
 `mechaharness.core.types`.
+
+## Judge
+
+**Pattern:** Strategy adapter over typed questions + injectable connection  
+**Code:** `mechaharness.inference.judge`, `mechaharness.inference.systemone`,
+`mechaharness.api_connection`, `mechaharness.judgement_policy`
+
+`judge()` evaluates closed-world questions (`noul` / `choice` / `score`) and
+returns a **Judgement**. HTTP reachability uses `APIConnectionConfig` (default
+`SimpleHttpConnectionConfig` from `MECHA_JUDGE_*`). Pure `JudgementPolicy` /
+`decide(...)` turns a Judgement into allow/deny/ask-human verdicts — models never
+grant permission. Generative calls yield a **Completion**; media yields a
+**Generation**. Tool grants remain `AccessPolicy`. See
+[Judge reference](./reference/judge.md).
+
+## Capability lanes
+
+**Code:** `mechaharness.core.environment`
+
+Hosts implement `InferenceEnvironment` with `active_lane()` (`reason`, `judge`,
+`media`, or a host namespace). `AbstractHarness` calls `assert_compatible` before
+tools that need grants or media. Wrong-lane errors name the operator load hint.
 
 ## Harness hierarchy
 

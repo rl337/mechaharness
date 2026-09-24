@@ -1,4 +1,9 @@
-"""Settings loaded from environment / .env for CLI and API."""
+"""Settings loaded from environment / .env for CLI and API.
+
+Shared run surface only. Lane- and provider-specific knobs belong on the
+owning injectable (e.g. ``APIConnectionConfig.from_env`` for judge HTTP) —
+do not grow this class into a provider bag. See ``.cursor/rules/di-first.mdc``.
+"""
 
 from __future__ import annotations
 
@@ -6,10 +11,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Runtime settings loaded from environment / ``.env`` (``MECHA_`` prefix).
+    """Runtime settings for CLI / HTTP / reason-lane OpenAI-compat (transitional).
 
-    Used by the CLI, HTTP API, and ``SettingsConfig``. Hosts that construct
-    strategies directly may pass a ``Settings`` instance into constructors.
+    Reason ``base_url`` / ``api_key`` / ``model`` here are known debt to migrate
+    onto connection config later. Do not add judge/media/OAuth fields.
     """
 
     model_config = SettingsConfigDict(env_prefix="MECHA_", env_file=".env", extra="ignore")
