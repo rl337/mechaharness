@@ -1,0 +1,7 @@
+{
+  "id": "fangore_config_access_policy",
+  "persona": "fangore",
+  "title": "Wiring the nest with DI",
+  "kind": "config_access_policy",
+  "narrative": "Fangore subclasses `MechaHarnessConfig` for his host. He does not want a\nservice-locator bag of grants \u2014 he overrides `get_access_policy()` to return\nhis `CompoundPolicy`, configures once, and injects `AccessControl`. When the\ninjector hands back a control that already honors his layers, he knows the app\nis wired the MechaHarness way. He relates to this whenever a host must stay\nDI-first instead of sprinkling grants into constructors by hand."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "nubble_run_cost_events",
+  "persona": "nubble",
+  "title": "Counting the sparks",
+  "kind": "pass_through",
+  "narrative": "Finance asked Nubble for a boring truth: can they see that a harness run\nactually burned units? He kicks a one-shot pass-through (\u201csay hello\u201d) and opens\nthe EventLog. He needs `core:inference` and `core:cost` sitting there with\nnon-zero units \u2014 the same signals he would forward to billing or a Grafana\npanel. If those events are missing, ops is flying blind; if they\u2019re present, he\ntrusts the ledger enough to put an alert on it."
+}

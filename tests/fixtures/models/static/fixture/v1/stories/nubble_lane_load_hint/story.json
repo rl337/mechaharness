@@ -1,0 +1,7 @@
+{
+  "id": "nubble_lane_load_hint",
+  "persona": "nubble",
+  "title": "The wrong torch on the wall",
+  "kind": "wrong_lane_deny",
+  "narrative": "Nubble is mid-shift when a paging alert fires: the refund-routing job is failing\non the Spark. He SSH\u2019s in, expects a judge profile, and finds someone left the\n**reason** torch lit from an earlier experiment. The harness should not shrug\nwith a generic failure \u2014 it should tell him, in operator language, that this\nwork needs the judge lane and which load command to run. When the error names\n`infer load decide-fast` (or the host\u2019s judge hint), Nubble flips the profile\nand the page clears. He relates to this story whenever a lane mismatch wastes\nminutes of incident time."
+}

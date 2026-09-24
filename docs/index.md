@@ -13,6 +13,7 @@ Published site: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness
 | [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, pyiv Config |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Junespark](./guides/junespark.md) | Named OpenAI-compat LAN backend + live tests |
+| [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
 | [Dependency injection](./guides/dependency-injection.md) | Config hooks vs OpenAPI `run()` |
 | [CLI reference](./reference/cli.md) | `mechaharness` commands |
 | [HTTP API reference](./reference/api.md) | FastAPI routes |

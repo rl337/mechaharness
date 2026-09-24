@@ -73,6 +73,12 @@ routes change, update in this order:
 3. `docs/architecture.md` if the design shifted
 4. `README.md` only for summary/quick-start impact
 
+When the change is **user-facing acceptance behavior** (harness runs, grants,
+lanes, judge/verdicts, adapters), also follow the
+[`user-stories`](../user-stories/SKILL.md) skill: prose narrative in
+`docs/guides/user-stories.md`, matching `story.json`, and a story test that
+exercises the path.
+
 ## Writing rules
 
 - Lead with what the reader can do, then how.

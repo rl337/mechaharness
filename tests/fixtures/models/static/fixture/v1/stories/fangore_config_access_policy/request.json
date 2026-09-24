@@ -1,0 +1,17 @@
+{
+  "layers": [
+    [
+      "core:fs.read"
+    ],
+    [
+      "core:fs.write"
+    ]
+  ],
+  "must_allow": [
+    "core:fs.read",
+    "core:fs.write"
+  ],
+  "must_deny": [
+    "core:media.image"
+  ]
+}
