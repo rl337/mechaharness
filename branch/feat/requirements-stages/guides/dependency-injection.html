@@ -1,0 +1,225 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dependency injection &mdash; MechaHarness 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Local OpenAI-compat backend (junespark)" href="junespark.html" />
+    <link rel="prev" title="Install &amp; quick start" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge / decide (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Dependency injection</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/guides/dependency-injection.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dependency-injection">
+<h1>Dependency injection<a class="headerlink" href="#dependency-injection" title="Link to this heading"></a></h1>
+<p>Use pyiv to wire MechaHarness, or call the OpenAPI-shaped <code class="docutils literal notranslate"><span class="pre">run()</span></code> helper if you
+do not want to touch injectors.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>MechaHarness installed (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">&quot;.[dev]&quot;</span></code>), which pulls in pyiv</p></li>
+<li><p>Familiarity with <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code> and <code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code> from <a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a></p></li>
+</ul>
+</section>
+<section id="steps">
+<h2>Steps<a class="headerlink" href="#steps" title="Link to this heading"></a></h2>
+<section id="subclass-mechaharnessconfig">
+<h3>1. Subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code><a class="headerlink" href="#subclass-mechaharnessconfig" title="Link to this heading"></a></h3>
+<p>Override the class hooks. <code class="docutils literal notranslate"><span class="pre">configure()</span></code> (called from the Config constructor)
+registers those classes against the interfaces.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_injector</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractHarness</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.tool_loop</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolLoopHarness</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.openai_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAICompatStrategy</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyConfig</span><span class="p">(</span><span class="n">MechaHarnessConfig</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">OpenAICompatStrategy</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_harness_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ToolLoopHarness</span>
+
+
+<span class="n">injector</span> <span class="o">=</span> <span class="n">get_injector</span><span class="p">(</span><span class="n">MyConfig</span><span class="p">)</span>
+<span class="n">harness</span> <span class="o">=</span> <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">AbstractHarness</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Host apps that already have a Config should subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> and
+call <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code> before registering their own types.</p>
+</section>
+<section id="name-maps-for-cli-http-style-selection">
+<h3>2. Name maps for CLI/HTTP-style selection<a class="headerlink" href="#name-maps-for-cli-http-style-selection" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> looks up <code class="docutils literal notranslate"><span class="pre">Settings.inference_backend</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Settings.harness_family</span></code> in overridable maps. Add a backend by overriding
+<code class="docutils literal notranslate"><span class="pre">inference_classes()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">SettingsConfig</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">AppConfig</span><span class="p">(</span><span class="n">SettingsConfig</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inference_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">inference_classes</span><span class="p">()</span>
+        <span class="n">classes</span><span class="p">[</span><span class="s2">"mine"</span><span class="p">]</span> <span class="o">=</span> <span class="n">MyStrategy</span>
+        <span class="k">return</span> <span class="n">classes</span>
+</pre></div>
+</div>
+</section>
+<section id="non-di-openapi-path">
+<h3>3. Non-DI OpenAPI path<a class="headerlink" href="#non-di-openapi-path" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunRequest</span><span class="p">,</span> <span class="n">run</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run</span><span class="p">(</span><span class="n">RunRequest</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"lmstudio"</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">final_text</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">run()</span></code> still constructs a <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> and injects; it only hides pyiv from
+the caller.</p>
+<p>Override <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> (or <code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code>) to inject a deny-by-default
+tool grant list. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
+</section>
+</section>
+<section id="verify">
+<h2>Verify<a class="headerlink" href="#verify" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">injector.inject(AbstractHarness)</span></code> returns your harness family</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/test_di.py</span></code> passes</p></li>
+<li><p>Unknown <code class="docutils literal notranslate"><span class="pre">--backend</span></code> / <code class="docutils literal notranslate"><span class="pre">family</span></code> names raise <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> listing known maps</p></li>
+</ul>
+</section>
+<section id="next">
+<h2>Next<a class="headerlink" href="#next" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a> (including host extension)</p></li>
+<li><p><a class="reference internal" href="install.html"><span class="std std-doc">Install</span></a></p></li>
+<li><p>ADR: <a class="reference internal" href="../adr/0001-pyiv-config.html"><span class="std std-doc">0001 pyiv Config</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="install.html" class="btn btn-neutral float-left" title="Install &amp; quick start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="junespark.html" class="btn btn-neutral float-right" title="Local OpenAI-compat backend (junespark)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
