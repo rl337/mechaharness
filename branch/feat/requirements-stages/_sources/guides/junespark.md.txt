@@ -37,22 +37,23 @@ MECHA_LIVE_JUNESPARK=1 \
 Discover which profile is loaded, map grants/lane, and attach tools in a host
 `MechaHarnessConfig` subclass. Use
 `InferenceEnvironment.assert_compatible(require_media=True)`,
-`require_lane="decide"`, or required grants to refuse mismatched work.
+`require_lane="judge"`, or required grants to refuse mismatched work.
 
-### Decide lane (`MECHA_DECIDE_*`)
+### Judge lane (`MECHA_JUDGE_*`)
 
-Decide is not OpenAI chat. Point the library at the System One server:
+Judge is not OpenAI chat. Point the library at the System One (or compatible)
+server:
 
 ```bash
-export MECHA_DECIDE_BASE_URL=http://127.0.0.1:8009
-export MECHA_DECIDE_MODEL=laya
+export MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009
+export MECHA_JUDGE_PATH=/v1/systemone   # default; override if needed
+export MECHA_JUDGE_MODEL=laya
 
-MECHA_LIVE_DECIDE=1 pytest -q tests/test_judge.py -k live_systemone
+MECHA_LIVE_JUDGE=1 pytest -q tests/test_judge.py -k live_systemone
 ```
 
-Host apps typically load `decide-fast` / `decide-api`, then expose
-`decide_route` / `decide_escalate` / `decide_score` tools that call `judge()`
-with typed answers (no prose re-parse). See [Judge reference](../reference/judge.md).
+Legacy `MECHA_DECIDE_*` env names still work as aliases. Host apps typically load
+`decide-fast` / `decide-api` profiles (filenames), expose judge tools, and map
+those profiles to lane `judge`. See [Judge reference](../reference/judge.md).
 
-Reason-only profiles must fail decide tools with a clear `infer load decide-fast`
-hint.
+Reason-only profiles must fail judge tools with a clear load hint.

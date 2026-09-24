@@ -91,27 +91,27 @@ OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different defaul
 `mechaharness.inference.openai_wire`; portable domain types stay in
 `mechaharness.core.types`.
 
-## Judge / decide
+## Judge
 
-**Pattern:** Strategy adapter over typed questions  
-**Code:** `mechaharness.inference.judge`, `mechaharness.inference.systemone`
+**Pattern:** Strategy adapter over typed questions + injectable connection  
+**Code:** `mechaharness.inference.judge`, `mechaharness.inference.systemone`,
+`mechaharness.connection`
 
-Chat completions are not the only inference path. `judge()` evaluates closed-world
-questions (`noul` / `choice` / `score`) and returns a **Judgement** (signals).
-The System One HTTP adapter maps host `/v1/systemone` onto those types. Pure
-`JudgementPolicy` / `decide(...)` turns a Judgement into allow/deny/ask-human
-verdicts — models never grant permission. Generative calls yield a **Completion**;
-media yields a **Generation** (`mechaharness.core.outcomes`). Tool grants remain
-`AccessPolicy`. See [Judge reference](./reference/judge.md).
+`judge()` evaluates closed-world questions (`noul` / `choice` / `score`) and
+returns a **Judgement**. HTTP reachability uses `APIConnectionConfig` (default
+`SimpleHttpConnectionConfig` from `MECHA_JUDGE_*`). Pure `JudgementPolicy` /
+`decide(...)` turns a Judgement into allow/deny/ask-human verdicts — models never
+grant permission. Generative calls yield a **Completion**; media yields a
+**Generation**. Tool grants remain `AccessPolicy`. See
+[Judge reference](./reference/judge.md).
 
 ## Capability lanes
 
 **Code:** `mechaharness.core.environment`
 
-Hosts implement `InferenceEnvironment` with `active_lane()` (`reason`, `decide`,
+Hosts implement `InferenceEnvironment` with `active_lane()` (`reason`, `judge`,
 `media`, or a host namespace). `AbstractHarness` calls `assert_compatible` before
-tools that need grants or media. Wrong-lane errors name the operator load hint
-(for example `infer load decide-fast`).
+tools that need grants or media. Wrong-lane errors name the operator load hint.
 
 ## Harness hierarchy
 
