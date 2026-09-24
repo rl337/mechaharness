@@ -146,13 +146,20 @@ the non-DI facade, not a second architecture. See <code class="docutils literal 
 <strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.di</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.configure()</span></code> binds <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, <code class="docutils literal notranslate"><span class="pre">Completer</span></code>,
 <code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code>, <code class="docutils literal notranslate"><span class="pre">Settings</span></code>, <code class="docutils literal notranslate"><span class="pre">HarnessConfig</span></code>, <code class="docutils literal notranslate"><span class="pre">ToolRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>,
-<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, and <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code>. Subclasses
-override <code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called from the
+<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code>,
+<code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> (judge), and <code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code>. Subclasses override
+<code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called from the
 Config constructor). Host apps subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code>, call
 <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code>, and <code class="docutils literal notranslate"><span class="pre">injector.inject(AbstractHarness)</span></code> — or inject those
 types into their own services. Override <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> for the deny-by-default
 tool grant list. Override <code class="docutils literal notranslate"><span class="pre">include_subagent_tools()</span></code> to opt in parent EventLog
-query tools. Override <code class="docutils literal notranslate"><span class="pre">get_inference_environment()</span></code> for host profile probes.</p>
+query tools. Override <code class="docutils literal notranslate"><span class="pre">get_inference_environment()</span></code> for host profile probes.
+Override <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> for judge HTTP and
+wire adapters.</p>
+<p><strong>Config ownership:</strong> lane- and provider-specific knobs belong on the owning
+injectable (e.g. <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> for <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>), not
+as a growing pile of fields on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Providers are never attributes of
+<code class="docutils literal notranslate"><span class="pre">Settings</span></code>. See <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code> and the <code class="docutils literal notranslate"><span class="pre">di-config-ownership</span></code> skill.</p>
 <p><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> implements the hooks via overridable <code class="docutils literal notranslate"><span class="pre">inference_classes()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">harness_classes()</span></code> maps plus <code class="docutils literal notranslate"><span class="pre">Settings.inference_backend</span></code> /
 <code class="docutils literal notranslate"><span class="pre">Settings.harness_family</span></code>. That is the configuration path for CLI/HTTP callers

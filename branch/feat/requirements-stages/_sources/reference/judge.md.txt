@@ -28,10 +28,11 @@ deprecated alias of `Judgement`.)
 ## Connection (`APIConnectionConfig`)
 
 Judge HTTP reachability is an injectable `APIConnectionConfig` (default:
-`SimpleHttpConnectionConfig`). Path is configurable — not hardcoded forever.
+`SimpleHttpConnectionConfig`). Env knobs bind on the connection via
+`from_env()` / `for_judge()` — **not** on `Settings`.
 
-| Setting / env | Purpose |
-|---------------|---------|
+| Env | Purpose |
+|-----|---------|
 | `MECHA_JUDGE_BASE_URL` | Origin only (e.g. `http://host:8009`) |
 | `MECHA_JUDGE_PATH` | Path joined to base (default `/v1/systemone`) |
 | `MECHA_JUDGE_URL` | Full endpoint override (ignores base+path) |
@@ -39,9 +40,11 @@ Judge HTTP reachability is an injectable `APIConnectionConfig` (default:
 | `MECHA_JUDGE_API_KEY` | Optional Bearer token |
 | `MECHA_JUDGE_TIMEOUT_SECONDS` | HTTP timeout |
 
-Legacy `MECHA_DECIDE_BASE_URL` / `MECHA_DECIDE_MODEL` still populate judge fields
-when the `MECHA_JUDGE_*` values are unset. Hosts override
+Legacy `MECHA_DECIDE_BASE_URL` / `MECHA_DECIDE_MODEL` still apply when the
+`MECHA_JUDGE_*` values are unset. Hosts override
 `MechaHarnessConfig.get_judge_connection()` for OAuth or other schemes later.
+Providers (`JudgeProvider`, `InferenceStrategy`, …) are Config DI injectables —
+never fields on `Settings`.
 
 ## API
 
