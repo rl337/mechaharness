@@ -34,7 +34,26 @@ MECHA_LIVE_JUNESPARK=1 \
 
 ## Host Config
 
-Discover which profile is loaded, map grants, and attach media tools in a host
+Discover which profile is loaded, map grants/lane, and attach tools in a host
 `MechaHarnessConfig` subclass. Use
-`InferenceEnvironment.assert_compatible(require_media=True)` (or required
-grants) to refuse media work while a reason-only profile is active.
+`InferenceEnvironment.assert_compatible(require_media=True)`,
+`require_lane="judge"`, or required grants to refuse mismatched work.
+
+### Judge lane (`MECHA_JUDGE_*`)
+
+Judge is not OpenAI chat. Connection env binds on `APIConnectionConfig`
+(`SimpleHttpConnectionConfig.from_env`), not Settings:
+
+```bash
+export MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009
+export MECHA_JUDGE_PATH=/v1/systemone   # default; override if needed
+export MECHA_JUDGE_MODEL=laya
+
+MECHA_LIVE_JUDGE=1 pytest -q tests/test_judge.py -k live_systemone
+```
+
+Legacy `MECHA_DECIDE_*` env names still work as aliases. Host apps typically load
+`decide-fast` / `decide-api` profiles (filenames), expose judge tools, and map
+those profiles to lane `judge`. See [Judge reference](../reference/judge.md).
+
+Reason-only profiles must fail judge tools with a clear load hint.

@@ -25,8 +25,10 @@ from mechaharness.core.access import (
     CostReport,
     InMemoryAccessControl,
     InMemoryCostAccountant,
+    grant_key,
 )
 from mechaharness.core.completer import Completer
+from mechaharness.core.environment import InferenceEnvironment, NoOpInferenceEnvironment
 from mechaharness.core.events import (
     AgentEnd,
     AgentStart,
@@ -89,6 +91,7 @@ class AbstractHarness(Completer):
         event_log: EventLog | None = None,
         access: AccessControl | AccessPolicy | None = None,
         cost: CostAccountant | None = None,
+        environment: InferenceEnvironment | None = None,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
         subagent_tools: bool = False,
@@ -103,6 +106,7 @@ class AbstractHarness(Completer):
             access = InMemoryAccessControl(event_log=self.event_log, policy=access)
         self.access = access or InMemoryAccessControl(event_log=self.event_log)
         self.cost = cost or InMemoryCostAccountant(event_log=self.event_log)
+        self.environment = environment or NoOpInferenceEnvironment()
         if subagent_tools:
             install_subagent_tools(self.tools, self.event_log, self.agent_id)
 
@@ -348,6 +352,10 @@ class AbstractHarness(Completer):
                 self._emit_tool_result(result, run_id, name=call.name)
                 continue
             tool = self.tools.get(call.name)
+            if tool.grants:
+                self.environment.assert_compatible(required_grants=tool.grants)
+                if any(grant_key(g).startswith("core:media.") for g in tool.grants):
+                    self.environment.assert_compatible(require_media=True)
             if not self.access.allows(
                 tool.grants,
                 tool_name=tool.name,
