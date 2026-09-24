@@ -119,7 +119,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.api_connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="n">SimpleHttpConnectionConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AccessControl</span><span class="p">,</span>
+    <span class="n">AccessPolicy</span><span class="p">,</span>
     <span class="n">CostAccountant</span><span class="p">,</span>
+    <span class="n">GrantPolicyLike</span><span class="p">,</span>
     <span class="n">InMemoryAccessControl</span><span class="p">,</span>
     <span class="n">InMemoryCostAccountant</span><span class="p">,</span>
 <span class="p">)</span>
@@ -214,10 +216,22 @@
         <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">existing</span> <span class="o">=</span> <span class="n">InMemoryAccessControl</span><span class="p">(</span>
                 <span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">(),</span>
-                <span class="n">grants</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_grants</span><span class="p">(),</span>
+                <span class="n">policy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_access_policy</span><span class="p">(),</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_access_control</span> <span class="o">=</span> <span class="n">existing</span>
         <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_access_policy">
+<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_access_policy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_access_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GrantPolicyLike</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Grant policy for harness tool gates.</span>
+
+<span class="sd">        Default wraps :meth:`get_grants` in an :class:`AccessPolicy`. Hosts</span>
+<span class="sd">        override to return a :class:`CompoundPolicy` of reusable grant sets.</span>
+<span class="sd">        Not :class:`~mechaharness.judgement_policy.JudgementPolicy`.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_grants</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_grants">

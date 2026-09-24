@@ -117,6 +117,7 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
@@ -230,8 +231,6 @@
 </li>
       <li><a href="api/access.html#mechaharness.core.access.Ability.ADVANCED">ADVANCED (mechaharness.core.access.Ability attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/events.html#mechaharness.core.events.AgentRef.agent_id">agent_id (mechaharness.core.events.AgentRef attribute)</a>
 
       <ul>
@@ -240,6 +239,8 @@
         <li><a href="api/mechaharness.html#mechaharness.Event.agent_id">(mechaharness.Event attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/events.html#mechaharness.core.events.AgentEnd">AgentEnd (class in mechaharness.core.events)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.AgentRef">AgentRef (class in mechaharness.core.events)</a>
@@ -264,6 +265,8 @@
         <li><a href="api/access.html#mechaharness.core.access.AccessControl.allows">(mechaharness.core.access.AccessControl method)</a>
 </li>
         <li><a href="api/access.html#mechaharness.core.access.AccessPolicy.allows">(mechaharness.core.access.AccessPolicy method)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.allows">(mechaharness.core.access.CompoundPolicy method)</a>
 </li>
         <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.allows">(mechaharness.core.access.InMemoryAccessControl method)</a>
 </li>
@@ -396,8 +399,6 @@
         <li><a href="api/completer.html#mechaharness.core.completer.Completer">(class in mechaharness.core.completer)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/access.html#mechaharness.core.access.CostEntry.completion_tokens">completion_tokens (mechaharness.core.access.CostEntry attribute)</a>
 
       <ul>
@@ -406,6 +407,8 @@
         <li><a href="api/types.html#mechaharness.core.types.Usage.completion_tokens">(mechaharness.core.types.Usage attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mechaharness.html#mechaharness.CompletionRequest">CompletionRequest (class in mechaharness)</a>
 
       <ul>
@@ -418,6 +421,8 @@
         <li><a href="api/types.html#mechaharness.core.types.CompletionResponse">(class in mechaharness.core.types)</a>
 </li>
       </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy">CompoundPolicy (class in mechaharness.core.access)</a>
+</li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.configure">configure() (mechaharness.di.MechaHarnessConfig method)</a>
 
       <ul>
@@ -620,6 +625,8 @@
       </ul></li>
       <li><a href="api/events.html#mechaharness.core.events.AgentRef.first_ts">first_ts (mechaharness.core.events.AgentRef attribute)</a>
 </li>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.flatten">flatten() (mechaharness.core.access.CompoundPolicy method)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.FsRead">FsRead (class in mechaharness.core.access)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.FsWrite">FsWrite (class in mechaharness.core.access)</a>
@@ -640,6 +647,12 @@
 
       <ul>
         <li><a href="api/mechaharness.html#mechaharness.MechaHarnessConfig.get_access_control">(mechaharness.MechaHarnessConfig method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_access_policy">get_access_policy() (mechaharness.di.MechaHarnessConfig method)</a>
+
+      <ul>
+        <li><a href="api/mechaharness.html#mechaharness.MechaHarnessConfig.get_access_policy">(mechaharness.MechaHarnessConfig method)</a>
 </li>
       </ul></li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_cost_accountant">get_cost_accountant() (mechaharness.di.MechaHarnessConfig method)</a>
@@ -735,6 +748,8 @@
       <li><a href="api/access.html#mechaharness.core.access.AccessPolicy.grants">grants (mechaharness.core.access.AccessPolicy attribute)</a>
 
       <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.grants">(mechaharness.core.access.CompoundPolicy property)</a>
+</li>
         <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.grants">(mechaharness.core.access.InMemoryAccessControl property)</a>
 </li>
       </ul></li>
@@ -1063,8 +1078,6 @@
         <li><a href="api/mechaharness.html#mechaharness.RunResponse.messages">(mechaharness.RunResponse attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mechaharness.html#mechaharness.CompletionRequest.model">model (mechaharness.CompletionRequest attribute)</a>
 
       <ul>
@@ -1083,6 +1096,8 @@
         <li><a href="api/mechaharness.html#mechaharness.Settings.model">(mechaharness.Settings attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mechaharness.html#mechaharness.ChatMessage.model_config">model_config (mechaharness.ChatMessage attribute)</a>
 
       <ul>
@@ -1097,6 +1112,8 @@
         <li><a href="api/access.html#mechaharness.core.access.Capability.model_config">(mechaharness.core.access.Capability attribute)</a>
 </li>
         <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile.model_config">(mechaharness.core.access.CapabilityProfile attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.model_config">(mechaharness.core.access.CompoundPolicy attribute)</a>
 </li>
         <li><a href="api/access.html#mechaharness.core.access.CostEntry.model_config">(mechaharness.core.access.CostEntry attribute)</a>
 </li>
@@ -1265,6 +1282,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.of">of() (mechaharness.core.access.CompoundPolicy class method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1296,6 +1321,8 @@
         <li><a href="api/mechaharness.html#mechaharness.Event.payload">(mechaharness.Event attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.policies">policies (mechaharness.core.access.CompoundPolicy attribute)</a>
+</li>
       <li><a href="api/config.html#mechaharness.config.Settings.port">port (mechaharness.config.Settings attribute)</a>
 
       <ul>
