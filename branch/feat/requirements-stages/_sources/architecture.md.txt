@@ -97,10 +97,12 @@ OpenAI mode) through one strategy (`OpenAICompatStrategy`) with different defaul
 **Code:** `mechaharness.inference.judge`, `mechaharness.inference.systemone`
 
 Chat completions are not the only inference path. `judge()` evaluates closed-world
-questions (`noul` / `choice` / `score`) and returns calibrated signals. The System
-One HTTP adapter maps host `/v1/systemone` onto those types. Pure
-`mechaharness.policy.decide(...)` turns signals into allow/deny/ask-human verdicts —
-models never grant permission. See [Judge reference](./reference/judge.md).
+questions (`noul` / `choice` / `score`) and returns a **Judgement** (signals).
+The System One HTTP adapter maps host `/v1/systemone` onto those types. Pure
+`JudgementPolicy` / `decide(...)` turns a Judgement into allow/deny/ask-human
+verdicts — models never grant permission. Generative calls yield a **Completion**;
+media yields a **Generation** (`mechaharness.core.outcomes`). Tool grants remain
+`AccessPolicy`. See [Judge reference](./reference/judge.md).
 
 ## Capability lanes
 
