@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from mechaharness.connection import SimpleHttpConnectionConfig
+from mechaharness.api_connection import SimpleHttpConnectionConfig
 
 
 def test_simple_http_joins_base_and_path() -> None:

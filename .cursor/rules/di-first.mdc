@@ -32,7 +32,7 @@ fields that only one injectable or one lane understands.
 
 | Owns | Examples |
 |------|----------|
-| `APIConnectionConfig` | `MECHA_JUDGE_*` HTTP reachability |
+| `APIConnectionConfig` | `MECHA_JUDGE_*` HTTP reachability (`mechaharness.api_connection`) |
 | `JudgeProvider` / `InferenceStrategy` | Wire adapters; Config hooks |
 | Host media tools (until a media provider) | Comfy base URL — not Settings |
 | `Settings` | Shared run surface only (reason `base_url`/`api_key`/`model` are transitional debt) |

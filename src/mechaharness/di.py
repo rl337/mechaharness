@@ -14,7 +14,7 @@ from pyiv import Config, get_injector
 from pyiv.injector import Injector
 
 from mechaharness.config import Settings
-from mechaharness.connection import APIConnectionConfig, SimpleHttpConnectionConfig
+from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
 from mechaharness.core.access import (
     AccessControl,
     CostAccountant,

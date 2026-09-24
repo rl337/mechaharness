@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
-from mechaharness.connection import (
+from mechaharness.api_connection import (
     APIConnectionConfig,
     SimpleHttpConnectionConfig,
 )

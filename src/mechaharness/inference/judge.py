@@ -1,7 +1,7 @@
 """Provider-neutral judge types and validation (JDG-*).
 
 Adapters (System One, fixtures) map wire JSON onto these types. Models produce
-signals only — policy authority lives in ``mechaharness.policy``.
+signals only — policy authority lives in ``mechaharness.judgement_policy``.
 """
 
 from __future__ import annotations
