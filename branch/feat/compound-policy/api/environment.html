@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mechaharness.core.environment &mdash; MechaHarness 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mechaharness.inference.base" href="inference.html" />
+    <link rel="prev" title="mechaharness.core.access" href="access.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">mechaharness.tools.base</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mechaharness.core.environment</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/api/environment.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mechaharness.core.environment">
+<span id="mechaharness-core-environment"></span><h1>mechaharness.core.environment<a class="headerlink" href="#module-mechaharness.core.environment" title="Link to this heading"></a></h1>
+<p>Optional host probe for the active inference environment.</p>
+<p>Hosts (for example junespark) implement this to refuse runs that need
+capabilities the loaded profile does not provide. The library default is a
+no-op so CLI/mock paths stay unchanged.</p>
+<p>Lanes are open <code class="docutils literal notranslate"><span class="pre">str</span></code> identity (<code class="docutils literal notranslate"><span class="pre">reason</span></code>, <code class="docutils literal notranslate"><span class="pre">judge</span></code>, <code class="docutils literal notranslate"><span class="pre">media</span></code>, or a host
+namespace). Unknown lanes round-trip; hosts supply load hints.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.environment.InferenceEnvironment">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.environment.</span></span><span class="sig-name descname"><span class="pre">InferenceEnvironment</span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#InferenceEnvironment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.InferenceEnvironment" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Describe what the current backend / host profile can do.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.InferenceEnvironment.active_capabilities">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">active_capabilities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="access.html#mechaharness.core.access.CapabilityProfile" title="mechaharness.core.access.CapabilityProfile"><span class="pre">CapabilityProfile</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#InferenceEnvironment.active_capabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.InferenceEnvironment.active_capabilities" title="Link to this definition"></a></dt>
+<dd><p>Capability set of the loaded environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.InferenceEnvironment.active_grants">
+<span class="sig-name descname"><span class="pre">active_grants</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#InferenceEnvironment.active_grants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.InferenceEnvironment.active_grants" title="Link to this definition"></a></dt>
+<dd><p>Grants the environment is willing to honor (default: none).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.InferenceEnvironment.active_lane">
+<span class="sig-name descname"><span class="pre">active_lane</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#InferenceEnvironment.active_lane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.InferenceEnvironment.active_lane" title="Link to this definition"></a></dt>
+<dd><p>Capability lane derived from the active profile, or None if unknown.</p>
+<p>Well-known values: <code class="docutils literal notranslate"><span class="pre">reason</span></code>, <code class="docutils literal notranslate"><span class="pre">judge</span></code>, <code class="docutils literal notranslate"><span class="pre">media</span></code>. Hosts may return
+other namespaced lanes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.InferenceEnvironment.active_profile">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">active_profile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#InferenceEnvironment.active_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.InferenceEnvironment.active_profile" title="Link to this definition"></a></dt>
+<dd><p>Host profile name, or None when unknown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.InferenceEnvironment.assert_compatible">
+<span class="sig-name descname"><span class="pre">assert_compatible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_grants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_media</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_lane</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#InferenceEnvironment.assert_compatible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.InferenceEnvironment.assert_compatible" title="Link to this definition"></a></dt>
+<dd><p>Raise if the active environment cannot satisfy the request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.InferenceEnvironment.lane_load_hint">
+<span class="sig-name descname"><span class="pre">lane_load_hint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lane</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#InferenceEnvironment.lane_load_hint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.InferenceEnvironment.lane_load_hint" title="Link to this definition"></a></dt>
+<dd><p>Operator hint naming how to load a profile for <code class="docutils literal notranslate"><span class="pre">lane</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="mechaharness.core.environment.InferenceEnvironmentError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.environment.</span></span><span class="sig-name descname"><span class="pre">InferenceEnvironmentError</span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#InferenceEnvironmentError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.InferenceEnvironmentError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MechaHarnessError</span></code></p>
+<p>Requested work does not match the active inference environment.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.environment.NoOpInferenceEnvironment">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.environment.</span></span><span class="sig-name descname"><span class="pre">NoOpInferenceEnvironment</span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#NoOpInferenceEnvironment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.NoOpInferenceEnvironment" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.environment.InferenceEnvironment" title="mechaharness.core.environment.InferenceEnvironment"><code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code></a></p>
+<p>Always compatible; used when no host probe is configured.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.NoOpInferenceEnvironment.active_capabilities">
+<span class="sig-name descname"><span class="pre">active_capabilities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="access.html#mechaharness.core.access.CapabilityProfile" title="mechaharness.core.access.CapabilityProfile"><span class="pre">CapabilityProfile</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#NoOpInferenceEnvironment.active_capabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.NoOpInferenceEnvironment.active_capabilities" title="Link to this definition"></a></dt>
+<dd><p>Capability set of the loaded environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.NoOpInferenceEnvironment.active_lane">
+<span class="sig-name descname"><span class="pre">active_lane</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#NoOpInferenceEnvironment.active_lane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.NoOpInferenceEnvironment.active_lane" title="Link to this definition"></a></dt>
+<dd><p>Capability lane derived from the active profile, or None if unknown.</p>
+<p>Well-known values: <code class="docutils literal notranslate"><span class="pre">reason</span></code>, <code class="docutils literal notranslate"><span class="pre">judge</span></code>, <code class="docutils literal notranslate"><span class="pre">media</span></code>. Hosts may return
+other namespaced lanes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.NoOpInferenceEnvironment.active_profile">
+<span class="sig-name descname"><span class="pre">active_profile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#NoOpInferenceEnvironment.active_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.NoOpInferenceEnvironment.active_profile" title="Link to this definition"></a></dt>
+<dd><p>Host profile name, or None when unknown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.core.environment.NoOpInferenceEnvironment.assert_compatible">
+<span class="sig-name descname"><span class="pre">assert_compatible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_grants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_media</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_lane</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/core/environment.html#NoOpInferenceEnvironment.assert_compatible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.environment.NoOpInferenceEnvironment.assert_compatible" title="Link to this definition"></a></dt>
+<dd><p>Raise if the active environment cannot satisfy the request.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="access.html" class="btn btn-neutral float-left" title="mechaharness.core.access" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="inference.html" class="btn btn-neutral float-right" title="mechaharness.inference.base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
