@@ -93,8 +93,12 @@ verdict = decide(
 ```bash
 export MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009
 export MECHA_JUDGE_MODEL=laya
-MECHA_LIVE_JUDGE=1 pytest -q tests/test_judge.py -k live_systemone
+MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
+  pytest -q tests/stories -k 'refund_verdict or systemone_cassette'
 ```
+
+Offline CI replays the System One cassette for the same stories (no skip).
+See [User stories](../guides/user-stories.md).
 
 ## JudgementPolicy
 
