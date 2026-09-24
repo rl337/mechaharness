@@ -1,0 +1,41 @@
+---
+description: File and module names must be unambiguous in directory listings
+alwaysApply: true
+---
+
+# Unambiguous names
+
+A basename must identify the concept **without opening the file**. This applies
+to `src/`, `tests/`, `docs/`, `.cursor/`, and host packages — not only tests.
+
+## Rules
+
+- Prefer the **domain term** over a short generic noun when both exist in this
+  codebase (`JudgementPolicy` → `judgement_policy`, not `policy`).
+- Mirror source ↔ test: `judgement_policy.py` ↔ `test_judgement_policy.py`.
+- One concern per test module. Do not dump unrelated areas into a bag file
+  (`test_phases.py`).
+- If two peers could share a short name (`policy` vs `AccessPolicy`,
+  `connection` vs HTTP vs DB), pick the longer disambiguator at the leaf.
+- Deprecate public imports with a thin re-export shim; update call sites and
+  docs in the same change when practical.
+
+## Litmus
+
+From `ls tests/` or `ls src/mechaharness/`, would a newcomer pick the right
+file for the concept they have in mind? If not, rename before merge.
+
+```text
+# BAD — ambiguous in a listing
+policy.py / test_policy.py
+decisions.py / operations.py / connection.py
+test_phases.py          # graph + routing + research + …
+
+# GOOD — domain-clear at the leaf
+judgement_policy.py / test_judgement_policy.py
+decision_log.py / operation_registry.py / api_connection.py
+test_graph.py, test_routing.py, test_research.py, …
+```
+
+`AccessPolicy` stays under access-oriented names (`access`, `test_access`); do
+not reuse bare `policy` for judgement verdicts.
