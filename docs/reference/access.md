@@ -40,22 +40,36 @@ still store on `AccessPolicy.grants`; `parse` raises `KeyError` for those.
 declares is held (`set(required) <= set(granted)`). Tools that declare no
 grants always pass.
 
-`InMemoryAccessControl` holds that list, records each check, and emits
+`CompoundPolicy` unions several `AccessPolicy` layers into one grant set
+(first-seen order; overlaps are idempotent). There is no deny grant — only
+allow-list membership. Use it to compose reusable profiles (read-only,
+media-allowed, …) without rewriting lists. It is unrelated to
+`JudgementPolicy` (signals → verdict).
+
+`InMemoryAccessControl` holds the flattened list, records each check, and emits
 `core:access_check` when `agent_id` and `run_id` are set.
 
 Bind grants through Config:
 
 ```python
-from mechaharness.core.access import FsWrite
+from mechaharness.core.access import AccessPolicy, CompoundPolicy, FsRead, FsWrite, MediaImage
 from mechaharness.di import MechaHarnessConfig
 
 class AppConfig(MechaHarnessConfig):
-    def get_grants(self):
-        return [FsWrite]
+    def get_access_policy(self):
+        read_only = AccessPolicy(grants=[FsRead])
+        media = AccessPolicy(grants=[MediaImage])
+        return CompoundPolicy.of(read_only, media)
+
+    # Or simply:
+    # def get_grants(self):
+    #     return [FsWrite]
 ```
 
-Or pass `access=InMemoryAccessControl(grants=[FsWrite], event_log=log)` into
-`AbstractHarness`. Denied tools return an error `ToolResult` and are not
+`get_access_control()` uses `get_access_policy()` (default: `AccessPolicy` from
+`get_grants()`). Or pass
+`access=InMemoryAccessControl(policy=CompoundPolicy.of(...), event_log=log)`
+into `AbstractHarness`. Denied tools return an error `ToolResult` and are not
 priced.
 
 ## Tools
