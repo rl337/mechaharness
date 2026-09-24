@@ -152,19 +152,32 @@ still store on <code class="docutils literal notranslate"><span class="pre">Acce
 <p><code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> is a grant list. A tool may run only when every grant it
 declares is held (<code class="docutils literal notranslate"><span class="pre">set(required)</span> <span class="pre">&lt;=</span> <span class="pre">set(granted)</span></code>). Tools that declare no
 grants always pass.</p>
-<p><code class="docutils literal notranslate"><span class="pre">InMemoryAccessControl</span></code> holds that list, records each check, and emits
+<p><code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> unions several <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers into one grant set
+(first-seen order; overlaps are idempotent). There is no deny grant — only
+allow-list membership. Use it to compose reusable profiles (read-only,
+media-allowed, …) without rewriting lists. It is unrelated to
+<code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> (signals → verdict).</p>
+<p><code class="docutils literal notranslate"><span class="pre">InMemoryAccessControl</span></code> holds the flattened list, records each check, and emits
 <code class="docutils literal notranslate"><span class="pre">core:access_check</span></code> when <code class="docutils literal notranslate"><span class="pre">agent_id</span></code> and <code class="docutils literal notranslate"><span class="pre">run_id</span></code> are set.</p>
 <p>Bind grants through Config:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="n">FsWrite</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessPolicy</span><span class="p">,</span> <span class="n">CompoundPolicy</span><span class="p">,</span> <span class="n">FsRead</span><span class="p">,</span> <span class="n">FsWrite</span><span class="p">,</span> <span class="n">MediaImage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AppConfig</span><span class="p">(</span><span class="n">MechaHarnessConfig</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_grants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">FsWrite</span><span class="p">]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_access_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">read_only</span> <span class="o">=</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="p">[</span><span class="n">FsRead</span><span class="p">])</span>
+        <span class="n">media</span> <span class="o">=</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="p">[</span><span class="n">MediaImage</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">CompoundPolicy</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">read_only</span><span class="p">,</span> <span class="n">media</span><span class="p">)</span>
+
+    <span class="c1"># Or simply:</span>
+    <span class="c1"># def get_grants(self):</span>
+    <span class="c1">#     return [FsWrite]</span>
 </pre></div>
 </div>
-<p>Or pass <code class="docutils literal notranslate"><span class="pre">access=InMemoryAccessControl(grants=[FsWrite],</span> <span class="pre">event_log=log)</span></code> into
-<code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code>. Denied tools return an error <code class="docutils literal notranslate"><span class="pre">ToolResult</span></code> and are not
+<p><code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code> uses <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (default: <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> from
+<code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>). Or pass
+<code class="docutils literal notranslate"><span class="pre">access=InMemoryAccessControl(policy=CompoundPolicy.of(...),</span> <span class="pre">event_log=log)</span></code>
+into <code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code>. Denied tools return an error <code class="docutils literal notranslate"><span class="pre">ToolResult</span></code> and are not
 priced.</p>
 </section>
 <section id="tools">

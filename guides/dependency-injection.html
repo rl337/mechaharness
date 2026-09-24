@@ -169,8 +169,9 @@ call <code class="docutils literal notranslate"><span class="pre">super().config
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">run()</span></code> still constructs a <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> and injects; it only hides pyiv from
 the caller.</p>
-<p>Override <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> (or <code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code>) to inject a deny-by-default
-tool grant list. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
+<p>Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> (or <code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code>) to
+inject deny-by-default tool grants; use <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> to union reusable
+<code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
 </section>
 </section>
 <section id="verify">

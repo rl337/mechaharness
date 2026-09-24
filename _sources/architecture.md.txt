@@ -50,8 +50,9 @@ the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
 `get_inference_class()` and `get_harness_class()` (called from the
 Config constructor). Host apps subclass `MechaHarnessConfig`, call
 `super().configure()`, and `injector.inject(AbstractHarness)` — or inject those
-types into their own services. Override `get_grants()` for the deny-by-default
-tool grant list. Override `include_subagent_tools()` to opt in parent EventLog
+types into their own services. Override `get_access_policy()` (or
+`get_grants()`) for deny-by-default tool grants; compose reusable sets with
+`CompoundPolicy`. Override `include_subagent_tools()` to opt in parent EventLog
 query tools. Override `get_inference_environment()` for host profile probes.
 Override `get_judge_connection()` / `get_judge_provider()` for judge HTTP and
 wire adapters.

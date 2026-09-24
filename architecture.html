@@ -151,8 +151,9 @@ the non-DI facade, not a second architecture. See <code class="docutils literal 
 <code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called from the
 Config constructor). Host apps subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code>, call
 <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code>, and <code class="docutils literal notranslate"><span class="pre">injector.inject(AbstractHarness)</span></code> — or inject those
-types into their own services. Override <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> for the deny-by-default
-tool grant list. Override <code class="docutils literal notranslate"><span class="pre">include_subagent_tools()</span></code> to opt in parent EventLog
+types into their own services. Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>) for deny-by-default tool grants; compose reusable sets with
+<code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code>. Override <code class="docutils literal notranslate"><span class="pre">include_subagent_tools()</span></code> to opt in parent EventLog
 query tools. Override <code class="docutils literal notranslate"><span class="pre">get_inference_environment()</span></code> for host profile probes.
 Override <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> for judge HTTP and
 wire adapters.</p>

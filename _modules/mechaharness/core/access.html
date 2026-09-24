@@ -338,6 +338,54 @@
 
 
 
+<div class="viewcode-block" id="CompoundPolicy">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CompoundPolicy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CompoundPolicy</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Union of :class:`AccessPolicy` layers (still deny-by-default).</span>
+
+<span class="sd">    Compose reusable grant sets (e.g. read-only + media) without rewriting</span>
+<span class="sd">    lists. Overlaps are idempotent — there is no deny grant, only allow-list</span>
+<span class="sd">    membership. Not related to :class:`~mechaharness.judgement_policy.JudgementPolicy`.</span>
+<span class="sd">    """</span>
+
+    <span class="n">policies</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AccessPolicy</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompoundPolicy.of">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CompoundPolicy.of">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">of</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">policies</span><span class="p">:</span> <span class="n">AccessPolicy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompoundPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build from one or more access policies."""</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">policies</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">policies</span><span class="p">))</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">grants</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Flattened unique grants in first-seen order across ``policies``."""</span>
+        <span class="n">seen</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">policies</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">policy</span><span class="o">.</span><span class="n">grants</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                    <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">seen</span>
+
+<div class="viewcode-block" id="CompoundPolicy.allows">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CompoundPolicy.allows">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">allows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span><span class="o">.</span><span class="n">allows</span><span class="p">(</span><span class="n">required</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompoundPolicy.flatten">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CompoundPolicy.flatten">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Single :class:`AccessPolicy` with the unioned grant list."""</span>
+        <span class="k">return</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="n">GrantPolicyLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">AccessPolicy</span><span class="p">,</span> <span class="n">CompoundPolicy</span><span class="p">]</span>
+
+
 <div class="viewcode-block" id="CostEntry">
 <a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CostEntry">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CostEntry</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
@@ -502,7 +550,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">grants</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">policy</span><span class="p">:</span> <span class="n">AccessPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">policy</span><span class="p">:</span> <span class="n">GrantPolicyLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">policy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span>
