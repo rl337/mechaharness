@@ -23,6 +23,11 @@ from mechaharness.core.access import (
 from mechaharness.core.completer import Completer
 from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.environment import (
+    DEFAULT_LANE_LOAD_HINTS,
+    LANE_DECIDE,
+    LANE_JUDGE,
+    LANE_MEDIA,
+    LANE_REASON,
     InferenceEnvironment,
     InferenceEnvironmentError,
     NoOpInferenceEnvironment,
@@ -37,6 +42,7 @@ from mechaharness.core.events import (
     InMemoryEventLog,
     LoggingEventLog,
 )
+from mechaharness.core.outcomes import Completion, Generation
 from mechaharness.core.exceptions import (
     HarnessError,
     InferenceError,
@@ -68,14 +74,17 @@ __all__ = [
     "CostAccountant",
     "CostEntry",
     "CostReport",
+    "Completion",
     "CompletionRequest",
     "CompletionResponse",
+    "DEFAULT_LANE_LOAD_HINTS",
     "Event",
     "EventLog",
     "EventType",
     "FanoutEventLog",
     "FsRead",
     "FsWrite",
+    "Generation",
     "Grant",
     "HarnessError",
     "InMemoryAccessControl",
@@ -84,6 +93,10 @@ __all__ = [
     "InferenceEnvironment",
     "InferenceEnvironmentError",
     "InferenceError",
+    "LANE_DECIDE",
+    "LANE_JUDGE",
+    "LANE_MEDIA",
+    "LANE_REASON",
     "LoggingEventLog",
     "MechaHarnessError",
     "MediaAudio",
