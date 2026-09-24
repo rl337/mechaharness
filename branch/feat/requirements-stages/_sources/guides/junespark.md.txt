@@ -41,8 +41,8 @@ Discover which profile is loaded, map grants/lane, and attach tools in a host
 
 ### Judge lane (`MECHA_JUDGE_*`)
 
-Judge is not OpenAI chat. Point the library at the System One (or compatible)
-server:
+Judge is not OpenAI chat. Connection env binds on `APIConnectionConfig`
+(`SimpleHttpConnectionConfig.from_env`), not Settings:
 
 ```bash
 export MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009

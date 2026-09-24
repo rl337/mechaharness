@@ -164,10 +164,11 @@ deprecated alias of <code class="docutils literal notranslate"><span class="pre"
 <section id="connection-apiconnectionconfig">
 <h2>Connection (<code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code>)<a class="headerlink" href="#connection-apiconnectionconfig" title="Link to this heading"></a></h2>
 <p>Judge HTTP reachability is an injectable <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> (default:
-<code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig</span></code>). Path is configurable — not hardcoded forever.</p>
+<code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig</span></code>). Env knobs bind on the connection via
+<code class="docutils literal notranslate"><span class="pre">from_env()</span></code> / <code class="docutils literal notranslate"><span class="pre">for_judge()</span></code> — <strong>not</strong> on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>.</p>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Setting / env</p></th>
+<tr class="row-odd"><th class="head"><p>Env</p></th>
 <th class="head"><p>Purpose</p></th>
 </tr>
 </thead>
@@ -192,9 +193,11 @@ deprecated alias of <code class="docutils literal notranslate"><span class="pre"
 </tr>
 </tbody>
 </table>
-<p>Legacy <code class="docutils literal notranslate"><span class="pre">MECHA_DECIDE_BASE_URL</span></code> / <code class="docutils literal notranslate"><span class="pre">MECHA_DECIDE_MODEL</span></code> still populate judge fields
-when the <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code> values are unset. Hosts override
-<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_judge_connection()</span></code> for OAuth or other schemes later.</p>
+<p>Legacy <code class="docutils literal notranslate"><span class="pre">MECHA_DECIDE_BASE_URL</span></code> / <code class="docutils literal notranslate"><span class="pre">MECHA_DECIDE_MODEL</span></code> still apply when the
+<code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code> values are unset. Hosts override
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_judge_connection()</span></code> for OAuth or other schemes later.
+Providers (<code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code>, <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, …) are Config DI injectables —
+never fields on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>.</p>
 </section>
 <section id="api">
 <h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>

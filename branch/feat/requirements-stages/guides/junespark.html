@@ -139,8 +139,8 @@ Hugging Face repo id.</p>
 <code class="docutils literal notranslate"><span class="pre">require_lane=&quot;judge&quot;</span></code>, or required grants to refuse mismatched work.</p>
 <section id="judge-lane-mecha-judge">
 <h3>Judge lane (<code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>)<a class="headerlink" href="#judge-lane-mecha-judge" title="Link to this heading"></a></h3>
-<p>Judge is not OpenAI chat. Point the library at the System One (or compatible)
-server:</p>
+<p>Judge is not OpenAI chat. Connection env binds on <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code>
+(<code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code>), not Settings:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8009
 <span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_PATH</span><span class="o">=</span>/v1/systemone<span class="w">   </span><span class="c1"># default; override if needed</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_JUDGE_MODEL</span><span class="o">=</span>laya
