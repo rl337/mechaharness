@@ -102,7 +102,7 @@ exercises the path.
 | Architecture | `docs/architecture.md` | Patterns, layering, extension model |
 | Guide | `docs/guides/*.md` | Task-oriented how-tos |
 | Reference | `docs/reference/*.md` | Exact CLI/API/types contracts |
-| ADR | `docs/adr/NNNN-title.md` | Decision + context + consequences |
+| ADR | `docs/adr/NNNN-title.md` (local-only / gitignored) | Decision + context + consequences |
 
 ## Quality checklist
 

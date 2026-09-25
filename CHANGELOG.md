@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no new persona): decision surface reject, convergence ceiling, context deficit,
   local plan resume, topology efficiency, shadow backends, validator qualification,
   ATK reject, offline decision export
+- Keep `docs/adr/` and `REQUIREMENTS.md` local-only (gitignored; not published)
 
 ### Changed
 
