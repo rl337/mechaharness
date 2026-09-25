@@ -2,14 +2,20 @@
 
 ![MechaHarness](docs/logo.png)
 
-Python agentic harness that separates **how you call models** from **how you run agent loops**.
+Python **agent harness** for hosts that compose inference safely — not a thin
+chat-client wrapper. Founding principles:
 
-- **Inference Strategy** — swap OpenAI, Anthropic, LM Studio, vLLM, Ollama, or any OpenAI-compatible server
-- **Harness hierarchy** — model-family architectures (tool-calling loops, ReAct, …) share one base loop
-- **DI-first** — pyiv `MechaHarnessConfig` wires the graph; OpenAPI `RunRequest` / `run()` is the non-DI facade
-- **Frontends** — Typer CLI and FastAPI HTTP API (stable shapes for future language bindings)
+1. **Modular via dependency injection** — pyiv `MechaHarnessConfig`; hosts
+   subclass and compose (no forked enums / string registries)
+2. **Multi-model / lanes native** — reason, judge, and media lanes;
+   `Completion` / `Judgement` / `Generation` outcomes
+3. **Cost in the object model** — `CostAccountant` on the harness path so runs
+   cannot quietly go AWOL on spend
+4. **EventLog telemetry built in** — queryable lifecycle, inference, tools,
+   cost, and access events on every run
 
-Documentation: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness/)
+Also: deny-by-default grants / `CompoundPolicy`, and host-extendable open
+identity. Docs: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness/)
 
 ## Install
 

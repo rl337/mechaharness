@@ -90,3 +90,15 @@ master_doc = "index"
 myst_enable_extensions = [
     "colon_fence",
 ]
+
+# Prefer defining-module targets when names are also re-exported at package root.
+autodoc_type_aliases = {
+    "EventLog": "mechaharness.core.events.EventLog",
+    "Event": "mechaharness.core.events.Event",
+    "EventType": "mechaharness.core.events.EventType",
+    "AccessControl": "mechaharness.core.access.AccessControl",
+    "CostAccountant": "mechaharness.core.access.CostAccountant",
+    "Settings": "mechaharness.config.Settings",
+    "MechaHarnessConfig": "mechaharness.di.MechaHarnessConfig",
+    "SettingsConfig": "mechaharness.di.SettingsConfig",
+}

@@ -15,7 +15,8 @@ from typing import Any, ClassVar, Union
 
 from pydantic import BaseModel, Field, field_validator
 
-from mechaharness.core.events import AccessCheck, Cost, Event, EventLog, EventType, event_type_key
+from mechaharness.core import events as core_events
+from mechaharness.core.events import AccessCheck, Cost, Event, EventType, event_type_key
 from mechaharness.core.types import Usage
 
 
@@ -317,7 +318,7 @@ class CostAccountant(ABC):
 
 
 def _emit_policy_event(
-    event_log: EventLog | None,
+    event_log: core_events.EventLog | None,
     event_type: type[EventType],
     payload: dict[str, Any],
     *,
@@ -343,7 +344,7 @@ class InMemoryAccessControl(AccessControl):
 
     def __init__(
         self,
-        event_log: EventLog | None = None,
+        event_log: core_events.EventLog | None = None,
         grants: Sequence[object] | None = None,
         policy: GrantPolicyLike | None = None,
     ) -> None:
@@ -391,7 +392,7 @@ class InMemoryAccessControl(AccessControl):
 class InMemoryCostAccountant(CostAccountant):
     """Prices from the capability profile and tool ability; emits ``core:cost``."""
 
-    def __init__(self, event_log: EventLog | None = None) -> None:
+    def __init__(self, event_log: core_events.EventLog | None = None) -> None:
         self._event_log = event_log
         self._report = CostReport()
 
