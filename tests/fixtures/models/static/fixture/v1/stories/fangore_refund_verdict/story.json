@@ -3,7 +3,15 @@
   "persona": "fangore",
   "title": "Keep billing authority in product rules, not the model",
   "kind": "route_refund",
-  "narrative": "A customer was charged twice. Fangore’s product rule is simple: only the billing team may own that ticket. The model may suggest a team, but it must not grant permission. He runs the judge over the ticket text, then product policy allows only when the route signal is billing. If the model picks technical support, policy denies. Builds on the idea that suggestions are not authority — see also `fangore_decision_surface_reject`. He uses this whenever business authority must stay in product rules, not prompt wording.",
-  "implementation": "`judge()` collects closed-world signals (`ChoiceSignal`, `ScoreSignal`, `NoulSignal`) via a `JudgeProvider`. Product authority is `JudgementPolicy` + `decide()` in `mechaharness.judgement_policy`: thresholds over signal ids (for example choice `route`) yield ALLOW/DENY with reason codes. The model never unlocks the next action by itself — policy does. System One mapping lives in `SystemOneJudgeProvider`.",
-  "validation": "Kind `route_refund` → `_run_route_refund` (cassette twin kind `systemone_cassette` shares this runner). Soft expects: ALLOW when route is billing; DENY when technical. Fixtures under static and `systemone/laya/v1`. Related: `tests/test_judgement_policy.py`, `tests/test_judge.py`."
+  "narrative": "A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing \u2014 and a high quality score alone must not override missing completion evidence. See also `fangore_decision_surface_reject`.",
+  "implementation": "Provider-neutral judge types (`Choice`/`Score`/`Noul` questions and signals) plus `JudgementPolicy` / `decide()` apply configured thresholds. Judge scores are supplementary: policy owns ALLOW/DENY. Thresholds live in policy config per signal id. System One maps vendor wire into these types via `SystemOneJudgeProvider`.\n\nCovers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.",
+  "validation": "Kind `route_refund` \u2192 `_run_route_refund`. Soft expects: ALLOW for billing, DENY for technical. Unit: `tests/test_judgement_policy.py`, `tests/test_judge.py`.",
+  "footnotes": [
+    {
+      "id": "jev-decisions",
+      "label": "Jev decisions in a Pi harness",
+      "url": "https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness",
+      "note": "Routing, gating, batched questions, thresholds"
+    }
+  ]
 }

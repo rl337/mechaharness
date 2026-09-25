@@ -11,7 +11,19 @@ from pyiv import get_injector
 
 from mechaharness.api_connection import SimpleHttpConnectionConfig
 from mechaharness.config import Settings
-from mechaharness.context_experiments import ContextCompiler
+from mechaharness.context_experiments import (
+    ContextCompiler,
+    CtxFlags,
+    DerivedMemoryRecord,
+    DerivedMemoryStore,
+    ObservationRef,
+    ObservationStore,
+    RepositoryTopologyProvider,
+    compact_at_boundary,
+    compile_cache_aware_layout,
+    fuse_actions,
+    reduce_evidence,
+)
 from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
 from mechaharness.core.access import (
     Ability,
@@ -32,6 +44,7 @@ from mechaharness.decision_log import (
     TopologySpan,
     compute_topology_metrics,
     export_offline_dataset,
+    replay_verdict,
 )
 from mechaharness.decision_surfaces import (
     DecisionSurface,
@@ -46,6 +59,7 @@ from mechaharness.graph import (
     GraphNode,
     GraphStore,
     NodeStatus,
+    bounded_repair,
     hierarchical_fan_in,
     merge_branch_artifacts,
     qualify_validator,
@@ -62,6 +76,7 @@ from mechaharness.inference.judge import (
     FixtureJudgeProvider,
     JudgeRequest,
     NoulQuestion,
+    NoulSignal,
     ScoreAnchor,
     ScoreQuestion,
     hash_state,
@@ -82,7 +97,11 @@ from mechaharness.operation_registry import (
     default_operations,
 )
 from mechaharness.research import EvalProtocol, ResearchLab
-from mechaharness.routing import shadow_decision_backends
+from mechaharness.routing import (
+    activate_scoped_policy,
+    route_at_boundary,
+    shadow_decision_backends,
+)
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
@@ -198,6 +217,15 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "validator_qualification": _run_validator_qualification,
         "atk_research_reject": _run_atk_research_reject,
         "offline_decision_export": _run_offline_decision_export,
+        "human_review_pending": _run_human_review_pending,
+        "tool_gating": _run_tool_gating,
+        "bounded_repair_loop": _run_bounded_repair_loop,
+        "context_observation_chain": _run_context_observation_chain,
+        "derived_memory": _run_derived_memory,
+        "repo_topology": _run_repo_topology,
+        "model_affinity": _run_model_affinity,
+        "cache_layout_experiment": _run_cache_layout_experiment,
+        "policy_replay": _run_policy_replay,
     }
     try:
         runner = runners[kind]
@@ -758,4 +786,236 @@ async def _run_offline_decision_export(case: StoryCase, backend: StoryBackend) -
         "lineage_include": export.lineage,
         "split_in": export.split,
     }
+    _assert_expect(actual, expect)
+
+
+async def _run_human_review_pending(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    expect = case.load_json("expect.json")
+    policy = JudgementPolicy(
+        version="story-review",
+        require_approval_for=["mutate"],
+        thresholds=[
+            JudgementThreshold(signal_id="destructive", allow_above=0.9, ask_below=0.9),
+        ],
+    )
+    ask = decide(
+        JudgementFacts(action="mutate", action_digest="sha256:story"),
+        [NoulSignal(id="destructive", p_true=0.95)],
+        policy,
+    )
+    allow = decide(
+        JudgementFacts(
+            action="mutate",
+            action_digest="sha256:story",
+            approvals={"sha256:story": "approved-1"},
+        ),
+        [NoulSignal(id="destructive", p_true=0.95)],
+        policy,
+    )
+    actual = {"verdict_kinds": [ask.kind, allow.kind]}
+    _assert_expect(actual, expect)
+
+
+async def _run_tool_gating(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    response = case.load_json("response.json")
+    expect = case.load_json("expect.json")
+
+    registry = ToolRegistry()
+
+    @registry.tool(
+        description="Write a file",
+        parameters={
+            "type": "object",
+            "properties": {"path": {"type": "string"}},
+            "required": ["path"],
+        },
+        grants=[FsWrite],
+        ability=Ability.BASIC,
+    )
+    def write_file(path: str) -> str:
+        return f"wrote {path}"
+
+    tool_calls = [
+        ToolCall(
+            id=tc["id"],
+            name=tc["name"],
+            arguments=tc.get("arguments") or {},
+        )
+        for tc in response.get("tool_calls", [])
+    ]
+
+    def _script() -> ScriptedInference:
+        return ScriptedInference(
+            [
+                ChatMessage(role=Role.ASSISTANT, content=None, tool_calls=tool_calls),
+                ChatMessage(role=Role.ASSISTANT, content="done"),
+            ]
+        )
+
+    deny_policy = AccessPolicy(grants=request.get("deny_grants", []))
+    allow_policy = AccessPolicy(grants=request.get("allow_grants", [FsWrite]))
+
+    denied_log = InMemoryEventLog()
+    denied = await ToolLoopHarness(
+        inference=_script(),
+        tools=registry,
+        config=HarnessConfig(model="story", max_turns=4),
+        event_log=denied_log,
+        access=InMemoryAccessControl(event_log=denied_log, policy=deny_policy),
+    ).run(request.get("prompt", "write"))
+    denied_ok = any("Permission denied" in (m.content or "") for m in denied.messages)
+
+    allow_log = InMemoryEventLog()
+    allowed = await ToolLoopHarness(
+        inference=_script(),
+        tools=registry,
+        config=HarnessConfig(model="story", max_turns=4),
+        event_log=allow_log,
+        access=InMemoryAccessControl(event_log=allow_log, policy=allow_policy),
+    ).run(request.get("prompt", "write"))
+    allowed_ok = allowed.final_text == "done"
+
+    actual = {
+        "denied_without_grant": denied_ok,
+        "allowed_with_grant": allowed_ok,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_bounded_repair_loop(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    expect = case.load_json("expect.json")
+
+    def has_file(node: GraphNode) -> tuple[bool, dict[str, Any]]:
+        ok = bool(node.payload.get("path"))
+        return ok, {"file": node.payload.get("path")}
+
+    node = GraphNode(id="repair-story", payload={}, max_attempts=3)
+    repaired = bounded_repair(
+        node,
+        verifiers=[has_file],
+        repair=lambda n: n.model_copy(update={"payload": {"path": "/tmp/story.png"}}),
+    )
+    actual = {"final_status_in": repaired.status.value}
+    _assert_expect(actual, expect)
+
+
+async def _run_context_observation_chain(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    expect = case.load_json("expect.json")
+    store = ObservationStore()
+    store.put(ObservationRef(tool_name="comfy", content="raw bytes"))
+    flags = CtxFlags(
+        evidence_reduction=True, economic_compaction=True, action_fusion=True
+    )
+    fake = reduce_evidence(store, "obs:missing", summary="lie", flags=flags)
+    fused = fuse_actions(
+        ["edit", "test"], allowed_sequences=[["edit", "test"]], flags=flags
+    )
+    compacted = compact_at_boundary(
+        [{"role": "user", "content": str(i)} for i in range(10)],
+        flags=flags,
+        keep_last=2,
+    )
+    actual = {
+        "fabricated_receipt": bool(fake.fabricated),
+        "fused": fused == ["edit", "test"],
+        "compacted": len(compacted) < 10,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_derived_memory(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    expect = case.load_json("expect.json")
+    store = DerivedMemoryStore()
+    events = [
+        {"id": "e1", "content": "Redis"},
+        {"id": "e2", "content": "Dragonfly"},
+        {"id": "e3", "content": "Redis"},
+    ]
+    store.consolidate_from(events, up_to=2)
+    first = len(store.current())
+    store.consolidate_from(events, up_to=2)
+    idempotent = len(store.current()) == first
+    popular = DerivedMemoryRecord(content="rumor", retrieval_rank=99, authority=False)
+    rule = DerivedMemoryRecord(content="approval-rule", retrieval_rank=0, authority=True)
+    store.apply("add", popular)
+    store.apply("add", rule)
+    store._published[popular.id] = popular
+    store._published[rule.id] = rule
+    auth = store.current(authoritative_only=True)
+    actual = {
+        "authority_outranks_popularity": bool(auth) and all(r.authority for r in auth),
+        "idempotent": idempotent,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_repo_topology(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    expect = case.load_json("expect.json")
+    topo = RepositoryTopologyProvider()
+    view = topo.index(
+        revision="r1",
+        files={"a.py": "def foo():\n  pass\n", "b.py": "x"},
+        budget=1,
+    )
+    actual = {
+        "has_omissions_or_entries": bool(view.entries) or bool(view.omissions),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_model_affinity(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    expect = case.load_json("expect.json")
+    decision = route_at_boundary(boundary="task_entry", task_kind="judge")
+    policy = JudgementPolicy(
+        version="v1",
+        thresholds=[JudgementThreshold(signal_id="e", allow_above=0.5)],
+    )
+    uncalibrated = activate_scoped_policy(
+        facts=JudgementFacts(),
+        signals=[NoulSignal(id="e", p_true=0.9)],
+        policy=policy,
+        calibrated=False,
+    )
+    actual = {
+        "selected_lane": decision.selected.lane,
+        "uncalibrated_is_null": uncalibrated is None,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_cache_layout_experiment(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    expect = case.load_json("expect.json")
+    layout = compile_cache_aware_layout(
+        policy_blocks=["policy"],
+        relevant=["ctx"],
+        dynamic=["q"],
+        flags=CtxFlags(cache_aware_layout=True),
+        policy_version="v2",
+    )
+    actual = {"enabled_has_stable_prefix": bool(layout.stable_prefix)}
+    _assert_expect(actual, expect)
+
+
+async def _run_policy_replay(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    expect = case.load_json("expect.json")
+    policy = JudgementPolicy(
+        version="story-replay",
+        thresholds=[JudgementThreshold(signal_id="e", allow_above=0.5)],
+    )
+    verdict = replay_verdict(
+        facts=JudgementFacts(action="noop"),
+        signals=[NoulSignal(id="e", p_true=0.9)],
+        policy=policy,
+    )
+    actual = {"verdict_kind": verdict.kind}
     _assert_expect(actual, expect)

@@ -3,7 +3,8 @@
   "persona": "nubble",
   "title": "Record cost and inference events for every harness run",
   "kind": "pass_through",
-  "narrative": "Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units — the same signals he would forward to billing or a Grafana panel. If those events are missing, operations is flying blind. If they are present, he trusts the ledger enough to alert on it.",
-  "implementation": "Harness runs emit structured events on `EventLog`: inference completion and cost accounting via `CostAccountant` / `InMemoryCostAccountant` producing `core:cost` (and `core:inference`) with ability-scaled units. `PassThroughHarness` (and other families) sit on the same path so every run records ledger signals without a separate billing bolt-on. Event types are host-extendable under the `core:` namespace in `mechaharness.core.events`.",
-  "validation": "Story kind `pass_through` → `_run_pass_through`. In-process uses `ScriptedInference` + `PassThroughHarness` + `InMemoryEventLog`; `openai_compat` twins replay cassette HTTP through `OpenAICompatStrategy`. Soft expects: `core:inference` and `core:cost` present with non-zero units. Related: `tests/test_events.py`, `tests/test_harness.py`, `tests/test_pass_through.py`."
+  "narrative": "Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units \u2014 the same signals he would forward to billing or a Grafana panel.",
+  "implementation": "Harness runs emit structured `EventLog` records for inference and cost (`CostAccountant` / `core:cost`, `core:inference`). This is the baseline observability stream for every run \u2014 decisions, routing, and tools extend the same log rather than a separate ledger.\n\nCovers: OBS-01.",
+  "validation": "Kind `pass_through` \u2192 `_run_pass_through`. Soft expects: inference and cost events with non-zero units. Related: `tests/test_events.py`, `tests/test_pass_through.py`.",
+  "footnotes": []
 }

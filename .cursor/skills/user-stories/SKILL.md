@@ -21,7 +21,7 @@ that story is proven.
 
 | Field | Where it lives | Who may edit |
 |-------|----------------|--------------|
-| `id`, `persona`, `title`, `kind`, `narrative`, `implementation`, `validation` | `tests/fixtures/models/**/stories/<id>/story.json` | Humans / agents editing stories |
+| `id`, `persona`, `title`, `kind`, `narrative`, `implementation`, `validation`, `footnotes` | `tests/fixtures/models/**/stories/<id>/story.json` | Humans / agents editing stories |
 | Persona bios + suite preamble | `tests/fixtures/models/personas.json` | Same |
 | Guide body | `docs/guides/user-stories.md` | **Generator only** — never hand-edit story sections |
 
@@ -51,11 +51,22 @@ Bios live in `personas.json` and are rendered into the guide.
   "persona": "fangore",
   "title": "Compose read-only and write permission packs",
   "kind": "grant_gate_write",
-  "narrative": "PM-facing prose; may cite `other_story_id`…",
+  "narrative": "PM-facing prose; may cite `other_story_id` or [^footnote-id]…",
   "implementation": "Library modules/classes that fulfill the feature…",
-  "validation": "Story runner kind, expects, related unit tests…"
+  "validation": "Story runner kind, expects, related unit tests…",
+  "footnotes": [
+    {
+      "id": "pyiv",
+      "label": "pyiv",
+      "url": "https://rl337.org/pyiv/",
+      "note": "Config-hook DI"
+    }
+  ]
 }
 ```
+
+`footnotes` is **required** (use `[]` when none). Each entry needs `id`, `label`, and
+`url`; `note` is optional.
 
 ### `narrative` (required)
 
@@ -64,6 +75,8 @@ Audience: a **non-technical project manager** who understands features, not code
 - Literal English. Keep persona names; do **not** assume dragon lore or use forge/torch metaphors.
 - No CamelCase modules, Config hooks, event type keys, CLI flags, or file paths as API docs.
 - Cross-refs: only other story ids in backticks (`` `story_id` ``) plus plain domain words (lane, grant, judge, cassette).
+- External articles: put them in `footnotes` and optionally cite as `[^id]` in the
+  narrative — **not** raw URLs in the narrative body.
 - If you need a capability that has no story yet — **backfill that story first**, then cite it.
 
 ### `implementation` (required)
@@ -73,6 +86,23 @@ Audience: a **non-technical project manager** who understands features, not code
 - Name modules, classes, Config hooks, and behaviors in `src/mechaharness/…`.
 - Write so a reader can trace “this code exists because of this story.”
 - Do **not** put runner kinds, soft expects, or fixture paths here (those belong in `validation`).
+- New library acceptance maps to a **story id**. Local `REQUIREMENTS.md` cites
+  stories (not new INF/POL codes as the primary vocabulary).
+
+### `footnotes` (required key; may be `[]`)
+
+External article citations for this story. Twin parity includes `footnotes`
+(deep-equal). Catalog / generator `--check` enforces:
+
+1. **Story ids unique** in the canonical set (prefer `static/fixture/v1`). Directory
+   name must equal `story.json` `"id"`. Twins may reuse the same id with parity;
+   they must not introduce a different story under a colliding id.
+2. **Footnote `id`s unique within each story.**
+3. **Footnote `id`s unique across the generated guide** (no global collisions) so
+   `[^id]` markers stay stable.
+
+Generator renders a **Footnotes** subsection per story (numbered list, or markdown
+footnote defs when the narrative contains matching `[^id]` markers).
 
 ### `validation` (required)
 
@@ -91,7 +121,8 @@ Literal feature outcome (not metaphor). Must match what `narrative` claims.
 1. **Edit fixtures first.** Never patch `docs/guides/user-stories.md` by hand.
 2. **Twin parity.** The same `id` under `static/fixture`, `openai_compat/…`, and
    `systemone/…` must share identical `title`, `narrative`, `implementation`,
-   `validation`, `persona`, and `kind`. Catalog validation fails the PR on drift.
+   `validation`, `persona`, `kind`, and `footnotes`. Catalog validation fails
+   the PR on drift.
 3. **Sibling coherence.** If `kind` or acceptance intent changes, update
    `request.json` / `expect.json` / `tests/stories/runners.py` in the same
    change. Narrative must not claim an outcome expects do not cover;
@@ -127,7 +158,7 @@ tests/fixtures/models/
   <family>/<model>/<version>/
     manifest.json
     stories/<story_id>/
-      story.json      # id, persona, title, kind, narrative, implementation, validation
+      story.json      # id, persona, title, kind, narrative, implementation, validation, footnotes
       request.json
       response.json
       expect.json
@@ -163,11 +194,13 @@ Soft expects only. Exact wire text belongs in `response.json` for replay.
 
 ```text
 # BAD — hand-edit docs/guides/user-stories.md
-# BAD — twin drift (same id, different narrative/implementation/validation)
+# BAD — twin drift (same id, different narrative/implementation/validation/footnotes)
 # BAD — narrative with MechaHarnessConfig / JudgementPolicy / core:cost
+# BAD — raw article URLs in narrative (use footnotes + optional [^id])
+# BAD — duplicate story id or duplicate footnote id (within story or globally)
 # BAD — putting runner/expect details in implementation (use validation)
 # BAD — putting library design only in validation (use implementation)
-# BAD — cite a capability with no story id
+# BAD — cite a capability with no story id / mint new INF-POL codes as primary
 # BAD — change kind without runners/expects + validation update
 # BAD — commit story.json without regenerating the guide
 # BAD — As-a bullet as the only story body

@@ -3,7 +3,8 @@
   "persona": "taloneth",
   "title": "Compare decision backends without inventing missing results",
   "kind": "shadow_decision_backends",
-  "narrative": "Taloneth compares decision backends on a matched ticket snapshot: deterministic rules, a small local model, and System One when the decide lane is loaded. Tonight the decide profile is cold. He needs the shadow report to mark System One unavailable — no synthetic latency, no fake verdict — while still logging matched candidates and evidence. Activation stays behind evaluation, not the cheapest unit price. Related: wrong-profile honesty in `nubble_lane_load_hint`. He uses this whenever routing experiments must stay honest about exclusive-profile hosts.",
-  "implementation": "`shadow_decision_backends()` in `mechaharness.routing` runs matched candidates across decision backends and records comparison evidence. When the decide/judge lane is unavailable, that backend is marked unavailable — no synthetic latency or fabricated verdict. Routing stays behind exclusive lane gates from `InferenceEnvironment`.",
-  "validation": "Kind `shadow_decision_backends` → `_run_shadow_decision_backends`. Soft expects: System One unavailable without synthetic fields; other backends still compared. Unit tests: `tests/test_routing.py`."
+  "narrative": "Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable \u2014 no fake latency or verdict. Related: `nubble_lane_load_hint`, `nubble_model_affinity`.",
+  "implementation": "`shadow_decision_backends` / `route_at_boundary` compare candidates at task and phase boundaries and estimate whole-task cost honesty. Unavailable backends stay unavailable.\n\nCovers: RTE-01, RTE-02.",
+  "validation": "Kind `shadow_decision_backends` \u2192 `_run_shadow_decision_backends`. Unit: `tests/test_routing.py`.",
+  "footnotes": []
 }

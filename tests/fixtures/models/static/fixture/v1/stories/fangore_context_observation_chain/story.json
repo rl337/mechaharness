@@ -1,0 +1,10 @@
+{
+  "id": "fangore_context_observation_chain",
+  "persona": "fangore",
+  "title": "Keep original observations and refuse fabricated reductions",
+  "kind": "context_observation_chain",
+  "narrative": "Tool output must stay addressable as an immutable observation. A cheaper summary is allowed only when it points at a real observation; fabricated receipts must fail lookup. Compaction happens at semantic boundaries, and action fusion only for predeclared sequences. Compiler deficits remain `fangore_context_compiler_deficit`.",
+  "implementation": "`ObservationStore` / `ObservationRef`, `reduce_evidence`, `compact_at_boundary`, and `fuse_actions` under `CtxFlags` in `mechaharness.context_experiments`.\n\nCovers: CTX-01, CTX-02, CTX-03, CTX-04.",
+  "validation": "Kind `context_observation_chain` \u2192 `_run_context_observation_chain`. Unit: `tests/test_context_experiments.py`.",
+  "footnotes": []
+}

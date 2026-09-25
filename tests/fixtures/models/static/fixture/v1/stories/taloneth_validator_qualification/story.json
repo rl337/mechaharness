@@ -3,7 +3,8 @@
   "persona": "taloneth",
   "title": "Qualify validators before they gate completion",
   "kind": "validator_qualification",
-  "narrative": "Taloneth is about to promote a new schema validator into required completion evidence. Before it can gate done, he runs known-good, known-bad, and missing fixtures — including a deliberately weakened always-pass checker. The honest validator qualifies; the weak one must fail qualification. A passing schema with wrong behavior is not success, and research candidates cannot rewrite their own evaluator. He uses this whenever verification oracles need bounded coverage proof, not gut feel.",
-  "implementation": "`qualify_validator` / `validator_qualified` and `VerificationOracle` in `mechaharness.graph` implement VER-04-style qualification: known-good, known-bad, and missing cases must pass before a validator may gate completion. Weak always-pass mutants fail qualification so coverage is bounded proof, not schema shape alone.",
-  "validation": "Kind `validator_qualification` → `_run_validator_qualification`. Soft expects: honest oracle qualifies; always-pass mutant fails. Unit tests: `tests/test_graph.py`."
+  "narrative": "Before a schema validator gates done, known-good, known-bad, and missing fixtures must run \u2014 including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see `fangore_refund_verdict`).",
+  "implementation": "`VerificationOracle` / `verify_node` define completion evidence; `qualify_validator` / `validator_qualified` reject always-pass mutants. Judge quality signals remain supplementary to evidence checks.\n\nCovers: VER-01, VER-04.",
+  "validation": "Kind `validator_qualification` \u2192 `_run_validator_qualification`. Unit: `tests/test_graph.py`.",
+  "footnotes": []
 }

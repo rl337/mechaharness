@@ -1,0 +1,10 @@
+{
+  "id": "taloneth_policy_replay",
+  "persona": "taloneth",
+  "title": "Replay product policy from recorded facts and signals",
+  "kind": "policy_replay",
+  "narrative": "Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools \u2014 so offline audits match live verdicts.",
+  "implementation": "`replay_verdict` in `mechaharness.decision_log` re-runs `decide()` on recorded facts/signals/policy for deterministic audits.\n\nCovers: OBS-03.",
+  "validation": "Kind `policy_replay` \u2192 `_run_policy_replay`. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.",
+  "footnotes": []
+}

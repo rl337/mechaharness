@@ -3,7 +3,15 @@
   "persona": "fangore",
   "title": "Report context deficits instead of silent truncation",
   "kind": "context_compiler_deficit",
-  "narrative": "Fangore’s agent must not quietly drop mandatory blockers just because the prompt budget is tight. He runs context compilation with a tiny token budget and a mandatory policy requirement that cannot fit. Success is a deficit report — unresolved gaps named, blockers preserved — not a silently shortened prompt that looks complete. Deterministic steps can skip a model prompt entirely. He uses this whenever working context is a temporary view, never the only copy of obligations.",
-  "implementation": "`ContextCompiler` in `mechaharness.context_experiments` builds a `ContextManifest` (compiler version, token estimate, unresolved gaps). When mandatory material exceeds budget, gaps are named rather than silently truncated. Supporting CTX experiment primitives (derived memory, topology views, cache layout) are independent toggles on the same module.",
-  "validation": "Kind `context_compiler_deficit` → `_run_context_compiler_deficit`. Soft expects: deficit / unresolved gaps reported; blockers not omitted. Unit tests: `tests/test_context_experiments.py`."
+  "narrative": "Mandatory blockers must not disappear when the prompt budget is tight. Success is a deficit report with unresolved gaps named. Related observation chain: `fangore_context_observation_chain`.",
+  "implementation": "`ContextCompiler` builds a versioned `ContextManifest` with token estimates and unresolved gaps. Working context is ephemeral; obligations stay in authoritative stores.\n\nCovers: CTX-05.",
+  "validation": "Kind `context_compiler_deficit` \u2192 `_run_context_compiler_deficit`. Unit: `tests/test_context_experiments.py`.",
+  "footnotes": [
+    {
+      "id": "sol-pi",
+      "label": "SoL-Pi",
+      "url": "https://arxiv.org/abs/2609.20519",
+      "note": "Empirical harness optimization and context mechanisms to evaluate"
+    }
+  ]
 }

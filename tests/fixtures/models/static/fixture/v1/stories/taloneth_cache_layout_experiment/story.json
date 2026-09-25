@@ -1,0 +1,10 @@
+{
+  "id": "taloneth_cache_layout_experiment",
+  "persona": "taloneth",
+  "title": "Measure cache-aware prompt layout as an explicit experiment",
+  "kind": "cache_layout_experiment",
+  "narrative": "Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.",
+  "implementation": "`compile_cache_aware_layout` / `CacheLayout` under `CtxFlags.cache_aware_layout` \u2014 an independent experiment toggle with prefix identity diagnostics.\n\nCovers: CTX-09.",
+  "validation": "Kind `cache_layout_experiment` \u2192 `_run_cache_layout_experiment`. Unit: `tests/test_context_experiments.py`.",
+  "footnotes": []
+}

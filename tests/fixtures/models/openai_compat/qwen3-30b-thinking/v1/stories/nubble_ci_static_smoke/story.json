@@ -3,7 +3,15 @@
   "persona": "nubble",
   "title": "Prove the HTTP adapter in CI without a live model host",
   "kind": "pass_through",
-  "narrative": "It is late and the local inference host is offline for maintenance, but a pull request still needs green CI. Nubble refuses to block merges on network reachability. He wants the OpenAI-compatible path proven from a cassette — a recorded reply replayed through the real HTTP client — so the pipeline stays honest about wire shape without needing a live model. When static CI is green, the adapter is safe to merge; when someone breaks the adapter, CI fails before production.",
-  "implementation": "`OpenAICompatStrategy` implements the OpenAI-compatible chat completions wire against `httpx`, shared by named backends (openai, vllm, ollama, lmstudio, junespark). The strategy is a real HTTP client path: request and response shapes are part of the library contract, not a test double. Hosts bind it through `MechaHarnessConfig` / `Settings` backend selection.",
-  "validation": "Same kind `pass_through` on `openai_compat` model trees. Static mode mounts recorded `response.json` via httpx mock transport so the real strategy code runs. Soft expects: non-empty assistant text. Live mode: `MECHA_STORY_BACKEND=live` against `MECHA_BASE_URL`. Cassette fixtures under `tests/fixtures/models/openai_compat/*/v1/stories/nubble_ci_static_smoke/`."
+  "narrative": "The local inference host is offline, but a pull request still needs green CI. Nubble wants the OpenAI-compatible path proven from a cassette \u2014 a recorded reply replayed through the real HTTP client \u2014 so merges do not depend on LAN reachability.",
+  "implementation": "`OpenAICompatStrategy` implements Chat Completions HTTP for reason-lane backends. Cassette replay exercises the real client path so adapter wire shape stays honest in CI.\n\nCovers: offline CI / OpenAI-compat smoke.",
+  "validation": "Kind `pass_through` on `openai_compat` trees with mock transport. Soft expects: non-empty assistant text. Live: `MECHA_STORY_BACKEND=live`.",
+  "footnotes": [
+    {
+      "id": "openai-chat-completions",
+      "label": "OpenAI Chat Completions",
+      "url": "https://platform.openai.com/docs/api-reference/chat",
+      "note": "Wire models for reason-lane HTTP"
+    }
+  ]
 }

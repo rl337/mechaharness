@@ -3,7 +3,8 @@
   "persona": "taloneth",
   "title": "Validate judge question batches without a live model",
   "kind": "fixture_judge_batch",
-  "narrative": "Taloneth is iterating on judge question sets — yes/no, choice, and score in one batch — and cannot wait on a GPU host for every tweak. He drives an offline fixture judge with known answers and checks that validation accepts clean signals and reports errors when answers are missing. The lab bench is offline, deterministic, and fast. He uses this whenever contract tests must not depend on a served model.",
-  "implementation": "Judge domain types (`ChoiceQuestion`, `NoulQuestion`, `ScoreQuestion`, signals, `Judgement`, `JudgeErrorItem`) and the `judge()` entrypoint live in `mechaharness.inference.judge`. `FixtureJudgeProvider` supplies deterministic answers for offline contract work without HTTP. Validation reports missing or malformed answers as structured errors on the judgement.",
-  "validation": "Kind `fixture_judge_batch` → `_run_fixture_judge_batch`. Soft expects: clean batch validates; missing answers surface errors. Related: `tests/test_judge.py`, `tests/test_outcomes.py`."
+  "narrative": "Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors \u2014 including partial failure reporting \u2014 without a GPU host.",
+  "implementation": "Provider-neutral judge schema in `mechaharness.inference.judge` (`Choice`/`Noul`/`Score` questions and signals, `Judgement`, `JudgeErrorItem`, provenance). `FixtureJudgeProvider` + `judge()` validate batches and report per-question errors. Semantics cover closed-world answers, partial failure, and calibration/provenance fields adapters must map.\n\nCovers: JDG-01, JDG-02, JDG-03, JDG-04.",
+  "validation": "Kind `fixture_judge_batch` \u2192 `_run_fixture_judge_batch`. Unit: `tests/test_judge.py`.",
+  "footnotes": []
 }

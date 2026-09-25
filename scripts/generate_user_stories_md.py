@@ -13,94 +13,52 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tests"))
+
+from stories.catalog import (  # noqa: E402
+    collect_canonical_stories,
+    validate_story_fixtures,
+)
+
 FIXTURES = ROOT / "tests" / "fixtures" / "models"
 PERSONAS_PATH = FIXTURES / "personas.json"
 GUIDE_PATH = ROOT / "docs" / "guides" / "user-stories.md"
-REQUIRED_FIELDS = (
-    "id",
-    "persona",
-    "title",
-    "kind",
-    "narrative",
-    "implementation",
-    "validation",
-)
 PERSONA_ORDER = ("nubble", "fangore", "taloneth")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
+    import json
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def collect_canonical_stories() -> dict[str, dict[str, Any]]:
-    """Return story_id -> story.json, preferring static/fixture when present."""
-    by_id: dict[str, list[tuple[Path, dict[str, Any]]]] = defaultdict(list)
-    for path in sorted(FIXTURES.glob("*/*/v*/stories/*/story.json")):
-        data = _load_json(path)
-        story_id = str(data.get("id") or path.parent.name)
-        by_id[story_id].append((path, data))
-
-    canonical: dict[str, dict[str, Any]] = {}
-    for story_id, copies in sorted(by_id.items()):
-        preferred = next(
-            (
-                data
-                for path, data in copies
-                if "static/fixture" in path.as_posix()
-            ),
-            copies[0][1],
-        )
-        canonical[story_id] = preferred
-    return canonical
-
-
-def validate_story(data: dict[str, Any], *, path: Path) -> list[str]:
-    errors: list[str] = []
-    for field in REQUIRED_FIELDS:
-        value = data.get(field)
-        if not isinstance(value, str) or not value.strip():
-            errors.append(f"{path}: missing or empty required field {field!r}")
-    if data.get("id") and path.parent.name != data["id"]:
-        errors.append(
-            f"{path}: directory name {path.parent.name!r} != id {data['id']!r}"
-        )
-    return errors
-
-
-def validate_all() -> list[str]:
-    errors: list[str] = []
-    by_id: dict[str, list[tuple[Path, dict[str, Any]]]] = defaultdict(list)
-    for path in sorted(FIXTURES.glob("*/*/v*/stories/*/story.json")):
-        data = _load_json(path)
-        errors.extend(validate_story(data, path=path))
-        by_id[str(data.get("id") or path.parent.name)].append((path, data))
-
-    parity_fields = (
-        "persona",
-        "title",
-        "kind",
-        "narrative",
-        "implementation",
-        "validation",
-    )
-    for story_id, copies in sorted(by_id.items()):
-        if len(copies) < 2:
-            continue
-        base = copies[0][1]
-        for path, data in copies[1:]:
-            for field in parity_fields:
-                if data.get(field) != base.get(field):
-                    errors.append(
-                        f"twin drift for {story_id!r}: {field} differs at {path}"
-                    )
-    return errors
+def _render_footnotes(story: dict[str, Any]) -> list[str]:
+    footnotes = story.get("footnotes") or []
+    if not footnotes:
+        return []
+    lines = ["#### Footnotes", ""]
+    narrative = str(story.get("narrative") or "")
+    cited = set(re.findall(r"\[\^([A-Za-z0-9_-]+)\]", narrative))
+    for i, item in enumerate(footnotes, start=1):
+        fid = str(item["id"])
+        label = str(item["label"])
+        url = str(item["url"])
+        note = item.get("note")
+        suffix = f" — {note}" if isinstance(note, str) and note.strip() else ""
+        if cited:
+            # Markdown footnote definition form when narrative uses [^id]
+            lines.append(f"[^{fid}]: [{label}]({url}){suffix}")
+        else:
+            lines.append(f"{i}. [{label}]({url}){suffix}")
+    lines.append("")
+    return lines
 
 
 def render_guide(stories: dict[str, dict[str, Any]], personas: dict[str, Any]) -> str:
@@ -152,6 +110,7 @@ def render_guide(stories: dict[str, dict[str, Any]], personas: dict[str, Any]) -
             lines.append("")
             lines.append(str(story["validation"]).rstrip())
             lines.append("")
+            lines.extend(_render_footnotes(story))
 
     return "\n".join(lines).rstrip() + "\n"
 
@@ -165,7 +124,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    errors = validate_all()
+    errors = validate_story_fixtures()
     if errors:
         print("story.json validation failed:", file=sys.stderr)
         for err in errors:
