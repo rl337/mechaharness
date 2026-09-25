@@ -104,20 +104,55 @@
              
   <section id="mechaharness-documentation">
 <h1>MechaHarness documentation<a class="headerlink" href="#mechaharness-documentation" title="Link to this heading"></a></h1>
-<p>Python agentic harness that separates <strong>how you call models</strong> from <strong>how you
-run agent loops</strong>.</p>
+<p>MechaHarness is a Python <strong>agent harness</strong> for hosts that must compose
+inference safely — not a thin chat-client wrapper. Provider I/O, agent-loop
+policy, cost accounting, and telemetry are first-class seams so you can swap
+models and policies without rewriting the run path, and so agents cannot
+quietly burn unbounded spend.</p>
 <div class="hero-meta docutils container">
 <div class="version-badge docutils container">
 <p>0.1.0</p>
 </div>
-<p>Inference Strategy + harness hierarchy + pyiv Config. Python 3.9+.</p>
+<p>pyiv Config · multi-lane inference · cost + EventLog on every run · Python 3.9+</p>
 </div>
 <div style="margin: 20px 0; padding: 15px; background: #e8f4f8; border-left: 4px solid #0066cc; border-radius: 4px;">
 <strong>Quick Links:</strong>
 <a href="https://github.com/rl337/mechaharness" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">GitHub</a>
 <a href="https://pypi.org/project/mechaharness/" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">PyPI</a>
 <a href="changelog.html" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">Changelog</a>
-</div><section id="installation">
+</div><section id="founding-principles">
+<h2>Founding principles<a class="headerlink" href="#founding-principles" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Modular through dependency injection.</strong>
+Wiring is pyiv <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> and constructor injection. Hosts
+subclass Config hooks to bind strategies, harnesses, connections, and
+providers — they do not fork closed enums or grow string registries.
+See <a class="reference internal" href="guides/dependency-injection.html"><span class="doc">Dependency injection</span></a>, <a class="reference internal" href="adr/0001-pyiv-config.html"><span class="doc">0001. pyiv Config instead of string registries</span></a>, and
+<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>.</p></li>
+<li><p><strong>Multi-model and lanes are native.</strong>
+Reason, judge, and media (plus host-named lanes) are first-class via
+<code class="docutils literal notranslate"><span class="pre">InferenceEnvironment.active_lane()</span></code>. Generative work yields a
+<code class="docutils literal notranslate"><span class="pre">Completion</span></code>; closed-world decide yields a <code class="docutils literal notranslate"><span class="pre">Judgement</span></code>; media yields a
+<code class="docutils literal notranslate"><span class="pre">Generation</span></code>. Swap <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code> or <code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code> without
+rewriting the harness loop. See <a class="reference internal" href="reference/judge.html"><span class="doc">Judge (judge())</span></a> and
+<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>.</p></li>
+<li><p><strong>Cost lives in the object model.</strong>
+Ability-scaled units and <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code> sit on the harness path so every
+inference and tool invocation is priced as it happens. The design goal is to
+keep agents from going AWOL with unbounded spend — cost is not an optional
+after-the-fact report. See <a class="reference internal" href="reference/cost.html"><span class="doc">Cost</span></a>.</p></li>
+<li><p><strong>Event logging and telemetry are built in.</strong>
+A queryable <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> records agent lifecycle, inference, tools, cost, and
+access checks (<code class="docutils literal notranslate"><span class="pre">core:agent_*</span></code>, <code class="docutils literal notranslate"><span class="pre">core:inference</span></code>, <code class="docutils literal notranslate"><span class="pre">core:cost</span></code>, …) on
+every run. Telemetry is part of the product surface, not a bolt-on sink.
+See <a class="reference internal" href="reference/events.html"><span class="doc">Event log</span></a>.</p></li>
+</ol>
+<p><strong>Also in the core model:</strong> deny-by-default tool grants and
+<code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> (<a class="reference internal" href="reference/access.html"><span class="doc">Access control</span></a>), plus host-extendable open
+identity for events and grants so third parties compose without patching this
+package (<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>).</p>
+</section>
+<section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>mechaharness
 </pre></div>
@@ -230,33 +265,9 @@ run agent loops</strong>.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.AbstractHarness"><code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.AccessControl"><code class="docutils literal notranslate"><span class="pre">AccessControl</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.ChatMessage"><code class="docutils literal notranslate"><span class="pre">ChatMessage</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.Completer"><code class="docutils literal notranslate"><span class="pre">Completer</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.CompletionRequest"><code class="docutils literal notranslate"><span class="pre">CompletionRequest</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.CompletionResponse"><code class="docutils literal notranslate"><span class="pre">CompletionResponse</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.CostAccountant"><code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.Event"><code class="docutils literal notranslate"><span class="pre">Event</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.EventLog"><code class="docutils literal notranslate"><span class="pre">EventLog</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.EventType"><code class="docutils literal notranslate"><span class="pre">EventType</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.HarnessConfig"><code class="docutils literal notranslate"><span class="pre">HarnessConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.HarnessResult"><code class="docutils literal notranslate"><span class="pre">HarnessResult</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.InferenceEnvironment"><code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.InferenceStrategy"><code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.MechaHarnessConfig"><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.Role"><code class="docutils literal notranslate"><span class="pre">Role</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.RunRequest"><code class="docutils literal notranslate"><span class="pre">RunRequest</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.RunResponse"><code class="docutils literal notranslate"><span class="pre">RunResponse</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.Settings"><code class="docutils literal notranslate"><span class="pre">Settings</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.SettingsConfig"><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.Tool"><code class="docutils literal notranslate"><span class="pre">Tool</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.ToolCall"><code class="docutils literal notranslate"><span class="pre">ToolCall</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.ToolDefinition"><code class="docutils literal notranslate"><span class="pre">ToolDefinition</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.ToolRegistry"><code class="docutils literal notranslate"><span class="pre">ToolRegistry</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.ToolResult"><code class="docutils literal notranslate"><span class="pre">ToolResult</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.list_inference_backends"><code class="docutils literal notranslate"><span class="pre">list_inference_backends()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.list_inference_backends"><code class="docutils literal notranslate"><span class="pre">list_inference_backends()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.__version__"><code class="docutils literal notranslate"><span class="pre">__version__</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/config.html">mechaharness.config</a><ul>

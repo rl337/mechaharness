@@ -118,7 +118,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessCheck</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">EventLog</span><span class="p">,</span> <span class="n">EventType</span><span class="p">,</span> <span class="n">event_type_key</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">events</span> <span class="k">as</span> <span class="n">core_events</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessCheck</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">EventType</span><span class="p">,</span> <span class="n">event_type_key</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Usage</span>
 
 
@@ -452,12 +453,12 @@
 
 
 <div class="viewcode-block" id="AccessControl">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.AccessControl">[docs]</a>
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.AccessControl">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AccessControl</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Whether a tool may run. Deny-by-default unless a grant covers it."""</span>
 
 <div class="viewcode-block" id="AccessControl.allows">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.AccessControl.allows">[docs]</a>
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.AccessControl.allows">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">allows</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -474,12 +475,12 @@
 
 
 <div class="viewcode-block" id="CostAccountant">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.CostAccountant">[docs]</a>
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CostAccountant">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CostAccountant</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Price one inference call or tool invocation and keep a ledger."""</span>
 
 <div class="viewcode-block" id="CostAccountant.price_inference">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.CostAccountant.price_inference">[docs]</a>
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CostAccountant.price_inference">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">price_inference</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -495,7 +496,7 @@
 
 
 <div class="viewcode-block" id="CostAccountant.price_tool">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.CostAccountant.price_tool">[docs]</a>
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CostAccountant.price_tool">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">price_tool</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -510,7 +511,7 @@
 
 
 <div class="viewcode-block" id="CostAccountant.report">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.access.CostAccountant.report">[docs]</a>
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.CostAccountant.report">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostReport</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Accumulated ledger for this accountant instance."""</span></div>
@@ -519,7 +520,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_emit_policy_event</span><span class="p">(</span>
-    <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">event_log</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">event_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">EventType</span><span class="p">],</span>
     <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
@@ -549,7 +550,7 @@
 <a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryAccessControl.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">event_log</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">grants</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">policy</span><span class="p">:</span> <span class="n">GrantPolicyLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -606,7 +607,7 @@
 
 <div class="viewcode-block" id="InMemoryCostAccountant.__init__">
 <a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryCostAccountant.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_log</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span> <span class="o">=</span> <span class="n">event_log</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_report</span> <span class="o">=</span> <span class="n">CostReport</span><span class="p">()</span></div>
 

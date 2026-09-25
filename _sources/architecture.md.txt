@@ -1,8 +1,12 @@
 # Architecture
 
-MechaHarness keeps provider I/O and agent-loop policy as separate extension axes.
-Wiring is **pyiv dependency injection first**. OpenAPI (`RunRequest` / `run()`) is
-the non-DI facade, not a second architecture. See `.cursor/rules/di-first.mdc`.
+MechaHarness is built on four founding principles — **DI modularity**,
+**native multi-model / lanes**, **cost in the object model**, and **built-in
+EventLog telemetry** — described on the [docs home](./index.md). This page is
+the structural map: provider I/O and agent-loop policy stay separate extension
+axes. Wiring is **pyiv dependency injection first**. OpenAPI (`RunRequest` /
+`run()`) is the non-DI facade, not a second architecture. See
+`.cursor/rules/di-first.mdc`.
 
 ```text
 ┌─────────────┐     ┌─────────────┐

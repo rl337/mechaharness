@@ -116,7 +116,7 @@
 
 
 <div class="viewcode-block" id="Role">
-<a class="viewcode-back" href="../../../api/types.html#mechaharness.Role">[docs]</a>
+<a class="viewcode-back" href="../../../api/types.html#mechaharness.core.types.Role">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Role</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
     <span class="n">SYSTEM</span> <span class="o">=</span> <span class="s2">"system"</span>
     <span class="n">USER</span> <span class="o">=</span> <span class="s2">"user"</span>
@@ -126,7 +126,7 @@
 
 
 <div class="viewcode-block" id="ToolDefinition">
-<a class="viewcode-back" href="../../../api/types.html#mechaharness.ToolDefinition">[docs]</a>
+<a class="viewcode-back" href="../../../api/types.html#mechaharness.core.types.ToolDefinition">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ToolDefinition</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Provider-agnostic tool/function schema exposed to a harness."""</span>
 
@@ -137,7 +137,7 @@
 
 
 <div class="viewcode-block" id="ToolCall">
-<a class="viewcode-back" href="../../../api/types.html#mechaharness.ToolCall">[docs]</a>
+<a class="viewcode-back" href="../../../api/types.html#mechaharness.core.types.ToolCall">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ToolCall</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Model-requested tool invocation (id, name, decoded arguments)."""</span>
 
@@ -148,7 +148,7 @@
 
 
 <div class="viewcode-block" id="ToolResult">
-<a class="viewcode-back" href="../../../api/types.html#mechaharness.ToolResult">[docs]</a>
+<a class="viewcode-back" href="../../../api/types.html#mechaharness.core.types.ToolResult">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ToolResult</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Result of executing a tool, fed back as a tool-role message."""</span>
 
@@ -159,7 +159,7 @@
 
 
 <div class="viewcode-block" id="ChatMessage">
-<a class="viewcode-back" href="../../../api/types.html#mechaharness.ChatMessage">[docs]</a>
+<a class="viewcode-back" href="../../../api/types.html#mechaharness.core.types.ChatMessage">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ChatMessage</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""One turn in a chat transcript (portable across providers)."""</span>
 
@@ -174,7 +174,7 @@
 
 
 <div class="viewcode-block" id="CompletionRequest">
-<a class="viewcode-back" href="../../../api/types.html#mechaharness.CompletionRequest">[docs]</a>
+<a class="viewcode-back" href="../../../api/types.html#mechaharness.core.types.CompletionRequest">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CompletionRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Normalized request handed to an InferenceStrategy."""</span>
 
@@ -189,7 +189,7 @@
 
 
 <div class="viewcode-block" id="Usage">
-<a class="viewcode-back" href="../../../api/types.html#mechaharness.Usage">[docs]</a>
+<a class="viewcode-back" href="../../../api/types.html#mechaharness.core.types.Usage">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Usage</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Token usage reported by a provider (fields may be unset)."""</span>
 
@@ -200,7 +200,7 @@
 
 
 <div class="viewcode-block" id="CompletionResponse">
-<a class="viewcode-back" href="../../../api/types.html#mechaharness.CompletionResponse">[docs]</a>
+<a class="viewcode-back" href="../../../api/types.html#mechaharness.core.types.CompletionResponse">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CompletionResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Normalized response returned by an InferenceStrategy."""</span>
 

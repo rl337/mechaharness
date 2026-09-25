@@ -171,12 +171,12 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MechaHarnessConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Template-method pyiv Config. Override the ``get_*_class`` hooks."""</span>
 
 <div class="viewcode-block" id="MechaHarnessConfig.configure">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.configure">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.configure">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">Settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_settings</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">HarnessConfig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_harness_config</span><span class="p">())</span>
@@ -192,14 +192,14 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_settings">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_settings">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_settings">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Settings</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Settings instance registered for this config (override to customize)."""</span>
         <span class="k">return</span> <span class="n">Settings</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_event_log">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_event_log">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_event_log">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_event_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EventLog</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Shared ``EventLog`` for harnesses and access/cost policies."""</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_event_log"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -210,7 +210,7 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_access_control">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_access_control">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_access_control">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_access_control</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessControl</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Deny-by-default access control bound into harnesses."""</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_access_control"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -224,7 +224,7 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_access_policy">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_access_policy">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_access_policy">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_access_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GrantPolicyLike</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Grant policy for harness tool gates.</span>
 
@@ -236,14 +236,14 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_grants">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_grants">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_grants">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_grants</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">object</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Deny-by-default grant list. Hosts override; unknown namespaced keys ok."""</span>
         <span class="k">return</span> <span class="p">[]</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_inference_environment">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_inference_environment">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_environment">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_environment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InferenceEnvironment</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Host probe for the active inference profile (default: no-op)."""</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_inference_environment"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -254,7 +254,7 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_judge_connection">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_judge_connection">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_connection">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIConnectionConfig</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""HTTP connection for the judge lane (override for OAuth, etc.)."""</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_judge_connection"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -265,7 +265,7 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_judge_provider">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_judge_provider">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_provider">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JudgeProvider</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Judge backend (default: System One over ``get_judge_connection()``)."""</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_judge_provider"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -276,14 +276,14 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.include_subagent_tools">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.include_subagent_tools">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.include_subagent_tools">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">include_subagent_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""When True, parent harnesses get list_subagents / get_subagent_events."""</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_cost_accountant">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_cost_accountant">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_cost_accountant">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_cost_accountant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostAccountant</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Ledger used to price inference and tool invocations."""</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_cost_accountant"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -294,21 +294,21 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_inference_class">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_inference_class">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_class">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">InferenceStrategy</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Required override: class bound to ``InferenceStrategy``."""</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_harness_class">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_harness_class">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_harness_class">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_harness_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">AbstractHarness</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Required override: class bound to ``AbstractHarness``."""</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_harness_config">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_harness_config">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_harness_config">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_harness_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HarnessConfig</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Build ``HarnessConfig`` from ``get_settings()``."""</span>
         <span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_settings</span><span class="p">()</span>
@@ -322,14 +322,14 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_tools">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.get_tools">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_tools">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolRegistry</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Tools available to the harness (default: empty registry)."""</span>
         <span class="k">return</span> <span class="n">ToolRegistry</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.inference_classes">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.inference_classes">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.inference_classes">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">inference_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">InferenceStrategy</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">"""Named backend map. Hosts merge via ``super().inference_classes()``."""</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -345,7 +345,7 @@
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.harness_classes">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.MechaHarnessConfig.harness_classes">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.harness_classes">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">harness_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">AbstractHarness</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">"""Named harness family map. Hosts merge via ``super().harness_classes()``."""</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -392,12 +392,12 @@
 
 
 <div class="viewcode-block" id="SettingsConfig">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.SettingsConfig">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.SettingsConfig">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SettingsConfig</span><span class="p">(</span><span class="n">MechaHarnessConfig</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Resolves inference/harness classes from ``Settings`` name maps."""</span>
 
 <div class="viewcode-block" id="SettingsConfig.__init__">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.SettingsConfig.__init__">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.SettingsConfig.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">settings</span><span class="p">:</span> <span class="n">Settings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -410,7 +410,7 @@
 
 
 <div class="viewcode-block" id="SettingsConfig.get_settings">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.SettingsConfig.get_settings">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.SettingsConfig.get_settings">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Settings</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolved_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_resolved_settings</span> <span class="o">=</span> <span class="n">apply_backend_defaults</span><span class="p">(</span>
@@ -420,7 +420,7 @@
 
 
 <div class="viewcode-block" id="SettingsConfig.get_tools">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.SettingsConfig.get_tools">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.SettingsConfig.get_tools">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolRegistry</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_provided_tools</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_provided_tools</span>
@@ -428,7 +428,7 @@
 
 
 <div class="viewcode-block" id="SettingsConfig.get_inference_class">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.SettingsConfig.get_inference_class">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.SettingsConfig.get_inference_class">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">InferenceStrategy</span><span class="p">]:</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_settings</span><span class="p">()</span><span class="o">.</span><span class="n">inference_backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="n">classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_classes</span><span class="p">()</span>
@@ -440,7 +440,7 @@
 
 
 <div class="viewcode-block" id="SettingsConfig.get_harness_class">
-<a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.SettingsConfig.get_harness_class">[docs]</a>
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.SettingsConfig.get_harness_class">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_harness_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">AbstractHarness</span><span class="p">]:</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_settings</span><span class="p">()</span><span class="o">.</span><span class="n">harness_family</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="n">classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">harness_classes</span><span class="p">()</span>
