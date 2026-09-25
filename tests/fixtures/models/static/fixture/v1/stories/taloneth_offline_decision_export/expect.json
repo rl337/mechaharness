@@ -1,0 +1,6 @@
+{
+  "record_count": 2,
+  "outcomes_leaked": false,
+  "lineage_include": ["d1", "d2"],
+  "split_in": ["train"]
+}

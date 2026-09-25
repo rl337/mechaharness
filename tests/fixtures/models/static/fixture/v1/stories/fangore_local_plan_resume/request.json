@@ -1,0 +1,11 @@
+{
+  "goal": "ship patch",
+  "state_revision": "r1",
+  "evidence_refs": ["obs:1"],
+  "satisfied": [],
+  "fan_in_budget": 4,
+  "branches": [
+    {"path": "app.py", "content": "a", "status": "ok"},
+    {"path": "app.py", "content": "b", "status": "ok"}
+  ]
+}

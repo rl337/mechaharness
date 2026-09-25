@@ -1,0 +1,10 @@
+{
+  "id": "taloneth_shadow_decision_backends",
+  "persona": "taloneth",
+  "title": "Compare decision backends without inventing missing results",
+  "kind": "shadow_decision_backends",
+  "narrative": "Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable \u2014 no fake latency or verdict. Related: `nubble_lane_load_hint`, `nubble_model_affinity`.",
+  "implementation": "`shadow_decision_backends` / `route_at_boundary` compare candidates at task and phase boundaries and estimate whole-task cost honesty. Unavailable backends stay unavailable.\n\nCovers: RTE-01, RTE-02.",
+  "validation": "Kind `shadow_decision_backends` \u2192 `_run_shadow_decision_backends`. Unit: `tests/test_routing.py`.",
+  "footnotes": []
+}

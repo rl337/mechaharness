@@ -43,13 +43,13 @@ from mechaharness.core.events import (
     InMemoryEventLog,
     LoggingEventLog,
 )
-from mechaharness.core.outcomes import Completion, Generation
 from mechaharness.core.exceptions import (
     HarnessError,
     InferenceError,
     MechaHarnessError,
     ToolExecutionError,
 )
+from mechaharness.core.outcomes import Completion, Generation
 from mechaharness.core.types import (
     ChatMessage,
     CompletionRequest,

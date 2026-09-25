@@ -1,0 +1,10 @@
+{
+  "id": "fangore_bounded_repair_loop",
+  "persona": "fangore",
+  "title": "Bound verification repair loops to a fixed number of attempts",
+  "kind": "bounded_repair_loop",
+  "narrative": "After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed \u2014 it does not loop forever. Complements `fangore_convergence_ceiling` for judge loops.",
+  "implementation": "`bounded_repair` in `mechaharness.graph` runs verify \u2192 classify \u2192 permitted repair \u2192 retry until `max_attempts`. Judge scores remain supplementary to verifier evidence.\n\nCovers: VER-03.",
+  "validation": "Kind `bounded_repair_loop` \u2192 `_run_bounded_repair_loop`. Soft expects: succeeds within budget or fails after max attempts. Unit: `tests/test_graph.py`.",
+  "footnotes": []
+}

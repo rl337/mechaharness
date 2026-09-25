@@ -1,0 +1,15 @@
+{
+  "state": {"ticket": "double charge"},
+  "allowed_actions": ["billing", "technical"],
+  "invalid_choice": "pirate-crew",
+  "answers": {"route": "billing"},
+  "question": {
+    "kind": "choice",
+    "id": "route",
+    "instructions": "Which team owns this?",
+    "options": [
+      {"id": "billing", "description": "Billing"},
+      {"id": "technical", "description": "Technical"}
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "good_fixtures": ["ok1"],
+  "bad_fixtures": ["bad1"],
+  "missing_fixtures": ["missing"]
+}

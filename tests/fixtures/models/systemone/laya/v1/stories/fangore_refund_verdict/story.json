@@ -1,7 +1,17 @@
 {
   "id": "fangore_refund_verdict",
   "persona": "fangore",
-  "title": "Billing owns the double-charge",
+  "title": "Keep billing authority in product rules, not the model",
   "kind": "route_refund",
-  "narrative": "A customer was charged twice. Fangore\u2019s product rule is simple: only the billing\nteam may own that ticket \u2014 the model may *suggest*, but it must not grant\npermission. He runs the judge over the ticket text, then `JudgementPolicy`\ndecides ALLOW only when the route signal is billing. If the model picks\ntechnical, policy denies. He relates to this whenever business authority must\nstay in code, not in prompt vibes."
+  "narrative": "A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing \u2014 and a high quality score alone must not override missing completion evidence. See also `fangore_decision_surface_reject`.",
+  "implementation": "Provider-neutral judge types (`Choice`/`Score`/`Noul` questions and signals) plus `JudgementPolicy` / `decide()` apply configured thresholds. Judge scores are supplementary: policy owns ALLOW/DENY. Thresholds live in policy config per signal id. System One maps vendor wire into these types via `SystemOneJudgeProvider`.\n\nCovers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.",
+  "validation": "Kind `route_refund` \u2192 `_run_route_refund`. Soft expects: ALLOW for billing, DENY for technical. Unit: `tests/test_judgement_policy.py`, `tests/test_judge.py`.",
+  "footnotes": [
+    {
+      "id": "jev-decisions",
+      "label": "Jev decisions in a Pi harness",
+      "url": "https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness",
+      "note": "Routing, gating, batched questions, thresholds"
+    }
+  ]
 }

@@ -4,9 +4,19 @@ from __future__ import annotations
 
 from mechaharness.core.outcomes import Completion, Generation
 from mechaharness.core.types import ChatMessage, CompletionResponse, Role
-from mechaharness.inference.judge import Judgement, JudgeResult, JudgeProvenance, JudgeUsage
-from mechaharness.judgement_policy import JudgementFacts, JudgementPolicy, JudgementThreshold, decide
-from mechaharness.inference.judge import NoulSignal
+from mechaharness.inference.judge import (
+    Judgement,
+    JudgeProvenance,
+    JudgeResult,
+    JudgeUsage,
+    NoulSignal,
+)
+from mechaharness.judgement_policy import (
+    JudgementFacts,
+    JudgementPolicy,
+    JudgementThreshold,
+    decide,
+)
 
 
 def test_completion_aliases_completion_response() -> None:

@@ -1,0 +1,10 @@
+{
+  "id": "taloneth_validator_qualification",
+  "persona": "taloneth",
+  "title": "Qualify validators before they gate completion",
+  "kind": "validator_qualification",
+  "narrative": "Before a schema validator gates done, known-good, known-bad, and missing fixtures must run \u2014 including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see `fangore_refund_verdict`).",
+  "implementation": "`VerificationOracle` / `verify_node` define completion evidence; `qualify_validator` / `validator_qualified` reject always-pass mutants. Judge quality signals remain supplementary to evidence checks.\n\nCovers: VER-01, VER-04.",
+  "validation": "Kind `validator_qualification` \u2192 `_run_validator_qualification`. Unit: `tests/test_graph.py`.",
+  "footnotes": []
+}

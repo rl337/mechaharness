@@ -1,7 +1,10 @@
 {
   "id": "taloneth_systemone_cassette",
   "persona": "taloneth",
-  "title": "Pinning Laya\u2019s handwriting",
+  "title": "Pin System One adapter behavior to a versioned cassette",
   "kind": "systemone_cassette",
-  "narrative": "A new Laya build changes confidence fields in the System One JSON. Taloneth\nkeeps a **versioned cassette** of the wire response under `systemone/laya/v1`\nand replays it through `SystemOneJudgeProvider`. If mapping breaks, the story\nfails before silent drift ships. He relates to this whenever adapter code must\nstay pinned to a known model handwriting."
+  "narrative": "A new Laya build changes confidence fields. A versioned cassette must fail the story before silent adapter drift ships.",
+  "implementation": "`SystemOneJudgeProvider` maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (`get_judge_connection`, `get_judge_provider`).\n\nCovers: JDG wire map (System One).",
+  "validation": "Kind `systemone_cassette` \u2192 `_run_route_refund` with `systemone/laya/v1` cassette.",
+  "footnotes": []
 }

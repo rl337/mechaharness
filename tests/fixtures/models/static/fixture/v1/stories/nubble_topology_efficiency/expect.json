@@ -1,0 +1,6 @@
+{
+  "min_total_node_work_ms": 25,
+  "min_elapsed_ms": 15,
+  "work_exceeds_elapsed": true,
+  "notes_include": ["worker_count=2", "parallel_efficiency_not_comparable_without_serial_baseline"]
+}

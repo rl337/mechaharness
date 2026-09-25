@@ -1,0 +1,10 @@
+{
+  "id": "nubble_topology_efficiency",
+  "persona": "nubble",
+  "title": "Separate wall-clock speedup from total work and queue wait",
+  "kind": "topology_efficiency",
+  "narrative": "Nubble is asked whether parallel agents sped things up. Wall time dropped, but total work grew and queue waits hid under a vanity speedup. He needs metrics that separate critical path, total work, and elapsed time \u2014 and that refuse misleading efficiency claims without a serial baseline and worker-count note.",
+  "implementation": "`compute_topology_metrics` / `TopologySpan` in `mechaharness.decision_log` report critical path, total work, and elapsed time distinctly and reject vanity speedups that omit baselines.\n\nCovers: OBS-04.",
+  "validation": "Kind `topology_efficiency` \u2192 `_run_topology_efficiency`. Unit: `tests/test_decision_log.py`.",
+  "footnotes": []
+}
