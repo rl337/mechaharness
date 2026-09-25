@@ -1,0 +1,7 @@
+{
+  "id": "fangore_local_plan_resume",
+  "persona": "fangore",
+  "title": "The plan that survived the crash",
+  "kind": "local_plan_resume",
+  "narrative": "Fangore’s host fans out a local execution plan: produce a patch, then consume it under an exclusive write scope. Mid-dispatch the process dies. On restart there is no chat transcript — only EventLog checkpoints. He needs the graph to resume at the recorded boundary, keep justified data/resource edges, refuse stale preconditions, surface a failed fan-in branch, and refuse silent overwrite when two branches edit the same base. He relates to this whenever durable local DAGs must outlive a flaky worker without reconstructing progress from conversation."
+}

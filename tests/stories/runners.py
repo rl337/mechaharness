@@ -51,6 +51,35 @@ from mechaharness.judgement_policy import (
     decide,
 )
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
+from mechaharness.context_experiments import ContextCompiler
+from mechaharness.decision_log import (
+    DecisionRecord,
+    TopologySpan,
+    compute_topology_metrics,
+    export_offline_dataset,
+)
+from mechaharness.decision_surfaces import DecisionSurface, RulesDecisionBackend, reject_invalid_choice
+from mechaharness.graph import (
+    DependencyEdge,
+    ExecutionGraph,
+    FanInItem,
+    GraphNode,
+    GraphStore,
+    NodeStatus,
+    hierarchical_fan_in,
+    merge_branch_artifacts,
+    qualify_validator,
+    validator_qualified,
+)
+from mechaharness.operation_registry import (
+    NodeContractBind,
+    OperationContract,
+    ResourceScope,
+    default_operations,
+)
+from mechaharness.research import EvalProtocol, ResearchLab
+from mechaharness.routing import shadow_decision_backends
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
@@ -156,6 +185,15 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "grant_gate_write": _run_grant_gate_write,
         "config_access_policy": _run_config_access_policy,
         "fixture_judge_batch": _run_fixture_judge_batch,
+        "decision_surface_reject": _run_decision_surface_reject,
+        "convergence_ceiling": _run_convergence_ceiling,
+        "context_compiler_deficit": _run_context_compiler_deficit,
+        "local_plan_resume": _run_local_plan_resume,
+        "topology_efficiency": _run_topology_efficiency,
+        "shadow_decision_backends": _run_shadow_decision_backends,
+        "validator_qualification": _run_validator_qualification,
+        "atk_research_reject": _run_atk_research_reject,
+        "offline_decision_export": _run_offline_decision_export,
     }
     try:
         runner = runners[kind]
@@ -434,5 +472,286 @@ async def _run_fixture_judge_batch(case: StoryCase, backend: StoryBackend) -> No
         "min_answer_count": len(judgement.answers),
         "error_count": len(judgement.errors),
         "answer_ids_include": [a.id for a in judgement.answers],
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_decision_surface_reject(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    questions = _build_questions([request["question"]])
+    surface = DecisionSurface(
+        kind="choice",
+        question=questions[0],
+        allowed_actions=list(request.get("allowed_actions", [])),
+    )
+    backend_rules = RulesDecisionBackend(request.get("answers", {}))
+    result = await backend_rules.evaluate(surface, state=request.get("state", {}))
+    # Also reject an out-of-set proposal explicitly
+    from mechaharness.inference.judge import ChoiceSignal
+
+    invalid = reject_invalid_choice(
+        ChoiceSignal(
+            id=surface.question.id,
+            selected=request["invalid_choice"],
+            probabilities={request["invalid_choice"]: 1.0},
+        ),
+        request.get("allowed_actions", []),
+    )
+    actual = {
+        "rules_rejected": result.rejected,
+        "invalid_choice_rejected": invalid.rejected,
+        "rules_source_in": result.source,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_convergence_ceiling(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    contract = ConvergenceContract(**request["contract"])
+    guard = ConvergenceGuard(contract)
+    fingerprints = list(request.get("fingerprints", []))
+    for fp in fingerprints:
+        guard.tick(fingerprint=fp, elapsed_ms=float(request.get("elapsed_ms_per_tick", 1)))
+    actual = {
+        "terminal_in": guard.state.terminal,
+        "reason_in": guard.state.reason,
+        "success": guard.state.terminal == "success",
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_context_compiler_deficit(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    compiler = ContextCompiler(token_budget=int(request.get("token_budget", 8)))
+    compiled = compiler.compile(
+        state_revision=request.get("state_revision", "r1"),
+        operation=request.get("operation", "chat"),
+        sources=request.get("sources", {}),
+        mandatory=request.get("mandatory", []),
+        blockers=request.get("blockers", []),
+        verification_obligations=request.get("verification_obligations", []),
+    )
+    actual = {
+        "deficit": compiled.deficit,
+        "unresolved_gaps_include": compiled.manifest.unresolved_gaps,
+        "blockers_include": compiled.manifest.blockers,
+        "silent_truncate": (
+            not compiled.deficit
+            and any(m in compiled.manifest.omitted for m in request.get("mandatory", []))
+        ),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_local_plan_resume(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    ops = default_operations()
+    ops.register(
+        "write_file",
+        lambda **_: None,
+        contract=OperationContract(
+            name="write_file",
+            version="1",
+            write_scopes=[ResourceScope(name="app.py", mode="write")],
+            preconditions=["approved"],
+            external_effects="write",
+        ),
+    )
+    bind = NodeContractBind(
+        operation="write_file",
+        contract_version="1",
+        state_revision=request.get("state_revision", "r1"),
+        planned_effects="write",
+        evidence_refs=request.get("evidence_refs", []),
+    )
+    ops.bind_node(bind)
+    stale = ops.recheck_preconditions("write_file", satisfied=request.get("satisfied", []))
+
+    graph = ExecutionGraph(goal=request.get("goal", "ship patch"))
+    graph.add_node(
+        GraphNode(
+            id="produce",
+            status=NodeStatus.SUCCEEDED,
+            write_scopes=["app.py"],
+            payload={"path": "app.py", "content": "v1"},
+        )
+    )
+    graph.add_node(
+        GraphNode(
+            id="consume",
+            write_scopes=["app.py"],
+            status=NodeStatus.PENDING,
+        )
+    )
+    graph.add_dependency(
+        DependencyEdge(
+            from_node="produce",
+            to_node="consume",
+            types=["data", "resource"],
+            reason="consume needs produce output; exclusive write",
+            evidence_ref="edge:1",
+        )
+    )
+    store = GraphStore()
+    store.save(graph, run_id="story-graph", boundary="dispatch")
+    restored = store.latest(run_id="story-graph")
+    assert restored is not None
+    ready = [n.id for n in restored.ready_nodes()]
+    fan = hierarchical_fan_in(
+        [
+            FanInItem(id="ok", source_ref="b1", payload={"id": "x"}),
+            FanInItem(id="dup", source_ref="b2", payload={"id": "x"}),
+            FanInItem(id="bad", source_ref="b3", payload={"id": "y"}, failed=True),
+        ],
+        budget=int(request.get("fan_in_budget", 4)),
+    )
+    merged = merge_branch_artifacts(
+        base_revision="r0",
+        branches=request.get(
+            "branches",
+            [
+                {"path": "app.py", "content": "a", "status": "ok"},
+                {"path": "app.py", "content": "b", "status": "ok"},
+            ],
+        ),
+    )
+    actual = {
+        "stale_preconditions_include": stale,
+        "ready_include": ready,
+        "dependency_justified": all(e.reason and e.types for e in restored.edges),
+        "fan_in_failures_include": fan.failures,
+        "merge_conflicts_include": merged["conflicts"],
+        "recovery_boundary_in": store.latest_boundary(run_id="story-graph"),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_topology_efficiency(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    spans = [TopologySpan(**s) for s in request["spans"]]
+    metrics = compute_topology_metrics(
+        spans,
+        graph_version=request.get("graph_version", "1"),
+        worker_count=request.get("worker_count"),
+    )
+    actual = {
+        "min_total_node_work_ms": metrics.total_node_work_ms,
+        "min_elapsed_ms": metrics.elapsed_ms,
+        "work_exceeds_elapsed": metrics.total_node_work_ms > metrics.elapsed_ms,
+        "notes_include": metrics.notes,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_shadow_decision_backends(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    report = shadow_decision_backends(
+        state_hash=request.get("state_hash", "h"),
+        candidate_actions=request.get("candidate_actions", []),
+        evidence_refs=request.get("evidence_refs", []),
+        backends=request.get("backends", {}),
+    )
+    by_kind = {c.kind: c for c in report.candidates}
+    unavailable = [
+        k for k, c in by_kind.items() if not c.available and c.latency_ms is None
+    ]
+    actual = {
+        "unavailable_include": unavailable,
+        "available_include": [k for k, c in by_kind.items() if c.available],
+        "matched_actions_include": report.matched_inputs.get("candidate_actions", []),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_validator_qualification(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    def honest(item: str) -> str:
+        if item == "missing":
+            return "unknown"
+        return "pass" if item.startswith("ok") else "fail"
+
+    def always_pass(_item: str) -> str:
+        return "pass"
+
+    good = qualify_validator(
+        name="honest",
+        verifier=honest,
+        good_fixtures=request.get("good_fixtures", ["ok1"]),
+        bad_fixtures=request.get("bad_fixtures", ["bad1"]),
+        missing_fixtures=request.get("missing_fixtures", ["missing"]),
+    )
+    weak = qualify_validator(
+        name="weak",
+        verifier=always_pass,
+        good_fixtures=["ok"],
+        bad_fixtures=["bad"],
+    )
+    actual = {
+        "honest_qualified": validator_qualified(good),
+        "weak_qualified": validator_qualified(weak),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_atk_research_reject(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    lab = ResearchLab(
+        EvalProtocol(task_split=request.get("task_split", "story-atk")),
+        baseline_metric=float(request.get("baseline_metric", 0.9)),
+    )
+    for row in request.get("candidates", []):
+        cand = lab.propose(row["hypothesis"], row.get("change_set", {}))
+        lab.evaluate(
+            cand,
+            metric=float(row["metric"]),
+            safety_ok=bool(row.get("safety_ok", True)),
+            whole_task_cost=row.get("whole_task_cost"),
+            ablations=row.get("ablations"),
+        )
+    accepted = [c for c in lab.candidates if c.status.value == "accepted"]
+    if accepted:
+        lab.promote(accepted[0])
+    report = lab.report()
+    actual = {
+        "rejected_cheap_nonempty": bool(report.rejected_cheap_failures),
+        "promoted_nonempty": bool(report.promoted_id),
+        "negative_results_nonempty": bool(report.negative_results),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_offline_decision_export(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    records = [DecisionRecord.model_validate(r) for r in request.get("records", [])]
+    export = export_offline_dataset(
+        records,
+        split=request.get("split", "train"),
+        include_outcomes=bool(request.get("include_outcomes", False)),
+    )
+    outcome_ids = [r.get("outcomeId") for r in export.records]
+    actual = {
+        "record_count": len(export.records),
+        "outcomes_leaked": any(oid is not None for oid in outcome_ids),
+        "lineage_include": export.lineage,
+        "split_in": export.split,
     }
     _assert_expect(actual, expect)

@@ -1,0 +1,7 @@
+{
+  "id": "fangore_convergence_ceiling",
+  "persona": "fangore",
+  "title": "The loop that learned to stop",
+  "kind": "convergence_ceiling",
+  "narrative": "Fangore’s repair loop keeps asking the same judge the same question and getting the same shrug. Without a convergence contract, the agent burns budget until someone kills the process. He declares a versioned ceiling: identical fingerprints inside a short window are not progress, and hitting the ceiling must end as no_progress — never as a fake success. Nested repair shares a slice of the parent budget so a child cannot outspend the parent. He relates to this whenever an agent loop must remain finite even if the model never asks to stop."
+}

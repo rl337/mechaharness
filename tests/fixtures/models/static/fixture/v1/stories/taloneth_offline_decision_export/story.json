@@ -1,0 +1,7 @@
+{
+  "id": "taloneth_offline_decision_export",
+  "persona": "taloneth",
+  "title": "No peeking at tomorrow’s outcome",
+  "kind": "offline_decision_export",
+  "narrative": "Taloneth exports a decision trajectory for offline study. One run finished later with a delayed outcome id; another was interrupted. Decision-time features must reconstruct what the policy saw then — without leaking future outcomes into the training split by default. Missing labels stay missing, not coerced into failure. He relates to this whenever logged decisions feed research without inventing counterfactuals or chain-of-thought."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "fangore_decision_surface_reject",
+  "persona": "fangore",
+  "title": "A suggestion is not a key",
+  "kind": "decision_surface_reject",
+  "narrative": "Fangore wires a Choice surface so a triage model can propose which team owns a ticket. One night the model confidently returns an option that was never on the allowed set — a free-form team name invented mid-thought. He needs the decision plane to treat that as a rejected proposal, not as authority. Rules or an inference adapter may score the same surface, but only JudgementPolicy may unlock the next action. He relates to this whenever a host must keep Choice/Score/Noul as signals, never as automatic execution."
+}

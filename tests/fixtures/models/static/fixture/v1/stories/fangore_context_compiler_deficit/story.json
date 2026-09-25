@@ -1,0 +1,7 @@
+{
+  "id": "fangore_context_compiler_deficit",
+  "persona": "fangore",
+  "title": "The truncated oath",
+  "kind": "context_compiler_deficit",
+  "narrative": "Fangore’s agent must not quietly drop mandatory blockers just because the prompt budget is tight. He runs the context compiler with a tiny token budget and a mandatory policy oath that cannot fit. Success is a deficit report — unresolved gaps named, blockers preserved — not a silently shortened prompt that looks complete. Deterministic steps can skip a model prompt entirely. He relates to this whenever working context is an ephemeral view, never the only copy of obligations."
+}

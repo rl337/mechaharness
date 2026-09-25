@@ -119,3 +119,81 @@ def activate_scoped_policy(
     if not calibrated:
         return None
     return decide(facts, signals, policy)
+
+
+DecisionBackendKind = Literal[
+    "rules", "small_local", "reason_adapter", "systemone", "hybrid"
+]
+
+
+@dataclass
+class DecisionBackendCandidate:
+    kind: DecisionBackendKind
+    available: bool
+    latency_ms: float | None = None
+    decision_error: float | None = None
+    verified_success: float | None = None
+    whole_task_cost: float | None = None
+    exclusion_reason: str | None = None
+    notes: list[str] = field(default_factory=list)
+
+
+@dataclass
+class DecisionBackendShadowReport:
+    """RTE-01/02 shadow comparison on matched decision obligations."""
+
+    state_hash: str
+    candidates: list[DecisionBackendCandidate]
+    matched_inputs: dict[str, Any]
+    baseline_kind: DecisionBackendKind = "rules"
+
+
+def shadow_decision_backends(
+    *,
+    state_hash: str,
+    candidate_actions: Sequence[str],
+    evidence_refs: Sequence[str],
+    backends: Mapping[DecisionBackendKind, Mapping[str, Any]],
+) -> DecisionBackendShadowReport:
+    """Compare decision backends; unavailable → marked, never synthetic results."""
+    rows: list[DecisionBackendCandidate] = []
+    for kind, meta in backends.items():
+        available = bool(meta.get("available", False))
+        if not available:
+            rows.append(
+                DecisionBackendCandidate(
+                    kind=kind,
+                    available=False,
+                    exclusion_reason=str(meta.get("exclusion_reason", "unavailable")),
+                )
+            )
+            continue
+        rows.append(
+            DecisionBackendCandidate(
+                kind=kind,
+                available=True,
+                latency_ms=float(meta["latency_ms"]) if "latency_ms" in meta else None,
+                decision_error=(
+                    float(meta["decision_error"]) if "decision_error" in meta else None
+                ),
+                verified_success=(
+                    float(meta["verified_success"])
+                    if "verified_success" in meta
+                    else None
+                ),
+                whole_task_cost=(
+                    float(meta["whole_task_cost"])
+                    if "whole_task_cost" in meta
+                    else None
+                ),
+                notes=list(meta.get("notes", [])),
+            )
+        )
+    return DecisionBackendShadowReport(
+        state_hash=state_hash,
+        candidates=rows,
+        matched_inputs={
+            "candidate_actions": list(candidate_actions),
+            "evidence_refs": list(evidence_refs),
+        },
+    )

@@ -1,0 +1,23 @@
+{
+  "split": "train",
+  "include_outcomes": false,
+  "records": [
+    {
+      "eventId": "d1",
+      "stateHash": "h1",
+      "policyVersion": "p1",
+      "verdict": "ALLOW",
+      "outcomeId": "late-success",
+      "allowedCandidates": ["a", "b"],
+      "excludedCandidates": {"c": "unauthorized"}
+    },
+    {
+      "eventId": "d2",
+      "stateHash": "h2",
+      "policyVersion": "p1",
+      "verdict": "ASK_HUMAN",
+      "terminationReason": "interrupted",
+      "outcomeId": null
+    }
+  ]
+}

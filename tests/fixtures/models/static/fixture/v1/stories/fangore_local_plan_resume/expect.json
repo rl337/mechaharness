@@ -1,0 +1,8 @@
+{
+  "stale_preconditions_include": ["approved"],
+  "ready_include": ["consume"],
+  "dependency_justified": true,
+  "fan_in_failures_include": ["bad"],
+  "merge_conflicts_include": ["app.py"],
+  "recovery_boundary_in": ["dispatch"]
+}

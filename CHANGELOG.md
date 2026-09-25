@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- REQUIREMENTS.md addendum incorporation: decision plane, convergence, CTX-05–09,
+  GRF-05/06, VER-04, OBS-04, ATK-style EXP search; host track generalized to a
+  nameless local inference source
+- Library implementations: `OperationContract`, `ConvergenceGuard`, decision
+  surfaces, shadow decision-backend reports, context compiler / derived memory /
+  topology / cache layout, offline decision export, topology metrics, validator
+  qualification, hierarchical fan-in
+- Persona user stories for addendum acceptance paths (Nubble / Fangore / Taloneth;
+  no new persona): decision surface reject, convergence ceiling, context deficit,
+  local plan resume, topology efficiency, shadow backends, validator qualification,
+  ATK reject, offline decision export
+
 ### Changed
 
 - Keep `docs/adr/` local-only (gitignored; purged from git history; not published)

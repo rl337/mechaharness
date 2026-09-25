@@ -1,0 +1,7 @@
+{
+  "id": "taloneth_validator_qualification",
+  "persona": "taloneth",
+  "title": "Trust, but mutate the checker",
+  "kind": "validator_qualification",
+  "narrative": "Taloneth is about to promote a new schema validator into required completion evidence. Before it can gate DONE, he runs known-good, known-bad, and missing fixtures — including a deliberately weakened always-pass checker. The honest validator qualifies; the weak one must fail qualification. A passing schema with wrong behavior is not success, and research candidates cannot rewrite their own evaluator. He relates to this whenever verification oracles need bounded coverage proof, not vibes."
+}
