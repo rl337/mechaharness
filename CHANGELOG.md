@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.1] — 2026-09-25
+## [0.1.2] — 2026-09-25
+
+PyPI cut of the #12 requirements-addendum library (GitHub also tagged `v0.1.1`
+for the intermediate TestPyPI upload; production skipped that number after
+auto-bump raced the publish).
 
 ### Added
 
