@@ -187,14 +187,21 @@ pytest<span class="w"> </span>-q
 <h2>Nubble’s stories<a class="headerlink" href="#nubble-s-stories" title="Link to this heading"></a></h2>
 <section id="nubble-ci-static-smoke-prove-the-http-adapter-in-ci-without-a-live-model-host">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_ci_static_smoke</span></code> — Prove the HTTP adapter in CI without a live model host<a class="headerlink" href="#nubble-ci-static-smoke-prove-the-http-adapter-in-ci-without-a-live-model-host" title="Link to this heading"></a></h3>
-<p>It is late and the local inference host is offline for maintenance, but a pull request still needs green CI. Nubble refuses to block merges on network reachability. He wants the OpenAI-compatible path proven from a cassette — a recorded reply replayed through the real HTTP client — so the pipeline stays honest about wire shape without needing a live model. When static CI is green, the adapter is safe to merge; when someone breaks the adapter, CI fails before production.</p>
+<p>The local inference host is offline, but a pull request still needs green CI. Nubble wants the OpenAI-compatible path proven from a cassette — a recorded reply replayed through the real HTTP client — so merges do not depend on LAN reachability.</p>
 <section id="implementation">
 <h4>Implementation<a class="headerlink" href="#implementation" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">OpenAICompatStrategy</span></code> implements the OpenAI-compatible chat completions wire against <code class="docutils literal notranslate"><span class="pre">httpx</span></code>, shared by named backends (openai, vllm, ollama, lmstudio, junespark). The strategy is a real HTTP client path: request and response shapes are part of the library contract, not a test double. Hosts bind it through <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> / <code class="docutils literal notranslate"><span class="pre">Settings</span></code> backend selection.</p>
+<p><code class="docutils literal notranslate"><span class="pre">OpenAICompatStrategy</span></code> implements Chat Completions HTTP for reason-lane backends. Cassette replay exercises the real client path so adapter wire shape stays honest in CI.</p>
+<p>Covers: offline CI / OpenAI-compat smoke.</p>
 </section>
 <section id="validation">
 <h4>Validation<a class="headerlink" href="#validation" title="Link to this heading"></a></h4>
-<p>Same kind <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> on <code class="docutils literal notranslate"><span class="pre">openai_compat</span></code> model trees. Static mode mounts recorded <code class="docutils literal notranslate"><span class="pre">response.json</span></code> via httpx mock transport so the real strategy code runs. Soft expects: non-empty assistant text. Live mode: <code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> against <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>. Cassette fixtures under <code class="docutils literal notranslate"><span class="pre">tests/fixtures/models/openai_compat/*/v1/stories/nubble_ci_static_smoke/</span></code>.</p>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> on <code class="docutils literal notranslate"><span class="pre">openai_compat</span></code> trees with mock transport. Soft expects: non-empty assistant text. Live: <code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code>.</p>
+</section>
+<section id="footnotes">
+<h4>Footnotes<a class="headerlink" href="#footnotes" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://platform.openai.com/docs/api-reference/chat">OpenAI Chat Completions</a> — Wire models for reason-lane HTTP</p></li>
+</ol>
 </section>
 </section>
 <section id="nubble-lane-load-hint-refuse-work-when-the-wrong-inference-profile-is-loaded">
@@ -202,122 +209,247 @@ pytest<span class="w"> </span>-q
 <p>Nubble is on call when a refund-routing job fails on the local inference host. The job needs the judge profile, but an earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error. It must tell him, in plain operator language, that this work needs the judge lane and which load command to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile mismatch wastes incident time.</p>
 <section id="id1">
 <h4>Implementation<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code> (and <code class="docutils literal notranslate"><span class="pre">NoOpInferenceEnvironment</span></code> for hosts that do not probe) gates work by exclusive lane: reason, decide/judge, and media must not run under the wrong active profile. When the required lane is cold, the environment raises <code class="docutils literal notranslate"><span class="pre">InferenceEnvironmentError</span></code> with an operator-facing message that includes the host load hint from <code class="docutils literal notranslate"><span class="pre">DEFAULT_LANE_LOAD_HINTS</span></code> (for example <code class="docutils literal notranslate"><span class="pre">infer</span> <span class="pre">load</span> <span class="pre">decide-fast</span></code>). Lane constants live in <code class="docutils literal notranslate"><span class="pre">mechaharness.core.environment</span></code> (<code class="docutils literal notranslate"><span class="pre">LANE_REASON</span></code>, <code class="docutils literal notranslate"><span class="pre">LANE_JUDGE</span></code> / decide, <code class="docutils literal notranslate"><span class="pre">LANE_MEDIA</span></code>). Hosts override probing via Config hooks that supply a real environment instead of the no-op.</p>
+<p>Exclusive lanes (reason / decide-judge / media) on <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code> refuse cross-lane work and surface load hints (<code class="docutils literal notranslate"><span class="pre">DEFAULT_LANE_LOAD_HINTS</span></code>). This is the operator-facing half of decide-versus-reason profile discipline: bounded judge work must not run under a generative reason profile. Hosts supply a real environment via Config instead of <code class="docutils literal notranslate"><span class="pre">NoOpInferenceEnvironment</span></code>.</p>
+<p>Covers: INF-02.</p>
 </section>
 <section id="id2">
 <h4>Validation<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
-<p>Story kind <code class="docutils literal notranslate"><span class="pre">wrong_lane_deny</span></code> → <code class="docutils literal notranslate"><span class="pre">tests/stories/runners.py</span></code> <code class="docutils literal notranslate"><span class="pre">_run_wrong_lane_deny</span></code>. Soft expects in <code class="docutils literal notranslate"><span class="pre">expect.json</span></code> require non-empty error text naming the required lane / load hint. Related unit coverage: <code class="docutils literal notranslate"><span class="pre">tests/test_environment.py</span></code>.</p>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">wrong_lane_deny</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_wrong_lane_deny</span></code>. Soft expects: non-empty error naming the required lane / load hint. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_environment.py</span></code>.</p>
+</section>
+</section>
+<section id="nubble-model-affinity-keep-model-affinity-inside-a-coherent-work-loop">
+<h3><code class="docutils literal notranslate"><span class="pre">nubble_model_affinity</span></code> — Keep model affinity inside a coherent work loop<a class="headerlink" href="#nubble-model-affinity-keep-model-affinity-inside-a-coherent-work-loop" title="Link to this heading"></a></h3>
+<p>Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch. Random lane thrash must not win on unit price alone.</p>
+<section id="id3">
+<h4>Implementation<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">route_at_boundary</span></code> selects lanes at task/phase boundaries; <code class="docutils literal notranslate"><span class="pre">activate_scoped_policy</span></code> activates judgement policy only when calibration criteria are met — affinity and activation stay behind evaluation, not cheapest unit price.</p>
+<p>Covers: RTE-03.</p>
+</section>
+<section id="id4">
+<h4>Validation<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">model_affinity</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_model_affinity</span></code>. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_routing.py</span></code>.</p>
+</section>
+</section>
+<section id="nubble-repo-topology-budget-repository-topology-maps-and-fall-back-when-stale">
+<h3><code class="docutils literal notranslate"><span class="pre">nubble_repo_topology</span></code> — Budget repository topology maps and fall back when stale<a class="headerlink" href="#nubble-repo-topology-budget-repository-topology-maps-and-fall-back-when-stale" title="Link to this heading"></a></h3>
+<p>Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback — not pretend the map is complete.</p>
+<section id="id5">
+<h4>Implementation<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">RepositoryTopologyProvider</span></code> builds budgeted <code class="docutils literal notranslate"><span class="pre">TopologyView</span></code> entries with omissions and invalidation; stale maps fall back to source inspection.</p>
+<p>Covers: CTX-08.</p>
+</section>
+<section id="id6">
+<h4>Validation<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">repo_topology</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_repo_topology</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
 </section>
 <section id="nubble-run-cost-events-record-cost-and-inference-events-for-every-harness-run">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_run_cost_events</span></code> — Record cost and inference events for every harness run<a class="headerlink" href="#nubble-run-cost-events-record-cost-and-inference-events-for-every-harness-run" title="Link to this heading"></a></h3>
-<p>Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units — the same signals he would forward to billing or a Grafana panel. If those events are missing, operations is flying blind. If they are present, he trusts the ledger enough to alert on it.</p>
-<section id="id3">
-<h4>Implementation<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
-<p>Harness runs emit structured events on <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>: inference completion and cost accounting via <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code> / <code class="docutils literal notranslate"><span class="pre">InMemoryCostAccountant</span></code> producing <code class="docutils literal notranslate"><span class="pre">core:cost</span></code> (and <code class="docutils literal notranslate"><span class="pre">core:inference</span></code>) with ability-scaled units. <code class="docutils literal notranslate"><span class="pre">PassThroughHarness</span></code> (and other families) sit on the same path so every run records ledger signals without a separate billing bolt-on. Event types are host-extendable under the <code class="docutils literal notranslate"><span class="pre">core:</span></code> namespace in <code class="docutils literal notranslate"><span class="pre">mechaharness.core.events</span></code>.</p>
+<p>Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units — the same signals he would forward to billing or a Grafana panel.</p>
+<section id="id7">
+<h4>Implementation<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<p>Harness runs emit structured <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> records for inference and cost (<code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code> / <code class="docutils literal notranslate"><span class="pre">core:cost</span></code>, <code class="docutils literal notranslate"><span class="pre">core:inference</span></code>). This is the baseline observability stream for every run — decisions, routing, and tools extend the same log rather than a separate ledger.</p>
+<p>Covers: OBS-01.</p>
 </section>
-<section id="id4">
-<h4>Validation<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
-<p>Story kind <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_pass_through</span></code>. In-process uses <code class="docutils literal notranslate"><span class="pre">ScriptedInference</span></code> + <code class="docutils literal notranslate"><span class="pre">PassThroughHarness</span></code> + <code class="docutils literal notranslate"><span class="pre">InMemoryEventLog</span></code>; <code class="docutils literal notranslate"><span class="pre">openai_compat</span></code> twins replay cassette HTTP through <code class="docutils literal notranslate"><span class="pre">OpenAICompatStrategy</span></code>. Soft expects: <code class="docutils literal notranslate"><span class="pre">core:inference</span></code> and <code class="docutils literal notranslate"><span class="pre">core:cost</span></code> present with non-zero units. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_events.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_harness.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_pass_through.py</span></code>.</p>
+<section id="id8">
+<h4>Validation<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_pass_through</span></code>. Soft expects: inference and cost events with non-zero units. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_events.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_pass_through.py</span></code>.</p>
 </section>
 </section>
 <section id="nubble-topology-efficiency-separate-wall-clock-speedup-from-total-work-and-queue-wait">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_topology_efficiency</span></code> — Separate wall-clock speedup from total work and queue wait<a class="headerlink" href="#nubble-topology-efficiency-separate-wall-clock-speedup-from-total-work-and-queue-wait" title="Link to this heading"></a></h3>
-<p>Nubble is asked whether parallel agents sped things up. Elapsed wall time dropped, but total node work grew and queue waits hid under a vanity speedup number. He needs topology metrics that separate critical path, total work, and elapsed time — and that refuse a misleading efficiency claim without a serial baseline and an honest worker-count note. He uses this whenever operations must explain cost and concurrency without overselling parallelism.</p>
-<section id="id5">
-<h4>Implementation<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log.compute_topology_metrics</span></code> (and related <code class="docutils literal notranslate"><span class="pre">TopologySpan</span></code> / topology metric types) compute critical path, total work, and elapsed time as distinct quantities. Efficiency claims that omit a serial baseline or worker-count context are rejected so operations cannot publish vanity speedups. This is library observability for plan/graph execution, not a dashboard product.</p>
+<p>Nubble is asked whether parallel agents sped things up. Wall time dropped, but total work grew and queue waits hid under a vanity speedup. He needs metrics that separate critical path, total work, and elapsed time — and that refuse misleading efficiency claims without a serial baseline and worker-count note.</p>
+<section id="id9">
+<h4>Implementation<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">compute_topology_metrics</span></code> / <code class="docutils literal notranslate"><span class="pre">TopologySpan</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log</span></code> report critical path, total work, and elapsed time distinctly and reject vanity speedups that omit baselines.</p>
+<p>Covers: OBS-04.</p>
 </section>
-<section id="id6">
-<h4>Validation<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">topology_efficiency</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_topology_efficiency</span></code> with synthetic spans in <code class="docutils literal notranslate"><span class="pre">request.json</span></code>. Soft expects reject vanity speedup without baseline/worker notes. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_log.py</span></code>.</p>
+<section id="id10">
+<h4>Validation<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">topology_efficiency</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_topology_efficiency</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_log.py</span></code>.</p>
 </section>
 </section>
 </section>
 <section id="fangore-s-stories">
 <h2>Fangore’s stories<a class="headerlink" href="#fangore-s-stories" title="Link to this heading"></a></h2>
+<section id="fangore-bounded-repair-loop-bound-verification-repair-loops-to-a-fixed-number-of-attempts">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code> — Bound verification repair loops to a fixed number of attempts<a class="headerlink" href="#fangore-bounded-repair-loop-bound-verification-repair-loops-to-a-fixed-number-of-attempts" title="Link to this heading"></a></h3>
+<p>After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed — it does not loop forever. Complements <code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code> for judge loops.</p>
+<section id="id11">
+<h4>Implementation<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">bounded_repair</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph</span></code> runs verify → classify → permitted repair → retry until <code class="docutils literal notranslate"><span class="pre">max_attempts</span></code>. Judge scores remain supplementary to verifier evidence.</p>
+<p>Covers: VER-03.</p>
+</section>
+<section id="id12">
+<h4>Validation<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">bounded_repair_loop</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_bounded_repair_loop</span></code>. Soft expects: succeeds within budget or fails after max attempts. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>.</p>
+</section>
+</section>
 <section id="fangore-compound-grants-compose-read-only-and-write-permission-packs">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code> — Compose read-only and write permission packs<a class="headerlink" href="#fangore-compound-grants-compose-read-only-and-write-permission-packs" title="Link to this heading"></a></h3>
-<p>Fangore is building a host app that must not let agents write the filesystem by default. He starts with a read-only permission pack — the write tool is refused, which proves deny-by-default works. Later he composes that pack with a write pack into one reusable set, and the same tool succeeds. He uses this whenever an app needs reusable permission packs instead of copy-pasted grant lists.</p>
-<section id="id7">
-<h4>Implementation<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> is a deny-by-default grant list (<code class="docutils literal notranslate"><span class="pre">grants</span></code> coerced via <code class="docutils literal notranslate"><span class="pre">grant_key</span></code>). <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> unions multiple <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers into one reusable allow-list (first-seen order, overlaps idempotent). <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> / <code class="docutils literal notranslate"><span class="pre">InMemoryAccessControl</span></code> enforces required grants for tool invocations and emits <code class="docutils literal notranslate"><span class="pre">core:access_check</span></code> events. Named grants such as <code class="docutils literal notranslate"><span class="pre">FsWrite</span></code> live in <code class="docutils literal notranslate"><span class="pre">mechaharness.core.access</span></code>.</p>
+<p>Fangore’s host app must not let agents write the filesystem by default. A read-only pack refuses the write tool; composing it with a write pack allows the same tool. He needs reusable permission packs instead of copy-pasted lists.</p>
+<section id="id13">
+<h4>Implementation<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> deny-by-default grants; <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> unions packs; <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> enforces tool grants and emits access-check events. This is the permission half of tool gating — every tool call must pass access before side effects.</p>
+<p>Covers: host compound grants.</p>
 </section>
-<section id="id8">
-<h4>Validation<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">grant_gate_write</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_grant_gate_write</span></code>. Soft expects: write denied under read-only policy, then allowed after <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> composition. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_access.py</span></code>.</p>
+<section id="id14">
+<h4>Validation<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">grant_gate_write</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_grant_gate_write</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_access.py</span></code>.</p>
 </section>
 </section>
 <section id="fangore-config-access-policy-let-the-host-app-supply-its-own-permission-policy">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_config_access_policy</span></code> — Let the host app supply its own permission policy<a class="headerlink" href="#fangore-config-access-policy-let-the-host-app-supply-its-own-permission-policy" title="Link to this heading"></a></h3>
-<p>Fangore’s product needs a host app whose permission rules are defined by the application, not by copying grant lists into every agent constructor. He configures the harness once so the app’s composed permission packs — as in <code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code> — are what the harness enforces. Success: the injected access control already honors those packs. He uses this whenever a host must stay configuration-first instead of sprinkling grants by hand.</p>
-<section id="id9">
-<h4>Implementation<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (pyiv) owns DI wiring. Hosts subclass Config and override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> to return an <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> or <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code>; <code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code> builds <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> from that policy and the event log. Default <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> is deny-by-default empty. This is the library extension point for host permission packs — not a service locator bag of grants on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>.</p>
+<p>Fangore’s product needs permission rules defined by the application. He configures the harness once so composed packs from <code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code> are what the harness enforces.</p>
+<section id="id15">
+<h4>Implementation<a class="headerlink" href="#id15" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> hooks (<code class="docutils literal notranslate"><span class="pre">get_access_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">get_access_control</span></code>, <code class="docutils literal notranslate"><span class="pre">get_grants</span></code>) bind host permission packs through pyiv injection — not Settings bags or hand-wired constructors.</p>
+<p>Covers: host DI access policy.</p>
 </section>
-<section id="id10">
-<h4>Validation<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">config_access_policy</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_config_access_policy</span></code>. Soft expects: injector-resolved <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> honors the host <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code>. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_di.py</span></code>, access/compound policy unit tests.</p>
+<section id="id16">
+<h4>Validation<a class="headerlink" href="#id16" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">config_access_policy</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_config_access_policy</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_di.py</span></code>.</p>
+</section>
+<section id="id17">
+<h4>Footnotes<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://rl337.org/pyiv/">pyiv</a> — Config-hook dependency injection</p></li>
+</ol>
 </section>
 </section>
 <section id="fangore-context-compiler-deficit-report-context-deficits-instead-of-silent-truncation">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_context_compiler_deficit</span></code> — Report context deficits instead of silent truncation<a class="headerlink" href="#fangore-context-compiler-deficit-report-context-deficits-instead-of-silent-truncation" title="Link to this heading"></a></h3>
-<p>Fangore’s agent must not quietly drop mandatory blockers just because the prompt budget is tight. He runs context compilation with a tiny token budget and a mandatory policy requirement that cannot fit. Success is a deficit report — unresolved gaps named, blockers preserved — not a silently shortened prompt that looks complete. Deterministic steps can skip a model prompt entirely. He uses this whenever working context is a temporary view, never the only copy of obligations.</p>
-<section id="id11">
-<h4>Implementation<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ContextCompiler</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.context_experiments</span></code> builds a <code class="docutils literal notranslate"><span class="pre">ContextManifest</span></code> (compiler version, token estimate, unresolved gaps). When mandatory material exceeds budget, gaps are named rather than silently truncated. Supporting CTX experiment primitives (derived memory, topology views, cache layout) are independent toggles on the same module.</p>
+<p>Mandatory blockers must not disappear when the prompt budget is tight. Success is a deficit report with unresolved gaps named. Related observation chain: <code class="docutils literal notranslate"><span class="pre">fangore_context_observation_chain</span></code>.</p>
+<section id="id18">
+<h4>Implementation<a class="headerlink" href="#id18" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ContextCompiler</span></code> builds a versioned <code class="docutils literal notranslate"><span class="pre">ContextManifest</span></code> with token estimates and unresolved gaps. Working context is ephemeral; obligations stay in authoritative stores.</p>
+<p>Covers: CTX-05.</p>
 </section>
-<section id="id12">
-<h4>Validation<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">context_compiler_deficit</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_context_compiler_deficit</span></code>. Soft expects: deficit / unresolved gaps reported; blockers not omitted. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
+<section id="id19">
+<h4>Validation<a class="headerlink" href="#id19" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">context_compiler_deficit</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_context_compiler_deficit</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
+</section>
+<section id="id20">
+<h4>Footnotes<a class="headerlink" href="#id20" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/2609.20519">SoL-Pi</a> — Empirical harness optimization and context mechanisms to evaluate</p></li>
+</ol>
+</section>
+</section>
+<section id="fangore-context-observation-chain-keep-original-observations-and-refuse-fabricated-reductions">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_context_observation_chain</span></code> — Keep original observations and refuse fabricated reductions<a class="headerlink" href="#fangore-context-observation-chain-keep-original-observations-and-refuse-fabricated-reductions" title="Link to this heading"></a></h3>
+<p>Tool output must stay addressable as an immutable observation. A cheaper summary is allowed only when it points at a real observation; fabricated receipts must fail lookup. Compaction happens at semantic boundaries, and action fusion only for predeclared sequences. Compiler deficits remain <code class="docutils literal notranslate"><span class="pre">fangore_context_compiler_deficit</span></code>.</p>
+<section id="id21">
+<h4>Implementation<a class="headerlink" href="#id21" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ObservationStore</span></code> / <code class="docutils literal notranslate"><span class="pre">ObservationRef</span></code>, <code class="docutils literal notranslate"><span class="pre">reduce_evidence</span></code>, <code class="docutils literal notranslate"><span class="pre">compact_at_boundary</span></code>, and <code class="docutils literal notranslate"><span class="pre">fuse_actions</span></code> under <code class="docutils literal notranslate"><span class="pre">CtxFlags</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.context_experiments</span></code>.</p>
+<p>Covers: CTX-01, CTX-02, CTX-03, CTX-04.</p>
+</section>
+<section id="id22">
+<h4>Validation<a class="headerlink" href="#id22" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">context_observation_chain</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_context_observation_chain</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
 </section>
 <section id="fangore-convergence-ceiling-stop-agent-loops-that-make-no-progress">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code> — Stop agent loops that make no progress<a class="headerlink" href="#fangore-convergence-ceiling-stop-agent-loops-that-make-no-progress" title="Link to this heading"></a></h3>
-<p>Fangore’s repair loop keeps asking the same judge the same question and getting the same answer. Without a convergence contract, the agent burns budget until someone kills the process. He declares a versioned ceiling: identical fingerprints inside a short window are not progress, and hitting the ceiling must end as no-progress — never as a fake success. Nested repair shares a slice of the parent budget so a child cannot outspend the parent. He uses this whenever an agent loop must remain finite even if the model never asks to stop.</p>
-<section id="id13">
-<h4>Implementation<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ConvergenceContract</span></code> and <code class="docutils literal notranslate"><span class="pre">ConvergenceGuard</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.convergence</span></code> track fingerprints over a window and enforce a versioned ceiling. Terminal status includes <code class="docutils literal notranslate"><span class="pre">no_progress</span></code> (never success-on-stall). Nested guards inherit a budget slice from the parent so child repair cannot outspend the parent contract (POL-03).</p>
+<p>Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget.</p>
+<section id="id23">
+<h4>Implementation<a class="headerlink" href="#id23" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ConvergenceContract</span></code> / <code class="docutils literal notranslate"><span class="pre">ConvergenceGuard</span></code> fingerprint windows and nested budget slices. Escalation may request more evidence, but ceilings never count as task success.</p>
+<p>Covers: POL-03.</p>
 </section>
-<section id="id14">
-<h4>Validation<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">convergence_ceiling</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_convergence_ceiling</span></code>. Soft expects: ceiling trip yields <code class="docutils literal notranslate"><span class="pre">no_progress</span></code>. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_convergence.py</span></code>.</p>
+<section id="id24">
+<h4>Validation<a class="headerlink" href="#id24" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">convergence_ceiling</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_convergence_ceiling</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_convergence.py</span></code>.</p>
 </section>
 </section>
 <section id="fangore-decision-surface-reject-reject-model-choices-that-are-not-on-the-allowed-list">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_decision_surface_reject</span></code> — Reject model choices that are not on the allowed list<a class="headerlink" href="#fangore-decision-surface-reject-reject-model-choices-that-are-not-on-the-allowed-list" title="Link to this heading"></a></h3>
-<p>Fangore sets up a choice surface so a triage model can propose which team owns a ticket. One night the model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal, not as authority to act. Scoring adapters may evaluate the same surface, but only product judgement policy may unlock the next action — the same split as <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>. He uses this whenever choice, score, or yes/no signals must stay suggestions, never automatic execution.</p>
-<section id="id15">
-<h4>Implementation<a class="headerlink" href="#id15" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">mechaharness.decision_surfaces</span></code> defines named decision-plane surfaces (<code class="docutils literal notranslate"><span class="pre">DecisionSurface</span></code>, Choice/Score/Noul kinds) over judge signal types. <code class="docutils literal notranslate"><span class="pre">reject_invalid_choice</span></code> and <code class="docutils literal notranslate"><span class="pre">RulesDecisionBackend</span></code> treat out-of-set selections as rejected proposals. Surfaces produce signals for <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code>; they do not execute side effects or unlock actions.</p>
+<p>A triage model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal. Only product judgement policy may unlock the next action — same split as <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>.</p>
+<section id="id25">
+<h4>Implementation<a class="headerlink" href="#id25" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">DecisionSurface</span></code> / <code class="docutils literal notranslate"><span class="pre">reject_invalid_choice</span></code> / <code class="docutils literal notranslate"><span class="pre">RulesDecisionBackend</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_surfaces</span></code> name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects.</p>
+<p>Covers: POL-01.</p>
 </section>
-<section id="id16">
-<h4>Validation<a class="headerlink" href="#id16" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">decision_surface_reject</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_decision_surface_reject</span></code>. Soft expects: invalid option flagged rejected; no automatic unlock. Related unit coverage alongside decision surface / judgement policy tests.</p>
+<section id="id26">
+<h4>Validation<a class="headerlink" href="#id26" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">decision_surface_reject</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_decision_surface_reject</span></code>.</p>
+</section>
+</section>
+<section id="fangore-derived-memory-rebuild-derived-memory-without-letting-rank-invent-authority">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_derived_memory</span></code> — Rebuild derived memory without letting rank invent authority<a class="headerlink" href="#fangore-derived-memory-rebuild-derived-memory-without-letting-rank-invent-authority" title="Link to this heading"></a></h3>
+<p>When derived memory is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval rank must not confer authority over approval rules.</p>
+<section id="id27">
+<h4>Implementation<a class="headerlink" href="#id27" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">DerivedMemoryStore</span></code> / <code class="docutils literal notranslate"><span class="pre">DerivedMemoryRecord</span></code> separate provenance, validity, and retrieval priority. Consolidation is optional and idempotent; <code class="docutils literal notranslate"><span class="pre">retrieval_candidates</span></code> must not elevate non-authoritative rumors.</p>
+<p>Covers: CTX-06, CTX-07.</p>
+</section>
+<section id="id28">
+<h4>Validation<a class="headerlink" href="#id28" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">derived_memory</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_derived_memory</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
+</section>
+</section>
+<section id="fangore-human-review-pending-hold-mutations-until-a-matching-human-approval-exists">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_human_review_pending</span></code> — Hold mutations until a matching human approval exists<a class="headerlink" href="#fangore-human-review-pending-hold-mutations-until-a-matching-human-approval-exists" title="Link to this heading"></a></h3>
+<p>Fangore’s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human — not allow.</p>
+<section id="id29">
+<h4>Implementation<a class="headerlink" href="#id29" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">JudgementPolicy.require_approval_for</span></code> plus <code class="docutils literal notranslate"><span class="pre">JudgementFacts.approvals</span></code> / <code class="docutils literal notranslate"><span class="pre">action_digest</span></code> in <code class="docutils literal notranslate"><span class="pre">decide()</span></code>: missing approval yields <code class="docutils literal notranslate"><span class="pre">ASK_HUMAN</span></code> with <code class="docutils literal notranslate"><span class="pre">MISSING_APPROVAL</span></code>. Approvals bind to executed args via digest keys.</p>
+<p>Covers: POL-04, GAT-04.</p>
+</section>
+<section id="id30">
+<h4>Validation<a class="headerlink" href="#id30" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">human_review_pending</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_human_review_pending</span></code>. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in <code class="docutils literal notranslate"><span class="pre">tests/test_judgement_policy.py</span></code>.</p>
 </section>
 </section>
 <section id="fangore-local-plan-resume-resume-a-durable-local-plan-after-a-crash">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_local_plan_resume</span></code> — Resume a durable local plan after a crash<a class="headerlink" href="#fangore-local-plan-resume-resume-a-durable-local-plan-after-a-crash" title="Link to this heading"></a></h3>
-<p>Fangore’s host fans out a local execution plan: produce a patch, then consume it under an exclusive write scope. Midway through dispatch the process dies. On restart there is no chat transcript — only recorded checkpoints. He needs the plan to resume at the recorded boundary, keep justified data and resource edges, refuse stale preconditions, surface a failed fan-in branch, and refuse silent overwrite when two branches edit the same base. He uses this whenever durable local plans must outlive a flaky worker without reconstructing progress from conversation.</p>
-<section id="id17">
-<h4>Implementation<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ExecutionGraph</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphNode</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code>, and recovery boundaries in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph</span></code> persist plan state through <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> checkpoints (planning / dispatch / post_effect_pre_record / reduce / commit). Dependency edges, hierarchical fan-in, merge conflict refusal, and verifier/oracle hooks support durable local DAGs (GRF/VER). Operation contracts bind nodes via <code class="docutils literal notranslate"><span class="pre">mechaharness.operation_registry</span></code>.</p>
+<p>A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints — not chat — must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes.</p>
+<section id="id31">
+<h4>Implementation<a class="headerlink" href="#id31" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">OperationContract</span></code> / <code class="docutils literal notranslate"><span class="pre">OperationRegistry</span></code> register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. <code class="docutils literal notranslate"><span class="pre">ExecutionGraph</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> persist goal, nodes, and justified dependency edges on <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> with recovery boundaries; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.</p>
+<p>Covers: INF-01, INF-03, GRF-01, GRF-02, GRF-03, GRF-04, GRF-05, GRF-06.</p>
 </section>
-<section id="id18">
-<h4>Validation<a class="headerlink" href="#id18" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">local_plan_resume</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_local_plan_resume</span></code>. Soft expects: resume at recorded boundary; stale preconditions / fan-in failure / merge refusal as configured in fixtures. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_operation_registry.py</span></code>.</p>
+<section id="id32">
+<h4>Validation<a class="headerlink" href="#id32" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">local_plan_resume</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_local_plan_resume</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_operation_registry.py</span></code>.</p>
+</section>
+<section id="id33">
+<h4>Footnotes<a class="headerlink" href="#id33" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://medium.com/&#64;neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23">Loop vs graph engineering</a> — Explicit control flow; MechaHarness extends into execution graphs</p></li>
+</ol>
 </section>
 </section>
 <section id="fangore-refund-verdict-keep-billing-authority-in-product-rules-not-the-model">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code> — Keep billing authority in product rules, not the model<a class="headerlink" href="#fangore-refund-verdict-keep-billing-authority-in-product-rules-not-the-model" title="Link to this heading"></a></h3>
-<p>A customer was charged twice. Fangore’s product rule is simple: only the billing team may own that ticket. The model may suggest a team, but it must not grant permission. He runs the judge over the ticket text, then product policy allows only when the route signal is billing. If the model picks technical support, policy denies. Builds on the idea that suggestions are not authority — see also <code class="docutils literal notranslate"><span class="pre">fangore_decision_surface_reject</span></code>. He uses this whenever business authority must stay in product rules, not prompt wording.</p>
-<section id="id19">
-<h4>Implementation<a class="headerlink" href="#id19" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">judge()</span></code> collects closed-world signals (<code class="docutils literal notranslate"><span class="pre">ChoiceSignal</span></code>, <code class="docutils literal notranslate"><span class="pre">ScoreSignal</span></code>, <code class="docutils literal notranslate"><span class="pre">NoulSignal</span></code>) via a <code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code>. Product authority is <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> + <code class="docutils literal notranslate"><span class="pre">decide()</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.judgement_policy</span></code>: thresholds over signal ids (for example choice <code class="docutils literal notranslate"><span class="pre">route</span></code>) yield ALLOW/DENY with reason codes. The model never unlocks the next action by itself — policy does. System One mapping lives in <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code>.</p>
+<p>A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing — and a high quality score alone must not override missing completion evidence. See also <code class="docutils literal notranslate"><span class="pre">fangore_decision_surface_reject</span></code>.</p>
+<section id="id34">
+<h4>Implementation<a class="headerlink" href="#id34" title="Link to this heading"></a></h4>
+<p>Provider-neutral judge types (<code class="docutils literal notranslate"><span class="pre">Choice</span></code>/<code class="docutils literal notranslate"><span class="pre">Score</span></code>/<code class="docutils literal notranslate"><span class="pre">Noul</span></code> questions and signals) plus <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">decide()</span></code> apply configured thresholds. Judge scores are supplementary: policy owns ALLOW/DENY. Thresholds live in policy config per signal id. System One maps vendor wire into these types via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code>.</p>
+<p>Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.</p>
 </section>
-<section id="id20">
-<h4>Validation<a class="headerlink" href="#id20" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">route_refund</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_route_refund</span></code> (cassette twin kind <code class="docutils literal notranslate"><span class="pre">systemone_cassette</span></code> shares this runner). Soft expects: ALLOW when route is billing; DENY when technical. Fixtures under static and <code class="docutils literal notranslate"><span class="pre">systemone/laya/v1</span></code>. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_judgement_policy.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_judge.py</span></code>.</p>
+<section id="id35">
+<h4>Validation<a class="headerlink" href="#id35" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">route_refund</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_route_refund</span></code>. Soft expects: ALLOW for billing, DENY for technical. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_judgement_policy.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_judge.py</span></code>.</p>
+</section>
+<section id="id36">
+<h4>Footnotes<a class="headerlink" href="#id36" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness">Jev decisions in a Pi harness</a> — Routing, gating, batched questions, thresholds</p></li>
+</ol>
+</section>
+</section>
+<section id="fangore-tool-gating-gate-every-tool-call-through-deny-by-default-access-checks">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_tool_gating</span></code> — Gate every tool call through deny-by-default access checks<a class="headerlink" href="#fangore-tool-gating-gate-every-tool-call-through-deny-by-default-access-checks" title="Link to this heading"></a></h3>
+<p>Every tool call — including fused or loop-proposed calls — must pass access control. Uncertain or privileged scopes fail closed. Fangore shows product that a write without grant is refused and that composed packs from <code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code> still apply.</p>
+<section id="id37">
+<h4>Implementation<a class="headerlink" href="#id37" title="Link to this heading"></a></h4>
+<p>Harness tool loops consult <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> before execution; denied calls emit access-check events and do not run side effects. Failure defaults are deny for mutations / external / privileged / uncertain scope. This story covers tool-gating obligations alongside permission packs.</p>
+<p>Covers: GAT-01, GAT-02, GAT-03.</p>
+</section>
+<section id="id38">
+<h4>Validation<a class="headerlink" href="#id38" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">tool_gating</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_tool_gating</span></code>. Soft expects: deny without grant, allow with grant. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_access.py</span></code>, grant_gate story.</p>
 </section>
 </section>
 </section>
@@ -325,74 +457,106 @@ pytest<span class="w"> </span>-q
 <h2>Taloneth’s stories<a class="headerlink" href="#taloneth-s-stories" title="Link to this heading"></a></h2>
 <section id="taloneth-atk-research-reject-reject-research-candidates-that-fail-verified-success">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_atk_research_reject</span></code> — Reject research candidates that fail verified success<a class="headerlink" href="#taloneth-atk-research-reject-reject-research-candidates-that-fail-verified-success" title="Link to this heading"></a></h3>
-<p>Taloneth treats each harness tweak as a falsifiable recipe. A cheap decision backend looks thrifty on unit price but fails verified task success against the frozen baseline. His research lab must reject that candidate, keep negative results on the report, and only promote a survivor that clears noninferiority — with rollback ready. Held-out evaluation stays protected; rewriting the authoritative evaluator is forbidden. Related qualification discipline: <code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code>. He uses this whenever auto-research must earn activation instead of winning by decree.</p>
-<section id="id21">
-<h4>Implementation<a class="headerlink" href="#id21" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> and <code class="docutils literal notranslate"><span class="pre">EvalProtocol</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.research</span></code> run ATK-style evaluation: candidates are compared against a frozen baseline on verified task success, negative results are retained, and promotion requires noninferiority. Candidates cannot rewrite the authoritative evaluator; held-out evaluation stays protected.</p>
+<p>A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code>.</p>
+<section id="id39">
+<h4>Implementation<a class="headerlink" href="#id39" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> / <code class="docutils literal notranslate"><span class="pre">EvalProtocol</span></code> run bounded research: inspect → hypothesis → isolated experiment → ATK-style search → frozen evaluation protocol → promote/rollback. Production evaluators stay protected.</p>
+<p>Covers: EXP-01, EXP-02, EXP-03, EXP-04.</p>
 </section>
-<section id="id22">
-<h4>Validation<a class="headerlink" href="#id22" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">atk_research_reject</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_atk_research_reject</span></code>. Soft expects: failing candidate rejected; negative results retained. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_research.py</span></code>.</p>
+<section id="id40">
+<h4>Validation<a class="headerlink" href="#id40" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">atk_research_reject</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_atk_research_reject</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_research.py</span></code>.</p>
+</section>
+</section>
+<section id="taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code> — Measure cache-aware prompt layout as an explicit experiment<a class="headerlink" href="#taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment" title="Link to this heading"></a></h3>
+<p>Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.</p>
+<section id="id41">
+<h4>Implementation<a class="headerlink" href="#id41" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">compile_cache_aware_layout</span></code> / <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code> under <code class="docutils literal notranslate"><span class="pre">CtxFlags.cache_aware_layout</span></code> — an independent experiment toggle with prefix identity diagnostics.</p>
+<p>Covers: CTX-09.</p>
+</section>
+<section id="id42">
+<h4>Validation<a class="headerlink" href="#id42" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">cache_layout_experiment</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_cache_layout_experiment</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-fixture-judge-batch-validate-judge-question-batches-without-a-live-model">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_fixture_judge_batch</span></code> — Validate judge question batches without a live model<a class="headerlink" href="#taloneth-fixture-judge-batch-validate-judge-question-batches-without-a-live-model" title="Link to this heading"></a></h3>
-<p>Taloneth is iterating on judge question sets — yes/no, choice, and score in one batch — and cannot wait on a GPU host for every tweak. He drives an offline fixture judge with known answers and checks that validation accepts clean signals and reports errors when answers are missing. The lab bench is offline, deterministic, and fast. He uses this whenever contract tests must not depend on a served model.</p>
-<section id="id23">
-<h4>Implementation<a class="headerlink" href="#id23" title="Link to this heading"></a></h4>
-<p>Judge domain types (<code class="docutils literal notranslate"><span class="pre">ChoiceQuestion</span></code>, <code class="docutils literal notranslate"><span class="pre">NoulQuestion</span></code>, <code class="docutils literal notranslate"><span class="pre">ScoreQuestion</span></code>, signals, <code class="docutils literal notranslate"><span class="pre">Judgement</span></code>, <code class="docutils literal notranslate"><span class="pre">JudgeErrorItem</span></code>) and the <code class="docutils literal notranslate"><span class="pre">judge()</span></code> entrypoint live in <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code>. <code class="docutils literal notranslate"><span class="pre">FixtureJudgeProvider</span></code> supplies deterministic answers for offline contract work without HTTP. Validation reports missing or malformed answers as structured errors on the judgement.</p>
+<p>Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors — including partial failure reporting — without a GPU host.</p>
+<section id="id43">
+<h4>Implementation<a class="headerlink" href="#id43" title="Link to this heading"></a></h4>
+<p>Provider-neutral judge schema in <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code> (<code class="docutils literal notranslate"><span class="pre">Choice</span></code>/<code class="docutils literal notranslate"><span class="pre">Noul</span></code>/<code class="docutils literal notranslate"><span class="pre">Score</span></code> questions and signals, <code class="docutils literal notranslate"><span class="pre">Judgement</span></code>, <code class="docutils literal notranslate"><span class="pre">JudgeErrorItem</span></code>, provenance). <code class="docutils literal notranslate"><span class="pre">FixtureJudgeProvider</span></code> + <code class="docutils literal notranslate"><span class="pre">judge()</span></code> validate batches and report per-question errors. Semantics cover closed-world answers, partial failure, and calibration/provenance fields adapters must map.</p>
+<p>Covers: JDG-01, JDG-02, JDG-03, JDG-04.</p>
 </section>
-<section id="id24">
-<h4>Validation<a class="headerlink" href="#id24" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">fixture_judge_batch</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_fixture_judge_batch</span></code>. Soft expects: clean batch validates; missing answers surface errors. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_judge.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_outcomes.py</span></code>.</p>
+<section id="id44">
+<h4>Validation<a class="headerlink" href="#id44" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">fixture_judge_batch</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_fixture_judge_batch</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_judge.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_offline_decision_export</span></code> — Export decision data without leaking future outcomes<a class="headerlink" href="#taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes" title="Link to this heading"></a></h3>
-<p>Taloneth exports a decision trajectory for offline study. One run finished later with a delayed outcome id; another was interrupted. Decision-time features must reconstruct what the policy saw then — without leaking future outcomes into the training split by default. Missing labels stay missing, not coerced into failure. He uses this whenever logged decisions feed research without inventing counterfactuals or private chain-of-thought.</p>
-<section id="id25">
-<h4>Implementation<a class="headerlink" href="#id25" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code>, <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code>, <code class="docutils literal notranslate"><span class="pre">export_offline_dataset</span></code>, and <code class="docutils literal notranslate"><span class="pre">OfflineDecisionExport</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log</span></code> capture decision-time features and optional outcome linkage. Export defaults prevent future outcome leakage into training splits; missing labels remain missing rather than coerced to failure (OBS dataset path).</p>
+<p>Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.</p>
+<section id="id45">
+<h4>Implementation<a class="headerlink" href="#id45" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> / <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code> / <code class="docutils literal notranslate"><span class="pre">export_offline_dataset</span></code> persist append-only learning records and versioned exports without default future leakage.</p>
+<p>Covers: OBS-02.</p>
 </section>
-<section id="id26">
-<h4>Validation<a class="headerlink" href="#id26" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">offline_decision_export</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_offline_decision_export</span></code>. Soft expects: no future leakage by default; missing labels stay missing. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_log.py</span></code>.</p>
+<section id="id46">
+<h4>Validation<a class="headerlink" href="#id46" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">offline_decision_export</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_offline_decision_export</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_log.py</span></code>.</p>
+</section>
+</section>
+<section id="taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_policy_replay</span></code> — Replay product policy from recorded facts and signals<a class="headerlink" href="#taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals" title="Link to this heading"></a></h3>
+<p>Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts.</p>
+<section id="id47">
+<h4>Implementation<a class="headerlink" href="#id47" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">replay_verdict</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log</span></code> re-runs <code class="docutils literal notranslate"><span class="pre">decide()</span></code> on recorded facts/signals/policy for deterministic audits.</p>
+<p>Covers: OBS-03.</p>
+</section>
+<section id="id48">
+<h4>Validation<a class="headerlink" href="#id48" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">policy_replay</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_policy_replay</span></code>. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.</p>
 </section>
 </section>
 <section id="taloneth-shadow-decision-backends-compare-decision-backends-without-inventing-missing-results">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_shadow_decision_backends</span></code> — Compare decision backends without inventing missing results<a class="headerlink" href="#taloneth-shadow-decision-backends-compare-decision-backends-without-inventing-missing-results" title="Link to this heading"></a></h3>
-<p>Taloneth compares decision backends on a matched ticket snapshot: deterministic rules, a small local model, and System One when the decide lane is loaded. Tonight the decide profile is cold. He needs the shadow report to mark System One unavailable — no synthetic latency, no fake verdict — while still logging matched candidates and evidence. Activation stays behind evaluation, not the cheapest unit price. Related: wrong-profile honesty in <code class="docutils literal notranslate"><span class="pre">nubble_lane_load_hint</span></code>. He uses this whenever routing experiments must stay honest about exclusive-profile hosts.</p>
-<section id="id27">
-<h4>Implementation<a class="headerlink" href="#id27" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">shadow_decision_backends()</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.routing</span></code> runs matched candidates across decision backends and records comparison evidence. When the decide/judge lane is unavailable, that backend is marked unavailable — no synthetic latency or fabricated verdict. Routing stays behind exclusive lane gates from <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code>.</p>
+<p>Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: <code class="docutils literal notranslate"><span class="pre">nubble_lane_load_hint</span></code>, <code class="docutils literal notranslate"><span class="pre">nubble_model_affinity</span></code>.</p>
+<section id="id49">
+<h4>Implementation<a class="headerlink" href="#id49" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> / <code class="docutils literal notranslate"><span class="pre">route_at_boundary</span></code> compare candidates at task and phase boundaries and estimate whole-task cost honesty. Unavailable backends stay unavailable.</p>
+<p>Covers: RTE-01, RTE-02.</p>
 </section>
-<section id="id28">
-<h4>Validation<a class="headerlink" href="#id28" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_shadow_decision_backends</span></code>. Soft expects: System One unavailable without synthetic fields; other backends still compared. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_routing.py</span></code>.</p>
+<section id="id50">
+<h4>Validation<a class="headerlink" href="#id50" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_shadow_decision_backends</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_routing.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_systemone_cassette</span></code> — Pin System One adapter behavior to a versioned cassette<a class="headerlink" href="#taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette" title="Link to this heading"></a></h3>
-<p>A new Laya build changes confidence fields in the System One JSON. Taloneth keeps a versioned cassette of the wire response and replays it through the System One adapter. If mapping breaks, the story fails before silent drift ships. He uses this whenever adapter code must stay pinned to a known model response shape. Live parity for the same request is the live backend mode described in the suite preamble — not a separate story.</p>
-<section id="id29">
-<h4>Implementation<a class="headerlink" href="#id29" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.systemone</span></code> maps System One wire JSON to library <code class="docutils literal notranslate"><span class="pre">Judgement</span></code> / signals / provenance / usage. It is the production adapter for the System One HTTP judge; connection config comes from <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> / Config <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> hooks — not from Settings bags.</p>
+<p>A new Laya build changes confidence fields. A versioned cassette must fail the story before silent adapter drift ships.</p>
+<section id="id51">
+<h4>Implementation<a class="headerlink" href="#id51" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (<code class="docutils literal notranslate"><span class="pre">get_judge_connection</span></code>, <code class="docutils literal notranslate"><span class="pre">get_judge_provider</span></code>).</p>
+<p>Covers: JDG wire map (System One).</p>
 </section>
-<section id="id30">
-<h4>Validation<a class="headerlink" href="#id30" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">systemone_cassette</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_route_refund</span></code> with System One cassette under <code class="docutils literal notranslate"><span class="pre">systemone/laya/v1</span></code>. Soft expects: mapped signals and policy verdict match <code class="docutils literal notranslate"><span class="pre">expect.json</span></code>. Live: <code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + judge base URL. Related adapter/unit tests for systemone mapping.</p>
+<section id="id52">
+<h4>Validation<a class="headerlink" href="#id52" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">systemone_cassette</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_route_refund</span></code> with <code class="docutils literal notranslate"><span class="pre">systemone/laya/v1</span></code> cassette.</p>
 </section>
 </section>
 <section id="taloneth-validator-qualification-qualify-validators-before-they-gate-completion">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code> — Qualify validators before they gate completion<a class="headerlink" href="#taloneth-validator-qualification-qualify-validators-before-they-gate-completion" title="Link to this heading"></a></h3>
-<p>Taloneth is about to promote a new schema validator into required completion evidence. Before it can gate done, he runs known-good, known-bad, and missing fixtures — including a deliberately weakened always-pass checker. The honest validator qualifies; the weak one must fail qualification. A passing schema with wrong behavior is not success, and research candidates cannot rewrite their own evaluator. He uses this whenever verification oracles need bounded coverage proof, not gut feel.</p>
-<section id="id31">
-<h4>Implementation<a class="headerlink" href="#id31" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">qualify_validator</span></code> / <code class="docutils literal notranslate"><span class="pre">validator_qualified</span></code> and <code class="docutils literal notranslate"><span class="pre">VerificationOracle</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph</span></code> implement VER-04-style qualification: known-good, known-bad, and missing cases must pass before a validator may gate completion. Weak always-pass mutants fail qualification so coverage is bounded proof, not schema shape alone.</p>
+<p>Before a schema validator gates done, known-good, known-bad, and missing fixtures must run — including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>).</p>
+<section id="id53">
+<h4>Implementation<a class="headerlink" href="#id53" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">VerificationOracle</span></code> / <code class="docutils literal notranslate"><span class="pre">verify_node</span></code> define completion evidence; <code class="docutils literal notranslate"><span class="pre">qualify_validator</span></code> / <code class="docutils literal notranslate"><span class="pre">validator_qualified</span></code> reject always-pass mutants. Judge quality signals remain supplementary to evidence checks.</p>
+<p>Covers: VER-01, VER-04.</p>
 </section>
-<section id="id32">
-<h4>Validation<a class="headerlink" href="#id32" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">validator_qualification</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_validator_qualification</span></code>. Soft expects: honest oracle qualifies; always-pass mutant fails. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>.</p>
+<section id="id54">
+<h4>Validation<a class="headerlink" href="#id54" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">validator_qualification</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_validator_qualification</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>.</p>
 </section>
 </section>
 </section>

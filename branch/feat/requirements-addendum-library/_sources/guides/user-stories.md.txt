@@ -64,15 +64,21 @@ Live parity is a **mode** of cassette-backed stories (for example `nubble_run_co
 
 ### `nubble_ci_static_smoke` — Prove the HTTP adapter in CI without a live model host
 
-It is late and the local inference host is offline for maintenance, but a pull request still needs green CI. Nubble refuses to block merges on network reachability. He wants the OpenAI-compatible path proven from a cassette — a recorded reply replayed through the real HTTP client — so the pipeline stays honest about wire shape without needing a live model. When static CI is green, the adapter is safe to merge; when someone breaks the adapter, CI fails before production.
+The local inference host is offline, but a pull request still needs green CI. Nubble wants the OpenAI-compatible path proven from a cassette — a recorded reply replayed through the real HTTP client — so merges do not depend on LAN reachability.
 
 #### Implementation
 
-`OpenAICompatStrategy` implements the OpenAI-compatible chat completions wire against `httpx`, shared by named backends (openai, vllm, ollama, lmstudio, junespark). The strategy is a real HTTP client path: request and response shapes are part of the library contract, not a test double. Hosts bind it through `MechaHarnessConfig` / `Settings` backend selection.
+`OpenAICompatStrategy` implements Chat Completions HTTP for reason-lane backends. Cassette replay exercises the real client path so adapter wire shape stays honest in CI.
+
+Covers: offline CI / OpenAI-compat smoke.
 
 #### Validation
 
-Same kind `pass_through` on `openai_compat` model trees. Static mode mounts recorded `response.json` via httpx mock transport so the real strategy code runs. Soft expects: non-empty assistant text. Live mode: `MECHA_STORY_BACKEND=live` against `MECHA_BASE_URL`. Cassette fixtures under `tests/fixtures/models/openai_compat/*/v1/stories/nubble_ci_static_smoke/`.
+Kind `pass_through` on `openai_compat` trees with mock transport. Soft expects: non-empty assistant text. Live: `MECHA_STORY_BACKEND=live`.
+
+#### Footnotes
+
+1. [OpenAI Chat Completions](https://platform.openai.com/docs/api-reference/chat) — Wire models for reason-lane HTTP
 
 ### `nubble_lane_load_hint` — Refuse work when the wrong inference profile is loaded
 
@@ -80,192 +86,366 @@ Nubble is on call when a refund-routing job fails on the local inference host. T
 
 #### Implementation
 
-`InferenceEnvironment` (and `NoOpInferenceEnvironment` for hosts that do not probe) gates work by exclusive lane: reason, decide/judge, and media must not run under the wrong active profile. When the required lane is cold, the environment raises `InferenceEnvironmentError` with an operator-facing message that includes the host load hint from `DEFAULT_LANE_LOAD_HINTS` (for example `infer load decide-fast`). Lane constants live in `mechaharness.core.environment` (`LANE_REASON`, `LANE_JUDGE` / decide, `LANE_MEDIA`). Hosts override probing via Config hooks that supply a real environment instead of the no-op.
+Exclusive lanes (reason / decide-judge / media) on `InferenceEnvironment` refuse cross-lane work and surface load hints (`DEFAULT_LANE_LOAD_HINTS`). This is the operator-facing half of decide-versus-reason profile discipline: bounded judge work must not run under a generative reason profile. Hosts supply a real environment via Config instead of `NoOpInferenceEnvironment`.
+
+Covers: INF-02.
 
 #### Validation
 
-Story kind `wrong_lane_deny` → `tests/stories/runners.py` `_run_wrong_lane_deny`. Soft expects in `expect.json` require non-empty error text naming the required lane / load hint. Related unit coverage: `tests/test_environment.py`.
+Kind `wrong_lane_deny` → `_run_wrong_lane_deny`. Soft expects: non-empty error naming the required lane / load hint. Unit: `tests/test_environment.py`.
+
+### `nubble_model_affinity` — Keep model affinity inside a coherent work loop
+
+Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch. Random lane thrash must not win on unit price alone.
+
+#### Implementation
+
+`route_at_boundary` selects lanes at task/phase boundaries; `activate_scoped_policy` activates judgement policy only when calibration criteria are met — affinity and activation stay behind evaluation, not cheapest unit price.
+
+Covers: RTE-03.
+
+#### Validation
+
+Kind `model_affinity` → `_run_model_affinity`. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: `tests/test_routing.py`.
+
+### `nubble_repo_topology` — Budget repository topology maps and fall back when stale
+
+Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback — not pretend the map is complete.
+
+#### Implementation
+
+`RepositoryTopologyProvider` builds budgeted `TopologyView` entries with omissions and invalidation; stale maps fall back to source inspection.
+
+Covers: CTX-08.
+
+#### Validation
+
+Kind `repo_topology` → `_run_repo_topology`. Unit: `tests/test_context_experiments.py`.
 
 ### `nubble_run_cost_events` — Record cost and inference events for every harness run
 
-Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units — the same signals he would forward to billing or a Grafana panel. If those events are missing, operations is flying blind. If they are present, he trusts the ledger enough to alert on it.
+Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units — the same signals he would forward to billing or a Grafana panel.
 
 #### Implementation
 
-Harness runs emit structured events on `EventLog`: inference completion and cost accounting via `CostAccountant` / `InMemoryCostAccountant` producing `core:cost` (and `core:inference`) with ability-scaled units. `PassThroughHarness` (and other families) sit on the same path so every run records ledger signals without a separate billing bolt-on. Event types are host-extendable under the `core:` namespace in `mechaharness.core.events`.
+Harness runs emit structured `EventLog` records for inference and cost (`CostAccountant` / `core:cost`, `core:inference`). This is the baseline observability stream for every run — decisions, routing, and tools extend the same log rather than a separate ledger.
+
+Covers: OBS-01.
 
 #### Validation
 
-Story kind `pass_through` → `_run_pass_through`. In-process uses `ScriptedInference` + `PassThroughHarness` + `InMemoryEventLog`; `openai_compat` twins replay cassette HTTP through `OpenAICompatStrategy`. Soft expects: `core:inference` and `core:cost` present with non-zero units. Related: `tests/test_events.py`, `tests/test_harness.py`, `tests/test_pass_through.py`.
+Kind `pass_through` → `_run_pass_through`. Soft expects: inference and cost events with non-zero units. Related: `tests/test_events.py`, `tests/test_pass_through.py`.
 
 ### `nubble_topology_efficiency` — Separate wall-clock speedup from total work and queue wait
 
-Nubble is asked whether parallel agents sped things up. Elapsed wall time dropped, but total node work grew and queue waits hid under a vanity speedup number. He needs topology metrics that separate critical path, total work, and elapsed time — and that refuse a misleading efficiency claim without a serial baseline and an honest worker-count note. He uses this whenever operations must explain cost and concurrency without overselling parallelism.
+Nubble is asked whether parallel agents sped things up. Wall time dropped, but total work grew and queue waits hid under a vanity speedup. He needs metrics that separate critical path, total work, and elapsed time — and that refuse misleading efficiency claims without a serial baseline and worker-count note.
 
 #### Implementation
 
-`mechaharness.decision_log.compute_topology_metrics` (and related `TopologySpan` / topology metric types) compute critical path, total work, and elapsed time as distinct quantities. Efficiency claims that omit a serial baseline or worker-count context are rejected so operations cannot publish vanity speedups. This is library observability for plan/graph execution, not a dashboard product.
+`compute_topology_metrics` / `TopologySpan` in `mechaharness.decision_log` report critical path, total work, and elapsed time distinctly and reject vanity speedups that omit baselines.
+
+Covers: OBS-04.
 
 #### Validation
 
-Kind `topology_efficiency` → `_run_topology_efficiency` with synthetic spans in `request.json`. Soft expects reject vanity speedup without baseline/worker notes. Unit tests: `tests/test_decision_log.py`.
+Kind `topology_efficiency` → `_run_topology_efficiency`. Unit: `tests/test_decision_log.py`.
 
 ## Fangore's stories
 
-### `fangore_compound_grants` — Compose read-only and write permission packs
+### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 
-Fangore is building a host app that must not let agents write the filesystem by default. He starts with a read-only permission pack — the write tool is refused, which proves deny-by-default works. Later he composes that pack with a write pack into one reusable set, and the same tool succeeds. He uses this whenever an app needs reusable permission packs instead of copy-pasted grant lists.
+After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed — it does not loop forever. Complements `fangore_convergence_ceiling` for judge loops.
 
 #### Implementation
 
-`AccessPolicy` is a deny-by-default grant list (`grants` coerced via `grant_key`). `CompoundPolicy` unions multiple `AccessPolicy` layers into one reusable allow-list (first-seen order, overlaps idempotent). `AccessControl` / `InMemoryAccessControl` enforces required grants for tool invocations and emits `core:access_check` events. Named grants such as `FsWrite` live in `mechaharness.core.access`.
+`bounded_repair` in `mechaharness.graph` runs verify → classify → permitted repair → retry until `max_attempts`. Judge scores remain supplementary to verifier evidence.
+
+Covers: VER-03.
 
 #### Validation
 
-Kind `grant_gate_write` → `_run_grant_gate_write`. Soft expects: write denied under read-only policy, then allowed after `CompoundPolicy` composition. Unit tests: `tests/test_access.py`.
+Kind `bounded_repair_loop` → `_run_bounded_repair_loop`. Soft expects: succeeds within budget or fails after max attempts. Unit: `tests/test_graph.py`.
+
+### `fangore_compound_grants` — Compose read-only and write permission packs
+
+Fangore’s host app must not let agents write the filesystem by default. A read-only pack refuses the write tool; composing it with a write pack allows the same tool. He needs reusable permission packs instead of copy-pasted lists.
+
+#### Implementation
+
+`AccessPolicy` deny-by-default grants; `CompoundPolicy` unions packs; `AccessControl` enforces tool grants and emits access-check events. This is the permission half of tool gating — every tool call must pass access before side effects.
+
+Covers: host compound grants.
+
+#### Validation
+
+Kind `grant_gate_write` → `_run_grant_gate_write`. Unit: `tests/test_access.py`.
 
 ### `fangore_config_access_policy` — Let the host app supply its own permission policy
 
-Fangore’s product needs a host app whose permission rules are defined by the application, not by copying grant lists into every agent constructor. He configures the harness once so the app’s composed permission packs — as in `fangore_compound_grants` — are what the harness enforces. Success: the injected access control already honors those packs. He uses this whenever a host must stay configuration-first instead of sprinkling grants by hand.
+Fangore’s product needs permission rules defined by the application. He configures the harness once so composed packs from `fangore_compound_grants` are what the harness enforces.
 
 #### Implementation
 
-`MechaHarnessConfig` (pyiv) owns DI wiring. Hosts subclass Config and override `get_access_policy()` to return an `AccessPolicy` or `CompoundPolicy`; `get_access_control()` builds `AccessControl` from that policy and the event log. Default `get_grants()` is deny-by-default empty. This is the library extension point for host permission packs — not a service locator bag of grants on `Settings`.
+`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection — not Settings bags or hand-wired constructors.
+
+Covers: host DI access policy.
 
 #### Validation
 
-Kind `config_access_policy` → `_run_config_access_policy`. Soft expects: injector-resolved `AccessControl` honors the host `CompoundPolicy`. Related: `tests/test_di.py`, access/compound policy unit tests.
+Kind `config_access_policy` → `_run_config_access_policy`. Unit: `tests/test_di.py`.
+
+#### Footnotes
+
+1. [pyiv](https://rl337.org/pyiv/) — Config-hook dependency injection
 
 ### `fangore_context_compiler_deficit` — Report context deficits instead of silent truncation
 
-Fangore’s agent must not quietly drop mandatory blockers just because the prompt budget is tight. He runs context compilation with a tiny token budget and a mandatory policy requirement that cannot fit. Success is a deficit report — unresolved gaps named, blockers preserved — not a silently shortened prompt that looks complete. Deterministic steps can skip a model prompt entirely. He uses this whenever working context is a temporary view, never the only copy of obligations.
+Mandatory blockers must not disappear when the prompt budget is tight. Success is a deficit report with unresolved gaps named. Related observation chain: `fangore_context_observation_chain`.
 
 #### Implementation
 
-`ContextCompiler` in `mechaharness.context_experiments` builds a `ContextManifest` (compiler version, token estimate, unresolved gaps). When mandatory material exceeds budget, gaps are named rather than silently truncated. Supporting CTX experiment primitives (derived memory, topology views, cache layout) are independent toggles on the same module.
+`ContextCompiler` builds a versioned `ContextManifest` with token estimates and unresolved gaps. Working context is ephemeral; obligations stay in authoritative stores.
+
+Covers: CTX-05.
 
 #### Validation
 
-Kind `context_compiler_deficit` → `_run_context_compiler_deficit`. Soft expects: deficit / unresolved gaps reported; blockers not omitted. Unit tests: `tests/test_context_experiments.py`.
+Kind `context_compiler_deficit` → `_run_context_compiler_deficit`. Unit: `tests/test_context_experiments.py`.
+
+#### Footnotes
+
+1. [SoL-Pi](https://arxiv.org/abs/2609.20519) — Empirical harness optimization and context mechanisms to evaluate
+
+### `fangore_context_observation_chain` — Keep original observations and refuse fabricated reductions
+
+Tool output must stay addressable as an immutable observation. A cheaper summary is allowed only when it points at a real observation; fabricated receipts must fail lookup. Compaction happens at semantic boundaries, and action fusion only for predeclared sequences. Compiler deficits remain `fangore_context_compiler_deficit`.
+
+#### Implementation
+
+`ObservationStore` / `ObservationRef`, `reduce_evidence`, `compact_at_boundary`, and `fuse_actions` under `CtxFlags` in `mechaharness.context_experiments`.
+
+Covers: CTX-01, CTX-02, CTX-03, CTX-04.
+
+#### Validation
+
+Kind `context_observation_chain` → `_run_context_observation_chain`. Unit: `tests/test_context_experiments.py`.
 
 ### `fangore_convergence_ceiling` — Stop agent loops that make no progress
 
-Fangore’s repair loop keeps asking the same judge the same question and getting the same answer. Without a convergence contract, the agent burns budget until someone kills the process. He declares a versioned ceiling: identical fingerprints inside a short window are not progress, and hitting the ceiling must end as no-progress — never as a fake success. Nested repair shares a slice of the parent budget so a child cannot outspend the parent. He uses this whenever an agent loop must remain finite even if the model never asks to stop.
+Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget.
 
 #### Implementation
 
-`ConvergenceContract` and `ConvergenceGuard` in `mechaharness.convergence` track fingerprints over a window and enforce a versioned ceiling. Terminal status includes `no_progress` (never success-on-stall). Nested guards inherit a budget slice from the parent so child repair cannot outspend the parent contract (POL-03).
+`ConvergenceContract` / `ConvergenceGuard` fingerprint windows and nested budget slices. Escalation may request more evidence, but ceilings never count as task success.
+
+Covers: POL-03.
 
 #### Validation
 
-Kind `convergence_ceiling` → `_run_convergence_ceiling`. Soft expects: ceiling trip yields `no_progress`. Unit tests: `tests/test_convergence.py`.
+Kind `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_convergence.py`.
 
 ### `fangore_decision_surface_reject` — Reject model choices that are not on the allowed list
 
-Fangore sets up a choice surface so a triage model can propose which team owns a ticket. One night the model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal, not as authority to act. Scoring adapters may evaluate the same surface, but only product judgement policy may unlock the next action — the same split as `fangore_refund_verdict`. He uses this whenever choice, score, or yes/no signals must stay suggestions, never automatic execution.
+A triage model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal. Only product judgement policy may unlock the next action — same split as `fangore_refund_verdict`.
 
 #### Implementation
 
-`mechaharness.decision_surfaces` defines named decision-plane surfaces (`DecisionSurface`, Choice/Score/Noul kinds) over judge signal types. `reject_invalid_choice` and `RulesDecisionBackend` treat out-of-set selections as rejected proposals. Surfaces produce signals for `JudgementPolicy`; they do not execute side effects or unlock actions.
+`DecisionSurface` / `reject_invalid_choice` / `RulesDecisionBackend` in `mechaharness.decision_surfaces` name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects.
+
+Covers: POL-01.
 
 #### Validation
 
-Kind `decision_surface_reject` → `_run_decision_surface_reject`. Soft expects: invalid option flagged rejected; no automatic unlock. Related unit coverage alongside decision surface / judgement policy tests.
+Kind `decision_surface_reject` → `_run_decision_surface_reject`.
+
+### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
+
+When derived memory is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval rank must not confer authority over approval rules.
+
+#### Implementation
+
+`DerivedMemoryStore` / `DerivedMemoryRecord` separate provenance, validity, and retrieval priority. Consolidation is optional and idempotent; `retrieval_candidates` must not elevate non-authoritative rumors.
+
+Covers: CTX-06, CTX-07.
+
+#### Validation
+
+Kind `derived_memory` → `_run_derived_memory`. Unit: `tests/test_context_experiments.py`.
+
+### `fangore_human_review_pending` — Hold mutations until a matching human approval exists
+
+Fangore’s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human — not allow.
+
+#### Implementation
+
+`JudgementPolicy.require_approval_for` plus `JudgementFacts.approvals` / `action_digest` in `decide()`: missing approval yields `ASK_HUMAN` with `MISSING_APPROVAL`. Approvals bind to executed args via digest keys.
+
+Covers: POL-04, GAT-04.
+
+#### Validation
+
+Kind `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
 
 ### `fangore_local_plan_resume` — Resume a durable local plan after a crash
 
-Fangore’s host fans out a local execution plan: produce a patch, then consume it under an exclusive write scope. Midway through dispatch the process dies. On restart there is no chat transcript — only recorded checkpoints. He needs the plan to resume at the recorded boundary, keep justified data and resource edges, refuse stale preconditions, surface a failed fan-in branch, and refuse silent overwrite when two branches edit the same base. He uses this whenever durable local plans must outlive a flaky worker without reconstructing progress from conversation.
+A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints — not chat — must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes.
 
 #### Implementation
 
-`ExecutionGraph`, `GraphNode`, `GraphStore`, and recovery boundaries in `mechaharness.graph` persist plan state through `EventLog` checkpoints (planning / dispatch / post_effect_pre_record / reduce / commit). Dependency edges, hierarchical fan-in, merge conflict refusal, and verifier/oracle hooks support durable local DAGs (GRF/VER). Operation contracts bind nodes via `mechaharness.operation_registry`.
+`OperationContract` / `OperationRegistry` register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. `ExecutionGraph` / `GraphStore` persist goal, nodes, and justified dependency edges on `EventLog` with recovery boundaries; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.
+
+Covers: INF-01, INF-03, GRF-01, GRF-02, GRF-03, GRF-04, GRF-05, GRF-06.
 
 #### Validation
 
-Kind `local_plan_resume` → `_run_local_plan_resume`. Soft expects: resume at recorded boundary; stale preconditions / fan-in failure / merge refusal as configured in fixtures. Unit tests: `tests/test_graph.py`, `tests/test_operation_registry.py`.
+Kind `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.py`, `tests/test_operation_registry.py`.
+
+#### Footnotes
+
+1. [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Explicit control flow; MechaHarness extends into execution graphs
 
 ### `fangore_refund_verdict` — Keep billing authority in product rules, not the model
 
-A customer was charged twice. Fangore’s product rule is simple: only the billing team may own that ticket. The model may suggest a team, but it must not grant permission. He runs the judge over the ticket text, then product policy allows only when the route signal is billing. If the model picks technical support, policy denies. Builds on the idea that suggestions are not authority — see also `fangore_decision_surface_reject`. He uses this whenever business authority must stay in product rules, not prompt wording.
+A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing — and a high quality score alone must not override missing completion evidence. See also `fangore_decision_surface_reject`.
 
 #### Implementation
 
-`judge()` collects closed-world signals (`ChoiceSignal`, `ScoreSignal`, `NoulSignal`) via a `JudgeProvider`. Product authority is `JudgementPolicy` + `decide()` in `mechaharness.judgement_policy`: thresholds over signal ids (for example choice `route`) yield ALLOW/DENY with reason codes. The model never unlocks the next action by itself — policy does. System One mapping lives in `SystemOneJudgeProvider`.
+Provider-neutral judge types (`Choice`/`Score`/`Noul` questions and signals) plus `JudgementPolicy` / `decide()` apply configured thresholds. Judge scores are supplementary: policy owns ALLOW/DENY. Thresholds live in policy config per signal id. System One maps vendor wire into these types via `SystemOneJudgeProvider`.
+
+Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.
 
 #### Validation
 
-Kind `route_refund` → `_run_route_refund` (cassette twin kind `systemone_cassette` shares this runner). Soft expects: ALLOW when route is billing; DENY when technical. Fixtures under static and `systemone/laya/v1`. Related: `tests/test_judgement_policy.py`, `tests/test_judge.py`.
+Kind `route_refund` → `_run_route_refund`. Soft expects: ALLOW for billing, DENY for technical. Unit: `tests/test_judgement_policy.py`, `tests/test_judge.py`.
+
+#### Footnotes
+
+1. [Jev decisions in a Pi harness](https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness) — Routing, gating, batched questions, thresholds
+
+### `fangore_tool_gating` — Gate every tool call through deny-by-default access checks
+
+Every tool call — including fused or loop-proposed calls — must pass access control. Uncertain or privileged scopes fail closed. Fangore shows product that a write without grant is refused and that composed packs from `fangore_compound_grants` still apply.
+
+#### Implementation
+
+Harness tool loops consult `AccessControl` before execution; denied calls emit access-check events and do not run side effects. Failure defaults are deny for mutations / external / privileged / uncertain scope. This story covers tool-gating obligations alongside permission packs.
+
+Covers: GAT-01, GAT-02, GAT-03.
+
+#### Validation
+
+Kind `tool_gating` → `_run_tool_gating`. Soft expects: deny without grant, allow with grant. Related: `tests/test_access.py`, grant_gate story.
 
 ## Taloneth's stories
 
 ### `taloneth_atk_research_reject` — Reject research candidates that fail verified success
 
-Taloneth treats each harness tweak as a falsifiable recipe. A cheap decision backend looks thrifty on unit price but fails verified task success against the frozen baseline. His research lab must reject that candidate, keep negative results on the report, and only promote a survivor that clears noninferiority — with rollback ready. Held-out evaluation stays protected; rewriting the authoritative evaluator is forbidden. Related qualification discipline: `taloneth_validator_qualification`. He uses this whenever auto-research must earn activation instead of winning by decree.
+A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: `taloneth_validator_qualification`.
 
 #### Implementation
 
-`ResearchLab` and `EvalProtocol` in `mechaharness.research` run ATK-style evaluation: candidates are compared against a frozen baseline on verified task success, negative results are retained, and promotion requires noninferiority. Candidates cannot rewrite the authoritative evaluator; held-out evaluation stays protected.
+`ResearchLab` / `EvalProtocol` run bounded research: inspect → hypothesis → isolated experiment → ATK-style search → frozen evaluation protocol → promote/rollback. Production evaluators stay protected.
+
+Covers: EXP-01, EXP-02, EXP-03, EXP-04.
 
 #### Validation
 
-Kind `atk_research_reject` → `_run_atk_research_reject`. Soft expects: failing candidate rejected; negative results retained. Unit tests: `tests/test_research.py`.
+Kind `atk_research_reject` → `_run_atk_research_reject`. Unit: `tests/test_research.py`.
+
+### `taloneth_cache_layout_experiment` — Measure cache-aware prompt layout as an explicit experiment
+
+Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.
+
+#### Implementation
+
+`compile_cache_aware_layout` / `CacheLayout` under `CtxFlags.cache_aware_layout` — an independent experiment toggle with prefix identity diagnostics.
+
+Covers: CTX-09.
+
+#### Validation
+
+Kind `cache_layout_experiment` → `_run_cache_layout_experiment`. Unit: `tests/test_context_experiments.py`.
 
 ### `taloneth_fixture_judge_batch` — Validate judge question batches without a live model
 
-Taloneth is iterating on judge question sets — yes/no, choice, and score in one batch — and cannot wait on a GPU host for every tweak. He drives an offline fixture judge with known answers and checks that validation accepts clean signals and reports errors when answers are missing. The lab bench is offline, deterministic, and fast. He uses this whenever contract tests must not depend on a served model.
+Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors — including partial failure reporting — without a GPU host.
 
 #### Implementation
 
-Judge domain types (`ChoiceQuestion`, `NoulQuestion`, `ScoreQuestion`, signals, `Judgement`, `JudgeErrorItem`) and the `judge()` entrypoint live in `mechaharness.inference.judge`. `FixtureJudgeProvider` supplies deterministic answers for offline contract work without HTTP. Validation reports missing or malformed answers as structured errors on the judgement.
+Provider-neutral judge schema in `mechaharness.inference.judge` (`Choice`/`Noul`/`Score` questions and signals, `Judgement`, `JudgeErrorItem`, provenance). `FixtureJudgeProvider` + `judge()` validate batches and report per-question errors. Semantics cover closed-world answers, partial failure, and calibration/provenance fields adapters must map.
+
+Covers: JDG-01, JDG-02, JDG-03, JDG-04.
 
 #### Validation
 
-Kind `fixture_judge_batch` → `_run_fixture_judge_batch`. Soft expects: clean batch validates; missing answers surface errors. Related: `tests/test_judge.py`, `tests/test_outcomes.py`.
+Kind `fixture_judge_batch` → `_run_fixture_judge_batch`. Unit: `tests/test_judge.py`.
 
 ### `taloneth_offline_decision_export` — Export decision data without leaking future outcomes
 
-Taloneth exports a decision trajectory for offline study. One run finished later with a delayed outcome id; another was interrupted. Decision-time features must reconstruct what the policy saw then — without leaking future outcomes into the training split by default. Missing labels stay missing, not coerced into failure. He uses this whenever logged decisions feed research without inventing counterfactuals or private chain-of-thought.
+Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.
 
 #### Implementation
 
-`DecisionRecord`, `DecisionLog`, `export_offline_dataset`, and `OfflineDecisionExport` in `mechaharness.decision_log` capture decision-time features and optional outcome linkage. Export defaults prevent future outcome leakage into training splits; missing labels remain missing rather than coerced to failure (OBS dataset path).
+`DecisionRecord` / `DecisionLog` / `export_offline_dataset` persist append-only learning records and versioned exports without default future leakage.
+
+Covers: OBS-02.
 
 #### Validation
 
-Kind `offline_decision_export` → `_run_offline_decision_export`. Soft expects: no future leakage by default; missing labels stay missing. Unit tests: `tests/test_decision_log.py`.
+Kind `offline_decision_export` → `_run_offline_decision_export`. Unit: `tests/test_decision_log.py`.
+
+### `taloneth_policy_replay` — Replay product policy from recorded facts and signals
+
+Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts.
+
+#### Implementation
+
+`replay_verdict` in `mechaharness.decision_log` re-runs `decide()` on recorded facts/signals/policy for deterministic audits.
+
+Covers: OBS-03.
+
+#### Validation
+
+Kind `policy_replay` → `_run_policy_replay`. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.
 
 ### `taloneth_shadow_decision_backends` — Compare decision backends without inventing missing results
 
-Taloneth compares decision backends on a matched ticket snapshot: deterministic rules, a small local model, and System One when the decide lane is loaded. Tonight the decide profile is cold. He needs the shadow report to mark System One unavailable — no synthetic latency, no fake verdict — while still logging matched candidates and evidence. Activation stays behind evaluation, not the cheapest unit price. Related: wrong-profile honesty in `nubble_lane_load_hint`. He uses this whenever routing experiments must stay honest about exclusive-profile hosts.
+Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: `nubble_lane_load_hint`, `nubble_model_affinity`.
 
 #### Implementation
 
-`shadow_decision_backends()` in `mechaharness.routing` runs matched candidates across decision backends and records comparison evidence. When the decide/judge lane is unavailable, that backend is marked unavailable — no synthetic latency or fabricated verdict. Routing stays behind exclusive lane gates from `InferenceEnvironment`.
+`shadow_decision_backends` / `route_at_boundary` compare candidates at task and phase boundaries and estimate whole-task cost honesty. Unavailable backends stay unavailable.
+
+Covers: RTE-01, RTE-02.
 
 #### Validation
 
-Kind `shadow_decision_backends` → `_run_shadow_decision_backends`. Soft expects: System One unavailable without synthetic fields; other backends still compared. Unit tests: `tests/test_routing.py`.
+Kind `shadow_decision_backends` → `_run_shadow_decision_backends`. Unit: `tests/test_routing.py`.
 
 ### `taloneth_systemone_cassette` — Pin System One adapter behavior to a versioned cassette
 
-A new Laya build changes confidence fields in the System One JSON. Taloneth keeps a versioned cassette of the wire response and replays it through the System One adapter. If mapping breaks, the story fails before silent drift ships. He uses this whenever adapter code must stay pinned to a known model response shape. Live parity for the same request is the live backend mode described in the suite preamble — not a separate story.
+A new Laya build changes confidence fields. A versioned cassette must fail the story before silent adapter drift ships.
 
 #### Implementation
 
-`SystemOneJudgeProvider` in `mechaharness.inference.systemone` maps System One wire JSON to library `Judgement` / signals / provenance / usage. It is the production adapter for the System One HTTP judge; connection config comes from `APIConnectionConfig` / Config `get_judge_connection()` and `get_judge_provider()` hooks — not from Settings bags.
+`SystemOneJudgeProvider` maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (`get_judge_connection`, `get_judge_provider`).
+
+Covers: JDG wire map (System One).
 
 #### Validation
 
-Kind `systemone_cassette` → `_run_route_refund` with System One cassette under `systemone/laya/v1`. Soft expects: mapped signals and policy verdict match `expect.json`. Live: `MECHA_STORY_BACKEND=live` + judge base URL. Related adapter/unit tests for systemone mapping.
+Kind `systemone_cassette` → `_run_route_refund` with `systemone/laya/v1` cassette.
 
 ### `taloneth_validator_qualification` — Qualify validators before they gate completion
 
-Taloneth is about to promote a new schema validator into required completion evidence. Before it can gate done, he runs known-good, known-bad, and missing fixtures — including a deliberately weakened always-pass checker. The honest validator qualifies; the weak one must fail qualification. A passing schema with wrong behavior is not success, and research candidates cannot rewrite their own evaluator. He uses this whenever verification oracles need bounded coverage proof, not gut feel.
+Before a schema validator gates done, known-good, known-bad, and missing fixtures must run — including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see `fangore_refund_verdict`).
 
 #### Implementation
 
-`qualify_validator` / `validator_qualified` and `VerificationOracle` in `mechaharness.graph` implement VER-04-style qualification: known-good, known-bad, and missing cases must pass before a validator may gate completion. Weak always-pass mutants fail qualification so coverage is bounded proof, not schema shape alone.
+`VerificationOracle` / `verify_node` define completion evidence; `qualify_validator` / `validator_qualified` reject always-pass mutants. Judge quality signals remain supplementary to evidence checks.
+
+Covers: VER-01, VER-04.
 
 #### Validation
 
-Kind `validator_qualification` → `_run_validator_qualification`. Soft expects: honest oracle qualifies; always-pass mutant fails. Unit tests: `tests/test_graph.py`.
+Kind `validator_qualification` → `_run_validator_qualification`. Unit: `tests/test_graph.py`.
