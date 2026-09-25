@@ -43,7 +43,9 @@ dev = [
   "pytest>=8.2",
   "pytest-asyncio>=0.23",
   "ruff>=0.5",
-  "mypy>=1.10,<2",
+  # Exact pin: mypy 2.x requires Python >=3.10, and floating majors caused
+  # CI (3.12) vs local (3.9) to disagree on what passes. Bump deliberately.
+  "mypy==1.19.1",
   "build>=1.2",
   "twine>=5.0",
 ]

@@ -46,7 +46,18 @@ run_check() {
 }
 
 run_check "Ruff lint" "$RUFF" check src tests
-run_check "Mypy type checking" "$MYPY"
+
+EXPECTED_MYPY="1.19.1"
+MYPY_VER="$("$MYPY" --version 2>/dev/null | awk '{print $2}')"
+if [ "$MYPY_VER" != "$EXPECTED_MYPY" ]; then
+  echo ""
+  echo -e "${RED}✗ Mypy version mismatch: expected $EXPECTED_MYPY, got ${MYPY_VER:-missing}${NC}"
+  echo "  Reinstall: pip install -e '.[dev]'"
+  FAILED=1
+else
+  run_check "Mypy type checking" "$MYPY"
+fi
+
 run_check "Pytest" "$PYTEST" -q
 
 if "$PYTHON" -c "import sphinx" 2>/dev/null; then
