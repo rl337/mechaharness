@@ -1,7 +1,8 @@
 {
   "id": "nubble_topology_efficiency",
   "persona": "nubble",
-  "title": "Wall clock versus busy dragons",
+  "title": "Separate wall-clock speedup from total work and queue wait",
   "kind": "topology_efficiency",
-  "narrative": "Nubble is asked whether parallel agents “sped things up.” Elapsed wall time dropped, but total node work ballooned and queue waits hid under a vanity speedup number. He wants topology metrics that separate critical path, total work, and elapsed time — and that refuse a misleading efficiency claim without a serial baseline and an honest worker-count note. He relates to this whenever ops must explain cost and concurrency without Amdahl fairy tales."
+  "narrative": "Nubble is asked whether parallel agents sped things up. Elapsed wall time dropped, but total node work grew and queue waits hid under a vanity speedup number. He needs topology metrics that separate critical path, total work, and elapsed time — and that refuse a misleading efficiency claim without a serial baseline and an honest worker-count note. He uses this whenever operations must explain cost and concurrency without overselling parallelism.",
+  "implementation": "Kind `topology_efficiency`. Runner calls `mechaharness.decision_log.compute_topology_metrics` on synthetic spans. Expects reject vanity speedup without serial baseline / worker notes; critical path, total work, and elapsed time are reported distinctly."
 }

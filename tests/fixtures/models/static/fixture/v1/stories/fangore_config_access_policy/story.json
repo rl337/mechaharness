@@ -1,7 +1,8 @@
 {
   "id": "fangore_config_access_policy",
   "persona": "fangore",
-  "title": "Wiring the nest with DI",
+  "title": "Let the host app supply its own permission policy",
   "kind": "config_access_policy",
-  "narrative": "Fangore subclasses `MechaHarnessConfig` for his host. He does not want a\nservice-locator bag of grants \u2014 he overrides `get_access_policy()` to return\nhis `CompoundPolicy`, configures once, and injects `AccessControl`. When the\ninjector hands back a control that already honors his layers, he knows the app\nis wired the MechaHarness way. He relates to this whenever a host must stay\nDI-first instead of sprinkling grants into constructors by hand."
+  "narrative": "Fangore’s product needs a host app whose permission rules are defined by the application, not by copying grant lists into every agent constructor. He configures the harness once so the app’s composed permission packs — as in `fangore_compound_grants` — are what the harness enforces. Success: the injected access control already honors those packs. He uses this whenever a host must stay configuration-first instead of sprinkling grants by hand.",
+  "implementation": "Kind `config_access_policy`. Host subclasses `MechaHarnessConfig`, overrides `get_access_policy()` to return a `CompoundPolicy`, and resolves `AccessControl` from the injector. Soft expects: injected control allows the composed grants."
 }

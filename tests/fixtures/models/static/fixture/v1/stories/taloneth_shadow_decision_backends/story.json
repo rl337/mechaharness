@@ -1,7 +1,8 @@
 {
   "id": "taloneth_shadow_decision_backends",
   "persona": "taloneth",
-  "title": "Shadow the forge, do not invent it",
+  "title": "Compare decision backends without inventing missing results",
   "kind": "shadow_decision_backends",
-  "narrative": "Taloneth compares decision backends on a matched ticket snapshot: deterministic rules, a small local model, and System One when the decide lane is loaded. Tonight the decide profile is cold. He needs the shadow report to mark System One unavailable — no synthetic latency, no fake verdict — while still logging matched candidates and evidence. Activation stays behind evaluation, not the cheapest unit price. He relates to this whenever routing experiments must stay honest about exclusive-profile hosts."
+  "narrative": "Taloneth compares decision backends on a matched ticket snapshot: deterministic rules, a small local model, and System One when the decide lane is loaded. Tonight the decide profile is cold. He needs the shadow report to mark System One unavailable — no synthetic latency, no fake verdict — while still logging matched candidates and evidence. Activation stays behind evaluation, not the cheapest unit price. Related: wrong-profile honesty in `nubble_lane_load_hint`. He uses this whenever routing experiments must stay honest about exclusive-profile hosts.",
+  "implementation": "Kind `shadow_decision_backends`. `shadow_decision_backends()` in `mechaharness.routing` with decide lane unloaded. Soft expects: System One marked unavailable without synthetic latency/verdict; other backends still compared."
 }

@@ -3,11 +3,27 @@
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 FIXTURES_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "models"
+REQUIRED_STORY_FIELDS = (
+    "id",
+    "persona",
+    "title",
+    "kind",
+    "narrative",
+    "implementation",
+)
+TWIN_PARITY_FIELDS = (
+    "persona",
+    "title",
+    "kind",
+    "narrative",
+    "implementation",
+)
 
 
 @dataclass(frozen=True)
@@ -68,3 +84,41 @@ def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
                 )
             )
     return cases
+
+
+def validate_story_payload(data: dict[str, Any], *, path: Path) -> list[str]:
+    """Return human-readable errors for one ``story.json``."""
+    errors: list[str] = []
+    for field in REQUIRED_STORY_FIELDS:
+        value = data.get(field)
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{path}: missing or empty required field {field!r}")
+    story_id = data.get("id")
+    if isinstance(story_id, str) and path.parent.name != story_id:
+        errors.append(
+            f"{path}: directory name {path.parent.name!r} != id {story_id!r}"
+        )
+    return errors
+
+
+def validate_story_fixtures() -> list[str]:
+    """Validate required fields and twin parity across model trees."""
+    errors: list[str] = []
+    by_id: dict[str, list[tuple[Path, dict[str, Any]]]] = defaultdict(list)
+    for case in iter_story_cases():
+        path = case.path("story.json")
+        data = case.load_json("story.json")
+        errors.extend(validate_story_payload(data, path=path))
+        by_id[str(data.get("id") or case.story_id)].append((path, data))
+
+    for story_id, copies in sorted(by_id.items()):
+        if len(copies) < 2:
+            continue
+        base = copies[0][1]
+        for path, data in copies[1:]:
+            for field in TWIN_PARITY_FIELDS:
+                if data.get(field) != base.get(field):
+                    errors.append(
+                        f"twin drift for {story_id!r}: {field} differs at {path}"
+                    )
+    return errors

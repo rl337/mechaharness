@@ -1,7 +1,8 @@
 {
   "id": "fangore_local_plan_resume",
   "persona": "fangore",
-  "title": "The plan that survived the crash",
+  "title": "Resume a durable local plan after a crash",
   "kind": "local_plan_resume",
-  "narrative": "Fangore’s host fans out a local execution plan: produce a patch, then consume it under an exclusive write scope. Mid-dispatch the process dies. On restart there is no chat transcript — only EventLog checkpoints. He needs the graph to resume at the recorded boundary, keep justified data/resource edges, refuse stale preconditions, surface a failed fan-in branch, and refuse silent overwrite when two branches edit the same base. He relates to this whenever durable local DAGs must outlive a flaky worker without reconstructing progress from conversation."
+  "narrative": "Fangore’s host fans out a local execution plan: produce a patch, then consume it under an exclusive write scope. Midway through dispatch the process dies. On restart there is no chat transcript — only recorded checkpoints. He needs the plan to resume at the recorded boundary, keep justified data and resource edges, refuse stale preconditions, surface a failed fan-in branch, and refuse silent overwrite when two branches edit the same base. He uses this whenever durable local plans must outlive a flaky worker without reconstructing progress from conversation.",
+  "implementation": "Kind `local_plan_resume`. `ExecutionGraph` / `GraphStore` checkpoints on `EventLog` with recovery boundaries; dependency edges, fan-in failure visibility, and merge conflict refusal. Soft expects: resume at recorded boundary; stale preconditions rejected."
 }

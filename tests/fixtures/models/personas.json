@@ -1,0 +1,25 @@
+{
+  "intro": "MechaHarness acceptance paths are told as **user stories**: short scenes about what a product needs to do, written for readers who understand features but not code. Story text lives only in fixture `story.json` files. This guide is **generated** from those fixtures.\n\nSee the Cursor skill `.cursor/skills/user-stories/SKILL.md` when adding features: edit fixtures, regenerate this page, and keep twin copies of the same story id identical.",
+  "personas": [
+    {
+      "id": "nubble",
+      "name": "Nubble",
+      "role": "operations / DevOps",
+      "bio": "Nubble keeps production and CI reliable. He cares about the right inference profile being loaded, cost and progress signals he can forward to billing or monitoring, and metrics that explain whether parallel work actually helped."
+    },
+    {
+      "id": "fangore",
+      "name": "Fangore",
+      "role": "application developer",
+      "bio": "Fangore builds product applications on MechaHarness. He cares about deny-by-default permissions, product rules that models cannot override, durable local plans that survive crashes, loops that stop when they are not making progress, and context that never silently drops mandatory requirements."
+    },
+    {
+      "id": "taloneth",
+      "name": "Taloneth",
+      "role": "ML engineer",
+      "bio": "Taloneth owns judge contracts, adapter drift checks, and harness experiments. He cares about offline fixture batches, versioned recorded replies, honest shadow comparisons, validator qualification before promotion, research that rejects failing candidates, and decision exports that do not leak future outcomes."
+    }
+  ],
+  "running_suite": "Default CI runs **every** story offline (static fixture + cassettes) — no skips.\n\n```bash\n# CI / offline — all stories, zero skips\npytest -q tests/stories\n\n# Full suite (unit + stories)\npytest -q\n\n# Live OpenAI-compat — same tests, real HTTP\nMECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen3-30b-thinking \\\n  MECHA_BASE_URL=http://127.0.0.1:8000/v1 pytest -q tests/stories -k nubble_run_cost\n\n# Live System One\nMECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \\\n  MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 pytest -q tests/stories -k refund_verdict\n\n# Shorthand aliases (still dual-mode stories, not separate skipif modules)\nMECHA_LIVE_JUNESPARK=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost\nMECHA_LIVE_QWEN=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost\nMECHA_LIVE_JUDGE=1 pytest -q tests/stories -k 'refund_verdict or systemone_cassette'\n```\n\n| `MECHA_STORY_BACKEND` | Behavior |\n|-----------------------|----------|\n| `static` (default) | In-process fixture + HTTP cassettes |\n| `live` | Real servers; soft expects only |\n\nLive parity is a **mode** of cassette-backed stories (for example `nubble_run_cost_events`, `fangore_refund_verdict`, `taloneth_systemone_cassette`), not a separate empty fixture. Flip `MECHA_STORY_BACKEND=live` to run the same request and expect files against a real endpoint.",
+  "models": "| Path | Role |\n|------|------|\n| `static/fixture/v1` | Generic in-process model; model-agnostic paths |\n| `openai_compat/<served-id>/v1` | Captured OpenAI-compat chat |\n| `systemone/<served-id>/v1` | Captured System One judge wire |"
+}

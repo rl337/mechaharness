@@ -1,7 +1,8 @@
 {
   "id": "taloneth_systemone_cassette",
   "persona": "taloneth",
-  "title": "Pinning Laya\u2019s handwriting",
+  "title": "Pin System One adapter behavior to a versioned cassette",
   "kind": "systemone_cassette",
-  "narrative": "A new Laya build changes confidence fields in the System One JSON. Taloneth\nkeeps a **versioned cassette** of the wire response under `systemone/laya/v1`\nand replays it through `SystemOneJudgeProvider`. If mapping breaks, the story\nfails before silent drift ships. He relates to this whenever adapter code must\nstay pinned to a known model handwriting."
+  "narrative": "A new Laya build changes confidence fields in the System One JSON. Taloneth keeps a versioned cassette of the wire response and replays it through the System One adapter. If mapping breaks, the story fails before silent drift ships. He uses this whenever adapter code must stay pinned to a known model response shape. Live parity for the same request is the live backend mode described in the suite preamble — not a separate story.",
+  "implementation": "Kind `systemone_cassette` (shares `_run_route_refund`). Cassette under `systemone/laya/v1`; `SystemOneJudgeProvider` maps wire JSON to `Judgement`. Soft expects: mapped signals and policy verdict match `expect.json`. Live: `MECHA_STORY_BACKEND=live`."
 }

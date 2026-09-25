@@ -1,7 +1,8 @@
 {
   "id": "nubble_lane_load_hint",
   "persona": "nubble",
-  "title": "The wrong torch on the wall",
+  "title": "Refuse work when the wrong inference profile is loaded",
   "kind": "wrong_lane_deny",
-  "narrative": "Nubble is mid-shift when a paging alert fires: the refund-routing job is failing\non the local inference host. He checks in, expects a judge profile, and finds\nsomeone left the **reason** torch lit from an earlier experiment. The harness\nshould not shrug with a generic failure \u2014 it should tell him, in operator\nlanguage, that this work needs the judge lane and which load command to run.\nWhen the error names `infer load decide-fast` (or the host\u2019s judge hint), Nubble\nflips the profile and the page clears. He relates to this story whenever a lane\nmismatch wastes minutes of incident time."
+  "narrative": "Nubble is on call when a refund-routing job fails on the local inference host. The job needs the judge profile, but an earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error. It must tell him, in plain operator language, that this work needs the judge lane and which load command to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile mismatch wastes incident time.",
+  "implementation": "Kind `wrong_lane_deny`. Runner exercises `InferenceEnvironment` / lane load hints so a decide/judge job against the reason lane raises `InferenceEnvironmentError` whose message includes the host load hint (for example `infer load decide-fast`). Soft expects: non-empty error text naming the required lane."
 }

@@ -1,7 +1,8 @@
 {
   "id": "fangore_compound_grants",
   "persona": "fangore",
-  "title": "The locked scroll, then the keyring",
+  "title": "Compose read-only and write permission packs",
   "kind": "grant_gate_write",
-  "narrative": "Fangore is building a host app that must not let agents scribble the filesystem\nby default. He starts with a read-only grant set \u2014 the write tool is refused,\nand he can show product that deny-by-default works. Later he composes that\npolicy with a write layer via `CompoundPolicy` (one keyring, not a rewritten\nlist) and the same tool succeeds. He relates to this whenever an app needs\nreusable permission packs instead of copy-pasted grant arrays."
+  "narrative": "Fangore is building a host app that must not let agents write the filesystem by default. He starts with a read-only permission pack — the write tool is refused, which proves deny-by-default works. Later he composes that pack with a write pack into one reusable set, and the same tool succeeds. He uses this whenever an app needs reusable permission packs instead of copy-pasted grant lists.",
+  "implementation": "Kind `grant_gate_write`. `AccessPolicy` / `CompoundPolicy` over `FsWrite` grants; `AccessControl` denies then allows after composition. Soft expects: first attempt denied, second allowed after compound policy."
 }

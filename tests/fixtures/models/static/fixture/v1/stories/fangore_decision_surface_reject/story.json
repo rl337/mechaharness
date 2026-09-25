@@ -1,7 +1,8 @@
 {
   "id": "fangore_decision_surface_reject",
   "persona": "fangore",
-  "title": "A suggestion is not a key",
+  "title": "Reject model choices that are not on the allowed list",
   "kind": "decision_surface_reject",
-  "narrative": "Fangore wires a Choice surface so a triage model can propose which team owns a ticket. One night the model confidently returns an option that was never on the allowed set — a free-form team name invented mid-thought. He needs the decision plane to treat that as a rejected proposal, not as authority. Rules or an inference adapter may score the same surface, but only JudgementPolicy may unlock the next action. He relates to this whenever a host must keep Choice/Score/Noul as signals, never as automatic execution."
+  "narrative": "Fangore sets up a choice surface so a triage model can propose which team owns a ticket. One night the model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal, not as authority to act. Scoring adapters may evaluate the same surface, but only product judgement policy may unlock the next action — the same split as `fangore_refund_verdict`. He uses this whenever choice, score, or yes/no signals must stay suggestions, never automatic execution.",
+  "implementation": "Kind `decision_surface_reject`. `DecisionSurface` + `reject_invalid_choice` / `RulesDecisionBackend`; invalid selected option becomes a rejected proposal. Soft expects: rejection flagged; no automatic unlock without `JudgementPolicy`."
 }

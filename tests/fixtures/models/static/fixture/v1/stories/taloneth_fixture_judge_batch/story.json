@@ -1,7 +1,8 @@
 {
   "id": "taloneth_fixture_judge_batch",
   "persona": "taloneth",
-  "title": "Lab bench without the forge",
+  "title": "Validate judge question batches without a live model",
   "kind": "fixture_judge_batch",
-  "narrative": "Taloneth is iterating on question sets \u2014 noul, choice, and score in one batch \u2014\nand cannot wait on a GPU forge for every tweak. He drives `FixtureJudgeProvider`\nwith known answers and checks that validation accepts clean signals and reports\nerrors when answers are missing. The lab bench is offline, deterministic, and\nfast; he relates to this whenever contract tests must not depend on a served\nmodel."
+  "narrative": "Taloneth is iterating on judge question sets — yes/no, choice, and score in one batch — and cannot wait on a GPU host for every tweak. He drives an offline fixture judge with known answers and checks that validation accepts clean signals and reports errors when answers are missing. The lab bench is offline, deterministic, and fast. He uses this whenever contract tests must not depend on a served model.",
+  "implementation": "Kind `fixture_judge_batch`. `FixtureJudgeProvider` + `judge()` over mixed `ChoiceQuestion` / `NoulQuestion` / `ScoreQuestion`. Soft expects: clean batch validates; missing answers surface `JudgeErrorItem` entries."
 }

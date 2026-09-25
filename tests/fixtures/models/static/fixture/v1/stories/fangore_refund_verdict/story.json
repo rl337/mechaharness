@@ -1,7 +1,8 @@
 {
   "id": "fangore_refund_verdict",
   "persona": "fangore",
-  "title": "Billing owns the double-charge",
+  "title": "Keep billing authority in product rules, not the model",
   "kind": "route_refund",
-  "narrative": "A customer was charged twice. Fangore\u2019s product rule is simple: only the billing\nteam may own that ticket \u2014 the model may *suggest*, but it must not grant\npermission. He runs the judge over the ticket text, then `JudgementPolicy`\ndecides ALLOW only when the route signal is billing. If the model picks\ntechnical, policy denies. He relates to this whenever business authority must\nstay in code, not in prompt vibes."
+  "narrative": "A customer was charged twice. Fangore’s product rule is simple: only the billing team may own that ticket. The model may suggest a team, but it must not grant permission. He runs the judge over the ticket text, then product policy allows only when the route signal is billing. If the model picks technical support, policy denies. Builds on the idea that suggestions are not authority — see also `fangore_decision_surface_reject`. He uses this whenever business authority must stay in product rules, not prompt wording.",
+  "implementation": "Kind `route_refund` (System One cassette twin: `systemone_cassette` path reuses the same runner). `judge()` + `JudgementPolicy` / `decide()` with thresholds on choice signal `route`. Soft expects: ALLOW when selected is billing; DENY when technical. Live/systemone twins share narrative."
 }

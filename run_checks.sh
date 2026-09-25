@@ -58,6 +58,8 @@ else
   run_check "Mypy type checking" "$MYPY"
 fi
 
+run_check "User stories guide" "$PYTHON" scripts/generate_user_stories_md.py --check
+
 run_check "Pytest" "$PYTEST" -q
 
 if "$PYTHON" -c "import sphinx" 2>/dev/null; then
