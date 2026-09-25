@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Changelog &mdash; MechaHarness 0.1.0 documentation</title>
+  <title>Changelog &mdash; MechaHarness 0.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/documentation_options.js?v=a58bc63e"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -108,36 +108,39 @@
 and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <section id="unreleased">
 <h2>[Unreleased]<a class="headerlink" href="#unreleased" title="Link to this heading"></a></h2>
+</section>
+<section id="id1">
+<h2>[0.1.1] — 2026-09-25<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <section id="added">
 <h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>REQUIREMENTS.md addendum incorporation: decision plane, convergence, CTX-05–09,
-GRF-05/06, VER-04, OBS-04, ATK-style EXP search; host track generalized to a
-nameless local inference source</p></li>
+<li><p>REQUIREMENTS.md addendum incorporation: decision plane, convergence, context
+experiments, graph resume/fan-in, validator qualification, OBS export/metrics,
+ATK-style research; host track generalized to a nameless local inference source</p></li>
 <li><p>Library implementations: <code class="docutils literal notranslate"><span class="pre">OperationContract</span></code>, <code class="docutils literal notranslate"><span class="pre">ConvergenceGuard</span></code>, decision
 surfaces, shadow decision-backend reports, context compiler / derived memory /
 topology / cache layout, offline decision export, topology metrics, validator
 qualification, hierarchical fan-in</p></li>
-<li><p>Persona user stories for addendum acceptance paths (Nubble / Fangore / Taloneth;
-no new persona): decision surface reject, convergence ceiling, context deficit,
-local plan resume, topology efficiency, shadow backends, validator qualification,
-ATK reject, offline decision export</p></li>
-<li><p>Keep <code class="docutils literal notranslate"><span class="pre">docs/adr/</span></code> and <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> local-only (gitignored; not published)</p></li>
+<li><p>Persona user stories as acceptance vocabulary (Nubble / Fangore / Taloneth),
+including gap stories for tool gating, human review, repair loops, and related
+paths; story <code class="docutils literal notranslate"><span class="pre">footnotes</span></code> and generated guide sync</p></li>
 </ul>
 </section>
 <section id="changed">
 <h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Keep <code class="docutils literal notranslate"><span class="pre">docs/adr/</span></code> local-only (gitignored; purged from git history; not published)</p></li>
+<li><p>Keep <code class="docutils literal notranslate"><span class="pre">docs/adr/</span></code> and <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> local-only (gitignored; not published)</p></li>
+<li><p>Story acceptance is story-id primary; former INF/POL codes retired to local
+archaeology mapping</p></li>
 </ul>
 </section>
 </section>
-<section id="id1">
-<h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="id2">
+<h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
 <p>First public library cut: DI-first agent harness with native lanes, cost on the
 run path, built-in EventLog, judge/decide outcomes, and persona user stories.</p>
-<section id="id2">
-<h3>Added<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<section id="id3">
+<h3>Added<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>pyiv DI</strong> — <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> / <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code>; hosts subclass hooks
 (<code class="docutils literal notranslate"><span class="pre">get_inference_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_harness_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_access_policy</span></code>, judge
@@ -163,8 +166,8 @@ dual-mode static cassettes (CI, zero skips) / live via <code class="docutils lit
 principles on the home page; packaging, Trusted Publishing, and auto version bump</p></li>
 </ul>
 </section>
-<section id="id3">
-<h3>Changed<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id4">
+<h3>Changed<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">junespark</span></code> backend no longer ships a private LAN <code class="docutils literal notranslate"><span class="pre">base_url</span></code> default; set
 <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code></p></li>
