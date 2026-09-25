@@ -1,0 +1,1208 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index &mdash; MechaHarness 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            MechaHarness
+              <img src="_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Index</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/genindex" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ 
+</div>
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.__init__">__init__() (mechaharness.core.access.InMemoryAccessControl method)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant.__init__">(mechaharness.core.access.InMemoryCostAccountant method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.FanoutEventLog.__init__">(mechaharness.core.events.FanoutEventLog method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.InMemoryEventLog.__init__">(mechaharness.core.events.InMemoryEventLog method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.LoggingEventLog.__init__">(mechaharness.core.events.LoggingEventLog method)</a>
+</li>
+        <li><a href="api/di.html#mechaharness.di.SettingsConfig.__init__">(mechaharness.di.SettingsConfig method)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.__init__">(mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+        <li><a href="api/tools.html#mechaharness.tools.base.Tool.__init__">(mechaharness.tools.base.Tool method)</a>
+</li>
+        <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.__init__">(mechaharness.tools.base.ToolRegistry method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mechaharness.html#mechaharness.__version__">__version__ (in module mechaharness)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.Ability">Ability (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness">AbstractHarness (class in mechaharness.harness.base)</a>
+</li>
+      <li><a href="api/completer.html#mechaharness.core.completer.Completer.access_policy">access_policy() (mechaharness.core.completer.Completer method)</a>
+
+      <ul>
+        <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.access_policy">(mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.AccessCheck">AccessCheck (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.AccessControl">AccessControl (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.AccessPolicy">AccessPolicy (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.aclose">aclose() (mechaharness.inference.base.InferenceStrategy method)</a>
+</li>
+      <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_capabilities">active_capabilities() (mechaharness.core.environment.InferenceEnvironment method)</a>
+
+      <ul>
+        <li><a href="api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment.active_capabilities">(mechaharness.core.environment.NoOpInferenceEnvironment method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_grants">active_grants() (mechaharness.core.environment.InferenceEnvironment method)</a>
+</li>
+      <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_lane">active_lane() (mechaharness.core.environment.InferenceEnvironment method)</a>
+
+      <ul>
+        <li><a href="api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment.active_lane">(mechaharness.core.environment.NoOpInferenceEnvironment method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_profile">active_profile() (mechaharness.core.environment.InferenceEnvironment method)</a>
+
+      <ul>
+        <li><a href="api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment.active_profile">(mechaharness.core.environment.NoOpInferenceEnvironment method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.CostReport.add">add() (mechaharness.core.access.CostReport method)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.Ability.ADVANCED">ADVANCED (mechaharness.core.access.Ability attribute)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.AgentRef.agent_id">agent_id (mechaharness.core.events.AgentRef attribute)</a>
+
+      <ul>
+        <li><a href="api/events.html#mechaharness.core.events.Event.agent_id">(mechaharness.core.events.Event attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/events.html#mechaharness.core.events.AgentEnd">AgentEnd (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.AgentRef">AgentRef (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.EventLog.agents">agents() (mechaharness.core.events.EventLog method)</a>
+
+      <ul>
+        <li><a href="api/events.html#mechaharness.core.events.FanoutEventLog.agents">(mechaharness.core.events.FanoutEventLog method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.InMemoryEventLog.agents">(mechaharness.core.events.InMemoryEventLog method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.LoggingEventLog.agents">(mechaharness.core.events.LoggingEventLog method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.AgentStart">AgentStart (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.AccessControl.allows">allows() (mechaharness.core.access.AccessControl method)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.AccessPolicy.allows">(mechaharness.core.access.AccessPolicy method)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.allows">(mechaharness.core.access.CompoundPolicy method)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.allows">(mechaharness.core.access.InMemoryAccessControl method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/config.html#mechaharness.config.Settings.api_key">api_key (mechaharness.config.Settings attribute)</a>
+
+      <ul>
+        <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.api_key">(mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/di.html#mechaharness.di.apply_backend_defaults">apply_backend_defaults() (in module mechaharness.di)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.ToolCall.arguments">arguments (mechaharness.core.types.ToolCall attribute)</a>
+</li>
+      <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.assert_compatible">assert_compatible() (mechaharness.core.environment.InferenceEnvironment method)</a>
+
+      <ul>
+        <li><a href="api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment.assert_compatible">(mechaharness.core.environment.NoOpInferenceEnvironment method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/types.html#mechaharness.core.types.Role.ASSISTANT">ASSISTANT (mechaharness.core.types.Role attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.backend">backend (mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+      <li><a href="api/config.html#mechaharness.config.Settings.base_url">base_url (mechaharness.config.Settings attribute)</a>
+
+      <ul>
+        <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.base_url">(mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.Ability.BASIC">BASIC (mechaharness.core.access.Ability attribute)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.build_injector">build_injector() (in module mechaharness.di)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.build_request">build_request() (mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile.capabilities">capabilities (mechaharness.core.access.CapabilityProfile attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CostEntry.capabilities">(mechaharness.core.access.CostEntry attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.Capability">Capability (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/completer.html#mechaharness.core.completer.Completer.capability_profile">capability_profile() (mechaharness.core.completer.Completer method)</a>
+
+      <ul>
+        <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.capability_profile">(mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+        <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.capability_profile">(mechaharness.inference.base.InferenceStrategy method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.CapabilityKind">CapabilityKind (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile">CapabilityProfile (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.ChatMessage">ChatMessage (class in mechaharness.core.types)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.checks">checks (mechaharness.core.access.InMemoryAccessControl attribute)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CapabilityKind.CODE">CODE (mechaharness.core.access.CapabilityKind attribute)</a>
+</li>
+      <li><a href="api/completer.html#mechaharness.core.completer.Completer.complete">complete() (mechaharness.core.completer.Completer method)</a>
+
+      <ul>
+        <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.complete">(mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+        <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.complete">(mechaharness.inference.base.InferenceStrategy method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/completer.html#mechaharness.core.completer.Completer">Completer (class in mechaharness.core.completer)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CostEntry.completion_tokens">completion_tokens (mechaharness.core.access.CostEntry attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CostReport.completion_tokens">(mechaharness.core.access.CostReport attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.Usage.completion_tokens">(mechaharness.core.types.Usage attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionRequest">CompletionRequest (class in mechaharness.core.types)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionResponse">CompletionResponse (class in mechaharness.core.types)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy">CompoundPolicy (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.configure">configure() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.ChatMessage.content">content (mechaharness.core.types.ChatMessage attribute)</a>
+
+      <ul>
+        <li><a href="api/types.html#mechaharness.core.types.ToolResult.content">(mechaharness.core.types.ToolResult attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.CoreEvent">CoreEvent (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CoreGrant">CoreGrant (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.Cost">Cost (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionResponse.cost">cost (mechaharness.core.types.CompletionResponse attribute)</a>
+
+      <ul>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.cost">(mechaharness.harness.base.HarnessResult attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.CostAccountant">CostAccountant (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CostEntry">CostEntry (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CostReport">CostReport (class in mechaharness.core.access)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.default_capability_profile">default_capability_profile() (in module mechaharness.core.access)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.default_event_log">default_event_log() (in module mechaharness.core.events)</a>
+</li>
+      <li><a href="api/tools.html#mechaharness.tools.base.Tool.definition">definition() (mechaharness.tools.base.Tool method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.definitions">definitions() (mechaharness.tools.base.ToolRegistry method)</a>
+</li>
+      <li><a href="api/factory.html#mechaharness.factory.describe">describe() (in module mechaharness.factory)</a>
+
+      <ul>
+        <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.describe">(mechaharness.inference.base.InferenceStrategy method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/types.html#mechaharness.core.types.ToolDefinition.description">description (mechaharness.core.types.ToolDefinition attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/events.html#mechaharness.core.events.EventLog.emit">emit() (mechaharness.core.events.EventLog method)</a>
+
+      <ul>
+        <li><a href="api/events.html#mechaharness.core.events.FanoutEventLog.emit">(mechaharness.core.events.FanoutEventLog method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.InMemoryEventLog.emit">(mechaharness.core.events.InMemoryEventLog method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.LoggingEventLog.emit">(mechaharness.core.events.LoggingEventLog method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.CostReport.entries">entries (mechaharness.core.access.CostReport attribute)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.Event">Event (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.event_type_key">event_type_key() (in module mechaharness.core.events)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.EventLog">EventLog (class in mechaharness.core.events)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunResponse.events">events (mechaharness.core.contract.RunResponse attribute)</a>
+
+      <ul>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.events">(mechaharness.harness.base.HarnessResult attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.EventType">EventType (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.execute">execute() (mechaharness.tools.base.ToolRegistry method)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.execute_tools">execute_tools() (mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.ChatMessage.extra">extra (mechaharness.core.types.ChatMessage attribute)</a>
+
+      <ul>
+        <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.extra">(mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.extra">(mechaharness.harness.base.HarnessConfig attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.family">family (mechaharness.core.contract.RunRequest attribute)</a>
+
+      <ul>
+        <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.family">(mechaharness.harness.base.AbstractHarness attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.FanoutEventLog">FanoutEventLog (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunResponse.final_text">final_text (mechaharness.core.contract.RunResponse attribute)</a>
+
+      <ul>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.final_text">(mechaharness.harness.base.HarnessResult attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.final_text">final_text() (mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionResponse.finish_reason">finish_reason (mechaharness.core.types.CompletionResponse attribute)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.AgentRef.first_ts">first_ts (mechaharness.core.events.AgentRef attribute)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.flatten">flatten() (mechaharness.core.access.CompoundPolicy method)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.FsRead">FsRead (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.FsWrite">FsWrite (class in mechaharness.core.access)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.get">get() (mechaharness.tools.base.ToolRegistry method)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_access_control">get_access_control() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_access_policy">get_access_policy() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_cost_accountant">get_cost_accountant() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_event_log">get_event_log() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_grants">get_grants() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_harness_class">get_harness_class() (mechaharness.di.MechaHarnessConfig method)</a>
+
+      <ul>
+        <li><a href="api/di.html#mechaharness.di.SettingsConfig.get_harness_class">(mechaharness.di.SettingsConfig method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_harness_config">get_harness_config() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_class">get_inference_class() (mechaharness.di.MechaHarnessConfig method)</a>
+
+      <ul>
+        <li><a href="api/di.html#mechaharness.di.SettingsConfig.get_inference_class">(mechaharness.di.SettingsConfig method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_environment">get_inference_environment() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_connection">get_judge_connection() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_provider">get_judge_provider() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/config.html#mechaharness.config.get_settings">get_settings() (in module mechaharness.config)</a>
+
+      <ul>
+        <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_settings">(mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+        <li><a href="api/di.html#mechaharness.di.SettingsConfig.get_settings">(mechaharness.di.SettingsConfig method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_tools">get_tools() (mechaharness.di.MechaHarnessConfig method)</a>
+
+      <ul>
+        <li><a href="api/di.html#mechaharness.di.SettingsConfig.get_tools">(mechaharness.di.SettingsConfig method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.Grant">Grant (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.grant_key">grant_key() (in module mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.AccessPolicy.grants">grants (mechaharness.core.access.AccessPolicy attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.grants">(mechaharness.core.access.CompoundPolicy property)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.grants">(mechaharness.core.access.InMemoryAccessControl property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.harness_classes">harness_classes() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/config.html#mechaharness.config.Settings.harness_family">harness_family (mechaharness.config.Settings attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig">HarnessConfig (class in mechaharness.harness.base)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult">HarnessResult (class in mechaharness.harness.base)</a>
+</li>
+      <li><a href="api/config.html#mechaharness.config.Settings.host">host (mechaharness.config.Settings attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/types.html#mechaharness.core.types.ToolCall.id">id (mechaharness.core.types.ToolCall attribute)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.include_subagent_tools">include_subagent_tools() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.Inference">Inference (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/config.html#mechaharness.config.Settings.inference_backend">inference_backend (mechaharness.config.Settings attribute)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.inference_classes">inference_classes() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.inference_cost_entry">inference_cost_entry() (in module mechaharness.core.access)</a>
+</li>
+      <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment">InferenceEnvironment (class in mechaharness.core.environment)</a>
+</li>
+      <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironmentError">InferenceEnvironmentError</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy">InferenceStrategy (class in mechaharness.inference.base)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl">InMemoryAccessControl (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant">InMemoryCostAccountant (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.InMemoryEventLog">InMemoryEventLog (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.Ability.INTERMEDIATE">INTERMEDIATE (mechaharness.core.access.Ability attribute)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.interpret_tool_calls">interpret_tool_calls() (mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      <li><a href="api/tools.html#mechaharness.tools.base.Tool.invoke">invoke() (mechaharness.tools.base.Tool method)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.ToolResult.is_error">is_error (mechaharness.core.types.ToolResult attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.Grant.key">key() (mechaharness.core.access.Grant class method)</a>
+
+      <ul>
+        <li><a href="api/events.html#mechaharness.core.events.EventType.key">(mechaharness.core.events.EventType class method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.Capability.kind">kind (mechaharness.core.access.Capability attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CostEntry.kind">(mechaharness.core.access.CostEntry attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/events.html#mechaharness.core.events.AgentRef.label">label (mechaharness.core.events.AgentRef attribute)</a>
+</li>
+      <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.lane_load_hint">lane_load_hint() (mechaharness.core.environment.InferenceEnvironment method)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.AgentRef.last_ts">last_ts (mechaharness.core.events.AgentRef attribute)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.Capability.level">level (mechaharness.core.access.Capability attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/di.html#mechaharness.di.list_harness_families">list_harness_families() (in module mechaharness.di)</a>
+</li>
+      <li><a href="api/mechaharness.html#mechaharness.list_inference_backends">list_inference_backends() (in module mechaharness)</a>
+
+      <ul>
+        <li><a href="api/di.html#mechaharness.di.list_inference_backends">(in module mechaharness.di)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.LoggingEventLog">LoggingEventLog (class in mechaharness.core.events)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/config.html#mechaharness.config.Settings.max_tokens">max_tokens (mechaharness.config.Settings attribute)</a>
+
+      <ul>
+        <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.max_tokens">(mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.max_tokens">(mechaharness.harness.base.HarnessConfig attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/config.html#mechaharness.config.Settings.max_turns">max_turns (mechaharness.config.Settings attribute)</a>
+
+      <ul>
+        <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.max_turns">(mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.max_turns">(mechaharness.harness.base.HarnessConfig attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.MaxTurns">MaxTurns (class in mechaharness.core.events)</a>
+</li>
+      <li>
+    mechaharness.config
+
+      <ul>
+        <li><a href="api/config.html#module-mechaharness.config">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.core.access
+
+      <ul>
+        <li><a href="api/access.html#module-mechaharness.core.access">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.core.completer
+
+      <ul>
+        <li><a href="api/completer.html#module-mechaharness.core.completer">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.core.contract
+
+      <ul>
+        <li><a href="api/contract.html#module-mechaharness.core.contract">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.core.environment
+
+      <ul>
+        <li><a href="api/environment.html#module-mechaharness.core.environment">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.core.events
+
+      <ul>
+        <li><a href="api/events.html#module-mechaharness.core.events">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.core.types
+
+      <ul>
+        <li><a href="api/types.html#module-mechaharness.core.types">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.di
+
+      <ul>
+        <li><a href="api/di.html#module-mechaharness.di">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.factory
+
+      <ul>
+        <li><a href="api/factory.html#module-mechaharness.factory">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.harness.base
+
+      <ul>
+        <li><a href="api/harness.html#module-mechaharness.harness.base">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.inference.base
+
+      <ul>
+        <li><a href="api/inference.html#module-mechaharness.inference.base">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.tools.base
+
+      <ul>
+        <li><a href="api/tools.html#module-mechaharness.tools.base">module</a>
+</li>
+      </ul></li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig">MechaHarnessConfig (class in mechaharness.di)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.MediaAudio">MediaAudio (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.MediaImage">MediaImage (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.MediaVideo">MediaVideo (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionResponse.message">message (mechaharness.core.types.CompletionResponse attribute)</a>
+</li>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunResponse.messages">messages (mechaharness.core.contract.RunResponse attribute)</a>
+
+      <ul>
+        <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.messages">(mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.messages">(mechaharness.harness.base.HarnessResult attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/config.html#mechaharness.config.Settings.model">model (mechaharness.config.Settings attribute)</a>
+
+      <ul>
+        <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.model">(mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.model">(mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.model">(mechaharness.harness.base.HarnessConfig attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/config.html#mechaharness.config.Settings.model_config">model_config (mechaharness.config.Settings attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.AccessPolicy.model_config">(mechaharness.core.access.AccessPolicy attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.Capability.model_config">(mechaharness.core.access.Capability attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile.model_config">(mechaharness.core.access.CapabilityProfile attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.model_config">(mechaharness.core.access.CompoundPolicy attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.CostEntry.model_config">(mechaharness.core.access.CostEntry attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.CostReport.model_config">(mechaharness.core.access.CostReport attribute)</a>
+</li>
+        <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.model_config">(mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+        <li><a href="api/contract.html#mechaharness.core.contract.RunResponse.model_config">(mechaharness.core.contract.RunResponse attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.AgentRef.model_config">(mechaharness.core.events.AgentRef attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.Event.model_config">(mechaharness.core.events.Event attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.ChatMessage.model_config">(mechaharness.core.types.ChatMessage attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.model_config">(mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.CompletionResponse.model_config">(mechaharness.core.types.CompletionResponse attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.ToolCall.model_config">(mechaharness.core.types.ToolCall attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.ToolDefinition.model_config">(mechaharness.core.types.ToolDefinition attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.ToolResult.model_config">(mechaharness.core.types.ToolResult attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.Usage.model_config">(mechaharness.core.types.Usage attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.model_config">(mechaharness.harness.base.HarnessConfig attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.model_config">(mechaharness.harness.base.HarnessResult attribute)</a>
+</li>
+      </ul></li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="api/config.html#module-mechaharness.config">mechaharness.config</a>
+</li>
+        <li><a href="api/access.html#module-mechaharness.core.access">mechaharness.core.access</a>
+</li>
+        <li><a href="api/completer.html#module-mechaharness.core.completer">mechaharness.core.completer</a>
+</li>
+        <li><a href="api/contract.html#module-mechaharness.core.contract">mechaharness.core.contract</a>
+</li>
+        <li><a href="api/environment.html#module-mechaharness.core.environment">mechaharness.core.environment</a>
+</li>
+        <li><a href="api/events.html#module-mechaharness.core.events">mechaharness.core.events</a>
+</li>
+        <li><a href="api/types.html#module-mechaharness.core.types">mechaharness.core.types</a>
+</li>
+        <li><a href="api/di.html#module-mechaharness.di">mechaharness.di</a>
+</li>
+        <li><a href="api/factory.html#module-mechaharness.factory">mechaharness.factory</a>
+</li>
+        <li><a href="api/harness.html#module-mechaharness.harness.base">mechaharness.harness.base</a>
+</li>
+        <li><a href="api/inference.html#module-mechaharness.inference.base">mechaharness.inference.base</a>
+</li>
+        <li><a href="api/tools.html#module-mechaharness.tools.base">mechaharness.tools.base</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.CostEntry.name">name (mechaharness.core.access.CostEntry attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.FsRead.name">(mechaharness.core.access.FsRead attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.FsWrite.name">(mechaharness.core.access.FsWrite attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.Grant.name">(mechaharness.core.access.Grant attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.MediaAudio.name">(mechaharness.core.access.MediaAudio attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.MediaImage.name">(mechaharness.core.access.MediaImage attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.MediaVideo.name">(mechaharness.core.access.MediaVideo attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.NetHttp.name">(mechaharness.core.access.NetHttp attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.AccessCheck.name">(mechaharness.core.events.AccessCheck attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.AgentEnd.name">(mechaharness.core.events.AgentEnd attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.AgentStart.name">(mechaharness.core.events.AgentStart attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.Cost.name">(mechaharness.core.events.Cost attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.EventType.name">(mechaharness.core.events.EventType attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.Inference.name">(mechaharness.core.events.Inference attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.MaxTurns.name">(mechaharness.core.events.MaxTurns attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.RunEnd.name">(mechaharness.core.events.RunEnd attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.RunStart.name">(mechaharness.core.events.RunStart attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.ToolCall.name">(mechaharness.core.events.ToolCall attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.ToolResult.name">(mechaharness.core.events.ToolResult attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.TurnStart.name">(mechaharness.core.events.TurnStart attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.ChatMessage.name">(mechaharness.core.types.ChatMessage attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.ToolCall.name">(mechaharness.core.types.ToolCall attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.ToolDefinition.name">(mechaharness.core.types.ToolDefinition attribute)</a>
+</li>
+        <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.name">(mechaharness.inference.base.InferenceStrategy attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.CoreGrant.namespace">namespace (mechaharness.core.access.CoreGrant attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.Grant.namespace">(mechaharness.core.access.Grant attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.CoreEvent.namespace">(mechaharness.core.events.CoreEvent attribute)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.EventType.namespace">(mechaharness.core.events.EventType attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.NetHttp">NetHttp (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment">NoOpInferenceEnvironment (class in mechaharness.core.environment)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.of">of() (mechaharness.core.access.CompoundPolicy class method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/types.html#mechaharness.core.types.ToolDefinition.parameters">parameters (mechaharness.core.types.ToolDefinition attribute)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.AgentRef.parent_agent_id">parent_agent_id (mechaharness.core.events.AgentRef attribute)</a>
+
+      <ul>
+        <li><a href="api/events.html#mechaharness.core.events.Event.parent_agent_id">(mechaharness.core.events.Event attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.Grant.parse">parse() (mechaharness.core.access.Grant class method)</a>
+
+      <ul>
+        <li><a href="api/events.html#mechaharness.core.events.EventType.parse">(mechaharness.core.events.EventType class method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.Event.payload">payload (mechaharness.core.events.Event attribute)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.policies">policies (mechaharness.core.access.CompoundPolicy attribute)</a>
+</li>
+      <li><a href="api/config.html#mechaharness.config.Settings.port">port (mechaharness.config.Settings attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.CostAccountant.price_inference">price_inference() (mechaharness.core.access.CostAccountant method)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant.price_inference">(mechaharness.core.access.InMemoryCostAccountant method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.CostAccountant.price_tool">price_tool() (mechaharness.core.access.CostAccountant method)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant.price_tool">(mechaharness.core.access.InMemoryCostAccountant method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.Ability.PROFICIENT">PROFICIENT (mechaharness.core.access.Ability attribute)</a>
+</li>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.prompt">prompt (mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CostEntry.prompt_tokens">prompt_tokens (mechaharness.core.access.CostEntry attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CostReport.prompt_tokens">(mechaharness.core.access.CostReport attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.Usage.prompt_tokens">(mechaharness.core.types.Usage attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/events.html#mechaharness.core.events.EventLog.query">query() (mechaharness.core.events.EventLog method)</a>
+
+      <ul>
+        <li><a href="api/events.html#mechaharness.core.events.FanoutEventLog.query">(mechaharness.core.events.FanoutEventLog method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.InMemoryEventLog.query">(mechaharness.core.events.InMemoryEventLog method)</a>
+</li>
+        <li><a href="api/events.html#mechaharness.core.events.LoggingEventLog.query">(mechaharness.core.events.LoggingEventLog method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.Ability.rank">rank (mechaharness.core.access.Ability property)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionResponse.raw">raw (mechaharness.core.types.CompletionResponse attribute)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CapabilityKind.REASONING">REASONING (mechaharness.core.access.CapabilityKind attribute)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.ChatMessage.reasoning_content">reasoning_content (mechaharness.core.types.ChatMessage attribute)</a>
+</li>
+      <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.register">register() (mechaharness.tools.base.ToolRegistry method)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CostAccountant.report">report() (mechaharness.core.access.CostAccountant method)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant.report">(mechaharness.core.access.InMemoryCostAccountant method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/types.html#mechaharness.core.types.Role">Role (class in mechaharness.core.types)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/types.html#mechaharness.core.types.ChatMessage.role">role (mechaharness.core.types.ChatMessage attribute)</a>
+</li>
+      <li><a href="api/mechaharness.html#mechaharness.run">run() (in module mechaharness)</a>
+
+      <ul>
+        <li><a href="api/factory.html#mechaharness.factory.run">(in module mechaharness.factory)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.run">(mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.Event.run_id">run_id (mechaharness.core.events.Event attribute)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.RunEnd">RunEnd (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunRequest">RunRequest (class in mechaharness.core.contract)</a>
+</li>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunResponse">RunResponse (class in mechaharness.core.contract)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.RunStart">RunStart (class in mechaharness.core.events)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/config.html#mechaharness.config.Settings">Settings (class in mechaharness.config)</a>
+</li>
+      <li><a href="api/factory.html#mechaharness.factory.settings_from_request">settings_from_request() (in module mechaharness.factory)</a>
+</li>
+      <li><a href="api/di.html#mechaharness.di.SettingsConfig">SettingsConfig (class in mechaharness.di)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.should_continue_without_tools">should_continue_without_tools() (mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.should_stop">should_stop() (mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.Ability.SIMPLE">SIMPLE (mechaharness.core.access.Ability attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.stop">stop (mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.stream">stream() (mechaharness.inference.base.InferenceStrategy method)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.stream_events">stream_events() (mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.Role.SYSTEM">SYSTEM (mechaharness.core.types.Role attribute)</a>
+</li>
+      <li><a href="api/config.html#mechaharness.config.Settings.system_prompt">system_prompt (mechaharness.config.Settings attribute)</a>
+
+      <ul>
+        <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.system_prompt">(mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.system_prompt">(mechaharness.harness.base.HarnessConfig attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/config.html#mechaharness.config.Settings.temperature">temperature (mechaharness.config.Settings attribute)</a>
+
+      <ul>
+        <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.temperature">(mechaharness.core.contract.RunRequest attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.temperature">(mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.temperature">(mechaharness.harness.base.HarnessConfig attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/tools.html#mechaharness.tools.base.Tool">Tool (class in mechaharness.tools.base)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.Role.TOOL">TOOL (mechaharness.core.types.Role attribute)</a>
+</li>
+      <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.tool">tool() (mechaharness.tools.base.ToolRegistry method)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.ChatMessage.tool_call_id">tool_call_id (mechaharness.core.types.ChatMessage attribute)</a>
+
+      <ul>
+        <li><a href="api/types.html#mechaharness.core.types.ToolResult.tool_call_id">(mechaharness.core.types.ToolResult attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/types.html#mechaharness.core.types.ChatMessage.tool_calls">tool_calls (mechaharness.core.types.ChatMessage attribute)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.tool_cost_entry">tool_cost_entry() (in module mechaharness.core.access)</a>
+</li>
+      <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.tool_result_message">tool_result_message() (mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CapabilityKind.TOOL_USE">TOOL_USE (mechaharness.core.access.CapabilityKind attribute)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.ToolCall">ToolCall (class in mechaharness.core.events)</a>
+
+      <ul>
+        <li><a href="api/types.html#mechaharness.core.types.ToolCall">(class in mechaharness.core.types)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/types.html#mechaharness.core.types.ToolDefinition">ToolDefinition (class in mechaharness.core.types)</a>
+</li>
+      <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry">ToolRegistry (class in mechaharness.tools.base)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.ToolResult">ToolResult (class in mechaharness.core.events)</a>
+
+      <ul>
+        <li><a href="api/types.html#mechaharness.core.types.ToolResult">(class in mechaharness.core.types)</a>
+</li>
+      </ul></li>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.tools">tools (mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
+      <li><a href="api/access.html#mechaharness.core.access.CostEntry.total_tokens">total_tokens (mechaharness.core.access.CostEntry attribute)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CostReport.total_tokens">(mechaharness.core.access.CostReport attribute)</a>
+</li>
+        <li><a href="api/types.html#mechaharness.core.types.Usage.total_tokens">(mechaharness.core.types.Usage attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.Event.ts">ts (mechaharness.core.events.Event attribute)</a>
+</li>
+      <li><a href="api/contract.html#mechaharness.core.contract.RunResponse.turns">turns (mechaharness.core.contract.RunResponse attribute)</a>
+
+      <ul>
+        <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.turns">(mechaharness.harness.base.HarnessResult attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/events.html#mechaharness.core.events.TurnStart">TurnStart (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/events.html#mechaharness.core.events.Event.type">type (mechaharness.core.events.Event attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.Ability.units">units (mechaharness.core.access.Ability property)</a>
+
+      <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CostEntry.units">(mechaharness.core.access.CostEntry attribute)</a>
+</li>
+        <li><a href="api/access.html#mechaharness.core.access.CostReport.units">(mechaharness.core.access.CostReport attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile.units">units() (mechaharness.core.access.CapabilityProfile method)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.Usage">Usage (class in mechaharness.core.types)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionResponse.usage">usage (mechaharness.core.types.CompletionResponse attribute)</a>
+</li>
+      <li><a href="api/types.html#mechaharness.core.types.Role.USER">USER (mechaharness.core.types.Role attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
