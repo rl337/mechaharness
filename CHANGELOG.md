@@ -7,24 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-09-25
+
 ### Added
 
-- REQUIREMENTS.md addendum incorporation: decision plane, convergence, CTX-05–09,
-  GRF-05/06, VER-04, OBS-04, ATK-style EXP search; host track generalized to a
-  nameless local inference source
+- REQUIREMENTS.md addendum incorporation: decision plane, convergence, context
+  experiments, graph resume/fan-in, validator qualification, OBS export/metrics,
+  ATK-style research; host track generalized to a nameless local inference source
 - Library implementations: `OperationContract`, `ConvergenceGuard`, decision
   surfaces, shadow decision-backend reports, context compiler / derived memory /
   topology / cache layout, offline decision export, topology metrics, validator
   qualification, hierarchical fan-in
-- Persona user stories for addendum acceptance paths (Nubble / Fangore / Taloneth;
-  no new persona): decision surface reject, convergence ceiling, context deficit,
-  local plan resume, topology efficiency, shadow backends, validator qualification,
-  ATK reject, offline decision export
-- Keep `docs/adr/` and `REQUIREMENTS.md` local-only (gitignored; not published)
+- Persona user stories as acceptance vocabulary (Nubble / Fangore / Taloneth),
+  including gap stories for tool gating, human review, repair loops, and related
+  paths; story `footnotes` and generated guide sync
 
 ### Changed
 
-- Keep `docs/adr/` local-only (gitignored; purged from git history; not published)
+- Keep `docs/adr/` and `REQUIREMENTS.md` local-only (gitignored; not published)
+- Story acceptance is story-id primary; former INF/POL codes retired to local
+  archaeology mapping
 
 ## [0.1.0] — 2026-09-25
 

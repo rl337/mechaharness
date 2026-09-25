@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mechaharness"
-version = "0.1.0"
+version = "0.1.1"
 description = "Agentic harness that abstracts inference backends and model-family harness architectures"
 readme = "README.md"
 license = { text = "MIT" }
