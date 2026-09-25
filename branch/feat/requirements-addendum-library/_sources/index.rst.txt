@@ -1,0 +1,122 @@
+MechaHarness documentation
+==========================
+
+MechaHarness is a Python **agent harness** for hosts that must compose
+inference safely — not a thin chat-client wrapper. Provider I/O, agent-loop
+policy, cost accounting, and telemetry are first-class seams so you can swap
+models and policies without rewriting the run path, and so agents cannot
+quietly burn unbounded spend.
+
+.. container:: hero-meta
+
+   .. container:: version-badge
+
+      |release|
+
+   pyiv Config · multi-lane inference · cost + EventLog on every run · Python 3.9+
+
+.. raw:: html
+
+   <div style="margin: 20px 0; padding: 15px; background: #e8f4f8; border-left: 4px solid #0066cc; border-radius: 4px;">
+   <strong>Quick Links:</strong>
+   <a href="https://github.com/rl337/mechaharness" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">GitHub</a>
+   <a href="https://pypi.org/project/mechaharness/" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">PyPI</a>
+   <a href="changelog.html" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">Changelog</a>
+   </div>
+
+Founding principles
+-------------------
+
+1. **Modular through dependency injection.**
+   Wiring is pyiv ``MechaHarnessConfig`` and constructor injection. Hosts
+   subclass Config hooks to bind strategies, harnesses, connections, and
+   providers — they do not fork closed enums or grow string registries.
+   See :doc:`guides/dependency-injection`, :doc:`adr/0001-pyiv-config`, and
+   :doc:`architecture`.
+
+2. **Multi-model and lanes are native.**
+   Reason, judge, and media (plus host-named lanes) are first-class via
+   ``InferenceEnvironment.active_lane()``. Generative work yields a
+   ``Completion``; closed-world decide yields a ``Judgement``; media yields a
+   ``Generation``. Swap ``InferenceStrategy`` or ``JudgeProvider`` without
+   rewriting the harness loop. See :doc:`reference/judge` and
+   :doc:`architecture`.
+
+3. **Cost lives in the object model.**
+   Ability-scaled units and ``CostAccountant`` sit on the harness path so every
+   inference and tool invocation is priced as it happens. The design goal is to
+   keep agents from going AWOL with unbounded spend — cost is not an optional
+   after-the-fact report. See :doc:`reference/cost`.
+
+4. **Event logging and telemetry are built in.**
+   A queryable ``EventLog`` records agent lifecycle, inference, tools, cost, and
+   access checks (``core:agent_*``, ``core:inference``, ``core:cost``, …) on
+   every run. Telemetry is part of the product surface, not a bolt-on sink.
+   See :doc:`reference/events`.
+
+**Also in the core model:** deny-by-default tool grants and
+``CompoundPolicy`` (:doc:`reference/access`), plus host-extendable open
+identity for events and grants so third parties compose without patching this
+package (:doc:`architecture`).
+
+Installation
+------------
+
+.. code-block:: bash
+
+   pip install mechaharness
+
+Guides
+------
+
+.. toctree::
+   :maxdepth: 2
+
+   architecture
+   guides/install
+   guides/dependency-injection
+   guides/junespark
+   guides/user-stories
+
+Reference
+---------
+
+.. toctree::
+   :maxdepth: 2
+
+   reference/cli
+   reference/api
+   reference/events
+   reference/cost
+   reference/access
+   reference/judge
+   adr/0001-pyiv-config
+   adr/0002-requirements-phase0-gap-map
+
+API
+---
+
+.. toctree::
+   :maxdepth: 2
+
+   api/mechaharness
+   api/config
+   api/di
+   api/factory
+   api/completer
+   api/types
+   api/contract
+   api/events
+   api/access
+   api/environment
+   api/inference
+   api/harness
+   api/tools
+
+Changelog
+---------
+
+.. toctree::
+   :maxdepth: 1
+
+   changelog

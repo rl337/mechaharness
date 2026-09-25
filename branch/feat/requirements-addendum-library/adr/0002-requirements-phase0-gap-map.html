@@ -1,0 +1,239 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADR 0002: Requirements Phase 0 gap map &mdash; MechaHarness 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mechaharness" href="../api/mechaharness.html" />
+    <link rel="prev" title="0001. pyiv Config instead of string registries" href="0001-pyiv-config.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ADR 0002: Requirements Phase 0 gap map</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ADR 0002: Requirements Phase 0 gap map</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/adr/0002-requirements-phase0-gap-map.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="adr-0002-requirements-phase-0-gap-map">
+<h1>ADR 0002: Requirements Phase 0 gap map<a class="headerlink" href="#adr-0002-requirements-phase-0-gap-map" title="Link to this heading"></a></h1>
+<section id="status">
+<h2>Status<a class="headerlink" href="#status" title="Link to this heading"></a></h2>
+<p>Accepted (Phase 0 baseline for REQUIREMENTS.md addendum incorporation).</p>
+</section>
+<section id="context">
+<h2>Context<a class="headerlink" href="#context" title="Link to this heading"></a></h2>
+<p>REQUIREMENTS.md (library track + local inference host lanes) was refined with the
+2026-09-25 context/memory/decision-plane addendum. Phase 0 maps contracts onto
+existing modules and records gaps before growing APIs. No second EventLog, judge
+schema, policy authority, or permission path.</p>
+<p>Baseline ID set (refined in place unless marked new): INF-01/03, JDG-01–04,
+POL-01–04, RTE-01–03, GAT-01–04, VER-01–03 (+ new VER-04), GRF-01–04 (+ new
+GRF-05/06), CTX-01–04 (+ new CTX-05–09), OBS-01–03 (+ new OBS-04), EXP-01–04.</p>
+</section>
+<section id="decision">
+<h2>Decision<a class="headerlink" href="#decision" title="Link to this heading"></a></h2>
+<p>Reuse existing modules; extend types and helpers rather than introducing parallel
+services. Host identity remains env-configured local inference (no named appliance
+in requirements).</p>
+</section>
+<section id="mapping">
+<h2>Mapping<a class="headerlink" href="#mapping" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Area</p></th>
+<th class="head"><p>Module</p></th>
+<th class="head"><p>Status at Phase 0</p></th>
+<th class="head"><p>Gap</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>INF-01/03</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">operation_registry.py</span></code></p></td>
+<td><p>Name registry only</p></td>
+<td><p>Typed <code class="docutils literal notranslate"><span class="pre">OperationContract</span></code> (scopes, effects, idempotency, version bind)</p></td>
+</tr>
+<tr class="row-odd"><td><p>POL-01 decision plane</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">judgement_policy.py</span></code>, <code class="docutils literal notranslate"><span class="pre">inference/judge.py</span></code></p></td>
+<td><p>Judge + pure decide</p></td>
+<td><p>Named Choice/Score/Noul surfaces; widen verdict vocabulary over time</p></td>
+</tr>
+<tr class="row-even"><td><p>POL-03 convergence</p></td>
+<td><p>harness loops</p></td>
+<td><p>max_turns / attempts only</p></td>
+<td><p>Versioned <code class="docutils literal notranslate"><span class="pre">ConvergenceContract</span></code> with budgets and terminal status</p></td>
+</tr>
+<tr class="row-odd"><td><p>RTE</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">routing.py</span></code></p></td>
+<td><p>Lane routing + shadow judge</p></td>
+<td><p>Decision-backend shadow comparison on matched snapshots</p></td>
+</tr>
+<tr class="row-even"><td><p>GAT</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core/access.py</span></code></p></td>
+<td><p>Central grants</p></td>
+<td><p>Align effect reconciliation with GRF isolation</p></td>
+</tr>
+<tr class="row-odd"><td><p>VER</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">graph.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">verify_node</span></code> / <code class="docutils literal notranslate"><span class="pre">bounded_repair</span></code></p></td>
+<td><p>Strongest-oracle selection; VER-04 fixture qualification</p></td>
+</tr>
+<tr class="row-even"><td><p>GRF</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">graph.py</span></code> + EventLog</p></td>
+<td><p>Checkpoint/resume</p></td>
+<td><p>Edge taxonomy, effect isolation, hierarchical fan-in, interrupt boundaries</p></td>
+</tr>
+<tr class="row-odd"><td><p>CTX</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">context_experiments.py</span></code></p></td>
+<td><p>CTX-01–04 flags</p></td>
+<td><p>CTX-05 compiler/manifest; 06–09 flagged experiments</p></td>
+</tr>
+<tr class="row-even"><td><p>OBS</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">decision_log.py</span></code></p></td>
+<td><p>Basic DecisionRecord</p></td>
+<td><p>Learning-record fields, topology metrics, offline export without leakage</p></td>
+</tr>
+<tr class="row-odd"><td><p>EXP</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">research.py</span></code></p></td>
+<td><p>Noninferiority promote/rollback</p></td>
+<td><p>ATK search space + ablation reporting</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="baselines-to-freeze">
+<h2>Baselines to freeze<a class="headerlink" href="#baselines-to-freeze" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Harness success/cost: existing Completer + harness family fixture runs</p></li>
+<li><p>Decision: FixtureJudgeProvider + deterministic <code class="docutils literal notranslate"><span class="pre">decide()</span></code> replay</p></li>
+<li><p>Topology: synthetic ExecutionGraph timing fixtures (OBS-04)</p></li>
+</ul>
+</section>
+<section id="consequences">
+<h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading"></a></h2>
+<p>Phases 1–5 implement the gaps above behind existing DI hooks. Optional CTX/RTE
+mechanisms stay off until EXP-04 reports support activation.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="0001-pyiv-config.html" class="btn btn-neutral float-left" title="0001. pyiv Config instead of string registries" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/mechaharness.html" class="btn btn-neutral float-right" title="mechaharness" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
