@@ -9,7 +9,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.core.environment import LANE_JUDGE, LANE_MEDIA, LANE_REASON
-from mechaharness.inference.judge import JudgeProvider, JudgeRequest, Judgement, judge
+from mechaharness.inference.judge import Judgement, JudgeProvider, JudgeRequest, judge
 from mechaharness.judgement_policy import JudgementFacts, JudgementPolicy, Verdict, decide
 
 Lane = str

@@ -18,7 +18,6 @@ from mechaharness.inference.judge import (
     Signal,
 )
 
-
 DecisionSurfaceKind = Literal["choice", "score", "noul"]
 
 

@@ -22,7 +22,7 @@ from mechaharness.graph import (
 def test_graph_checkpoint_resume_and_verification() -> None:
     graph = ExecutionGraph(goal="media render")
     n1 = graph.add_node(GraphNode(id="submit", kind="tool", acceptance=["prompt_id"]))
-    n2 = graph.add_node(
+    graph.add_node(
         GraphNode(id="fetch", kind="tool", depends_on=["submit"], acceptance=["file"])
     )
     n1.status = NodeStatus.SUCCEEDED

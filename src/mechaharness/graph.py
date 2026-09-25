@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from enum import Enum
-from typing import Any, Literal
+from typing import Any, Literal, cast
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -181,14 +181,17 @@ class GraphStore:
         if not events:
             return None
         boundary = events[-1].payload.get("recovery_boundary")
-        if boundary in {
-            "planning",
-            "dispatch",
-            "post_effect_pre_record",
-            "reduce",
-            "commit",
-        }:
-            return boundary  # type: ignore[return-value]
+        allowed: frozenset[RecoveryBoundary] = frozenset(
+            {
+                "planning",
+                "dispatch",
+                "post_effect_pre_record",
+                "reduce",
+                "commit",
+            }
+        )
+        if isinstance(boundary, str) and boundary in allowed:
+            return cast(RecoveryBoundary, boundary)
         return None
 
 

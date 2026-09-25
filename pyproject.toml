@@ -85,9 +85,11 @@ target-version = "py39"
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.mypy]
-python_version = "3.9"
+# Checker target only; runtime still supports 3.9+. Mypy 1.19+ requires >=3.10 here.
+python_version = "3.10"
 strict = true
 packages = ["mechaharness"]
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 module = "pyiv.*"

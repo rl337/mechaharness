@@ -2,8 +2,8 @@ from mechaharness.inference.anthropic import AnthropicStrategy
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
     FixtureJudgeProvider,
-    JudgeRequest,
     Judgement,
+    JudgeRequest,
     judge,
 )
 from mechaharness.inference.mock import MockInferenceStrategy

@@ -385,10 +385,15 @@ class RepositoryTopologyProvider:
             if i >= budget:
                 omissions.append(path)
                 continue
+            symbols = [
+                line.strip()
+                for line in content.splitlines()
+                if line.startswith("def ")
+            ]
             entries.append(
                 TopologyEntry(
                     path=path,
-                    symbols=[line.strip() for line in content.splitlines() if line.startswith("def ")],
+                    symbols=symbols,
                     content_hash=str(hash(content)),
                     unsupported="\0" in content,
                 )

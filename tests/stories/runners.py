@@ -11,6 +11,8 @@ from pyiv import get_injector
 
 from mechaharness.api_connection import SimpleHttpConnectionConfig
 from mechaharness.config import Settings
+from mechaharness.context_experiments import ContextCompiler
+from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
 from mechaharness.core.access import (
     Ability,
     AccessControl,
@@ -25,7 +27,30 @@ from mechaharness.core.environment import (
 )
 from mechaharness.core.events import InMemoryEventLog
 from mechaharness.core.types import ChatMessage, Role, ToolCall
+from mechaharness.decision_log import (
+    DecisionRecord,
+    TopologySpan,
+    compute_topology_metrics,
+    export_offline_dataset,
+)
+from mechaharness.decision_surfaces import (
+    DecisionSurface,
+    RulesDecisionBackend,
+    reject_invalid_choice,
+)
 from mechaharness.di import MechaHarnessConfig
+from mechaharness.graph import (
+    DependencyEdge,
+    ExecutionGraph,
+    FanInItem,
+    GraphNode,
+    GraphStore,
+    NodeStatus,
+    hierarchical_fan_in,
+    merge_branch_artifacts,
+    qualify_validator,
+    validator_qualified,
+)
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
@@ -50,28 +75,6 @@ from mechaharness.judgement_policy import (
     JudgementThreshold,
     decide,
 )
-from mechaharness.tools.base import ToolRegistry
-from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
-from mechaharness.context_experiments import ContextCompiler
-from mechaharness.decision_log import (
-    DecisionRecord,
-    TopologySpan,
-    compute_topology_metrics,
-    export_offline_dataset,
-)
-from mechaharness.decision_surfaces import DecisionSurface, RulesDecisionBackend, reject_invalid_choice
-from mechaharness.graph import (
-    DependencyEdge,
-    ExecutionGraph,
-    FanInItem,
-    GraphNode,
-    GraphStore,
-    NodeStatus,
-    hierarchical_fan_in,
-    merge_branch_artifacts,
-    qualify_validator,
-    validator_qualified,
-)
 from mechaharness.operation_registry import (
     NodeContractBind,
     OperationContract,
@@ -80,6 +83,7 @@ from mechaharness.operation_registry import (
 )
 from mechaharness.research import EvalProtocol, ResearchLab
 from mechaharness.routing import shadow_decision_backends
+from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase

@@ -116,7 +116,8 @@ class DecisionLog:
 
     def iter_jsonl(self) -> Iterable[DecisionRecord]:
         if self.jsonl_path is None or not self.jsonl_path.is_file():
-            return []
+            yield from ()
+            return
         with self.jsonl_path.open(encoding="utf-8") as fh:
             for line in fh:
                 line = line.strip()
