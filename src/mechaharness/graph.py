@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from enum import Enum
-from typing import Any, Literal, cast
+from typing import Any, Literal
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -36,6 +36,14 @@ RecoveryBoundary = Literal[
     "reduce",
     "commit",
 ]
+
+_RECOVERY_BOUNDARIES: dict[str, RecoveryBoundary] = {
+    "planning": "planning",
+    "dispatch": "dispatch",
+    "post_effect_pre_record": "post_effect_pre_record",
+    "reduce": "reduce",
+    "commit": "commit",
+}
 
 
 class DependencyEdge(BaseModel):
@@ -181,17 +189,8 @@ class GraphStore:
         if not events:
             return None
         boundary = events[-1].payload.get("recovery_boundary")
-        allowed: frozenset[RecoveryBoundary] = frozenset(
-            {
-                "planning",
-                "dispatch",
-                "post_effect_pre_record",
-                "reduce",
-                "commit",
-            }
-        )
-        if isinstance(boundary, str) and boundary in allowed:
-            return cast(RecoveryBoundary, boundary)
+        if isinstance(boundary, str):
+            return _RECOVERY_BOUNDARIES.get(boundary)
         return None
 
 
