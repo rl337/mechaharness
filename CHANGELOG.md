@@ -7,15 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] — 2026-09-25
+
+First public library cut: DI-first agent harness with native lanes, cost on the
+run path, built-in EventLog, judge/decide outcomes, and persona user stories.
+
 ### Added
 
-- Sphinx documentation published at https://rl337.org/mechaharness/
-- PyPI packaging metadata, Trusted Publishing release workflow, and auto version bump
+- **pyiv DI** — `MechaHarnessConfig` / `SettingsConfig`; hosts subclass hooks
+  (`get_inference_class`, `get_harness_class`, `get_access_policy`, judge
+  connection/provider). OpenAPI `RunRequest` / `run()` remains the non-DI facade
+- **EventLog** — namespaced, host-extendable event types; queryable in-memory /
+  logging logs; harness lifecycle, inference, tools, cost, and access checks
+- **Cost** — Ability units, `CostAccountant`, `core:cost` on harness runs
+- **Access** — deny-by-default grants, `AccessPolicy`, `CompoundPolicy` composition,
+  `AccessControl` / Config `get_access_policy()`
+- **Harness families** — `pass_through`, `tool_loop`, `react`, OpenAI/Anthropic
+  tool families on the shared EventLog + cost path; Completer nesting
+- **Lanes** — `InferenceEnvironment.active_lane()` (`reason` / `judge` / `media`);
+  wrong-lane errors name operator load hints
+- **Judge** — typed `judge()` → `Judgement` (signals); `JudgementPolicy` /
+  `decide()` verdicts; System One adapter; injectable `APIConnectionConfig` /
+  `SimpleHttpConnectionConfig.from_env` (`MECHA_JUDGE_*`); outcomes
+  `Completion` / `Judgement` / `Generation`
+- **Phase 1–5 scaffolds** — routing, graph, research, context experiments,
+  operation registry, decision log
+- **Persona user stories** — Nubble / Fangore / Taloneth prose narratives;
+  dual-mode static cassettes (CI, zero skips) / live via `MECHA_STORY_BACKEND`
+- **Docs site** — Sphinx + Pages at https://rl337.org/mechaharness/; founding
+  principles on the home page; packaging, Trusted Publishing, and auto version bump
 
 ### Changed
 
-- `junespark` backend no longer ships a private LAN `base_url` default; set `MECHA_BASE_URL`
+- `junespark` backend no longer ships a private LAN `base_url` default; set
+  `MECHA_BASE_URL`
+- Settings stays slim: judge HTTP knobs bind on `APIConnectionConfig`, not as a
+  provider bag on `Settings`
 
 ### Security
 
-- Purged historical `REQUIREMENTS.md` (host LAN inventory) from git history prior to public release
+- Purged historical `REQUIREMENTS.md` (host LAN inventory) from git history prior
+  to public release
