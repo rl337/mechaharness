@@ -119,28 +119,28 @@
 
 
 <div class="viewcode-block" id="InferenceStrategy">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.inference.base.InferenceStrategy">[docs]</a>
+<a class="viewcode-back" href="../../../api/inference.html#mechaharness.inference.base.InferenceStrategy">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InferenceStrategy</span><span class="p">(</span><span class="n">Completer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Strategy interface for talking to an inference engine."""</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"base"</span>
 
 <div class="viewcode-block" id="InferenceStrategy.capability_profile">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.inference.base.InferenceStrategy.capability_profile">[docs]</a>
+<a class="viewcode-back" href="../../../api/inference.html#mechaharness.inference.base.InferenceStrategy.capability_profile">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">capability_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CapabilityProfile</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Declared skills used for cost pricing of this backend."""</span>
         <span class="k">return</span> <span class="n">default_capability_profile</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="InferenceStrategy.complete">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.inference.base.InferenceStrategy.complete">[docs]</a>
+<a class="viewcode-back" href="../../../api/inference.html#mechaharness.inference.base.InferenceStrategy.complete">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">CompletionRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompletionResponse</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Run a single non-streaming completion."""</span></div>
 
 
 <div class="viewcode-block" id="InferenceStrategy.stream">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.inference.base.InferenceStrategy.stream">[docs]</a>
+<a class="viewcode-back" href="../../../api/inference.html#mechaharness.inference.base.InferenceStrategy.stream">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">CompletionRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Optional token stream. Default falls back to a single complete()."""</span>
         <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -150,13 +150,13 @@
 
 
 <div class="viewcode-block" id="InferenceStrategy.aclose">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.inference.base.InferenceStrategy.aclose">[docs]</a>
+<a class="viewcode-back" href="../../../api/inference.html#mechaharness.inference.base.InferenceStrategy.aclose">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">aclose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: B027 - optional cleanup hook</span>
 <span class="w">        </span><span class="sd">"""Release network resources. Override when the strategy holds a client."""</span></div>
 
 
 <div class="viewcode-block" id="InferenceStrategy.describe">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.inference.base.InferenceStrategy.describe">[docs]</a>
+<a class="viewcode-back" href="../../../api/inference.html#mechaharness.inference.base.InferenceStrategy.describe">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Machine-readable metadata for CLI/API introspection."""</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">}</span></div>

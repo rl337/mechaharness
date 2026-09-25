@@ -142,26 +142,26 @@
 
 
 <div class="viewcode-block" id="InferenceEnvironment">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment">[docs]</a>
+<a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.InferenceEnvironment">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InferenceEnvironment</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Describe what the current backend / host profile can do."""</span>
 
 <div class="viewcode-block" id="InferenceEnvironment.active_profile">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.active_profile">[docs]</a>
+<a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_profile">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">active_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Host profile name, or None when unknown."""</span></div>
 
 
 <div class="viewcode-block" id="InferenceEnvironment.active_capabilities">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.active_capabilities">[docs]</a>
+<a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_capabilities">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">active_capabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CapabilityProfile</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Capability set of the loaded environment."""</span></div>
 
 
 <div class="viewcode-block" id="InferenceEnvironment.active_lane">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.active_lane">[docs]</a>
+<a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_lane">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">active_lane</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Capability lane derived from the active profile, or None if unknown.</span>
 
@@ -172,21 +172,21 @@
 
 
 <div class="viewcode-block" id="InferenceEnvironment.active_grants">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.active_grants">[docs]</a>
+<a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_grants">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">active_grants</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Grants the environment is willing to honor (default: none)."""</span>
         <span class="k">return</span> <span class="p">[]</span></div>
 
 
 <div class="viewcode-block" id="InferenceEnvironment.lane_load_hint">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.lane_load_hint">[docs]</a>
+<a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.InferenceEnvironment.lane_load_hint">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">lane_load_hint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lane</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Operator hint naming how to load a profile for ``lane``."""</span>
         <span class="k">return</span> <span class="n">DEFAULT_LANE_LOAD_HINTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lane</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"infer load &lt;profile-for-</span><span class="si">{</span><span class="n">lane</span><span class="si">}</span><span class="s2">&gt;"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="InferenceEnvironment.assert_compatible">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.environment.InferenceEnvironment.assert_compatible">[docs]</a>
+<a class="viewcode-back" href="../../../api/environment.html#mechaharness.core.environment.InferenceEnvironment.assert_compatible">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">assert_compatible</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>

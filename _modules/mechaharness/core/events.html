@@ -123,7 +123,7 @@
 
 
 <div class="viewcode-block" id="EventType">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.events.EventType">[docs]</a>
+<a class="viewcode-back" href="../../../api/events.html#mechaharness.core.events.EventType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EventType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Namespaced event identity.</span>
 
@@ -150,7 +150,7 @@
         <span class="n">_EVENT_TYPES</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
 
 <div class="viewcode-block" id="EventType.key">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.events.EventType.key">[docs]</a>
+<a class="viewcode-back" href="../../../api/events.html#mechaharness.core.events.EventType.key">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">key</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">namespace</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
@@ -159,7 +159,7 @@
 
 
 <div class="viewcode-block" id="EventType.parse">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.events.EventType.parse">[docs]</a>
+<a class="viewcode-back" href="../../../api/events.html#mechaharness.core.events.EventType.parse">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">EventType</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Return the class registered for ``namespace:name``."""</span>
@@ -284,7 +284,7 @@
 
 
 <div class="viewcode-block" id="Event">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.events.Event">[docs]</a>
+<a class="viewcode-back" href="../../../api/events.html#mechaharness.core.events.Event">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Event</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""One structured log record."""</span>
 
@@ -316,19 +316,19 @@
 
 
 <div class="viewcode-block" id="EventLog">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.events.EventLog">[docs]</a>
+<a class="viewcode-back" href="../../../api/events.html#mechaharness.core.events.EventLog">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EventLog</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Write and query structured agent events."""</span>
 
 <div class="viewcode-block" id="EventLog.emit">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.events.EventLog.emit">[docs]</a>
+<a class="viewcode-back" href="../../../api/events.html#mechaharness.core.events.EventLog.emit">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Append one event."""</span></div>
 
 
 <div class="viewcode-block" id="EventLog.query">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.events.EventLog.query">[docs]</a>
+<a class="viewcode-back" href="../../../api/events.html#mechaharness.core.events.EventLog.query">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -342,7 +342,7 @@
 
 
 <div class="viewcode-block" id="EventLog.agents">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.events.EventLog.agents">[docs]</a>
+<a class="viewcode-back" href="../../../api/events.html#mechaharness.core.events.EventLog.agents">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">agents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">AgentRef</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Agents seen in the log. ``parent_id`` limits to direct children."""</span></div>

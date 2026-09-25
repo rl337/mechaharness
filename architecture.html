@@ -105,9 +105,13 @@
              
   <section id="architecture">
 <h1>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h1>
-<p>MechaHarness keeps provider I/O and agent-loop policy as separate extension axes.
-Wiring is <strong>pyiv dependency injection first</strong>. OpenAPI (<code class="docutils literal notranslate"><span class="pre">RunRequest</span></code> / <code class="docutils literal notranslate"><span class="pre">run()</span></code>) is
-the non-DI facade, not a second architecture. See <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code>.</p>
+<p>MechaHarness is built on four founding principles — <strong>DI modularity</strong>,
+<strong>native multi-model / lanes</strong>, <strong>cost in the object model</strong>, and <strong>built-in
+EventLog telemetry</strong> — described on the <a class="reference internal" href="index.html"><span class="std std-doc">docs home</span></a>. This page is
+the structural map: provider I/O and agent-loop policy stay separate extension
+axes. Wiring is <strong>pyiv dependency injection first</strong>. OpenAPI (<code class="docutils literal notranslate"><span class="pre">RunRequest</span></code> /
+<code class="docutils literal notranslate"><span class="pre">run()</span></code>) is the non-DI facade, not a second architecture. See
+<code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code>.</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────┐     ┌─────────────┐
 │  CLI (Typer)│     │ API (FastAPI)│
 └──────┬──────┘     └──────┬──────┘

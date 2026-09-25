@@ -109,23 +109,52 @@
 and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <section id="unreleased">
 <h2>[Unreleased]<a class="headerlink" href="#unreleased" title="Link to this heading"></a></h2>
+</section>
+<section id="id1">
+<h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>First public library cut: DI-first agent harness with native lanes, cost on the
+run path, built-in EventLog, judge/decide outcomes, and persona user stories.</p>
 <section id="added">
 <h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Sphinx documentation published at https://rl337.org/mechaharness/</p></li>
-<li><p>PyPI packaging metadata, Trusted Publishing release workflow, and auto version bump</p></li>
+<li><p><strong>pyiv DI</strong> — <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> / <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code>; hosts subclass hooks
+(<code class="docutils literal notranslate"><span class="pre">get_inference_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_harness_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_access_policy</span></code>, judge
+connection/provider). OpenAPI <code class="docutils literal notranslate"><span class="pre">RunRequest</span></code> / <code class="docutils literal notranslate"><span class="pre">run()</span></code> remains the non-DI facade</p></li>
+<li><p><strong>EventLog</strong> — namespaced, host-extendable event types; queryable in-memory /
+logging logs; harness lifecycle, inference, tools, cost, and access checks</p></li>
+<li><p><strong>Cost</strong> — Ability units, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, <code class="docutils literal notranslate"><span class="pre">core:cost</span></code> on harness runs</p></li>
+<li><p><strong>Access</strong> — deny-by-default grants, <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> composition,
+<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> / Config <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code></p></li>
+<li><p><strong>Harness families</strong> — <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">react</span></code>, OpenAI/Anthropic
+tool families on the shared EventLog + cost path; Completer nesting</p></li>
+<li><p><strong>Lanes</strong> — <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment.active_lane()</span></code> (<code class="docutils literal notranslate"><span class="pre">reason</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">media</span></code>);
+wrong-lane errors name operator load hints</p></li>
+<li><p><strong>Judge</strong> — typed <code class="docutils literal notranslate"><span class="pre">judge()</span></code> → <code class="docutils literal notranslate"><span class="pre">Judgement</span></code> (signals); <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> /
+<code class="docutils literal notranslate"><span class="pre">decide()</span></code> verdicts; System One adapter; injectable <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> /
+<code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> (<code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>); outcomes
+<code class="docutils literal notranslate"><span class="pre">Completion</span></code> / <code class="docutils literal notranslate"><span class="pre">Judgement</span></code> / <code class="docutils literal notranslate"><span class="pre">Generation</span></code></p></li>
+<li><p><strong>Phase 1–5 scaffolds</strong> — routing, graph, research, context experiments,
+operation registry, decision log</p></li>
+<li><p><strong>Persona user stories</strong> — Nubble / Fangore / Taloneth prose narratives;
+dual-mode static cassettes (CI, zero skips) / live via <code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND</span></code></p></li>
+<li><p><strong>Docs site</strong> — Sphinx + Pages at https://rl337.org/mechaharness/; founding
+principles on the home page; packaging, Trusted Publishing, and auto version bump</p></li>
 </ul>
 </section>
 <section id="changed">
 <h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">junespark</span></code> backend no longer ships a private LAN <code class="docutils literal notranslate"><span class="pre">base_url</span></code> default; set <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">junespark</span></code> backend no longer ships a private LAN <code class="docutils literal notranslate"><span class="pre">base_url</span></code> default; set
+<code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code></p></li>
+<li><p>Settings stays slim: judge HTTP knobs bind on <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code>, not as a
+provider bag on <code class="docutils literal notranslate"><span class="pre">Settings</span></code></p></li>
 </ul>
 </section>
 <section id="security">
 <h3>Security<a class="headerlink" href="#security" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Purged historical <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> (host LAN inventory) from git history prior to public release</p></li>
+<li><p>Purged historical <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> (host LAN inventory) from git history prior
+to public release</p></li>
 </ul>
 </section>
 </section>

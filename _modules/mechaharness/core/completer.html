@@ -112,7 +112,7 @@
 
 
 <div class="viewcode-block" id="Completer">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.completer.Completer">[docs]</a>
+<a class="viewcode-back" href="../../../api/completer.html#mechaharness.core.completer.Completer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Completer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Something that can answer a ``CompletionRequest``.</span>
 
@@ -121,21 +121,21 @@
 <span class="sd">    """</span>
 
 <div class="viewcode-block" id="Completer.capability_profile">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.completer.Completer.capability_profile">[docs]</a>
+<a class="viewcode-back" href="../../../api/completer.html#mechaharness.core.completer.Completer.capability_profile">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">capability_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CapabilityProfile</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Skills (and therefore inference cost) of this completer."""</span></div>
 
 
 <div class="viewcode-block" id="Completer.access_policy">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.completer.Completer.access_policy">[docs]</a>
+<a class="viewcode-back" href="../../../api/completer.html#mechaharness.core.completer.Completer.access_policy">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">access_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessPolicy</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Tool grants. Models default to none; harnesses override."""</span>
         <span class="k">return</span> <span class="n">AccessPolicy</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Completer.complete">
-<a class="viewcode-back" href="../../../api/mechaharness.html#mechaharness.core.completer.Completer.complete">[docs]</a>
+<a class="viewcode-back" href="../../../api/completer.html#mechaharness.core.completer.Completer.complete">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">CompletionRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompletionResponse</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Run one completion (a model call or a full harness run)."""</span></div>
