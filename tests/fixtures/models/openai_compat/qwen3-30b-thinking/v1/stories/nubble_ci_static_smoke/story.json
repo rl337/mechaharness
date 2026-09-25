@@ -1,7 +1,17 @@
 {
   "id": "nubble_ci_static_smoke",
   "persona": "nubble",
-  "title": "Merge night without the mountain",
+  "title": "Prove the HTTP adapter in CI without a live model host",
   "kind": "pass_through",
-  "narrative": "It is late; the DGX Spark is offline for maintenance, and a PR still needs\ngreen CI. Nubble refuses to block merges on LAN reachability. He wants the\nOpenAI-compat path proven from a **cassette** \u2014 a recorded reply replayed\nthrough the real HTTP client \u2014 so the pipeline stays honest about wire shape\nwithout waking the mountain. When static CI is green, he sleeps; when someone\nbreaks the adapter, CI fails before production."
+  "narrative": "The local inference host is offline, but a pull request still needs green CI. Nubble wants the OpenAI-compatible path proven from a cassette \u2014 a recorded reply replayed through the real HTTP client \u2014 so merges do not depend on LAN reachability.",
+  "implementation": "`OpenAICompatStrategy` implements Chat Completions HTTP for reason-lane backends. Cassette replay exercises the real client path so adapter wire shape stays honest in CI.\n\nCovers: offline CI / OpenAI-compat smoke.",
+  "validation": "Kind `pass_through` on `openai_compat` trees with mock transport. Soft expects: non-empty assistant text. Live: `MECHA_STORY_BACKEND=live`.",
+  "footnotes": [
+    {
+      "id": "openai-chat-completions",
+      "label": "OpenAI Chat Completions",
+      "url": "https://platform.openai.com/docs/api-reference/chat",
+      "note": "Wire models for reason-lane HTTP"
+    }
+  ]
 }

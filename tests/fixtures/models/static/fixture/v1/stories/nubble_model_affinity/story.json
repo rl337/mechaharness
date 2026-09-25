@@ -1,0 +1,10 @@
+{
+  "id": "nubble_model_affinity",
+  "persona": "nubble",
+  "title": "Keep model affinity inside a coherent work loop",
+  "kind": "model_affinity",
+  "narrative": "Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch. Random lane thrash must not win on unit price alone.",
+  "implementation": "`route_at_boundary` selects lanes at task/phase boundaries; `activate_scoped_policy` activates judgement policy only when calibration criteria are met \u2014 affinity and activation stay behind evaluation, not cheapest unit price.\n\nCovers: RTE-03.",
+  "validation": "Kind `model_affinity` \u2192 `_run_model_affinity`. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: `tests/test_routing.py`.",
+  "footnotes": []
+}

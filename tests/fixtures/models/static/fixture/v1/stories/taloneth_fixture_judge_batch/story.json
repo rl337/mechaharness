@@ -1,7 +1,10 @@
 {
   "id": "taloneth_fixture_judge_batch",
   "persona": "taloneth",
-  "title": "Lab bench without the forge",
+  "title": "Validate judge question batches without a live model",
   "kind": "fixture_judge_batch",
-  "narrative": "Taloneth is iterating on question sets \u2014 noul, choice, and score in one batch \u2014\nand cannot wait on a GPU forge for every tweak. He drives `FixtureJudgeProvider`\nwith known answers and checks that validation accepts clean signals and reports\nerrors when answers are missing. The lab bench is offline, deterministic, and\nfast; he relates to this whenever contract tests must not depend on a served\nmodel."
+  "narrative": "Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors \u2014 including partial failure reporting \u2014 without a GPU host.",
+  "implementation": "Provider-neutral judge schema in `mechaharness.inference.judge` (`Choice`/`Noul`/`Score` questions and signals, `Judgement`, `JudgeErrorItem`, provenance). `FixtureJudgeProvider` + `judge()` validate batches and report per-question errors. Semantics cover closed-world answers, partial failure, and calibration/provenance fields adapters must map.\n\nCovers: JDG-01, JDG-02, JDG-03, JDG-04.",
+  "validation": "Kind `fixture_judge_batch` \u2192 `_run_fixture_judge_batch`. Unit: `tests/test_judge.py`.",
+  "footnotes": []
 }

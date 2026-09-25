@@ -2,8 +2,8 @@
 
 from mechaharness.api_connection import *  # noqa: F403
 from mechaharness.api_connection import (  # noqa: F401
-    APIConnectionConfig,
     DEFAULT_JUDGE_PATH,
+    APIConnectionConfig,
     SimpleHttpConnectionConfig,
     connection_as_dict,
 )

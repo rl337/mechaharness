@@ -1,7 +1,17 @@
 {
   "id": "fangore_config_access_policy",
   "persona": "fangore",
-  "title": "Wiring the nest with DI",
+  "title": "Let the host app supply its own permission policy",
   "kind": "config_access_policy",
-  "narrative": "Fangore subclasses `MechaHarnessConfig` for his host. He does not want a\nservice-locator bag of grants \u2014 he overrides `get_access_policy()` to return\nhis `CompoundPolicy`, configures once, and injects `AccessControl`. When the\ninjector hands back a control that already honors his layers, he knows the app\nis wired the MechaHarness way. He relates to this whenever a host must stay\nDI-first instead of sprinkling grants into constructors by hand."
+  "narrative": "Fangore\u2019s product needs permission rules defined by the application. He configures the harness once so composed packs from `fangore_compound_grants` are what the harness enforces.",
+  "implementation": "`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection \u2014 not Settings bags or hand-wired constructors.\n\nCovers: host DI access policy.",
+  "validation": "Kind `config_access_policy` \u2192 `_run_config_access_policy`. Unit: `tests/test_di.py`.",
+  "footnotes": [
+    {
+      "id": "pyiv",
+      "label": "pyiv",
+      "url": "https://rl337.org/pyiv/",
+      "note": "Config-hook dependency injection"
+    }
+  ]
 }

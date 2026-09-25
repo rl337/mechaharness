@@ -1,0 +1,5 @@
+{
+  "terminal_in": ["no_progress"],
+  "reason_in": ["stagnation"],
+  "success": false
+}

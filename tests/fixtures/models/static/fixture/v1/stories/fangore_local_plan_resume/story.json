@@ -1,0 +1,17 @@
+{
+  "id": "fangore_local_plan_resume",
+  "persona": "fangore",
+  "title": "Resume a durable local plan after a crash",
+  "kind": "local_plan_resume",
+  "narrative": "A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints \u2014 not chat \u2014 must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes.",
+  "implementation": "`OperationContract` / `OperationRegistry` register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. `ExecutionGraph` / `GraphStore` persist goal, nodes, and justified dependency edges on `EventLog` with recovery boundaries; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.\n\nCovers: INF-01, INF-03, GRF-01, GRF-02, GRF-03, GRF-04, GRF-05, GRF-06.",
+  "validation": "Kind `local_plan_resume` \u2192 `_run_local_plan_resume`. Unit: `tests/test_graph.py`, `tests/test_operation_registry.py`.",
+  "footnotes": [
+    {
+      "id": "loop-vs-graph",
+      "label": "Loop vs graph engineering",
+      "url": "https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23",
+      "note": "Explicit control flow; MechaHarness extends into execution graphs"
+    }
+  ]
+}

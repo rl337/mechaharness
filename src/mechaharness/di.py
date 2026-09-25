@@ -13,8 +13,8 @@ from typing import Any
 from pyiv import Config, get_injector
 from pyiv.injector import Injector
 
-from mechaharness.config import Settings
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
+from mechaharness.config import Settings
 from mechaharness.core.access import (
     AccessControl,
     AccessPolicy,

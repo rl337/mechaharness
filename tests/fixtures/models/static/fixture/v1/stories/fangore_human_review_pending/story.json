@@ -1,0 +1,10 @@
+{
+  "id": "fangore_human_review_pending",
+  "persona": "fangore",
+  "title": "Hold mutations until a matching human approval exists",
+  "kind": "human_review_pending",
+  "narrative": "Fangore\u2019s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human \u2014 not allow.",
+  "implementation": "`JudgementPolicy.require_approval_for` plus `JudgementFacts.approvals` / `action_digest` in `decide()`: missing approval yields `ASK_HUMAN` with `MISSING_APPROVAL`. Approvals bind to executed args via digest keys.\n\nCovers: POL-04, GAT-04.",
+  "validation": "Kind `human_review_pending` \u2192 `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.",
+  "footnotes": []
+}

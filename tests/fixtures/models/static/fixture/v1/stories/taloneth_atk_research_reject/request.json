@@ -1,0 +1,21 @@
+{
+  "task_split": "story-atk-v1",
+  "baseline_metric": 0.9,
+  "candidates": [
+    {
+      "hypothesis": "always pick cheapest backend",
+      "change_set": {"decision_backend": "tiny"},
+      "metric": 0.4,
+      "whole_task_cost": 0.01,
+      "safety_ok": true
+    },
+    {
+      "hypothesis": "keep rules + qualified tests",
+      "change_set": {"verification_strategy": "tests"},
+      "metric": 0.95,
+      "whole_task_cost": 0.3,
+      "ablations": {"no_ctx09": 0.94},
+      "safety_ok": true
+    }
+  ]
+}

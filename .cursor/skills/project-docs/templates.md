@@ -72,7 +72,7 @@ When extending `docs/architecture.md`, add a short subsection:
 [2–4 sentences on responsibility and non-goals.]
 ```
 
-## ADR (`docs/adr/NNNN-title.md`)
+## ADR (`docs/adr/NNNN-title.md`, local-only / gitignored)
 
 ```markdown
 # NNNN. [Title]

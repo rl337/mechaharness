@@ -1,0 +1,10 @@
+{
+  "id": "taloneth_atk_research_reject",
+  "persona": "taloneth",
+  "title": "Reject research candidates that fail verified success",
+  "kind": "atk_research_reject",
+  "narrative": "A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: `taloneth_validator_qualification`.",
+  "implementation": "`ResearchLab` / `EvalProtocol` run bounded research: inspect \u2192 hypothesis \u2192 isolated experiment \u2192 ATK-style search \u2192 frozen evaluation protocol \u2192 promote/rollback. Production evaluators stay protected.\n\nCovers: EXP-01, EXP-02, EXP-03, EXP-04.",
+  "validation": "Kind `atk_research_reject` \u2192 `_run_atk_research_reject`. Unit: `tests/test_research.py`.",
+  "footnotes": []
+}

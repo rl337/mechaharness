@@ -1,0 +1,10 @@
+{
+  "id": "fangore_convergence_ceiling",
+  "persona": "fangore",
+  "title": "Stop agent loops that make no progress",
+  "kind": "convergence_ceiling",
+  "narrative": "Fangore\u2019s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress \u2014 never fake success \u2014 and nested repair must share parent budget.",
+  "implementation": "`ConvergenceContract` / `ConvergenceGuard` fingerprint windows and nested budget slices. Escalation may request more evidence, but ceilings never count as task success.\n\nCovers: POL-03.",
+  "validation": "Kind `convergence_ceiling` \u2192 `_run_convergence_ceiling`. Unit: `tests/test_convergence.py`.",
+  "footnotes": []
+}

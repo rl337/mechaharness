@@ -74,10 +74,11 @@ routes change, update in this order:
 4. `README.md` only for summary/quick-start impact
 
 When the change is **user-facing acceptance behavior** (harness runs, grants,
-lanes, judge/verdicts, adapters), also follow the
-[`user-stories`](../user-stories/SKILL.md) skill: prose narrative in
-`docs/guides/user-stories.md`, matching `story.json`, and a story test that
-exercises the path.
+lanes, judge/verdicts, adapters), defer entirely to the
+[`user-stories`](../user-stories/SKILL.md) skill: edit `story.json` (and
+`personas.json` if needed), keep twin copies identical, regenerate
+`docs/guides/user-stories.md` with `scripts/generate_user_stories_md.py`, and
+run `--check`. Do **not** hand-edit the user-stories guide as ordinary markdown.
 
 ## Writing rules
 
@@ -102,7 +103,7 @@ exercises the path.
 | Architecture | `docs/architecture.md` | Patterns, layering, extension model |
 | Guide | `docs/guides/*.md` | Task-oriented how-tos |
 | Reference | `docs/reference/*.md` | Exact CLI/API/types contracts |
-| ADR | `docs/adr/NNNN-title.md` | Decision + context + consequences |
+| ADR | `docs/adr/NNNN-title.md` (local-only / gitignored) | Decision + context + consequences |
 
 ## Quality checklist
 

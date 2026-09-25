@@ -43,7 +43,9 @@ dev = [
   "pytest>=8.2",
   "pytest-asyncio>=0.23",
   "ruff>=0.5",
-  "mypy>=1.10",
+  # Exact pin: mypy 2.x requires Python >=3.10, and floating majors caused
+  # CI (3.12) vs local (3.9) to disagree on what passes. Bump deliberately.
+  "mypy==1.19.1",
   "build>=1.2",
   "twine>=5.0",
 ]
@@ -85,9 +87,11 @@ target-version = "py39"
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.mypy]
-python_version = "3.9"
+# Checker target only; runtime still supports 3.9+. Mypy 1.19+ requires >=3.10 here.
+python_version = "3.10"
 strict = true
 packages = ["mechaharness"]
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 module = "pyiv.*"

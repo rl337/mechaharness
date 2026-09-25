@@ -1,0 +1,10 @@
+{
+  "id": "taloneth_offline_decision_export",
+  "persona": "taloneth",
+  "title": "Export decision data without leaking future outcomes",
+  "kind": "offline_decision_export",
+  "narrative": "Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.",
+  "implementation": "`DecisionRecord` / `DecisionLog` / `export_offline_dataset` persist append-only learning records and versioned exports without default future leakage.\n\nCovers: OBS-02.",
+  "validation": "Kind `offline_decision_export` \u2192 `_run_offline_decision_export`. Unit: `tests/test_decision_log.py`.",
+  "footnotes": []
+}

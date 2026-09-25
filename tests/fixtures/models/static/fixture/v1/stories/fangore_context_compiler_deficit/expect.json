@@ -1,0 +1,6 @@
+{
+  "deficit": true,
+  "unresolved_gaps_include": ["oath"],
+  "blockers_include": ["awaiting-human"],
+  "silent_truncate": false
+}

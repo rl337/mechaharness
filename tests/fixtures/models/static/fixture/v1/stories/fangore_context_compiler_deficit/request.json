@@ -1,0 +1,12 @@
+{
+  "token_budget": 5,
+  "state_revision": "r-story",
+  "operation": "chat",
+  "sources": {
+    "noise": "word word word word word word word word word word word word",
+    "oath": "MUST retain approval boundary and verification obligations forever and ever with lots of text"
+  },
+  "mandatory": ["oath"],
+  "blockers": ["awaiting-human"],
+  "verification_obligations": ["tests-green"]
+}

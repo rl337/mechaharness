@@ -1,0 +1,10 @@
+{
+  "contract": {
+    "version": "story-conv-v1",
+    "max_iterations": 10,
+    "stagnation_window": 2,
+    "max_elapsed_ms": 60000
+  },
+  "fingerprints": ["same", "same", "same"],
+  "elapsed_ms_per_tick": 5
+}
