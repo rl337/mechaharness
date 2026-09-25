@@ -4,5 +4,6 @@
   "title": "Validate judge question batches without a live model",
   "kind": "fixture_judge_batch",
   "narrative": "Taloneth is iterating on judge question sets — yes/no, choice, and score in one batch — and cannot wait on a GPU host for every tweak. He drives an offline fixture judge with known answers and checks that validation accepts clean signals and reports errors when answers are missing. The lab bench is offline, deterministic, and fast. He uses this whenever contract tests must not depend on a served model.",
-  "implementation": "Kind `fixture_judge_batch`. `FixtureJudgeProvider` + `judge()` over mixed `ChoiceQuestion` / `NoulQuestion` / `ScoreQuestion`. Soft expects: clean batch validates; missing answers surface `JudgeErrorItem` entries."
+  "implementation": "Judge domain types (`ChoiceQuestion`, `NoulQuestion`, `ScoreQuestion`, signals, `Judgement`, `JudgeErrorItem`) and the `judge()` entrypoint live in `mechaharness.inference.judge`. `FixtureJudgeProvider` supplies deterministic answers for offline contract work without HTTP. Validation reports missing or malformed answers as structured errors on the judgement.",
+  "validation": "Kind `fixture_judge_batch` → `_run_fixture_judge_batch`. Soft expects: clean batch validates; missing answers surface errors. Related: `tests/test_judge.py`, `tests/test_outcomes.py`."
 }

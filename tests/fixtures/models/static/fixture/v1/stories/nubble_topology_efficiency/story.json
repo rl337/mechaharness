@@ -4,5 +4,6 @@
   "title": "Separate wall-clock speedup from total work and queue wait",
   "kind": "topology_efficiency",
   "narrative": "Nubble is asked whether parallel agents sped things up. Elapsed wall time dropped, but total node work grew and queue waits hid under a vanity speedup number. He needs topology metrics that separate critical path, total work, and elapsed time — and that refuse a misleading efficiency claim without a serial baseline and an honest worker-count note. He uses this whenever operations must explain cost and concurrency without overselling parallelism.",
-  "implementation": "Kind `topology_efficiency`. Runner calls `mechaharness.decision_log.compute_topology_metrics` on synthetic spans. Expects reject vanity speedup without serial baseline / worker notes; critical path, total work, and elapsed time are reported distinctly."
+  "implementation": "`mechaharness.decision_log.compute_topology_metrics` (and related `TopologySpan` / topology metric types) compute critical path, total work, and elapsed time as distinct quantities. Efficiency claims that omit a serial baseline or worker-count context are rejected so operations cannot publish vanity speedups. This is library observability for plan/graph execution, not a dashboard product.",
+  "validation": "Kind `topology_efficiency` → `_run_topology_efficiency` with synthetic spans in `request.json`. Soft expects reject vanity speedup without baseline/worker notes. Unit tests: `tests/test_decision_log.py`."
 }

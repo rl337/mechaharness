@@ -4,5 +4,6 @@
   "title": "Reject model choices that are not on the allowed list",
   "kind": "decision_surface_reject",
   "narrative": "Fangore sets up a choice surface so a triage model can propose which team owns a ticket. One night the model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal, not as authority to act. Scoring adapters may evaluate the same surface, but only product judgement policy may unlock the next action — the same split as `fangore_refund_verdict`. He uses this whenever choice, score, or yes/no signals must stay suggestions, never automatic execution.",
-  "implementation": "Kind `decision_surface_reject`. `DecisionSurface` + `reject_invalid_choice` / `RulesDecisionBackend`; invalid selected option becomes a rejected proposal. Soft expects: rejection flagged; no automatic unlock without `JudgementPolicy`."
+  "implementation": "`mechaharness.decision_surfaces` defines named decision-plane surfaces (`DecisionSurface`, Choice/Score/Noul kinds) over judge signal types. `reject_invalid_choice` and `RulesDecisionBackend` treat out-of-set selections as rejected proposals. Surfaces produce signals for `JudgementPolicy`; they do not execute side effects or unlock actions.",
+  "validation": "Kind `decision_surface_reject` → `_run_decision_surface_reject`. Soft expects: invalid option flagged rejected; no automatic unlock. Related unit coverage alongside decision surface / judgement policy tests."
 }

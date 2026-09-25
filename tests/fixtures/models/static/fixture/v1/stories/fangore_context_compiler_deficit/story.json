@@ -4,5 +4,6 @@
   "title": "Report context deficits instead of silent truncation",
   "kind": "context_compiler_deficit",
   "narrative": "Fangore’s agent must not quietly drop mandatory blockers just because the prompt budget is tight. He runs context compilation with a tiny token budget and a mandatory policy requirement that cannot fit. Success is a deficit report — unresolved gaps named, blockers preserved — not a silently shortened prompt that looks complete. Deterministic steps can skip a model prompt entirely. He uses this whenever working context is a temporary view, never the only copy of obligations.",
-  "implementation": "Kind `context_compiler_deficit`. `ContextCompiler` builds a `ContextManifest` with `unresolved_gaps` when mandatory material exceeds `token_estimate` budget. Soft expects: deficit reported; blockers not silently omitted."
+  "implementation": "`ContextCompiler` in `mechaharness.context_experiments` builds a `ContextManifest` (compiler version, token estimate, unresolved gaps). When mandatory material exceeds budget, gaps are named rather than silently truncated. Supporting CTX experiment primitives (derived memory, topology views, cache layout) are independent toggles on the same module.",
+  "validation": "Kind `context_compiler_deficit` → `_run_context_compiler_deficit`. Soft expects: deficit / unresolved gaps reported; blockers not omitted. Unit tests: `tests/test_context_experiments.py`."
 }

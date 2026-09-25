@@ -16,6 +16,7 @@ REQUIRED_STORY_FIELDS = (
     "kind",
     "narrative",
     "implementation",
+    "validation",
 )
 TWIN_PARITY_FIELDS = (
     "persona",
@@ -23,6 +24,7 @@ TWIN_PARITY_FIELDS = (
     "kind",
     "narrative",
     "implementation",
+    "validation",
 )
 
 

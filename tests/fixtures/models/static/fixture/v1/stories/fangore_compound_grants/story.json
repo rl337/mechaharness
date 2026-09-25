@@ -4,5 +4,6 @@
   "title": "Compose read-only and write permission packs",
   "kind": "grant_gate_write",
   "narrative": "Fangore is building a host app that must not let agents write the filesystem by default. He starts with a read-only permission pack — the write tool is refused, which proves deny-by-default works. Later he composes that pack with a write pack into one reusable set, and the same tool succeeds. He uses this whenever an app needs reusable permission packs instead of copy-pasted grant lists.",
-  "implementation": "Kind `grant_gate_write`. `AccessPolicy` / `CompoundPolicy` over `FsWrite` grants; `AccessControl` denies then allows after composition. Soft expects: first attempt denied, second allowed after compound policy."
+  "implementation": "`AccessPolicy` is a deny-by-default grant list (`grants` coerced via `grant_key`). `CompoundPolicy` unions multiple `AccessPolicy` layers into one reusable allow-list (first-seen order, overlaps idempotent). `AccessControl` / `InMemoryAccessControl` enforces required grants for tool invocations and emits `core:access_check` events. Named grants such as `FsWrite` live in `mechaharness.core.access`.",
+  "validation": "Kind `grant_gate_write` → `_run_grant_gate_write`. Soft expects: write denied under read-only policy, then allowed after `CompoundPolicy` composition. Unit tests: `tests/test_access.py`."
 }

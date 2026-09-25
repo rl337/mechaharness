@@ -4,5 +4,6 @@
   "title": "Export decision data without leaking future outcomes",
   "kind": "offline_decision_export",
   "narrative": "Taloneth exports a decision trajectory for offline study. One run finished later with a delayed outcome id; another was interrupted. Decision-time features must reconstruct what the policy saw then — without leaking future outcomes into the training split by default. Missing labels stay missing, not coerced into failure. He uses this whenever logged decisions feed research without inventing counterfactuals or private chain-of-thought.",
-  "implementation": "Kind `offline_decision_export`. `DecisionRecord` + `export_offline_dataset` / `OfflineDecisionExport` in `mechaharness.decision_log`. Soft expects: no future outcome leakage by default; missing labels remain missing."
+  "implementation": "`DecisionRecord`, `DecisionLog`, `export_offline_dataset`, and `OfflineDecisionExport` in `mechaharness.decision_log` capture decision-time features and optional outcome linkage. Export defaults prevent future outcome leakage into training splits; missing labels remain missing rather than coerced to failure (OBS dataset path).",
+  "validation": "Kind `offline_decision_export` → `_run_offline_decision_export`. Soft expects: no future leakage by default; missing labels stay missing. Unit tests: `tests/test_decision_log.py`."
 }

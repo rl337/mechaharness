@@ -23,7 +23,15 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "models"
 PERSONAS_PATH = FIXTURES / "personas.json"
 GUIDE_PATH = ROOT / "docs" / "guides" / "user-stories.md"
-REQUIRED_FIELDS = ("id", "persona", "title", "kind", "narrative", "implementation")
+REQUIRED_FIELDS = (
+    "id",
+    "persona",
+    "title",
+    "kind",
+    "narrative",
+    "implementation",
+    "validation",
+)
 PERSONA_ORDER = ("nubble", "fangore", "taloneth")
 
 
@@ -74,7 +82,14 @@ def validate_all() -> list[str]:
         errors.extend(validate_story(data, path=path))
         by_id[str(data.get("id") or path.parent.name)].append((path, data))
 
-    parity_fields = ("persona", "title", "kind", "narrative", "implementation")
+    parity_fields = (
+        "persona",
+        "title",
+        "kind",
+        "narrative",
+        "implementation",
+        "validation",
+    )
     for story_id, copies in sorted(by_id.items()):
         if len(copies) < 2:
             continue
@@ -132,6 +147,10 @@ def render_guide(stories: dict[str, dict[str, Any]], personas: dict[str, Any]) -
             lines.append("#### Implementation")
             lines.append("")
             lines.append(str(story["implementation"]).rstrip())
+            lines.append("")
+            lines.append("#### Validation")
+            lines.append("")
+            lines.append(str(story["validation"]).rstrip())
             lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"

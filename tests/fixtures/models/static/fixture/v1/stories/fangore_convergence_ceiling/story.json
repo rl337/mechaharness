@@ -4,5 +4,6 @@
   "title": "Stop agent loops that make no progress",
   "kind": "convergence_ceiling",
   "narrative": "Fangore’s repair loop keeps asking the same judge the same question and getting the same answer. Without a convergence contract, the agent burns budget until someone kills the process. He declares a versioned ceiling: identical fingerprints inside a short window are not progress, and hitting the ceiling must end as no-progress — never as a fake success. Nested repair shares a slice of the parent budget so a child cannot outspend the parent. He uses this whenever an agent loop must remain finite even if the model never asks to stop.",
-  "implementation": "Kind `convergence_ceiling`. `ConvergenceContract` + `ConvergenceGuard` fingerprint window; terminal status `no_progress`. Nested budgets inherit a slice of the parent. Soft expects: ceiling trip yields `no_progress`, not success."
+  "implementation": "`ConvergenceContract` and `ConvergenceGuard` in `mechaharness.convergence` track fingerprints over a window and enforce a versioned ceiling. Terminal status includes `no_progress` (never success-on-stall). Nested guards inherit a budget slice from the parent so child repair cannot outspend the parent contract (POL-03).",
+  "validation": "Kind `convergence_ceiling` → `_run_convergence_ceiling`. Soft expects: ceiling trip yields `no_progress`. Unit tests: `tests/test_convergence.py`."
 }

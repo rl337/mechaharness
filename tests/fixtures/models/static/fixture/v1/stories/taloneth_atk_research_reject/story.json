@@ -4,5 +4,6 @@
   "title": "Reject research candidates that fail verified success",
   "kind": "atk_research_reject",
   "narrative": "Taloneth treats each harness tweak as a falsifiable recipe. A cheap decision backend looks thrifty on unit price but fails verified task success against the frozen baseline. His research lab must reject that candidate, keep negative results on the report, and only promote a survivor that clears noninferiority — with rollback ready. Held-out evaluation stays protected; rewriting the authoritative evaluator is forbidden. Related qualification discipline: `taloneth_validator_qualification`. He uses this whenever auto-research must earn activation instead of winning by decree.",
-  "implementation": "Kind `atk_research_reject`. `ResearchLab` + `EvalProtocol` ATK-style reporting. Soft expects: failing candidate rejected; negative results retained; no rewrite of the authoritative evaluator."
+  "implementation": "`ResearchLab` and `EvalProtocol` in `mechaharness.research` run ATK-style evaluation: candidates are compared against a frozen baseline on verified task success, negative results are retained, and promotion requires noninferiority. Candidates cannot rewrite the authoritative evaluator; held-out evaluation stays protected.",
+  "validation": "Kind `atk_research_reject` → `_run_atk_research_reject`. Soft expects: failing candidate rejected; negative results retained. Unit tests: `tests/test_research.py`."
 }

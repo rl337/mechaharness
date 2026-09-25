@@ -1,5 +1,5 @@
 {
-  "intro": "MechaHarness acceptance paths are told as **user stories**: short scenes about what a product needs to do, written for readers who understand features but not code. Story text lives only in fixture `story.json` files. This guide is **generated** from those fixtures.\n\nSee the Cursor skill `.cursor/skills/user-stories/SKILL.md` when adding features: edit fixtures, regenerate this page, and keep twin copies of the same story id identical.",
+  "intro": "MechaHarness acceptance paths are told as **user stories**: short scenes about what a product needs to do, written for readers who understand features but not code. Each story has a human **narrative**, an **implementation** section that traces library code fulfilling the feature, and a **validation** section that describes how the story is tested. Story text lives only in fixture `story.json` files. This guide is **generated** from those fixtures.\n\nSee the Cursor skill `.cursor/skills/user-stories/SKILL.md` when adding features: edit fixtures, regenerate this page, and keep twin copies of the same story id identical.",
   "personas": [
     {
       "id": "nubble",
