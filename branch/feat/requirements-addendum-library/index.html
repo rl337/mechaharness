@@ -57,8 +57,6 @@
 <li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/access.html">Access control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0002-requirements-phase0-gap-map.html">ADR 0002: Requirements Phase 0 gap map</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a></li>
@@ -128,8 +126,7 @@ quietly burn unbounded spend.</p>
 Wiring is pyiv <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> and constructor injection. Hosts
 subclass Config hooks to bind strategies, harnesses, connections, and
 providers — they do not fork closed enums or grow string registries.
-See <a class="reference internal" href="guides/dependency-injection.html"><span class="doc">Dependency injection</span></a>, <a class="reference internal" href="adr/0001-pyiv-config.html"><span class="doc">0001. pyiv Config instead of string registries</span></a>, and
-<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>.</p></li>
+See <a class="reference internal" href="guides/dependency-injection.html"><span class="doc">Dependency injection</span></a> and <a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>.</p></li>
 <li><p><strong>Multi-model and lanes are native.</strong>
 Reason, judge, and media (plus host-named lanes) are first-class via
 <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment.active_lane()</span></code>. Generative work yields a
@@ -250,21 +247,6 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="reference/judge.html#api">API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/judge.html#judgementpolicy">JudgementPolicy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/judge.html#lanes">Lanes</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="adr/0001-pyiv-config.html#context">Context</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0001-pyiv-config.html#decision">Decision</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0001-pyiv-config.html#consequences">Consequences</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0002-requirements-phase0-gap-map.html">ADR 0002: Requirements Phase 0 gap map</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="adr/0002-requirements-phase0-gap-map.html#status">Status</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0002-requirements-phase0-gap-map.html#context">Context</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0002-requirements-phase0-gap-map.html#decision">Decision</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0002-requirements-phase0-gap-map.html#mapping">Mapping</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0002-requirements-phase0-gap-map.html#baselines-to-freeze">Baselines to freeze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0002-requirements-phase0-gap-map.html#consequences">Consequences</a></li>
 </ul>
 </li>
 </ul>

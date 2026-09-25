@@ -31,8 +31,7 @@ Founding principles
    Wiring is pyiv ``MechaHarnessConfig`` and constructor injection. Hosts
    subclass Config hooks to bind strategies, harnesses, connections, and
    providers — they do not fork closed enums or grow string registries.
-   See :doc:`guides/dependency-injection`, :doc:`adr/0001-pyiv-config`, and
-   :doc:`architecture`.
+   See :doc:`guides/dependency-injection` and :doc:`architecture`.
 
 2. **Multi-model and lanes are native.**
    Reason, judge, and media (plus host-named lanes) are first-class via
@@ -90,8 +89,6 @@ Reference
    reference/cost
    reference/access
    reference/judge
-   adr/0001-pyiv-config
-   adr/0002-requirements-phase0-gap-map
 
 API
 ---
