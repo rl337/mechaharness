@@ -221,8 +221,9 @@ __marimo__/
 .DS_Store
 Thumbs.db
 
-# Local host contracts (do not publish)
+# Local host contracts / design notes (do not publish)
 REQUIREMENTS.md
+docs/adr/
 .agents/
 
 # Local docs tooling install (sandbox-friendly target dir)

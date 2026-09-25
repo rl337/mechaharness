@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Keep `docs/adr/` local-only (gitignored; purged from git history; not published)
+
 ## [0.1.0] — 2026-09-25
 
 First public library cut: DI-first agent harness with native lanes, cost on the

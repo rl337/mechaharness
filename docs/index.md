@@ -16,8 +16,8 @@ Published site: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness
    `MechaHarnessConfig` and constructor injection. Hosts subclass Config hooks
    to bind strategies, harnesses, connections, and providers — they do not fork
    closed enums or grow string registries. See
-   [Dependency injection](./guides/dependency-injection.md),
-   [ADR 0001](./adr/0001-pyiv-config.md), and [Architecture](./architecture.md).
+   [Dependency injection](./guides/dependency-injection.md) and
+   [Architecture](./architecture.md).
 
 2. **Multi-model and lanes are native.** Reason, judge, and media (plus
    host-named lanes) are first-class via `InferenceEnvironment.active_lane()`.
@@ -55,7 +55,6 @@ for events and grants ([Architecture](./architecture.md)).
 | [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
 | [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, `core:access_check` |
 | [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
-| [ADR 0001](./adr/0001-pyiv-config.md) | Why Config hooks replaced string registries |
 
 ## Mental model
 
