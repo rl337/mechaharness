@@ -89,7 +89,7 @@ For durable plans, override `get_node_runner_registry()`,
 `get_graph_failure_policy()`, and `get_graph_escalation()`, then
 `injector.inject(GraphExecutor)`. Include `core:graph.execute` (and
 `core:graph.escalate` when using escalation) in grants. See
-[Architecture — Execution graph](../architecture.md#execution-graph).
+[Architecture](../architecture.md) (Execution graph).
 
 ## Verify
 
