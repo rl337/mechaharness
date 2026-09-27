@@ -35,7 +35,9 @@ dependencies = [
   "rich>=13.7",
   "fastapi>=0.111",
   "uvicorn[standard]>=0.30",
-  "eval_type_backport>=0.2; python_version < '3.10'",
+  # Always install: di.py imports it, and CI runs Python 3.12 where the old
+  # ``python_version < '3.10'`` marker skipped the package and broke the CLI.
+  "eval_type_backport>=0.2",
 ]
 
 [project.optional-dependencies]

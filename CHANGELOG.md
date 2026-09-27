@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Install `eval_type_backport` on all Python versions so CI (3.12) and the CLI
+  can import `mechaharness.di` (previously gated behind `python_version < '3.10'`).
+
 ### Changed
 
 - **pyiv ≥ 0.4.1** — floor bumped for qualified keys (`Named` / `Matched` /
