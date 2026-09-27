@@ -1,0 +1,23 @@
+{
+  "id": "escalate_denied_without_grant",
+  "description": "Escalation path requires core:graph.escalate; otherwise node stays failed",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "heal",
+  "runners": {
+    "flaky": {"mode": "fail", "error": "always"}
+  },
+  "graph": {
+    "goal": "esc-deny",
+    "nodes": [{"id": "n", "kind": "flaky", "max_attempts": 1}]
+  },
+  "run": {"run_id": "esc-deny"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "n": {"status": "failed", "attempt": 1, "error": "escalation_denied"}
+    },
+    "runner_calls": {"flaky": 1},
+    "events_include": ["core:access_check"]
+  }
+}

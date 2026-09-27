@@ -1,0 +1,27 @@
+{
+  "id": "write_conflict_serialized",
+  "description": "Ready nodes sharing write_scopes still complete sequentially",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "step": {"mode": "echo_id"}
+  },
+  "graph": {
+    "goal": "conflict",
+    "nodes": [
+      {"id": "a", "kind": "step", "write_scopes": ["shared"]},
+      {"id": "b", "kind": "step", "write_scopes": ["shared"]}
+    ]
+  },
+  "run": {"run_id": "ww"},
+  "expect": {
+    "status": "ok",
+    "nodes": {
+      "a": {"status": "succeeded", "payload": {"done": "a"}},
+      "b": {"status": "succeeded", "payload": {"done": "b"}}
+    },
+    "runner_calls": {"step": 2},
+    "run_order": ["a", "b"]
+  }
+}

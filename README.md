@@ -5,8 +5,8 @@
 Python **agent harness** for hosts that compose inference safely — not a thin
 chat-client wrapper. Founding principles:
 
-1. **Modular via dependency injection** — pyiv `MechaHarnessConfig`; hosts
-   subclass and compose (no forked enums / string registries)
+1. **Modular via dependency injection** — pyiv ≥ 0.4 `MechaHarnessConfig`;
+   hosts subclass and compose (no hand-wired harnesses / string registries)
 2. **Multi-model / lanes native** — reason, judge, and media lanes;
    `Completion` / `Judgement` / `Generation` outcomes
 3. **Cost in the object model** — `CostAccountant` on the harness path so runs

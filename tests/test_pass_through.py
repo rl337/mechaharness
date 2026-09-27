@@ -24,6 +24,7 @@ from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.mock import MockInferenceStrategy
 from tests.fakes import ScriptedInference
+from tests.support.di import make_harness
 
 EXPECTED_PASS_THROUGH_TYPES = [
     AgentStart.key(),
@@ -46,9 +47,10 @@ async def test_pass_through_mock_emits_events_and_cost() -> None:
     inference = ScriptedInference(
         [ChatMessage(role=Role.ASSISTANT, content="four")]
     )
-    harness = PassThroughHarness(
-        inference=inference,
+    harness = make_harness(
+        inference,
         config=HarnessConfig(model="mock-model"),
+        harness_cls=PassThroughHarness,
         event_log=log,
     )
     result = await harness.run("What is 2+2?")

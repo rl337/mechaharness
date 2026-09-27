@@ -4,7 +4,7 @@
   "title": "Let the host app supply its own permission policy",
   "kind": "config_access_policy",
   "narrative": "Fangore\u2019s product needs permission rules defined by the application. He configures the harness once so composed packs from `fangore_compound_grants` are what the harness enforces.",
-  "implementation": "`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection \u2014 not Settings bags or hand-wired constructors.\n\nCovers: host DI access policy.",
+  "implementation": "`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection \u2014 not Settings bags or hand-wired harness constructors. Fangore subclasses Config once; the injector builds `AccessControl` and the harness with those grants.\n\nCovers: host DI access policy.",
   "validation": "Kind `config_access_policy` \u2192 `_run_config_access_policy`. Unit: `tests/test_di.py`.",
   "footnotes": [
     {

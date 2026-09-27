@@ -1,0 +1,23 @@
+{
+  "id": "no_runner_for_kind",
+  "description": "Unknown node kind fails without invoking any runner",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {},
+  "graph": {
+    "goal": "missing",
+    "nodes": [{"id": "x", "kind": "unregistered", "max_attempts": 1}]
+  },
+  "run": {"run_id": "no-runner"},
+  "expect": {
+    "status": "failed",
+    "error": "graph_incomplete",
+    "nodes": {
+      "x": {"status": "failed", "attempt": 1, "error": "no_runner:unregistered"}
+    },
+    "events_include": ["core:graph_start", "core:graph_end", "core:graph_node_end"],
+    "events_exclude": ["core:graph_node_start"],
+    "runner_calls": {}
+  }
+}

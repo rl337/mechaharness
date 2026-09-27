@@ -1,0 +1,34 @@
+{
+  "id": "ok_linear_dag",
+  "description": "Produce then consume with justified edge; lifecycle events emitted once",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "produce": {"mode": "succeed", "payload": {"value": 1}, "evidence": {"produced": true}},
+    "consume": {"mode": "succeed_from_parent", "parent": "produce", "field": "value", "add": 1, "out_field": "sum"}
+  },
+  "graph": {
+    "goal": "pipe",
+    "nodes": [
+      {"id": "produce", "kind": "produce"},
+      {"id": "consume", "kind": "consume", "depends_on": ["produce"]}
+    ],
+    "edges": [
+      {"from": "produce", "to": "consume", "types": ["data"], "reason": "consume needs produce"}
+    ]
+  },
+  "run": {"run_id": "ok-linear"},
+  "expect": {
+    "status": "ok",
+    "error_is_none": true,
+    "nodes": {
+      "produce": {"status": "succeeded", "attempt": 1, "payload": {"value": 1}},
+      "consume": {"status": "succeeded", "attempt": 1, "payload": {"sum": 2}}
+    },
+    "events_include": ["core:graph_start", "core:graph_end", "core:graph_node_start", "core:graph_node_end"],
+    "graph_end_count": 1,
+    "runner_calls": {"produce": 1, "consume": 1},
+    "run_order": ["produce", "consume"]
+  }
+}

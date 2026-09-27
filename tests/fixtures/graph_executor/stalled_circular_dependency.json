@@ -1,0 +1,32 @@
+{
+  "id": "stalled_circular_dependency",
+  "description": "Mutual dependencies never become ready; terminal status is stalled",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "step": {"mode": "succeed"}
+  },
+  "graph": {
+    "goal": "cycle",
+    "nodes": [
+      {"id": "a", "kind": "step", "depends_on": ["b"]},
+      {"id": "b", "kind": "step", "depends_on": ["a"]}
+    ],
+    "edges": [
+      {"from": "b", "to": "a", "types": ["control"], "reason": "cycle-a"},
+      {"from": "a", "to": "b", "types": ["control"], "reason": "cycle-b"}
+    ]
+  },
+  "run": {"run_id": "cycle"},
+  "expect": {
+    "status": "stalled",
+    "error": "graph_incomplete",
+    "nodes": {
+      "a": {"status": "blocked", "attempt": 0},
+      "b": {"status": "blocked", "attempt": 0}
+    },
+    "runner_calls": {"step": 0},
+    "events_exclude": ["core:graph_node_start"]
+  }
+}
