@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cost &mdash; MechaHarness 0.1.2 documentation</title>
+  <title>Cost &mdash; MechaHarness 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -140,25 +140,40 @@ Spark/$0 pricing can still use Ability units while tracking tokens).</p>
 </section>
 <section id="harness">
 <h2>Harness<a class="headerlink" href="#harness" title="Link to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code> injects <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code> (default <code class="docutils literal notranslate"><span class="pre">InMemoryCostAccountant</span></code> on
-the same <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>). Each inference turn is priced after <code class="docutils literal notranslate"><span class="pre">complete()</span></code> and
+<p><code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code> injects <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code> (required; Config binds
+<code class="docutils literal notranslate"><span class="pre">InMemoryCostAccountant</span></code> on the shared <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>). Each inference turn is priced after <code class="docutils literal notranslate"><span class="pre">complete()</span></code> and
 passes through <code class="docutils literal notranslate"><span class="pre">CompletionResponse.usage</span></code>. Each successful tool run is priced
 after invoke. Denied or unknown tools are not priced. <code class="docutils literal notranslate"><span class="pre">HarnessResult.cost</span></code> is
 the ledger for that run. Thinking-model <code class="docutils literal notranslate"><span class="pre">reasoning_content</span></code> is kept on
 <code class="docutils literal notranslate"><span class="pre">ChatMessage</span></code> and recorded on <code class="docutils literal notranslate"><span class="pre">core:inference</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="n">InMemoryCostAccountant</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_injector</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">InMemoryEventLog</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">HarnessConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractHarness</span><span class="p">,</span> <span class="n">HarnessConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.pass_through</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassThroughHarness</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MockInferenceStrategy</span>
 
-<span class="n">log</span> <span class="o">=</span> <span class="n">InMemoryEventLog</span><span class="p">()</span>
-<span class="n">harness</span> <span class="o">=</span> <span class="n">PassThroughHarness</span><span class="p">(</span>
-    <span class="n">inference</span><span class="o">=</span><span class="n">MockInferenceStrategy</span><span class="p">(),</span>
-    <span class="n">config</span><span class="o">=</span><span class="n">HarnessConfig</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"mock"</span><span class="p">),</span>
-    <span class="n">event_log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span>
-    <span class="n">cost</span><span class="o">=</span><span class="n">InMemoryCostAccountant</span><span class="p">(</span><span class="n">event_log</span><span class="o">=</span><span class="n">log</span><span class="p">),</span>
-<span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CostDemoConfig</span><span class="p">(</span><span class="n">MechaHarnessConfig</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span> <span class="o">=</span> <span class="n">InMemoryEventLog</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">MockInferenceStrategy</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_harness_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">PassThroughHarness</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_event_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_harness_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HarnessConfig</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"mock"</span><span class="p">)</span>
+
+
+<span class="n">harness</span> <span class="o">=</span> <span class="n">get_injector</span><span class="p">(</span><span class="n">CostDemoConfig</span><span class="p">)</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">AbstractHarness</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Tool grants are documented in <a class="reference internal" href="access.html"><span class="std std-doc">Access control</span></a>.</p>

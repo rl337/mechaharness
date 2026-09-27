@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Event log &mdash; MechaHarness 0.1.2 documentation</title>
+  <title>Event log &mdash; MechaHarness 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -208,12 +208,26 @@ long as they are namespaced. Bare names (<code class="docutils literal notransla
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AccessCheck</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">core:access_check</span></code></p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GraphStart</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GraphEnd</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GraphNodeStart</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:graph_node_start</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GraphNodeEnd</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:graph_node_end</span></code></p></td>
+</tr>
 </tbody>
 </table>
 <p><code class="docutils literal notranslate"><span class="pre">core:access_check</span></code> payload: <code class="docutils literal notranslate"><span class="pre">tool</span></code>, <code class="docutils literal notranslate"><span class="pre">required</span></code>, <code class="docutils literal notranslate"><span class="pre">granted</span></code>, <code class="docutils literal notranslate"><span class="pre">allowed</span></code>.
 <code class="docutils literal notranslate"><span class="pre">core:cost</span></code> may include <code class="docutils literal notranslate"><span class="pre">prompt_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">completion_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">total_tokens</span></code>.
-<code class="docutils literal notranslate"><span class="pre">core:inference</span></code> may include <code class="docutils literal notranslate"><span class="pre">reasoning_content</span></code> and <code class="docutils literal notranslate"><span class="pre">usage</span></code>. Hosts add types by
-subclassing without editing this module:</p>
+<code class="docutils literal notranslate"><span class="pre">core:inference</span></code> may include <code class="docutils literal notranslate"><span class="pre">reasoning_content</span></code> and <code class="docutils literal notranslate"><span class="pre">usage</span></code>.
+<code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> emits <code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code> and per-node
+start/end events; <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> checkpoints use <code class="docutils literal notranslate"><span class="pre">core:graph_node</span></code>. Hosts add
+types by subclassing without editing this module:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventType</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">WidgetDone</span><span class="p">(</span><span class="n">EventType</span><span class="p">):</span>

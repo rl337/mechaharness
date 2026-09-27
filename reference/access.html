@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Access control &mdash; MechaHarness 0.1.2 documentation</title>
+  <title>Access control &mdash; MechaHarness 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -133,8 +133,8 @@ Stability: evolving.</p>
 <code class="docutils literal notranslate"><span class="pre">namespace</span></code>; leaves set <code class="docutils literal notranslate"><span class="pre">name</span></code>. The wire form is <code class="docutils literal notranslate"><span class="pre">namespace:name</span></code>. Unknown
 namespaced keys round-trip; bare names (<code class="docutils literal notranslate"><span class="pre">fs.write</span></code>) are rejected.</p>
 <p>Built-in <code class="docutils literal notranslate"><span class="pre">CoreGrant</span></code> leaves (<code class="docutils literal notranslate"><span class="pre">FsRead</span></code>, <code class="docutils literal notranslate"><span class="pre">FsWrite</span></code>, <code class="docutils literal notranslate"><span class="pre">NetHttp</span></code>, <code class="docutils literal notranslate"><span class="pre">MediaImage</span></code>,
-<code class="docutils literal notranslate"><span class="pre">MediaVideo</span></code>, <code class="docutils literal notranslate"><span class="pre">MediaAudio</span></code>) are conveniences. Hosts add types without editing
-this package:</p>
+<code class="docutils literal notranslate"><span class="pre">MediaVideo</span></code>, <code class="docutils literal notranslate"><span class="pre">MediaAudio</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code>) are conveniences.
+Hosts add types without editing this package:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="n">Grant</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Widget</span><span class="p">(</span><span class="n">Grant</span><span class="p">):</span>
@@ -175,10 +175,12 @@ media-allowed, …) without rewriting lists. It is unrelated to
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code> uses <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (default: <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> from
-<code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>). Or pass
-<code class="docutils literal notranslate"><span class="pre">access=InMemoryAccessControl(policy=CompoundPolicy.of(...),</span> <span class="pre">event_log=log)</span></code>
-into <code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code>. Denied tools return an error <code class="docutils literal notranslate"><span class="pre">ToolResult</span></code> and are not
-priced.</p>
+<code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>) and requires an <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>. Bind access only through Config —
+do not hand-wire <code class="docutils literal notranslate"><span class="pre">AbstractHarness(...,</span> <span class="pre">access=...)</span></code>. Denied tools return an
+error <code class="docutils literal notranslate"><span class="pre">ToolResult</span></code> and are not priced.</p>
+<p><code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> checks <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> before walking a plan and
+<code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> before calling <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>. Node runners may declare
+extra grants via <code class="docutils literal notranslate"><span class="pre">GraphNodeRunner.required_grants()</span></code>.</p>
 </section>
 <section id="tools">
 <h2>Tools<a class="headerlink" href="#tools" title="Link to this heading"></a></h2>

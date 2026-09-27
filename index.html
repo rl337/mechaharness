@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MechaHarness documentation &mdash; MechaHarness 0.1.2 documentation</title>
+  <title>MechaHarness documentation &mdash; MechaHarness 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=92734c54"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -110,7 +110,7 @@ models and policies without rewriting the run path, and so agents cannot
 quietly burn unbounded spend.</p>
 <div class="hero-meta docutils container">
 <div class="version-badge docutils container">
-<p>0.1.2</p>
+<p>0.1.0</p>
 </div>
 <p>pyiv Config · multi-lane inference · cost + EventLog on every run · Python 3.9+</p>
 </div>
@@ -162,6 +162,7 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#dependency-injection">Dependency injection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#execution-graph">Execution graph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#host-extension">Host extension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#inference-strategy">Inference Strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#judge">Judge</a></li>
@@ -256,32 +257,14 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.list_inference_backends"><code class="docutils literal notranslate"><span class="pre">list_inference_backends()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/mechaharness.html#mechaharness.__version__"><code class="docutils literal notranslate"><span class="pre">__version__</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/config.html">mechaharness.config</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/config.html#mechaharness.config.Settings"><code class="docutils literal notranslate"><span class="pre">Settings</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/config.html#mechaharness.config.get_settings"><code class="docutils literal notranslate"><span class="pre">get_settings()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/di.html">mechaharness.di</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.MechaHarnessConfig"><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.SettingsConfig"><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.apply_backend_defaults"><code class="docutils literal notranslate"><span class="pre">apply_backend_defaults()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.build_injector"><code class="docutils literal notranslate"><span class="pre">build_injector()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.list_harness_families"><code class="docutils literal notranslate"><span class="pre">list_harness_families()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.list_inference_backends"><code class="docutils literal notranslate"><span class="pre">list_inference_backends()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/factory.html">mechaharness.factory</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/factory.html#mechaharness.factory.describe"><code class="docutils literal notranslate"><span class="pre">describe()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/factory.html#mechaharness.factory.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/factory.html#mechaharness.factory.settings_from_request"><code class="docutils literal notranslate"><span class="pre">settings_from_request()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/factory.html">mechaharness.factory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/completer.html">mechaharness.core.completer</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/completer.html#mechaharness.core.completer.Completer"><code class="docutils literal notranslate"><span class="pre">Completer</span></code></a></li>
 </ul>
@@ -313,6 +296,10 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.EventLog"><code class="docutils literal notranslate"><span class="pre">EventLog</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.EventType"><code class="docutils literal notranslate"><span class="pre">EventType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.FanoutEventLog"><code class="docutils literal notranslate"><span class="pre">FanoutEventLog</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.GraphEnd"><code class="docutils literal notranslate"><span class="pre">GraphEnd</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.GraphNodeEnd"><code class="docutils literal notranslate"><span class="pre">GraphNodeEnd</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.GraphNodeStart"><code class="docutils literal notranslate"><span class="pre">GraphNodeStart</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.GraphStart"><code class="docutils literal notranslate"><span class="pre">GraphStart</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.InMemoryEventLog"><code class="docutils literal notranslate"><span class="pre">InMemoryEventLog</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.Inference"><code class="docutils literal notranslate"><span class="pre">Inference</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.LoggingEventLog"><code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code></a></li>
@@ -341,6 +328,8 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.FsRead"><code class="docutils literal notranslate"><span class="pre">FsRead</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.FsWrite"><code class="docutils literal notranslate"><span class="pre">FsWrite</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.Grant"><code class="docutils literal notranslate"><span class="pre">Grant</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.GraphEscalate"><code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.GraphExecute"><code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.InMemoryAccessControl"><code class="docutils literal notranslate"><span class="pre">InMemoryAccessControl</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.InMemoryCostAccountant"><code class="docutils literal notranslate"><span class="pre">InMemoryCostAccountant</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.MediaAudio"><code class="docutils literal notranslate"><span class="pre">MediaAudio</span></code></a></li>
@@ -359,21 +348,9 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment"><code class="docutils literal notranslate"><span class="pre">NoOpInferenceEnvironment</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/inference.html#mechaharness.inference.base.InferenceStrategy"><code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/harness.html#mechaharness.harness.base.AbstractHarness"><code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/harness.html#mechaharness.harness.base.HarnessConfig"><code class="docutils literal notranslate"><span class="pre">HarnessConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/harness.html#mechaharness.harness.base.HarnessResult"><code class="docutils literal notranslate"><span class="pre">HarnessResult</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/tools.html#mechaharness.tools.base.Tool"><code class="docutils literal notranslate"><span class="pre">Tool</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/tools.html#mechaharness.tools.base.ToolRegistry"><code class="docutils literal notranslate"><span class="pre">ToolRegistry</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
 </ul>
 </div>
 </section>

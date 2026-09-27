@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dependency injection &mdash; MechaHarness 0.1.2 documentation</title>
+  <title>Dependency injection &mdash; MechaHarness 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -104,8 +104,11 @@
              
   <section id="dependency-injection">
 <h1>Dependency injection<a class="headerlink" href="#dependency-injection" title="Link to this heading"></a></h1>
-<p>Use pyiv to wire MechaHarness, or call the OpenAPI-shaped <code class="docutils literal notranslate"><span class="pre">run()</span></code> helper if you
-do not want to touch injectors.</p>
+<p>Host apps <strong>must</strong> wire MechaHarness through pyiv (<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> →
+<code class="docutils literal notranslate"><span class="pre">get_injector</span></code> → <code class="docutils literal notranslate"><span class="pre">inject(...)</span></code>). Manual <code class="docutils literal notranslate"><span class="pre">ToolLoopHarness(...)</span></code> construction is
+not a supported host path. Prefer the OpenAPI-shaped <code class="docutils literal notranslate"><span class="pre">run()</span></code> helper only when
+you want the facade that builds a Config under the hood.</p>
+<p>Requires <strong>pyiv ≥ 0.4.1</strong> (qualified keys: <code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code>).</p>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <ul class="simple">
@@ -118,7 +121,9 @@ do not want to touch injectors.</p>
 <section id="subclass-mechaharnessconfig">
 <h3>1. Subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code><a class="headerlink" href="#subclass-mechaharnessconfig" title="Link to this heading"></a></h3>
 <p>Override the class hooks. <code class="docutils literal notranslate"><span class="pre">configure()</span></code> (called from the Config constructor)
-registers those classes against the interfaces.</p>
+class-binds inference and harness (singleton), aliases <code class="docutils literal notranslate"><span class="pre">Completer</span></code> to the
+bound <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, and registers shared services (<code class="docutils literal notranslate"><span class="pre">EventLog</span></code>,
+<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, judge connection/provider, …).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_injector</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span>
@@ -139,8 +144,13 @@ registers those classes against the interfaces.</p>
 <span class="n">harness</span> <span class="o">=</span> <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">AbstractHarness</span><span class="p">)</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code> constructor deps are required injectables: <code class="docutils literal notranslate"><span class="pre">Completer</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ToolRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">HarnessConfig</span></code>, <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>, <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>,
+<code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code>. Opt into EventLog query tools with
+<code class="docutils literal notranslate"><span class="pre">include_subagent_tools()</span></code> → <code class="docutils literal notranslate"><span class="pre">HarnessConfig.subagent_tools</span></code>.</p>
 <p>Host apps that already have a Config should subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> and
-call <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code> before registering their own types.</p>
+call <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code> before registering their own types. Tests may use
+<code class="docutils literal notranslate"><span class="pre">pyiv.override(base).with_(overrides)</span></code> to swap doubles.</p>
 </section>
 <section id="name-maps-for-cli-http-style-selection">
 <h3>2. Name maps for CLI/HTTP-style selection<a class="headerlink" href="#name-maps-for-cli-http-style-selection" title="Link to this heading"></a></h3>
@@ -172,13 +182,19 @@ the caller.</p>
 <p>Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> (or <code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code>) to
 inject deny-by-default tool grants; use <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> to union reusable
 <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
+<p>For durable plans, override <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, then
+<code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>. Include <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and
+<code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> when using escalation) in grants. See
+<a class="reference internal" href="../architecture.html#execution-graph"><span class="std std-ref">Architecture — Execution graph</span></a>.</p>
 </section>
 </section>
 <section id="verify">
 <h2>Verify<a class="headerlink" href="#verify" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">injector.inject(AbstractHarness)</span></code> returns your harness family</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/test_di.py</span></code> passes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code> returns the bound executor</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/test_di.py</span></code> / <code class="docutils literal notranslate"><span class="pre">tests/test_graph_executor.py</span></code> pass</p></li>
 <li><p>Unknown <code class="docutils literal notranslate"><span class="pre">--backend</span></code> / <code class="docutils literal notranslate"><span class="pre">family</span></code> names raise <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> listing known maps</p></li>
 </ul>
 </section>

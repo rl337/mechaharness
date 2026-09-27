@@ -18,8 +18,8 @@ Stability: evolving.
 namespaced keys round-trip; bare names (`fs.write`) are rejected.
 
 Built-in `CoreGrant` leaves (`FsRead`, `FsWrite`, `NetHttp`, `MediaImage`,
-`MediaVideo`, `MediaAudio`) are conveniences. Hosts add types without editing
-this package:
+`MediaVideo`, `MediaAudio`, `GraphExecute`, `GraphEscalate`) are conveniences.
+Hosts add types without editing this package:
 
 ```python
 from mechaharness.core.access import Grant
@@ -67,10 +67,13 @@ class AppConfig(MechaHarnessConfig):
 ```
 
 `get_access_control()` uses `get_access_policy()` (default: `AccessPolicy` from
-`get_grants()`). Or pass
-`access=InMemoryAccessControl(policy=CompoundPolicy.of(...), event_log=log)`
-into `AbstractHarness`. Denied tools return an error `ToolResult` and are not
-priced.
+`get_grants()`) and requires an `EventLog`. Bind access only through Config —
+do not hand-wire `AbstractHarness(..., access=...)`. Denied tools return an
+error `ToolResult` and are not priced.
+
+`GraphExecutor` checks `core:graph.execute` before walking a plan and
+`core:graph.escalate` before calling `GraphEscalation`. Node runners may declare
+extra grants via `GraphNodeRunner.required_grants()`.
 
 ## Tools
 
