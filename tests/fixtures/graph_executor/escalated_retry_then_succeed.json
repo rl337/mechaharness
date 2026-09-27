@@ -1,0 +1,22 @@
+{
+  "id": "escalated_retry_then_succeed",
+  "description": "Escalation may re-queue; subsequent runner success finishes the node",
+  "grants": ["core:graph.execute", "core:graph.escalate"],
+  "failure_policy": "escalate",
+  "escalation": "retry",
+  "runners": {
+    "flaky": {"mode": "fail_n_then_succeed", "fail_count": 1, "payload": {"recovered": true}}
+  },
+  "graph": {
+    "goal": "esc-retry",
+    "nodes": [{"id": "n", "kind": "flaky", "max_attempts": 3}]
+  },
+  "run": {"run_id": "esc-retry"},
+  "expect": {
+    "status": "ok",
+    "nodes": {
+      "n": {"status": "succeeded", "attempt": 2, "payload": {"recovered": true}}
+    },
+    "runner_calls": {"flaky": 2}
+  }
+}

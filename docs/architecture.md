@@ -44,22 +44,25 @@ axes. Wiring is **pyiv dependency injection first**. OpenAPI (`RunRequest` /
 
 ## Dependency injection
 
-**Pattern:** Template-method pyiv `Config` + constructor injection  
+**Pattern:** Template-method pyiv `Config` + constructor injection (pyiv ≥ 0.4.1)  
 **Code:** `mechaharness.di`
 
-`MechaHarnessConfig.configure()` binds `InferenceStrategy`, `Completer`,
-`AbstractHarness`, `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
+Hosts **must** subclass `MechaHarnessConfig` (or use `run()`). Hand-constructing
+harness families is unsupported. `configure()` class-binds `InferenceStrategy`
+and `AbstractHarness` (singleton), aliases `Completer` to the strategy, and
+registers `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
 `AccessControl`, `CostAccountant`, `InferenceEnvironment`,
-`APIConnectionConfig` (judge), and `JudgeProvider`. Subclasses override
+`APIConnectionConfig` (judge), `JudgeProvider`, `GraphNodeRunnerRegistry`,
+`GraphFailurePolicy`, `GraphEscalation`, and `GraphExecutor`. Subclasses override
 `get_inference_class()` and `get_harness_class()` (called from the
-Config constructor). Host apps subclass `MechaHarnessConfig`, call
-`super().configure()`, and `injector.inject(AbstractHarness)` — or inject those
-types into their own services. Override `get_access_policy()` (or
+Config constructor). Override `get_access_policy()` (or
 `get_grants()`) for deny-by-default tool grants; compose reusable sets with
-`CompoundPolicy`. Override `include_subagent_tools()` to opt in parent EventLog
-query tools. Override `get_inference_environment()` for host profile probes.
+`CompoundPolicy`. Override `include_subagent_tools()` to set
+`HarnessConfig.subagent_tools` (parent EventLog query tools). Override
+`get_inference_environment()` for host profile probes.
 Override `get_judge_connection()` / `get_judge_provider()` for judge HTTP and
-wire adapters.
+wire adapters. Override `get_node_runner_registry()` /
+`get_graph_failure_policy()` / `get_graph_escalation()` for plan execution.
 
 **Config ownership:** lane- and provider-specific knobs belong on the owning
 injectable (e.g. `SimpleHttpConnectionConfig.from_env` for `MECHA_JUDGE_*`), not
@@ -71,7 +74,24 @@ as a growing pile of fields on `Settings`. Providers are never attributes of
 `Settings.harness_family`. That is the configuration path for CLI/HTTP callers
 who pick backends by name.
 
+(execution-graph)=
+## Execution graph
+
+**Pattern:** Injectable scheduler over durable DAG primitives  
+**Code:** `mechaharness.graph`, `mechaharness.graph_executor`
+
+`ExecutionGraph` / `GraphStore` model nodes, justified edges, checkpoints, and
+verification helpers. `GraphExecutor` walks ready nodes: it requires
+`core:graph.execute`, dispatches open `kind` strings through a host-populated
+`GraphNodeRunnerRegistry`, applies `GraphFailurePolicy` (retry / escalate /
+fail), optional `GraphEscalation` (needs `core:graph.escalate`), and emits
+`core:graph_start` / `core:graph_end` plus per-node events. Bind via Config
+hooks `get_node_runner_registry()`, `get_graph_failure_policy()`,
+`get_graph_escalation()`, and `get_graph_executor_class()` — not Settings.
+
 Do not add string registries or a global injector. Domain types stay pyiv-free.
+Same-lane Completer flavors for nested subagents can use pyiv `Named` /
+`Matched` keys when a host Config needs more than one Completer binding.
 
 ## Host extension
 

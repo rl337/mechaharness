@@ -12,6 +12,7 @@ from mechaharness.harness.react import ReactHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
+from tests.support.di import make_harness
 
 
 @pytest.fixture
@@ -52,10 +53,11 @@ async def test_tool_loop_executes_then_stops(tools: ToolRegistry) -> None:
             ChatMessage(role=Role.ASSISTANT, content="The sum is 5."),
         ]
     )
-    harness = ToolLoopHarness(
-        inference=inference,
+    harness = make_harness(
+        inference,
         tools=tools,
         config=HarnessConfig(model="test-model", max_turns=4),
+        harness_cls=ToolLoopHarness,
     )
     result = await harness.run("What is 2+3?")
     assert result.final_text == "The sum is 5."
@@ -66,10 +68,11 @@ async def test_tool_loop_executes_then_stops(tools: ToolRegistry) -> None:
 @pytest.mark.asyncio
 async def test_openai_tools_family(tools: ToolRegistry) -> None:
     inference = ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="hello")])
-    harness = OpenAIToolsHarness(
-        inference=inference,
+    harness = make_harness(
+        inference,
         tools=tools,
         config=HarnessConfig(model="m"),
+        harness_cls=OpenAIToolsHarness,
     )
     result = await harness.run("hi")
     assert result.final_text == "hello"
@@ -93,10 +96,11 @@ async def test_react_harness_parses_action(tools: ToolRegistry) -> None:
             ),
         ]
     )
-    harness = ReactHarness(
-        inference=inference,
+    harness = make_harness(
+        inference,
         tools=tools,
         config=HarnessConfig(model="m", max_turns=4),
+        harness_cls=ReactHarness,
     )
     result = await harness.run("2+3?")
     assert result.final_text == "5"

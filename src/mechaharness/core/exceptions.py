@@ -17,3 +17,7 @@ class HarnessError(MechaHarnessError):
 
 class ToolExecutionError(MechaHarnessError):
     """Raised when a registered tool fails during execution."""
+
+
+class GraphExecutorError(MechaHarnessError):
+    """Raised when a graph executor run fails hard (denied, stalled, exhausted)."""

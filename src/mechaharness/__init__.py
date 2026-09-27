@@ -17,6 +17,7 @@ from mechaharness.core.types import (
 )
 from mechaharness.di import MechaHarnessConfig, SettingsConfig, list_inference_backends
 from mechaharness.factory import run
+from mechaharness.graph_executor import GraphExecutor
 from mechaharness.harness.base import AbstractHarness, HarnessConfig, HarnessResult
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.tools.base import Tool, ToolRegistry
@@ -32,6 +33,7 @@ __all__ = [
     "Event",
     "EventLog",
     "EventType",
+    "GraphExecutor",
     "HarnessConfig",
     "HarnessResult",
     "InferenceEnvironment",

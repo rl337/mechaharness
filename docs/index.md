@@ -60,7 +60,8 @@ for events and grants ([Architecture](./architecture.md)).
 
 1. **Inference Strategy** — pluggable backends (`openai`, `anthropic`, `lmstudio`, `vllm`, `ollama`, …)
 2. **Harness family** — agent-loop policy (`pass_through`, `tool_loop`, `react`, `openai_tools`, `anthropic_tools`)
-3. **Frontends** — Typer CLI and FastAPI share `RunRequest` / `mechaharness.factory.run`
-4. **DI** — `MechaHarnessConfig` binds interfaces; see [Dependency injection](./guides/dependency-injection.md)
+3. **Execution graph** — durable plans via `GraphExecutor` + host node runners (see [Architecture](./architecture.md#execution-graph))
+4. **Frontends** — Typer CLI and FastAPI share `RunRequest` / `mechaharness.factory.run`
+5. **DI** — `MechaHarnessConfig` binds interfaces; see [Dependency injection](./guides/dependency-injection.md)
 
 Normalized types in `mechaharness.core.types` are the portable contract for future language bindings.

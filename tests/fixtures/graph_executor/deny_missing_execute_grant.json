@@ -1,0 +1,24 @@
+{
+  "id": "deny_missing_execute_grant",
+  "description": "Executor refuses to start without core:graph.execute",
+  "grants": [],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "noop": {"mode": "succeed"}
+  },
+  "graph": {
+    "goal": "denied",
+    "nodes": [{"id": "a", "kind": "noop", "max_attempts": 2}]
+  },
+  "run": {"run_id": "deny"},
+  "expect": {
+    "status": "denied",
+    "error": "missing_grant:core:graph.execute",
+    "nodes": {"a": {"status": "pending", "attempt": 0}},
+    "events_include": ["core:graph_start", "core:graph_end", "core:access_check"],
+    "events_exclude": ["core:graph_node_start"],
+    "graph_end_count": 1,
+    "runner_calls": {"noop": 0}
+  }
+}

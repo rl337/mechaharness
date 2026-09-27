@@ -1,0 +1,22 @@
+{
+  "id": "runner_grant_allowed",
+  "description": "Same runner succeeds when fs.write is held",
+  "grants": ["core:graph.execute", "core:fs.write"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "write": {"mode": "succeed", "grants": ["core:fs.write"], "payload": {"wrote": true}}
+  },
+  "graph": {
+    "goal": "perm-ok",
+    "nodes": [{"id": "w", "kind": "write", "max_attempts": 1}]
+  },
+  "run": {"run_id": "runner-grant-ok"},
+  "expect": {
+    "status": "ok",
+    "nodes": {
+      "w": {"status": "succeeded", "attempt": 1, "payload": {"wrote": true}}
+    },
+    "runner_calls": {"write": 1}
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "runner_non_success_normalized",
+  "description": "Non-success non-failed runner status is normalized to failed",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "fail",
+  "escalation": "reject",
+  "runners": {
+    "weird": {"mode": "non_success_status", "status": "running"}
+  },
+  "graph": {
+    "goal": "normalize",
+    "nodes": [{"id": "w", "kind": "weird", "max_attempts": 2}]
+  },
+  "run": {"run_id": "normalize"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "w": {"status": "failed", "attempt": 1, "error": "runner_non_success"}
+    },
+    "runner_calls": {"weird": 1}
+  }
+}

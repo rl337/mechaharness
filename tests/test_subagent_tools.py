@@ -13,23 +13,26 @@ from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
+from tests.support.di import make_harness
 
 
 @pytest.mark.asyncio
 async def test_subagent_tools_list_and_query() -> None:
     log = InMemoryEventLog()
-    child = PassThroughHarness(
-        inference=ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="inner")]),
+    child = make_harness(
+        ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="inner")]),
         config=HarnessConfig(model="child"),
+        harness_cls=PassThroughHarness,
         event_log=log,
         agent_id="child-1",
     )
-    parent = PassThroughHarness(
-        inference=child,
-        config=HarnessConfig(model="parent"),
+    parent = make_harness(
+        child,
+        config=HarnessConfig(model="parent", subagent_tools=True),
+        harness_cls=PassThroughHarness,
         event_log=log,
         agent_id="parent-1",
-        subagent_tools=True,
+        include_subagent_tools=True,
     )
     await parent.run("go")
     assert "list_subagents" in parent.tools
@@ -51,9 +54,10 @@ async def test_subagent_tools_list_and_query() -> None:
 
 @pytest.mark.asyncio
 async def test_subagent_tools_not_installed_by_default() -> None:
-    harness = ToolLoopHarness(
-        inference=ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="x")]),
+    harness = make_harness(
+        ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="x")]),
         tools=ToolRegistry(),
         config=HarnessConfig(model="m"),
+        harness_cls=ToolLoopHarness,
     )
     assert "list_subagents" not in harness.tools

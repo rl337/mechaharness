@@ -10,10 +10,14 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any
 
+from mechaharness.core.access import AccessControl, CostAccountant
+from mechaharness.core.completer import Completer
+from mechaharness.core.environment import InferenceEnvironment
+from mechaharness.core.events import EventLog
 from mechaharness.core.types import ChatMessage, CompletionRequest, Role, ToolCall, ToolResult
-from mechaharness.harness.base import AbstractHarness
+from mechaharness.harness.base import AbstractHarness, HarnessConfig
+from mechaharness.tools.base import ToolRegistry
 
 _ACTION_RE = re.compile(
     r"Action\s*:\s*(?P<name>[A-Za-z0-9_\-]+)\s*\n"
@@ -37,8 +41,30 @@ class ReactHarness(AbstractHarness):
         "Final Answer: the answer for the user\n"
     )
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        inference: Completer,
+        tools: ToolRegistry,
+        *,
+        config: HarnessConfig,
+        event_log: EventLog,
+        access: AccessControl,
+        cost: CostAccountant,
+        environment: InferenceEnvironment,
+        agent_id: str | None = None,
+        parent_agent_id: str | None = None,
+    ) -> None:
+        super().__init__(
+            inference,
+            tools,
+            config=config,
+            event_log=event_log,
+            access=access,
+            cost=cost,
+            environment=environment,
+            agent_id=agent_id,
+            parent_agent_id=parent_agent_id,
+        )
         if not self.config.system_prompt:
             tool_lines = "\n".join(
                 f"- {t.name}: {t.description}" for t in self.tools.definitions()

@@ -27,6 +27,7 @@ from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
+from tests.support.di import make_harness
 
 
 class WidgetGrant(Grant):
@@ -110,10 +111,11 @@ def test_compound_policy_unions_layers() -> None:
 
 def test_inmemory_access_accepts_compound_policy() -> None:
     control = InMemoryAccessControl(
+        event_log=InMemoryEventLog(),
         policy=CompoundPolicy.of(
             AccessPolicy(grants=[FsWrite]),
             AccessPolicy(grants=[WidgetGrant]),
-        )
+        ),
     )
     assert control.allows([FsWrite])
     assert control.allows([WidgetGrant])
@@ -195,12 +197,13 @@ def _write_script() -> ScriptedInference:
 @pytest.mark.asyncio
 async def test_tool_denied_without_grant() -> None:
     log = InMemoryEventLog()
-    harness = ToolLoopHarness(
-        inference=_write_script(),
+    harness = make_harness(
+        _write_script(),
         tools=write_tools(),
         config=HarnessConfig(model="mock", max_turns=4),
+        harness_cls=ToolLoopHarness,
         event_log=log,
-        access=InMemoryAccessControl(event_log=log),
+        access_policy=AccessPolicy(),
     )
     result = await harness.run("write a.txt")
     assert any("Permission denied" in (m.content or "") for m in result.messages)
@@ -215,12 +218,13 @@ async def test_tool_denied_without_grant() -> None:
 @pytest.mark.asyncio
 async def test_tool_runs_when_granted() -> None:
     log = InMemoryEventLog()
-    harness = ToolLoopHarness(
-        inference=_write_script(),
+    harness = make_harness(
+        _write_script(),
         tools=write_tools(),
         config=HarnessConfig(model="mock", max_turns=4),
+        harness_cls=ToolLoopHarness,
         event_log=log,
-        access=InMemoryAccessControl(event_log=log, grants=[FsWrite]),
+        grants=[FsWrite],
     )
     result = await harness.run("write a.txt")
     assert result.final_text == "done"
@@ -250,10 +254,11 @@ async def test_ungranted_tool_still_runs_when_it_requires_nothing() -> None:
         ]
     )
     log = InMemoryEventLog()
-    harness = ToolLoopHarness(
-        inference=inference,
+    harness = make_harness(
+        inference,
         tools=add_tools(),
         config=HarnessConfig(model="mock", max_turns=4),
+        harness_cls=ToolLoopHarness,
         event_log=log,
     )
     result = await harness.run("2+3?")
@@ -270,10 +275,11 @@ async def test_ungranted_tool_still_runs_when_it_requires_nothing() -> None:
 @pytest.mark.asyncio
 async def test_pass_through_does_not_emit_access_or_tool_cost() -> None:
     log = InMemoryEventLog()
-    harness = PassThroughHarness(
-        inference=ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="ok")]),
+    harness = make_harness(
+        ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="ok")]),
         tools=write_tools(),
         config=HarnessConfig(model="mock"),
+        harness_cls=PassThroughHarness,
         event_log=log,
     )
     result = await harness.run("hi")
@@ -299,12 +305,13 @@ async def test_react_shared_loop_emits_access_and_cost() -> None:
             ChatMessage(role=Role.ASSISTANT, content="Thought: done\nFinal Answer: wrote"),
         ]
     )
-    harness = ReactHarness(
-        inference=inference,
+    harness = make_harness(
+        inference,
         tools=write_tools(),
         config=HarnessConfig(model="m", max_turns=4),
+        harness_cls=ReactHarness,
         event_log=log,
-        access=InMemoryAccessControl(event_log=log, grants=[FsWrite]),
+        grants=[FsWrite],
     )
     result = await harness.run("write")
     assert result.final_text == "wrote"

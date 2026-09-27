@@ -1,0 +1,23 @@
+{
+  "id": "runner_raises_exception",
+  "description": "Exceptions from runners become failed outcomes fed to the policy",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "fail",
+  "escalation": "reject",
+  "runners": {
+    "explode": {"mode": "raise", "message": "kaboom"}
+  },
+  "graph": {
+    "goal": "raise",
+    "nodes": [{"id": "e", "kind": "explode", "max_attempts": 3}]
+  },
+  "run": {"run_id": "raise"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "e": {"status": "failed", "attempt": 1, "error": "kaboom"}
+    },
+    "runner_calls": {"explode": 1},
+    "events_include": ["core:graph_node_start", "core:graph_node_end"]
+  }
+}

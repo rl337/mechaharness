@@ -11,14 +11,16 @@ from mechaharness.harness.base import HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from tests.fakes import ScriptedInference
+from tests.support.di import make_harness
 
 
 @pytest.mark.asyncio
 async def test_harness_is_a_completer() -> None:
     inference = ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="pong")])
-    harness = PassThroughHarness(
-        inference=inference,
+    harness = make_harness(
+        inference,
         config=HarnessConfig(model="m"),
+        harness_cls=PassThroughHarness,
     )
     assert isinstance(harness, Completer)
     assert isinstance(inference, Completer)
@@ -37,15 +39,17 @@ async def test_harness_is_a_completer() -> None:
 @pytest.mark.asyncio
 async def test_nested_harness_shares_event_log() -> None:
     log = InMemoryEventLog()
-    child = PassThroughHarness(
-        inference=ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="inner")]),
+    child = make_harness(
+        ScriptedInference([ChatMessage(role=Role.ASSISTANT, content="inner")]),
         config=HarnessConfig(model="child"),
+        harness_cls=PassThroughHarness,
         event_log=log,
         agent_id="child-agent",
     )
-    parent = PassThroughHarness(
-        inference=child,
+    parent = make_harness(
+        child,
         config=HarnessConfig(model="parent"),
+        harness_cls=PassThroughHarness,
         event_log=log,
         agent_id="parent-agent",
     )

@@ -1,0 +1,22 @@
+{
+  "id": "escalate_handler_fails",
+  "description": "Escalation that returns FAILED keeps the graph failed",
+  "grants": ["core:graph.execute", "core:graph.escalate"],
+  "failure_policy": "default",
+  "escalation": "fail",
+  "runners": {
+    "flaky": {"mode": "fail", "error": "upstream"}
+  },
+  "graph": {
+    "goal": "esc-fail",
+    "nodes": [{"id": "n", "kind": "flaky", "max_attempts": 1}]
+  },
+  "run": {"run_id": "esc-fail"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "n": {"status": "failed", "attempt": 1, "error": "upstream"}
+    },
+    "runner_calls": {"flaky": 1}
+  }
+}

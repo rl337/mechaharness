@@ -31,6 +31,8 @@ from mechaharness.core.access import (
     AccessPolicy,
     CompoundPolicy,
     FsWrite,
+    GraphEscalate,
+    GraphExecute,
     InMemoryAccessControl,
 )
 from mechaharness.core.environment import (
@@ -64,6 +66,14 @@ from mechaharness.graph import (
     merge_branch_artifacts,
     qualify_validator,
     validator_qualified,
+)
+from mechaharness.graph_executor import (
+    CallableGraphNodeRunner,
+    GraphEscalation,
+    GraphExecutor,
+    GraphNodeRunnerRegistry,
+    GraphRunContext,
+    NodeOutcome,
 )
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
@@ -106,6 +116,7 @@ from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
+from tests.support.di import make_harness
 
 
 class _LaneEnvironment(InferenceEnvironment):
@@ -212,6 +223,7 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "convergence_ceiling": _run_convergence_ceiling,
         "context_compiler_deficit": _run_context_compiler_deficit,
         "local_plan_resume": _run_local_plan_resume,
+        "graph_executor_run": _run_graph_executor_run,
         "topology_efficiency": _run_topology_efficiency,
         "shadow_decision_backends": _run_shadow_decision_backends,
         "validator_qualification": _run_validator_qualification,
@@ -247,9 +259,10 @@ async def _run_pass_through(case: StoryCase, backend: StoryBackend) -> None:
         inference = ScriptedInference(
             [ChatMessage(role=Role.ASSISTANT, content=content)]
         )
-        harness = PassThroughHarness(
-            inference=inference,
+        harness = make_harness(
+            inference,
             config=HarnessConfig(model=model, max_turns=1),
+            harness_cls=PassThroughHarness,
             event_log=log,
         )
         result = await harness.run(prompt)
@@ -279,13 +292,14 @@ async def _run_pass_through(case: StoryCase, backend: StoryBackend) -> None:
                 pytest.fail("MECHA_BASE_URL is required for live openai_compat stories")
             client = None
         strategy = OpenAICompatStrategy(settings, timeout=180.0, client=client)
-        harness = PassThroughHarness(
-            inference=strategy,
+        harness = make_harness(
+            strategy,
             config=HarnessConfig(
                 model=settings.model,
                 max_turns=1,
                 max_tokens=settings.max_tokens,
             ),
+            harness_cls=PassThroughHarness,
             event_log=log,
         )
         try:
@@ -425,22 +439,24 @@ async def _run_grant_gate_write(case: StoryCase, backend: StoryBackend) -> None:
     )
 
     denied_log = InMemoryEventLog()
-    denied = await ToolLoopHarness(
-        inference=_script(),
+    denied = await make_harness(
+        _script(),
         tools=registry,
         config=HarnessConfig(model="story", max_turns=4),
+        harness_cls=ToolLoopHarness,
         event_log=denied_log,
-        access=InMemoryAccessControl(event_log=denied_log, policy=read_only),
+        access_policy=read_only,
     ).run(request.get("prompt", "write"))
     denied_ok = any("Permission denied" in (m.content or "") for m in denied.messages)
 
     allow_log = InMemoryEventLog()
-    allowed = await ToolLoopHarness(
-        inference=_script(),
+    allowed = await make_harness(
+        _script(),
         tools=registry,
         config=HarnessConfig(model="story", max_turns=4),
+        harness_cls=ToolLoopHarness,
         event_log=allow_log,
-        access=InMemoryAccessControl(event_log=allow_log, policy=with_write),
+        access_policy=with_write,
     ).run(request.get("prompt", "write"))
     allowed_ok = allowed.final_text == "done"
 
@@ -666,6 +682,127 @@ async def _run_local_plan_resume(case: StoryCase, backend: StoryBackend) -> None
     _assert_expect(actual, expect)
 
 
+async def _run_graph_executor_run(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    attempts: list[int] = []
+
+    async def produce(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(
+            status=NodeStatus.SUCCEEDED,
+            payload={"value": request.get("produce_value", 1)},
+            evidence={"node": node.id},
+        )
+
+    async def flaky(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        attempts.append(node.attempt)
+        if len(attempts) < int(request.get("fail_until_attempt", 2)):
+            return NodeOutcome(status=NodeStatus.FAILED, error="transient")
+        return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"recovered": True})
+
+    async def consume(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del node
+        parent = context.graph.nodes["produce"]
+        return NodeOutcome(
+            status=NodeStatus.SUCCEEDED,
+            payload={"sum": int(parent.payload.get("value", 0)) + 1},
+        )
+
+    class _Heal(GraphEscalation):
+        async def handle(self, node: GraphNode, *, context: GraphRunContext) -> NodeOutcome:
+            del context
+            return NodeOutcome(
+                status=NodeStatus.SUCCEEDED,
+                payload={**node.payload, "escalated": True},
+            )
+
+    registry = GraphNodeRunnerRegistry(
+        [
+            CallableGraphNodeRunner(["produce"], produce),
+            CallableGraphNodeRunner(["flaky"], flaky),
+            CallableGraphNodeRunner(["consume"], consume),
+        ]
+    )
+
+    class StoryGraphConfig(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            from mechaharness.inference.mock import MockInferenceStrategy
+
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_harness_config(self) -> HarnessConfig:
+            return HarnessConfig(model="story", max_turns=1)
+
+        def get_tools(self) -> ToolRegistry:
+            return ToolRegistry()
+
+        def get_grants(self) -> list[object]:
+            return list(request.get("grants", [GraphExecute, GraphEscalate]))
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return registry
+
+        def get_graph_escalation(self) -> GraphEscalation:
+            return _Heal()
+
+    executor = get_injector(StoryGraphConfig()).inject(GraphExecutor)
+    graph = ExecutionGraph(goal=request.get("goal", "local pipe"))
+    graph.add_node(GraphNode(id="produce", kind="produce"))
+    graph.add_node(
+        GraphNode(
+            id="flaky",
+            kind="flaky",
+            depends_on=["produce"],
+            max_attempts=int(request.get("max_attempts", 2)),
+        )
+    )
+    graph.add_node(GraphNode(id="consume", kind="consume", depends_on=["flaky"]))
+    graph.add_dependency(
+        DependencyEdge(
+            from_node="produce",
+            to_node="flaky",
+            types=["data"],
+            reason="flaky needs produce",
+        )
+    )
+    graph.add_dependency(
+        DependencyEdge(
+            from_node="flaky",
+            to_node="consume",
+            types=["control"],
+            reason="consume after repair",
+        )
+    )
+
+    denied = None
+    if request.get("check_deny", True):
+        class DenyConfig(StoryGraphConfig):
+            def get_grants(self) -> list[object]:
+                return []
+
+        denied_exec = get_injector(DenyConfig()).inject(GraphExecutor)
+        denied = await denied_exec.run(graph.model_copy(deep=True), run_id="story-deny")
+
+    result = await executor.run(graph, run_id="story-graph-exec")
+    types = [e.type for e in result.events]
+    actual = {
+        "status": result.status,
+        "consume_sum": result.graph.nodes["consume"].payload.get("sum"),
+        "emitted_graph_start": "core:graph_start" in types,
+        "emitted_graph_end": "core:graph_end" in types,
+        "denied_without_execute_grant": denied is not None and denied.status == "denied",
+        "flaky_attempts": len(attempts),
+    }
+    _assert_expect(actual, expect)
+
+
 async def _run_topology_efficiency(case: StoryCase, backend: StoryBackend) -> None:
     del backend
     request = case.load_json("request.json")
@@ -859,22 +996,24 @@ async def _run_tool_gating(case: StoryCase, backend: StoryBackend) -> None:
     allow_policy = AccessPolicy(grants=request.get("allow_grants", [FsWrite]))
 
     denied_log = InMemoryEventLog()
-    denied = await ToolLoopHarness(
-        inference=_script(),
+    denied = await make_harness(
+        _script(),
         tools=registry,
         config=HarnessConfig(model="story", max_turns=4),
+        harness_cls=ToolLoopHarness,
         event_log=denied_log,
-        access=InMemoryAccessControl(event_log=denied_log, policy=deny_policy),
+        access_policy=deny_policy,
     ).run(request.get("prompt", "write"))
     denied_ok = any("Permission denied" in (m.content or "") for m in denied.messages)
 
     allow_log = InMemoryEventLog()
-    allowed = await ToolLoopHarness(
-        inference=_script(),
+    allowed = await make_harness(
+        _script(),
         tools=registry,
         config=HarnessConfig(model="story", max_turns=4),
+        harness_cls=ToolLoopHarness,
         event_log=allow_log,
-        access=InMemoryAccessControl(event_log=allow_log, policy=allow_policy),
+        access_policy=allow_policy,
     ).run(request.get("prompt", "write"))
     allowed_ok = allowed.final_text == "done"
 

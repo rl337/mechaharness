@@ -25,27 +25,42 @@ Spark/$0 pricing can still use Ability units while tracking tokens).
 
 ## Harness
 
-`AbstractHarness` injects `CostAccountant` (default `InMemoryCostAccountant` on
-the same `EventLog`). Each inference turn is priced after `complete()` and
+`AbstractHarness` injects `CostAccountant` (required; Config binds
+`InMemoryCostAccountant` on the shared `EventLog`). Each inference turn is priced after `complete()` and
 passes through `CompletionResponse.usage`. Each successful tool run is priced
 after invoke. Denied or unknown tools are not priced. `HarnessResult.cost` is
 the ledger for that run. Thinking-model `reasoning_content` is kept on
 `ChatMessage` and recorded on `core:inference`.
 
 ```python
-from mechaharness.core.access import InMemoryCostAccountant
+from pyiv import get_injector
+
 from mechaharness.core.events import InMemoryEventLog
-from mechaharness.harness.base import HarnessConfig
+from mechaharness.di import MechaHarnessConfig
+from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.mock import MockInferenceStrategy
 
-log = InMemoryEventLog()
-harness = PassThroughHarness(
-    inference=MockInferenceStrategy(),
-    config=HarnessConfig(model="mock"),
-    event_log=log,
-    cost=InMemoryCostAccountant(event_log=log),
-)
+
+class CostDemoConfig(MechaHarnessConfig):
+    def __init__(self) -> None:
+        self._log = InMemoryEventLog()
+        super().__init__()
+
+    def get_inference_class(self):
+        return MockInferenceStrategy
+
+    def get_harness_class(self):
+        return PassThroughHarness
+
+    def get_event_log(self):
+        return self._log
+
+    def get_harness_config(self):
+        return HarnessConfig(model="mock")
+
+
+harness = get_injector(CostDemoConfig).inject(AbstractHarness)
 ```
 
 Tool grants are documented in [Access control](./access.md).

@@ -1,0 +1,22 @@
+{
+  "id": "failure_policy_fail_terminal",
+  "description": "FAIL policy stops after one attempt even when max_attempts is high",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "fail",
+  "escalation": "reject",
+  "runners": {
+    "boom": {"mode": "fail", "error": "boom"}
+  },
+  "graph": {
+    "goal": "fail-policy",
+    "nodes": [{"id": "x", "kind": "boom", "max_attempts": 5}]
+  },
+  "run": {"run_id": "fail-policy"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "x": {"status": "failed", "attempt": 1, "error": "boom"}
+    },
+    "runner_calls": {"boom": 1}
+  }
+}

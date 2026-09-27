@@ -1,0 +1,30 @@
+{
+  "id": "downstream_blocked_on_failed_upstream",
+  "description": "Failed upstream leaves dependents blocked; graph status failed",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "fail",
+  "escalation": "reject",
+  "runners": {
+    "boom": {"mode": "fail", "error": "upstream_dead"},
+    "leaf": {"mode": "succeed"}
+  },
+  "graph": {
+    "goal": "blocked-down",
+    "nodes": [
+      {"id": "up", "kind": "boom", "max_attempts": 2},
+      {"id": "down", "kind": "leaf", "depends_on": ["up"]}
+    ],
+    "edges": [
+      {"from": "up", "to": "down", "types": ["data"], "reason": "needs up"}
+    ]
+  },
+  "run": {"run_id": "down-block"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "up": {"status": "failed", "attempt": 1, "error": "upstream_dead"},
+      "down": {"status": "blocked", "attempt": 0}
+    },
+    "runner_calls": {"boom": 1, "leaf": 0}
+  }
+}

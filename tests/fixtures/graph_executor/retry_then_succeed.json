@@ -1,0 +1,22 @@
+{
+  "id": "retry_then_succeed",
+  "description": "Default policy retries while attempts remain; succeeds before escalate",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "flaky": {"mode": "fail_n_then_succeed", "fail_count": 2, "payload": {"recovered": true}}
+  },
+  "graph": {
+    "goal": "retry",
+    "nodes": [{"id": "n", "kind": "flaky", "max_attempts": 3}]
+  },
+  "run": {"run_id": "retry-ok"},
+  "expect": {
+    "status": "ok",
+    "nodes": {
+      "n": {"status": "succeeded", "attempt": 3, "payload": {"recovered": true}}
+    },
+    "runner_calls": {"flaky": 3}
+  }
+}

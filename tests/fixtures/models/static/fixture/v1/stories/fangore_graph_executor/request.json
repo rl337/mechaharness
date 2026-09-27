@@ -1,0 +1,8 @@
+{
+  "goal": "local pipe",
+  "produce_value": 1,
+  "max_attempts": 2,
+  "fail_until_attempt": 99,
+  "check_deny": true,
+  "grants": ["core:graph.execute", "core:graph.escalate"]
+}

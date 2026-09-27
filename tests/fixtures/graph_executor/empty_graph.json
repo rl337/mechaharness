@@ -1,0 +1,17 @@
+{
+  "id": "empty_graph",
+  "description": "No nodes yields a non-ok terminal result without runner calls",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {},
+  "graph": {"goal": "empty", "nodes": []},
+  "run": {"run_id": "empty"},
+  "expect": {
+    "status": "failed",
+    "error": "graph_incomplete",
+    "events_include": ["core:graph_start", "core:graph_end"],
+    "events_exclude": ["core:graph_node_start"],
+    "runner_calls": {}
+  }
+}

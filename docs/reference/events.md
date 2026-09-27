@@ -49,11 +49,17 @@ long as they are namespaced. Bare names (`run_start`) are rejected.
 | `MaxTurns` | `core:max_turns` |
 | `Cost` | `core:cost` |
 | `AccessCheck` | `core:access_check` |
+| `GraphStart` | `core:graph_start` |
+| `GraphEnd` | `core:graph_end` |
+| `GraphNodeStart` | `core:graph_node_start` |
+| `GraphNodeEnd` | `core:graph_node_end` |
 
 `core:access_check` payload: `tool`, `required`, `granted`, `allowed`.
 `core:cost` may include `prompt_tokens` / `completion_tokens` / `total_tokens`.
-`core:inference` may include `reasoning_content` and `usage`. Hosts add types by
-subclassing without editing this module:
+`core:inference` may include `reasoning_content` and `usage`.
+`GraphExecutor` emits `core:graph_start` / `core:graph_end` and per-node
+start/end events; `GraphStore` checkpoints use `core:graph_node`. Hosts add
+types by subclassing without editing this module:
 
 ```python
 from mechaharness.core.events import EventType

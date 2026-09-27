@@ -1,0 +1,23 @@
+{
+  "id": "retry_exhausted_escalate_heal",
+  "description": "After max_attempts failures, default policy escalates; heal recovers",
+  "grants": ["core:graph.execute", "core:graph.escalate"],
+  "failure_policy": "default",
+  "escalation": "heal",
+  "runners": {
+    "flaky": {"mode": "fail", "error": "always"}
+  },
+  "graph": {
+    "goal": "escalate-heal",
+    "nodes": [{"id": "n", "kind": "flaky", "max_attempts": 2}]
+  },
+  "run": {"run_id": "esc-heal"},
+  "expect": {
+    "status": "ok",
+    "nodes": {
+      "n": {"status": "succeeded", "attempt": 2, "payload": {"healed": true}}
+    },
+    "runner_calls": {"flaky": 2},
+    "events_include": ["core:graph_node_end"]
+  }
+}

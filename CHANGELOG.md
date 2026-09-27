@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **pyiv ≥ 0.4.1** — floor bumped for qualified keys (`Named` / `Matched` /
+  `Key`). Constructor injection for harness/strategy; hosts must subclass
+  `MechaHarnessConfig` (or use `run()`). `AbstractHarness` requires injectable
+  deps; `HarnessConfig.subagent_tools` replaces the harness kwarg.
+  `InMemoryAccessControl` / `InMemoryCostAccountant` require `event_log` (and
+  policy for access). Same-lane Completer flavors can use Named bindings when
+  hosts need multiple completers per Config.
+
 ## [0.1.2] — 2026-09-25
 
 PyPI cut of the #12 requirements-addendum library (GitHub also tagged `v0.1.1`
