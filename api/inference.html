@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.inference.base &mdash; MechaHarness 0.1.0 documentation</title>
+  <title>mechaharness.inference.base &mdash; MechaHarness 0.1.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/documentation_options.js?v=360bc84d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -102,8 +102,53 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="mechaharness-inference-base">
-<h1>mechaharness.inference.base<a class="headerlink" href="#mechaharness-inference-base" title="Link to this heading"></a></h1>
+  <section id="module-mechaharness.inference.base">
+<span id="mechaharness-inference-base"></span><h1>mechaharness.inference.base<a class="headerlink" href="#module-mechaharness.inference.base" title="Link to this heading"></a></h1>
+<p>Inference Strategy: pluggable backends for raw model calls.</p>
+<p>Client code depends on <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, not on a specific provider.
+Concrete strategies adapt OpenAI, Anthropic, LM Studio, vLLM, etc.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.inference.base.InferenceStrategy">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.inference.base.</span></span><span class="sig-name descname"><span class="pre">InferenceStrategy</span></span><a class="reference internal" href="../_modules/mechaharness/inference/base.html#InferenceStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.inference.base.InferenceStrategy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="completer.html#mechaharness.core.completer.Completer" title="mechaharness.core.completer.Completer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Completer</span></code></a></p>
+<p>Strategy interface for talking to an inference engine.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.inference.base.InferenceStrategy.aclose">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">aclose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/inference/base.html#InferenceStrategy.aclose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.inference.base.InferenceStrategy.aclose" title="Link to this definition"></a></dt>
+<dd><p>Release network resources. Override when the strategy holds a client.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.inference.base.InferenceStrategy.capability_profile">
+<span class="sig-name descname"><span class="pre">capability_profile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="access.html#mechaharness.core.access.CapabilityProfile" title="mechaharness.core.access.CapabilityProfile"><span class="pre">CapabilityProfile</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/inference/base.html#InferenceStrategy.capability_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.inference.base.InferenceStrategy.capability_profile" title="Link to this definition"></a></dt>
+<dd><p>Declared skills used for cost pricing of this backend.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.inference.base.InferenceStrategy.complete">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">complete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#mechaharness.core.types.CompletionRequest" title="mechaharness.core.types.CompletionRequest"><span class="pre">CompletionRequest</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#mechaharness.core.types.CompletionResponse" title="mechaharness.core.types.CompletionResponse"><span class="pre">CompletionResponse</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/inference/base.html#InferenceStrategy.complete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.inference.base.InferenceStrategy.complete" title="Link to this definition"></a></dt>
+<dd><p>Run a single non-streaming completion.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.inference.base.InferenceStrategy.describe">
+<span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/inference/base.html#InferenceStrategy.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.inference.base.InferenceStrategy.describe" title="Link to this definition"></a></dt>
+<dd><p>Machine-readable metadata for CLI/API introspection.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.inference.base.InferenceStrategy.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'base'</span></span><a class="headerlink" href="#mechaharness.inference.base.InferenceStrategy.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.inference.base.InferenceStrategy.stream">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#mechaharness.core.types.CompletionRequest" title="mechaharness.core.types.CompletionRequest"><span class="pre">CompletionRequest</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.AsyncIterator" title="(in Python v3.14)"><span class="pre">AsyncIterator</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/inference/base.html#InferenceStrategy.stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.inference.base.InferenceStrategy.stream" title="Link to this definition"></a></dt>
+<dd><p>Optional token stream. Default falls back to a single complete().</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
