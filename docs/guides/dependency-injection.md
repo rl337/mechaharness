@@ -5,7 +5,7 @@ Host apps **must** wire MechaHarness through pyiv (`MechaHarnessConfig` →
 not a supported host path. Prefer the OpenAPI-shaped `run()` helper only when
 you want the facade that builds a Config under the hood.
 
-Requires **pyiv ≥ 0.4**.
+Requires **pyiv ≥ 0.4.1** (qualified keys: `Named` / `Matched` / `Key`).
 
 ## Prerequisites
 

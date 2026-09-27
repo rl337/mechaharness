@@ -81,7 +81,7 @@ def apply_backend_defaults(settings: Settings) -> Settings:
 def _expose_ctor_type_hints(cls: type) -> None:
     """Resolve PEP 563 string annotations so pyiv can constructor-inject.
 
-    pyiv 0.4 reads ``inspect.signature`` annotations as-is; with
+    pyiv ≥ 0.4 reads ``inspect.signature`` annotations as-is; with
     ``from __future__ import annotations`` those are strings. On Python 3.9,
     ``X | Y`` also needs ``eval_type_backport``. Rewriting
     ``__init__.__annotations__`` exposes real types for the injector.

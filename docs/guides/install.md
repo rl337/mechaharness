@@ -23,7 +23,7 @@ source .venv/bin/activate
 pip install -e ".[dev,docs]"
 ```
 
-Install pulls **pyiv** from PyPI (`pyiv>=0.4.0`). Docs: https://rl337.org/mechaharness/
+Install pulls **pyiv** from PyPI (`pyiv>=0.4.1`). Docs: https://rl337.org/mechaharness/
 
 ### Mock (no network)
 

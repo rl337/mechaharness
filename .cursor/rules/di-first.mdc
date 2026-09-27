@@ -5,7 +5,7 @@ alwaysApply: true
 
 # DI-first (pyiv)
 
-Default path is **pyiv ≥ 0.4**. New services, backends, harness families, and
+Default path is **pyiv ≥ 0.4.1**. New services, backends, harness families, and
 CLI/API wiring go through `MechaHarnessConfig` and constructor injection. Do
 not add string registries, service locators, or a global injector. Hosts must
 subclass Config (or use `run()`); do not hand-construct harness families.
@@ -17,7 +17,9 @@ Extend by **subclassing Config**. Override `get_inference_class()` /
 Constructors take types pyiv can inject (`Completer`, `InferenceStrategy`,
 `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`, `AccessControl`,
 `CostAccountant`, `InferenceEnvironment`, `APIConnectionConfig`,
-`JudgeProvider`), not `str`/`dict` bags the injector cannot resolve.
+`JudgeProvider`), not `str`/`dict` bags the injector cannot resolve. Prefer
+`Key` / `Named` / `Matched` when a Config needs multiple bindings of the same
+type (e.g. same-lane Completer flavors).
 
 OpenAPI is the **non-DI facade**, not a second architecture. `RunRequest` / `run()`
 may hide the injector; they must still construct a Config and inject. Do not grow

@@ -44,7 +44,7 @@ axes. Wiring is **pyiv dependency injection first**. OpenAPI (`RunRequest` /
 
 ## Dependency injection
 
-**Pattern:** Template-method pyiv `Config` + constructor injection (pyiv ≥ 0.4)  
+**Pattern:** Template-method pyiv `Config` + constructor injection (pyiv ≥ 0.4.1)  
 **Code:** `mechaharness.di`
 
 Hosts **must** subclass `MechaHarnessConfig` (or use `run()`). Hand-constructing
@@ -90,8 +90,8 @@ hooks `get_node_runner_registry()`, `get_graph_failure_policy()`,
 `get_graph_escalation()`, and `get_graph_executor_class()` — not Settings.
 
 Do not add string registries or a global injector. Domain types stay pyiv-free.
-Same-lane Completer flavors for nested subagents wait on pyiv parameterized
-constructors; today one Completer / judge binding per Config is enough.
+Same-lane Completer flavors for nested subagents can use pyiv `Named` /
+`Matched` keys when a host Config needs more than one Completer binding.
 
 ## Host extension
 
