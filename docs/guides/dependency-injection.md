@@ -1,7 +1,11 @@
 # Dependency injection
 
-Use pyiv to wire MechaHarness, or call the OpenAPI-shaped `run()` helper if you
-do not want to touch injectors.
+Host apps **must** wire MechaHarness through pyiv (`MechaHarnessConfig` →
+`get_injector` → `inject(...)`). Manual `ToolLoopHarness(...)` construction is
+not a supported host path. Prefer the OpenAPI-shaped `run()` helper only when
+you want the facade that builds a Config under the hood.
+
+Requires **pyiv ≥ 0.4.1** (qualified keys: `Named` / `Matched` / `Key`).
 
 ## Prerequisites
 
@@ -13,7 +17,9 @@ do not want to touch injectors.
 ### 1. Subclass `MechaHarnessConfig`
 
 Override the class hooks. `configure()` (called from the Config constructor)
-registers those classes against the interfaces.
+class-binds inference and harness (singleton), aliases `Completer` to the
+bound `InferenceStrategy`, and registers shared services (`EventLog`,
+`AccessControl`, `CostAccountant`, judge connection/provider, …).
 
 ```python
 from pyiv import get_injector
@@ -36,8 +42,14 @@ injector = get_injector(MyConfig)
 harness = injector.inject(AbstractHarness)
 ```
 
+`AbstractHarness` constructor deps are required injectables: `Completer`,
+`ToolRegistry`, `HarnessConfig`, `EventLog`, `AccessControl`, `CostAccountant`,
+`InferenceEnvironment`. Opt into EventLog query tools with
+`include_subagent_tools()` → `HarnessConfig.subagent_tools`.
+
 Host apps that already have a Config should subclass `MechaHarnessConfig` and
-call `super().configure()` before registering their own types.
+call `super().configure()` before registering their own types. Tests may use
+`pyiv.override(base).with_(overrides)` to swap doubles.
 
 ### 2. Name maps for CLI/HTTP-style selection
 
@@ -73,10 +85,17 @@ Override `get_access_policy()` / `get_grants()` (or `get_access_control()`) to
 inject deny-by-default tool grants; use `CompoundPolicy` to union reusable
 `AccessPolicy` layers. See [Access control](../reference/access.md).
 
+For durable plans, override `get_node_runner_registry()`,
+`get_graph_failure_policy()`, and `get_graph_escalation()`, then
+`injector.inject(GraphExecutor)`. Include `core:graph.execute` (and
+`core:graph.escalate` when using escalation) in grants. See
+[Architecture — Execution graph](../architecture.md#execution-graph).
+
 ## Verify
 
 - `injector.inject(AbstractHarness)` returns your harness family
-- `pytest tests/test_di.py` passes
+- `injector.inject(GraphExecutor)` returns the bound executor
+- `pytest tests/test_di.py` / `tests/test_graph_executor.py` pass
 - Unknown `--backend` / `family` names raise `KeyError` listing known maps
 
 ## Next

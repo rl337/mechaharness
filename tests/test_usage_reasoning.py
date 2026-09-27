@@ -9,6 +9,7 @@ from mechaharness.core.types import ChatMessage, Role, Usage
 from mechaharness.harness.base import HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from tests.fakes import ScriptedInference
+from tests.support.di import make_harness
 
 
 @pytest.mark.asyncio
@@ -18,9 +19,10 @@ async def test_pass_through_records_usage_on_cost() -> None:
         [ChatMessage(role=Role.ASSISTANT, content="ok", reasoning_content="think")],
         usages=[Usage(prompt_tokens=10, completion_tokens=4, total_tokens=14)],
     )
-    harness = PassThroughHarness(
-        inference=inference,
+    harness = make_harness(
+        inference,
         config=HarnessConfig(model="m"),
+        harness_cls=PassThroughHarness,
         event_log=log,
     )
     result = await harness.run("hi")

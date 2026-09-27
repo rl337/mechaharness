@@ -1,0 +1,24 @@
+{
+  "id": "runner_grant_denied",
+  "description": "Node runner grants are checked; missing fs.write denies the node",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "write": {"mode": "succeed", "grants": ["core:fs.write"]}
+  },
+  "graph": {
+    "goal": "perm",
+    "nodes": [{"id": "w", "kind": "write", "max_attempts": 1}]
+  },
+  "run": {"run_id": "runner-grant"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "w": {"status": "failed", "attempt": 1, "error": "permission_denied"}
+    },
+    "events_include": ["core:access_check", "core:graph_node_end"],
+    "events_exclude": ["core:graph_node_start"],
+    "runner_calls": {"write": 0}
+  }
+}

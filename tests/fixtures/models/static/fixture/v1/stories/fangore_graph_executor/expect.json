@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "consume_sum": 2,
+  "emitted_graph_start": true,
+  "emitted_graph_end": true,
+  "denied_without_execute_grant": true,
+  "flaky_attempts": 2
+}

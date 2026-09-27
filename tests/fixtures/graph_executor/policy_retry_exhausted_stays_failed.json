@@ -1,0 +1,22 @@
+{
+  "id": "policy_retry_exhausted_stays_failed",
+  "description": "Fixed RETRY policy does not escalate; exhausted attempts end failed",
+  "grants": ["core:graph.execute", "core:graph.escalate"],
+  "failure_policy": "retry",
+  "escalation": "heal",
+  "runners": {
+    "flaky": {"mode": "fail", "error": "still"}
+  },
+  "graph": {
+    "goal": "retry-exhausted",
+    "nodes": [{"id": "n", "kind": "flaky", "max_attempts": 2}]
+  },
+  "run": {"run_id": "retry-exhausted"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "n": {"status": "failed", "attempt": 2, "error": "still"}
+    },
+    "runner_calls": {"flaky": 2}
+  }
+}

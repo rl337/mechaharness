@@ -23,12 +23,10 @@ from mechaharness.core.access import (
     CapabilityProfile,
     CostAccountant,
     CostReport,
-    InMemoryAccessControl,
-    InMemoryCostAccountant,
     grant_key,
 )
 from mechaharness.core.completer import Completer
-from mechaharness.core.environment import InferenceEnvironment, NoOpInferenceEnvironment
+from mechaharness.core.environment import InferenceEnvironment
 from mechaharness.core.events import (
     AgentEnd,
     AgentStart,
@@ -40,7 +38,6 @@ from mechaharness.core.events import (
     RunEnd,
     RunStart,
     TurnStart,
-    default_event_log,
     event_type_key,
 )
 from mechaharness.core.exceptions import HarnessError
@@ -64,6 +61,7 @@ class HarnessConfig(BaseModel):
     max_turns: int = 8
     temperature: float | None = None
     max_tokens: int | None = None
+    subagent_tools: bool = False
     extra: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -85,29 +83,26 @@ class AbstractHarness(Completer):
     def __init__(
         self,
         inference: Completer,
-        tools: ToolRegistry | None = None,
+        tools: ToolRegistry,
         *,
         config: HarnessConfig,
-        event_log: EventLog | None = None,
-        access: AccessControl | AccessPolicy | None = None,
-        cost: CostAccountant | None = None,
-        environment: InferenceEnvironment | None = None,
+        event_log: EventLog,
+        access: AccessControl,
+        cost: CostAccountant,
+        environment: InferenceEnvironment,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
-        subagent_tools: bool = False,
     ) -> None:
         self.inference = inference
-        self.tools = tools or ToolRegistry()
+        self.tools = tools
         self.config = config
-        self.event_log = event_log or default_event_log()
+        self.event_log = event_log
         self.agent_id = agent_id or str(uuid4())
         self.parent_agent_id = parent_agent_id
-        if isinstance(access, AccessPolicy):
-            access = InMemoryAccessControl(event_log=self.event_log, policy=access)
-        self.access = access or InMemoryAccessControl(event_log=self.event_log)
-        self.cost = cost or InMemoryCostAccountant(event_log=self.event_log)
-        self.environment = environment or NoOpInferenceEnvironment()
-        if subagent_tools:
+        self.access = access
+        self.cost = cost
+        self.environment = environment
+        if config.subagent_tools:
             install_subagent_tools(self.tools, self.event_log, self.agent_id)
 
     def capability_profile(self) -> CapabilityProfile:

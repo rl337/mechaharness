@@ -145,6 +145,18 @@ class MediaAudio(CoreGrant):
     name = "media.audio"
 
 
+class GraphExecute(CoreGrant):
+    """Run an :class:`~mechaharness.graph_executor.GraphExecutor` over a plan."""
+
+    name = "graph.execute"
+
+
+class GraphEscalate(CoreGrant):
+    """Invoke escalation after a node exhausts retries."""
+
+    name = "graph.escalate"
+
+
 def grant_key(value: object) -> str:
     """Normalize a class or ``namespace:name`` string to the wire key."""
     if isinstance(value, str):
@@ -344,15 +356,10 @@ class InMemoryAccessControl(AccessControl):
 
     def __init__(
         self,
-        event_log: core_events.EventLog | None = None,
-        grants: Sequence[object] | None = None,
-        policy: GrantPolicyLike | None = None,
+        event_log: core_events.EventLog,
+        policy: GrantPolicyLike,
     ) -> None:
-        if policy is not None:
-            keys = list(policy.grants)
-        else:
-            keys = [grant_key(item) for item in (grants or [])]
-        self.policy = AccessPolicy(grants=keys)
+        self.policy = AccessPolicy(grants=list(policy.grants))
         self._event_log = event_log
         self.checks: list[dict[str, Any]] = []
 
@@ -392,7 +399,7 @@ class InMemoryAccessControl(AccessControl):
 class InMemoryCostAccountant(CostAccountant):
     """Prices from the capability profile and tool ability; emits ``core:cost``."""
 
-    def __init__(self, event_log: core_events.EventLog | None = None) -> None:
+    def __init__(self, event_log: core_events.EventLog) -> None:
         self._event_log = event_log
         self._report = CostReport()
 

@@ -1,0 +1,22 @@
+{
+  "id": "escalate_reject_default",
+  "description": "RejectGraphEscalation leaves the node failed after retries",
+  "grants": ["core:graph.execute", "core:graph.escalate"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "flaky": {"mode": "fail", "error": "nope"}
+  },
+  "graph": {
+    "goal": "esc-reject",
+    "nodes": [{"id": "n", "kind": "flaky", "max_attempts": 2}]
+  },
+  "run": {"run_id": "esc-reject"},
+  "expect": {
+    "status": "failed",
+    "nodes": {
+      "n": {"status": "failed", "attempt": 2, "error": "nope"}
+    },
+    "runner_calls": {"flaky": 2}
+  }
+}

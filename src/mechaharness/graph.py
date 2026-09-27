@@ -114,7 +114,12 @@ class ExecutionGraph(BaseModel):
     def ready_nodes(self) -> list[GraphNode]:
         ready: list[GraphNode] = []
         for node in self.nodes.values():
-            if node.status not in {NodeStatus.PENDING, NodeStatus.READY, NodeStatus.FAILED}:
+            if node.status not in {
+                NodeStatus.PENDING,
+                NodeStatus.READY,
+                NodeStatus.FAILED,
+                NodeStatus.BLOCKED,
+            }:
                 continue
             if node.attempt >= node.max_attempts and node.status == NodeStatus.FAILED:
                 continue
@@ -124,7 +129,7 @@ class ExecutionGraph(BaseModel):
                 if d in self.nodes
             )
             if deps_ok:
-                if node.status == NodeStatus.PENDING:
+                if node.status in {NodeStatus.PENDING, NodeStatus.BLOCKED}:
                     node.status = NodeStatus.READY
                 ready.append(node)
             elif node.status != NodeStatus.FAILED:

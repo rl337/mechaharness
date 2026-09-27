@@ -14,6 +14,8 @@ from mechaharness.core.access import (
     FsRead,
     FsWrite,
     Grant,
+    GraphEscalate,
+    GraphExecute,
     InMemoryAccessControl,
     InMemoryCostAccountant,
     MediaAudio,
@@ -44,6 +46,7 @@ from mechaharness.core.events import (
     LoggingEventLog,
 )
 from mechaharness.core.exceptions import (
+    GraphExecutorError,
     HarnessError,
     InferenceError,
     MechaHarnessError,
@@ -88,6 +91,9 @@ __all__ = [
     "FsWrite",
     "Generation",
     "Grant",
+    "GraphEscalate",
+    "GraphExecute",
+    "GraphExecutorError",
     "HarnessError",
     "InMemoryAccessControl",
     "InMemoryCostAccountant",

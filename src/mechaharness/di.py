@@ -4,12 +4,18 @@
 hooks. Hosts subclass and override ``get_inference_class`` /
 ``get_harness_class``. ``SettingsConfig`` resolves those classes from string
 maps (the OpenAPI/CLI configuration path).
+
+Hosts must wire via Config + ``get_injector`` (or the OpenAPI ``run()``
+facade). Manual harness construction is not a supported host path.
 """
 
 from __future__ import annotations
 
-from typing import Any
+import inspect
+import sys
+from typing import Any, ForwardRef, get_type_hints
 
+from eval_type_backport import eval_type_backport
 from pyiv import Config, get_injector
 from pyiv.injector import Injector
 
@@ -26,6 +32,14 @@ from mechaharness.core.access import (
 from mechaharness.core.completer import Completer
 from mechaharness.core.environment import InferenceEnvironment, NoOpInferenceEnvironment
 from mechaharness.core.events import EventLog, default_event_log
+from mechaharness.graph_executor import (
+    DefaultGraphFailurePolicy,
+    GraphEscalation,
+    GraphExecutor,
+    GraphFailurePolicy,
+    GraphNodeRunnerRegistry,
+    RejectGraphEscalation,
+)
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
 from mechaharness.harness.pass_through import PassThroughHarness
@@ -64,21 +78,74 @@ def apply_backend_defaults(settings: Settings) -> Settings:
     return settings.model_copy(update=updates) if updates else settings
 
 
+def _expose_ctor_type_hints(cls: type) -> None:
+    """Resolve PEP 563 string annotations so pyiv can constructor-inject.
+
+    pyiv ≥ 0.4 reads ``inspect.signature`` annotations as-is; with
+    ``from __future__ import annotations`` those are strings. On Python 3.9,
+    ``X | Y`` also needs ``eval_type_backport``. Rewriting
+    ``__init__.__annotations__`` exposes real types for the injector.
+    """
+    init = getattr(cls, "__init__", None)
+    if init is None or init is object.__init__:
+        return
+    init_module = getattr(init, "__module__", cls.__module__)
+    globalns = getattr(sys.modules.get(init_module), "__dict__", {})
+    try:
+        hints = get_type_hints(init, globalns=globalns)
+    except (TypeError, NameError):
+        hints = {}
+        for name, param in inspect.signature(init).parameters.items():
+            if name == "self" or param.annotation is inspect.Parameter.empty:
+                continue
+            ann: Any = param.annotation
+            if isinstance(ann, str):
+                ann = ForwardRef(ann)
+            try:
+                hints[name] = eval_type_backport(ann, globalns, globalns)
+            except Exception:  # noqa: BLE001
+                continue
+    if hints:
+        init.__annotations__.update(hints)
+
+
 class MechaHarnessConfig(Config):
     """Template-method pyiv Config. Override the ``get_*_class`` hooks."""
 
     def configure(self) -> None:
+        event_log = self.get_event_log()
         self.register_instance(Settings, self.get_settings())
         self.register_instance(HarnessConfig, self.get_harness_config())
         self.register_instance(ToolRegistry, self.get_tools())
-        self.register_instance(EventLog, self.get_event_log())
+        self.register_instance(EventLog, event_log)
         self.register_instance(AccessControl, self.get_access_control())
         self.register_instance(CostAccountant, self.get_cost_accountant())
         self.register_instance(InferenceEnvironment, self.get_inference_environment())
         self.register_instance(APIConnectionConfig, self.get_judge_connection())
         self.register_instance(JudgeProvider, self.get_judge_provider())
-        self._bind_inference()
-        self._bind_harness()
+        self.register_instance(GraphNodeRunnerRegistry, self.get_node_runner_registry())
+        self.register_instance(GraphFailurePolicy, self.get_graph_failure_policy())
+        self.register_instance(GraphEscalation, self.get_graph_escalation())
+
+        inference_cls = self.get_inference_class()
+        harness_cls = self.get_harness_class()
+        graph_executor_cls = self.get_graph_executor_class()
+        _expose_ctor_type_hints(inference_cls)
+        _expose_ctor_type_hints(harness_cls)
+        _expose_ctor_type_hints(AbstractHarness)
+        _expose_ctor_type_hints(graph_executor_cls)
+        _expose_ctor_type_hints(GraphExecutor)
+
+        self.register(InferenceStrategy, inference_cls, singleton=True)
+
+        def make_completer(injector: Injector) -> Completer:
+            strategy = injector.inject(InferenceStrategy)
+            assert isinstance(strategy, Completer)
+            return strategy
+
+        self.register(Completer, make_completer, singleton=True)
+        self.register(AbstractHarness, harness_cls, singleton=True)
+        self.register(GraphExecutor, graph_executor_cls, singleton=True)
 
     def get_settings(self) -> Settings:
         """Settings instance registered for this config (override to customize)."""
@@ -94,14 +161,10 @@ class MechaHarnessConfig(Config):
 
     def get_access_control(self) -> AccessControl:
         """Deny-by-default access control bound into harnesses."""
-        existing = getattr(self, "_access_control", None)
-        if existing is None:
-            existing = InMemoryAccessControl(
-                event_log=self.get_event_log(),
-                policy=self.get_access_policy(),
-            )
-            self._access_control = existing
-        return existing
+        return InMemoryAccessControl(
+            event_log=self.get_event_log(),
+            policy=self.get_access_policy(),
+        )
 
     def get_access_policy(self) -> GrantPolicyLike:
         """Grant policy for harness tool gates.
@@ -118,11 +181,7 @@ class MechaHarnessConfig(Config):
 
     def get_inference_environment(self) -> InferenceEnvironment:
         """Host probe for the active inference profile (default: no-op)."""
-        existing = getattr(self, "_inference_environment", None)
-        if existing is None:
-            existing = NoOpInferenceEnvironment()
-            self._inference_environment = existing
-        return existing
+        return NoOpInferenceEnvironment()
 
     def get_judge_connection(self) -> APIConnectionConfig:
         """HTTP connection for the judge lane (override for OAuth, etc.)."""
@@ -134,11 +193,7 @@ class MechaHarnessConfig(Config):
 
     def get_judge_provider(self) -> JudgeProvider:
         """Judge backend (default: System One over ``get_judge_connection()``)."""
-        existing = getattr(self, "_judge_provider", None)
-        if existing is None:
-            existing = SystemOneJudgeProvider(connection=self.get_judge_connection())
-            self._judge_provider = existing
-        return existing
+        return SystemOneJudgeProvider(connection=self.get_judge_connection())
 
     def include_subagent_tools(self) -> bool:
         """When True, parent harnesses get list_subagents / get_subagent_events."""
@@ -146,11 +201,7 @@ class MechaHarnessConfig(Config):
 
     def get_cost_accountant(self) -> CostAccountant:
         """Ledger used to price inference and tool invocations."""
-        existing = getattr(self, "_cost_accountant", None)
-        if existing is None:
-            existing = InMemoryCostAccountant(event_log=self.get_event_log())
-            self._cost_accountant = existing
-        return existing
+        return InMemoryCostAccountant(event_log=self.get_event_log())
 
     def get_inference_class(self) -> type[InferenceStrategy]:
         """Required override: class bound to ``InferenceStrategy``."""
@@ -169,11 +220,28 @@ class MechaHarnessConfig(Config):
             max_turns=settings.max_turns,
             temperature=settings.temperature,
             max_tokens=settings.max_tokens,
+            subagent_tools=self.include_subagent_tools(),
         )
 
     def get_tools(self) -> ToolRegistry:
         """Tools available to the harness (default: empty registry)."""
         return ToolRegistry()
+
+    def get_graph_executor_class(self) -> type[GraphExecutor]:
+        """Class bound to ``GraphExecutor`` (override to specialize)."""
+        return GraphExecutor
+
+    def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+        """Node-kind runners for the graph executor (default: empty)."""
+        return GraphNodeRunnerRegistry()
+
+    def get_graph_failure_policy(self) -> GraphFailurePolicy:
+        """Retry / escalate / fail policy for graph node attempts."""
+        return DefaultGraphFailurePolicy()
+
+    def get_graph_escalation(self) -> GraphEscalation:
+        """Escalation hook after retries are exhausted (default: reject)."""
+        return RejectGraphEscalation()
 
     def inference_classes(self) -> dict[str, type[InferenceStrategy]]:
         """Named backend map. Hosts merge via ``super().inference_classes()``."""
@@ -197,38 +265,6 @@ class MechaHarnessConfig(Config):
             "openai_tools": OpenAIToolsHarness,
             "anthropic_tools": AnthropicToolsHarness,
         }
-
-    def _bind_inference(self) -> None:
-        inference_cls = self.get_inference_class()
-
-        def make_inference() -> InferenceStrategy:
-            return inference_cls(self.get_settings())  # type: ignore[call-arg]
-
-        self.register(InferenceStrategy, make_inference)
-
-        def make_completer(injector: Injector) -> Completer:
-            strategy = injector.inject(InferenceStrategy)
-            assert isinstance(strategy, Completer)
-            return strategy
-
-        self.register(Completer, make_completer)
-
-    def _bind_harness(self) -> None:
-        harness_cls = self.get_harness_class()
-
-        def make_harness(injector: Injector) -> AbstractHarness:
-            return harness_cls(
-                inference=injector.inject(Completer),
-                tools=self.get_tools(),
-                config=self.get_harness_config(),
-                event_log=injector.inject(EventLog),
-                access=injector.inject(AccessControl),
-                cost=injector.inject(CostAccountant),
-                environment=injector.inject(InferenceEnvironment),
-                subagent_tools=self.include_subagent_tools(),
-            )
-
-        self.register(AbstractHarness, make_harness)
 
 
 class SettingsConfig(MechaHarnessConfig):

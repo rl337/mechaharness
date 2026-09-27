@@ -1,0 +1,47 @@
+{
+  "id": "resume_skips_succeeded_upstream",
+  "description": "resume=true loads checkpoint and only runs remaining pending work",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "runners": {
+    "step": {"mode": "echo_id"}
+  },
+  "graph": {
+    "goal": "resume",
+    "nodes": [
+      {"id": "a", "kind": "step"},
+      {"id": "b", "kind": "step", "depends_on": ["a"]}
+    ],
+    "edges": [
+      {"from": "a", "to": "b", "types": ["control"], "reason": "order"}
+    ]
+  },
+  "phases": [
+    {
+      "run": {"run_id": "resume-1"},
+      "expect": {
+        "status": "ok",
+        "run_order": ["a", "b"],
+        "runner_calls": {"step": 2}
+      }
+    },
+    {
+      "mutate": {
+        "nodes": {
+          "b": {"status": "pending", "attempt": 0, "clear_payload": true}
+        }
+      },
+      "run": {"run_id": "resume-1", "resume": true},
+      "expect": {
+        "status": "ok",
+        "nodes": {
+          "a": {"status": "succeeded", "payload": {"done": "a"}},
+          "b": {"status": "succeeded", "attempt": 1, "payload": {"done": "b"}}
+        },
+        "run_order": ["b"],
+        "runner_calls": {"step": 1}
+      }
+    }
+  ]
+}

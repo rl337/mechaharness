@@ -1,0 +1,22 @@
+{
+  "id": "policy_escalate_immediate_heal",
+  "description": "Fixed escalate policy skips retries and heals on first failure",
+  "grants": ["core:graph.execute", "core:graph.escalate"],
+  "failure_policy": "escalate",
+  "escalation": "heal",
+  "runners": {
+    "once": {"mode": "fail", "error": "first"}
+  },
+  "graph": {
+    "goal": "imm-esc",
+    "nodes": [{"id": "n", "kind": "once", "max_attempts": 5}]
+  },
+  "run": {"run_id": "imm-esc"},
+  "expect": {
+    "status": "ok",
+    "nodes": {
+      "n": {"status": "succeeded", "attempt": 1, "payload": {"healed": true}}
+    },
+    "runner_calls": {"once": 1}
+  }
+}

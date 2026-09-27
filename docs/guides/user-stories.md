@@ -186,7 +186,7 @@ Fangore’s product needs permission rules defined by the application. He config
 
 #### Implementation
 
-`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection — not Settings bags or hand-wired constructors.
+`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection — not Settings bags or hand-wired harness constructors. Fangore subclasses Config once; the injector builds `AccessControl` and the harness with those grants.
 
 Covers: host DI access policy.
 
@@ -271,6 +271,22 @@ Covers: CTX-06, CTX-07.
 #### Validation
 
 Kind `derived_memory` → `_run_derived_memory`. Unit: `tests/test_context_experiments.py`.
+
+### `fangore_graph_executor` — Run a local plan through an authorized graph executor
+
+Fangore ships a host app with a produce → repair → consume plan. The library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; this story is the authorized runner that advances them.
+
+#### Implementation
+
+`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, and `GraphEscalation`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override `get_graph_failure_policy()` / `get_graph_escalation()`, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node start/end events, checkpoints through `GraphStore`, and enforces per-runner grants.
+
+#### Validation
+
+Kind `graph_executor_run` → `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py` (grants, retry/escalate/fail policies, stall, resume, runner errors).
+
+#### Footnotes
+
+1. [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Executor advances durable plans hosts define
 
 ### `fangore_human_review_pending` — Hold mutations until a matching human approval exists
 

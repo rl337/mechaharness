@@ -114,6 +114,22 @@ class AccessCheck(CoreEvent):
     name = "access_check"
 
 
+class GraphStart(CoreEvent):
+    name = "graph_start"
+
+
+class GraphEnd(CoreEvent):
+    name = "graph_end"
+
+
+class GraphNodeStart(CoreEvent):
+    name = "graph_node_start"
+
+
+class GraphNodeEnd(CoreEvent):
+    name = "graph_node_end"
+
+
 def event_type_key(value: object) -> str:
     """Normalize a class or ``namespace:name`` string to the wire key."""
     if isinstance(value, str):
