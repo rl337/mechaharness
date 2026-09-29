@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Developer Blog Inspiration for MechaHarness / June &mdash; MechaHarness 0.1.3 documentation</title>
+  <title>Developer Blog Inspiration for MechaHarness &mdash; MechaHarness 0.1.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -90,7 +90,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Developer Blog Inspiration for MechaHarness / June</li>
+      <li class="breadcrumb-item active">Developer Blog Inspiration for MechaHarness</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -100,15 +100,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="developer-blog-inspiration-for-mechaharness-june">
-<h1>Developer Blog Inspiration for MechaHarness / June<a class="headerlink" href="#developer-blog-inspiration-for-mechaharness-june" title="Link to this heading"></a></h1>
+  <section id="developer-blog-inspiration-for-mechaharness">
+<h1>Developer Blog Inspiration for MechaHarness<a class="headerlink" href="#developer-blog-inspiration-for-mechaharness" title="Link to this heading"></a></h1>
 <blockquote>
-<div><p>Living design-notes document. External developer material is evidence and inspiration, not specification. Requirements below generalize ideas only where they strengthen MechaHarness and June.</p>
+<div><p>Living design-notes document for the reusable MechaHarness execution library. External developer material is evidence and inspiration, not specification. June is a client/orchestrator and maintains a separate companion inspiration document.</p>
 </div></blockquote>
 <p>Last reviewed: 2026-09-29</p>
 <section id="purpose">
 <h2>Purpose<a class="headerlink" href="#purpose" title="Link to this heading"></a></h2>
-<p>This document tracks useful agent-harness ideas from Claude/Anthropic and Cursor and translates them into testable MechaHarness requirements. It is deliberately provenance-heavy: every inspiration-derived requirement names the source material that motivated it. The goal is not product compatibility. It is to challenge MechaHarness assumptions against production agent systems and retain only patterns that generalize.</p>
+<p>This document tracks useful agent-harness ideas from Claude/Anthropic and Cursor and translates them into testable requirements for the reusable MechaHarness execution library. It is deliberately provenance-heavy: every inspiration-derived requirement names the source material that motivated it. The goal is not product compatibility. It is to challenge MechaHarness assumptions against production agent systems and retain only patterns that generalize.\n\n## Ownership boundary with June\n\nMechaHarness owns reusable execution vocabulary and mechanisms: primitives, injectable protocols, graph execution semantics, runtime linkage/validation, capability envelopes, context-provider interfaces, verification/delegation/advisor policies, durable execution contracts, generic observability/evaluation hooks, and <strong>parameterized reusable graph-template definitions</strong>. Generic patterns such as fan-out/aggregate, verify/repair, independent review, and environment repair belong here when they are useful beyond June.\n\nJune is a client of MechaHarness and its own orchestrator. June owns scheduling, task lifecycle, document management, knowledge-graph operation, issue/work tracking, persistent goals, product policy, provider implementations, and the decision about <strong>which MechaHarness templates to instantiate, bind, sequence, schedule, and compose for June behavior</strong>. June does not fork or reimplement generic template definitions merely because it owns orchestration.\n\nA June requirement may motivate a generic MechaHarness capability, but this document SHOULD state the reusable interface rather than encode June-specific workflow policy.</p>
 </section>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
@@ -129,7 +129,7 @@
 <li><p>Policies that no longer improve outcomes SHOULD be removable without changing task semantics.</p></li>
 <li><p>Token, latency, compute, memory and coordination overhead SHOULD count against retaining scaffolding.</p></li>
 </ul>
-<p>For June, stronger local models should be allowed to absorb work previously supplied by explicit scaffolding rather than leaving a fossil layer of obsolete prompts and control logic.</p>
+<p>Client orchestrators such as June SHOULD be able to absorb or retire scaffolding as model capability changes without requiring task semantics to be rewritten.</p>
 </section>
 <section id="primitive-linkage-and-runtime-graph-resolution-are-distinct">
 <h3>2. Primitive linkage and runtime graph resolution are distinct<a class="headerlink" href="#primitive-linkage-and-runtime-graph-resolution-are-distinct" title="Link to this heading"></a></h3>
@@ -213,7 +213,7 @@ Every repeating graph/subgraph MUST expose a trigger, continuation condition, su
 <li><p>Static instructions SHOULD be separated from task-specific retrieved context.</p></li>
 <li><p>Context consumption SHOULD be observable and attributable to providers.</p></li>
 </ul>
-<p>For June, vector/KG memory is therefore a context provider, not permission to dump remembered material into every turn.</p>
+<p>A client knowledge graph or document system, such as June’s, is therefore a ContextProvider implementation rather than permission for MechaHarness to own application memory policy.</p>
 </section>
 <section id="delegation-requires-capability-boundaries-and-measurable-coordination-cost">
 <h3>7. Delegation requires capability boundaries and measurable coordination cost<a class="headerlink" href="#delegation-requires-capability-boundaries-and-measurable-coordination-cost" title="Link to this heading"></a></h3>
@@ -387,7 +387,7 @@ MechaHarness SHOULD distinguish advisory context, behavioral instruction, execut
 <li><p>Event handling SHOULD re-resolve relevant linkage/environment state before resuming.</p></li>
 <li><p>Conversational steering SHOULD update running goals at defined safe boundaries rather than necessarily abort current atomic work.</p></li>
 </ul>
-<p>For June, reminders, monitoring, background research, maintenance and sleep/dreaming become persistent goals rather than pretend conversations.</p>
+<p>Persistent-goal ownership belongs to the client orchestrator. MechaHarness SHOULD provide resumable execution and event-compatible contracts that a client such as June can invoke when a goal wakes.</p>
 </section>
 <section id="advisor-is-sparse-non-binding-reasoning-escalation">
 <h3>18. Advisor is sparse, non-binding reasoning escalation<a class="headerlink" href="#advisor-is-sparse-non-binding-reasoning-escalation" title="Link to this heading"></a></h3>
@@ -412,7 +412,7 @@ MechaHarness SHOULD distinguish advisory context, behavioral instruction, execut
 <li><p>Optional-advisor failure MUST have an explicit fallback policy.</p></li>
 </ul>
 <p><strong>Architectural distinction:</strong> a subagent owns delegated work; an advisor observes a decision state and returns counsel while the caller retains ownership. Model escalation replaces/upgrades the executor; advising lets the existing executor continue while purchasing stronger or specialized reasoning only at selected boundaries.</p>
-<p>For June this permits a small/medium local worker to preserve task continuity while consulting a larger reasoning model sparsely. It is also a natural future target for a small learned/Jev-like policy deciding whether consultation is worth its marginal cost.</p>
+<p>This permits a client such as June to preserve executor continuity while consulting a larger reasoning model sparsely. The generic consultation decision is also a natural target for a small learned/Jev-like policy deciding whether advice is worth its marginal cost.</p>
 </section>
 </section>
 <section id="candidate-reusable-primitives">
@@ -433,22 +433,23 @@ MechaHarness SHOULD distinguish advisory context, behavioral instruction, execut
 </ul>
 <p>These SHOULD normally be interfaces/protocols rather than framework-mandated concrete implementations.</p>
 </section>
-<section id="june-specific-implications">
-<h2>June-specific implications<a class="headerlink" href="#june-specific-implications" title="Link to this heading"></a></h2>
-<p>June SHOULD use MechaHarness so that:</p>
+<section id="client-orchestrator-interface-implications">
+<h2>Client-orchestrator interface implications<a class="headerlink" href="#client-orchestrator-interface-implications" title="Link to this heading"></a></h2>
+<p>MechaHarness SHOULD make it possible for a client orchestrator such as June to:</p>
 <ol class="arabic simple">
-<li><p>Ordinary conversational turns remain cheap/shallow when orchestration is unnecessary.</p></li>
-<li><p>Focused tool/child execution can occur without contaminating the main conversational context.</p></li>
-<li><p>Complex goals can instantiate template subgraphs only after available tools, models, memory sources, permissions and environment are known.</p></li>
-<li><p>Final runtime linkage validation occurs before those graphs materially execute.</p></li>
-<li><p>Verification effort scales with consequence and uncertainty.</p></li>
-<li><p>Durable state, not the context window, is authoritative for long-running work.</p></li>
-<li><p>Sleep/dreaming can mine traces for recurring failure classes and propose changes to gotchas, routing, retrieval or graph structure.</p></li>
-<li><p>Proposed self-improvements are evaluated against retained cases before promotion.</p></li>
-<li><p>Model upgrades trigger re-evaluation and possible deletion of obsolete scaffolding.</p></li>
-<li><p>Security boundaries remain structurally enforced even when the model is confused or prompt-injected.</p></li>
-<li><p>Sparse Advisor calls can buy stronger reasoning without handing routine execution to the largest model.</p></li>
+<li><p>Keep ordinary turns cheap when complex graph execution is unnecessary.</p></li>
+<li><p>Spawn focused child/tool executions without automatically contaminating parent context.</p></li>
+<li><p>Instantiate reusable parameterized graph templates after tools, models, providers, permissions and environment are known.</p></li>
+<li><p>Perform final runtime linkage validation before material execution.</p></li>
+<li><p>Scale verification with consequence and uncertainty.</p></li>
+<li><p>Persist execution/checkpoint state independently of model context.</p></li>
+<li><p>Mine structured traces externally for recurring failure classes and proposed policy changes.</p></li>
+<li><p>Evaluate proposed harness changes against retained cases before promotion.</p></li>
+<li><p>Re-evaluate and retire obsolete scaffolding after model/runtime upgrades.</p></li>
+<li><p>Enforce security boundaries structurally despite model confusion or prompt injection.</p></li>
+<li><p>Consult sparse Advisors without transferring task ownership.</p></li>
 </ol>
+<p>The scheduler, task runner, persistent-goal store, document manager, knowledge graph, issue tracker, and concrete June orchestration remain outside this library.</p>
 </section>
 <section id="monitoring-protocol">
 <h2>Monitoring protocol<a class="headerlink" href="#monitoring-protocol" title="Link to this heading"></a></h2>
@@ -465,7 +466,7 @@ MechaHarness SHOULD distinguish advisory context, behavioral instruction, execut
 <li><p>Prefer testable MUST/SHOULD/MAY statements.</p></li>
 <li><p>If no material document change exists, create no branch, commit or PR.</p></li>
 <li><p>If material change exists, create a branch from current <code class="docutils literal notranslate"><span class="pre">main</span></code>, update this file, verify the diff is non-empty, and open a <strong>draft PR</strong>.</p></li>
-<li><p>The PR body MUST identify triggering sources, summarize proposed requirements/refinements/retirements, explain relevance to MechaHarness/June, and call out uncertainty or architectural tension.</p></li>
+<li><p>The PR body MUST identify triggering sources, summarize proposed requirements/refinements/retirements, explain relevance to MechaHarness and any client-interface implication, and call out uncertainty or architectural tension.</p></li>
 <li><p>Future updates after this bootstrap SHOULD be incremental.</p></li>
 </ol>
 </section>
