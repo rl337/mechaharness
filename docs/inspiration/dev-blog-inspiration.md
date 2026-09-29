@@ -288,3 +288,82 @@ For June this permits a small/medium local worker to preserve task continuity wh
 
 These SHOULD normally be interfaces/protocols rather than framework-mandated concrete implementations.
 
+
+## June-specific implications
+
+June SHOULD use MechaHarness so that:
+1. Ordinary conversational turns remain cheap/shallow when orchestration is unnecessary.
+2. Focused tool/child execution can occur without contaminating the main conversational context.
+3. Complex goals can instantiate template subgraphs only after available tools, models, memory sources, permissions and environment are known.
+4. Final runtime linkage validation occurs before those graphs materially execute.
+5. Verification effort scales with consequence and uncertainty.
+6. Durable state, not the context window, is authoritative for long-running work.
+7. Sleep/dreaming can mine traces for recurring failure classes and propose changes to gotchas, routing, retrieval or graph structure.
+8. Proposed self-improvements are evaluated against retained cases before promotion.
+9. Model upgrades trigger re-evaluation and possible deletion of obsolete scaffolding.
+10. Security boundaries remain structurally enforced even when the model is confused or prompt-injected.
+11. Sparse Advisor calls can buy stronger reasoning without handing routine execution to the largest model.
+
+## Monitoring protocol
+
+When refreshing this document:
+1. Read the current canonical file from `main` first.
+2. Enumerate new Claude/Anthropic developer-blog entries, relevant Claude Code documentation changes, and Cursor developer-blog entries since `Last reviewed`.
+3. Prefer material concerning harnesses, loops/graphs, tools, context, skills, subagents, model routing, advisors/escalation, verification/evals, memory, security, autonomy, execution environments, long-running work and self-improvement.
+4. Read relevant sources rather than relying on title/snippet.
+5. Compare each idea with existing MechaHarness requirements.
+6. Add only net-new requirements, meaningful refinements, contradictions, retirements, or evidence that materially changes priority.
+7. Every changed requirement MUST name its material source(s), date when available, and canonical URL.
+8. Generalize product mechanics only when they map cleanly to MechaHarness.
+9. Prefer testable MUST/SHOULD/MAY statements.
+10. If no material document change exists, create no branch, commit or PR.
+11. If material change exists, create a branch from current `main`, update this file, verify the diff is non-empty, and open a **draft PR**.
+12. The PR body MUST identify triggering sources, summarize proposed requirements/refinements/retirements, explain relevance to MechaHarness/June, and call out uncertainty or architectural tension.
+13. Future updates after this bootstrap SHOULD be incremental.
+
+## Source ledger: Claude / Anthropic
+
+Reviewed through 2026-09-29:
+
+- **Agent Harness Design: 3 Patterns for Harnessing Claude's Intelligence** — 2026-04-02 — https://claude.com/blog/harnessing-claudes-intelligence
+- **How and when to use subagents in Claude Code** — 2026-04-07 — https://claude.com/blog/subagents-in-claude-code
+- **Seeing like an agent: how we design tools in Claude Code** — 2026-04-10 — https://claude.com/blog/seeing-like-an-agent
+- **Introducing dynamic workflows in Claude Code** — 2026-05-28 — https://claude.com/blog/introducing-dynamic-workflows-in-claude-code
+- **A harness for every task: dynamic workflows in Claude Code** — 2026-06-02 — https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code
+- **Lessons from building Claude Code: How we use skills** — 2026-06-03 — https://claude.com/blog/lessons-from-building-claude-code-how-we-use-skills
+- **Running an AI-native engineering org** — 2026-06-03 — https://claude.com/blog/running-an-ai-native-engineering-org
+- **Steering Claude Code: when to use CLAUDE.md, skills, hooks, and subagents** — 2026-06-18 — https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more
+- **Loop engineering: Getting started with loops** — 2026-06-30 — https://claude.com/blog/getting-started-with-loops
+- **How Anthropic runs large-scale code migrations with Claude Code** — 2026-07-16 — https://claude.com/blog/ai-code-migration
+- **How Anthropic secures its AI-native software development lifecycle** — 2026-07-21 — https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle
+- **How Datadog built a "universal machine tool" for Claude Code** — 2026-07-21 — https://claude.com/blog/how-datadog-built-a-universal-machine-tool-for-claude-code
+- **Building verification loops in Claude Code with skills** — 2026-07-22 — https://claude.com/blog/building-verification-loops-in-claude-code-with-skills
+- **The new rules of context engineering for Claude 5 generation models** — 2026-07-24 — https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models
+- **Agentic coding is straining CI. Here's how we scaled test impact analysis at Anthropic** — 2026-09-14 — https://claude.com/blog/agentic-coding-is-straining-ci-heres-how-we-scaled-test-impact-analysis-at-anthropic
+- **Coding sessions are longer and use more context. Claude Opus 5.5 is built with that in mind.** — 2026-09-24 — https://claude.com/blog/claude-opus-5-5-built-for-coding-sessions-that-use-more-context
+- **Escalate hard decisions with the advisor tool** — Claude Code Docs, reviewed 2026-09-29 — https://code.claude.com/docs/en/advisor
+
+Watch source: https://claude.com/blog-category/claude-code
+
+## Source ledger: Cursor
+
+Reviewed through 2026-09-29:
+
+- **Dynamic context discovery** — 2026-01-06 — https://cursor.com/blog/dynamic-context-discovery
+- **Subagents, Skills, and Image Generation** — 2026-01-22 — https://cursor.com/changelog/2-4
+- **Implementing a secure sandbox for local agents** — 2026-02-18 — https://cursor.com/blog/agent-sandboxing
+- **Cursor agents can now control their own computers** — 2026-02-24 — https://cursor.com/blog/agent-computer-use
+- **Build agents that run automatically** — 2026-03-05 — https://cursor.com/blog/automations
+- **How we compare model quality in Cursor** — 2026-03-11 — https://cursor.com/blog/cursorbench
+- **Continually improving our agent harness** — 2026-04-30 — https://cursor.com/blog/continually-improving-agent-harness
+- **What we've learned building cloud agents** — 2026-06-02 — https://cursor.com/blog/cloud-agent-lessons
+- **Governing agent autonomy with Auto-review** — 2026-06-11 — https://cursor.com/blog/agent-autonomy-auto-review
+- **Cloud Agents and Cursor Harness Improvements** — 2026-08-19 — https://cursor.com/changelog/08-19-26
+- **Introducing Projects** — 2026-09-10 — https://cursor.com/blog/projects
+- **Improved token efficiency for longer agent runs** — 2026-09-23 — https://cursor.com/blog/improved-token-efficiency
+
+Watch source: https://cursor.com/blog
+
+## Provenance note
+
+This first version is intentionally broad: it establishes the 0-to-1 baseline accumulated from the reviewed Claude/Anthropic and Cursor material. Subsequent changes should be much smaller and should make it easy to trace a source article to the specific MechaHarness requirement it changes.
