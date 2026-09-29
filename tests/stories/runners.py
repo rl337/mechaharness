@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Annotated, Any
 
 import httpx
 import pytest
-from pyiv import get_injector
+from pyiv.key import Matched, Named
 
 from mechaharness.api_connection import SimpleHttpConnectionConfig
 from mechaharness.config import Settings
@@ -35,6 +35,7 @@ from mechaharness.core.access import (
     GraphExecute,
     InMemoryAccessControl,
 )
+from mechaharness.core.completer import Completer
 from mechaharness.core.environment import (
     InferenceEnvironment,
     InferenceEnvironmentError,
@@ -53,7 +54,7 @@ from mechaharness.decision_surfaces import (
     RulesDecisionBackend,
     reject_invalid_choice,
 )
-from mechaharness.di import MechaHarnessConfig
+from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -218,6 +219,7 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "wrong_lane_deny": _run_wrong_lane_deny,
         "grant_gate_write": _run_grant_gate_write,
         "config_access_policy": _run_config_access_policy,
+        "completer_flavors": _run_completer_flavors,
         "fixture_judge_batch": _run_fixture_judge_batch,
         "decision_surface_reject": _run_decision_surface_reject,
         "convergence_ceiling": _run_convergence_ceiling,
@@ -497,6 +499,67 @@ async def _run_config_access_policy(case: StoryCase, backend: StoryBackend) -> N
     allows = all(control.allows([g]) for g in request["must_allow"])
     denies = all(not control.allows([g]) for g in request["must_deny"])
     actual = {"allows_compound": allows, "denies_missing": denies}
+    _assert_expect(actual, expect)
+
+
+async def _run_completer_flavors(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    flavor_tags = list(request["flavor_tags"])
+    matched_required = list(request["matched_required"])
+    assert flavor_tags == ["reason", "code", "deep"]
+    assert matched_required == ["reason", "code"]
+
+    class FlavorCompleter(ScriptedInference):
+        def __init__(self) -> None:
+            super().__init__([])
+            self.flavor = "code"
+
+    class CodeReviewHost:
+        def __init__(
+            self,
+            inference: Annotated[Completer, Named(["reason", "code", "deep"])],
+            via_matched: Annotated[
+                Completer,
+                Matched(required=["reason", "code"]),
+            ],
+        ) -> None:
+            self.inference = inference
+            self.via_matched = via_matched
+
+    class StoryConfig(MechaHarnessConfig):
+        def __init__(self) -> None:
+            self._default = ScriptedInference([])
+            super().__init__()  # type: ignore[no-untyped-call]
+
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            return type(self._default)
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def completer_bindings(self):
+            return [
+                (Named(["reason"], default=True), self.get_inference_class()),
+                (Named(["reason", "code", "deep"]), FlavorCompleter),
+            ]
+
+        def configure(self) -> None:
+            super().configure()
+            self.register_instance(InferenceStrategy, self._default)
+            _expose_ctor_type_hints(CodeReviewHost)
+            self.register(CodeReviewHost, CodeReviewHost)
+
+    injector = get_injector(StoryConfig())
+    default = injector.inject(Completer)
+    strategy = injector.inject(InferenceStrategy)
+    host = injector.inject(CodeReviewHost)
+    actual = {
+        "default_is_inference": default is strategy,
+        "flavor_selected": getattr(host.inference, "flavor", None) == "code",
+        "matched_selects_flavor": host.via_matched is host.inference,
+    }
     _assert_expect(actual, expect)
 
 

@@ -2,15 +2,25 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 import pytest
-from pyiv import get_injector
+from pyiv import CreationError
+from pyiv.key import Key, Matched, Named
 
 from mechaharness.config import Settings
+from mechaharness.core.completer import Completer
 from mechaharness.core.types import ChatMessage, Role, ToolCall
-from mechaharness.di import MechaHarnessConfig, SettingsConfig
+from mechaharness.di import (
+    MechaHarnessConfig,
+    SettingsConfig,
+    _expose_ctor_type_hints,
+    get_injector,
+)
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
 
@@ -107,3 +117,118 @@ def test_base_config_requires_class_hooks() -> None:
 def test_settings_config_unknown_family() -> None:
     with pytest.raises(KeyError, match="Unknown harness family"):
         SettingsConfig(Settings(harness_family="not-a-family"))
+
+
+class _CodeFlavorCompleter(MockInferenceStrategy):
+    name = "code-flavor"
+
+    def __init__(self, settings: Settings | None = None) -> None:
+        super().__init__(settings)
+        self.flavor = "code"
+
+
+class _DeepFlavorCompleter(MockInferenceStrategy):
+    name = "deep-flavor"
+
+    def __init__(self, settings: Settings | None = None) -> None:
+        super().__init__(settings)
+        self.flavor = "deep"
+
+
+class _FlavorHostHarness:
+    """Minimal host type that selects Completer flavors via Annotated."""
+
+    def __init__(
+        self,
+        code: Annotated[Completer, Named(["reason", "code"])],
+        deep: Annotated[
+            Completer,
+            Matched(required=["reason"], prefer=["deep"]),
+        ],
+        optional_missing: Annotated[
+            Completer | None,
+            Matched(required=["reason", "summarize"]),
+        ] = None,
+    ) -> None:
+        self.code = code
+        self.deep = deep
+        self.optional_missing = optional_missing
+
+
+class FlavorConfig(MechaHarnessConfig):
+    def get_inference_class(self) -> type[InferenceStrategy]:
+        return MockInferenceStrategy
+
+    def get_harness_class(self) -> type[AbstractHarness]:
+        return ToolLoopHarness
+
+    def completer_bindings(self):
+        return [
+            (Named(["reason"], default=True), self.get_inference_class()),
+            (Named(["reason", "code"]), _CodeFlavorCompleter),
+            (Named(["reason", "deep"]), _DeepFlavorCompleter),
+        ]
+
+    def configure(self) -> None:
+        super().configure()
+        _expose_ctor_type_hints(_FlavorHostHarness)
+        self.register(_FlavorHostHarness, _FlavorHostHarness)
+
+
+def test_default_completer_aliases_inference_strategy() -> None:
+    injector = get_injector(FlavorConfig)
+    completer = injector.inject(Completer)
+    strategy = injector.inject(InferenceStrategy)
+    assert completer is strategy
+    assert isinstance(completer, MockInferenceStrategy)
+    named = injector.inject(Key(Completer, Named(["reason"], default=True)))
+    assert named is completer
+
+
+def test_annotated_named_and_matched_completer_flavors() -> None:
+    host = get_injector(FlavorConfig).inject(_FlavorHostHarness)
+    assert isinstance(host.code, _CodeFlavorCompleter)
+    assert host.code.flavor == "code"
+    assert isinstance(host.deep, _DeepFlavorCompleter)
+    assert host.deep.flavor == "deep"
+    assert host.optional_missing is None
+
+
+def test_matched_missing_tags_raises_creation_error() -> None:
+    injector = get_injector(FlavorConfig)
+    with pytest.raises(CreationError, match="satisfies|No Named"):
+        injector.inject(Key(Completer, Matched(required=["reason", "summarize"])))
+
+
+def test_matched_ambiguous_tags_raises_creation_error() -> None:
+    class AmbiguousConfig(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return ToolLoopHarness
+
+        def completer_bindings(self):
+            return [
+                (Named(["reason"], default=True), self.get_inference_class()),
+                (Named(["reason", "deep", "a"]), _CodeFlavorCompleter),
+                (Named(["reason", "deep", "b"]), _DeepFlavorCompleter),
+            ]
+
+    injector = get_injector(AmbiguousConfig)
+    with pytest.raises(CreationError, match="Ambiguous"):
+        injector.inject(Key(Completer, Matched(required=["reason", "deep"])))
+
+
+def test_expose_ctor_type_hints_preserves_named_annotation() -> None:
+    class Sample:
+        def __init__(
+            self,
+            inference: Annotated[Completer, Named(["reason", "code"])],
+        ) -> None:
+            self.inference = inference
+
+    _expose_ctor_type_hints(Sample)
+    ann = Sample.__init__.__annotations__["inference"]
+    assert getattr(ann, "__metadata__", None)
+    assert isinstance(ann.__metadata__[0], Named)
