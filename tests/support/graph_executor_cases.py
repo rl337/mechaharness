@@ -30,6 +30,7 @@ from mechaharness.graph_executor import (
     NodeOutcome,
     RejectGraphEscalation,
 )
+from mechaharness.linkage_resolver import LinkageResolver, NoOpLinkageResolver
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
@@ -305,6 +306,10 @@ class CaseConfig(MechaHarnessConfig):
 
     def get_graph_escalation(self) -> GraphEscalation:
         return self._escalation
+
+    def get_linkage_resolver(self) -> LinkageResolver:
+        # Executor fixtures cover runtime failure paths; linkage is tested separately.
+        return NoOpLinkageResolver()
 
 
 def mutate_graph(graph: ExecutionGraph, mutations: dict[str, Any] | None) -> None:

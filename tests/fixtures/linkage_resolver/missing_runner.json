@@ -1,0 +1,8 @@
+{
+  "id": "missing_runner",
+  "description": "Unknown node kind fails linkage before execution",
+  "runner_kinds": ["compute"],
+  "grants": ["core:graph.execute"],
+  "nodes": [{"id": "a", "kind": "mystery"}],
+  "expect": {"ok": false, "codes_include": ["no_runner"], "has_fingerprint": true}
+}
