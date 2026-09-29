@@ -20,7 +20,10 @@ from pyiv import Config, get_injector
 from pyiv.injector import Injector
 
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
+from mechaharness.advisor import Advisor, AdvisorPolicy, DefaultAdvisorPolicy, RejectAdvisor
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.config import Settings
+from mechaharness.context_provider import ContextProviderRegistry
 from mechaharness.core.access import (
     AccessControl,
     AccessPolicy,
@@ -32,6 +35,7 @@ from mechaharness.core.access import (
 from mechaharness.core.completer import Completer
 from mechaharness.core.environment import InferenceEnvironment, NoOpInferenceEnvironment
 from mechaharness.core.events import EventLog, default_event_log
+from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
 from mechaharness.graph_executor import (
     DefaultGraphFailurePolicy,
     GraphEscalation,
@@ -40,6 +44,7 @@ from mechaharness.graph_executor import (
     GraphNodeRunnerRegistry,
     RejectGraphEscalation,
 )
+from mechaharness.graph_template import GraphTemplateRegistry, default_graph_templates
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
 from mechaharness.harness.pass_through import PassThroughHarness
@@ -51,7 +56,10 @@ from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.linkage_resolver import DefaultLinkageResolver, LinkageResolver
+from mechaharness.operation_registry import OperationRegistry, default_operations
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.verification_policy import DefaultVerificationPolicy, VerificationPolicy
 
 _INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai": {"base_url": "https://api.openai.com/v1"},
@@ -126,6 +134,15 @@ class MechaHarnessConfig(Config):
         self.register_instance(GraphNodeRunnerRegistry, self.get_node_runner_registry())
         self.register_instance(GraphFailurePolicy, self.get_graph_failure_policy())
         self.register_instance(GraphEscalation, self.get_graph_escalation())
+        self.register_instance(OperationRegistry, self.get_operation_registry())
+        self.register_instance(LinkageResolver, self.get_linkage_resolver())
+        self.register_instance(VerificationPolicy, self.get_verification_policy())
+        self.register_instance(DelegationPolicy, self.get_delegation_policy())
+        self.register_instance(AdvisorPolicy, self.get_advisor_policy())
+        self.register_instance(Advisor, self.get_advisor())
+        self.register_instance(GraphTemplateRegistry, self.get_graph_template_registry())
+        self.register_instance(ContextProviderRegistry, self.get_context_provider_registry())
+        self.register_instance(CapabilityEnvelope, self.get_capability_envelope())
 
         inference_cls = self.get_inference_class()
         harness_cls = self.get_harness_class()
@@ -161,10 +178,14 @@ class MechaHarnessConfig(Config):
 
     def get_access_control(self) -> AccessControl:
         """Deny-by-default access control bound into harnesses."""
-        return InMemoryAccessControl(
-            event_log=self.get_event_log(),
-            policy=self.get_access_policy(),
-        )
+        existing = getattr(self, "_access_control", None)
+        if existing is None:
+            existing = InMemoryAccessControl(
+                event_log=self.get_event_log(),
+                policy=self.get_access_policy(),
+            )
+            self._access_control = existing
+        return existing
 
     def get_access_policy(self) -> GrantPolicyLike:
         """Grant policy for harness tool gates.
@@ -233,7 +254,11 @@ class MechaHarnessConfig(Config):
 
     def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
         """Node-kind runners for the graph executor (default: empty)."""
-        return GraphNodeRunnerRegistry()
+        existing = getattr(self, "_node_runner_registry", None)
+        if existing is None:
+            existing = GraphNodeRunnerRegistry()
+            self._node_runner_registry = existing
+        return existing
 
     def get_graph_failure_policy(self) -> GraphFailurePolicy:
         """Retry / escalate / fail policy for graph node attempts."""
@@ -242,6 +267,51 @@ class MechaHarnessConfig(Config):
     def get_graph_escalation(self) -> GraphEscalation:
         """Escalation hook after retries are exhausted (default: reject)."""
         return RejectGraphEscalation()
+
+    def get_operation_registry(self) -> OperationRegistry:
+        """Shared operation contracts for linkage / compilers."""
+        existing = getattr(self, "_operation_registry", None)
+        if existing is None:
+            existing = default_operations()
+            self._operation_registry = existing
+        return existing
+
+    def get_linkage_resolver(self) -> LinkageResolver:
+        """Pre-execution graph wiring validator."""
+        return DefaultLinkageResolver(
+            runners=self.get_node_runner_registry(),
+            access=self.get_access_control(),
+            environment=self.get_inference_environment(),
+            operations=self.get_operation_registry(),
+        )
+
+    def get_verification_policy(self) -> VerificationPolicy:
+        """Selects and runs verification for graph/outcome gates."""
+        return DefaultVerificationPolicy()
+
+    def get_delegation_policy(self) -> DelegationPolicy:
+        """Chooses inline versus child/subgraph execution."""
+        return DefaultDelegationPolicy()
+
+    def get_advisor_policy(self) -> AdvisorPolicy:
+        """Sparse advisor consultation policy."""
+        return DefaultAdvisorPolicy()
+
+    def get_advisor(self) -> Advisor:
+        """Non-binding advisor (default: unavailable / reject)."""
+        return RejectAdvisor()
+
+    def get_graph_template_registry(self) -> GraphTemplateRegistry:
+        """Library-owned parameterized graph templates."""
+        return default_graph_templates()
+
+    def get_context_provider_registry(self) -> ContextProviderRegistry:
+        """Host context providers (June KG/docs bind here)."""
+        return ContextProviderRegistry()
+
+    def get_capability_envelope(self) -> CapabilityEnvelope:
+        """Default run envelope from configured grants."""
+        return CapabilityEnvelope.from_grants(self.get_grants())
 
     def inference_classes(self) -> dict[str, type[InferenceStrategy]]:
         """Named backend map. Hosts merge via ``super().inference_classes()``."""

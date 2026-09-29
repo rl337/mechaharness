@@ -36,11 +36,16 @@ from mechaharness.core.events import (
     event_type_key,
 )
 from mechaharness.core.exceptions import GraphExecutorError
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.graph import (
     ExecutionGraph,
     GraphNode,
     GraphStore,
     NodeStatus,
+)
+from mechaharness.linkage_resolver import (
+    LinkageError,
+    LinkageResolver,
 )
 
 
@@ -71,6 +76,8 @@ class GraphRunContext:
     run_id: str
     agent_id: str
     parent_agent_id: str | None = None
+    envelope: CapabilityEnvelope | None = None
+    config_fingerprint: str | None = None
 
 
 class GraphResult(BaseModel):
@@ -206,7 +213,8 @@ class GraphExecutor:
 
     Constructor dependencies are pyiv-injectable. Hosts subclass Config and
     override ``get_node_runner_registry`` / ``get_graph_failure_policy`` /
-    ``get_graph_escalation`` rather than hand-building the executor.
+    ``get_graph_escalation`` / ``get_linkage_resolver`` rather than
+    hand-building the executor.
     """
 
     def __init__(
@@ -216,17 +224,21 @@ class GraphExecutor:
         runners: GraphNodeRunnerRegistry,
         failure_policy: GraphFailurePolicy,
         escalation: GraphEscalation,
+        linkage_resolver: LinkageResolver,
         *,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
+        fingerprint_parts: Mapping[str, Any] | None = None,
     ) -> None:
         self.event_log = event_log
         self.access = access
         self.runners = runners
         self.failure_policy = failure_policy
         self.escalation = escalation
+        self.linkage_resolver = linkage_resolver
         self.agent_id = agent_id or str(uuid4())
         self.parent_agent_id = parent_agent_id
+        self.fingerprint_parts = dict(fingerprint_parts or {})
         self.store = GraphStore(event_log, agent_id=self.agent_id)
 
     def _emit(self, event_type: type[EventType], payload: dict[str, Any], run_id: str) -> None:
@@ -288,11 +300,14 @@ class GraphExecutor:
         *,
         run_id: str | None = None,
         resume: bool = False,
+        envelope: CapabilityEnvelope | None = None,
+        skip_linkage: bool = False,
     ) -> GraphResult:
         """Execute ``graph`` until completion, denial, stall, or hard failure.
 
         When ``resume`` is true, load the latest checkpoint for ``run_id`` (or
-        ``graph.id``) and continue from that snapshot.
+        ``graph.id``) and continue from that snapshot. Resume refuses when the
+        current linkage fingerprint does not match the checkpoint.
         """
         rid = run_id or graph.id
         if resume:
@@ -319,11 +334,59 @@ class GraphExecutor:
                 error="missing_grant:core:graph.execute",
             )
 
+        report = None
+        fingerprint = graph.config_fingerprint
+        if not skip_linkage:
+            report = self.linkage_resolver.resolve(
+                graph,
+                envelope=envelope,
+                fingerprint_parts=self.fingerprint_parts,
+            )
+            fingerprint = report.fingerprint or fingerprint
+            if resume:
+                prior = self.store.latest_fingerprint(run_id=rid) or graph.config_fingerprint
+                if prior and fingerprint and prior != fingerprint:
+                    err = f"incompatible_checkpoint_fingerprint:{prior}!={fingerprint}"
+                    self._emit(GraphStart, {"goal": graph.goal, "status": "failed"}, rid)
+                    self._emit(GraphEnd, {"status": "failed", "error": err}, rid)
+                    return GraphResult(
+                        status="failed",
+                        graph=graph,
+                        run_id=rid,
+                        events=self.event_log.query(run_id=rid),
+                        error=err,
+                    )
+            if not report.ok:
+                err = f"linkage_failed:{';'.join(e.code for e in report.edges)}"
+                self._emit(
+                    GraphStart,
+                    {
+                        "goal": graph.goal,
+                        "node_count": len(graph.nodes),
+                        "status": "failed",
+                        "linkage_edges": [e.model_dump() for e in report.edges],
+                    },
+                    rid,
+                )
+                self._emit(GraphEnd, {"status": "failed", "error": err}, rid)
+                return GraphResult(
+                    status="failed",
+                    graph=graph,
+                    run_id=rid,
+                    events=self.event_log.query(run_id=rid),
+                    error=err,
+                )
+
+        if fingerprint:
+            graph.config_fingerprint = fingerprint
+
         context = GraphRunContext(
             graph=graph,
             run_id=rid,
             agent_id=self.agent_id,
             parent_agent_id=self.parent_agent_id,
+            envelope=envelope,
+            config_fingerprint=fingerprint,
         )
         self._emit(
             GraphStart,
@@ -331,15 +394,16 @@ class GraphExecutor:
                 "goal": graph.goal,
                 "node_count": len(graph.nodes),
                 "kinds": self.runners.kinds(),
+                "config_fingerprint": fingerprint,
             },
             rid,
         )
-        self.store.save(graph, run_id=rid, boundary="dispatch")
+        self.store.save(graph, run_id=rid, boundary="dispatch", fingerprint=fingerprint)
 
         try:
             await self._run_loop(graph, context)
         except GraphExecutorError as exc:
-            self.store.save(graph, run_id=rid, boundary="commit")
+            self.store.save(graph, run_id=rid, boundary="commit", fingerprint=fingerprint)
             status = self._terminal_status(graph)
             self._emit(GraphEnd, {"status": status, "error": str(exc)}, rid)
             return GraphResult(
@@ -349,8 +413,18 @@ class GraphExecutor:
                 events=self.event_log.query(run_id=rid),
                 error=str(exc),
             )
+        except LinkageError as exc:
+            self.store.save(graph, run_id=rid, boundary="commit", fingerprint=fingerprint)
+            self._emit(GraphEnd, {"status": "failed", "error": str(exc)}, rid)
+            return GraphResult(
+                status="failed",
+                graph=graph,
+                run_id=rid,
+                events=self.event_log.query(run_id=rid),
+                error=str(exc),
+            )
 
-        self.store.save(graph, run_id=rid, boundary="commit")
+        self.store.save(graph, run_id=rid, boundary="commit", fingerprint=fingerprint)
         status = self._terminal_status(graph)
         self._emit(GraphEnd, {"status": status, "node_count": len(graph.nodes)}, rid)
         return GraphResult(
@@ -377,13 +451,82 @@ class GraphExecutor:
             self.store.save(graph, run_id=context.run_id, boundary="reduce")
         raise GraphExecutorError("exceeded graph execution budget")
 
+    async def _run_subgraph_node(
+        self,
+        graph: ExecutionGraph,
+        node: GraphNode,
+        context: GraphRunContext,
+    ) -> None:
+        """Execute an embedded child graph as an observable nested graph run."""
+        del graph
+        node.attempt += 1
+        node.status = NodeStatus.RUNNING
+        self._emit(
+            GraphNodeStart,
+            {
+                "node_id": node.id,
+                "kind": node.kind,
+                "attempt": node.attempt,
+                "subgraph": True,
+            },
+            context.run_id,
+        )
+        raw = node.subgraph or node.payload.get("subgraph")
+        if not isinstance(raw, dict):
+            node.status = NodeStatus.FAILED
+            node.error = "missing_subgraph"
+            self._emit(
+                GraphNodeEnd,
+                {
+                    "node_id": node.id,
+                    "kind": node.kind,
+                    "status": node.status.value,
+                    "error": node.error,
+                },
+                context.run_id,
+            )
+            return
+        child = ExecutionGraph.resume(raw)
+        child_run_id = f"{context.run_id}:{node.id}"
+        child_result = await self.run(
+            child,
+            run_id=child_run_id,
+            envelope=context.envelope,
+        )
+        node.payload = {
+            **node.payload,
+            "child_status": child_result.status,
+            "child_run_id": child_run_id,
+            "child_graph_id": child.id,
+        }
+        if child_result.status == "ok":
+            node.status = NodeStatus.SUCCEEDED
+            node.error = None
+        else:
+            node.status = NodeStatus.FAILED
+            node.error = child_result.error or f"subgraph_{child_result.status}"
+        self._emit(
+            GraphNodeEnd,
+            {
+                "node_id": node.id,
+                "kind": node.kind,
+                "status": node.status.value,
+                "attempt": node.attempt,
+                "error": node.error,
+                "child_run_id": child_run_id,
+            },
+            context.run_id,
+        )
+
     async def _run_node(
         self,
         graph: ExecutionGraph,
         node: GraphNode,
         context: GraphRunContext,
     ) -> None:
-        del graph
+        if node.kind == "subgraph" or node.subgraph:
+            await self._run_subgraph_node(graph, node, context)
+            return
         runner = self.runners.get(node.kind)
         if runner is None:
             node.status = NodeStatus.FAILED

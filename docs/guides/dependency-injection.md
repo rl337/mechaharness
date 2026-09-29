@@ -86,10 +86,13 @@ inject deny-by-default tool grants; use `CompoundPolicy` to union reusable
 `AccessPolicy` layers. See [Access control](../reference/access.md).
 
 For durable plans, override `get_node_runner_registry()`,
-`get_graph_failure_policy()`, and `get_graph_escalation()`, then
-`injector.inject(GraphExecutor)`. Include `core:graph.execute` (and
-`core:graph.escalate` when using escalation) in grants. See
-[Architecture](../architecture.md) (Execution graph).
+`get_graph_failure_policy()`, `get_graph_escalation()`, and optionally
+`get_linkage_resolver()` / `get_graph_template_registry()` /
+`get_capability_envelope()`, then `injector.inject(GraphExecutor)`. Include
+`core:graph.execute` (and `core:graph.escalate` when using escalation) in
+grants. Library templates are owned by MechaHarness; June instantiates them.
+See [Architecture](../architecture.md) and
+[Inspiration requirements map](../inspiration/requirements-map.md).
 
 ## Verify
 

@@ -1,5 +1,6 @@
 """MechaHarness: agentic harness with pluggable inference and harness families."""
 
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.config import Settings
 from mechaharness.core.access import AccessControl, CostAccountant
 from mechaharness.core.completer import Completer
@@ -20,11 +21,14 @@ from mechaharness.factory import run
 from mechaharness.graph_executor import GraphExecutor
 from mechaharness.harness.base import AbstractHarness, HarnessConfig, HarnessResult
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.linkage_resolver import LinkageResolver
+from mechaharness.stop_contract import StopContract
 from mechaharness.tools.base import Tool, ToolRegistry
 
 __all__ = [
     "AbstractHarness",
     "AccessControl",
+    "CapabilityEnvelope",
     "ChatMessage",
     "Completer",
     "CompletionRequest",
@@ -38,12 +42,14 @@ __all__ = [
     "HarnessResult",
     "InferenceEnvironment",
     "InferenceStrategy",
+    "LinkageResolver",
     "MechaHarnessConfig",
     "Role",
     "RunRequest",
     "RunResponse",
     "Settings",
     "SettingsConfig",
+    "StopContract",
     "Tool",
     "ToolCall",
     "ToolDefinition",

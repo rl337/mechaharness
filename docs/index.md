@@ -45,6 +45,7 @@ for events and grants ([Architecture](./architecture.md)).
 | Page | Description |
 |------|-------------|
 | [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, pyiv Config |
+| [Inspiration requirements map](./inspiration/requirements-map.md) | Blog-inspired reqs → modules → MH vs June ownership |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Junespark](./guides/junespark.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
