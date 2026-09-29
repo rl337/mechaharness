@@ -1,0 +1,17 @@
+{
+  "id": "fangore_completer_flavors",
+  "persona": "fangore",
+  "title": "Wire same-lane Completer flavors without forking the library",
+  "kind": "completer_flavors",
+  "narrative": "Fangore’s product needs a deep code Completer beside the default reason Completer in one Config. He registers a second Named flavor and a small host harness that selects it with Annotated Matched tags — no marker-lane ABCs and no edits to MechaHarness enums.",
+  "implementation": "`MechaHarnessConfig.completer_bindings()` registers `Named` Completer tag sets (lane + host flavors). Host constructors declare `Annotated[Completer, Named(...)]` / `Matched(...)`. Bare `inject(Completer)` keeps the default aliased to `InferenceStrategy`. Lanes on `InferenceEnvironment` stay capability partitions; flavors are DI bindings.\n\nCovers: same-lane Completer flavors via pyiv Named/Matched.",
+  "validation": "Kind `completer_flavors` → `_run_completer_flavors`. Unit: `tests/test_di.py`.",
+  "footnotes": [
+    {
+      "id": "pyiv-named-matched",
+      "label": "pyiv Named/Matched",
+      "url": "https://rl337.org/pyiv/",
+      "note": "Named / Matched / Annotated constructor injection"
+    }
+  ]
+}

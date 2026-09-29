@@ -5,19 +5,31 @@ hooks. Hosts subclass and override ``get_inference_class`` /
 ``get_harness_class``. ``SettingsConfig`` resolves those classes from string
 maps (the OpenAPI/CLI configuration path).
 
+Same-lane Completer / JudgeProvider **flavors** are additional ``Named``
+bindings from ``completer_bindings()`` / ``judge_bindings()``. Host harnesses
+select them with ``Annotated[T, Named(...)]`` / ``Matched(...)`` on
+constructors (not field injection).
+
 Hosts must wire via Config + ``get_injector`` (or the OpenAPI ``run()``
 facade). Manual harness construction is not a supported host path.
+Prefer ``mechaharness.di.get_injector`` so Named default Completer aliases
+share identity with ``InferenceStrategy``.
 """
 
 from __future__ import annotations
 
 import inspect
 import sys
-from typing import Any, ForwardRef, get_type_hints
+from collections.abc import Callable, Sequence
+from typing import Any, ForwardRef, Union, cast, get_type_hints
 
 from eval_type_backport import eval_type_backport
-from pyiv import Config, get_injector
+from pyiv import Config, Stage
 from pyiv.injector import Injector
+from pyiv.injector import get_injector as _pyiv_get_injector
+from pyiv.key import Key, Named
+from pyiv.provider import InstanceProvider
+from pyiv.scope import SingletonScope
 
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
 from mechaharness.config import Settings
@@ -30,7 +42,12 @@ from mechaharness.core.access import (
     InMemoryCostAccountant,
 )
 from mechaharness.core.completer import Completer
-from mechaharness.core.environment import InferenceEnvironment, NoOpInferenceEnvironment
+from mechaharness.core.environment import (
+    LANE_JUDGE,
+    LANE_REASON,
+    InferenceEnvironment,
+    NoOpInferenceEnvironment,
+)
 from mechaharness.core.events import EventLog, default_event_log
 from mechaharness.graph_executor import (
     DefaultGraphFailurePolicy,
@@ -52,6 +69,77 @@ from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
 from mechaharness.tools.base import ToolRegistry
+
+CompleterBinding = tuple[
+    Named, Union[type, Completer, Callable[..., Completer]]
+]
+JudgeBinding = tuple[
+    Named, Union[type, JudgeProvider, Callable[..., JudgeProvider]]
+]
+
+
+class _BoundInjectorProvider:
+    """Provider that resolves a type once the injector is bound."""
+
+    def __init__(self, target: type) -> None:
+        self._target = target
+        self._injector: Injector | None = None
+
+    def bind(self, injector: Injector) -> None:
+        self._injector = injector
+
+    def get(self) -> Any:
+        if self._injector is None:
+            raise RuntimeError(
+                "Named binding resolved before injector bind; use "
+                "mechaharness.di.get_injector or inject Completer / "
+                "InferenceStrategy first"
+            )
+        return self._injector.inject(self._target)
+
+
+class _BoundFactoryProvider:
+    """Provider wrapping a zero-arg or ``injector=`` factory after bind."""
+
+    def __init__(self, factory: Callable[..., Any]) -> None:
+        self._factory = factory
+        self._injector: Injector | None = None
+
+    def bind(self, injector: Injector) -> None:
+        self._injector = injector
+
+    def get(self) -> Any:
+        if self._injector is None:
+            raise RuntimeError(
+                "Named factory binding resolved before injector bind; use "
+                "mechaharness.di.get_injector"
+            )
+        sig = inspect.signature(self._factory)
+        if "injector" in sig.parameters:
+            return self._factory(injector=self._injector)
+        return self._factory()
+
+
+def _normalize_named_bindings(
+    bindings: Sequence[tuple[Named, Any]],
+    *,
+    hook: str,
+) -> list[tuple[Named, Any]]:
+    items = list(bindings)
+    if not items:
+        raise ValueError(f"{hook}() must return at least one binding")
+    defaults = [named for named, _ in items if named.default]
+    if len(items) == 1 and not defaults:
+        named, impl = items[0]
+        items = [(Named(sorted(named.tags), default=True), impl)]
+        defaults = [items[0][0]]
+    if len(defaults) != 1:
+        raise ValueError(
+            f"{hook}() requires exactly one Named(..., default=True) "
+            f"or a single binding; got {len(defaults)} defaults among "
+            f"{len(items)} bindings"
+        )
+    return items
 
 _INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai": {"base_url": "https://api.openai.com/v1"},
@@ -85,6 +173,9 @@ def _expose_ctor_type_hints(cls: type) -> None:
     ``from __future__ import annotations`` those are strings. On Python 3.9,
     ``X | Y`` also needs ``eval_type_backport``. Rewriting
     ``__init__.__annotations__`` exposes real types for the injector.
+
+    Uses ``include_extras=True`` so ``Annotated[T, Named|Matched]`` metadata
+    survives for qualified constructor injection.
     """
     init = getattr(cls, "__init__", None)
     if init is None or init is object.__init__:
@@ -92,7 +183,7 @@ def _expose_ctor_type_hints(cls: type) -> None:
     init_module = getattr(init, "__module__", cls.__module__)
     globalns = getattr(sys.modules.get(init_module), "__dict__", {})
     try:
-        hints = get_type_hints(init, globalns=globalns)
+        hints = get_type_hints(init, globalns=globalns, include_extras=True)
     except (TypeError, NameError):
         hints = {}
         for name, param in inspect.signature(init).parameters.items():
@@ -112,6 +203,60 @@ def _expose_ctor_type_hints(cls: type) -> None:
 class MechaHarnessConfig(Config):
     """Template-method pyiv Config. Override the ``get_*_class`` hooks."""
 
+    def __init__(self) -> None:
+        self._mh_bound_providers: list[Any] = []
+        super().__init__()  # type: ignore[no-untyped-call]
+
+    def _bind_mh_providers(self, injector: Injector) -> None:
+        for provider in self._mh_bound_providers:
+            provider.bind(injector)
+
+    def _implementation_for_key(
+        self,
+        impl: Any,
+        *,
+        alias_to: type | None = None,
+    ) -> Any:
+        """Map a binding value to a ``register_key`` implementation."""
+        if alias_to is not None:
+            alias_provider = _BoundInjectorProvider(alias_to)
+            self._mh_bound_providers.append(alias_provider)
+            return alias_provider
+        if isinstance(impl, type):
+            return impl
+        if hasattr(impl, "get") and callable(impl.get) and not isinstance(impl, type):
+            return impl
+        if callable(impl):
+            factory_provider = _BoundFactoryProvider(impl)
+            self._mh_bound_providers.append(factory_provider)
+            return factory_provider
+        return InstanceProvider(impl)
+
+    def _register_named_bindings(
+        self,
+        abstract: type,
+        bindings: Sequence[tuple[Named, Any]],
+        *,
+        hook: str,
+        alias_default_to: type | None = None,
+        default_impl: Any | None = None,
+    ) -> None:
+        normalized = _normalize_named_bindings(bindings, hook=hook)
+        scope = SingletonScope()  # type: ignore[no-untyped-call]
+        for named, impl in normalized:
+            if isinstance(impl, type):
+                _expose_ctor_type_hints(impl)
+            alias_to = None
+            if (
+                named.default
+                and alias_default_to is not None
+                and default_impl is not None
+                and impl is default_impl
+            ):
+                alias_to = alias_default_to
+            key_impl = self._implementation_for_key(impl, alias_to=alias_to)
+            self.register_key(Key(abstract, named), key_impl, scope=scope)
+
     def configure(self) -> None:
         event_log = self.get_event_log()
         self.register_instance(Settings, self.get_settings())
@@ -122,7 +267,6 @@ class MechaHarnessConfig(Config):
         self.register_instance(CostAccountant, self.get_cost_accountant())
         self.register_instance(InferenceEnvironment, self.get_inference_environment())
         self.register_instance(APIConnectionConfig, self.get_judge_connection())
-        self.register_instance(JudgeProvider, self.get_judge_provider())
         self.register_instance(GraphNodeRunnerRegistry, self.get_node_runner_registry())
         self.register_instance(GraphFailurePolicy, self.get_graph_failure_policy())
         self.register_instance(GraphEscalation, self.get_graph_escalation())
@@ -136,14 +280,55 @@ class MechaHarnessConfig(Config):
         _expose_ctor_type_hints(graph_executor_cls)
         _expose_ctor_type_hints(GraphExecutor)
 
-        self.register(InferenceStrategy, inference_cls, singleton=True)
+        def make_inference(injector: Injector) -> InferenceStrategy:
+            self._bind_mh_providers(injector)
+            return cast(
+                InferenceStrategy,
+                injector._instantiate(inference_cls),  # noqa: SLF001
+            )
+
+        self.register(InferenceStrategy, make_inference, singleton=True)
 
         def make_completer(injector: Injector) -> Completer:
+            self._bind_mh_providers(injector)
             strategy = injector.inject(InferenceStrategy)
             assert isinstance(strategy, Completer)
             return strategy
 
+        # Thin alias so bare inject(Completer) shares identity with InferenceStrategy
+        # (including host register_instance overrides). Named default also aliases.
         self.register(Completer, make_completer, singleton=True)
+        self._register_named_bindings(
+            Completer,
+            self.completer_bindings(),
+            hook="completer_bindings",
+            alias_default_to=InferenceStrategy,
+            default_impl=inference_cls,
+        )
+
+        judge_bindings = self.judge_bindings()
+        self._register_named_bindings(
+            JudgeProvider,
+            judge_bindings,
+            hook="judge_bindings",
+        )
+        default_judge_named = next(
+            named
+            for named, _ in _normalize_named_bindings(
+                judge_bindings, hook="judge_bindings"
+            )
+            if named.default
+        )
+
+        def make_judge(injector: Injector) -> JudgeProvider:
+            self._bind_mh_providers(injector)
+            return cast(
+                JudgeProvider,
+                injector.inject(Key(JudgeProvider, default_judge_named)),
+            )
+
+        self.register(JudgeProvider, make_judge, singleton=True)
+
         self.register(AbstractHarness, harness_cls, singleton=True)
         self.register(GraphExecutor, graph_executor_cls, singleton=True)
 
@@ -194,6 +379,27 @@ class MechaHarnessConfig(Config):
     def get_judge_provider(self) -> JudgeProvider:
         """Judge backend (default: System One over ``get_judge_connection()``)."""
         return SystemOneJudgeProvider(connection=self.get_judge_connection())
+
+    def completer_bindings(self) -> Sequence[CompleterBinding]:
+        """Named Completer flavors (lane + host tags).
+
+        Default: ``Named([reason], default=True)`` → ``get_inference_class()``,
+        aliased to the ``InferenceStrategy`` singleton so bare
+        ``inject(Completer)`` and the Named default share identity.
+
+        Hosts append flavors (e.g. ``Named(["reason", "code", "deep"])``).
+        Exactly one ``default=True`` (or a single binding) is required.
+        """
+        return [(Named([LANE_REASON], default=True), self.get_inference_class())]
+
+    def judge_bindings(self) -> Sequence[JudgeBinding]:
+        """Named JudgeProvider flavors.
+
+        Default: ``Named([judge], default=True)`` → ``get_judge_provider()``.
+        Hosts append flavors (e.g. ``Named(["judge", "heavy"])``).
+        Exactly one ``default=True`` (or a single binding) is required.
+        """
+        return [(Named([LANE_JUDGE], default=True), self.get_judge_provider())]
 
     def include_subagent_tools(self) -> bool:
         """When True, parent harnesses get list_subagents / get_subagent_events."""
@@ -278,7 +484,7 @@ class SettingsConfig(MechaHarnessConfig):
         self._provided_settings = settings
         self._provided_tools = tools
         self._resolved_settings: Settings | None = None
-        super().__init__()  # type: ignore[no-untyped-call]
+        super().__init__()
 
     def get_settings(self) -> Settings:
         if self._resolved_settings is None:
@@ -350,6 +556,24 @@ def list_inference_backends() -> list[str]:
 def list_harness_families() -> list[str]:
     """Sorted names from the default ``SettingsConfig.harness_classes()`` map."""
     return sorted(SettingsConfig().harness_classes())
+
+
+def get_injector(
+    config: type[Config] | Config,
+    *,
+    stage: Stage = Stage.DEVELOPMENT,
+) -> Injector:
+    """Create an injector and bind MechaHarness Named alias providers.
+
+    Prefer this over ``pyiv.get_injector`` so default Completer Named bindings
+    that alias ``InferenceStrategy`` resolve safely. Injecting ``Completer`` or
+    ``InferenceStrategy`` first also binds aliases when using pyiv directly.
+    """
+    injector = _pyiv_get_injector(config, stage=stage)
+    bind = getattr(injector._config, "_bind_mh_providers", None)  # noqa: SLF001
+    if callable(bind):
+        bind(injector)
+    return injector
 
 
 def build_injector(

@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from pyiv import get_injector
-
 from mechaharness.core.access import AccessPolicy, GrantPolicyLike
 from mechaharness.core.completer import Completer
 from mechaharness.core.events import EventLog
-from mechaharness.di import MechaHarnessConfig
+from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.base import InferenceStrategy

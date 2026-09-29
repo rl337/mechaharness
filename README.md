@@ -5,7 +5,7 @@
 Python **agent harness** for hosts that compose inference safely — not a thin
 chat-client wrapper. Founding principles:
 
-1. **Modular via dependency injection** — pyiv ≥ 0.4.1 `MechaHarnessConfig`;
+1. **Modular via dependency injection** — pyiv ≥ 0.4.2 `MechaHarnessConfig`;
    hosts subclass and compose (no hand-wired harnesses / string registries)
 2. **Multi-model / lanes native** — reason, judge, and media lanes;
    `Completion` / `Judgement` / `Generation` outcomes
@@ -71,9 +71,7 @@ asyncio.run(main())
 DI (pyiv Config hooks):
 
 ```python
-from pyiv import get_injector
-
-from mechaharness.di import MechaHarnessConfig
+from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
