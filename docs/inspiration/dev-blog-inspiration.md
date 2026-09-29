@@ -1,12 +1,12 @@
-# Developer Blog Inspiration for MechaHarness / June
+# Developer Blog Inspiration for MechaHarness
 
-> Living design-notes document. External developer material is evidence and inspiration, not specification. Requirements below generalize ideas only where they strengthen MechaHarness and June.
+> Living design-notes document for the reusable MechaHarness execution library. External developer material is evidence and inspiration, not specification. June is a client/orchestrator and maintains a separate companion inspiration document.
 
 Last reviewed: 2026-09-29
 
 ## Purpose
 
-This document tracks useful agent-harness ideas from Claude/Anthropic and Cursor and translates them into testable MechaHarness requirements. It is deliberately provenance-heavy: every inspiration-derived requirement names the source material that motivated it. The goal is not product compatibility. It is to challenge MechaHarness assumptions against production agent systems and retain only patterns that generalize.
+This document tracks useful agent-harness ideas from Claude/Anthropic and Cursor and translates them into testable requirements for the reusable MechaHarness execution library. It is deliberately provenance-heavy: every inspiration-derived requirement names the source material that motivated it. The goal is not product compatibility. It is to challenge MechaHarness assumptions against production agent systems and retain only patterns that generalize.\n\n## Ownership boundary with June\n\nMechaHarness owns reusable execution vocabulary and mechanisms: primitives, injectable protocols, graph execution semantics, runtime linkage/validation, capability envelopes, context-provider interfaces, verification/delegation/advisor policies, durable execution contracts, generic observability/evaluation hooks, and **parameterized reusable graph-template definitions**. Generic patterns such as fan-out/aggregate, verify/repair, independent review, and environment repair belong here when they are useful beyond June.\n\nJune is a client of MechaHarness and its own orchestrator. June owns scheduling, task lifecycle, document management, knowledge-graph operation, issue/work tracking, persistent goals, product policy, provider implementations, and the decision about **which MechaHarness templates to instantiate, bind, sequence, schedule, and compose for June behavior**. June does not fork or reimplement generic template definitions merely because it owns orchestration.\n\nA June requirement may motivate a generic MechaHarness capability, but this document SHOULD state the reusable interface rather than encode June-specific workflow policy.
 
 ## Requirements
 
@@ -25,7 +25,7 @@ This document tracks useful agent-harness ideas from Claude/Anthropic and Cursor
 - Policies that no longer improve outcomes SHOULD be removable without changing task semantics.
 - Token, latency, compute, memory and coordination overhead SHOULD count against retaining scaffolding.
 
-For June, stronger local models should be allowed to absorb work previously supplied by explicit scaffolding rather than leaving a fossil layer of obsolete prompts and control logic.
+Client orchestrators such as June SHOULD be able to absorb or retire scaffolding as model capability changes without requiring task semantics to be rewritten.
 
 ### 2. Primitive linkage and runtime graph resolution are distinct
 
@@ -99,7 +99,7 @@ Every repeating graph/subgraph MUST expose a trigger, continuation condition, su
 - Static instructions SHOULD be separated from task-specific retrieved context.
 - Context consumption SHOULD be observable and attributable to providers.
 
-For June, vector/KG memory is therefore a context provider, not permission to dump remembered material into every turn.
+A client knowledge graph or document system, such as June's, is therefore a ContextProvider implementation rather than permission for MechaHarness to own application memory policy.
 
 ### 7. Delegation requires capability boundaries and measurable coordination cost
 
@@ -245,7 +245,7 @@ This is the MechaHarness "test kitchen": observe a failure or opportunity, form 
 - Event handling SHOULD re-resolve relevant linkage/environment state before resuming.
 - Conversational steering SHOULD update running goals at defined safe boundaries rather than necessarily abort current atomic work.
 
-For June, reminders, monitoring, background research, maintenance and sleep/dreaming become persistent goals rather than pretend conversations.
+Persistent-goal ownership belongs to the client orchestrator. MechaHarness SHOULD provide resumable execution and event-compatible contracts that a client such as June can invoke when a goal wakes.
 
 ### 18. Advisor is sparse, non-binding reasoning escalation
 
@@ -269,7 +269,7 @@ For June, reminders, monitoring, background research, maintenance and sleep/drea
 
 **Architectural distinction:** a subagent owns delegated work; an advisor observes a decision state and returns counsel while the caller retains ownership. Model escalation replaces/upgrades the executor; advising lets the existing executor continue while purchasing stronger or specialized reasoning only at selected boundaries.
 
-For June this permits a small/medium local worker to preserve task continuity while consulting a larger reasoning model sparsely. It is also a natural future target for a small learned/Jev-like policy deciding whether consultation is worth its marginal cost.
+This permits a client such as June to preserve executor continuity while consulting a larger reasoning model sparsely. The generic consultation decision is also a natural target for a small learned/Jev-like policy deciding whether advice is worth its marginal cost.
 
 ## Candidate reusable primitives
 
@@ -289,20 +289,22 @@ For June this permits a small/medium local worker to preserve task continuity wh
 These SHOULD normally be interfaces/protocols rather than framework-mandated concrete implementations.
 
 
-## June-specific implications
+## Client-orchestrator interface implications
 
-June SHOULD use MechaHarness so that:
-1. Ordinary conversational turns remain cheap/shallow when orchestration is unnecessary.
-2. Focused tool/child execution can occur without contaminating the main conversational context.
-3. Complex goals can instantiate template subgraphs only after available tools, models, memory sources, permissions and environment are known.
-4. Final runtime linkage validation occurs before those graphs materially execute.
-5. Verification effort scales with consequence and uncertainty.
-6. Durable state, not the context window, is authoritative for long-running work.
-7. Sleep/dreaming can mine traces for recurring failure classes and propose changes to gotchas, routing, retrieval or graph structure.
-8. Proposed self-improvements are evaluated against retained cases before promotion.
-9. Model upgrades trigger re-evaluation and possible deletion of obsolete scaffolding.
-10. Security boundaries remain structurally enforced even when the model is confused or prompt-injected.
-11. Sparse Advisor calls can buy stronger reasoning without handing routine execution to the largest model.
+MechaHarness SHOULD make it possible for a client orchestrator such as June to:
+1. Keep ordinary turns cheap when complex graph execution is unnecessary.
+2. Spawn focused child/tool executions without automatically contaminating parent context.
+3. Instantiate reusable parameterized graph templates after tools, models, providers, permissions and environment are known.
+4. Perform final runtime linkage validation before material execution.
+5. Scale verification with consequence and uncertainty.
+6. Persist execution/checkpoint state independently of model context.
+7. Mine structured traces externally for recurring failure classes and proposed policy changes.
+8. Evaluate proposed harness changes against retained cases before promotion.
+9. Re-evaluate and retire obsolete scaffolding after model/runtime upgrades.
+10. Enforce security boundaries structurally despite model confusion or prompt injection.
+11. Consult sparse Advisors without transferring task ownership.
+
+The scheduler, task runner, persistent-goal store, document manager, knowledge graph, issue tracker, and concrete June orchestration remain outside this library.
 
 ## Monitoring protocol
 
@@ -318,7 +320,7 @@ When refreshing this document:
 9. Prefer testable MUST/SHOULD/MAY statements.
 10. If no material document change exists, create no branch, commit or PR.
 11. If material change exists, create a branch from current `main`, update this file, verify the diff is non-empty, and open a **draft PR**.
-12. The PR body MUST identify triggering sources, summarize proposed requirements/refinements/retirements, explain relevance to MechaHarness/June, and call out uncertainty or architectural tension.
+12. The PR body MUST identify triggering sources, summarize proposed requirements/refinements/retirements, explain relevance to MechaHarness and any client-interface implication, and call out uncertainty or architectural tension.
 13. Future updates after this bootstrap SHOULD be incremental.
 
 ## Source ledger: Claude / Anthropic
