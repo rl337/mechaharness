@@ -175,3 +175,116 @@ MechaHarness SHOULD distinguish advisory context, behavioral instruction, execut
 - Checkpoints MUST identify graph/component versions, inputs, completed nodes, pending work and relevant side effects.
 - Resume MUST detect incompatible graph/config changes instead of silently continuing with altered semantics.
 
+
+### 13. Model routing optimizes an outcome frontier
+
+**Sources**
+- Claude, **How and when to use subagents in Claude Code** (2026-04-07): https://claude.com/blog/subagents-in-claude-code
+- Cursor, **How we compare model quality in Cursor** (2026-03-11): https://cursor.com/blog/cursorbench
+- Cursor, **Continually improving our agent harness** (2026-04-30): https://cursor.com/blog/continually-improving-agent-harness
+
+**Requirements**
+- Model selection MUST be injectable at graph and node/subgraph level.
+- Nodes SHOULD declare capability needs instead of hard-coding model identity where practical.
+- Routing SHOULD consider correctness together with latency, context size, memory pressure, energy/compute and monetary cost where relevant.
+- Model switching inside accumulated context SHOULD account for context-transfer/cache cost and semantic loss.
+- Fresh specialized child execution MAY be preferable to mid-context model replacement.
+- Escalation from a smaller worker to a larger reasoning model SHOULD be representable as policy.
+
+### 14. Harness changes are hypotheses requiring online and offline evidence
+
+**Sources**
+- Cursor, **Continually improving our agent harness** (2026-04-30): https://cursor.com/blog/continually-improving-agent-harness
+- Cursor, **How we compare model quality in Cursor** (2026-03-11): https://cursor.com/blog/cursorbench
+
+**Requirements**
+- A harness change SHOULD be expressible as a testable hypothesis with expected affected metrics.
+- MechaHarness SHOULD support replay/offline evaluation plus production/online telemetry.
+- Evaluation SHOULD be multidimensional where correctness, latency, compute/token use, tool churn or interaction behavior can trade off.
+- Eval corpora SHOULD evolve with real workloads rather than freeze into a benchmark.
+- Harness versions and experiment assignments SHOULD be recorded in traces.
+
+This is the MechaHarness "test kitchen": observe a failure or opportunity, form a harness hypothesis, evaluate it, retain improvements and retire regressions.
+
+### 15. Autonomy is risk-scaled, not binary
+
+**Sources**
+- Cursor, **Governing agent autonomy with Auto-review** (2026-06-11): https://cursor.com/blog/agent-autonomy-auto-review
+- Cursor, **Implementing a secure sandbox for local agents** (2026-02-18): https://cursor.com/blog/agent-sandboxing
+- Claude, **How Anthropic secures its AI-native software development lifecycle** (2026-07-21): https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle
+
+**Requirements**
+- Permission policy SHOULD classify actions by consequence/risk rather than globally enable/disable autonomy.
+- Low-risk actions MAY proceed under structural sandbox constraints without repeated approval.
+- Crossing declared trust boundaries SHOULD trigger stronger verification, narrower capabilities, explicit approval or denial according to policy.
+- Approval frequency SHOULD be treated as a safety/usability metric because excessive prompting degrades meaningful review.
+
+### 16. The execution environment is part of the linkage contract
+
+**Sources**
+- Cursor, **What we've learned building cloud agents** (2026-06-02): https://cursor.com/blog/cloud-agent-lessons
+- Cursor, **Cursor agents can now control their own computers** (2026-02-24): https://cursor.com/blog/agent-computer-use
+
+**Requirements**
+- Environment capabilities and health MUST be discoverable before dependent graph work executes.
+- Missing secrets, routes, binaries, resource capacity and incompatible runtime state SHOULD become structured linkage/environment failures where possible.
+- Environment repair MAY itself be a bounded subgraph.
+- Environment identity/version SHOULD be durable execution provenance.
+
+### 17. Persistent goals and event-triggered execution are not long chat turns
+
+**Sources**
+- Cursor, **Build agents that run automatically** (2026-03-05): https://cursor.com/blog/automations
+- Cursor, **Introducing Projects** (2026-09-10): https://cursor.com/blog/projects
+- Cursor, **Cloud Agents and Cursor Harness Improvements** (2026-08-19): https://cursor.com/changelog/08-19-26
+
+**Requirements**
+- A goal MUST be able to outlive a conversational session.
+- Graph execution MAY wake from schedules, events, external state changes or child completion.
+- Persistent goals SHOULD store their own state, completion contract, subscriptions/triggers and graph checkpoint.
+- Event handling SHOULD re-resolve relevant linkage/environment state before resuming.
+- Conversational steering SHOULD update running goals at defined safe boundaries rather than necessarily abort current atomic work.
+
+For June, reminders, monitoring, background research, maintenance and sleep/dreaming become persistent goals rather than pretend conversations.
+
+### 18. Advisor is sparse, non-binding reasoning escalation
+
+**Sources**
+- Claude Code Docs, **Escalate hard decisions with the advisor tool** (reviewed 2026-09-29): https://code.claude.com/docs/en/advisor
+
+**Requirements**
+- MechaHarness SHOULD expose an `Advisor` and/or `AdvisorPolicy` distinct from delegation and model replacement.
+- The active executor MUST retain task ownership; advisor output is non-binding guidance.
+- Advisor model/provider selection SHOULD be injectable and capability-routed.
+- AdvisorPolicy SHOULD support sparse triggers such as consequential planning, repeated failure, unresolved hypotheses, uncertainty/evaluator thresholds and high-consequence completion.
+- Invocation MAY be model-, policy-, graph- or user-initiated.
+- Advisor input MUST use an explicit context contract. Full history MAY be supplied, but scoped summaries, evidence, traces, artifacts and retrieved state SHOULD also be supported.
+- Output SHOULD structure recommendations, uncertainty, assumptions, requested evidence and proposed next actions.
+- Executors MUST be able to reject/adapt advice when evidence contradicts it; disagreement SHOULD remain in the trace.
+- Advisor compatibility SHOULD participate in runtime linkage resolution.
+- Advisor use MUST be observable: trigger, advisor, supplied context, latency/resource cost, response, whether advice was followed and eventual outcome.
+- Effectiveness SHOULD be evaluable against equivalent execution without consultation.
+- Policies SHOULD support budgets/rate limits and avoid low-value routine consultation.
+- Optional-advisor failure MUST have an explicit fallback policy.
+
+**Architectural distinction:** a subagent owns delegated work; an advisor observes a decision state and returns counsel while the caller retains ownership. Model escalation replaces/upgrades the executor; advising lets the existing executor continue while purchasing stronger or specialized reasoning only at selected boundaries.
+
+For June this permits a small/medium local worker to preserve task continuity while consulting a larger reasoning model sparsely. It is also a natural future target for a small learned/Jev-like policy deciding whether consultation is worth its marginal cost.
+
+## Candidate reusable primitives
+
+- `LinkageResolver` — validates final runtime graph wiring and substrate capabilities.
+- `CapabilityEnvelope` — tools, permissions, context, model class and budgets available to an execution.
+- `StopContract` — continuation, success, abort and resource limits for repeating work.
+- `VerificationPolicy` — selects and executes appropriate verification.
+- `ContextProvider` — lazily supplies scoped, provenance-bearing context.
+- `DelegationPolicy` — chooses inline versus child/subgraph execution.
+- `Reviewer` / `Adversary` — isolated verification roles with explicit evidence contracts.
+- `CheckpointStore` — durable graph execution state.
+- `OutcomeContract` — machine-readable satisfactory-completion definition.
+- `HarnessExperiment` — A/B or hill-climb comparison of orchestration changes.
+- `Advisor` — accepts structured decision state and returns non-binding guidance.
+- `AdvisorPolicy` — decides whether consultation is warranted, required capability and supplied context.
+
+These SHOULD normally be interfaces/protocols rather than framework-mandated concrete implementations.
+
