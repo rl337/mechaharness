@@ -6,7 +6,19 @@ Last reviewed: 2026-09-29
 
 ## Purpose
 
-This document tracks useful agent-harness ideas from Claude/Anthropic and Cursor and translates them into testable requirements for the reusable MechaHarness execution library. It is deliberately provenance-heavy: every inspiration-derived requirement names the source material that motivated it. The goal is not product compatibility. It is to challenge MechaHarness assumptions against production agent systems and retain only patterns that generalize.\n\n## Ownership boundary with June\n\nMechaHarness owns reusable execution vocabulary and mechanisms: primitives, injectable protocols, graph execution semantics, runtime linkage/validation, capability envelopes, context-provider interfaces, verification/delegation/advisor policies, durable execution contracts, generic observability/evaluation hooks, and **parameterized reusable graph-template definitions**. Generic patterns such as fan-out/aggregate, verify/repair, independent review, and environment repair belong here when they are useful beyond June.\n\nJune is a client of MechaHarness and its own orchestrator. June owns scheduling, task lifecycle, document management, knowledge-graph operation, issue/work tracking, persistent goals, product policy, provider implementations, and the decision about **which MechaHarness templates to instantiate, bind, sequence, schedule, and compose for June behavior**. June does not fork or reimplement generic template definitions merely because it owns orchestration.\n\nA June requirement may motivate a generic MechaHarness capability, but this document SHOULD state the reusable interface rather than encode June-specific workflow policy.
+This document tracks useful agent-harness ideas from Claude/Anthropic and Cursor and translates them into testable requirements for the reusable MechaHarness execution library. It is deliberately provenance-heavy: every inspiration-derived requirement names the source material that motivated it. The goal is not product compatibility. It is to challenge MechaHarness assumptions against production agent systems and retain only patterns that generalize.
+
+## Ownership boundary with June
+
+MechaHarness owns reusable execution vocabulary and mechanisms: primitives, injectable protocols, graph execution semantics, runtime linkage/validation, capability envelopes, context-provider interfaces, verification/delegation/advisor policies, durable execution contracts, generic observability/evaluation hooks, and **parameterized reusable graph-template definitions**. Generic patterns such as fan-out/aggregate, verify/repair, independent review, and environment repair belong here when they are useful beyond June.
+
+June is a client of MechaHarness and its own orchestrator. June owns scheduling, task lifecycle, document management, knowledge-graph operation, issue/work tracking, persistent goals, product policy, provider implementations, and the decision about **which MechaHarness templates to instantiate, bind, sequence, schedule, and compose for June behavior**.
+
+The ownership boundary is between **abstract reusable template definitions** and **concrete executable graph realizations**. A MechaHarness template is intentionally incomplete: it exposes soft points for tools, providers, prompts/skills, model capabilities, budgets, persistence adapters, policies, task state, and other client-specific bindings. June code may instantiate that template, fill those soft points, add June-specific nodes or composition, and retain the resulting executable graph or workflow definition in the June repository. The fact that MechaHarness executes or validates that graph does not transfer ownership of the June-specific realization back into the library.
+
+A June-specific graph pattern MAY be born and remain in June while its shape is still coupled to June semantics. When repeated evidence shows a stable, reusable structure, its generic skeleton SHOULD be extracted into MechaHarness and its June-specific assumptions converted into explicit parameters/providers/contracts. June then consumes the promoted template. The reverse is also valid: a purportedly generic MechaHarness template that proves application-specific SHOULD be simplified, deprecated, or moved back toward the client boundary rather than preserved as accidental framework policy.
+
+A June requirement may therefore motivate a generic MechaHarness capability, but this document SHOULD state the reusable interface rather than encode June-specific workflow policy.
 
 ## Requirements
 
@@ -289,12 +301,31 @@ This permits a client such as June to preserve executor continuity while consult
 These SHOULD normally be interfaces/protocols rather than framework-mandated concrete implementations.
 
 
+### 19. Template incubation and promotion are evidence-driven
+
+**Sources**
+- Claude, **Introducing dynamic workflows in Claude Code** (2026-05-28): https://claude.com/blog/introducing-dynamic-workflows-in-claude-code
+- Claude, **A harness for every task: dynamic workflows in Claude Code** (2026-06-02): https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code
+- Cursor, **Continually improving our agent harness** (2026-04-30): https://cursor.com/blog/continually-improving-agent-harness
+
+**Requirements**
+- A reusable `GraphTemplate` SHOULD expose explicit soft points rather than embed client-specific tools, providers, prompts, models, persistence, product policy or durable application state.
+- Template instantiation SHOULD be able to produce a concrete executable graph whose client-specific bindings remain owned by the client repository.
+- MechaHarness MUST be able to validate and execute such client-owned concrete graphs without requiring their application bindings or workflow definitions to move into MechaHarness.
+- A graph/workflow MAY incubate entirely in a client such as June while its topology and semantics are still application-specific or unstable.
+- Repeated successful use, repeated duplication, or evidence of a stable generic topology SHOULD trigger an abstraction review rather than automatic promotion.
+- Promotion into MechaHarness SHOULD extract only the reusable skeleton and convert client assumptions into explicit parameters, providers, contracts or policy hooks.
+- Promotion SHOULD preserve provenance and tests connecting the original client workflow to the extracted template so behavior drift can be detected.
+- A MechaHarness template that later proves application-specific SHOULD be eligible for deprecation, simplification or demotion rather than becoming permanent framework scaffolding.
+
+This creates a deliberate incubation path: **client concrete graph → observed stable pattern → abstract reusable template → MechaHarness → client rebinds the promoted template**.
+
 ## Client-orchestrator interface implications
 
 MechaHarness SHOULD make it possible for a client orchestrator such as June to:
 1. Keep ordinary turns cheap when complex graph execution is unnecessary.
 2. Spawn focused child/tool executions without automatically contaminating parent context.
-3. Instantiate reusable parameterized graph templates after tools, models, providers, permissions and environment are known.
+3. Instantiate reusable parameterized graph templates after tools, models, providers, permissions and environment are known, producing concrete client-owned executable graphs from those bindings.
 4. Perform final runtime linkage validation before material execution.
 5. Scale verification with consequence and uncertainty.
 6. Persist execution/checkpoint state independently of model context.
