@@ -146,7 +146,7 @@ axes. Wiring is <strong>pyiv dependency injection first</strong>. OpenAPI (<code
 </div>
 <section id="dependency-injection">
 <h2>Dependency injection<a class="headerlink" href="#dependency-injection" title="Link to this heading"></a></h2>
-<p><strong>Pattern:</strong> Template-method pyiv <code class="docutils literal notranslate"><span class="pre">Config</span></code> + constructor injection (pyiv ≥ 0.4.1)<br />
+<p><strong>Pattern:</strong> Template-method pyiv <code class="docutils literal notranslate"><span class="pre">Config</span></code> + constructor injection (pyiv ≥ 0.4.2)<br />
 <strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.di</span></code></p>
 <p>Hosts <strong>must</strong> subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (or use <code class="docutils literal notranslate"><span class="pre">run()</span></code>). Hand-constructing
 harness families is unsupported. <code class="docutils literal notranslate"><span class="pre">configure()</span></code> class-binds <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>
@@ -154,7 +154,10 @@ and <code class="docutils literal notranslate"><span class="pre">AbstractHarness
 registers <code class="docutils literal notranslate"><span class="pre">Settings</span></code>, <code class="docutils literal notranslate"><span class="pre">HarnessConfig</span></code>, <code class="docutils literal notranslate"><span class="pre">ToolRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>,
 <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code>,
 <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> (judge), <code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphNodeRunnerRegistry</span></code>,
-<code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>, and <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code>. Subclasses override
+<code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>, <code class="docutils literal notranslate"><span class="pre">OperationRegistry</span></code>,
+<code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code>, <code class="docutils literal notranslate"><span class="pre">VerificationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">DelegationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">Advisor</span></code>,
+<code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">ContextProviderRegistry</span></code>,
+<code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>, and <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code>. Subclasses override
 <code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called from the
 Config constructor). Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (or
 <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>) for deny-by-default tool grants; compose reusable sets with
@@ -163,7 +166,8 @@ Config constructor). Override <code class="docutils literal notranslate"><span c
 <code class="docutils literal notranslate"><span class="pre">get_inference_environment()</span></code> for host profile probes.
 Override <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> for judge HTTP and
 wire adapters. Override <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code> /
-<code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code> for plan execution.</p>
+<code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> for plan execution.</p>
 <p><strong>Config ownership:</strong> lane- and provider-specific knobs belong on the owning
 injectable (e.g. <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> for <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>), not
 as a growing pile of fields on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Providers are never attributes of
@@ -185,9 +189,22 @@ fail), optional <code class="docutils literal notranslate"><span class="pre">Gra
 <code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code> plus per-node events. Bind via Config
 hooks <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>,
 <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get_graph_executor_class()</span></code> — not Settings.</p>
-<p>Do not add string registries or a global injector. Domain types stay pyiv-free.
-Same-lane Completer flavors for nested subagents can use pyiv <code class="docutils literal notranslate"><span class="pre">Named</span></code> /
-<code class="docutils literal notranslate"><span class="pre">Matched</span></code> keys when a host Config needs more than one Completer binding.</p>
+<p>Do not add string registries or a global injector. Domain types stay pyiv-free.</p>
+<p><strong>Lanes vs flavors:</strong> <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code> lanes (<code class="docutils literal notranslate"><span class="pre">reason</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> /
+<code class="docutils literal notranslate"><span class="pre">media</span></code>) are capability partitions. Same-lane Completer / JudgeProvider
+<strong>flavors</strong> are extra pyiv <code class="docutils literal notranslate"><span class="pre">Named</span></code> bindings from
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.completer_bindings()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">judge_bindings()</span></code>; host constructors select them with
+<code class="docutils literal notranslate"><span class="pre">Annotated[T,</span> <span class="pre">Named(...)]</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched(...)</span></code> (pyiv ≥ 0.4.2). See
+<a class="reference internal" href="guides/dependency-injection.html"><span class="std std-doc">Dependency injection</span></a>.</p>
+<p>Before substantive work, <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> runs an injectable
+<code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code> (runner kinds, grants, operation binds, stop contracts,
+envelopes, environment). Checkpoints carry a config/graph fingerprint so
+resume refuses incompatible changes. Parameterized <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code>s and
+policies (<code class="docutils literal notranslate"><span class="pre">VerificationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">DelegationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code>) are
+library-owned; hosts such as June instantiate them via Config without
+owning template definitions. See
+<a class="reference internal" href="inspiration/requirements-map.html"><span class="std std-doc">Inspiration requirements map</span></a>.</p>
 </section>
 <section id="host-extension">
 <h2>Host extension<a class="headerlink" href="#host-extension" title="Link to this heading"></a></h2>
