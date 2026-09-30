@@ -104,8 +104,10 @@
              
   <section id="cost">
 <h1>Cost<a class="headerlink" href="#cost" title="Link to this heading"></a></h1>
-<p>Ledger and unit pricing for completer calls and successful tool runs. Module:
-<code class="docutils literal notranslate"><span class="pre">mechaharness.core.access</span></code>. Stability: evolving.</p>
+<p>Ledger and unit pricing for completer calls and successful tool runs, plus
+graph-execution budgets. Modules: <code class="docutils literal notranslate"><span class="pre">mechaharness.core.access</span></code> (Ability units /
+<code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>) and <code class="docutils literal notranslate"><span class="pre">mechaharness.budget</span></code> (<code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">Budget</span></code>).
+Stability: evolving.</p>
 <section id="surface">
 <h2>Surface<a class="headerlink" href="#surface" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
@@ -116,7 +118,7 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Module</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.core.access</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.core.access</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.budget</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Event</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">core:cost</span></code></p></td>
@@ -137,6 +139,16 @@ profile counts as simple / 1). Tool cost is that tool’s <code class="docutils 
 <code class="docutils literal notranslate"><span class="pre">run_id</span></code> are set. When a completer returns OpenAI-style <code class="docutils literal notranslate"><span class="pre">usage</span></code>, those
 token counts are stored on the entry and on the run <code class="docutils literal notranslate"><span class="pre">CostReport</span></code> (local
 Spark/$0 pricing can still use Ability units while tracking tokens).</p>
+</section>
+<section id="graph-budgets">
+<h2>Graph budgets<a class="headerlink" href="#graph-budgets" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code> declares optional <code class="docutils literal notranslate"><span class="pre">soft_limit</span></code> and <code class="docutils literal notranslate"><span class="pre">hard_limit</span></code> (abstract cost
+units). <code class="docutils literal notranslate"><span class="pre">hard_limit=None</span></code> means unlimited. <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run</span></code> <strong>requires</strong> a
+<code class="docutils literal notranslate"><span class="pre">budget_policy</span></code>; node attempts charge a shared <code class="docutils literal notranslate"><span class="pre">Budget</span></code> (including nested
+subgraphs). Soft breach cancels remaining open nodes and returns
+<code class="docutils literal notranslate"><span class="pre">soft_exhausted</span></code>. Hard breach fails open nodes with prejudice
+(<code class="docutils literal notranslate"><span class="pre">hard_budget_exceeded</span></code>). Stories: <code class="docutils literal notranslate"><span class="pre">fangore_insp_graph_budget</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_insp_budget_subgraph_rollup</span></code>.</p>
 </section>
 <section id="harness">
 <h2>Harness<a class="headerlink" href="#harness" title="Link to this heading"></a></h2>

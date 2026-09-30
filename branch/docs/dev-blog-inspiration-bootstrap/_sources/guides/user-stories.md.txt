@@ -425,6 +425,22 @@ Covers: POL-04, GAT-04.
 
 Kind `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
 
+### `fangore_insp_budget_subgraph_rollup` — Roll nested subgraph spend into the parent budget
+
+When a parent step embeds a child graph, child node costs must count against the same budget the parent is running under. After the child spends enough to hit the soft limit, later parent steps wind down instead of starting. Complements `fangore_insp_graph_budget` and `fangore_insp_dynamic_subgraph`.[^insp-budget-rollup]
+
+#### Implementation
+
+`GraphExecutor` passes the parent `Budget` into nested `run` for subgraph nodes so charges aggregate. Soft breach after the child cancels remaining parent work (`soft_exhausted`).
+
+#### Validation
+
+Kind `graph_budget_subgraph_rollup`. Soft expects aggregated spent, soft level, and cancelled downstream parent node.
+
+#### Footnotes
+
+[^insp-budget-rollup]: [Inspiration dynamic subgraphs + budgets](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 3 nested graphs share observable resource ceilings with the parent
+
 ### `fangore_insp_capability_envelope` — Narrow child envelopes without silent parent inheritance
 
 Delegated work gets an explicit capability envelope. Children must not inherit the parent's full grants, and widening must fail. Accepts inspiration requirement 7[^insp-r07].
@@ -475,7 +491,7 @@ Kind `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume faile
 
 ### `fangore_insp_dynamic_subgraph` — Nest a child graph as an observable subgraph
 
-Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Accepts inspiration requirement 3[^insp-r03].
+Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`. Accepts inspiration requirement 3[^insp-r03].
 
 #### Implementation
 
@@ -504,6 +520,22 @@ Kind `failure_attribution_trace`. Soft expects linkage category and repeated cla
 #### Footnotes
 
 [^insp-r11]: [Inspiration requirements (req 11: fix the process)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 11 — fix the process
+
+### `fangore_insp_graph_budget` — Enforce soft and hard spend limits on graph runs
+
+Every graph run must declare how much spend is allowed. Crossing the soft limit winds remaining steps down without treating the job as a hard failure. Crossing the hard limit stops the run immediately. Hard can also be unlimited when no ceiling applies. Related: `fangore_insp_budget_subgraph_rollup` for nested spend, and `fangore_insp_stop_contract` for repeating-step ceilings.[^insp-budget]
+
+#### Implementation
+
+`BudgetPolicy` / `Budget` in `mechaharness.budget`. `GraphExecutor.run` requires `budget_policy`; each node attempt charges the shared ledger. Soft cancel open nodes → status `soft_exhausted`; hard fail open nodes → `hard_budget_exceeded`. `hard_limit=None` means unlimited.
+
+#### Validation
+
+Kind `graph_budget_limits`. Soft expects soft wind-down then hard fail levels. Related fixtures: `tests/fixtures/graph_executor/budget_*.json`, `tests/test_budget.py`.
+
+#### Footnotes
+
+[^insp-budget]: [Inspiration stop/budget ceilings](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 stop contracts and resource budgets on repeating work
 
 ### `fangore_insp_independent_review` — Review artifacts in isolated reviewer context
 
