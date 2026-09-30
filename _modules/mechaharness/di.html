@@ -107,22 +107,47 @@
 <span class="sd">``get_harness_class``. ``SettingsConfig`` resolves those classes from string</span>
 <span class="sd">maps (the OpenAPI/CLI configuration path).</span>
 
+<span class="sd">Same-lane Completer / JudgeProvider **flavors** are additional ``Named``</span>
+<span class="sd">bindings from ``completer_bindings()`` / ``judge_bindings()``. Host harnesses</span>
+<span class="sd">select them with ``Annotated[T, Named(...)]`` / ``Matched(...)`` on</span>
+<span class="sd">constructors (not field injection).</span>
+
 <span class="sd">Hosts must wire via Config + ``get_injector`` (or the OpenAPI ``run()``</span>
 <span class="sd">facade). Manual harness construction is not a supported host path.</span>
+<span class="sd">Prefer ``mechaharness.di.get_injector`` so Named default Completer aliases</span>
+<span class="sd">share identity with ``InferenceStrategy``.</span>
 <span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ForwardRef</span><span class="p">,</span> <span class="n">get_type_hints</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Annotated</span><span class="p">,</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">ForwardRef</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+    <span class="n">get_args</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">get_type_hints</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">eval_type_backport</span><span class="w"> </span><span class="kn">import</span> <span class="n">eval_type_backport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">get_injector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">Stage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.injector</span><span class="w"> </span><span class="kn">import</span> <span class="n">Injector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.injector</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_injector</span> <span class="k">as</span> <span class="n">_pyiv_get_injector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.key</span><span class="w"> </span><span class="kn">import</span> <span class="n">Key</span><span class="p">,</span> <span class="n">Named</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstanceProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.scope</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingletonScope</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Advisor</span><span class="p">,</span> <span class="n">AdvisorPolicy</span><span class="p">,</span> <span class="n">DefaultAdvisorPolicy</span><span class="p">,</span> <span class="n">RejectAdvisor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.api_connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="n">SimpleHttpConnectionConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.capability_envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapabilityEnvelope</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.context_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextProviderRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AccessControl</span><span class="p">,</span>
     <span class="n">AccessPolicy</span><span class="p">,</span>
@@ -132,8 +157,14 @@
     <span class="n">InMemoryCostAccountant</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.completer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceEnvironment</span><span class="p">,</span> <span class="n">NoOpInferenceEnvironment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">LANE_JUDGE</span><span class="p">,</span>
+    <span class="n">LANE_REASON</span><span class="p">,</span>
+    <span class="n">InferenceEnvironment</span><span class="p">,</span>
+    <span class="n">NoOpInferenceEnvironment</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventLog</span><span class="p">,</span> <span class="n">default_event_log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.delegation_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultDelegationPolicy</span><span class="p">,</span> <span class="n">DelegationPolicy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_executor</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DefaultGraphFailurePolicy</span><span class="p">,</span>
     <span class="n">GraphEscalation</span><span class="p">,</span>
@@ -142,6 +173,7 @@
     <span class="n">GraphNodeRunnerRegistry</span><span class="p">,</span>
     <span class="n">RejectGraphEscalation</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="n">default_graph_templates</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractHarness</span><span class="p">,</span> <span class="n">HarnessConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.families</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnthropicToolsHarness</span><span class="p">,</span> <span class="n">OpenAIToolsHarness</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.pass_through</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassThroughHarness</span>
@@ -153,7 +185,81 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MockInferenceStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.openai_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAICompatStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.systemone</span><span class="w"> </span><span class="kn">import</span> <span class="n">SystemOneJudgeProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.linkage_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultLinkageResolver</span><span class="p">,</span> <span class="n">LinkageResolver</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.operation_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">OperationRegistry</span><span class="p">,</span> <span class="n">default_operations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.tools.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.verification_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultVerificationPolicy</span><span class="p">,</span> <span class="n">VerificationPolicy</span>
+
+<span class="n">CompleterBinding</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span>
+    <span class="n">Named</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Completer</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Completer</span><span class="p">]]</span>
+<span class="p">]</span>
+<span class="n">JudgeBinding</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span>
+    <span class="n">Named</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">JudgeProvider</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">JudgeProvider</span><span class="p">]]</span>
+<span class="p">]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_BoundInjectorProvider</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Provider that resolves a type once the injector is bound."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_injector</span><span class="p">:</span> <span class="n">Injector</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_injector</span> <span class="o">=</span> <span class="n">injector</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_injector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">"Named binding resolved before injector bind; use "</span>
+                <span class="s2">"mechaharness.di.get_injector or inject Completer / "</span>
+                <span class="s2">"InferenceStrategy first"</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_BoundFactoryProvider</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Provider wrapping a zero-arg or ``injector=`` factory after bind."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_factory</span> <span class="o">=</span> <span class="n">factory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_injector</span><span class="p">:</span> <span class="n">Injector</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_injector</span> <span class="o">=</span> <span class="n">injector</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_injector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">"Named factory binding resolved before injector bind; use "</span>
+                <span class="s2">"mechaharness.di.get_injector"</span>
+            <span class="p">)</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_factory</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"injector"</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_factory</span><span class="p">(</span><span class="n">injector</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_injector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_factory</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_named_bindings</span><span class="p">(</span>
+    <span class="n">bindings</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Named</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">hook</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Named</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bindings</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">hook</span><span class="si">}</span><span class="s2">() must return at least one binding"</span><span class="p">)</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">[</span><span class="n">named</span> <span class="k">for</span> <span class="n">named</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">items</span> <span class="k">if</span> <span class="n">named</span><span class="o">.</span><span class="n">default</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">defaults</span><span class="p">:</span>
+        <span class="n">named</span><span class="p">,</span> <span class="n">impl</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[(</span><span class="n">Named</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">named</span><span class="o">.</span><span class="n">tags</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">impl</span><span class="p">)]</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">[</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">hook</span><span class="si">}</span><span class="s2">() requires exactly one Named(..., default=True) "</span>
+            <span class="sa">f</span><span class="s2">"or a single binding; got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span><span class="si">}</span><span class="s2"> defaults among "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2"> bindings"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">items</span>
 
 <span class="n">_INFERENCE_DEFAULTS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">"openai"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"base_url"</span><span class="p">:</span> <span class="s2">"https://api.openai.com/v1"</span><span class="p">},</span>
@@ -183,6 +289,46 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_union_origin</span><span class="p">(</span><span class="n">origin</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""True for ``typing.Union`` and PEP 604 ``types.UnionType`` (3.10+)."""</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"UnionType"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_injection_annotation</span><span class="p">(</span><span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rewrite PEP 604 optionals so pyiv 0.4 can peel Named/Matched.</span>
+
+<span class="sd">    pyiv's ``is_optional_type`` only recognizes ``typing.Union`` / ``Optional``.</span>
+<span class="sd">    On Python 3.10+, ``get_type_hints`` may leave ``T | None`` as</span>
+<span class="sd">    ``types.UnionType``, so ``Annotated[T | None, Named(...)]`` fails with</span>
+<span class="sd">    "requires a concrete type". Prefer ``Optional[Annotated[T, Q]]``.</span>
+<span class="sd">    """</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_is_union_origin</span><span class="p">(</span><span class="n">origin</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">non_none</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_normalize_injection_annotation</span><span class="p">(</span><span class="n">non_none</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">annotation</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Annotated</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"Annotated"</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">annotation</span>
+        <span class="n">base</span><span class="p">,</span> <span class="n">metas</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">base_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_is_union_origin</span><span class="p">(</span><span class="n">base_origin</span><span class="p">):</span>
+            <span class="n">b_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">b_args</span><span class="p">:</span>
+                <span class="n">inner</span> <span class="o">=</span> <span class="n">b_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">b_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">b_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Annotated</span><span class="p">[(</span><span class="n">inner</span><span class="p">,</span> <span class="o">*</span><span class="n">metas</span><span class="p">)]]</span>
+        <span class="n">normalized_base</span> <span class="o">=</span> <span class="n">_normalize_injection_annotation</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">normalized_base</span> <span class="ow">is</span> <span class="n">base</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">annotation</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">normalized_base</span><span class="p">,</span> <span class="o">*</span><span class="n">metas</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">annotation</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_expose_ctor_type_hints</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Resolve PEP 563 string annotations so pyiv can constructor-inject.</span>
 
@@ -190,6 +336,10 @@
 <span class="sd">    ``from __future__ import annotations`` those are strings. On Python 3.9,</span>
 <span class="sd">    ``X | Y`` also needs ``eval_type_backport``. Rewriting</span>
 <span class="sd">    ``__init__.__annotations__`` exposes real types for the injector.</span>
+
+<span class="sd">    Uses ``include_extras=True`` so ``Annotated[T, Named|Matched]`` metadata</span>
+<span class="sd">    survives for qualified constructor injection. Normalizes ``T | None``</span>
+<span class="sd">    optionals for pyiv compatibility on 3.10+.</span>
 <span class="sd">    """</span>
     <span class="n">init</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"__init__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">init</span> <span class="ow">is</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
@@ -197,7 +347,7 @@
     <span class="n">init_module</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="s2">"__module__"</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span>
     <span class="n">globalns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">init_module</span><span class="p">),</span> <span class="s2">"__dict__"</span><span class="p">,</span> <span class="p">{})</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">globalns</span><span class="o">=</span><span class="n">globalns</span><span class="p">)</span>
+        <span class="n">hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">globalns</span><span class="o">=</span><span class="n">globalns</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">NameError</span><span class="p">):</span>
         <span class="n">hints</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">init</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -211,13 +361,72 @@
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
                 <span class="k">continue</span>
     <span class="k">if</span> <span class="n">hints</span><span class="p">:</span>
-        <span class="n">init</span><span class="o">.</span><span class="vm">__annotations__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hints</span><span class="p">)</span>
+        <span class="n">init</span><span class="o">.</span><span class="vm">__annotations__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">_normalize_injection_annotation</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">hints</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="p">)</span>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MechaHarnessConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Template-method pyiv Config. Override the ``get_*_class`` hooks."""</span>
+
+<div class="viewcode-block" id="MechaHarnessConfig.__init__">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mh_bound_providers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># type: ignore[no-untyped-call]</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bind_mh_providers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mh_bound_providers</span><span class="p">:</span>
+            <span class="n">provider</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">injector</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_implementation_for_key</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">impl</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">alias_to</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Map a binding value to a ``register_key`` implementation."""</span>
+        <span class="k">if</span> <span class="n">alias_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">alias_provider</span> <span class="o">=</span> <span class="n">_BoundInjectorProvider</span><span class="p">(</span><span class="n">alias_to</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mh_bound_providers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alias_provider</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">alias_provider</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">impl</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">impl</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">impl</span><span class="p">,</span> <span class="s2">"get"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">impl</span><span class="o">.</span><span class="n">get</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">impl</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">impl</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">impl</span><span class="p">):</span>
+            <span class="n">factory_provider</span> <span class="o">=</span> <span class="n">_BoundFactoryProvider</span><span class="p">(</span><span class="n">impl</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mh_bound_providers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">factory_provider</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">factory_provider</span>
+        <span class="k">return</span> <span class="n">InstanceProvider</span><span class="p">(</span><span class="n">impl</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_named_bindings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">abstract</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">bindings</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Named</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">hook</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alias_default_to</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_impl</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">_normalize_named_bindings</span><span class="p">(</span><span class="n">bindings</span><span class="p">,</span> <span class="n">hook</span><span class="o">=</span><span class="n">hook</span><span class="p">)</span>
+        <span class="n">scope</span> <span class="o">=</span> <span class="n">SingletonScope</span><span class="p">()</span>  <span class="c1"># type: ignore[no-untyped-call]</span>
+        <span class="k">for</span> <span class="n">named</span><span class="p">,</span> <span class="n">impl</span> <span class="ow">in</span> <span class="n">normalized</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">impl</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+                <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">impl</span><span class="p">)</span>
+            <span class="n">alias_to</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">named</span><span class="o">.</span><span class="n">default</span>
+                <span class="ow">and</span> <span class="n">alias_default_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">default_impl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">impl</span> <span class="ow">is</span> <span class="n">default_impl</span>
+            <span class="p">):</span>
+                <span class="n">alias_to</span> <span class="o">=</span> <span class="n">alias_default_to</span>
+            <span class="n">key_impl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_implementation_for_key</span><span class="p">(</span><span class="n">impl</span><span class="p">,</span> <span class="n">alias_to</span><span class="o">=</span><span class="n">alias_to</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_key</span><span class="p">(</span><span class="n">Key</span><span class="p">(</span><span class="n">abstract</span><span class="p">,</span> <span class="n">named</span><span class="p">),</span> <span class="n">key_impl</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MechaHarnessConfig.configure">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.configure">[docs]</a>
@@ -231,10 +440,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CostAccountant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cost_accountant</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">InferenceEnvironment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_environment</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_judge_connection</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">JudgeProvider</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_judge_provider</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphNodeRunnerRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_runner_registry</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphFailurePolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_failure_policy</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphEscalation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_escalation</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">OperationRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_operation_registry</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">LinkageResolver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_linkage_resolver</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">VerificationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_verification_policy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">DelegationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_delegation_policy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">AdvisorPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_advisor_policy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">Advisor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_advisor</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_template_registry</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">ContextProviderRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_provider_registry</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CapabilityEnvelope</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_capability_envelope</span><span class="p">())</span>
 
         <span class="n">inference_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_class</span><span class="p">()</span>
         <span class="n">harness_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_harness_class</span><span class="p">()</span>
@@ -245,14 +462,55 @@
         <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">graph_executor_cls</span><span class="p">)</span>
         <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">GraphExecutor</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">InferenceStrategy</span><span class="p">,</span> <span class="n">inference_cls</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_inference</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InferenceStrategy</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bind_mh_providers</span><span class="p">(</span><span class="n">injector</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span>
+                <span class="n">InferenceStrategy</span><span class="p">,</span>
+                <span class="n">injector</span><span class="o">.</span><span class="n">_instantiate</span><span class="p">(</span><span class="n">inference_cls</span><span class="p">),</span>  <span class="c1"># noqa: SLF001</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">InferenceStrategy</span><span class="p">,</span> <span class="n">make_inference</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">make_completer</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Completer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bind_mh_providers</span><span class="p">(</span><span class="n">injector</span><span class="p">)</span>
             <span class="n">strategy</span> <span class="o">=</span> <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">InferenceStrategy</span><span class="p">)</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">Completer</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">strategy</span>
 
+        <span class="c1"># Thin alias so bare inject(Completer) shares identity with InferenceStrategy</span>
+        <span class="c1"># (including host register_instance overrides). Named default also aliases.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Completer</span><span class="p">,</span> <span class="n">make_completer</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_named_bindings</span><span class="p">(</span>
+            <span class="n">Completer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">completer_bindings</span><span class="p">(),</span>
+            <span class="n">hook</span><span class="o">=</span><span class="s2">"completer_bindings"</span><span class="p">,</span>
+            <span class="n">alias_default_to</span><span class="o">=</span><span class="n">InferenceStrategy</span><span class="p">,</span>
+            <span class="n">default_impl</span><span class="o">=</span><span class="n">inference_cls</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">judge_bindings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">judge_bindings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_named_bindings</span><span class="p">(</span>
+            <span class="n">JudgeProvider</span><span class="p">,</span>
+            <span class="n">judge_bindings</span><span class="p">,</span>
+            <span class="n">hook</span><span class="o">=</span><span class="s2">"judge_bindings"</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">default_judge_named</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="n">named</span>
+            <span class="k">for</span> <span class="n">named</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_normalize_named_bindings</span><span class="p">(</span>
+                <span class="n">judge_bindings</span><span class="p">,</span> <span class="n">hook</span><span class="o">=</span><span class="s2">"judge_bindings"</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">named</span><span class="o">.</span><span class="n">default</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_judge</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JudgeProvider</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bind_mh_providers</span><span class="p">(</span><span class="n">injector</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span>
+                <span class="n">JudgeProvider</span><span class="p">,</span>
+                <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">Key</span><span class="p">(</span><span class="n">JudgeProvider</span><span class="p">,</span> <span class="n">default_judge_named</span><span class="p">)),</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">JudgeProvider</span><span class="p">,</span> <span class="n">make_judge</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AbstractHarness</span><span class="p">,</span> <span class="n">harness_cls</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">GraphExecutor</span><span class="p">,</span> <span class="n">graph_executor_cls</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
@@ -279,10 +537,14 @@
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_access_control">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_access_control</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessControl</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Deny-by-default access control bound into harnesses."""</span>
-        <span class="k">return</span> <span class="n">InMemoryAccessControl</span><span class="p">(</span>
-            <span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">(),</span>
-            <span class="n">policy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_access_policy</span><span class="p">(),</span>
-        <span class="p">)</span></div>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_access_control"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">InMemoryAccessControl</span><span class="p">(</span>
+                <span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">(),</span>
+                <span class="n">policy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_access_policy</span><span class="p">(),</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_access_control</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_access_policy">
@@ -327,6 +589,33 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JudgeProvider</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Judge backend (default: System One over ``get_judge_connection()``)."""</span>
         <span class="k">return</span> <span class="n">SystemOneJudgeProvider</span><span class="p">(</span><span class="n">connection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_judge_connection</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.completer_bindings">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.completer_bindings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">completer_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">CompleterBinding</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Named Completer flavors (lane + host tags).</span>
+
+<span class="sd">        Default: ``Named([reason], default=True)`` → ``get_inference_class()``,</span>
+<span class="sd">        aliased to the ``InferenceStrategy`` singleton so bare</span>
+<span class="sd">        ``inject(Completer)`` and the Named default share identity.</span>
+
+<span class="sd">        Hosts append flavors (e.g. ``Named(["reason", "code", "deep"])``).</span>
+<span class="sd">        Exactly one ``default=True`` (or a single binding) is required.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">Named</span><span class="p">([</span><span class="n">LANE_REASON</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_class</span><span class="p">())]</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.judge_bindings">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.judge_bindings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">judge_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">JudgeBinding</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Named JudgeProvider flavors.</span>
+
+<span class="sd">        Default: ``Named([judge], default=True)`` → ``get_judge_provider()``.</span>
+<span class="sd">        Hosts append flavors (e.g. ``Named(["judge", "heavy"])``).</span>
+<span class="sd">        Exactly one ``default=True`` (or a single binding) is required.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">Named</span><span class="p">([</span><span class="n">LANE_JUDGE</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_judge_provider</span><span class="p">())]</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.include_subagent_tools">
@@ -390,7 +679,11 @@
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_node_runner_registry">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_node_runner_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphNodeRunnerRegistry</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Node-kind runners for the graph executor (default: empty)."""</span>
-        <span class="k">return</span> <span class="n">GraphNodeRunnerRegistry</span><span class="p">()</span></div>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_node_runner_registry"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">GraphNodeRunnerRegistry</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_node_runner_registry</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_graph_failure_policy">
@@ -405,6 +698,78 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_graph_escalation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphEscalation</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Escalation hook after retries are exhausted (default: reject)."""</span>
         <span class="k">return</span> <span class="n">RejectGraphEscalation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_operation_registry">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_operation_registry">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_operation_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OperationRegistry</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Shared operation contracts for linkage / compilers."""</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_operation_registry"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">default_operations</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_operation_registry</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_linkage_resolver">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_linkage_resolver">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_linkage_resolver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LinkageResolver</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Pre-execution graph wiring validator."""</span>
+        <span class="k">return</span> <span class="n">DefaultLinkageResolver</span><span class="p">(</span>
+            <span class="n">runners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_node_runner_registry</span><span class="p">(),</span>
+            <span class="n">access</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_access_control</span><span class="p">(),</span>
+            <span class="n">environment</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_inference_environment</span><span class="p">(),</span>
+            <span class="n">operations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_operation_registry</span><span class="p">(),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_verification_policy">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_verification_policy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_verification_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VerificationPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Selects and runs verification for graph/outcome gates."""</span>
+        <span class="k">return</span> <span class="n">DefaultVerificationPolicy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_delegation_policy">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_delegation_policy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_delegation_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DelegationPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Chooses inline versus child/subgraph execution."""</span>
+        <span class="k">return</span> <span class="n">DefaultDelegationPolicy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_advisor_policy">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_advisor_policy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_advisor_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AdvisorPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Sparse advisor consultation policy."""</span>
+        <span class="k">return</span> <span class="n">DefaultAdvisorPolicy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_advisor">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_advisor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_advisor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Advisor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Non-binding advisor (default: unavailable / reject)."""</span>
+        <span class="k">return</span> <span class="n">RejectAdvisor</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_graph_template_registry">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_graph_template_registry">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_graph_template_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphTemplateRegistry</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Library-owned parameterized graph templates."""</span>
+        <span class="k">return</span> <span class="n">default_graph_templates</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_context_provider_registry">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_context_provider_registry">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_context_provider_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ContextProviderRegistry</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Host context providers (document/KG adapters bind here)."""</span>
+        <span class="k">return</span> <span class="n">ContextProviderRegistry</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_capability_envelope">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_capability_envelope">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_capability_envelope</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CapabilityEnvelope</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Default run envelope from configured grants."""</span>
+        <span class="k">return</span> <span class="n">CapabilityEnvelope</span><span class="o">.</span><span class="n">from_grants</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_grants</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.inference_classes">
@@ -453,7 +818,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_provided_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_provided_tools</span> <span class="o">=</span> <span class="n">tools</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resolved_settings</span><span class="p">:</span> <span class="n">Settings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># type: ignore[no-untyped-call]</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="SettingsConfig.get_settings">
@@ -544,6 +909,27 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">list_harness_families</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Sorted names from the default ``SettingsConfig.harness_classes()`` map."""</span>
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">SettingsConfig</span><span class="p">()</span><span class="o">.</span><span class="n">harness_classes</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="get_injector">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.get_injector">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_injector</span><span class="p">(</span>
+    <span class="n">config</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Config</span><span class="p">]</span> <span class="o">|</span> <span class="n">Config</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span> <span class="o">=</span> <span class="n">Stage</span><span class="o">.</span><span class="n">DEVELOPMENT</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Injector</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Create an injector and bind MechaHarness Named alias providers.</span>
+
+<span class="sd">    Prefer this over ``pyiv.get_injector`` so default Completer Named bindings</span>
+<span class="sd">    that alias ``InferenceStrategy`` resolve safely. Injecting ``Completer`` or</span>
+<span class="sd">    ``InferenceStrategy`` first also binds aliases when using pyiv directly.</span>
+<span class="sd">    """</span>
+    <span class="n">injector</span> <span class="o">=</span> <span class="n">_pyiv_get_injector</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="n">stage</span><span class="p">)</span>
+    <span class="n">bind</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">injector</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="s2">"_bind_mh_providers"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># noqa: SLF001</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">bind</span><span class="p">):</span>
+        <span class="n">bind</span><span class="p">(</span><span class="n">injector</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">injector</span></div>
 
 
 

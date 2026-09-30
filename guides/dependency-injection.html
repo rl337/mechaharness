@@ -108,7 +108,9 @@
 <code class="docutils literal notranslate"><span class="pre">get_injector</span></code> → <code class="docutils literal notranslate"><span class="pre">inject(...)</span></code>). Manual <code class="docutils literal notranslate"><span class="pre">ToolLoopHarness(...)</span></code> construction is
 not a supported host path. Prefer the OpenAPI-shaped <code class="docutils literal notranslate"><span class="pre">run()</span></code> helper only when
 you want the facade that builds a Config under the hood.</p>
-<p>Requires <strong>pyiv ≥ 0.4.1</strong> (qualified keys: <code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code>).</p>
+<p>Requires <strong>pyiv ≥ 0.4.2</strong> (<code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code>, plus <code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code>
+constructor injection). Prefer <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mechaharness.di</span> <span class="pre">import</span> <span class="pre">get_injector</span></code> so
+Named Completer aliases bind correctly.</p>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <ul class="simple">
@@ -122,11 +124,10 @@ you want the facade that builds a Config under the hood.</p>
 <h3>1. Subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code><a class="headerlink" href="#subclass-mechaharnessconfig" title="Link to this heading"></a></h3>
 <p>Override the class hooks. <code class="docutils literal notranslate"><span class="pre">configure()</span></code> (called from the Config constructor)
 class-binds inference and harness (singleton), aliases <code class="docutils literal notranslate"><span class="pre">Completer</span></code> to the
-bound <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, and registers shared services (<code class="docutils literal notranslate"><span class="pre">EventLog</span></code>,
-<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, judge connection/provider, …).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_injector</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span>
+bound <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, registers Named Completer / JudgeProvider bindings
+from <code class="docutils literal notranslate"><span class="pre">completer_bindings()</span></code> / <code class="docutils literal notranslate"><span class="pre">judge_bindings()</span></code>, and registers shared services
+(<code class="docutils literal notranslate"><span class="pre">EventLog</span></code>, <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, judge connection, …).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span><span class="p">,</span> <span class="n">get_injector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractHarness</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.tool_loop</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolLoopHarness</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.openai_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAICompatStrategy</span>
@@ -152,8 +153,69 @@ bound <code class="docutils literal notranslate"><span class="pre">InferenceStra
 call <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code> before registering their own types. Tests may use
 <code class="docutils literal notranslate"><span class="pre">pyiv.override(base).with_(overrides)</span></code> to swap doubles.</p>
 </section>
+<section id="lanes-vs-completer-flavors">
+<h3>2. Lanes vs Completer flavors<a class="headerlink" href="#lanes-vs-completer-flavors" title="Link to this heading"></a></h3>
+<p><strong>Lanes</strong> (<code class="docutils literal notranslate"><span class="pre">reason</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">media</span></code> on <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code>) are
+capability partitions for load hints and access. They are not DI qualifiers.</p>
+<p><strong>Flavors</strong> are multiple Completer (or JudgeProvider) bindings in one injector,
+distinguished by pyiv <code class="docutils literal notranslate"><span class="pre">Named</span></code> tag sets (lane tag + host tags such as <code class="docutils literal notranslate"><span class="pre">code</span></code>,
+<code class="docutils literal notranslate"><span class="pre">deep</span></code>, or <code class="docutils literal notranslate"><span class="pre">acme:…</span></code>). Declare them on Config; select them on host constructors
+with <code class="docutils literal notranslate"><span class="pre">Annotated</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.key</span><span class="w"> </span><span class="kn">import</span> <span class="n">Named</span><span class="p">,</span> <span class="n">Matched</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">Provider</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.completer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.judge</span><span class="w"> </span><span class="kn">import</span> <span class="n">JudgeProvider</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">AppConfig</span><span class="p">(</span><span class="n">MechaHarnessConfig</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">completer_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">Named</span><span class="p">([</span><span class="s2">"reason"</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_class</span><span class="p">()),</span>
+            <span class="p">(</span><span class="n">Named</span><span class="p">([</span><span class="s2">"reason"</span><span class="p">,</span> <span class="s2">"code"</span><span class="p">,</span> <span class="s2">"deep"</span><span class="p">]),</span> <span class="n">CodeCompleter</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Named</span><span class="p">([</span><span class="s2">"reason"</span><span class="p">,</span> <span class="s2">"summarize"</span><span class="p">]),</span> <span class="n">SummarizeCompleter</span><span class="p">),</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">judge_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">Named</span><span class="p">([</span><span class="s2">"judge"</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_judge_provider</span><span class="p">()),</span>
+            <span class="p">(</span><span class="n">Named</span><span class="p">([</span><span class="s2">"judge"</span><span class="p">,</span> <span class="s2">"heavy"</span><span class="p">]),</span> <span class="n">HeavyJudgeProvider</span><span class="p">),</span>
+        <span class="p">]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CodeReviewHarness</span><span class="p">(</span><span class="n">AbstractHarness</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">inference</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Completer</span><span class="p">,</span> <span class="n">Named</span><span class="p">([</span><span class="s2">"reason"</span><span class="p">,</span> <span class="s2">"code"</span><span class="p">,</span> <span class="s2">"deep"</span><span class="p">])],</span>
+        <span class="n">tools</span><span class="p">:</span> <span class="n">ToolRegistry</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">HarnessConfig</span><span class="p">,</span>
+        <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span><span class="p">,</span>
+        <span class="n">access</span><span class="p">:</span> <span class="n">AccessControl</span><span class="p">,</span>
+        <span class="n">cost</span><span class="p">:</span> <span class="n">CostAccountant</span><span class="p">,</span>
+        <span class="n">environment</span><span class="p">:</span> <span class="n">InferenceEnvironment</span><span class="p">,</span>
+        <span class="n">summarize</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+            <span class="n">Optional</span><span class="p">[</span><span class="n">Completer</span><span class="p">],</span>
+            <span class="n">Matched</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="p">[</span><span class="s2">"reason"</span><span class="p">,</span> <span class="s2">"summarize"</span><span class="p">]),</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">judge</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Provider</span><span class="p">[</span><span class="n">JudgeProvider</span><span class="p">],</span> <span class="n">Named</span><span class="p">([</span><span class="s2">"judge"</span><span class="p">,</span> <span class="s2">"heavy"</span><span class="p">])]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>Rules of thumb:</p>
+<ul class="simple">
+<li><p>Register with <code class="docutils literal notranslate"><span class="pre">Named</span></code> only (never <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Annotated</span></code> on <code class="docutils literal notranslate"><span class="pre">register_key</span></code>).</p></li>
+<li><p>Exactly one <code class="docutils literal notranslate"><span class="pre">Named(...,</span> <span class="pre">default=True)</span></code> per type (or a single binding).</p></li>
+<li><p>Prefer constructor injection; <code class="docutils literal notranslate"><span class="pre">inject_members</span></code> / fields ignore <code class="docutils literal notranslate"><span class="pre">Annotated</span></code>.</p></li>
+<li><p>Do not invent marker ABC lanes or new <code class="docutils literal notranslate"><span class="pre">active_lane()</span></code> values for flavors.</p></li>
+</ul>
+</section>
 <section id="name-maps-for-cli-http-style-selection">
-<h3>2. Name maps for CLI/HTTP-style selection<a class="headerlink" href="#name-maps-for-cli-http-style-selection" title="Link to this heading"></a></h3>
+<h3>3. Name maps for CLI/HTTP-style selection<a class="headerlink" href="#name-maps-for-cli-http-style-selection" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> looks up <code class="docutils literal notranslate"><span class="pre">Settings.inference_backend</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Settings.harness_family</span></code> in overridable maps. Add a backend by overriding
 <code class="docutils literal notranslate"><span class="pre">inference_classes()</span></code>:</p>
@@ -169,7 +231,7 @@ call <code class="docutils literal notranslate"><span class="pre">super().config
 </div>
 </section>
 <section id="non-di-openapi-path">
-<h3>3. Non-DI OpenAPI path<a class="headerlink" href="#non-di-openapi-path" title="Link to this heading"></a></h3>
+<h3>4. Non-DI OpenAPI path<a class="headerlink" href="#non-di-openapi-path" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunRequest</span><span class="p">,</span> <span class="n">run</span>
 
@@ -183,10 +245,14 @@ the caller.</p>
 inject deny-by-default tool grants; use <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> to union reusable
 <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
 <p>For durable plans, override <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code>,
-<code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, then
-<code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>. Include <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and
-<code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> when using escalation) in grants. See
-<a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a> (Execution graph).</p>
+<code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, and optionally
+<code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code>, then <code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>. Include
+<code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> when using escalation) in
+grants. Library templates are owned by MechaHarness; clients instantiate them
+via Config and may retain the resulting concrete graphs.
+See <a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a> and
+<a class="reference internal" href="../reference/graph-templates.html"><span class="std std-doc">Graph templates</span></a>.</p>
 </section>
 </section>
 <section id="verify">
