@@ -53,7 +53,10 @@ and `AbstractHarness` (singleton), aliases `Completer` to the strategy, and
 registers `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
 `AccessControl`, `CostAccountant`, `InferenceEnvironment`,
 `APIConnectionConfig` (judge), `JudgeProvider`, `GraphNodeRunnerRegistry`,
-`GraphFailurePolicy`, `GraphEscalation`, and `GraphExecutor`. Subclasses override
+`GraphFailurePolicy`, `GraphEscalation`, `OperationRegistry`,
+`LinkageResolver`, `VerificationPolicy`, `DelegationPolicy`, `Advisor`,
+`AdvisorPolicy`, `GraphTemplateRegistry`, `ContextProviderRegistry`,
+`CapabilityEnvelope`, and `GraphExecutor`. Subclasses override
 `get_inference_class()` and `get_harness_class()` (called from the
 Config constructor). Override `get_access_policy()` (or
 `get_grants()`) for deny-by-default tool grants; compose reusable sets with
@@ -62,7 +65,8 @@ Config constructor). Override `get_access_policy()` (or
 `get_inference_environment()` for host profile probes.
 Override `get_judge_connection()` / `get_judge_provider()` for judge HTTP and
 wire adapters. Override `get_node_runner_registry()` /
-`get_graph_failure_policy()` / `get_graph_escalation()` for plan execution.
+`get_graph_failure_policy()` / `get_graph_escalation()` /
+`get_linkage_resolver()` / `get_graph_template_registry()` for plan execution.
 
 **Config ownership:** lane- and provider-specific knobs belong on the owning
 injectable (e.g. `SimpleHttpConnectionConfig.from_env` for `MECHA_JUDGE_*`), not
@@ -82,11 +86,13 @@ who pick backends by name.
 
 `ExecutionGraph` / `GraphStore` model nodes, justified edges, checkpoints, and
 verification helpers. `GraphExecutor` walks ready nodes: it requires
-`core:graph.execute`, dispatches open `kind` strings through a host-populated
-`GraphNodeRunnerRegistry`, applies `GraphFailurePolicy` (retry / escalate /
-fail), optional `GraphEscalation` (needs `core:graph.escalate`), and emits
-`core:graph_start` / `core:graph_end` plus per-node events. Bind via Config
-hooks `get_node_runner_registry()`, `get_graph_failure_policy()`,
+`core:graph.execute` and a `BudgetPolicy` on every `run()`, dispatches open
+`kind` strings through a host-populated `GraphNodeRunnerRegistry`, charges a
+shared `Budget` (soft wind-down / hard fail; nested subgraphs aggregate),
+applies `GraphFailurePolicy` (retry / escalate / fail), optional
+`GraphEscalation` (needs `core:graph.escalate`), and emits `core:graph_start` /
+`core:graph_end` plus per-node events. Bind via Config hooks
+`get_node_runner_registry()`, `get_graph_failure_policy()`,
 `get_graph_escalation()`, and `get_graph_executor_class()` — not Settings.
 
 Do not add string registries or a global injector. Domain types stay pyiv-free.
@@ -98,6 +104,16 @@ Do not add string registries or a global injector. Domain types stay pyiv-free.
 `judge_bindings()`; host constructors select them with
 `Annotated[T, Named(...)]` / `Matched(...)` (pyiv ≥ 0.4.2). See
 [Dependency injection](./guides/dependency-injection.md).
+
+Before substantive work, `GraphExecutor` runs an injectable
+`LinkageResolver` (runner kinds, grants, operation binds, stop contracts,
+envelopes, environment). Checkpoints carry a config/graph fingerprint so
+resume refuses incompatible changes. Parameterized graph templates live in
+`mechaharness.graph_templates` (see
+[Graph templates](./reference/graph-templates.md)); policies
+(`VerificationPolicy`, `DelegationPolicy`, `AdvisorPolicy`) are library-owned.
+Clients instantiate templates and may retain concrete graphs.
+See [Inspiration requirements map](./inspiration/requirements-map.md).
 
 ## Host extension
 

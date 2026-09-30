@@ -9,8 +9,18 @@ import httpx
 import pytest
 from pyiv.key import Matched, Named
 
+from mechaharness.advisor import (
+    AdvisorContextContract,
+    AdvisorRequest,
+    DefaultAdvisorPolicy,
+    RejectAdvisor,
+    consult_advisor,
+)
 from mechaharness.api_connection import SimpleHttpConnectionConfig
+from mechaharness.budget import BudgetPolicy
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.config import Settings
+from mechaharness.consequence import ActionConsequence, ConsequencePolicy
 from mechaharness.context_experiments import (
     ContextCompiler,
     CtxFlags,
@@ -24,6 +34,7 @@ from mechaharness.context_experiments import (
     fuse_actions,
     reduce_evidence,
 )
+from mechaharness.context_provider import StaticContextProvider
 from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
 from mechaharness.core.access import (
     Ability,
@@ -39,6 +50,7 @@ from mechaharness.core.completer import Completer
 from mechaharness.core.environment import (
     InferenceEnvironment,
     InferenceEnvironmentError,
+    NoOpInferenceEnvironment,
 )
 from mechaharness.core.events import InMemoryEventLog
 from mechaharness.core.types import ChatMessage, Role, ToolCall
@@ -54,7 +66,9 @@ from mechaharness.decision_surfaces import (
     RulesDecisionBackend,
     reject_invalid_choice,
 )
+from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
+from mechaharness.failure_attribution import attribute_error, detect_repeated_failure_classes
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -62,6 +76,7 @@ from mechaharness.graph import (
     GraphNode,
     GraphStore,
     NodeStatus,
+    VerificationOracle,
     bounded_repair,
     hierarchical_fan_in,
     merge_branch_artifacts,
@@ -76,9 +91,17 @@ from mechaharness.graph_executor import (
     GraphRunContext,
     NodeOutcome,
 )
+from mechaharness.graph_templates import (
+    FanOutAggregateTemplate,
+    GraphTemplateParams,
+    IndependentReviewTemplate,
+    SubgraphNodeRunner,
+    default_graph_templates,
+)
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
+from mechaharness.harness_experiment import HarnessExperiment, HarnessExperimentRunner
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
     ChoiceOption,
@@ -95,25 +118,30 @@ from mechaharness.inference.judge import (
 )
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.instruction_component import InstructionCatalog
 from mechaharness.judgement_policy import (
     JudgementFacts,
     JudgementPolicy,
     JudgementThreshold,
     decide,
 )
+from mechaharness.linkage_resolver import DefaultLinkageResolver
 from mechaharness.operation_registry import (
     NodeContractBind,
     OperationContract,
     ResourceScope,
     default_operations,
 )
+from mechaharness.outcome_contract import OutcomeContract
 from mechaharness.research import EvalProtocol, ResearchLab
 from mechaharness.routing import (
     activate_scoped_policy,
     route_at_boundary,
+    route_for_capability_needs,
     shadow_decision_backends,
 )
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.verification_policy import DefaultVerificationPolicy
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
@@ -148,7 +176,11 @@ def _assert_expect(actual: dict[str, Any], expect: dict[str, Any]) -> None:
             assert not missing, f"{key}: missing {missing} in {got}"
         elif key.endswith("_in") and isinstance(wanted, list):
             assert got in wanted, f"{key}: {got!r} not in {wanted!r}"
+        elif key.endswith("_contains") and isinstance(wanted, str):
+            assert wanted in str(got), f"{key}: {wanted!r} not in {got!r}"
         elif key.startswith("min_") and isinstance(wanted, (int, float)):
+            assert got >= wanted, f"{key}: {got} < {wanted}"
+        elif key.endswith("_min") and isinstance(wanted, (int, float)):
             assert got >= wanted, f"{key}: {got} < {wanted}"
         elif key.endswith("_nonempty"):
             assert bool(got) is bool(wanted), f"{key}: {got!r} vs {wanted!r}"
@@ -240,6 +272,24 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "model_affinity": _run_model_affinity,
         "cache_layout_experiment": _run_cache_layout_experiment,
         "policy_replay": _run_policy_replay,
+        "graph_linkage_preflight": _run_graph_linkage_preflight,
+        "graph_template_soft_points": _run_graph_template_soft_points,
+        "capability_envelope_narrow": _run_capability_envelope_narrow,
+        "sparse_advisor_consult": _run_sparse_advisor_consult,
+        "verification_outcome_gate": _run_verification_outcome_gate,
+        "consequence_risk_scale": _run_consequence_risk_scale,
+        "harness_experiment_retire": _run_harness_experiment_retire,
+        "dynamic_subgraph_nest": _run_dynamic_subgraph_nest,
+        "context_provider_discovery": _run_context_provider_discovery,
+        "instruction_gotcha_metrics": _run_instruction_gotcha_metrics,
+        "independent_review_template": _run_independent_review_template,
+        "failure_attribution_trace": _run_failure_attribution_trace,
+        "checkpoint_fingerprint_refuse": _run_checkpoint_fingerprint_refuse,
+        "capability_need_routing": _run_capability_need_routing,
+        "environment_linkage_fail": _run_environment_linkage_fail,
+        "wake_reresolve_resume": _run_wake_reresolve_resume,
+        "graph_budget_limits": _run_graph_budget_limits,
+        "graph_budget_subgraph_rollup": _run_graph_budget_subgraph_rollup,
     }
     try:
         runner = runners[kind]
@@ -851,9 +901,15 @@ async def _run_graph_executor_run(case: StoryCase, backend: StoryBackend) -> Non
                 return []
 
         denied_exec = get_injector(DenyConfig()).inject(GraphExecutor)
-        denied = await denied_exec.run(graph.model_copy(deep=True), run_id="story-deny")
+        denied = await denied_exec.run(
+            graph.model_copy(deep=True),
+            budget_policy=BudgetPolicy.unlimited(),
+            run_id="story-deny",
+        )
 
-    result = await executor.run(graph, run_id="story-graph-exec")
+    result = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="story-graph-exec"
+    )
     types = [e.type for e in result.events]
     actual = {
         "status": result.status,
@@ -1220,4 +1276,613 @@ async def _run_policy_replay(case: StoryCase, backend: StoryBackend) -> None:
         policy=policy,
     )
     actual = {"verdict_kind": verdict.kind}
+    _assert_expect(actual, expect)
+
+
+async def _run_graph_linkage_preflight(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"id": node.id})
+
+    registry = GraphNodeRunnerRegistry(
+        [CallableGraphNodeRunner(["compute"], ok), CallableGraphNodeRunner(["loop"], ok)]
+    )
+    access = InMemoryAccessControl(
+        event_log=InMemoryEventLog(),
+        policy=AccessPolicy(grants=[GraphExecute]),
+    )
+    resolver = DefaultLinkageResolver(
+        runners=registry,
+        access=access,
+        environment=NoOpInferenceEnvironment(),
+    )
+
+    actual: dict[str, Any] = {}
+    if request.get("check_missing_runner", True):
+        g = ExecutionGraph(goal="missing")
+        g.add_node(GraphNode(id="x", kind="unregistered"))
+        report = resolver.resolve(g)
+        actual["missing_runner_ok"] = report.ok
+        actual["missing_runner_codes_include"] = [e.code for e in report.edges]
+    if request.get("check_missing_stop", True):
+        g = ExecutionGraph(goal="loop")
+        g.add_node(GraphNode(id="loop", kind="loop", repeating=True))
+        report = resolver.resolve(g)
+        actual["missing_stop_ok"] = report.ok
+        actual["missing_stop_codes_include"] = [e.code for e in report.edges]
+    if request.get("check_ok_linear", True):
+        g = ExecutionGraph(goal="ok")
+        g.add_node(GraphNode(id="a", kind="compute"))
+        g.add_node(GraphNode(id="b", kind="compute", depends_on=["a"]))
+        report = resolver.resolve(g)
+        actual["ok_linear_ok"] = report.ok
+        actual["ok_linear_fingerprint_nonempty"] = bool(report.fingerprint)
+    _assert_expect(actual, expect)
+
+
+async def _run_graph_template_soft_points(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    registry = default_graph_templates()
+    template = registry.get(str(request["template"]))
+    assert template is not None
+    n = int(request.get("branch_count", 2))
+    graph = template.instantiate(
+        GraphTemplateParams(
+            goal=str(request.get("goal") or ""),
+            branch_payloads=[{"index": i} for i in range(n)],
+            acceptance=list(request.get("acceptance") or []),
+            source_workflow_ref=request.get("source_workflow_ref"),
+        )
+    )
+    demoted = FanOutAggregateTemplate()
+    demoted.status = "demoted"
+    refused = False
+    try:
+        demoted.instantiate(GraphTemplateParams(goal="nope"))
+    except RuntimeError:
+        refused = True
+    catalog = registry.catalog()
+    soft_nonempty = all(bool(row.get("soft_points")) for row in catalog)
+    actual = {
+        "template_name": graph.template_name,
+        "template_status": graph.template_status,
+        "node_ids_include": list(graph.nodes),
+        "source_workflow_ref": graph.source_workflow_ref,
+        "catalog_soft_points_nonempty": soft_nonempty,
+        "demoted_refused": refused,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_capability_envelope_narrow(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    parent = CapabilityEnvelope(grants=list(request["parent_grants"]))
+    child = parent.narrow(grants=list(request["child_grants"]))
+    widen_raises = False
+    try:
+        parent.narrow(grants=list(request["widen_grants"]))
+    except ValueError:
+        widen_raises = True
+    decision = DefaultDelegationPolicy().decide(
+        DelegationRequest(independence_required=True, parent_envelope=parent)
+    )
+    actual = {
+        "narrow_ok": set(child.grants).issubset(set(parent.grants)),
+        "child_grant_count": len(child.grants),
+        "widen_raises": widen_raises,
+        "delegation_choice": decision.choice,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_sparse_advisor_consult(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    policy = DefaultAdvisorPolicy(max_consultations=int(request.get("max_consultations", 1)))
+    observations: list[Any] = []
+    trigger = request.get("trigger", "consequential_planning")
+    first = await consult_advisor(
+        RejectAdvisor(),
+        policy,
+        AdvisorRequest(
+            trigger=trigger,
+            context=AdvisorContextContract(summary="plan boundary"),
+        ),
+        observations=observations,
+    )
+    second = await consult_advisor(
+        RejectAdvisor(),
+        policy,
+        AdvisorRequest(trigger=trigger),
+        observations=observations,
+    )
+    actual = {
+        "first_consult_ok": first is not None,
+        "second_consult_blocked": second is None,
+        "observation_count": len(observations),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_verification_outcome_gate(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    outcome = OutcomeContract(require_verification=bool(request.get("require_verification", True)))
+    before = outcome.evaluate(answer_generated=True, verification_passed=None)
+    policy = DefaultVerificationPolicy()
+    node = GraphNode(id="n", kind="compute")
+
+    def good(_node: GraphNode) -> tuple[bool, dict[str, Any]]:
+        return True, {"ok": True}
+
+    result = policy.verify(
+        node,
+        oracles=[VerificationOracle(name="exec", strength="executable")],
+        verifiers=[good],
+        outcome=outcome,
+        answer_generated=True,
+    )
+    actual = {
+        "before_verify_completion": before,
+        "after_verify_completion": result.completion,
+        "verification_passed": result.passed,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_consequence_risk_scale(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    policy = ConsequencePolicy(
+        actions=[
+            ActionConsequence(
+                action=str(request["action"]),
+                consequence=request.get("consequence", "high"),
+                requires_approval=True,
+            )
+        ]
+    )
+    policy.record_approval_prompt()
+    policy.record_approval_decision()
+    actual = {
+        "requires_stronger_controls": policy.requires_stronger_controls(str(request["action"])),
+        "approval_frequency": policy.approval_frequency(),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_harness_experiment_retire(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    runner = HarnessExperimentRunner()
+    exp = runner.propose(
+        HarnessExperiment(
+            hypothesis=str(request["hypothesis"]),
+            intervention=str(request["intervention"]),
+            failure_mode="token_bloat",
+            evidence="inspiration:req-1",
+        )
+    )
+    treatment = float(request.get("treatment_success", 0.7))
+    control = float(request.get("control_success", 0.9))
+    runner.evaluate(
+        exp,
+        with_intervention=lambda: {"task_success_rate": treatment},
+        without_intervention=lambda: {"task_success_rate": control},
+    )
+    actual = {
+        "status": exp.status,
+        "retirement_candidates_nonempty": bool(runner.retirement_candidates()),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_dynamic_subgraph_nest(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"id": node.id})
+
+    registry = GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
+
+    class Cfg(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            from mechaharness.inference.mock import MockInferenceStrategy
+
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return [GraphExecute]
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return registry
+
+    executor = get_injector(Cfg()).inject(GraphExecutor)
+    child = ExecutionGraph(goal=str(request.get("child_goal") or "child"))
+    child.add_node(GraphNode(id="c1", kind="compute"))
+    parent = ExecutionGraph(goal=str(request.get("parent_goal") or "parent"))
+    parent.add_node(SubgraphNodeRunner.embed(child, parent_node_id="wrap"))
+    result = await executor.run(
+        parent,
+        budget_policy=BudgetPolicy.unlimited(),
+        skip_linkage=True,
+        run_id="story-subgraph",
+    )
+    wrap = result.graph.nodes["wrap"]
+    actual = {
+        "status": result.status,
+        "child_status": wrap.payload.get("child_status"),
+        "child_run_id_nonempty": bool(wrap.payload.get("child_run_id")),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_context_provider_discovery(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    provider = StaticContextProvider(
+        str(request["provider_id"]),
+        {str(request["ref"]): str(request["content"])},
+    )
+    entries = provider.index(budget=8)
+    chunks = provider.load([str(request["ref"])])
+    actual = {
+        "index_count": len(entries),
+        "loaded_provider_id": chunks[0].provider_id if chunks else None,
+        "token_estimate_min": chunks[0].token_estimate if chunks else 0,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_instruction_gotcha_metrics(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    catalog = InstructionCatalog()
+    gotcha = catalog.append_gotcha(
+        str(request["title"]),
+        str(request["body"]),
+        provenance={"source": "client"},
+    )
+    if request.get("over_trigger"):
+        gotcha.record_trigger(used=True, appropriate=False)
+    else:
+        gotcha.record_trigger(used=True, appropriate=True)
+    catalog.promote(gotcha.id)
+    actual = {
+        "over_trigger_count": gotcha.over_trigger_count,
+        "status_after_promote": gotcha.status,
+        "active_gotcha_count": len(catalog.active(kind="gotcha")),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_independent_review_template(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    graph = IndependentReviewTemplate().instantiate(
+        GraphTemplateParams(
+            goal="review",
+            inputs={"reviewer_count": int(request.get("reviewer_count", 1))},
+            acceptance=list(request.get("acceptance") or []),
+        )
+    )
+    reviews = [n for n in graph.nodes if n.startswith("review_")]
+    actual = {
+        "review_count": len(reviews),
+        "omit_producer_reasoning": graph.nodes[reviews[0]].payload.get(
+            "omit_producer_reasoning"
+        ),
+        "retain_disagreement": graph.nodes["aggregate_reviews"].payload.get(
+            "retain_disagreement"
+        ),
+        "template_name": graph.template_name,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_failure_attribution_trace(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    attrs = [attribute_error(err) for err in request.get("errors") or []]
+    actual = {
+        "categories_include": [a.category for a in attrs],
+        "repeated_classes_include": detect_repeated_failure_classes(attrs),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_checkpoint_fingerprint_refuse(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    registry = GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
+
+    class Cfg(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            from mechaharness.inference.mock import MockInferenceStrategy
+
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return [GraphExecute]
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return registry
+
+    executor = get_injector(Cfg()).inject(GraphExecutor)
+    graph = ExecutionGraph(goal=str(request.get("goal") or "fp"), version="1")
+    graph.add_node(GraphNode(id="a", kind="compute"))
+    first = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-fp"
+    )
+    executor.fingerprint_parts = {"harness_version": "changed"}
+    resumed = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-fp", resume=True
+    )
+    actual = {
+        "first_status": first.status,
+        "resume_status": resumed.status,
+        "error_contains": resumed.error or "",
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_capability_need_routing(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    route = route_for_capability_needs(
+        capability_needs=list(request.get("capability_needs") or []),
+        available_model_classes=list(request.get("available_model_classes") or []),
+    )
+    actual = {"selected_model_class": route["selected_model_class"]}
+    _assert_expect(actual, expect)
+
+
+async def _run_environment_linkage_fail(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    class StrictEnv(InferenceEnvironment):
+        def active_profile(self) -> str | None:
+            return "story-strict"
+
+        def active_capabilities(self):
+            from mechaharness.core.access import CapabilityProfile
+
+            return CapabilityProfile()
+
+        def active_grants(self) -> list[str]:
+            return []
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    registry = GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
+    access = InMemoryAccessControl(
+        event_log=InMemoryEventLog(),
+        policy=AccessPolicy(grants=[GraphExecute]),
+    )
+    from mechaharness.capability_envelope import CapabilityEnvelope
+
+    resolver = DefaultLinkageResolver(
+        runners=registry,
+        access=access,
+        environment=StrictEnv(),
+    )
+    graph = ExecutionGraph(goal="env")
+    graph.add_node(GraphNode(id="a", kind="compute"))
+    report = resolver.resolve(
+        graph,
+        envelope=CapabilityEnvelope(grants=[str(request.get("required_grant"))]),
+    )
+    actual = {
+        "ok": report.ok,
+        "codes_include": [e.code for e in report.edges],
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_wake_reresolve_resume(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    registry = GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
+
+    class Cfg(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            from mechaharness.inference.mock import MockInferenceStrategy
+
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return [GraphExecute]
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return registry
+
+    inj = get_injector(Cfg())
+    executor = inj.inject(GraphExecutor)
+    graph = ExecutionGraph(goal=str(request.get("goal") or "wake"))
+    graph.add_node(GraphNode(id="a", kind="compute"))
+    # Client wake: resolve then run; checkpoint; wake again with matching fingerprint
+    first = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-wake"
+    )
+    resolve = executor.linkage_resolver.resolve(first.graph)
+    resumed = await executor.run(
+        first.graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-wake", resume=True
+    )
+    actual = {
+        "resolve_ok": resolve.ok,
+        "resume_status": resumed.status,
+        "fingerprint_nonempty": bool(first.graph.config_fingerprint or resolve.fingerprint),
+    }
+    _assert_expect(actual, expect)
+
+
+def _story_graph_executor(registry: GraphNodeRunnerRegistry) -> GraphExecutor:
+    class Cfg(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            from mechaharness.inference.mock import MockInferenceStrategy
+
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return [GraphExecute]
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return registry
+
+    return get_injector(Cfg()).inject(GraphExecutor)
+
+
+async def _run_graph_budget_limits(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    cost = float(request.get("node_cost", 1))
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(
+            status=NodeStatus.SUCCEEDED,
+            payload={"id": node.id},
+            cost_units=cost,
+        )
+
+    registry = GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
+    executor = _story_graph_executor(registry)
+
+    def _linear() -> ExecutionGraph:
+        g = ExecutionGraph(goal="budget-limits")
+        g.add_node(GraphNode(id="a", kind="compute", payload={"cost_units": cost}))
+        g.add_node(
+            GraphNode(
+                id="b",
+                kind="compute",
+                depends_on=["a"],
+                payload={"cost_units": cost},
+            )
+        )
+        return g
+
+    soft_pol = BudgetPolicy(
+        soft_limit=request["soft_policy"].get("soft_limit"),
+        hard_limit=request["soft_policy"].get("hard_limit"),
+    )
+    soft = await executor.run(_linear(), budget_policy=soft_pol, run_id="story-budget-soft")
+    hard_pol = BudgetPolicy(
+        soft_limit=request["hard_policy"].get("soft_limit"),
+        hard_limit=request["hard_policy"].get("hard_limit"),
+    )
+    hard = await executor.run(_linear(), budget_policy=hard_pol, run_id="story-budget-hard")
+    actual = {
+        "soft_status": soft.status,
+        "soft_error": soft.error,
+        "soft_budget_level": soft.budget_level,
+        "hard_status": hard.status,
+        "hard_error": hard.error,
+        "hard_budget_level": hard.budget_level,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_graph_budget_subgraph_rollup(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    cost = float(request.get("node_cost", 1))
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(
+            status=NodeStatus.SUCCEEDED,
+            payload={"id": node.id},
+            cost_units=cost,
+        )
+
+    registry = GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
+    executor = _story_graph_executor(registry)
+
+    child = ExecutionGraph(goal="child-budget")
+    child.add_node(GraphNode(id="c1", kind="compute", payload={"cost_units": cost}))
+    child.add_node(
+        GraphNode(
+            id="c2",
+            kind="compute",
+            depends_on=["c1"],
+            payload={"cost_units": cost},
+        )
+    )
+    parent = ExecutionGraph(goal="parent-budget")
+    parent.add_node(SubgraphNodeRunner.embed(child, parent_node_id="wrap"))
+    parent.add_node(
+        GraphNode(
+            id="after",
+            kind="compute",
+            depends_on=["wrap"],
+            payload={"cost_units": cost},
+        )
+    )
+    policy = BudgetPolicy(
+        soft_limit=request.get("soft_limit"),
+        hard_limit=request.get("hard_limit"),
+    )
+    result = await executor.run(
+        parent,
+        budget_policy=policy,
+        skip_linkage=True,
+        run_id="story-budget-rollup",
+    )
+    actual = {
+        "status": result.status,
+        "budget_spent": result.budget_spent,
+        "budget_level": result.budget_level,
+        "error": result.error,
+        "after_status": parent.nodes["after"].status.value,
+    }
     _assert_expect(actual, expect)

@@ -1,0 +1,22 @@
+{
+  "id": "fan_out_aggregate_kind_override",
+  "description": "Soft-point runner kind overrides stay on the skeleton",
+  "template": "fan_out_aggregate",
+  "params": {
+    "goal": "custom kinds",
+    "branch_payloads": [{"index": 0}],
+    "soft_bindings": {
+      "plan_kind": "host_plan",
+      "branch_kind": "host_branch",
+      "reduce_kind": "host_reduce"
+    }
+  },
+  "expect": {
+    "node_ids": ["plan", "branch_0", "reduce"],
+    "nodes": {
+      "plan": {"kind": "host_plan"},
+      "branch_0": {"kind": "host_branch"},
+      "reduce": {"kind": "host_reduce"}
+    }
+  }
+}

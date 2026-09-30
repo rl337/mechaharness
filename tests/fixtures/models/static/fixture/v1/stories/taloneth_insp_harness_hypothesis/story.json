@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_harness_hypothesis",
+  "persona": "taloneth",
+  "title": "Express a harness change as a testable hypothesis",
+  "kind": "harness_experiment_retire",
+  "narrative": "Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].",
+  "implementation": "`HarnessExperiment` carries hypothesis, intervention, failure_mode, evidence, and `to_trace_fields` for version/assignment on traces.",
+  "validation": "Kind `harness_experiment_retire`. Soft expects retired when treatment loses (evidence-driven retain/retire).",
+  "footnotes": [
+    {
+      "id": "insp-r14",
+      "label": "Inspiration requirements (req 14: harness hypotheses)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 14 \u2014 harness hypotheses"
+    }
+  ]
+}

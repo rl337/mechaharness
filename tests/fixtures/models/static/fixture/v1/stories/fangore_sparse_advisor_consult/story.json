@@ -1,0 +1,17 @@
+{
+  "id": "fangore_sparse_advisor_consult",
+  "persona": "fangore",
+  "title": "Consult an advisor sparsely without transferring ownership",
+  "kind": "sparse_advisor_consult",
+  "narrative": "Fangore's worker hits a consequential planning boundary and asks a stronger advisor for counsel. The worker keeps ownership of the task: advice is guidance, not a hand-off, and a budget must stop low-value routine consultation. See inspiration requirements for the advisor pattern[^insp-advisor].",
+  "implementation": "`Advisor` / `AdvisorPolicy` in `mechaharness.advisor` are distinct from `GraphEscalation` (ownership transfer). `DefaultAdvisorPolicy` rate-limits consultations; `consult_advisor` records `AdvisorObservation` and never transfers task ownership. Default DI binds `RejectAdvisor` with an explicit continue fallback.",
+  "validation": "Kind `sparse_advisor_consult` → `_run_sparse_advisor_consult`. Soft expects: first consultation returns guidance; second blocked by budget; observation recorded. Unit: `tests/test_inspiration_primitives.py`.",
+  "footnotes": [
+    {
+      "id": "insp-advisor",
+      "label": "Inspiration requirements (advisor)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 18 — sparse non-binding advisor; executor retains ownership"
+    }
+  ]
+}

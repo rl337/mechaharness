@@ -19,6 +19,7 @@ class NodeStatus(str, Enum):
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     BLOCKED = "blocked"
+    CANCELLED = "cancelled"
 
 
 DependencyType = Literal["data", "state", "control", "resource"]
@@ -78,6 +79,10 @@ class GraphNode(BaseModel):
     write_scopes: list[str] = Field(default_factory=list)
     base_revision: str | None = None
     recovery_boundary: RecoveryBoundary | None = None
+    repeating: bool = False
+    stop_contract: dict[str, Any] | None = None
+    subgraph: dict[str, Any] | None = None
+    parent_graph_id: str | None = None
 
 
 class GraphEvent(CoreEvent):
@@ -94,6 +99,11 @@ class ExecutionGraph(BaseModel):
     nodes: dict[str, GraphNode] = Field(default_factory=dict)
     edges: list[DependencyEdge] = Field(default_factory=list)
     version: str = "1"
+    config_fingerprint: str | None = None
+    template_name: str | None = None
+    template_version: str | None = None
+    template_status: str | None = None
+    source_workflow_ref: str | None = None
 
     def add_node(self, node: GraphNode) -> GraphNode:
         self.nodes[node.id] = node
@@ -166,11 +176,16 @@ class GraphStore:
         *,
         run_id: str | None = None,
         boundary: RecoveryBoundary | None = None,
+        fingerprint: str | None = None,
     ) -> None:
         rid = run_id or graph.id
+        if fingerprint is not None:
+            graph.config_fingerprint = fingerprint
         payload: dict[str, Any] = {"graph": graph.checkpoint()}
         if boundary is not None:
             payload["recovery_boundary"] = boundary
+        if graph.config_fingerprint:
+            payload["config_fingerprint"] = graph.config_fingerprint
         self.event_log.emit(
             Event(
                 type=event_type_key(GraphEvent),
@@ -188,6 +203,20 @@ class GraphStore:
         if not isinstance(payload, dict):
             return None
         return ExecutionGraph.resume(payload)
+
+    def latest_fingerprint(self, *, run_id: str | None = None) -> str | None:
+        events = self.event_log.query(run_id=run_id, types=[GraphEvent])
+        if not events:
+            return None
+        fp = events[-1].payload.get("config_fingerprint")
+        if isinstance(fp, str):
+            return fp
+        graph_payload = events[-1].payload.get("graph")
+        if isinstance(graph_payload, dict):
+            nested = graph_payload.get("config_fingerprint")
+            if isinstance(nested, str):
+                return nested
+        return None
 
     def latest_boundary(self, *, run_id: str | None = None) -> RecoveryBoundary | None:
         events = self.event_log.query(run_id=run_id, types=[GraphEvent])

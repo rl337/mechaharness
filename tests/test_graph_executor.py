@@ -12,6 +12,7 @@ from collections import defaultdict
 import pytest
 from pyiv import get_injector
 
+from mechaharness.budget import Budget, BudgetPolicy
 from mechaharness.graph import ExecutionGraph, GraphNode, NodeStatus
 from mechaharness.graph_executor import (
     CallableGraphNodeRunner,
@@ -76,8 +77,15 @@ async def test_graph_executor_case(case: GraphExecutorCase) -> None:
             else:
                 mutate_graph(graph, mutate)
 
+        budget_raw = run_spec.get("budget_policy") or data.get("budget_policy") or {}
+        budget_policy = BudgetPolicy(
+            soft_limit=budget_raw.get("soft_limit"),
+            hard_limit=budget_raw.get("hard_limit"),
+            unit=budget_raw.get("unit", "units"),
+        )
         result = await executor.run(
             graph,
+            budget_policy=budget_policy,
             run_id=run_spec.get("run_id"),
             resume=bool(run_spec.get("resume")),
         )
@@ -146,6 +154,7 @@ async def test_registry_from_mapping_wires_sync_handler() -> None:
             graph=ExecutionGraph(),
             run_id="r",
             agent_id="a",
+            budget=Budget(BudgetPolicy.unlimited()),
         ),
     )
     assert outcome.payload["sync"] is True

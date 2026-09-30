@@ -1,0 +1,17 @@
+{
+  "id": "fangore_graph_template_soft_points",
+  "persona": "fangore",
+  "title": "Instantiate a reusable graph template with soft points",
+  "kind": "graph_template_soft_points",
+  "narrative": "Fangore picks a library fan-out template, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which template produced it so later upgrades can detect drift. Independent-review and verify-repair templates follow the same pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates].",
+  "implementation": "`mechaharness.graph_templates` ships parameterized skeletons (`FanOutAggregateTemplate`, `VerifyRepairTemplate`, `IndependentReviewTemplate`, `EnvironmentRepairTemplate`) with declared `SoftPoint`s. `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.",
+  "validation": "Kind `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft expects: fan-out node ids, stamped provenance, soft-point catalog nonempty, demoted template raises. Unit: `tests/test_graph_templates.py`, fixtures under `tests/fixtures/graph_templates/`.",
+  "footnotes": [
+    {
+      "id": "insp-templates",
+      "label": "Inspiration requirements (subgraphs & templates)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation"
+    }
+  ]
+}

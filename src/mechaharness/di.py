@@ -21,7 +21,17 @@ from __future__ import annotations
 import inspect
 import sys
 from collections.abc import Callable, Sequence
-from typing import Any, ForwardRef, Union, cast, get_type_hints
+from typing import (
+    Annotated,
+    Any,
+    ForwardRef,
+    Optional,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 from eval_type_backport import eval_type_backport
 from pyiv import Config, Stage
@@ -31,8 +41,11 @@ from pyiv.key import Key, Named
 from pyiv.provider import InstanceProvider
 from pyiv.scope import SingletonScope
 
+from mechaharness.advisor import Advisor, AdvisorPolicy, DefaultAdvisorPolicy, RejectAdvisor
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.config import Settings
+from mechaharness.context_provider import ContextProviderRegistry
 from mechaharness.core.access import (
     AccessControl,
     AccessPolicy,
@@ -49,6 +62,7 @@ from mechaharness.core.environment import (
     NoOpInferenceEnvironment,
 )
 from mechaharness.core.events import EventLog, default_event_log
+from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
 from mechaharness.graph_executor import (
     DefaultGraphFailurePolicy,
     GraphEscalation,
@@ -57,6 +71,7 @@ from mechaharness.graph_executor import (
     GraphNodeRunnerRegistry,
     RejectGraphEscalation,
 )
+from mechaharness.graph_templates import GraphTemplateRegistry, default_graph_templates
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
 from mechaharness.harness.pass_through import PassThroughHarness
@@ -68,7 +83,10 @@ from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.linkage_resolver import DefaultLinkageResolver, LinkageResolver
+from mechaharness.operation_registry import OperationRegistry, default_operations
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.verification_policy import DefaultVerificationPolicy, VerificationPolicy
 
 CompleterBinding = tuple[
     Named, Union[type, Completer, Callable[..., Completer]]
@@ -166,6 +184,46 @@ def apply_backend_defaults(settings: Settings) -> Settings:
     return settings.model_copy(update=updates) if updates else settings
 
 
+def _is_union_origin(origin: Any) -> bool:
+    """True for ``typing.Union`` and PEP 604 ``types.UnionType`` (3.10+)."""
+    if origin is Union:
+        return True
+    return getattr(origin, "__name__", None) == "UnionType"
+
+
+def _normalize_injection_annotation(annotation: Any) -> Any:
+    """Rewrite PEP 604 optionals so pyiv 0.4 can peel Named/Matched.
+
+    pyiv's ``is_optional_type`` only recognizes ``typing.Union`` / ``Optional``.
+    On Python 3.10+, ``get_type_hints`` may leave ``T | None`` as
+    ``types.UnionType``, so ``Annotated[T | None, Named(...)]`` fails with
+    "requires a concrete type". Prefer ``Optional[Annotated[T, Q]]``.
+    """
+    origin = get_origin(annotation)
+    if _is_union_origin(origin):
+        args = get_args(annotation)
+        if len(args) == 2 and type(None) in args:
+            non_none = args[0] if args[1] is type(None) else args[1]
+            return Optional[_normalize_injection_annotation(non_none)]
+        return annotation
+    if origin is Annotated or getattr(origin, "__name__", None) == "Annotated":
+        args = get_args(annotation)
+        if not args:
+            return annotation
+        base, metas = args[0], args[1:]
+        base_origin = get_origin(base)
+        if _is_union_origin(base_origin):
+            b_args = get_args(base)
+            if len(b_args) == 2 and type(None) in b_args:
+                inner = b_args[0] if b_args[1] is type(None) else b_args[1]
+                return Optional[Annotated[(inner, *metas)]]
+        normalized_base = _normalize_injection_annotation(base)
+        if normalized_base is base:
+            return annotation
+        return Annotated[(normalized_base, *metas)]
+    return annotation
+
+
 def _expose_ctor_type_hints(cls: type) -> None:
     """Resolve PEP 563 string annotations so pyiv can constructor-inject.
 
@@ -175,7 +233,8 @@ def _expose_ctor_type_hints(cls: type) -> None:
     ``__init__.__annotations__`` exposes real types for the injector.
 
     Uses ``include_extras=True`` so ``Annotated[T, Named|Matched]`` metadata
-    survives for qualified constructor injection.
+    survives for qualified constructor injection. Normalizes ``T | None``
+    optionals for pyiv compatibility on 3.10+.
     """
     init = getattr(cls, "__init__", None)
     if init is None or init is object.__init__:
@@ -197,7 +256,9 @@ def _expose_ctor_type_hints(cls: type) -> None:
             except Exception:  # noqa: BLE001
                 continue
     if hints:
-        init.__annotations__.update(hints)
+        init.__annotations__.update(
+            {name: _normalize_injection_annotation(ann) for name, ann in hints.items()}
+        )
 
 
 class MechaHarnessConfig(Config):
@@ -270,6 +331,15 @@ class MechaHarnessConfig(Config):
         self.register_instance(GraphNodeRunnerRegistry, self.get_node_runner_registry())
         self.register_instance(GraphFailurePolicy, self.get_graph_failure_policy())
         self.register_instance(GraphEscalation, self.get_graph_escalation())
+        self.register_instance(OperationRegistry, self.get_operation_registry())
+        self.register_instance(LinkageResolver, self.get_linkage_resolver())
+        self.register_instance(VerificationPolicy, self.get_verification_policy())
+        self.register_instance(DelegationPolicy, self.get_delegation_policy())
+        self.register_instance(AdvisorPolicy, self.get_advisor_policy())
+        self.register_instance(Advisor, self.get_advisor())
+        self.register_instance(GraphTemplateRegistry, self.get_graph_template_registry())
+        self.register_instance(ContextProviderRegistry, self.get_context_provider_registry())
+        self.register_instance(CapabilityEnvelope, self.get_capability_envelope())
 
         inference_cls = self.get_inference_class()
         harness_cls = self.get_harness_class()
@@ -346,10 +416,14 @@ class MechaHarnessConfig(Config):
 
     def get_access_control(self) -> AccessControl:
         """Deny-by-default access control bound into harnesses."""
-        return InMemoryAccessControl(
-            event_log=self.get_event_log(),
-            policy=self.get_access_policy(),
-        )
+        existing = getattr(self, "_access_control", None)
+        if existing is None:
+            existing = InMemoryAccessControl(
+                event_log=self.get_event_log(),
+                policy=self.get_access_policy(),
+            )
+            self._access_control = existing
+        return existing
 
     def get_access_policy(self) -> GrantPolicyLike:
         """Grant policy for harness tool gates.
@@ -439,7 +513,11 @@ class MechaHarnessConfig(Config):
 
     def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
         """Node-kind runners for the graph executor (default: empty)."""
-        return GraphNodeRunnerRegistry()
+        existing = getattr(self, "_node_runner_registry", None)
+        if existing is None:
+            existing = GraphNodeRunnerRegistry()
+            self._node_runner_registry = existing
+        return existing
 
     def get_graph_failure_policy(self) -> GraphFailurePolicy:
         """Retry / escalate / fail policy for graph node attempts."""
@@ -448,6 +526,51 @@ class MechaHarnessConfig(Config):
     def get_graph_escalation(self) -> GraphEscalation:
         """Escalation hook after retries are exhausted (default: reject)."""
         return RejectGraphEscalation()
+
+    def get_operation_registry(self) -> OperationRegistry:
+        """Shared operation contracts for linkage / compilers."""
+        existing = getattr(self, "_operation_registry", None)
+        if existing is None:
+            existing = default_operations()
+            self._operation_registry = existing
+        return existing
+
+    def get_linkage_resolver(self) -> LinkageResolver:
+        """Pre-execution graph wiring validator."""
+        return DefaultLinkageResolver(
+            runners=self.get_node_runner_registry(),
+            access=self.get_access_control(),
+            environment=self.get_inference_environment(),
+            operations=self.get_operation_registry(),
+        )
+
+    def get_verification_policy(self) -> VerificationPolicy:
+        """Selects and runs verification for graph/outcome gates."""
+        return DefaultVerificationPolicy()
+
+    def get_delegation_policy(self) -> DelegationPolicy:
+        """Chooses inline versus child/subgraph execution."""
+        return DefaultDelegationPolicy()
+
+    def get_advisor_policy(self) -> AdvisorPolicy:
+        """Sparse advisor consultation policy."""
+        return DefaultAdvisorPolicy()
+
+    def get_advisor(self) -> Advisor:
+        """Non-binding advisor (default: unavailable / reject)."""
+        return RejectAdvisor()
+
+    def get_graph_template_registry(self) -> GraphTemplateRegistry:
+        """Library-owned parameterized graph templates."""
+        return default_graph_templates()
+
+    def get_context_provider_registry(self) -> ContextProviderRegistry:
+        """Host context providers (document/KG adapters bind here)."""
+        return ContextProviderRegistry()
+
+    def get_capability_envelope(self) -> CapabilityEnvelope:
+        """Default run envelope from configured grants."""
+        return CapabilityEnvelope.from_grants(self.get_grants())
 
     def inference_classes(self) -> dict[str, type[InferenceStrategy]]:
         """Named backend map. Hosts merge via ``super().inference_classes()``."""

@@ -1,0 +1,6 @@
+{
+  "hypothesis": "drop redundant scaffold",
+  "intervention": "remove_scaffold_x",
+  "treatment_success": 0.7,
+  "control_success": 0.9
+}

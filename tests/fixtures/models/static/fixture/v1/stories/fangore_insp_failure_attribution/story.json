@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_failure_attribution",
+  "persona": "fangore",
+  "title": "Attribute repeated failures to linkage or tools",
+  "kind": "failure_attribution_trace",
+  "narrative": "When the same failure class repeats, Fangore needs structured attribution so the process can improve \u2014 not one-off output patches. Accepts inspiration requirement 11[^insp-r11].",
+  "implementation": "`attribute_error` / `detect_repeated_failure_classes` in `mechaharness.failure_attribution` map errors to categories for traces and offline mining.",
+  "validation": "Kind `failure_attribution_trace`. Soft expects linkage category and repeated class detection.",
+  "footnotes": [
+    {
+      "id": "insp-r11",
+      "label": "Inspiration requirements (req 11: fix the process)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 11 \u2014 fix the process"
+    }
+  ]
+}

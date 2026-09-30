@@ -1,0 +1,6 @@
+{
+  "narrow_ok": true,
+  "child_grant_count": 1,
+  "widen_raises": true,
+  "delegation_choice": "child"
+}

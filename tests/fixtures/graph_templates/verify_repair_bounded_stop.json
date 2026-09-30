@@ -1,0 +1,32 @@
+{
+  "id": "verify_repair_bounded_stop",
+  "description": "Repair node is repeating and carries StopContract",
+  "template": "verify_repair",
+  "params": {
+    "goal": "fix lint",
+    "inputs": {"path": "src/"},
+    "acceptance": ["tests_green"],
+    "stop_contract": {
+      "version": "1",
+      "mode": "bounded",
+      "max_iterations": 5,
+      "trigger": "verify_failed",
+      "continuation_condition": "not_terminal",
+      "success_condition": "acceptance_met",
+      "abort_condition": "budget_or_failure",
+      "progress_signal": "state_delta"
+    }
+  },
+  "expect": {
+    "template_name": "verify_repair",
+    "template_status": "active",
+    "node_ids": ["produce", "verify", "repair", "complete"],
+    "edge_count": 3,
+    "nodes": {
+      "produce": {"kind": "produce", "payload": {"path": "src/"}},
+      "verify": {"kind": "verify", "depends_on": ["produce"], "acceptance": ["tests_green"]},
+      "repair": {"kind": "repair", "repeating": true, "has_stop_contract": true, "depends_on": ["verify"]},
+      "complete": {"kind": "complete", "depends_on": ["repair"], "acceptance": ["tests_green"]}
+    }
+  }
+}

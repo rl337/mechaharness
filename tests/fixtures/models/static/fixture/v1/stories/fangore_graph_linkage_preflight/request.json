@@ -1,0 +1,5 @@
+{
+  "check_missing_runner": true,
+  "check_missing_stop": true,
+  "check_ok_linear": true
+}

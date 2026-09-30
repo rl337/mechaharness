@@ -1,13 +1,15 @@
 # Cost
 
-Ledger and unit pricing for completer calls and successful tool runs. Module:
-`mechaharness.core.access`. Stability: evolving.
+Ledger and unit pricing for completer calls and successful tool runs, plus
+graph-execution budgets. Modules: `mechaharness.core.access` (Ability units /
+`CostAccountant`) and `mechaharness.budget` (`BudgetPolicy` / `Budget`).
+Stability: evolving.
 
 ## Surface
 
 | Item | Value |
 |------|-------|
-| Module | `mechaharness.core.access` |
+| Module | `mechaharness.core.access`, `mechaharness.budget` |
 | Event | `core:cost` |
 | Stability | evolving |
 
@@ -22,6 +24,16 @@ profile counts as simple / 1). Tool cost is that tool's `ability.units`.
 `run_id` are set. When a completer returns OpenAI-style `usage`, those
 token counts are stored on the entry and on the run `CostReport` (local
 Spark/$0 pricing can still use Ability units while tracking tokens).
+
+## Graph budgets
+
+`BudgetPolicy` declares optional `soft_limit` and `hard_limit` (abstract cost
+units). `hard_limit=None` means unlimited. `GraphExecutor.run` **requires** a
+`budget_policy`; node attempts charge a shared `Budget` (including nested
+subgraphs). Soft breach cancels remaining open nodes and returns
+`soft_exhausted`. Hard breach fails open nodes with prejudice
+(`hard_budget_exceeded`). Stories: `fangore_insp_graph_budget`,
+`fangore_insp_budget_subgraph_rollup`.
 
 ## Harness
 

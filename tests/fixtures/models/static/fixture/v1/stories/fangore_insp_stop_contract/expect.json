@@ -1,0 +1,6 @@
+{
+  "missing_stop_ok": false,
+  "missing_stop_codes_include": [
+    "missing_stop_contract"
+  ]
+}

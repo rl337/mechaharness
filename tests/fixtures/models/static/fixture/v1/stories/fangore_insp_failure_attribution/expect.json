@@ -1,0 +1,9 @@
+{
+  "categories_include": [
+    "linkage",
+    "tools"
+  ],
+  "repeated_classes_include": [
+    "no_runner"
+  ]
+}

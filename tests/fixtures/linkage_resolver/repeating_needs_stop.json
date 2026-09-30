@@ -1,0 +1,8 @@
+{
+  "id": "repeating_needs_stop",
+  "description": "Repeating node without stop_contract fails linkage",
+  "runner_kinds": ["loop"],
+  "grants": ["core:graph.execute"],
+  "nodes": [{"id": "a", "kind": "loop", "repeating": true}],
+  "expect": {"ok": false, "codes_include": ["missing_stop_contract"]}
+}

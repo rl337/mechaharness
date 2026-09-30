@@ -1,0 +1,5 @@
+{
+  "title": "watch path",
+  "body": "do not dump full memory",
+  "over_trigger": true
+}
