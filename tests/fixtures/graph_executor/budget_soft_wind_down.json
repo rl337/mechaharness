@@ -1,0 +1,34 @@
+{
+  "id": "budget_soft_wind_down",
+  "description": "Soft limit cancels remaining ready work without hard failure",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "budget_policy": {"soft_limit": 1, "hard_limit": null},
+  "runners": {
+    "compute": {"mode": "succeed", "payload": {"ok": true}}
+  },
+  "graph": {
+    "goal": "soft",
+    "nodes": [
+      {"id": "a", "kind": "compute", "payload": {"cost_units": 1}},
+      {"id": "b", "kind": "compute", "depends_on": ["a"], "payload": {"cost_units": 1}}
+    ],
+    "edges": [
+      {"from": "a", "to": "b", "types": ["control"], "reason": "sequence"}
+    ]
+  },
+  "run": {"run_id": "budget-soft"},
+  "expect": {
+    "status": "soft_exhausted",
+    "error": "soft_budget_exceeded",
+    "budget_spent": 1,
+    "budget_level": "soft",
+    "nodes": {
+      "a": {"status": "succeeded", "attempt": 1},
+      "b": {"status": "cancelled", "error": "soft_budget_exceeded"}
+    },
+    "runner_calls": {"compute": 1},
+    "run_order": ["a"]
+  }
+}

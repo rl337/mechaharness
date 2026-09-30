@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_stop_contract",
+  "persona": "fangore",
+  "title": "Require a stop contract on repeating graph steps",
+  "kind": "graph_linkage_preflight",
+  "narrative": "A repeating repair step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration requirement 4[^insp-r04]. Complements `fangore_insp_linkage_preflight` and `fangore_convergence_ceiling`.",
+  "implementation": "`StopContract` plus `DefaultLinkageResolver` require stop contracts on repeating nodes unless declared a persistent service loop.",
+  "validation": "Kind `graph_linkage_preflight` with stop-focused request. Soft expects `missing_stop_contract`.",
+  "footnotes": [
+    {
+      "id": "insp-r04",
+      "label": "Inspiration requirements (req 4: stop contracts)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 4 \u2014 stop contracts"
+    }
+  ]
+}

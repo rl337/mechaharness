@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_soft_vs_hard",
+  "persona": "fangore",
+  "title": "Enforce grants mechanically instead of by prompt alone",
+  "kind": "tool_gating",
+  "narrative": "Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`.",
+  "implementation": "`AccessControl` deny-by-default on the harness tool path; prompts never grant permission.",
+  "validation": "Kind `tool_gating`. Soft expects deny without grant and allow with grant.",
+  "footnotes": [
+    {
+      "id": "insp-r09",
+      "label": "Inspiration requirements (req 9: soft vs hard)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 9 \u2014 soft vs hard"
+    }
+  ]
+}

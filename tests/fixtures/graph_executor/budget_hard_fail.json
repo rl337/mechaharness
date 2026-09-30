@@ -1,0 +1,34 @@
+{
+  "id": "budget_hard_fail",
+  "description": "Hard limit fails the graph with prejudice after spend crosses the ceiling",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "budget_policy": {"soft_limit": null, "hard_limit": 1},
+  "runners": {
+    "compute": {"mode": "succeed", "payload": {"ok": true}}
+  },
+  "graph": {
+    "goal": "hard",
+    "nodes": [
+      {"id": "a", "kind": "compute", "payload": {"cost_units": 1}},
+      {"id": "b", "kind": "compute", "depends_on": ["a"], "payload": {"cost_units": 1}}
+    ],
+    "edges": [
+      {"from": "a", "to": "b", "types": ["control"], "reason": "sequence"}
+    ]
+  },
+  "run": {"run_id": "budget-hard"},
+  "expect": {
+    "status": "failed",
+    "error": "hard_budget_exceeded",
+    "budget_spent": 1,
+    "budget_level": "hard",
+    "nodes": {
+      "a": {"status": "succeeded", "attempt": 1},
+      "b": {"status": "failed", "error": "hard_budget_exceeded"}
+    },
+    "runner_calls": {"compute": 1},
+    "run_order": ["a"]
+  }
+}

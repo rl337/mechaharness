@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_dynamic_subgraph",
+  "persona": "fangore",
+  "title": "Nest a child graph as an observable subgraph",
+  "kind": "dynamic_subgraph_nest",
+    "narrative": "Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`. Accepts inspiration requirement 3[^insp-r03].",
+  "implementation": "`SubgraphNodeRunner.embed` stores a child `ExecutionGraph` on a parent node; `GraphExecutor` runs nested graphs with linked run ids and emits graph lifecycle events for the child.",
+  "validation": "Kind `dynamic_subgraph_nest`. Soft expects parent ok, child_status ok, nested graph events present.",
+  "footnotes": [
+    {
+      "id": "insp-r03",
+      "label": "Inspiration requirements (req 3: dynamic subgraphs)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 3 \u2014 dynamic subgraphs"
+    }
+  ]
+}

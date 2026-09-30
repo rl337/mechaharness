@@ -1,0 +1,6 @@
+{
+  "review_count": 2,
+  "omit_producer_reasoning": true,
+  "retain_disagreement": true,
+  "template_name": "independent_review"
+}

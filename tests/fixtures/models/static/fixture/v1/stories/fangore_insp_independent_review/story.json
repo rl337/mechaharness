@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_independent_review",
+  "persona": "fangore",
+  "title": "Review artifacts in isolated reviewer context",
+  "kind": "independent_review_template",
+  "narrative": "Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10].",
+  "implementation": "`IndependentReviewTemplate` builds produce \u2192 isolated review_* \u2192 aggregate_reviews with omit_producer_reasoning and retain_disagreement.",
+  "validation": "Kind `independent_review_template`. Soft expects isolated payload flags and two reviewers.",
+  "footnotes": [
+    {
+      "id": "insp-r10",
+      "label": "Inspiration requirements (req 10: independent review)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 10 \u2014 independent review"
+    }
+  ]
+}

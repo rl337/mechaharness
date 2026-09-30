@@ -1,0 +1,8 @@
+{
+  "missing_runner_ok": false,
+  "missing_runner_codes_include": [
+    "no_runner"
+  ],
+  "ok_linear_ok": true,
+  "ok_linear_fingerprint_nonempty": true
+}

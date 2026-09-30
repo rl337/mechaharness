@@ -1,0 +1,11 @@
+{
+  "soft_policy": {
+    "soft_limit": 1,
+    "hard_limit": null
+  },
+  "hard_policy": {
+    "soft_limit": null,
+    "hard_limit": 1
+  },
+  "node_cost": 1
+}

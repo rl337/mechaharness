@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_sparse_advisor",
+  "persona": "fangore",
+  "title": "Consult an advisor without transferring task ownership",
+  "kind": "sparse_advisor_consult",
+  "narrative": "Sparse advisor counsel helps at hard boundaries while the active executor keeps ownership. Budgets stop routine consultation. Accepts inspiration requirement 18[^insp-r18].",
+  "implementation": "`Advisor` / `AdvisorPolicy` / `consult_advisor` \u2014 distinct from `GraphEscalation`.",
+  "validation": "Kind `sparse_advisor_consult`. Soft expects first consult ok, second blocked.",
+  "footnotes": [
+    {
+      "id": "insp-r18",
+      "label": "Inspiration requirements (req 18: advisor)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 18 \u2014 advisor"
+    }
+  ]
+}

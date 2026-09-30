@@ -1,0 +1,17 @@
+{
+  "id": "fangore_capability_envelope_narrow",
+  "persona": "fangore",
+  "title": "Narrow child capability envelopes without silent inheritance",
+  "kind": "capability_envelope_narrow",
+  "narrative": "Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent's full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes[^insp-envelope].",
+  "implementation": "`CapabilityEnvelope` in `mechaharness.capability_envelope` carries grants, tools, context provider ids, model class, budgets, and escalation policy. `narrow()` produces a child envelope that cannot widen parent grants or tools. Attached on `GraphRunContext.envelope` during graph runs. `DefaultDelegationPolicy` chooses inline versus child/subgraph using independence and pollution signals.",
+  "validation": "Kind `capability_envelope_narrow` → `_run_capability_envelope_narrow`. Soft expects: narrowed grants subset; widen raises; delegation chooses child when independence is required. Unit: `tests/test_inspiration_primitives.py`.",
+  "footnotes": [
+    {
+      "id": "insp-envelope",
+      "label": "Inspiration requirements (delegation envelopes)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 7 — CapabilityEnvelope; children must not inherit parent capabilities implicitly"
+    }
+  ]
+}

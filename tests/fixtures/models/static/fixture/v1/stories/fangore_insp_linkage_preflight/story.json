@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_linkage_preflight",
+  "persona": "fangore",
+  "title": "Resolve graph linkage before any node runs",
+  "kind": "graph_linkage_preflight",
+  "narrative": "Fangore's injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2[^insp-r02]. Related: `fangore_insp_stop_contract`.",
+  "implementation": "`DefaultLinkageResolver` validates runners, grants, environment, and termination separately from pyiv construction. `GraphExecutor` consults it before substantive work.",
+  "validation": "Kind `graph_linkage_preflight`. Soft expects `no_runner` on missing kinds and ok+fingerprint on a wired linear graph.",
+  "footnotes": [
+    {
+      "id": "insp-r02",
+      "label": "Inspiration requirements (req 2: linkage vs DI)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 2 \u2014 linkage vs DI"
+    }
+  ]
+}

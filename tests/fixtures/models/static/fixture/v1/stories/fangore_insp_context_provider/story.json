@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_context_provider",
+  "persona": "fangore",
+  "title": "Discover context indices before loading large payloads",
+  "kind": "context_provider_discovery",
+  "narrative": "Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06].",
+  "implementation": "`ContextProvider` / `StaticContextProvider` expose `index` then `load` with provenance and token estimates.",
+  "validation": "Kind `context_provider_discovery`. Soft expects index before load and provider attribution.",
+  "footnotes": [
+    {
+      "id": "insp-r06",
+      "label": "Inspiration requirements (req 6: scoped context)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 6 \u2014 scoped context"
+    }
+  ]
+}

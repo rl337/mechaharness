@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_verification_gate",
+  "persona": "fangore",
+  "title": "Keep answer-generated distinct from task-complete",
+  "kind": "verification_outcome_gate",
+  "narrative": "Producing an answer is not the same as finishing the task when verification is required. Accepts inspiration requirement 5[^insp-r05].",
+  "implementation": "`OutcomeContract` and `DefaultVerificationPolicy` gate completion on verification state.",
+  "validation": "Kind `verification_outcome_gate`. Soft expects answer_generated then complete after verify.",
+  "footnotes": [
+    {
+      "id": "insp-r05",
+      "label": "Inspiration requirements (req 5: verification)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 5 \u2014 verification"
+    }
+  ]
+}

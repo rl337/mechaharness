@@ -1,0 +1,24 @@
+{
+  "id": "repeating_with_stop",
+  "description": "Repeating node with StopContract passes",
+  "runner_kinds": ["loop"],
+  "grants": ["core:graph.execute"],
+  "nodes": [
+    {
+      "id": "a",
+      "kind": "loop",
+      "repeating": true,
+      "stop_contract": {
+        "version": "1",
+        "mode": "bounded",
+        "max_iterations": 3,
+        "trigger": "node_ready",
+        "continuation_condition": "not_terminal",
+        "success_condition": "acceptance_met",
+        "abort_condition": "budget_or_failure",
+        "progress_signal": "state_delta"
+      }
+    }
+  ],
+  "expect": {"ok": true, "codes_exclude": ["missing_stop_contract"]}
+}

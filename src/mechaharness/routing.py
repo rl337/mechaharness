@@ -108,6 +108,42 @@ def route_at_boundary(
     return RouteDecision(selected=selected, candidates=candidates, boundary=boundary)
 
 
+def route_for_capability_needs(
+    *,
+    capability_needs: Sequence[str],
+    available_model_classes: Sequence[str],
+    prefer: str | None = None,
+    boundary: str = "node",
+) -> dict[str, Any]:
+    """Node-level model-class routing from declared capability needs.
+
+    ``capability_needs`` entries like ``model:reason-fast`` select among
+    ``available_model_classes``. Escalation to a larger class is expressible by
+    listing a stronger need when the worker class is insufficient.
+    """
+    model_needs = [
+        n.split(":", 1)[1]
+        for n in capability_needs
+        if isinstance(n, str) and n.startswith("model:")
+    ]
+    available = list(available_model_classes)
+    selected = prefer
+    if selected is None:
+        for need in model_needs:
+            if need in available:
+                selected = need
+                break
+    if selected is None:
+        selected = available[0] if available else None
+    return {
+        "boundary": boundary,
+        "selected_model_class": selected,
+        "capability_needs": list(capability_needs),
+        "available_model_classes": available,
+        "escalation": bool(prefer and prefer != (model_needs[0] if model_needs else None)),
+    }
+
+
 def activate_scoped_policy(
     *,
     facts: JudgementFacts | Mapping[str, Any],

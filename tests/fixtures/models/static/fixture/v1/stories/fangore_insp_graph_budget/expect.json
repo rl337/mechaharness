@@ -1,0 +1,8 @@
+{
+  "soft_status": "soft_exhausted",
+  "soft_error": "soft_budget_exceeded",
+  "soft_budget_level": "soft",
+  "hard_status": "failed",
+  "hard_error": "hard_budget_exceeded",
+  "hard_budget_level": "hard"
+}

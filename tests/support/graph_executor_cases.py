@@ -34,6 +34,7 @@ from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.mock import MockInferenceStrategy
+from mechaharness.linkage_resolver import LinkageResolver, NoOpLinkageResolver
 from mechaharness.tools.base import ToolRegistry
 
 CASES_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "graph_executor"
@@ -306,6 +307,10 @@ class CaseConfig(MechaHarnessConfig):
     def get_graph_escalation(self) -> GraphEscalation:
         return self._escalation
 
+    def get_linkage_resolver(self) -> LinkageResolver:
+        # Executor fixtures cover runtime failure paths; linkage is tested separately.
+        return NoOpLinkageResolver()
+
 
 def mutate_graph(graph: ExecutionGraph, mutations: dict[str, Any] | None) -> None:
     if not mutations:
@@ -340,6 +345,12 @@ def assert_expect(
         assert result.error == expect["error"], f"{prefix}: error"
     if "error_is_none" in expect:
         assert (result.error is None) is bool(expect["error_is_none"]), f"{prefix}: error_is_none"
+    if "budget_spent" in expect:
+        assert result.budget_spent == expect["budget_spent"], f"{prefix}: budget_spent"
+    if "budget_spent_min" in expect:
+        assert result.budget_spent >= expect["budget_spent_min"], f"{prefix}: budget_spent_min"
+    if "budget_level" in expect:
+        assert result.budget_level == expect["budget_level"], f"{prefix}: budget_level"
 
     for node_id, node_exp in (expect.get("nodes") or {}).items():
         node = result.graph.nodes[node_id]

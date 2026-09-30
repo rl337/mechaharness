@@ -45,6 +45,7 @@ for events and grants ([Architecture](./architecture.md)).
 | Page | Description |
 |------|-------------|
 | [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, pyiv Config |
+| [Inspiration requirements map](./inspiration/requirements-map.md) | Blog-inspired reqs → modules → library vs client ownership |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Junespark](./guides/junespark.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
@@ -55,6 +56,7 @@ for events and grants ([Architecture](./architecture.md)).
 | [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
 | [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, `core:access_check` |
 | [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
+| [Graph templates](./reference/graph-templates.md) | Reusable subgraph skeletons + soft points |
 
 ## Mental model
 

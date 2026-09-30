@@ -1,0 +1,11 @@
+{
+  "id": "ok_linear",
+  "description": "Simple linear graph with registered runners passes linkage",
+  "runner_kinds": ["compute"],
+  "grants": ["core:graph.execute"],
+  "nodes": [
+    {"id": "a", "kind": "compute"},
+    {"id": "b", "kind": "compute", "depends_on": ["a"]}
+  ],
+  "expect": {"ok": true, "has_fingerprint": true, "codes_exclude": ["no_runner", "missing_stop_contract"]}
+}
