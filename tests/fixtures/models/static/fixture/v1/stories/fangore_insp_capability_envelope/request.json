@@ -1,0 +1,13 @@
+{
+  "parent_grants": [
+    "core:graph.execute",
+    "core:fs.read"
+  ],
+  "child_grants": [
+    "core:graph.execute"
+  ],
+  "widen_grants": [
+    "core:graph.execute",
+    "core:fs.write"
+  ]
+}

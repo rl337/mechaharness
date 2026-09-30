@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_instruction_gotchas",
+  "persona": "fangore",
+  "title": "Measure gotcha trigger rates before promoting them",
+  "kind": "instruction_gotcha_metrics",
+  "narrative": "Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8[^insp-r08].",
+  "implementation": "`InstructionCatalog` / `InstructionComponent` track trigger, use, over/under rates; `promote` moves proposed gotchas to active after evaluation.",
+  "validation": "Kind `instruction_gotcha_metrics`. Soft expects over_trigger recorded and active after promote.",
+  "footnotes": [
+    {
+      "id": "insp-r08",
+      "label": "Inspiration requirements (req 8: skills and gotchas)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 8 \u2014 skills and gotchas"
+    }
+  ]
+}

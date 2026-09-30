@@ -1,0 +1,9 @@
+{
+  "capability_needs": [
+    "model:reason-large"
+  ],
+  "available_model_classes": [
+    "reason-fast",
+    "reason-large"
+  ]
+}

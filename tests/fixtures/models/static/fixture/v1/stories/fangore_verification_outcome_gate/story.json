@@ -1,0 +1,17 @@
+{
+  "id": "fangore_verification_outcome_gate",
+  "persona": "fangore",
+  "title": "Treat answer generated as distinct from task complete",
+  "kind": "verification_outcome_gate",
+  "narrative": "Fangore's pipeline produces an answer and still needs verification before the task is complete. When verification is required, generating text alone must not count as done; when verification passes, completion can proceed. Complements `fangore_bounded_repair_loop`. See inspiration requirements for verification as part of execution[^insp-verify].",
+  "implementation": "`OutcomeContract` in `mechaharness.outcome_contract` distinguishes `answer_generated`, `verified`, `complete`, and `failed`. `DefaultVerificationPolicy` selects the strongest sufficient oracle and gates completion through the outcome contract when `require_verification` is set.",
+  "validation": "Kind `verification_outcome_gate` → `_run_verification_outcome_gate`. Soft expects: answer without verification stays `answer_generated`; verification pass yields `complete`. Unit: `tests/test_inspiration_primitives.py`.",
+  "footnotes": [
+    {
+      "id": "insp-verify",
+      "label": "Inspiration requirements (verification)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 5 — verification policy; answer generated ≠ task complete"
+    }
+  ]
+}

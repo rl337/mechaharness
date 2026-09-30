@@ -1,0 +1,17 @@
+{
+  "id": "fangore_graph_linkage_preflight",
+  "persona": "fangore",
+  "title": "Fail closed on missing graph linkage before work starts",
+  "kind": "graph_linkage_preflight",
+  "narrative": "Fangore composes a plan that still names a step the host has not wired, and another repeating step without a stop rule. The library must refuse those plans before any runner work starts, naming the missing edge so operators can fix wiring instead of debugging a mid-run crash. Complements `fangore_graph_executor` (authorized run once linkage is sound) and `fangore_convergence_ceiling` (budgets once a loop is allowed). See the inspiration requirements for linkage versus dependency injection and stop contracts[^insp-linkage].",
+  "implementation": "`DefaultLinkageResolver` in `mechaharness.linkage_resolver` validates runner kinds, grants, environment compatibility, termination sinks, and repeating nodes' `StopContract` before `GraphExecutor` substantive work. Missing runners and missing stop contracts become structured `UnsatisfiedEdge` codes (`no_runner`, `missing_stop_contract`). `GraphExecutor.run` records linkage failure without invoking node handlers.",
+  "validation": "Kind `graph_linkage_preflight` → `_run_graph_linkage_preflight`. Soft expects: missing-runner linkage fails with `no_runner`; repeating node without stop fails with `missing_stop_contract`; valid linear graph reports `ok` with a fingerprint. Unit: `tests/test_linkage_resolver.py`, fixtures under `tests/fixtures/linkage_resolver/`.",
+  "footnotes": [
+    {
+      "id": "insp-linkage",
+      "label": "Inspiration requirements (linkage & stop contracts)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Reqs 2 and 4 — primitive DI vs runtime graph resolution; explicit stop contracts"
+    }
+  ]
+}

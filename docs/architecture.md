@@ -100,11 +100,12 @@ Same-lane Completer flavors for nested subagents can use pyiv `Named` /
 Before substantive work, `GraphExecutor` runs an injectable
 `LinkageResolver` (runner kinds, grants, operation binds, stop contracts,
 envelopes, environment). Checkpoints carry a config/graph fingerprint so
-resume refuses incompatible changes. Parameterized `GraphTemplate`s and
-policies (`VerificationPolicy`, `DelegationPolicy`, `AdvisorPolicy`) are
-library-owned; hosts such as June instantiate them via Config without
-owning template definitions. See
-[Inspiration requirements map](./inspiration/requirements-map.md).
+resume refuses incompatible changes. Parameterized graph templates live in
+`mechaharness.graph_templates` (see
+[Graph templates](./reference/graph-templates.md)); policies
+(`VerificationPolicy`, `DelegationPolicy`, `AdvisorPolicy`) are library-owned.
+Clients instantiate templates and may retain concrete graphs.
+See [Inspiration requirements map](./inspiration/requirements-map.md).
 
 ## Host extension
 

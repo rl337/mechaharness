@@ -1,0 +1,18 @@
+{
+  "id": "environment_repair_defaults",
+  "description": "Env repair skeleton with default acceptance and repeating repair",
+  "template": "environment_repair",
+  "params": {
+    "goal": "restore media",
+    "inputs": {"missing": ["core:media.image"]}
+  },
+  "expect": {
+    "node_ids": ["diagnose", "repair_env", "recheck"],
+    "edge_count": 2,
+    "nodes": {
+      "diagnose": {"kind": "env_diagnose", "payload": {"missing": ["core:media.image"]}},
+      "repair_env": {"kind": "env_repair", "repeating": true, "has_stop_contract": true, "depends_on": ["diagnose"]},
+      "recheck": {"kind": "env_recheck", "depends_on": ["repair_env"], "acceptance": ["environment_ok"]}
+    }
+  }
+}

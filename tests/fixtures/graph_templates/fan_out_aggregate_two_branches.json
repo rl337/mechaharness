@@ -1,0 +1,26 @@
+{
+  "id": "fan_out_aggregate_two_branches",
+  "description": "Two-branch fan-out with custom fan_in_budget soft binding",
+  "template": "fan_out_aggregate",
+  "params": {
+    "goal": "compare drafts",
+    "branch_payloads": [
+      {"index": 0, "source": "a"},
+      {"index": 1, "source": "b", "write_scopes": ["draft"]}
+    ],
+    "acceptance": ["merged"],
+    "soft_bindings": {"fan_in_budget": 4}
+  },
+  "expect": {
+    "template_name": "fan_out_aggregate",
+    "template_version": "1",
+    "template_status": "active",
+    "goal": "compare drafts",
+    "node_ids": ["plan", "branch_0", "branch_1", "reduce"],
+    "edge_count": 4,
+    "nodes": {
+      "branch_1": {"kind": "branch", "depends_on": ["plan"], "payload": {"index": 1, "source": "b", "write_scopes": ["draft"]}},
+      "reduce": {"kind": "reduce", "depends_on": ["branch_0", "branch_1"], "acceptance": ["merged"], "payload": {"fan_in_budget": 4}}
+    }
+  }
+}

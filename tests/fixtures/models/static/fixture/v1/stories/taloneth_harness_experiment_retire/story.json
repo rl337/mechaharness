@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_harness_experiment_retire",
+  "persona": "taloneth",
+  "title": "Retire scaffolding that loses a with-versus-without experiment",
+  "kind": "harness_experiment_retire",
+  "narrative": "Taloneth treats a prompt scaffold as a hypothesis: keep it only if the with-intervention arm beats the without arm on the primary metric. When the scaffold hurts, it is retired rather than left as fossil control logic. See inspiration requirements for revisable scaffolding and harness hypotheses[^insp-experiment].",
+  "implementation": "`HarnessExperiment` / `HarnessExperimentRunner` in `mechaharness.harness_experiment` express interventions as hypotheses with expected metrics, compare with/without arms, and list retirement candidates. Integrates with `ResearchLab` for offline evaluation. Trace fields expose experiment id, harness version, and assignment.",
+  "validation": "Kind `harness_experiment_retire` → `_run_harness_experiment_retire`. Soft expects: treatment worse than control yields `retired` status and a retirement candidate. Related: `taloneth_atk_research_reject`. Unit: `tests/test_inspiration_primitives.py`.",
+  "footnotes": [
+    {
+      "id": "insp-experiment",
+      "label": "Inspiration requirements (harness experiments)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Reqs 1 and 14 — revisable scaffolding; harness changes as testable hypotheses"
+    }
+  ]
+}

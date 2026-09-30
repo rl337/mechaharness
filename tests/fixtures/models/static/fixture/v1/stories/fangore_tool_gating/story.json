@@ -3,8 +3,15 @@
   "persona": "fangore",
   "title": "Gate every tool call through deny-by-default access checks",
   "kind": "tool_gating",
-  "narrative": "Every tool call \u2014 including fused or loop-proposed calls \u2014 must pass access control. Uncertain or privileged scopes fail closed. Fangore shows product that a write without grant is refused and that composed packs from `fangore_compound_grants` still apply.",
+  "narrative": "Every tool call — including fused or loop-proposed calls — must pass access control. Uncertain or privileged scopes fail closed. Soft prompt guidance never replaces these hard grants. Fangore shows product that a write without grant is refused and that composed packs from `fangore_compound_grants` still apply. See inspiration requirements for soft versus hard enforcement[^insp-soft-hard].",
   "implementation": "Harness tool loops consult `AccessControl` before execution; denied calls emit access-check events and do not run side effects. Failure defaults are deny for mutations / external / privileged / uncertain scope. This story covers tool-gating obligations alongside permission packs.\n\nCovers: GAT-01, GAT-02, GAT-03.",
-  "validation": "Kind `tool_gating` \u2192 `_run_tool_gating`. Soft expects: deny without grant, allow with grant. Related: `tests/test_access.py`, grant_gate story.",
-  "footnotes": []
+  "validation": "Kind `tool_gating` → `_run_tool_gating`. Soft expects: deny without grant, allow with grant. Related: `tests/test_access.py`, grant_gate story, `fangore_consequence_risk_scale`.",
+  "footnotes": [
+    {
+      "id": "insp-soft-hard",
+      "label": "Inspiration requirements (soft vs hard)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 9 — soft guidance and hard enforcement are different mechanisms"
+    }
+  ]
 }

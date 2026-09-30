@@ -1,0 +1,7 @@
+{
+  "template": "fan_out_aggregate",
+  "goal": "compare drafts",
+  "branch_count": 2,
+  "acceptance": ["merged"],
+  "source_workflow_ref": "host:workflows/compare_v1"
+}

@@ -44,7 +44,7 @@ from mechaharness.graph_executor import (
     GraphNodeRunnerRegistry,
     RejectGraphEscalation,
 )
-from mechaharness.graph_template import GraphTemplateRegistry, default_graph_templates
+from mechaharness.graph_templates import GraphTemplateRegistry, default_graph_templates
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
 from mechaharness.harness.pass_through import PassThroughHarness
@@ -306,7 +306,7 @@ class MechaHarnessConfig(Config):
         return default_graph_templates()
 
     def get_context_provider_registry(self) -> ContextProviderRegistry:
-        """Host context providers (June KG/docs bind here)."""
+        """Host context providers (document/KG adapters bind here)."""
         return ContextProviderRegistry()
 
     def get_capability_envelope(self) -> CapabilityEnvelope:
