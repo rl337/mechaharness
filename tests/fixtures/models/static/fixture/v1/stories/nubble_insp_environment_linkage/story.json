@@ -1,0 +1,17 @@
+{
+  "id": "nubble_insp_environment_linkage",
+  "persona": "nubble",
+  "title": "Surface environment incompatibility as linkage failure",
+  "kind": "environment_linkage_fail",
+  "narrative": "Missing environment capability must become a structured pre-exec failure, not a mysterious mid-run error. Accepts inspiration requirement 16[^insp-r16].",
+  "implementation": "`InferenceEnvironment.assert_compatible` is consulted by `DefaultLinkageResolver`; mismatches become `environment_incompatible` edges.",
+  "validation": "Kind `environment_linkage_fail`. Soft expects environment_incompatible code when grants are required but absent.",
+  "footnotes": [
+    {
+      "id": "insp-r16",
+      "label": "Inspiration requirements (req 16: environment linkage)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 16 \u2014 environment linkage"
+    }
+  ]
+}

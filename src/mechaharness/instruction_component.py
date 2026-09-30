@@ -1,8 +1,8 @@
 """Instruction components and gotcha metrics (req 8).
 
-June may propose gotchas during sleep/dreaming; promotion to active policy
-requires evaluation. Components distinguish invariants, domain knowledge,
-procedures, and learned gotchas.
+Clients may propose gotchas from offline consolidation; promotion to active
+policy requires evaluation. Components distinguish invariants, domain
+knowledge, procedures, and learned gotchas.
 """
 
 from __future__ import annotations

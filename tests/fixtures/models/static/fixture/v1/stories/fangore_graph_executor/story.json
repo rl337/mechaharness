@@ -3,15 +3,21 @@
   "persona": "fangore",
   "title": "Run a local plan through an authorized graph executor",
   "kind": "graph_executor_run",
-  "narrative": "Fangore ships a host app with a produce → repair → consume plan. The library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; this story is the authorized runner that advances them.",
-  "implementation": "`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, and `GraphEscalation`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override `get_graph_failure_policy()` / `get_graph_escalation()`, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node start/end events, checkpoints through `GraphStore`, and enforces per-runner grants.",
-  "validation": "Kind `graph_executor_run` → `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py` (grants, retry/escalate/fail policies, stall, resume, runner errors).",
+  "narrative": "Fangore ships a host app with a produce → repair → consume plan. After linkage succeeds, the library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; preflight failures are covered by `fangore_graph_linkage_preflight`. See inspiration requirements for authorized graph execution[^insp-executor].",
+  "implementation": "`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node events, checkpoints through `GraphStore` (with config fingerprint), and enforces per-runner grants.",
+  "validation": "Kind `graph_executor_run` → `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py`. Related: `fangore_graph_linkage_preflight`.",
   "footnotes": [
     {
       "id": "loop-vs-graph-executor",
       "label": "Loop vs graph engineering",
       "url": "https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23",
       "note": "Executor advances durable plans hosts define"
+    },
+    {
+      "id": "insp-executor",
+      "label": "Inspiration requirements (graph execution)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Reqs 2 and 12 — linkage then execute; durable checkpoints"
     }
   ]
 }

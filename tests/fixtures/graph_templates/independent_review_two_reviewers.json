@@ -1,0 +1,33 @@
+{
+  "id": "independent_review_two_reviewers",
+  "description": "Two isolated reviewers omit producer reasoning; aggregate retains disagreement",
+  "template": "independent_review",
+  "params": {
+    "goal": "review plan",
+    "inputs": {"reviewer_count": 2},
+    "acceptance": ["lgtm"],
+    "soft_bindings": {"omit_producer_reasoning": true}
+  },
+  "expect": {
+    "node_ids": ["produce", "review_0", "review_1", "aggregate_reviews"],
+    "edge_count": 4,
+    "nodes": {
+      "review_0": {
+        "kind": "review",
+        "depends_on": ["produce"],
+        "payload": {
+          "isolated_context": true,
+          "omit_producer_reasoning": true,
+          "artifact_ref": "produce",
+          "acceptance": ["lgtm"]
+        }
+      },
+      "aggregate_reviews": {
+        "kind": "aggregate_reviews",
+        "depends_on": ["review_0", "review_1"],
+        "payload": {"retain_disagreement": true},
+        "acceptance": ["lgtm"]
+      }
+    }
+  }
+}

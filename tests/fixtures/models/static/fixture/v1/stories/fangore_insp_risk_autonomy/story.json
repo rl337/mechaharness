@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_risk_autonomy",
+  "persona": "fangore",
+  "title": "Scale controls by action consequence class",
+  "kind": "consequence_risk_scale",
+  "narrative": "High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15[^insp-r15].",
+  "implementation": "`ConsequencePolicy` classifies actions and tracks approval prompts versus decisions.",
+  "validation": "Kind `consequence_risk_scale`. Soft expects stronger controls and approval_frequency.",
+  "footnotes": [
+    {
+      "id": "insp-r15",
+      "label": "Inspiration requirements (req 15: risk-scaled autonomy)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 15 \u2014 risk-scaled autonomy"
+    }
+  ]
+}

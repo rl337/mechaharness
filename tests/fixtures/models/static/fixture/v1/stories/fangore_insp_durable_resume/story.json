@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_durable_resume",
+  "persona": "fangore",
+  "title": "Refuse resume when the harness fingerprint changed",
+  "kind": "checkpoint_fingerprint_refuse",
+  "narrative": "Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12].",
+  "implementation": "`GraphStore` persists `config_fingerprint`; `GraphExecutor.run(resume=True)` compares fingerprints after re-resolve.",
+  "validation": "Kind `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume failed with incompatible fingerprint.",
+  "footnotes": [
+    {
+      "id": "insp-r12",
+      "label": "Inspiration requirements (req 12: durable resume)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 12 \u2014 durable resume"
+    }
+  ]
+}

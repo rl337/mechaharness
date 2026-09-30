@@ -1,6 +1,6 @@
 """Lazy, provenance-bearing context providers.
 
-Hosts (e.g. June document manager / knowledge graph) implement providers.
+Hosts implement providers (document stores, knowledge graphs, indexes).
 MechaHarness consumes them through envelopes and context compilation.
 """
 

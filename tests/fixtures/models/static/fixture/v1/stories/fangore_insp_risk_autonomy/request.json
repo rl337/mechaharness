@@ -1,0 +1,4 @@
+{
+  "action": "fs.write",
+  "consequence": "high"
+}

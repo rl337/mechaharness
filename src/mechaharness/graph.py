@@ -99,6 +99,10 @@ class ExecutionGraph(BaseModel):
     edges: list[DependencyEdge] = Field(default_factory=list)
     version: str = "1"
     config_fingerprint: str | None = None
+    template_name: str | None = None
+    template_version: str | None = None
+    template_status: str | None = None
+    source_workflow_ref: str | None = None
 
     def add_node(self, node: GraphNode) -> GraphNode:
         self.nodes[node.id] = node

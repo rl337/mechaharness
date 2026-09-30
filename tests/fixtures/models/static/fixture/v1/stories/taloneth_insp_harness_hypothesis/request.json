@@ -1,0 +1,6 @@
+{
+  "hypothesis": "remove cache hint",
+  "intervention": "drop_cache_hint",
+  "treatment_success": 0.6,
+  "control_success": 0.85
+}

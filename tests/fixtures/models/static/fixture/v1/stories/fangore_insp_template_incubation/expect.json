@@ -1,0 +1,13 @@
+{
+  "template_name": "fan_out_aggregate",
+  "template_status": "active",
+  "node_ids_include": [
+    "plan",
+    "branch_0",
+    "branch_1",
+    "reduce"
+  ],
+  "source_workflow_ref": "host:workflows/compare_v1",
+  "catalog_soft_points_nonempty": true,
+  "demoted_refused": true
+}

@@ -1,0 +1,17 @@
+{
+  "id": "fangore_consequence_risk_scale",
+  "persona": "fangore",
+  "title": "Scale autonomy controls by action consequence",
+  "kind": "consequence_risk_scale",
+  "narrative": "Fangore marks a destructive write as high consequence. Low-risk reads may proceed under ordinary grants; high-consequence actions must trigger stronger controls and track how often humans are prompted so approval fatigue stays visible. Soft prompts alone must not replace hard grants. See inspiration requirements for risk-scaled autonomy[^insp-risk].",
+  "implementation": "`ConsequencePolicy` / `ActionConsequence` in `mechaharness.consequence` classify actions (`low`…`critical`), flag approval and exhaustive verification needs, and expose `approval_frequency` as a usability/safety metric. Grants in `AccessControl` remain the hard gate.",
+  "validation": "Kind `consequence_risk_scale` → `_run_consequence_risk_scale`. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: `tests/test_inspiration_primitives.py`. Related grants: `fangore_tool_gating`.",
+  "footnotes": [
+    {
+      "id": "insp-risk",
+      "label": "Inspiration requirements (risk-scaled autonomy)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Reqs 9 and 15 — soft vs hard mechanisms; consequence-scaled autonomy"
+    }
+  ]
+}

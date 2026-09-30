@@ -1,0 +1,5 @@
+{
+  "first_status": "ok",
+  "resume_status": "failed",
+  "error_contains": "incompatible_checkpoint_fingerprint"
+}

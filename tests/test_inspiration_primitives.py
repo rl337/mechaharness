@@ -21,7 +21,7 @@ from mechaharness.di import MechaHarnessConfig
 from mechaharness.failure_attribution import attribute_error, detect_repeated_failure_classes
 from mechaharness.graph import ExecutionGraph, GraphNode, GraphStore, NodeStatus, VerificationOracle
 from mechaharness.graph_executor import GraphExecutor
-from mechaharness.graph_template import (
+from mechaharness.graph_templates import (
     GraphTemplateParams,
     IndependentReviewTemplate,
     SubgraphNodeRunner,
@@ -49,7 +49,7 @@ class _TplConfig(MechaHarnessConfig):
 
 def test_default_templates_registered_via_di() -> None:
     inj = get_injector(_TplConfig())
-    from mechaharness.graph_template import GraphTemplateRegistry
+    from mechaharness.graph_templates import GraphTemplateRegistry
 
     registry = inj.inject(GraphTemplateRegistry)
     for name in (
@@ -212,7 +212,9 @@ def test_harness_experiment_retirement() -> None:
 
 def test_instruction_gotcha_metrics_and_consequence() -> None:
     catalog = InstructionCatalog()
-    gotcha = catalog.append_gotcha("watch path", "never dump full KG", provenance={"source": "june"})
+    gotcha = catalog.append_gotcha(
+        "watch path", "never dump full KG", provenance={"source": "client"}
+    )
     gotcha.record_trigger(used=True, appropriate=False)
     assert catalog.metrics()[gotcha.id]["over_trigger"] == 1.0
     catalog.promote(gotcha.id)
@@ -228,12 +230,12 @@ def test_instruction_gotcha_metrics_and_consequence() -> None:
 
 
 def test_context_provider_index_before_load() -> None:
-    provider = StaticContextProvider("june.kg", {"fact:1": "alpha beta " * 50})
+    provider = StaticContextProvider("host.kg", {"fact:1": "alpha beta " * 50})
     registry = ContextProviderRegistry([provider])
-    entries = registry.get("june.kg").index(budget=8)
+    entries = registry.get("host.kg").index(budget=8)
     assert entries[0].ref == "fact:1"
     chunks = provider.load([entries[0].ref])
-    assert chunks[0].provider_id == "june.kg"
+    assert chunks[0].provider_id == "host.kg"
 
 
 def test_failure_attribution_repeated_classes() -> None:
