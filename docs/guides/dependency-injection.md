@@ -5,7 +5,9 @@ Host apps **must** wire MechaHarness through pyiv (`MechaHarnessConfig` →
 not a supported host path. Prefer the OpenAPI-shaped `run()` helper only when
 you want the facade that builds a Config under the hood.
 
-Requires **pyiv ≥ 0.4.1** (qualified keys: `Named` / `Matched` / `Key`).
+Requires **pyiv ≥ 0.4.2** (`Named` / `Matched` / `Key`, plus `Annotated[...]`
+constructor injection). Prefer `from mechaharness.di import get_injector` so
+Named Completer aliases bind correctly.
 
 ## Prerequisites
 
@@ -18,13 +20,12 @@ Requires **pyiv ≥ 0.4.1** (qualified keys: `Named` / `Matched` / `Key`).
 
 Override the class hooks. `configure()` (called from the Config constructor)
 class-binds inference and harness (singleton), aliases `Completer` to the
-bound `InferenceStrategy`, and registers shared services (`EventLog`,
-`AccessControl`, `CostAccountant`, judge connection/provider, …).
+bound `InferenceStrategy`, registers Named Completer / JudgeProvider bindings
+from `completer_bindings()` / `judge_bindings()`, and registers shared services
+(`EventLog`, `AccessControl`, `CostAccountant`, judge connection, …).
 
 ```python
-from pyiv import get_injector
-
-from mechaharness.di import MechaHarnessConfig
+from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
@@ -51,7 +52,70 @@ Host apps that already have a Config should subclass `MechaHarnessConfig` and
 call `super().configure()` before registering their own types. Tests may use
 `pyiv.override(base).with_(overrides)` to swap doubles.
 
-### 2. Name maps for CLI/HTTP-style selection
+### 2. Lanes vs Completer flavors
+
+**Lanes** (`reason` / `judge` / `media` on `InferenceEnvironment`) are
+capability partitions for load hints and access. They are not DI qualifiers.
+
+**Flavors** are multiple Completer (or JudgeProvider) bindings in one injector,
+distinguished by pyiv `Named` tag sets (lane tag + host tags such as `code`,
+`deep`, or `acme:…`). Declare them on Config; select them on host constructors
+with `Annotated`:
+
+```python
+from typing import Annotated, Optional
+
+from pyiv.key import Named, Matched
+from pyiv.provider import Provider
+
+from mechaharness.core.completer import Completer
+from mechaharness.di import MechaHarnessConfig
+from mechaharness.inference.judge import JudgeProvider
+
+
+class AppConfig(MechaHarnessConfig):
+    def completer_bindings(self):
+        return [
+            (Named(["reason"], default=True), self.get_inference_class()),
+            (Named(["reason", "code", "deep"]), CodeCompleter),
+            (Named(["reason", "summarize"]), SummarizeCompleter),
+        ]
+
+    def judge_bindings(self):
+        return [
+            (Named(["judge"], default=True), self.get_judge_provider()),
+            (Named(["judge", "heavy"]), HeavyJudgeProvider),
+        ]
+
+
+class CodeReviewHarness(AbstractHarness):
+    def __init__(
+        self,
+        inference: Annotated[Completer, Named(["reason", "code", "deep"])],
+        tools: ToolRegistry,
+        *,
+        config: HarnessConfig,
+        event_log: EventLog,
+        access: AccessControl,
+        cost: CostAccountant,
+        environment: InferenceEnvironment,
+        summarize: Annotated[
+            Optional[Completer],
+            Matched(required=["reason", "summarize"]),
+        ] = None,
+        judge: Annotated[Provider[JudgeProvider], Named(["judge", "heavy"])] | None = None,
+    ) -> None:
+        ...
+```
+
+Rules of thumb:
+
+- Register with `Named` only (never `Matched` / `Annotated` on `register_key`).
+- Exactly one `Named(..., default=True)` per type (or a single binding).
+- Prefer constructor injection; `inject_members` / fields ignore `Annotated`.
+- Do not invent marker ABC lanes or new `active_lane()` values for flavors.
+
+### 3. Name maps for CLI/HTTP-style selection
 
 `SettingsConfig` looks up `Settings.inference_backend` and
 `Settings.harness_family` in overridable maps. Add a backend by overriding
@@ -68,7 +132,7 @@ class AppConfig(SettingsConfig):
         return classes
 ```
 
-### 3. Non-DI OpenAPI path
+### 4. Non-DI OpenAPI path
 
 ```python
 import asyncio

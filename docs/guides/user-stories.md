@@ -218,6 +218,24 @@ Kind `capability_envelope_narrow` → `_run_capability_envelope_narrow`. Soft ex
 
 [^insp-envelope]: [Inspiration requirements (delegation envelopes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 7 — CapabilityEnvelope; children must not inherit parent capabilities implicitly
 
+### `fangore_completer_flavors` — Wire same-lane Completer flavors without forking the library
+
+Fangore’s product needs a deep code Completer beside the default reason Completer in one Config. He registers a second Named flavor and a small host harness that selects it with Annotated Matched tags — no marker-lane ABCs and no edits to MechaHarness enums.
+
+#### Implementation
+
+`MechaHarnessConfig.completer_bindings()` registers `Named` Completer tag sets (lane + host flavors). Host constructors declare `Annotated[Completer, Named(...)]` / `Matched(...)`. Bare `inject(Completer)` keeps the default aliased to `InferenceStrategy`. Lanes on `InferenceEnvironment` stay capability partitions; flavors are DI bindings.
+
+Covers: same-lane Completer flavors via pyiv Named/Matched.
+
+#### Validation
+
+Kind `completer_flavors` → `_run_completer_flavors`. Unit: `tests/test_di.py`.
+
+#### Footnotes
+
+1. [pyiv Named/Matched](https://rl337.org/pyiv/) — Named / Matched / Annotated constructor injection
+
 ### `fangore_compound_grants` — Compose read-only and write permission packs
 
 Fangore’s host app must not let agents write the filesystem by default. A read-only pack refuses the write tool; composing it with a write pack allows the same tool. He needs reusable permission packs instead of copy-pasted lists.
