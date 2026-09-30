@@ -123,7 +123,17 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ForwardRef</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">get_type_hints</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Annotated</span><span class="p">,</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">ForwardRef</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+    <span class="n">get_args</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">get_type_hints</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">eval_type_backport</span><span class="w"> </span><span class="kn">import</span> <span class="n">eval_type_backport</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">Stage</span>
@@ -279,6 +289,46 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_union_origin</span><span class="p">(</span><span class="n">origin</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""True for ``typing.Union`` and PEP 604 ``types.UnionType`` (3.10+)."""</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"UnionType"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_injection_annotation</span><span class="p">(</span><span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rewrite PEP 604 optionals so pyiv 0.4 can peel Named/Matched.</span>
+
+<span class="sd">    pyiv's ``is_optional_type`` only recognizes ``typing.Union`` / ``Optional``.</span>
+<span class="sd">    On Python 3.10+, ``get_type_hints`` may leave ``T | None`` as</span>
+<span class="sd">    ``types.UnionType``, so ``Annotated[T | None, Named(...)]`` fails with</span>
+<span class="sd">    "requires a concrete type". Prefer ``Optional[Annotated[T, Q]]``.</span>
+<span class="sd">    """</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_is_union_origin</span><span class="p">(</span><span class="n">origin</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">non_none</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_normalize_injection_annotation</span><span class="p">(</span><span class="n">non_none</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">annotation</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Annotated</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"Annotated"</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">annotation</span>
+        <span class="n">base</span><span class="p">,</span> <span class="n">metas</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">base_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_is_union_origin</span><span class="p">(</span><span class="n">base_origin</span><span class="p">):</span>
+            <span class="n">b_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">b_args</span><span class="p">:</span>
+                <span class="n">inner</span> <span class="o">=</span> <span class="n">b_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">b_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">b_args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Annotated</span><span class="p">[(</span><span class="n">inner</span><span class="p">,</span> <span class="o">*</span><span class="n">metas</span><span class="p">)]]</span>
+        <span class="n">normalized_base</span> <span class="o">=</span> <span class="n">_normalize_injection_annotation</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">normalized_base</span> <span class="ow">is</span> <span class="n">base</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">annotation</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">normalized_base</span><span class="p">,</span> <span class="o">*</span><span class="n">metas</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">annotation</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_expose_ctor_type_hints</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Resolve PEP 563 string annotations so pyiv can constructor-inject.</span>
 
@@ -288,7 +338,8 @@
 <span class="sd">    ``__init__.__annotations__`` exposes real types for the injector.</span>
 
 <span class="sd">    Uses ``include_extras=True`` so ``Annotated[T, Named|Matched]`` metadata</span>
-<span class="sd">    survives for qualified constructor injection.</span>
+<span class="sd">    survives for qualified constructor injection. Normalizes ``T | None``</span>
+<span class="sd">    optionals for pyiv compatibility on 3.10+.</span>
 <span class="sd">    """</span>
     <span class="n">init</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"__init__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">init</span> <span class="ow">is</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
@@ -310,7 +361,9 @@
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
                 <span class="k">continue</span>
     <span class="k">if</span> <span class="n">hints</span><span class="p">:</span>
-        <span class="n">init</span><span class="o">.</span><span class="vm">__annotations__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hints</span><span class="p">)</span>
+        <span class="n">init</span><span class="o">.</span><span class="vm">__annotations__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">_normalize_injection_annotation</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">hints</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="p">)</span>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig">
