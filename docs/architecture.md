@@ -86,11 +86,13 @@ who pick backends by name.
 
 `ExecutionGraph` / `GraphStore` model nodes, justified edges, checkpoints, and
 verification helpers. `GraphExecutor` walks ready nodes: it requires
-`core:graph.execute`, dispatches open `kind` strings through a host-populated
-`GraphNodeRunnerRegistry`, applies `GraphFailurePolicy` (retry / escalate /
-fail), optional `GraphEscalation` (needs `core:graph.escalate`), and emits
-`core:graph_start` / `core:graph_end` plus per-node events. Bind via Config
-hooks `get_node_runner_registry()`, `get_graph_failure_policy()`,
+`core:graph.execute` and a `BudgetPolicy` on every `run()`, dispatches open
+`kind` strings through a host-populated `GraphNodeRunnerRegistry`, charges a
+shared `Budget` (soft wind-down / hard fail; nested subgraphs aggregate),
+applies `GraphFailurePolicy` (retry / escalate / fail), optional
+`GraphEscalation` (needs `core:graph.escalate`), and emits `core:graph_start` /
+`core:graph_end` plus per-node events. Bind via Config hooks
+`get_node_runner_registry()`, `get_graph_failure_policy()`,
 `get_graph_escalation()`, and `get_graph_executor_class()` — not Settings.
 
 Do not add string registries or a global injector. Domain types stay pyiv-free.

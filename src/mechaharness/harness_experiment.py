@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping
 from typing import Any, Literal
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from mechaharness.research import CandidateStatus, EvalProtocol, ResearchLab
+from mechaharness.research import EvalProtocol, ResearchLab
 
 ExperimentStatus = Literal["proposed", "running", "retained", "retired", "rejected"]
 

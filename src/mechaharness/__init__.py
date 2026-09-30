@@ -1,5 +1,6 @@
 """MechaHarness: agentic harness with pluggable inference and harness families."""
 
+from mechaharness.budget import Budget, BudgetLevel, BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.config import Settings
 from mechaharness.core.access import AccessControl, CostAccountant
@@ -28,6 +29,9 @@ from mechaharness.tools.base import Tool, ToolRegistry
 __all__ = [
     "AbstractHarness",
     "AccessControl",
+    "Budget",
+    "BudgetLevel",
+    "BudgetPolicy",
     "CapabilityEnvelope",
     "ChatMessage",
     "Completer",

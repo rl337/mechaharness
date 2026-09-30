@@ -35,7 +35,12 @@ class FailureAttribution(BaseModel):
         return self.model_dump(mode="json")
 
 
-def attribute_error(error: str | None, *, node_id: str | None = None, kind: str | None = None) -> FailureAttribution:
+def attribute_error(
+    error: str | None,
+    *,
+    node_id: str | None = None,
+    kind: str | None = None,
+) -> FailureAttribution:
     """Map common error prefixes to attribution categories."""
     text = error or ""
     category: FailureCategory = "unknown"

@@ -19,6 +19,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from mechaharness.budget import Budget, BudgetLevel, BudgetPolicy
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.core.access import (
     AccessControl,
     GraphEscalate,
@@ -36,7 +38,6 @@ from mechaharness.core.events import (
     event_type_key,
 )
 from mechaharness.core.exceptions import GraphExecutorError
-from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.graph import (
     ExecutionGraph,
     GraphNode,
@@ -66,6 +67,7 @@ class NodeOutcome(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
     evidence: dict[str, Any] = Field(default_factory=dict)
     error: str | None = None
+    cost_units: float | None = None
 
 
 @dataclass(frozen=True)
@@ -75,6 +77,7 @@ class GraphRunContext:
     graph: ExecutionGraph
     run_id: str
     agent_id: str
+    budget: Budget
     parent_agent_id: str | None = None
     envelope: CapabilityEnvelope | None = None
     config_fingerprint: str | None = None
@@ -85,11 +88,13 @@ class GraphResult(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    status: Literal["ok", "failed", "denied", "stalled"]
+    status: Literal["ok", "failed", "denied", "stalled", "soft_exhausted"]
     graph: ExecutionGraph
     run_id: str
     events: list[Event] = Field(default_factory=list)
     error: str | None = None
+    budget_spent: float = 0.0
+    budget_level: str = BudgetLevel.OK.value
 
 
 NodeHandler = Callable[
@@ -275,9 +280,15 @@ class GraphExecutor:
         node.error = outcome.error
         node.status = outcome.status
 
-    def _terminal_status(self, graph: ExecutionGraph) -> Literal["ok", "failed", "stalled"]:
+    def _terminal_status(
+        self, graph: ExecutionGraph
+    ) -> Literal["ok", "failed", "stalled", "soft_exhausted"]:
         statuses = {n.status for n in graph.nodes.values()}
         if statuses and statuses <= {NodeStatus.SUCCEEDED}:
+            return "ok"
+        if statuses and statuses <= {NodeStatus.SUCCEEDED, NodeStatus.CANCELLED}:
+            if NodeStatus.CANCELLED in statuses:
+                return "soft_exhausted"
             return "ok"
         if any(n.status == NodeStatus.FAILED for n in graph.nodes.values()):
             if not graph.ready_nodes():
@@ -294,22 +305,93 @@ class GraphExecutor:
             return "stalled"
         return "failed"
 
+    def _cancel_open_nodes(self, graph: ExecutionGraph, *, reason: str) -> None:
+        open_statuses = {
+            NodeStatus.PENDING,
+            NodeStatus.READY,
+            NodeStatus.BLOCKED,
+        }
+        for node in graph.nodes.values():
+            if node.status in open_statuses:
+                node.status = NodeStatus.CANCELLED
+                node.error = reason
+
+    def _fail_open_nodes(self, graph: ExecutionGraph, *, reason: str) -> None:
+        open_statuses = {
+            NodeStatus.PENDING,
+            NodeStatus.READY,
+            NodeStatus.BLOCKED,
+            NodeStatus.RUNNING,
+        }
+        for node in graph.nodes.values():
+            if node.status in open_statuses:
+                node.status = NodeStatus.FAILED
+                node.error = reason
+
+    def _charge_node(
+        self,
+        node: GraphNode,
+        outcome: NodeOutcome | None,
+        budget: Budget,
+        *,
+        subgraph: bool = False,
+    ) -> BudgetLevel:
+        """Charge cost for a finished node attempt into ``budget``."""
+        if subgraph:
+            # Nested run already charged the shared ledger.
+            return budget.status()
+        if outcome is not None and outcome.cost_units is not None:
+            amount = float(outcome.cost_units)
+        else:
+            raw = node.payload.get("cost_units", 1.0)
+            try:
+                amount = float(raw)
+            except (TypeError, ValueError):
+                amount = 1.0
+        return budget.charge(amount, node_id=node.id, kind=node.kind)
+
+    def _result(
+        self,
+        *,
+        status: Literal["ok", "failed", "denied", "stalled", "soft_exhausted"],
+        graph: ExecutionGraph,
+        run_id: str,
+        budget: Budget,
+        error: str | None = None,
+    ) -> GraphResult:
+        return GraphResult(
+            status=status,
+            graph=graph,
+            run_id=run_id,
+            events=self.event_log.query(run_id=run_id),
+            error=error,
+            budget_spent=budget.spent,
+            budget_level=budget.status().value,
+        )
+
     async def run(
         self,
         graph: ExecutionGraph,
         *,
+        budget_policy: BudgetPolicy,
+        budget: Budget | None = None,
         run_id: str | None = None,
         resume: bool = False,
         envelope: CapabilityEnvelope | None = None,
         skip_linkage: bool = False,
     ) -> GraphResult:
-        """Execute ``graph`` until completion, denial, stall, or hard failure.
+        """Execute ``graph`` until completion, denial, stall, or budget failure.
 
-        When ``resume`` is true, load the latest checkpoint for ``run_id`` (or
-        ``graph.id``) and continue from that snapshot. Resume refuses when the
-        current linkage fingerprint does not match the checkpoint.
+        ``budget_policy`` is required. Pass a shared ``budget`` for nested
+        subgraphs so spend aggregates; otherwise a fresh :class:`Budget` is
+        created from the policy.
+
+        Soft limit: cancel remaining open work and return ``soft_exhausted``.
+        Hard limit: fail open nodes and return ``failed`` with prejudice.
+        ``BudgetPolicy.hard_limit=None`` means unlimited hard ceiling.
         """
         rid = run_id or graph.id
+        ledger = budget if budget is not None else Budget(budget_policy)
         if resume:
             restored = self.store.latest(run_id=rid)
             if restored is not None:
@@ -326,11 +408,11 @@ class GraphExecutor:
                 {"status": "denied", "error": "missing_grant:core:graph.execute"},
                 rid,
             )
-            return GraphResult(
+            return self._result(
                 status="denied",
                 graph=graph,
                 run_id=rid,
-                events=self.event_log.query(run_id=rid),
+                budget=ledger,
                 error="missing_grant:core:graph.execute",
             )
 
@@ -349,12 +431,8 @@ class GraphExecutor:
                     err = f"incompatible_checkpoint_fingerprint:{prior}!={fingerprint}"
                     self._emit(GraphStart, {"goal": graph.goal, "status": "failed"}, rid)
                     self._emit(GraphEnd, {"status": "failed", "error": err}, rid)
-                    return GraphResult(
-                        status="failed",
-                        graph=graph,
-                        run_id=rid,
-                        events=self.event_log.query(run_id=rid),
-                        error=err,
+                    return self._result(
+                        status="failed", graph=graph, run_id=rid, budget=ledger, error=err
                     )
             if not report.ok:
                 err = f"linkage_failed:{';'.join(e.code for e in report.edges)}"
@@ -369,12 +447,8 @@ class GraphExecutor:
                     rid,
                 )
                 self._emit(GraphEnd, {"status": "failed", "error": err}, rid)
-                return GraphResult(
-                    status="failed",
-                    graph=graph,
-                    run_id=rid,
-                    events=self.event_log.query(run_id=rid),
-                    error=err,
+                return self._result(
+                    status="failed", graph=graph, run_id=rid, budget=ledger, error=err
                 )
 
         if fingerprint:
@@ -384,6 +458,7 @@ class GraphExecutor:
             graph=graph,
             run_id=rid,
             agent_id=self.agent_id,
+            budget=ledger,
             parent_agent_id=self.parent_agent_id,
             envelope=envelope,
             config_fingerprint=fingerprint,
@@ -395,6 +470,9 @@ class GraphExecutor:
                 "node_count": len(graph.nodes),
                 "kinds": self.runners.kinds(),
                 "config_fingerprint": fingerprint,
+                "budget_soft": budget_policy.soft_limit,
+                "budget_hard": budget_policy.hard_limit,
+                "budget_spent": ledger.spent,
             },
             rid,
         )
@@ -404,41 +482,73 @@ class GraphExecutor:
             await self._run_loop(graph, context)
         except GraphExecutorError as exc:
             self.store.save(graph, run_id=rid, boundary="commit", fingerprint=fingerprint)
+            if str(exc) == "hard_budget_exceeded":
+                self._fail_open_nodes(graph, reason="hard_budget_exceeded")
+                self._emit(
+                    GraphEnd,
+                    {
+                        "status": "failed",
+                        "error": str(exc),
+                        "budget_spent": ledger.spent,
+                        "budget_level": ledger.status().value,
+                    },
+                    rid,
+                )
+                return self._result(
+                    status="failed",
+                    graph=graph,
+                    run_id=rid,
+                    budget=ledger,
+                    error="hard_budget_exceeded",
+                )
             status = self._terminal_status(graph)
             self._emit(GraphEnd, {"status": status, "error": str(exc)}, rid)
-            return GraphResult(
+            return self._result(
                 status=status if status != "ok" else "failed",
                 graph=graph,
                 run_id=rid,
-                events=self.event_log.query(run_id=rid),
+                budget=ledger,
                 error=str(exc),
             )
         except LinkageError as exc:
             self.store.save(graph, run_id=rid, boundary="commit", fingerprint=fingerprint)
             self._emit(GraphEnd, {"status": "failed", "error": str(exc)}, rid)
-            return GraphResult(
-                status="failed",
-                graph=graph,
-                run_id=rid,
-                events=self.event_log.query(run_id=rid),
-                error=str(exc),
+            return self._result(
+                status="failed", graph=graph, run_id=rid, budget=ledger, error=str(exc)
             )
 
         self.store.save(graph, run_id=rid, boundary="commit", fingerprint=fingerprint)
         status = self._terminal_status(graph)
-        self._emit(GraphEnd, {"status": status, "node_count": len(graph.nodes)}, rid)
-        return GraphResult(
-            status=status,
-            graph=graph,
-            run_id=rid,
-            events=self.event_log.query(run_id=rid),
-            error=None if status == "ok" else "graph_incomplete",
+        end_payload: dict[str, Any] = {
+            "status": status,
+            "node_count": len(graph.nodes),
+            "budget_spent": ledger.spent,
+            "budget_level": ledger.status().value,
+        }
+        error = None
+        if status == "soft_exhausted":
+            error = "soft_budget_exceeded"
+            end_payload["error"] = error
+        elif status != "ok":
+            error = "graph_incomplete"
+            end_payload["error"] = error
+        self._emit(GraphEnd, end_payload, rid)
+        return self._result(
+            status=status, graph=graph, run_id=rid, budget=ledger, error=error
         )
 
     async def _run_loop(self, graph: ExecutionGraph, context: GraphRunContext) -> None:
         # Bound iterations: each node may attempt up to max_attempts (+ escalation).
-        budget = sum(max(1, n.max_attempts) for n in graph.nodes.values()) + len(graph.nodes) + 1
-        for _ in range(budget):
+        loop_budget = (
+            sum(max(1, n.max_attempts) for n in graph.nodes.values()) + len(graph.nodes) + 1
+        )
+        for _ in range(loop_budget):
+            level = context.budget.status()
+            if level is BudgetLevel.HARD:
+                raise GraphExecutorError("hard_budget_exceeded")
+            if level is BudgetLevel.SOFT:
+                self._cancel_open_nodes(graph, reason="soft_budget_exceeded")
+                return
             ready = graph.ready_nodes()
             if not ready:
                 return
@@ -448,6 +558,8 @@ class GraphExecutor:
                 ready = [ready[0]]
             node = ready[0]
             await self._run_node(graph, node, context)
+            if context.budget.status() is BudgetLevel.HARD:
+                raise GraphExecutorError("hard_budget_exceeded")
             self.store.save(graph, run_id=context.run_id, boundary="reduce")
         raise GraphExecutorError("exceeded graph execution budget")
 
@@ -475,6 +587,7 @@ class GraphExecutor:
         if not isinstance(raw, dict):
             node.status = NodeStatus.FAILED
             node.error = "missing_subgraph"
+            self._charge_node(node, None, context.budget, subgraph=True)
             self._emit(
                 GraphNodeEnd,
                 {
@@ -488,8 +601,11 @@ class GraphExecutor:
             return
         child = ExecutionGraph.resume(raw)
         child_run_id = f"{context.run_id}:{node.id}"
+        # Share the parent ledger so nested spend aggregates.
         child_result = await self.run(
             child,
+            budget_policy=context.budget.policy,
+            budget=context.budget,
             run_id=child_run_id,
             envelope=context.envelope,
         )
@@ -498,8 +614,13 @@ class GraphExecutor:
             "child_status": child_result.status,
             "child_run_id": child_run_id,
             "child_graph_id": child.id,
+            "budget_spent": child_result.budget_spent,
         }
         if child_result.status == "ok":
+            node.status = NodeStatus.SUCCEEDED
+            node.error = None
+        elif child_result.status == "soft_exhausted":
+            # Parent soft wind-down already reflected on shared budget.
             node.status = NodeStatus.SUCCEEDED
             node.error = None
         else:
@@ -514,6 +635,7 @@ class GraphExecutor:
                 "attempt": node.attempt,
                 "error": node.error,
                 "child_run_id": child_run_id,
+                "budget_spent": context.budget.spent,
             },
             context.run_id,
         )
@@ -532,6 +654,7 @@ class GraphExecutor:
             node.status = NodeStatus.FAILED
             node.error = f"no_runner:{node.kind}"
             node.attempt += 1
+            self._charge_node(node, None, context.budget)
             self._emit(
                 GraphNodeEnd,
                 {
@@ -553,6 +676,7 @@ class GraphExecutor:
             node.status = NodeStatus.FAILED
             node.error = "permission_denied"
             node.attempt += 1
+            self._charge_node(node, None, context.budget)
             self._emit(
                 GraphNodeEnd,
                 {
@@ -578,6 +702,7 @@ class GraphExecutor:
             outcome = NodeOutcome(status=NodeStatus.FAILED, error=str(exc))
 
         self._apply_outcome(node, outcome)
+        self._charge_node(node, outcome, context.budget)
         if node.status == NodeStatus.SUCCEEDED:
             self._emit(
                 GraphNodeEnd,
@@ -586,6 +711,7 @@ class GraphExecutor:
                     "kind": node.kind,
                     "status": node.status.value,
                     "attempt": node.attempt,
+                    "budget_spent": context.budget.spent,
                 },
                 context.run_id,
             )
@@ -612,7 +738,7 @@ class GraphExecutor:
             return
 
         if action == GraphFailureAction.FAIL:
-            # Clamp budget so ready_nodes will not re-queue this failure.
+            # Clamp attempt budget so ready_nodes will not re-queue this failure.
             node.max_attempts = node.attempt
             node.status = NodeStatus.FAILED
             self._emit(

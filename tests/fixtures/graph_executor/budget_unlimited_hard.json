@@ -1,0 +1,33 @@
+{
+  "id": "budget_unlimited_hard",
+  "description": "hard_limit null means unlimited; linear dag still completes",
+  "grants": ["core:graph.execute"],
+  "failure_policy": "default",
+  "escalation": "reject",
+  "budget_policy": {"soft_limit": null, "hard_limit": null},
+  "runners": {
+    "compute": {"mode": "succeed", "payload": {"ok": true}}
+  },
+  "graph": {
+    "goal": "unlimited",
+    "nodes": [
+      {"id": "a", "kind": "compute"},
+      {"id": "b", "kind": "compute", "depends_on": ["a"]}
+    ],
+    "edges": [
+      {"from": "a", "to": "b", "types": ["control"], "reason": "sequence"}
+    ]
+  },
+  "run": {"run_id": "budget-unlimited"},
+  "expect": {
+    "status": "ok",
+    "error_is_none": true,
+    "budget_spent": 2,
+    "budget_level": "ok",
+    "nodes": {
+      "a": {"status": "succeeded"},
+      "b": {"status": "succeeded"}
+    },
+    "runner_calls": {"compute": 2}
+  }
+}

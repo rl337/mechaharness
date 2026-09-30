@@ -122,7 +122,9 @@ def route_for_capability_needs(
     listing a stronger need when the worker class is insufficient.
     """
     model_needs = [
-        n.split(":", 1)[1] for n in capability_needs if isinstance(n, str) and n.startswith("model:")
+        n.split(":", 1)[1]
+        for n in capability_needs
+        if isinstance(n, str) and n.startswith("model:")
     ]
     available = list(available_model_classes)
     selected = prefer
