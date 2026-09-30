@@ -163,7 +163,7 @@
     <span class="n">GraphNodeRunnerRegistry</span><span class="p">,</span>
     <span class="n">RejectGraphEscalation</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_template</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="n">default_graph_templates</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="n">default_graph_templates</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractHarness</span><span class="p">,</span> <span class="n">HarnessConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.families</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnthropicToolsHarness</span><span class="p">,</span> <span class="n">OpenAIToolsHarness</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.pass_through</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassThroughHarness</span>
@@ -708,7 +708,7 @@
 <div class="viewcode-block" id="MechaHarnessConfig.get_context_provider_registry">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_context_provider_registry">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_context_provider_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ContextProviderRegistry</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Host context providers (June KG/docs bind here)."""</span>
+<span class="w">        </span><span class="sd">"""Host context providers (document/KG adapters bind here)."""</span>
         <span class="k">return</span> <span class="n">ContextProviderRegistry</span><span class="p">()</span></div>
 
 

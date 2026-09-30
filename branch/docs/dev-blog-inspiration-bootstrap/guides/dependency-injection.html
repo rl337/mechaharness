@@ -249,9 +249,10 @@ inject deny-by-default tool grants; use <code class="docutils literal notranslat
 <code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code>, then <code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>. Include
 <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> when using escalation) in
-grants. Library templates are owned by MechaHarness; June instantiates them.
+grants. Library templates are owned by MechaHarness; clients instantiate them
+via Config and may retain the resulting concrete graphs.
 See <a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a> and
-<a class="reference internal" href="../inspiration/requirements-map.html"><span class="std std-doc">Inspiration requirements map</span></a>.</p>
+<a class="reference internal" href="../reference/graph-templates.html"><span class="std std-doc">Graph templates</span></a>.</p>
 </section>
 </section>
 <section id="verify">

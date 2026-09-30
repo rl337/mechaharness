@@ -204,68 +204,98 @@ pytest<span class="w"> </span>-q
 </ol>
 </section>
 </section>
+<section id="nubble-insp-environment-linkage-surface-environment-incompatibility-as-linkage-failure">
+<h3><code class="docutils literal notranslate"><span class="pre">nubble_insp_environment_linkage</span></code> — Surface environment incompatibility as linkage failure<a class="headerlink" href="#nubble-insp-environment-linkage-surface-environment-incompatibility-as-linkage-failure" title="Link to this heading"></a></h3>
+<p>Missing environment capability must become a structured pre-exec failure, not a mysterious mid-run error. Accepts inspiration requirement 16<a class="footnote-reference brackets" href="#insp-r16" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+<section id="id2">
+<h4>Implementation<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">InferenceEnvironment.assert_compatible</span></code> is consulted by <code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code>; mismatches become <code class="docutils literal notranslate"><span class="pre">environment_incompatible</span></code> edges.</p>
+</section>
+<section id="id3">
+<h4>Validation<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">environment_linkage_fail</span></code>. Soft expects environment_incompatible code when grants are required but absent.</p>
+</section>
+<section id="id4">
+<h4>Footnotes<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="nubble-insp-model-routing-route-nodes-by-declared-capability-needs">
+<h3><code class="docutils literal notranslate"><span class="pre">nubble_insp_model_routing</span></code> — Route nodes by declared capability needs<a class="headerlink" href="#nubble-insp-model-routing-route-nodes-by-declared-capability-needs" title="Link to this heading"></a></h3>
+<p>Nubble prefers declaring what a step needs instead of hard-coding a model id, then picking among available classes. Accepts inspiration requirement 13<a class="footnote-reference brackets" href="#insp-r13" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
+<section id="id6">
+<h4>Implementation<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">route_for_capability_needs</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.routing</span></code> selects a model class from <code class="docutils literal notranslate"><span class="pre">model:</span></code> needs.</p>
+</section>
+<section id="id7">
+<h4>Validation<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">capability_need_routing</span></code>. Soft expects selected_model_class matches need.</p>
+</section>
+<section id="id8">
+<h4>Footnotes<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+</section>
+</section>
 <section id="nubble-lane-load-hint-refuse-work-when-the-wrong-inference-profile-is-loaded">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_lane_load_hint</span></code> — Refuse work when the wrong inference profile is loaded<a class="headerlink" href="#nubble-lane-load-hint-refuse-work-when-the-wrong-inference-profile-is-loaded" title="Link to this heading"></a></h3>
 <p>Nubble is on call when a refund-routing job fails on the local inference host. The job needs the judge profile, but an earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error. It must tell him, in plain operator language, that this work needs the judge lane and which load command to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile mismatch wastes incident time.</p>
-<section id="id1">
-<h4>Implementation<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<section id="id9">
+<h4>Implementation<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
 <p>Exclusive lanes (reason / decide-judge / media) on <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code> refuse cross-lane work and surface load hints (<code class="docutils literal notranslate"><span class="pre">DEFAULT_LANE_LOAD_HINTS</span></code>). This is the operator-facing half of decide-versus-reason profile discipline: bounded judge work must not run under a generative reason profile. Hosts supply a real environment via Config instead of <code class="docutils literal notranslate"><span class="pre">NoOpInferenceEnvironment</span></code>.</p>
 <p>Covers: INF-02.</p>
 </section>
-<section id="id2">
-<h4>Validation<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<section id="id10">
+<h4>Validation<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">wrong_lane_deny</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_wrong_lane_deny</span></code>. Soft expects: non-empty error naming the required lane / load hint. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_environment.py</span></code>.</p>
 </section>
 </section>
 <section id="nubble-model-affinity-keep-model-affinity-inside-a-coherent-work-loop">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_model_affinity</span></code> — Keep model affinity inside a coherent work loop<a class="headerlink" href="#nubble-model-affinity-keep-model-affinity-inside-a-coherent-work-loop" title="Link to this heading"></a></h3>
 <p>Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch. Random lane thrash must not win on unit price alone.</p>
-<section id="id3">
-<h4>Implementation<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<section id="id11">
+<h4>Implementation<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">route_at_boundary</span></code> selects lanes at task/phase boundaries; <code class="docutils literal notranslate"><span class="pre">activate_scoped_policy</span></code> activates judgement policy only when calibration criteria are met — affinity and activation stay behind evaluation, not cheapest unit price.</p>
 <p>Covers: RTE-03.</p>
 </section>
-<section id="id4">
-<h4>Validation<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<section id="id12">
+<h4>Validation<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">model_affinity</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_model_affinity</span></code>. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_routing.py</span></code>.</p>
 </section>
 </section>
 <section id="nubble-repo-topology-budget-repository-topology-maps-and-fall-back-when-stale">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_repo_topology</span></code> — Budget repository topology maps and fall back when stale<a class="headerlink" href="#nubble-repo-topology-budget-repository-topology-maps-and-fall-back-when-stale" title="Link to this heading"></a></h3>
 <p>Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback — not pretend the map is complete.</p>
-<section id="id5">
-<h4>Implementation<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<section id="id13">
+<h4>Implementation<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">RepositoryTopologyProvider</span></code> builds budgeted <code class="docutils literal notranslate"><span class="pre">TopologyView</span></code> entries with omissions and invalidation; stale maps fall back to source inspection.</p>
 <p>Covers: CTX-08.</p>
 </section>
-<section id="id6">
-<h4>Validation<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<section id="id14">
+<h4>Validation<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">repo_topology</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_repo_topology</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
 </section>
 <section id="nubble-run-cost-events-record-cost-and-inference-events-for-every-harness-run">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_run_cost_events</span></code> — Record cost and inference events for every harness run<a class="headerlink" href="#nubble-run-cost-events-record-cost-and-inference-events-for-every-harness-run" title="Link to this heading"></a></h3>
 <p>Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units — the same signals he would forward to billing or a Grafana panel.</p>
-<section id="id7">
-<h4>Implementation<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<section id="id15">
+<h4>Implementation<a class="headerlink" href="#id15" title="Link to this heading"></a></h4>
 <p>Harness runs emit structured <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> records for inference and cost (<code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code> / <code class="docutils literal notranslate"><span class="pre">core:cost</span></code>, <code class="docutils literal notranslate"><span class="pre">core:inference</span></code>). This is the baseline observability stream for every run — decisions, routing, and tools extend the same log rather than a separate ledger.</p>
 <p>Covers: OBS-01.</p>
 </section>
-<section id="id8">
-<h4>Validation<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<section id="id16">
+<h4>Validation<a class="headerlink" href="#id16" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_pass_through</span></code>. Soft expects: inference and cost events with non-zero units. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_events.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_pass_through.py</span></code>.</p>
 </section>
 </section>
 <section id="nubble-topology-efficiency-separate-wall-clock-speedup-from-total-work-and-queue-wait">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_topology_efficiency</span></code> — Separate wall-clock speedup from total work and queue wait<a class="headerlink" href="#nubble-topology-efficiency-separate-wall-clock-speedup-from-total-work-and-queue-wait" title="Link to this heading"></a></h3>
 <p>Nubble is asked whether parallel agents sped things up. Wall time dropped, but total work grew and queue waits hid under a vanity speedup. He needs metrics that separate critical path, total work, and elapsed time — and that refuse misleading efficiency claims without a serial baseline and worker-count note.</p>
-<section id="id9">
-<h4>Implementation<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<section id="id17">
+<h4>Implementation<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">compute_topology_metrics</span></code> / <code class="docutils literal notranslate"><span class="pre">TopologySpan</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log</span></code> report critical path, total work, and elapsed time distinctly and reject vanity speedups that omit baselines.</p>
 <p>Covers: OBS-04.</p>
 </section>
-<section id="id10">
-<h4>Validation<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<section id="id18">
+<h4>Validation<a class="headerlink" href="#id18" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">topology_efficiency</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_topology_efficiency</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_log.py</span></code>.</p>
 </section>
 </section>
@@ -274,31 +304,49 @@ pytest<span class="w"> </span>-q
 <h2>Fangore’s stories<a class="headerlink" href="#fangore-s-stories" title="Link to this heading"></a></h2>
 <section id="fangore-bounded-repair-loop-bound-verification-repair-loops-to-a-fixed-number-of-attempts">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code> — Bound verification repair loops to a fixed number of attempts<a class="headerlink" href="#fangore-bounded-repair-loop-bound-verification-repair-loops-to-a-fixed-number-of-attempts" title="Link to this heading"></a></h3>
-<p>After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed — it does not loop forever. Complements <code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code> for judge loops.</p>
-<section id="id11">
-<h4>Implementation<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">bounded_repair</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph</span></code> runs verify → classify → permitted repair → retry until <code class="docutils literal notranslate"><span class="pre">max_attempts</span></code>. Judge scores remain supplementary to verifier evidence.</p>
+<p>After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed — it does not loop forever. Complements <code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code> for judge loops and <code class="docutils literal notranslate"><span class="pre">fangore_verification_outcome_gate</span></code> for completion versus answer-generated. See inspiration requirements for verification loops<a class="footnote-reference brackets" href="#insp-repair" id="id19" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>.</p>
+<section id="id20">
+<h4>Implementation<a class="headerlink" href="#id20" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">bounded_repair</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph</span></code> runs verify → classify → permitted repair → retry until <code class="docutils literal notranslate"><span class="pre">max_attempts</span></code>. <code class="docutils literal notranslate"><span class="pre">VerificationPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">OutcomeContract</span></code> select verification and gate completion. Judge scores remain supplementary to verifier evidence.</p>
 <p>Covers: VER-03.</p>
 </section>
-<section id="id12">
-<h4>Validation<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">bounded_repair_loop</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_bounded_repair_loop</span></code>. Soft expects: succeeds within budget or fails after max attempts. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>.</p>
+<section id="id21">
+<h4>Validation<a class="headerlink" href="#id21" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">bounded_repair_loop</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_bounded_repair_loop</span></code>. Soft expects: succeeds within budget or fails after max attempts. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>. Related: <code class="docutils literal notranslate"><span class="pre">fangore_verification_outcome_gate</span></code>.</p>
+</section>
+<section id="id22">
+<h4>Footnotes<a class="headerlink" href="#id22" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-capability-envelope-narrow-narrow-child-capability-envelopes-without-silent-inheritance">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_capability_envelope_narrow</span></code> — Narrow child capability envelopes without silent inheritance<a class="headerlink" href="#fangore-capability-envelope-narrow-narrow-child-capability-envelopes-without-silent-inheritance" title="Link to this heading"></a></h3>
+<p>Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent’s full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes<a class="footnote-reference brackets" href="#insp-envelope" id="id23" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a>.</p>
+<section id="id24">
+<h4>Implementation<a class="headerlink" href="#id24" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.capability_envelope</span></code> carries grants, tools, context provider ids, model class, budgets, and escalation policy. <code class="docutils literal notranslate"><span class="pre">narrow()</span></code> produces a child envelope that cannot widen parent grants or tools. Attached on <code class="docutils literal notranslate"><span class="pre">GraphRunContext.envelope</span></code> during graph runs. <code class="docutils literal notranslate"><span class="pre">DefaultDelegationPolicy</span></code> chooses inline versus child/subgraph using independence and pollution signals.</p>
+</section>
+<section id="id25">
+<h4>Validation<a class="headerlink" href="#id25" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">capability_envelope_narrow</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_capability_envelope_narrow</span></code>. Soft expects: narrowed grants subset; widen raises; delegation chooses child when independence is required. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
+</section>
+<section id="id26">
+<h4>Footnotes<a class="headerlink" href="#id26" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="fangore-completer-flavors-wire-same-lane-completer-flavors-without-forking-the-library">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_completer_flavors</span></code> — Wire same-lane Completer flavors without forking the library<a class="headerlink" href="#fangore-completer-flavors-wire-same-lane-completer-flavors-without-forking-the-library" title="Link to this heading"></a></h3>
 <p>Fangore’s product needs a deep code Completer beside the default reason Completer in one Config. He registers a second Named flavor and a small host harness that selects it with Annotated Matched tags — no marker-lane ABCs and no edits to MechaHarness enums.</p>
-<section id="id13">
-<h4>Implementation<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
+<section id="id27">
+<h4>Implementation<a class="headerlink" href="#id27" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.completer_bindings()</span></code> registers <code class="docutils literal notranslate"><span class="pre">Named</span></code> Completer tag sets (lane + host flavors). Host constructors declare <code class="docutils literal notranslate"><span class="pre">Annotated[Completer,</span> <span class="pre">Named(...)]</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched(...)</span></code>. Bare <code class="docutils literal notranslate"><span class="pre">inject(Completer)</span></code> keeps the default aliased to <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>. Lanes on <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code> stay capability partitions; flavors are DI bindings.</p>
 <p>Covers: same-lane Completer flavors via pyiv Named/Matched.</p>
 </section>
-<section id="id14">
-<h4>Validation<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
+<section id="id28">
+<h4>Validation<a class="headerlink" href="#id28" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">completer_flavors</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_completer_flavors</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_di.py</span></code>.</p>
 </section>
-<section id="id15">
-<h4>Footnotes<a class="headerlink" href="#id15" title="Link to this heading"></a></h4>
+<section id="id29">
+<h4>Footnotes<a class="headerlink" href="#id29" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://rl337.org/pyiv/">pyiv Named/Matched</a> — Named / Matched / Annotated constructor injection</p></li>
 </ol>
@@ -307,49 +355,64 @@ pytest<span class="w"> </span>-q
 <section id="fangore-compound-grants-compose-read-only-and-write-permission-packs">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code> — Compose read-only and write permission packs<a class="headerlink" href="#fangore-compound-grants-compose-read-only-and-write-permission-packs" title="Link to this heading"></a></h3>
 <p>Fangore’s host app must not let agents write the filesystem by default. A read-only pack refuses the write tool; composing it with a write pack allows the same tool. He needs reusable permission packs instead of copy-pasted lists.</p>
-<section id="id16">
-<h4>Implementation<a class="headerlink" href="#id16" title="Link to this heading"></a></h4>
+<section id="id30">
+<h4>Implementation<a class="headerlink" href="#id30" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> deny-by-default grants; <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> unions packs; <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> enforces tool grants and emits access-check events. This is the permission half of tool gating — every tool call must pass access before side effects.</p>
 <p>Covers: host compound grants.</p>
 </section>
-<section id="id17">
-<h4>Validation<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
+<section id="id31">
+<h4>Validation<a class="headerlink" href="#id31" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">grant_gate_write</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_grant_gate_write</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_access.py</span></code>.</p>
 </section>
 </section>
 <section id="fangore-config-access-policy-let-the-host-app-supply-its-own-permission-policy">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_config_access_policy</span></code> — Let the host app supply its own permission policy<a class="headerlink" href="#fangore-config-access-policy-let-the-host-app-supply-its-own-permission-policy" title="Link to this heading"></a></h3>
 <p>Fangore’s product needs permission rules defined by the application. He configures the harness once so composed packs from <code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code> are what the harness enforces.</p>
-<section id="id18">
-<h4>Implementation<a class="headerlink" href="#id18" title="Link to this heading"></a></h4>
+<section id="id32">
+<h4>Implementation<a class="headerlink" href="#id32" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> hooks (<code class="docutils literal notranslate"><span class="pre">get_access_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">get_access_control</span></code>, <code class="docutils literal notranslate"><span class="pre">get_grants</span></code>) bind host permission packs through pyiv injection — not Settings bags or hand-wired harness constructors. Fangore subclasses Config once; the injector builds <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> and the harness with those grants.</p>
 <p>Covers: host DI access policy.</p>
 </section>
-<section id="id19">
-<h4>Validation<a class="headerlink" href="#id19" title="Link to this heading"></a></h4>
+<section id="id33">
+<h4>Validation<a class="headerlink" href="#id33" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">config_access_policy</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_config_access_policy</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_di.py</span></code>.</p>
 </section>
-<section id="id20">
-<h4>Footnotes<a class="headerlink" href="#id20" title="Link to this heading"></a></h4>
+<section id="id34">
+<h4>Footnotes<a class="headerlink" href="#id34" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://rl337.org/pyiv/">pyiv</a> — Config-hook dependency injection</p></li>
 </ol>
 </section>
 </section>
+<section id="fangore-consequence-risk-scale-scale-autonomy-controls-by-action-consequence">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_consequence_risk_scale</span></code> — Scale autonomy controls by action consequence<a class="headerlink" href="#fangore-consequence-risk-scale-scale-autonomy-controls-by-action-consequence" title="Link to this heading"></a></h3>
+<p>Fangore marks a destructive write as high consequence. Low-risk reads may proceed under ordinary grants; high-consequence actions must trigger stronger controls and track how often humans are prompted so approval fatigue stays visible. Soft prompts alone must not replace hard grants. See inspiration requirements for risk-scaled autonomy<a class="footnote-reference brackets" href="#insp-risk" id="id35" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a>.</p>
+<section id="id36">
+<h4>Implementation<a class="headerlink" href="#id36" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ConsequencePolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">ActionConsequence</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.consequence</span></code> classify actions (<code class="docutils literal notranslate"><span class="pre">low</span></code>…<code class="docutils literal notranslate"><span class="pre">critical</span></code>), flag approval and exhaustive verification needs, and expose <code class="docutils literal notranslate"><span class="pre">approval_frequency</span></code> as a usability/safety metric. Grants in <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> remain the hard gate.</p>
+</section>
+<section id="id37">
+<h4>Validation<a class="headerlink" href="#id37" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">consequence_risk_scale</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_consequence_risk_scale</span></code>. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>. Related grants: <code class="docutils literal notranslate"><span class="pre">fangore_tool_gating</span></code>.</p>
+</section>
+<section id="id38">
+<h4>Footnotes<a class="headerlink" href="#id38" title="Link to this heading"></a></h4>
+</section>
+</section>
 <section id="fangore-context-compiler-deficit-report-context-deficits-instead-of-silent-truncation">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_context_compiler_deficit</span></code> — Report context deficits instead of silent truncation<a class="headerlink" href="#fangore-context-compiler-deficit-report-context-deficits-instead-of-silent-truncation" title="Link to this heading"></a></h3>
 <p>Mandatory blockers must not disappear when the prompt budget is tight. Success is a deficit report with unresolved gaps named. Related observation chain: <code class="docutils literal notranslate"><span class="pre">fangore_context_observation_chain</span></code>.</p>
-<section id="id21">
-<h4>Implementation<a class="headerlink" href="#id21" title="Link to this heading"></a></h4>
+<section id="id39">
+<h4>Implementation<a class="headerlink" href="#id39" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ContextCompiler</span></code> builds a versioned <code class="docutils literal notranslate"><span class="pre">ContextManifest</span></code> with token estimates and unresolved gaps. Working context is ephemeral; obligations stay in authoritative stores.</p>
 <p>Covers: CTX-05.</p>
 </section>
-<section id="id22">
-<h4>Validation<a class="headerlink" href="#id22" title="Link to this heading"></a></h4>
+<section id="id40">
+<h4>Validation<a class="headerlink" href="#id40" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">context_compiler_deficit</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_context_compiler_deficit</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
-<section id="id23">
-<h4>Footnotes<a class="headerlink" href="#id23" title="Link to this heading"></a></h4>
+<section id="id41">
+<h4>Footnotes<a class="headerlink" href="#id41" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://arxiv.org/abs/2609.20519">SoL-Pi</a> — Empirical harness optimization and context mechanisms to evaluate</p></li>
 </ol>
@@ -358,135 +421,420 @@ pytest<span class="w"> </span>-q
 <section id="fangore-context-observation-chain-keep-original-observations-and-refuse-fabricated-reductions">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_context_observation_chain</span></code> — Keep original observations and refuse fabricated reductions<a class="headerlink" href="#fangore-context-observation-chain-keep-original-observations-and-refuse-fabricated-reductions" title="Link to this heading"></a></h3>
 <p>Tool output must stay addressable as an immutable observation. A cheaper summary is allowed only when it points at a real observation; fabricated receipts must fail lookup. Compaction happens at semantic boundaries, and action fusion only for predeclared sequences. Compiler deficits remain <code class="docutils literal notranslate"><span class="pre">fangore_context_compiler_deficit</span></code>.</p>
-<section id="id24">
-<h4>Implementation<a class="headerlink" href="#id24" title="Link to this heading"></a></h4>
+<section id="id42">
+<h4>Implementation<a class="headerlink" href="#id42" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ObservationStore</span></code> / <code class="docutils literal notranslate"><span class="pre">ObservationRef</span></code>, <code class="docutils literal notranslate"><span class="pre">reduce_evidence</span></code>, <code class="docutils literal notranslate"><span class="pre">compact_at_boundary</span></code>, and <code class="docutils literal notranslate"><span class="pre">fuse_actions</span></code> under <code class="docutils literal notranslate"><span class="pre">CtxFlags</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.context_experiments</span></code>.</p>
 <p>Covers: CTX-01, CTX-02, CTX-03, CTX-04.</p>
 </section>
-<section id="id25">
-<h4>Validation<a class="headerlink" href="#id25" title="Link to this heading"></a></h4>
+<section id="id43">
+<h4>Validation<a class="headerlink" href="#id43" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">context_observation_chain</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_context_observation_chain</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
 </section>
 <section id="fangore-convergence-ceiling-stop-agent-loops-that-make-no-progress">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code> — Stop agent loops that make no progress<a class="headerlink" href="#fangore-convergence-ceiling-stop-agent-loops-that-make-no-progress" title="Link to this heading"></a></h3>
-<p>Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget.</p>
-<section id="id26">
-<h4>Implementation<a class="headerlink" href="#id26" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ConvergenceContract</span></code> / <code class="docutils literal notranslate"><span class="pre">ConvergenceGuard</span></code> fingerprint windows and nested budget slices. Escalation may request more evidence, but ceilings never count as task success.</p>
+<p>Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget. Graph repeating nodes additionally require an explicit stop contract at linkage (<code class="docutils literal notranslate"><span class="pre">fangore_graph_linkage_preflight</span></code>). See inspiration requirements for stop contracts<a class="footnote-reference brackets" href="#insp-stop" id="id44" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>.</p>
+<section id="id45">
+<h4>Implementation<a class="headerlink" href="#id45" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ConvergenceContract</span></code> / <code class="docutils literal notranslate"><span class="pre">ConvergenceGuard</span></code> fingerprint windows and nested budget slices. <code class="docutils literal notranslate"><span class="pre">StopContract</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.stop_contract</span></code> is the graph-facing alias for the same ceilings plus trigger/continuation/success/abort fields. Escalation may request more evidence, but ceilings never count as task success.</p>
 <p>Covers: POL-03.</p>
 </section>
-<section id="id27">
-<h4>Validation<a class="headerlink" href="#id27" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">convergence_ceiling</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_convergence_ceiling</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_convergence.py</span></code>.</p>
+<section id="id46">
+<h4>Validation<a class="headerlink" href="#id46" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">convergence_ceiling</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_convergence_ceiling</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_convergence.py</span></code>. Linkage stop enforcement: <code class="docutils literal notranslate"><span class="pre">fangore_graph_linkage_preflight</span></code>.</p>
+</section>
+<section id="id47">
+<h4>Footnotes<a class="headerlink" href="#id47" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="fangore-decision-surface-reject-reject-model-choices-that-are-not-on-the-allowed-list">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_decision_surface_reject</span></code> — Reject model choices that are not on the allowed list<a class="headerlink" href="#fangore-decision-surface-reject-reject-model-choices-that-are-not-on-the-allowed-list" title="Link to this heading"></a></h3>
 <p>A triage model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal. Only product judgement policy may unlock the next action — same split as <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>.</p>
-<section id="id28">
-<h4>Implementation<a class="headerlink" href="#id28" title="Link to this heading"></a></h4>
+<section id="id48">
+<h4>Implementation<a class="headerlink" href="#id48" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">DecisionSurface</span></code> / <code class="docutils literal notranslate"><span class="pre">reject_invalid_choice</span></code> / <code class="docutils literal notranslate"><span class="pre">RulesDecisionBackend</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_surfaces</span></code> name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects.</p>
 <p>Covers: POL-01.</p>
 </section>
-<section id="id29">
-<h4>Validation<a class="headerlink" href="#id29" title="Link to this heading"></a></h4>
+<section id="id49">
+<h4>Validation<a class="headerlink" href="#id49" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">decision_surface_reject</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_decision_surface_reject</span></code>.</p>
 </section>
 </section>
 <section id="fangore-derived-memory-rebuild-derived-memory-without-letting-rank-invent-authority">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_derived_memory</span></code> — Rebuild derived memory without letting rank invent authority<a class="headerlink" href="#fangore-derived-memory-rebuild-derived-memory-without-letting-rank-invent-authority" title="Link to this heading"></a></h3>
 <p>When derived memory is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval rank must not confer authority over approval rules.</p>
-<section id="id30">
-<h4>Implementation<a class="headerlink" href="#id30" title="Link to this heading"></a></h4>
+<section id="id50">
+<h4>Implementation<a class="headerlink" href="#id50" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">DerivedMemoryStore</span></code> / <code class="docutils literal notranslate"><span class="pre">DerivedMemoryRecord</span></code> separate provenance, validity, and retrieval priority. Consolidation is optional and idempotent; <code class="docutils literal notranslate"><span class="pre">retrieval_candidates</span></code> must not elevate non-authoritative rumors.</p>
 <p>Covers: CTX-06, CTX-07.</p>
 </section>
-<section id="id31">
-<h4>Validation<a class="headerlink" href="#id31" title="Link to this heading"></a></h4>
+<section id="id51">
+<h4>Validation<a class="headerlink" href="#id51" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">derived_memory</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_derived_memory</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
 </section>
 <section id="fangore-graph-executor-run-a-local-plan-through-an-authorized-graph-executor">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_graph_executor</span></code> — Run a local plan through an authorized graph executor<a class="headerlink" href="#fangore-graph-executor-run-a-local-plan-through-an-authorized-graph-executor" title="Link to this heading"></a></h3>
-<p>Fangore ships a host app with a produce → repair → consume plan. The library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from <code class="docutils literal notranslate"><span class="pre">fangore_local_plan_resume</span></code> stay durable; this story is the authorized runner that advances them.</p>
-<section id="id32">
-<h4>Implementation<a class="headerlink" href="#id32" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph_executor</span></code> is a pyiv injectable: constructor takes <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>, <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphNodeRunnerRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code>, and <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>. Hosts register node runners by open <code class="docutils literal notranslate"><span class="pre">kind</span></code> string via <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_node_runner_registry()</span></code>, override <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, and grant <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code>. The executor emits <code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code> plus per-node start/end events, checkpoints through <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code>, and enforces per-runner grants.</p>
+<p>Fangore ships a host app with a produce → repair → consume plan. After linkage succeeds, the library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from <code class="docutils literal notranslate"><span class="pre">fangore_local_plan_resume</span></code> stay durable; preflight failures are covered by <code class="docutils literal notranslate"><span class="pre">fangore_graph_linkage_preflight</span></code>. See inspiration requirements for authorized graph execution<a class="footnote-reference brackets" href="#insp-executor" id="id52" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a>.</p>
+<section id="id53">
+<h4>Implementation<a class="headerlink" href="#id53" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph_executor</span></code> is a pyiv injectable: constructor takes <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>, <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphNodeRunnerRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>, and <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code>. Hosts register node runners by open <code class="docutils literal notranslate"><span class="pre">kind</span></code> string via <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_node_runner_registry()</span></code>, override failure/escalation/linkage hooks, and grant <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code>. The executor emits <code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code> plus per-node events, checkpoints through <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> (with config fingerprint), and enforces per-runner grants.</p>
 </section>
-<section id="id33">
-<h4>Validation<a class="headerlink" href="#id33" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">graph_executor_run</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_graph_executor_run</span></code>. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: <code class="docutils literal notranslate"><span class="pre">tests/fixtures/graph_executor/*.json</span></code> via <code class="docutils literal notranslate"><span class="pre">tests/test_graph_executor.py</span></code> (grants, retry/escalate/fail policies, stall, resume, runner errors).</p>
+<section id="id54">
+<h4>Validation<a class="headerlink" href="#id54" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">graph_executor_run</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_graph_executor_run</span></code>. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: <code class="docutils literal notranslate"><span class="pre">tests/fixtures/graph_executor/*.json</span></code> via <code class="docutils literal notranslate"><span class="pre">tests/test_graph_executor.py</span></code>. Related: <code class="docutils literal notranslate"><span class="pre">fangore_graph_linkage_preflight</span></code>.</p>
 </section>
-<section id="id34">
-<h4>Footnotes<a class="headerlink" href="#id34" title="Link to this heading"></a></h4>
-<ol class="arabic simple">
-<li><p><a class="reference external" href="https://medium.com/&#64;neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23">Loop vs graph engineering</a> — Executor advances durable plans hosts define</p></li>
-</ol>
+<section id="id55">
+<h4>Footnotes<a class="headerlink" href="#id55" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-graph-linkage-preflight-fail-closed-on-missing-graph-linkage-before-work-starts">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_graph_linkage_preflight</span></code> — Fail closed on missing graph linkage before work starts<a class="headerlink" href="#fangore-graph-linkage-preflight-fail-closed-on-missing-graph-linkage-before-work-starts" title="Link to this heading"></a></h3>
+<p>Fangore composes a plan that still names a step the host has not wired, and another repeating step without a stop rule. The library must refuse those plans before any runner work starts, naming the missing edge so operators can fix wiring instead of debugging a mid-run crash. Complements <code class="docutils literal notranslate"><span class="pre">fangore_graph_executor</span></code> (authorized run once linkage is sound) and <code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code> (budgets once a loop is allowed). See the inspiration requirements for linkage versus dependency injection and stop contracts<a class="footnote-reference brackets" href="#insp-linkage" id="id56" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a>.</p>
+<section id="id57">
+<h4>Implementation<a class="headerlink" href="#id57" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.linkage_resolver</span></code> validates runner kinds, grants, environment compatibility, termination sinks, and repeating nodes’ <code class="docutils literal notranslate"><span class="pre">StopContract</span></code> before <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> substantive work. Missing runners and missing stop contracts become structured <code class="docutils literal notranslate"><span class="pre">UnsatisfiedEdge</span></code> codes (<code class="docutils literal notranslate"><span class="pre">no_runner</span></code>, <code class="docutils literal notranslate"><span class="pre">missing_stop_contract</span></code>). <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run</span></code> records linkage failure without invoking node handlers.</p>
+</section>
+<section id="id58">
+<h4>Validation<a class="headerlink" href="#id58" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_graph_linkage_preflight</span></code>. Soft expects: missing-runner linkage fails with <code class="docutils literal notranslate"><span class="pre">no_runner</span></code>; repeating node without stop fails with <code class="docutils literal notranslate"><span class="pre">missing_stop_contract</span></code>; valid linear graph reports <code class="docutils literal notranslate"><span class="pre">ok</span></code> with a fingerprint. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_linkage_resolver.py</span></code>, fixtures under <code class="docutils literal notranslate"><span class="pre">tests/fixtures/linkage_resolver/</span></code>.</p>
+</section>
+<section id="id59">
+<h4>Footnotes<a class="headerlink" href="#id59" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-graph-template-soft-points-instantiate-a-reusable-graph-template-with-soft-points">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_graph_template_soft_points</span></code> — Instantiate a reusable graph template with soft points<a class="headerlink" href="#fangore-graph-template-soft-points-instantiate-a-reusable-graph-template-with-soft-points" title="Link to this heading"></a></h3>
+<p>Fangore picks a library fan-out template, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which template produced it so later upgrades can detect drift. Independent-review and verify-repair templates follow the same pattern. See inspiration requirements for dynamic subgraphs and template incubation<a class="footnote-reference brackets" href="#insp-templates" id="id60" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a>.</p>
+<section id="id61">
+<h4>Implementation<a class="headerlink" href="#id61" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">mechaharness.graph_templates</span></code> ships parameterized skeletons (<code class="docutils literal notranslate"><span class="pre">FanOutAggregateTemplate</span></code>, <code class="docutils literal notranslate"><span class="pre">VerifyRepairTemplate</span></code>, <code class="docutils literal notranslate"><span class="pre">IndependentReviewTemplate</span></code>, <code class="docutils literal notranslate"><span class="pre">EnvironmentRepairTemplate</span></code>) with declared <code class="docutils literal notranslate"><span class="pre">SoftPoint</span></code>s. <code class="docutils literal notranslate"><span class="pre">GraphTemplate.instantiate</span></code> builds via <code class="docutils literal notranslate"><span class="pre">build</span></code> then stamps <code class="docutils literal notranslate"><span class="pre">template_name</span></code>, <code class="docutils literal notranslate"><span class="pre">template_version</span></code>, <code class="docutils literal notranslate"><span class="pre">template_status</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">source_workflow_ref</span></code>. Demoted templates refuse instantiate. Bound via <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_graph_template_registry()</span></code>.</p>
+</section>
+<section id="id62">
+<h4>Validation<a class="headerlink" href="#id62" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">graph_template_soft_points</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_graph_template_soft_points</span></code>. Soft expects: fan-out node ids, stamped provenance, soft-point catalog nonempty, demoted template raises. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph_templates.py</span></code>, fixtures under <code class="docutils literal notranslate"><span class="pre">tests/fixtures/graph_templates/</span></code>.</p>
+</section>
+<section id="id63">
+<h4>Footnotes<a class="headerlink" href="#id63" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="fangore-human-review-pending-hold-mutations-until-a-matching-human-approval-exists">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_human_review_pending</span></code> — Hold mutations until a matching human approval exists<a class="headerlink" href="#fangore-human-review-pending-hold-mutations-until-a-matching-human-approval-exists" title="Link to this heading"></a></h3>
 <p>Fangore’s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human — not allow.</p>
-<section id="id35">
-<h4>Implementation<a class="headerlink" href="#id35" title="Link to this heading"></a></h4>
+<section id="id64">
+<h4>Implementation<a class="headerlink" href="#id64" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">JudgementPolicy.require_approval_for</span></code> plus <code class="docutils literal notranslate"><span class="pre">JudgementFacts.approvals</span></code> / <code class="docutils literal notranslate"><span class="pre">action_digest</span></code> in <code class="docutils literal notranslate"><span class="pre">decide()</span></code>: missing approval yields <code class="docutils literal notranslate"><span class="pre">ASK_HUMAN</span></code> with <code class="docutils literal notranslate"><span class="pre">MISSING_APPROVAL</span></code>. Approvals bind to executed args via digest keys.</p>
 <p>Covers: POL-04, GAT-04.</p>
 </section>
-<section id="id36">
-<h4>Validation<a class="headerlink" href="#id36" title="Link to this heading"></a></h4>
+<section id="id65">
+<h4>Validation<a class="headerlink" href="#id65" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">human_review_pending</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_human_review_pending</span></code>. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in <code class="docutils literal notranslate"><span class="pre">tests/test_judgement_policy.py</span></code>.</p>
+</section>
+</section>
+<section id="fangore-insp-capability-envelope-narrow-child-envelopes-without-silent-parent-inheritance">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_capability_envelope</span></code> — Narrow child envelopes without silent parent inheritance<a class="headerlink" href="#fangore-insp-capability-envelope-narrow-child-envelopes-without-silent-parent-inheritance" title="Link to this heading"></a></h3>
+<p>Delegated work gets an explicit capability envelope. Children must not inherit the parent’s full grants, and widening must fail. Accepts inspiration requirement 7<a class="footnote-reference brackets" href="#insp-r07" id="id66" role="doc-noteref"><span class="fn-bracket">[</span>10<span class="fn-bracket">]</span></a>.</p>
+<section id="id67">
+<h4>Implementation<a class="headerlink" href="#id67" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope.narrow</span></code> and <code class="docutils literal notranslate"><span class="pre">DefaultDelegationPolicy</span></code> choose inline versus child execution.</p>
+</section>
+<section id="id68">
+<h4>Validation<a class="headerlink" href="#id68" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">capability_envelope_narrow</span></code>. Soft expects narrow ok, widen raises, child delegation.</p>
+</section>
+<section id="id69">
+<h4>Footnotes<a class="headerlink" href="#id69" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-context-provider-discover-context-indices-before-loading-large-payloads">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_context_provider</span></code> — Discover context indices before loading large payloads<a class="headerlink" href="#fangore-insp-context-provider-discover-context-indices-before-loading-large-payloads" title="Link to this heading"></a></h3>
+<p>Fangore’s host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6<a class="footnote-reference brackets" href="#insp-r06" id="id70" role="doc-noteref"><span class="fn-bracket">[</span>11<span class="fn-bracket">]</span></a>.</p>
+<section id="id71">
+<h4>Implementation<a class="headerlink" href="#id71" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ContextProvider</span></code> / <code class="docutils literal notranslate"><span class="pre">StaticContextProvider</span></code> expose <code class="docutils literal notranslate"><span class="pre">index</span></code> then <code class="docutils literal notranslate"><span class="pre">load</span></code> with provenance and token estimates.</p>
+</section>
+<section id="id72">
+<h4>Validation<a class="headerlink" href="#id72" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">context_provider_discovery</span></code>. Soft expects index before load and provider attribution.</p>
+</section>
+<section id="id73">
+<h4>Footnotes<a class="headerlink" href="#id73" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-durable-resume-refuse-resume-when-the-harness-fingerprint-changed">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_durable_resume</span></code> — Refuse resume when the harness fingerprint changed<a class="headerlink" href="#fangore-insp-durable-resume-refuse-resume-when-the-harness-fingerprint-changed" title="Link to this heading"></a></h3>
+<p>Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12<a class="footnote-reference brackets" href="#insp-r12" id="id74" role="doc-noteref"><span class="fn-bracket">[</span>12<span class="fn-bracket">]</span></a>.</p>
+<section id="id75">
+<h4>Implementation<a class="headerlink" href="#id75" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> persists <code class="docutils literal notranslate"><span class="pre">config_fingerprint</span></code>; <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run(resume=True)</span></code> compares fingerprints after re-resolve.</p>
+</section>
+<section id="id76">
+<h4>Validation<a class="headerlink" href="#id76" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">checkpoint_fingerprint_refuse</span></code>. Soft expects first run ok and resume failed with incompatible fingerprint.</p>
+</section>
+<section id="id77">
+<h4>Footnotes<a class="headerlink" href="#id77" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-dynamic-subgraph-nest-a-child-graph-as-an-observable-subgraph">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_dynamic_subgraph</span></code> — Nest a child graph as an observable subgraph<a class="headerlink" href="#fangore-insp-dynamic-subgraph-nest-a-child-graph-as-an-observable-subgraph" title="Link to this heading"></a></h3>
+<p>Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Accepts inspiration requirement 3<a class="footnote-reference brackets" href="#insp-r03" id="id78" role="doc-noteref"><span class="fn-bracket">[</span>13<span class="fn-bracket">]</span></a>.</p>
+<section id="id79">
+<h4>Implementation<a class="headerlink" href="#id79" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">SubgraphNodeRunner.embed</span></code> stores a child <code class="docutils literal notranslate"><span class="pre">ExecutionGraph</span></code> on a parent node; <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> runs nested graphs with linked run ids and emits graph lifecycle events for the child.</p>
+</section>
+<section id="id80">
+<h4>Validation<a class="headerlink" href="#id80" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">dynamic_subgraph_nest</span></code>. Soft expects parent ok, child_status ok, nested graph events present.</p>
+</section>
+<section id="id81">
+<h4>Footnotes<a class="headerlink" href="#id81" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-failure-attribution-attribute-repeated-failures-to-linkage-or-tools">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_failure_attribution</span></code> — Attribute repeated failures to linkage or tools<a class="headerlink" href="#fangore-insp-failure-attribution-attribute-repeated-failures-to-linkage-or-tools" title="Link to this heading"></a></h3>
+<p>When the same failure class repeats, Fangore needs structured attribution so the process can improve — not one-off output patches. Accepts inspiration requirement 11<a class="footnote-reference brackets" href="#insp-r11" id="id82" role="doc-noteref"><span class="fn-bracket">[</span>14<span class="fn-bracket">]</span></a>.</p>
+<section id="id83">
+<h4>Implementation<a class="headerlink" href="#id83" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">attribute_error</span></code> / <code class="docutils literal notranslate"><span class="pre">detect_repeated_failure_classes</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.failure_attribution</span></code> map errors to categories for traces and offline mining.</p>
+</section>
+<section id="id84">
+<h4>Validation<a class="headerlink" href="#id84" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">failure_attribution_trace</span></code>. Soft expects linkage category and repeated class detection.</p>
+</section>
+<section id="id85">
+<h4>Footnotes<a class="headerlink" href="#id85" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-independent-review-review-artifacts-in-isolated-reviewer-context">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_independent_review</span></code> — Review artifacts in isolated reviewer context<a class="headerlink" href="#fangore-insp-independent-review-review-artifacts-in-isolated-reviewer-context" title="Link to this heading"></a></h3>
+<p>Independent review must not reuse the producer’s accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10<a class="footnote-reference brackets" href="#insp-r10" id="id86" role="doc-noteref"><span class="fn-bracket">[</span>15<span class="fn-bracket">]</span></a>.</p>
+<section id="id87">
+<h4>Implementation<a class="headerlink" href="#id87" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">IndependentReviewTemplate</span></code> builds produce → isolated review_* → aggregate_reviews with omit_producer_reasoning and retain_disagreement.</p>
+</section>
+<section id="id88">
+<h4>Validation<a class="headerlink" href="#id88" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">independent_review_template</span></code>. Soft expects isolated payload flags and two reviewers.</p>
+</section>
+<section id="id89">
+<h4>Footnotes<a class="headerlink" href="#id89" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-instruction-gotchas-measure-gotcha-trigger-rates-before-promoting-them">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_instruction_gotchas</span></code> — Measure gotcha trigger rates before promoting them<a class="headerlink" href="#fangore-insp-instruction-gotchas-measure-gotcha-trigger-rates-before-promoting-them" title="Link to this heading"></a></h3>
+<p>Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8<a class="footnote-reference brackets" href="#insp-r08" id="id90" role="doc-noteref"><span class="fn-bracket">[</span>16<span class="fn-bracket">]</span></a>.</p>
+<section id="id91">
+<h4>Implementation<a class="headerlink" href="#id91" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">InstructionCatalog</span></code> / <code class="docutils literal notranslate"><span class="pre">InstructionComponent</span></code> track trigger, use, over/under rates; <code class="docutils literal notranslate"><span class="pre">promote</span></code> moves proposed gotchas to active after evaluation.</p>
+</section>
+<section id="id92">
+<h4>Validation<a class="headerlink" href="#id92" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">instruction_gotcha_metrics</span></code>. Soft expects over_trigger recorded and active after promote.</p>
+</section>
+<section id="id93">
+<h4>Footnotes<a class="headerlink" href="#id93" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-linkage-preflight-resolve-graph-linkage-before-any-node-runs">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_linkage_preflight</span></code> — Resolve graph linkage before any node runs<a class="headerlink" href="#fangore-insp-linkage-preflight-resolve-graph-linkage-before-any-node-runs" title="Link to this heading"></a></h3>
+<p>Fangore’s injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2<a class="footnote-reference brackets" href="#insp-r02" id="id94" role="doc-noteref"><span class="fn-bracket">[</span>17<span class="fn-bracket">]</span></a>. Related: <code class="docutils literal notranslate"><span class="pre">fangore_insp_stop_contract</span></code>.</p>
+<section id="id95">
+<h4>Implementation<a class="headerlink" href="#id95" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> validates runners, grants, environment, and termination separately from pyiv construction. <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> consults it before substantive work.</p>
+</section>
+<section id="id96">
+<h4>Validation<a class="headerlink" href="#id96" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code>. Soft expects <code class="docutils literal notranslate"><span class="pre">no_runner</span></code> on missing kinds and ok+fingerprint on a wired linear graph.</p>
+</section>
+<section id="id97">
+<h4>Footnotes<a class="headerlink" href="#id97" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-risk-autonomy-scale-controls-by-action-consequence-class">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_risk_autonomy</span></code> — Scale controls by action consequence class<a class="headerlink" href="#fangore-insp-risk-autonomy-scale-controls-by-action-consequence-class" title="Link to this heading"></a></h3>
+<p>High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15<a class="footnote-reference brackets" href="#insp-r15" id="id98" role="doc-noteref"><span class="fn-bracket">[</span>18<span class="fn-bracket">]</span></a>.</p>
+<section id="id99">
+<h4>Implementation<a class="headerlink" href="#id99" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ConsequencePolicy</span></code> classifies actions and tracks approval prompts versus decisions.</p>
+</section>
+<section id="id100">
+<h4>Validation<a class="headerlink" href="#id100" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">consequence_risk_scale</span></code>. Soft expects stronger controls and approval_frequency.</p>
+</section>
+<section id="id101">
+<h4>Footnotes<a class="headerlink" href="#id101" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-soft-vs-hard-enforce-grants-mechanically-instead-of-by-prompt-alone">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_soft_vs_hard</span></code> — Enforce grants mechanically instead of by prompt alone<a class="headerlink" href="#fangore-insp-soft-vs-hard-enforce-grants-mechanically-instead-of-by-prompt-alone" title="Link to this heading"></a></h3>
+<p>Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9<a class="footnote-reference brackets" href="#insp-r09" id="id102" role="doc-noteref"><span class="fn-bracket">[</span>19<span class="fn-bracket">]</span></a>. Complements <code class="docutils literal notranslate"><span class="pre">fangore_insp_risk_autonomy</span></code>.</p>
+<section id="id103">
+<h4>Implementation<a class="headerlink" href="#id103" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> deny-by-default on the harness tool path; prompts never grant permission.</p>
+</section>
+<section id="id104">
+<h4>Validation<a class="headerlink" href="#id104" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">tool_gating</span></code>. Soft expects deny without grant and allow with grant.</p>
+</section>
+<section id="id105">
+<h4>Footnotes<a class="headerlink" href="#id105" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-sparse-advisor-consult-an-advisor-without-transferring-task-ownership">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_sparse_advisor</span></code> — Consult an advisor without transferring task ownership<a class="headerlink" href="#fangore-insp-sparse-advisor-consult-an-advisor-without-transferring-task-ownership" title="Link to this heading"></a></h3>
+<p>Sparse advisor counsel helps at hard boundaries while the active executor keeps ownership. Budgets stop routine consultation. Accepts inspiration requirement 18<a class="footnote-reference brackets" href="#insp-r18" id="id106" role="doc-noteref"><span class="fn-bracket">[</span>20<span class="fn-bracket">]</span></a>.</p>
+<section id="id107">
+<h4>Implementation<a class="headerlink" href="#id107" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">Advisor</span></code> / <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">consult_advisor</span></code> — distinct from <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>.</p>
+</section>
+<section id="id108">
+<h4>Validation<a class="headerlink" href="#id108" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">sparse_advisor_consult</span></code>. Soft expects first consult ok, second blocked.</p>
+</section>
+<section id="id109">
+<h4>Footnotes<a class="headerlink" href="#id109" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-stop-contract-require-a-stop-contract-on-repeating-graph-steps">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_stop_contract</span></code> — Require a stop contract on repeating graph steps<a class="headerlink" href="#fangore-insp-stop-contract-require-a-stop-contract-on-repeating-graph-steps" title="Link to this heading"></a></h3>
+<p>A repeating repair step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration requirement 4<a class="footnote-reference brackets" href="#insp-r04" id="id110" role="doc-noteref"><span class="fn-bracket">[</span>21<span class="fn-bracket">]</span></a>. Complements <code class="docutils literal notranslate"><span class="pre">fangore_insp_linkage_preflight</span></code> and <code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code>.</p>
+<section id="id111">
+<h4>Implementation<a class="headerlink" href="#id111" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">StopContract</span></code> plus <code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> require stop contracts on repeating nodes unless declared a persistent service loop.</p>
+</section>
+<section id="id112">
+<h4>Validation<a class="headerlink" href="#id112" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code> with stop-focused request. Soft expects <code class="docutils literal notranslate"><span class="pre">missing_stop_contract</span></code>.</p>
+</section>
+<section id="id113">
+<h4>Footnotes<a class="headerlink" href="#id113" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-template-incubation-stamp-template-provenance-and-refuse-demoted-skeletons">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_template_incubation</span></code> — Stamp template provenance and refuse demoted skeletons<a class="headerlink" href="#fangore-insp-template-incubation-stamp-template-provenance-and-refuse-demoted-skeletons" title="Link to this heading"></a></h3>
+<p>Reusable templates expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19<a class="footnote-reference brackets" href="#insp-r19" id="id114" role="doc-noteref"><span class="fn-bracket">[</span>22<span class="fn-bracket">]</span></a>.</p>
+<section id="id115">
+<h4>Implementation<a class="headerlink" href="#id115" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">SoftPoint</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphTemplate.stamp</span></code>, <code class="docutils literal notranslate"><span class="pre">status</span></code> active/deprecated/demoted, optional <code class="docutils literal notranslate"><span class="pre">source_workflow_ref</span></code>.</p>
+</section>
+<section id="id116">
+<h4>Validation<a class="headerlink" href="#id116" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">graph_template_soft_points</span></code>. Soft expects stamped provenance and demoted refuse.</p>
+</section>
+<section id="id117">
+<h4>Footnotes<a class="headerlink" href="#id117" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-verification-gate-keep-answer-generated-distinct-from-task-complete">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_verification_gate</span></code> — Keep answer-generated distinct from task-complete<a class="headerlink" href="#fangore-insp-verification-gate-keep-answer-generated-distinct-from-task-complete" title="Link to this heading"></a></h3>
+<p>Producing an answer is not the same as finishing the task when verification is required. Accepts inspiration requirement 5<a class="footnote-reference brackets" href="#insp-r05" id="id118" role="doc-noteref"><span class="fn-bracket">[</span>23<span class="fn-bracket">]</span></a>.</p>
+<section id="id119">
+<h4>Implementation<a class="headerlink" href="#id119" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">OutcomeContract</span></code> and <code class="docutils literal notranslate"><span class="pre">DefaultVerificationPolicy</span></code> gate completion on verification state.</p>
+</section>
+<section id="id120">
+<h4>Validation<a class="headerlink" href="#id120" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">verification_outcome_gate</span></code>. Soft expects answer_generated then complete after verify.</p>
+</section>
+<section id="id121">
+<h4>Footnotes<a class="headerlink" href="#id121" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-insp-wake-reresolve-re-resolve-linkage-when-resuming-a-woken-run">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_insp_wake_reresolve</span></code> — Re-resolve linkage when resuming a woken run<a class="headerlink" href="#fangore-insp-wake-reresolve-re-resolve-linkage-when-resuming-a-woken-run" title="Link to this heading"></a></h3>
+<p>Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17<a class="footnote-reference brackets" href="#insp-r17" id="id122" role="doc-noteref"><span class="fn-bracket">[</span>24<span class="fn-bracket">]</span></a>.</p>
+<section id="id123">
+<h4>Implementation<a class="headerlink" href="#id123" title="Link to this heading"></a></h4>
+<p>Client wakes call <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code> then <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run(resume=True)</span></code>. Fingerprint mismatch fails closed. Goal stores remain outside the library.</p>
+</section>
+<section id="id124">
+<h4>Validation<a class="headerlink" href="#id124" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">wake_reresolve_resume</span></code>. Soft expects re-resolve ok then successful resume with matching fingerprint.</p>
+</section>
+<section id="id125">
+<h4>Footnotes<a class="headerlink" href="#id125" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="fangore-local-plan-resume-resume-a-durable-local-plan-after-a-crash">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_local_plan_resume</span></code> — Resume a durable local plan after a crash<a class="headerlink" href="#fangore-local-plan-resume-resume-a-durable-local-plan-after-a-crash" title="Link to this heading"></a></h3>
-<p>A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints — not chat — must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes.</p>
-<section id="id37">
-<h4>Implementation<a class="headerlink" href="#id37" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">OperationContract</span></code> / <code class="docutils literal notranslate"><span class="pre">OperationRegistry</span></code> register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. <code class="docutils literal notranslate"><span class="pre">ExecutionGraph</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> persist goal, nodes, and justified dependency edges on <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> with recovery boundaries; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.</p>
+<p>A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints — not chat — must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes. Incompatible harness or graph fingerprints must refuse silent continue. See inspiration requirements for durable long-running work<a class="footnote-reference brackets" href="#insp-resume" id="id126" role="doc-noteref"><span class="fn-bracket">[</span>25<span class="fn-bracket">]</span></a>.</p>
+<section id="id127">
+<h4>Implementation<a class="headerlink" href="#id127" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">OperationContract</span></code> / <code class="docutils literal notranslate"><span class="pre">OperationRegistry</span></code> register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. <code class="docutils literal notranslate"><span class="pre">ExecutionGraph</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> persist goal, nodes, and justified dependency edges on <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> with recovery boundaries and optional <code class="docutils literal notranslate"><span class="pre">config_fingerprint</span></code>; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.</p>
 <p>Covers: INF-01, INF-03, GRF-01, GRF-02, GRF-03, GRF-04, GRF-05, GRF-06.</p>
 </section>
-<section id="id38">
-<h4>Validation<a class="headerlink" href="#id38" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">local_plan_resume</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_local_plan_resume</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_operation_registry.py</span></code>.</p>
+<section id="id128">
+<h4>Validation<a class="headerlink" href="#id128" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">local_plan_resume</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_local_plan_resume</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_operation_registry.py</span></code>. Fingerprint refuse covered in <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
 </section>
-<section id="id39">
-<h4>Footnotes<a class="headerlink" href="#id39" title="Link to this heading"></a></h4>
-<ol class="arabic simple">
-<li><p><a class="reference external" href="https://medium.com/&#64;neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23">Loop vs graph engineering</a> — Explicit control flow; MechaHarness extends into execution graphs</p></li>
-</ol>
+<section id="id129">
+<h4>Footnotes<a class="headerlink" href="#id129" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="fangore-refund-verdict-keep-billing-authority-in-product-rules-not-the-model">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code> — Keep billing authority in product rules, not the model<a class="headerlink" href="#fangore-refund-verdict-keep-billing-authority-in-product-rules-not-the-model" title="Link to this heading"></a></h3>
 <p>A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing — and a high quality score alone must not override missing completion evidence. See also <code class="docutils literal notranslate"><span class="pre">fangore_decision_surface_reject</span></code>.</p>
-<section id="id40">
-<h4>Implementation<a class="headerlink" href="#id40" title="Link to this heading"></a></h4>
+<section id="id130">
+<h4>Implementation<a class="headerlink" href="#id130" title="Link to this heading"></a></h4>
 <p>Provider-neutral judge types (<code class="docutils literal notranslate"><span class="pre">Choice</span></code>/<code class="docutils literal notranslate"><span class="pre">Score</span></code>/<code class="docutils literal notranslate"><span class="pre">Noul</span></code> questions and signals) plus <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">decide()</span></code> apply configured thresholds. Judge scores are supplementary: policy owns ALLOW/DENY. Thresholds live in policy config per signal id. System One maps vendor wire into these types via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code>.</p>
 <p>Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.</p>
 </section>
-<section id="id41">
-<h4>Validation<a class="headerlink" href="#id41" title="Link to this heading"></a></h4>
+<section id="id131">
+<h4>Validation<a class="headerlink" href="#id131" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">route_refund</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_route_refund</span></code>. Soft expects: ALLOW for billing, DENY for technical. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_judgement_policy.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/test_judge.py</span></code>.</p>
 </section>
-<section id="id42">
-<h4>Footnotes<a class="headerlink" href="#id42" title="Link to this heading"></a></h4>
+<section id="id132">
+<h4>Footnotes<a class="headerlink" href="#id132" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness">Jev decisions in a Pi harness</a> — Routing, gating, batched questions, thresholds</p></li>
 </ol>
 </section>
 </section>
+<section id="fangore-sparse-advisor-consult-consult-an-advisor-sparsely-without-transferring-ownership">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_sparse_advisor_consult</span></code> — Consult an advisor sparsely without transferring ownership<a class="headerlink" href="#fangore-sparse-advisor-consult-consult-an-advisor-sparsely-without-transferring-ownership" title="Link to this heading"></a></h3>
+<p>Fangore’s worker hits a consequential planning boundary and asks a stronger advisor for counsel. The worker keeps ownership of the task: advice is guidance, not a hand-off, and a budget must stop low-value routine consultation. See inspiration requirements for the advisor pattern<a class="footnote-reference brackets" href="#insp-advisor" id="id133" role="doc-noteref"><span class="fn-bracket">[</span>26<span class="fn-bracket">]</span></a>.</p>
+<section id="id134">
+<h4>Implementation<a class="headerlink" href="#id134" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">Advisor</span></code> / <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.advisor</span></code> are distinct from <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code> (ownership transfer). <code class="docutils literal notranslate"><span class="pre">DefaultAdvisorPolicy</span></code> rate-limits consultations; <code class="docutils literal notranslate"><span class="pre">consult_advisor</span></code> records <code class="docutils literal notranslate"><span class="pre">AdvisorObservation</span></code> and never transfers task ownership. Default DI binds <code class="docutils literal notranslate"><span class="pre">RejectAdvisor</span></code> with an explicit continue fallback.</p>
+</section>
+<section id="id135">
+<h4>Validation<a class="headerlink" href="#id135" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">sparse_advisor_consult</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_sparse_advisor_consult</span></code>. Soft expects: first consultation returns guidance; second blocked by budget; observation recorded. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
+</section>
+<section id="id136">
+<h4>Footnotes<a class="headerlink" href="#id136" title="Link to this heading"></a></h4>
+</section>
+</section>
 <section id="fangore-tool-gating-gate-every-tool-call-through-deny-by-default-access-checks">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_tool_gating</span></code> — Gate every tool call through deny-by-default access checks<a class="headerlink" href="#fangore-tool-gating-gate-every-tool-call-through-deny-by-default-access-checks" title="Link to this heading"></a></h3>
-<p>Every tool call — including fused or loop-proposed calls — must pass access control. Uncertain or privileged scopes fail closed. Fangore shows product that a write without grant is refused and that composed packs from <code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code> still apply.</p>
-<section id="id43">
-<h4>Implementation<a class="headerlink" href="#id43" title="Link to this heading"></a></h4>
+<p>Every tool call — including fused or loop-proposed calls — must pass access control. Uncertain or privileged scopes fail closed. Soft prompt guidance never replaces these hard grants. Fangore shows product that a write without grant is refused and that composed packs from <code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code> still apply. See inspiration requirements for soft versus hard enforcement<a class="footnote-reference brackets" href="#insp-soft-hard" id="id137" role="doc-noteref"><span class="fn-bracket">[</span>27<span class="fn-bracket">]</span></a>.</p>
+<section id="id138">
+<h4>Implementation<a class="headerlink" href="#id138" title="Link to this heading"></a></h4>
 <p>Harness tool loops consult <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> before execution; denied calls emit access-check events and do not run side effects. Failure defaults are deny for mutations / external / privileged / uncertain scope. This story covers tool-gating obligations alongside permission packs.</p>
 <p>Covers: GAT-01, GAT-02, GAT-03.</p>
 </section>
-<section id="id44">
-<h4>Validation<a class="headerlink" href="#id44" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">tool_gating</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_tool_gating</span></code>. Soft expects: deny without grant, allow with grant. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_access.py</span></code>, grant_gate story.</p>
+<section id="id139">
+<h4>Validation<a class="headerlink" href="#id139" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">tool_gating</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_tool_gating</span></code>. Soft expects: deny without grant, allow with grant. Related: <code class="docutils literal notranslate"><span class="pre">tests/test_access.py</span></code>, grant_gate story, <code class="docutils literal notranslate"><span class="pre">fangore_consequence_risk_scale</span></code>.</p>
+</section>
+<section id="id140">
+<h4>Footnotes<a class="headerlink" href="#id140" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-verification-outcome-gate-treat-answer-generated-as-distinct-from-task-complete">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_verification_outcome_gate</span></code> — Treat answer generated as distinct from task complete<a class="headerlink" href="#fangore-verification-outcome-gate-treat-answer-generated-as-distinct-from-task-complete" title="Link to this heading"></a></h3>
+<p>Fangore’s pipeline produces an answer and still needs verification before the task is complete. When verification is required, generating text alone must not count as done; when verification passes, completion can proceed. Complements <code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code>. See inspiration requirements for verification as part of execution<a class="footnote-reference brackets" href="#insp-verify" id="id141" role="doc-noteref"><span class="fn-bracket">[</span>28<span class="fn-bracket">]</span></a>.</p>
+<section id="id142">
+<h4>Implementation<a class="headerlink" href="#id142" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">OutcomeContract</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.outcome_contract</span></code> distinguishes <code class="docutils literal notranslate"><span class="pre">answer_generated</span></code>, <code class="docutils literal notranslate"><span class="pre">verified</span></code>, <code class="docutils literal notranslate"><span class="pre">complete</span></code>, and <code class="docutils literal notranslate"><span class="pre">failed</span></code>. <code class="docutils literal notranslate"><span class="pre">DefaultVerificationPolicy</span></code> selects the strongest sufficient oracle and gates completion through the outcome contract when <code class="docutils literal notranslate"><span class="pre">require_verification</span></code> is set.</p>
+</section>
+<section id="id143">
+<h4>Validation<a class="headerlink" href="#id143" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">verification_outcome_gate</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_verification_outcome_gate</span></code>. Soft expects: answer without verification stays <code class="docutils literal notranslate"><span class="pre">answer_generated</span></code>; verification pass yields <code class="docutils literal notranslate"><span class="pre">complete</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
+</section>
+<section id="id144">
+<h4>Footnotes<a class="headerlink" href="#id144" title="Link to this heading"></a></h4>
 </section>
 </section>
 </section>
@@ -495,109 +843,289 @@ pytest<span class="w"> </span>-q
 <section id="taloneth-atk-research-reject-reject-research-candidates-that-fail-verified-success">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_atk_research_reject</span></code> — Reject research candidates that fail verified success<a class="headerlink" href="#taloneth-atk-research-reject-reject-research-candidates-that-fail-verified-success" title="Link to this heading"></a></h3>
 <p>A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code>.</p>
-<section id="id45">
-<h4>Implementation<a class="headerlink" href="#id45" title="Link to this heading"></a></h4>
+<section id="id145">
+<h4>Implementation<a class="headerlink" href="#id145" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> / <code class="docutils literal notranslate"><span class="pre">EvalProtocol</span></code> run bounded research: inspect → hypothesis → isolated experiment → ATK-style search → frozen evaluation protocol → promote/rollback. Production evaluators stay protected.</p>
 <p>Covers: EXP-01, EXP-02, EXP-03, EXP-04.</p>
 </section>
-<section id="id46">
-<h4>Validation<a class="headerlink" href="#id46" title="Link to this heading"></a></h4>
+<section id="id146">
+<h4>Validation<a class="headerlink" href="#id146" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">atk_research_reject</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_atk_research_reject</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_research.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code> — Measure cache-aware prompt layout as an explicit experiment<a class="headerlink" href="#taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment" title="Link to this heading"></a></h3>
 <p>Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.</p>
-<section id="id47">
-<h4>Implementation<a class="headerlink" href="#id47" title="Link to this heading"></a></h4>
+<section id="id147">
+<h4>Implementation<a class="headerlink" href="#id147" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">compile_cache_aware_layout</span></code> / <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code> under <code class="docutils literal notranslate"><span class="pre">CtxFlags.cache_aware_layout</span></code> — an independent experiment toggle with prefix identity diagnostics.</p>
 <p>Covers: CTX-09.</p>
 </section>
-<section id="id48">
-<h4>Validation<a class="headerlink" href="#id48" title="Link to this heading"></a></h4>
+<section id="id148">
+<h4>Validation<a class="headerlink" href="#id148" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">cache_layout_experiment</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_cache_layout_experiment</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-fixture-judge-batch-validate-judge-question-batches-without-a-live-model">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_fixture_judge_batch</span></code> — Validate judge question batches without a live model<a class="headerlink" href="#taloneth-fixture-judge-batch-validate-judge-question-batches-without-a-live-model" title="Link to this heading"></a></h3>
 <p>Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors — including partial failure reporting — without a GPU host.</p>
-<section id="id49">
-<h4>Implementation<a class="headerlink" href="#id49" title="Link to this heading"></a></h4>
+<section id="id149">
+<h4>Implementation<a class="headerlink" href="#id149" title="Link to this heading"></a></h4>
 <p>Provider-neutral judge schema in <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code> (<code class="docutils literal notranslate"><span class="pre">Choice</span></code>/<code class="docutils literal notranslate"><span class="pre">Noul</span></code>/<code class="docutils literal notranslate"><span class="pre">Score</span></code> questions and signals, <code class="docutils literal notranslate"><span class="pre">Judgement</span></code>, <code class="docutils literal notranslate"><span class="pre">JudgeErrorItem</span></code>, provenance). <code class="docutils literal notranslate"><span class="pre">FixtureJudgeProvider</span></code> + <code class="docutils literal notranslate"><span class="pre">judge()</span></code> validate batches and report per-question errors. Semantics cover closed-world answers, partial failure, and calibration/provenance fields adapters must map.</p>
 <p>Covers: JDG-01, JDG-02, JDG-03, JDG-04.</p>
 </section>
-<section id="id50">
-<h4>Validation<a class="headerlink" href="#id50" title="Link to this heading"></a></h4>
+<section id="id150">
+<h4>Validation<a class="headerlink" href="#id150" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">fixture_judge_batch</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_fixture_judge_batch</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_judge.py</span></code>.</p>
+</section>
+</section>
+<section id="taloneth-harness-experiment-retire-retire-scaffolding-that-loses-a-with-versus-without-experiment">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_harness_experiment_retire</span></code> — Retire scaffolding that loses a with-versus-without experiment<a class="headerlink" href="#taloneth-harness-experiment-retire-retire-scaffolding-that-loses-a-with-versus-without-experiment" title="Link to this heading"></a></h3>
+<p>Taloneth treats a prompt scaffold as a hypothesis: keep it only if the with-intervention arm beats the without arm on the primary metric. When the scaffold hurts, it is retired rather than left as fossil control logic. See inspiration requirements for revisable scaffolding and harness hypotheses<a class="footnote-reference brackets" href="#insp-experiment" id="id151" role="doc-noteref"><span class="fn-bracket">[</span>29<span class="fn-bracket">]</span></a>.</p>
+<section id="id152">
+<h4>Implementation<a class="headerlink" href="#id152" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> / <code class="docutils literal notranslate"><span class="pre">HarnessExperimentRunner</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.harness_experiment</span></code> express interventions as hypotheses with expected metrics, compare with/without arms, and list retirement candidates. Integrates with <code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> for offline evaluation. Trace fields expose experiment id, harness version, and assignment.</p>
+</section>
+<section id="id153">
+<h4>Validation<a class="headerlink" href="#id153" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_experiment_retire</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_harness_experiment_retire</span></code>. Soft expects: treatment worse than control yields <code class="docutils literal notranslate"><span class="pre">retired</span></code> status and a retirement candidate. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_atk_research_reject</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
+</section>
+<section id="id154">
+<h4>Footnotes<a class="headerlink" href="#id154" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="taloneth-insp-harness-hypothesis-express-a-harness-change-as-a-testable-hypothesis">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_harness_hypothesis</span></code> — Express a harness change as a testable hypothesis<a class="headerlink" href="#taloneth-insp-harness-hypothesis-express-a-harness-change-as-a-testable-hypothesis" title="Link to this heading"></a></h3>
+<p>Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14<a class="footnote-reference brackets" href="#insp-r14" id="id155" role="doc-noteref"><span class="fn-bracket">[</span>30<span class="fn-bracket">]</span></a>.</p>
+<section id="id156">
+<h4>Implementation<a class="headerlink" href="#id156" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> carries hypothesis, intervention, failure_mode, evidence, and <code class="docutils literal notranslate"><span class="pre">to_trace_fields</span></code> for version/assignment on traces.</p>
+</section>
+<section id="id157">
+<h4>Validation<a class="headerlink" href="#id157" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_experiment_retire</span></code>. Soft expects retired when treatment loses (evidence-driven retain/retire).</p>
+</section>
+<section id="id158">
+<h4>Footnotes<a class="headerlink" href="#id158" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="taloneth-insp-scaffolding-retire-retire-scaffolding-that-loses-a-controlled-experiment">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_scaffolding_retire</span></code> — Retire scaffolding that loses a controlled experiment<a class="headerlink" href="#taloneth-insp-scaffolding-retire-retire-scaffolding-that-loses-a-controlled-experiment" title="Link to this heading"></a></h3>
+<p>Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1<a class="footnote-reference brackets" href="#insp-r01" id="id159" role="doc-noteref"><span class="fn-bracket">[</span>31<span class="fn-bracket">]</span></a>.</p>
+<section id="id160">
+<h4>Implementation<a class="headerlink" href="#id160" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> / <code class="docutils literal notranslate"><span class="pre">HarnessExperimentRunner</span></code> compare intervention arms and list retirement candidates. Hosts remove retired scaffolding without rewriting task goals.</p>
+</section>
+<section id="id161">
+<h4>Validation<a class="headerlink" href="#id161" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_experiment_retire</span></code>. Soft expects retired status when treatment underperforms control.</p>
+</section>
+<section id="id162">
+<h4>Footnotes<a class="headerlink" href="#id162" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_offline_decision_export</span></code> — Export decision data without leaking future outcomes<a class="headerlink" href="#taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes" title="Link to this heading"></a></h3>
 <p>Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.</p>
-<section id="id51">
-<h4>Implementation<a class="headerlink" href="#id51" title="Link to this heading"></a></h4>
+<section id="id163">
+<h4>Implementation<a class="headerlink" href="#id163" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> / <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code> / <code class="docutils literal notranslate"><span class="pre">export_offline_dataset</span></code> persist append-only learning records and versioned exports without default future leakage.</p>
 <p>Covers: OBS-02.</p>
 </section>
-<section id="id52">
-<h4>Validation<a class="headerlink" href="#id52" title="Link to this heading"></a></h4>
+<section id="id164">
+<h4>Validation<a class="headerlink" href="#id164" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">offline_decision_export</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_offline_decision_export</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_log.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_policy_replay</span></code> — Replay product policy from recorded facts and signals<a class="headerlink" href="#taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals" title="Link to this heading"></a></h3>
 <p>Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts.</p>
-<section id="id53">
-<h4>Implementation<a class="headerlink" href="#id53" title="Link to this heading"></a></h4>
+<section id="id165">
+<h4>Implementation<a class="headerlink" href="#id165" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">replay_verdict</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log</span></code> re-runs <code class="docutils literal notranslate"><span class="pre">decide()</span></code> on recorded facts/signals/policy for deterministic audits.</p>
 <p>Covers: OBS-03.</p>
 </section>
-<section id="id54">
-<h4>Validation<a class="headerlink" href="#id54" title="Link to this heading"></a></h4>
+<section id="id166">
+<h4>Validation<a class="headerlink" href="#id166" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">policy_replay</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_policy_replay</span></code>. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.</p>
 </section>
 </section>
 <section id="taloneth-shadow-decision-backends-compare-decision-backends-without-inventing-missing-results">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_shadow_decision_backends</span></code> — Compare decision backends without inventing missing results<a class="headerlink" href="#taloneth-shadow-decision-backends-compare-decision-backends-without-inventing-missing-results" title="Link to this heading"></a></h3>
 <p>Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: <code class="docutils literal notranslate"><span class="pre">nubble_lane_load_hint</span></code>, <code class="docutils literal notranslate"><span class="pre">nubble_model_affinity</span></code>.</p>
-<section id="id55">
-<h4>Implementation<a class="headerlink" href="#id55" title="Link to this heading"></a></h4>
+<section id="id167">
+<h4>Implementation<a class="headerlink" href="#id167" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> / <code class="docutils literal notranslate"><span class="pre">route_at_boundary</span></code> compare candidates at task and phase boundaries and estimate whole-task cost honesty. Unavailable backends stay unavailable.</p>
 <p>Covers: RTE-01, RTE-02.</p>
 </section>
-<section id="id56">
-<h4>Validation<a class="headerlink" href="#id56" title="Link to this heading"></a></h4>
+<section id="id168">
+<h4>Validation<a class="headerlink" href="#id168" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_shadow_decision_backends</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_routing.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_systemone_cassette</span></code> — Pin System One adapter behavior to a versioned cassette<a class="headerlink" href="#taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette" title="Link to this heading"></a></h3>
 <p>A new Laya build changes confidence fields. A versioned cassette must fail the story before silent adapter drift ships.</p>
-<section id="id57">
-<h4>Implementation<a class="headerlink" href="#id57" title="Link to this heading"></a></h4>
+<section id="id169">
+<h4>Implementation<a class="headerlink" href="#id169" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (<code class="docutils literal notranslate"><span class="pre">get_judge_connection</span></code>, <code class="docutils literal notranslate"><span class="pre">get_judge_provider</span></code>).</p>
 <p>Covers: JDG wire map (System One).</p>
 </section>
-<section id="id58">
-<h4>Validation<a class="headerlink" href="#id58" title="Link to this heading"></a></h4>
+<section id="id170">
+<h4>Validation<a class="headerlink" href="#id170" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">systemone_cassette</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_route_refund</span></code> with <code class="docutils literal notranslate"><span class="pre">systemone/laya/v1</span></code> cassette.</p>
 </section>
 </section>
 <section id="taloneth-validator-qualification-qualify-validators-before-they-gate-completion">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code> — Qualify validators before they gate completion<a class="headerlink" href="#taloneth-validator-qualification-qualify-validators-before-they-gate-completion" title="Link to this heading"></a></h3>
 <p>Before a schema validator gates done, known-good, known-bad, and missing fixtures must run — including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>).</p>
-<section id="id59">
-<h4>Implementation<a class="headerlink" href="#id59" title="Link to this heading"></a></h4>
+<section id="id171">
+<h4>Implementation<a class="headerlink" href="#id171" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">VerificationOracle</span></code> / <code class="docutils literal notranslate"><span class="pre">verify_node</span></code> define completion evidence; <code class="docutils literal notranslate"><span class="pre">qualify_validator</span></code> / <code class="docutils literal notranslate"><span class="pre">validator_qualified</span></code> reject always-pass mutants. Judge quality signals remain supplementary to evidence checks.</p>
 <p>Covers: VER-01, VER-04.</p>
 </section>
-<section id="id60">
-<h4>Validation<a class="headerlink" href="#id60" title="Link to this heading"></a></h4>
+<section id="id172">
+<h4>Validation<a class="headerlink" href="#id172" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">validator_qualification</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_validator_qualification</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>.</p>
 </section>
 </section>
 </section>
 </section>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="insp-r16" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 16: environment linkage)</a> — Req 16 — environment linkage</p>
+</aside>
+<aside class="footnote brackets" id="insp-r13" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">2</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 13: model routing)</a> — Req 13 — model routing</p>
+</aside>
+<aside class="footnote brackets" id="insp-repair" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id19">3</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (verification loops)</a> — Req 5 — verification is part of execution; structured enough to route repair</p>
+</aside>
+<aside class="footnote brackets" id="insp-envelope" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id23">4</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (delegation envelopes)</a> — Req 7 — CapabilityEnvelope; children must not inherit parent capabilities implicitly</p>
+</aside>
+<aside class="footnote brackets" id="insp-risk" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id35">5</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (risk-scaled autonomy)</a> — Reqs 9 and 15 — soft vs hard mechanisms; consequence-scaled autonomy</p>
+</aside>
+<aside class="footnote brackets" id="insp-stop" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id44">6</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (stop contracts)</a> — Req 4 — repeating execution requires an explicit stop contract</p>
+</aside>
+<aside class="footnote brackets" id="insp-executor" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id52">7</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (graph execution)</a> — Reqs 2 and 12 — linkage then execute; durable checkpoints</p>
+</aside>
+<aside class="footnote brackets" id="insp-linkage" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id56">8</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (linkage &amp; stop contracts)</a> — Reqs 2 and 4 — primitive DI vs runtime graph resolution; explicit stop contracts</p>
+</aside>
+<aside class="footnote brackets" id="insp-templates" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id60">9</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (subgraphs &amp; templates)</a> — Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation</p>
+</aside>
+<aside class="footnote brackets" id="insp-r07" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id66">10</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 7: delegation envelopes)</a> — Req 7 — delegation envelopes</p>
+</aside>
+<aside class="footnote brackets" id="insp-r06" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id70">11</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 6: scoped context)</a> — Req 6 — scoped context</p>
+</aside>
+<aside class="footnote brackets" id="insp-r12" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id74">12</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 12: durable resume)</a> — Req 12 — durable resume</p>
+</aside>
+<aside class="footnote brackets" id="insp-r03" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id78">13</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 3: dynamic subgraphs)</a> — Req 3 — dynamic subgraphs</p>
+</aside>
+<aside class="footnote brackets" id="insp-r11" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id82">14</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 11: fix the process)</a> — Req 11 — fix the process</p>
+</aside>
+<aside class="footnote brackets" id="insp-r10" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id86">15</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 10: independent review)</a> — Req 10 — independent review</p>
+</aside>
+<aside class="footnote brackets" id="insp-r08" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id90">16</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 8: skills and gotchas)</a> — Req 8 — skills and gotchas</p>
+</aside>
+<aside class="footnote brackets" id="insp-r02" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id94">17</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 2: linkage vs DI)</a> — Req 2 — linkage vs DI</p>
+</aside>
+<aside class="footnote brackets" id="insp-r15" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id98">18</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 15: risk-scaled autonomy)</a> — Req 15 — risk-scaled autonomy</p>
+</aside>
+<aside class="footnote brackets" id="insp-r09" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id102">19</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 9: soft vs hard)</a> — Req 9 — soft vs hard</p>
+</aside>
+<aside class="footnote brackets" id="insp-r18" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id106">20</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 18: advisor)</a> — Req 18 — advisor</p>
+</aside>
+<aside class="footnote brackets" id="insp-r04" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id110">21</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 4: stop contracts)</a> — Req 4 — stop contracts</p>
+</aside>
+<aside class="footnote brackets" id="insp-r19" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id114">22</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 19: template incubation)</a> — Req 19 — template incubation</p>
+</aside>
+<aside class="footnote brackets" id="insp-r05" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id118">23</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 5: verification)</a> — Req 5 — verification</p>
+</aside>
+<aside class="footnote brackets" id="insp-r17" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id122">24</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 17: persistent goals (library hooks))</a> — Req 17 — persistent goals (library hooks)</p>
+</aside>
+<aside class="footnote brackets" id="insp-resume" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id126">25</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (durable resume)</a> — Req 12 — resumable external state; incompatible fingerprint refuse</p>
+</aside>
+<aside class="footnote brackets" id="insp-advisor" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id133">26</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (advisor)</a> — Req 18 — sparse non-binding advisor; executor retains ownership</p>
+</aside>
+<aside class="footnote brackets" id="insp-soft-hard" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id137">27</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (soft vs hard)</a> — Req 9 — soft guidance and hard enforcement are different mechanisms</p>
+</aside>
+<aside class="footnote brackets" id="insp-verify" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id141">28</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (verification)</a> — Req 5 — verification policy; answer generated ≠ task complete</p>
+</aside>
+<aside class="footnote brackets" id="insp-experiment" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id151">29</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (harness experiments)</a> — Reqs 1 and 14 — revisable scaffolding; harness changes as testable hypotheses</p>
+</aside>
+<aside class="footnote brackets" id="insp-r14" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id155">30</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 14: harness hypotheses)</a> — Req 14 — harness hypotheses</p>
+</aside>
+<aside class="footnote brackets" id="insp-r01" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id159">31</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 1: revisable scaffolding)</a> — Req 1 — revisable scaffolding</p>
+</aside>
+<aside class="footnote brackets" id="loop-vs-graph-executor" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>32<span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://medium.com/&#64;neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23">Loop vs graph engineering</a> — Executor advances durable plans hosts define</p>
+</aside>
+<aside class="footnote brackets" id="loop-vs-graph" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>33<span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://medium.com/&#64;neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23">Loop vs graph engineering</a> — Explicit control flow; MechaHarness extends into execution graphs</p>
+</aside>
+</aside>
 
 
            </div>

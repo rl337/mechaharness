@@ -80,6 +80,38 @@ Kind `pass_through` on `openai_compat` trees with mock transport. Soft expects: 
 
 1. [OpenAI Chat Completions](https://platform.openai.com/docs/api-reference/chat) — Wire models for reason-lane HTTP
 
+### `nubble_insp_environment_linkage` — Surface environment incompatibility as linkage failure
+
+Missing environment capability must become a structured pre-exec failure, not a mysterious mid-run error. Accepts inspiration requirement 16[^insp-r16].
+
+#### Implementation
+
+`InferenceEnvironment.assert_compatible` is consulted by `DefaultLinkageResolver`; mismatches become `environment_incompatible` edges.
+
+#### Validation
+
+Kind `environment_linkage_fail`. Soft expects environment_incompatible code when grants are required but absent.
+
+#### Footnotes
+
+[^insp-r16]: [Inspiration requirements (req 16: environment linkage)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 16 — environment linkage
+
+### `nubble_insp_model_routing` — Route nodes by declared capability needs
+
+Nubble prefers declaring what a step needs instead of hard-coding a model id, then picking among available classes. Accepts inspiration requirement 13[^insp-r13].
+
+#### Implementation
+
+`route_for_capability_needs` in `mechaharness.routing` selects a model class from `model:` needs.
+
+#### Validation
+
+Kind `capability_need_routing`. Soft expects selected_model_class matches need.
+
+#### Footnotes
+
+[^insp-r13]: [Inspiration requirements (req 13: model routing)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 13 — model routing
+
 ### `nubble_lane_load_hint` — Refuse work when the wrong inference profile is loaded
 
 Nubble is on call when a refund-routing job fails on the local inference host. The job needs the judge profile, but an earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error. It must tell him, in plain operator language, that this work needs the judge lane and which load command to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile mismatch wastes incident time.
@@ -154,17 +186,37 @@ Kind `topology_efficiency` → `_run_topology_efficiency`. Unit: `tests/test_dec
 
 ### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 
-After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed — it does not loop forever. Complements `fangore_convergence_ceiling` for judge loops.
+After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed — it does not loop forever. Complements `fangore_convergence_ceiling` for judge loops and `fangore_verification_outcome_gate` for completion versus answer-generated. See inspiration requirements for verification loops[^insp-repair].
 
 #### Implementation
 
-`bounded_repair` in `mechaharness.graph` runs verify → classify → permitted repair → retry until `max_attempts`. Judge scores remain supplementary to verifier evidence.
+`bounded_repair` in `mechaharness.graph` runs verify → classify → permitted repair → retry until `max_attempts`. `VerificationPolicy` / `OutcomeContract` select verification and gate completion. Judge scores remain supplementary to verifier evidence.
 
 Covers: VER-03.
 
 #### Validation
 
-Kind `bounded_repair_loop` → `_run_bounded_repair_loop`. Soft expects: succeeds within budget or fails after max attempts. Unit: `tests/test_graph.py`.
+Kind `bounded_repair_loop` → `_run_bounded_repair_loop`. Soft expects: succeeds within budget or fails after max attempts. Unit: `tests/test_graph.py`. Related: `fangore_verification_outcome_gate`.
+
+#### Footnotes
+
+[^insp-repair]: [Inspiration requirements (verification loops)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification is part of execution; structured enough to route repair
+
+### `fangore_capability_envelope_narrow` — Narrow child capability envelopes without silent inheritance
+
+Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent's full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes[^insp-envelope].
+
+#### Implementation
+
+`CapabilityEnvelope` in `mechaharness.capability_envelope` carries grants, tools, context provider ids, model class, budgets, and escalation policy. `narrow()` produces a child envelope that cannot widen parent grants or tools. Attached on `GraphRunContext.envelope` during graph runs. `DefaultDelegationPolicy` chooses inline versus child/subgraph using independence and pollution signals.
+
+#### Validation
+
+Kind `capability_envelope_narrow` → `_run_capability_envelope_narrow`. Soft expects: narrowed grants subset; widen raises; delegation chooses child when independence is required. Unit: `tests/test_inspiration_primitives.py`.
+
+#### Footnotes
+
+[^insp-envelope]: [Inspiration requirements (delegation envelopes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 7 — CapabilityEnvelope; children must not inherit parent capabilities implicitly
 
 ### `fangore_completer_flavors` — Wire same-lane Completer flavors without forking the library
 
@@ -216,6 +268,22 @@ Kind `config_access_policy` → `_run_config_access_policy`. Unit: `tests/test_d
 
 1. [pyiv](https://rl337.org/pyiv/) — Config-hook dependency injection
 
+### `fangore_consequence_risk_scale` — Scale autonomy controls by action consequence
+
+Fangore marks a destructive write as high consequence. Low-risk reads may proceed under ordinary grants; high-consequence actions must trigger stronger controls and track how often humans are prompted so approval fatigue stays visible. Soft prompts alone must not replace hard grants. See inspiration requirements for risk-scaled autonomy[^insp-risk].
+
+#### Implementation
+
+`ConsequencePolicy` / `ActionConsequence` in `mechaharness.consequence` classify actions (`low`…`critical`), flag approval and exhaustive verification needs, and expose `approval_frequency` as a usability/safety metric. Grants in `AccessControl` remain the hard gate.
+
+#### Validation
+
+Kind `consequence_risk_scale` → `_run_consequence_risk_scale`. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: `tests/test_inspiration_primitives.py`. Related grants: `fangore_tool_gating`.
+
+#### Footnotes
+
+[^insp-risk]: [Inspiration requirements (risk-scaled autonomy)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 9 and 15 — soft vs hard mechanisms; consequence-scaled autonomy
+
 ### `fangore_context_compiler_deficit` — Report context deficits instead of silent truncation
 
 Mandatory blockers must not disappear when the prompt budget is tight. Success is a deficit report with unresolved gaps named. Related observation chain: `fangore_context_observation_chain`.
@@ -250,17 +318,21 @@ Kind `context_observation_chain` → `_run_context_observation_chain`. Unit: `te
 
 ### `fangore_convergence_ceiling` — Stop agent loops that make no progress
 
-Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget.
+Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget. Graph repeating nodes additionally require an explicit stop contract at linkage (`fangore_graph_linkage_preflight`). See inspiration requirements for stop contracts[^insp-stop].
 
 #### Implementation
 
-`ConvergenceContract` / `ConvergenceGuard` fingerprint windows and nested budget slices. Escalation may request more evidence, but ceilings never count as task success.
+`ConvergenceContract` / `ConvergenceGuard` fingerprint windows and nested budget slices. `StopContract` in `mechaharness.stop_contract` is the graph-facing alias for the same ceilings plus trigger/continuation/success/abort fields. Escalation may request more evidence, but ceilings never count as task success.
 
 Covers: POL-03.
 
 #### Validation
 
-Kind `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_convergence.py`.
+Kind `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_convergence.py`. Linkage stop enforcement: `fangore_graph_linkage_preflight`.
+
+#### Footnotes
+
+[^insp-stop]: [Inspiration requirements (stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 — repeating execution requires an explicit stop contract
 
 ### `fangore_decision_surface_reject` — Reject model choices that are not on the allowed list
 
@@ -292,19 +364,52 @@ Kind `derived_memory` → `_run_derived_memory`. Unit: `tests/test_context_exper
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 
-Fangore ships a host app with a produce → repair → consume plan. The library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; this story is the authorized runner that advances them.
+Fangore ships a host app with a produce → repair → consume plan. After linkage succeeds, the library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; preflight failures are covered by `fangore_graph_linkage_preflight`. See inspiration requirements for authorized graph execution[^insp-executor].
 
 #### Implementation
 
-`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, and `GraphEscalation`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override `get_graph_failure_policy()` / `get_graph_escalation()`, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node start/end events, checkpoints through `GraphStore`, and enforces per-runner grants.
+`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node events, checkpoints through `GraphStore` (with config fingerprint), and enforces per-runner grants.
 
 #### Validation
 
-Kind `graph_executor_run` → `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py` (grants, retry/escalate/fail policies, stall, resume, runner errors).
+Kind `graph_executor_run` → `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py`. Related: `fangore_graph_linkage_preflight`.
 
 #### Footnotes
 
-1. [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Executor advances durable plans hosts define
+[^loop-vs-graph-executor]: [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Executor advances durable plans hosts define
+[^insp-executor]: [Inspiration requirements (graph execution)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 2 and 12 — linkage then execute; durable checkpoints
+
+### `fangore_graph_linkage_preflight` — Fail closed on missing graph linkage before work starts
+
+Fangore composes a plan that still names a step the host has not wired, and another repeating step without a stop rule. The library must refuse those plans before any runner work starts, naming the missing edge so operators can fix wiring instead of debugging a mid-run crash. Complements `fangore_graph_executor` (authorized run once linkage is sound) and `fangore_convergence_ceiling` (budgets once a loop is allowed). See the inspiration requirements for linkage versus dependency injection and stop contracts[^insp-linkage].
+
+#### Implementation
+
+`DefaultLinkageResolver` in `mechaharness.linkage_resolver` validates runner kinds, grants, environment compatibility, termination sinks, and repeating nodes' `StopContract` before `GraphExecutor` substantive work. Missing runners and missing stop contracts become structured `UnsatisfiedEdge` codes (`no_runner`, `missing_stop_contract`). `GraphExecutor.run` records linkage failure without invoking node handlers.
+
+#### Validation
+
+Kind `graph_linkage_preflight` → `_run_graph_linkage_preflight`. Soft expects: missing-runner linkage fails with `no_runner`; repeating node without stop fails with `missing_stop_contract`; valid linear graph reports `ok` with a fingerprint. Unit: `tests/test_linkage_resolver.py`, fixtures under `tests/fixtures/linkage_resolver/`.
+
+#### Footnotes
+
+[^insp-linkage]: [Inspiration requirements (linkage & stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 2 and 4 — primitive DI vs runtime graph resolution; explicit stop contracts
+
+### `fangore_graph_template_soft_points` — Instantiate a reusable graph template with soft points
+
+Fangore picks a library fan-out template, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which template produced it so later upgrades can detect drift. Independent-review and verify-repair templates follow the same pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates].
+
+#### Implementation
+
+`mechaharness.graph_templates` ships parameterized skeletons (`FanOutAggregateTemplate`, `VerifyRepairTemplate`, `IndependentReviewTemplate`, `EnvironmentRepairTemplate`) with declared `SoftPoint`s. `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.
+
+#### Validation
+
+Kind `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft expects: fan-out node ids, stamped provenance, soft-point catalog nonempty, demoted template raises. Unit: `tests/test_graph_templates.py`, fixtures under `tests/fixtures/graph_templates/`.
+
+#### Footnotes
+
+[^insp-templates]: [Inspiration requirements (subgraphs & templates)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation
 
 ### `fangore_human_review_pending` — Hold mutations until a matching human approval exists
 
@@ -320,23 +425,264 @@ Covers: POL-04, GAT-04.
 
 Kind `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
 
-### `fangore_local_plan_resume` — Resume a durable local plan after a crash
+### `fangore_insp_capability_envelope` — Narrow child envelopes without silent parent inheritance
 
-A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints — not chat — must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes.
+Delegated work gets an explicit capability envelope. Children must not inherit the parent's full grants, and widening must fail. Accepts inspiration requirement 7[^insp-r07].
 
 #### Implementation
 
-`OperationContract` / `OperationRegistry` register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. `ExecutionGraph` / `GraphStore` persist goal, nodes, and justified dependency edges on `EventLog` with recovery boundaries; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.
+`CapabilityEnvelope.narrow` and `DefaultDelegationPolicy` choose inline versus child execution.
+
+#### Validation
+
+Kind `capability_envelope_narrow`. Soft expects narrow ok, widen raises, child delegation.
+
+#### Footnotes
+
+[^insp-r07]: [Inspiration requirements (req 7: delegation envelopes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 7 — delegation envelopes
+
+### `fangore_insp_context_provider` — Discover context indices before loading large payloads
+
+Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06].
+
+#### Implementation
+
+`ContextProvider` / `StaticContextProvider` expose `index` then `load` with provenance and token estimates.
+
+#### Validation
+
+Kind `context_provider_discovery`. Soft expects index before load and provider attribution.
+
+#### Footnotes
+
+[^insp-r06]: [Inspiration requirements (req 6: scoped context)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 6 — scoped context
+
+### `fangore_insp_durable_resume` — Refuse resume when the harness fingerprint changed
+
+Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12].
+
+#### Implementation
+
+`GraphStore` persists `config_fingerprint`; `GraphExecutor.run(resume=True)` compares fingerprints after re-resolve.
+
+#### Validation
+
+Kind `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume failed with incompatible fingerprint.
+
+#### Footnotes
+
+[^insp-r12]: [Inspiration requirements (req 12: durable resume)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 12 — durable resume
+
+### `fangore_insp_dynamic_subgraph` — Nest a child graph as an observable subgraph
+
+Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Accepts inspiration requirement 3[^insp-r03].
+
+#### Implementation
+
+`SubgraphNodeRunner.embed` stores a child `ExecutionGraph` on a parent node; `GraphExecutor` runs nested graphs with linked run ids and emits graph lifecycle events for the child.
+
+#### Validation
+
+Kind `dynamic_subgraph_nest`. Soft expects parent ok, child_status ok, nested graph events present.
+
+#### Footnotes
+
+[^insp-r03]: [Inspiration requirements (req 3: dynamic subgraphs)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 3 — dynamic subgraphs
+
+### `fangore_insp_failure_attribution` — Attribute repeated failures to linkage or tools
+
+When the same failure class repeats, Fangore needs structured attribution so the process can improve — not one-off output patches. Accepts inspiration requirement 11[^insp-r11].
+
+#### Implementation
+
+`attribute_error` / `detect_repeated_failure_classes` in `mechaharness.failure_attribution` map errors to categories for traces and offline mining.
+
+#### Validation
+
+Kind `failure_attribution_trace`. Soft expects linkage category and repeated class detection.
+
+#### Footnotes
+
+[^insp-r11]: [Inspiration requirements (req 11: fix the process)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 11 — fix the process
+
+### `fangore_insp_independent_review` — Review artifacts in isolated reviewer context
+
+Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10].
+
+#### Implementation
+
+`IndependentReviewTemplate` builds produce → isolated review_* → aggregate_reviews with omit_producer_reasoning and retain_disagreement.
+
+#### Validation
+
+Kind `independent_review_template`. Soft expects isolated payload flags and two reviewers.
+
+#### Footnotes
+
+[^insp-r10]: [Inspiration requirements (req 10: independent review)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 10 — independent review
+
+### `fangore_insp_instruction_gotchas` — Measure gotcha trigger rates before promoting them
+
+Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8[^insp-r08].
+
+#### Implementation
+
+`InstructionCatalog` / `InstructionComponent` track trigger, use, over/under rates; `promote` moves proposed gotchas to active after evaluation.
+
+#### Validation
+
+Kind `instruction_gotcha_metrics`. Soft expects over_trigger recorded and active after promote.
+
+#### Footnotes
+
+[^insp-r08]: [Inspiration requirements (req 8: skills and gotchas)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 8 — skills and gotchas
+
+### `fangore_insp_linkage_preflight` — Resolve graph linkage before any node runs
+
+Fangore's injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2[^insp-r02]. Related: `fangore_insp_stop_contract`.
+
+#### Implementation
+
+`DefaultLinkageResolver` validates runners, grants, environment, and termination separately from pyiv construction. `GraphExecutor` consults it before substantive work.
+
+#### Validation
+
+Kind `graph_linkage_preflight`. Soft expects `no_runner` on missing kinds and ok+fingerprint on a wired linear graph.
+
+#### Footnotes
+
+[^insp-r02]: [Inspiration requirements (req 2: linkage vs DI)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 2 — linkage vs DI
+
+### `fangore_insp_risk_autonomy` — Scale controls by action consequence class
+
+High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15[^insp-r15].
+
+#### Implementation
+
+`ConsequencePolicy` classifies actions and tracks approval prompts versus decisions.
+
+#### Validation
+
+Kind `consequence_risk_scale`. Soft expects stronger controls and approval_frequency.
+
+#### Footnotes
+
+[^insp-r15]: [Inspiration requirements (req 15: risk-scaled autonomy)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 15 — risk-scaled autonomy
+
+### `fangore_insp_soft_vs_hard` — Enforce grants mechanically instead of by prompt alone
+
+Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`.
+
+#### Implementation
+
+`AccessControl` deny-by-default on the harness tool path; prompts never grant permission.
+
+#### Validation
+
+Kind `tool_gating`. Soft expects deny without grant and allow with grant.
+
+#### Footnotes
+
+[^insp-r09]: [Inspiration requirements (req 9: soft vs hard)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 9 — soft vs hard
+
+### `fangore_insp_sparse_advisor` — Consult an advisor without transferring task ownership
+
+Sparse advisor counsel helps at hard boundaries while the active executor keeps ownership. Budgets stop routine consultation. Accepts inspiration requirement 18[^insp-r18].
+
+#### Implementation
+
+`Advisor` / `AdvisorPolicy` / `consult_advisor` — distinct from `GraphEscalation`.
+
+#### Validation
+
+Kind `sparse_advisor_consult`. Soft expects first consult ok, second blocked.
+
+#### Footnotes
+
+[^insp-r18]: [Inspiration requirements (req 18: advisor)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 18 — advisor
+
+### `fangore_insp_stop_contract` — Require a stop contract on repeating graph steps
+
+A repeating repair step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration requirement 4[^insp-r04]. Complements `fangore_insp_linkage_preflight` and `fangore_convergence_ceiling`.
+
+#### Implementation
+
+`StopContract` plus `DefaultLinkageResolver` require stop contracts on repeating nodes unless declared a persistent service loop.
+
+#### Validation
+
+Kind `graph_linkage_preflight` with stop-focused request. Soft expects `missing_stop_contract`.
+
+#### Footnotes
+
+[^insp-r04]: [Inspiration requirements (req 4: stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 — stop contracts
+
+### `fangore_insp_template_incubation` — Stamp template provenance and refuse demoted skeletons
+
+Reusable templates expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].
+
+#### Implementation
+
+`SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, optional `source_workflow_ref`.
+
+#### Validation
+
+Kind `graph_template_soft_points`. Soft expects stamped provenance and demoted refuse.
+
+#### Footnotes
+
+[^insp-r19]: [Inspiration requirements (req 19: template incubation)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 19 — template incubation
+
+### `fangore_insp_verification_gate` — Keep answer-generated distinct from task-complete
+
+Producing an answer is not the same as finishing the task when verification is required. Accepts inspiration requirement 5[^insp-r05].
+
+#### Implementation
+
+`OutcomeContract` and `DefaultVerificationPolicy` gate completion on verification state.
+
+#### Validation
+
+Kind `verification_outcome_gate`. Soft expects answer_generated then complete after verify.
+
+#### Footnotes
+
+[^insp-r05]: [Inspiration requirements (req 5: verification)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification
+
+### `fangore_insp_wake_reresolve` — Re-resolve linkage when resuming a woken run
+
+Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17].
+
+#### Implementation
+
+Client wakes call `LinkageResolver` then `GraphExecutor.run(resume=True)`. Fingerprint mismatch fails closed. Goal stores remain outside the library.
+
+#### Validation
+
+Kind `wake_reresolve_resume`. Soft expects re-resolve ok then successful resume with matching fingerprint.
+
+#### Footnotes
+
+[^insp-r17]: [Inspiration requirements (req 17: persistent goals (library hooks))](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 17 — persistent goals (library hooks)
+
+### `fangore_local_plan_resume` — Resume a durable local plan after a crash
+
+A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints — not chat — must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes. Incompatible harness or graph fingerprints must refuse silent continue. See inspiration requirements for durable long-running work[^insp-resume].
+
+#### Implementation
+
+`OperationContract` / `OperationRegistry` register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. `ExecutionGraph` / `GraphStore` persist goal, nodes, and justified dependency edges on `EventLog` with recovery boundaries and optional `config_fingerprint`; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.
 
 Covers: INF-01, INF-03, GRF-01, GRF-02, GRF-03, GRF-04, GRF-05, GRF-06.
 
 #### Validation
 
-Kind `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.py`, `tests/test_operation_registry.py`.
+Kind `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.py`, `tests/test_operation_registry.py`. Fingerprint refuse covered in `tests/test_inspiration_primitives.py`.
 
 #### Footnotes
 
-1. [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Explicit control flow; MechaHarness extends into execution graphs
+[^loop-vs-graph]: [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Explicit control flow; MechaHarness extends into execution graphs
+[^insp-resume]: [Inspiration requirements (durable resume)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 12 — resumable external state; incompatible fingerprint refuse
 
 ### `fangore_refund_verdict` — Keep billing authority in product rules, not the model
 
@@ -356,9 +702,25 @@ Kind `route_refund` → `_run_route_refund`. Soft expects: ALLOW for billing, DE
 
 1. [Jev decisions in a Pi harness](https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness) — Routing, gating, batched questions, thresholds
 
+### `fangore_sparse_advisor_consult` — Consult an advisor sparsely without transferring ownership
+
+Fangore's worker hits a consequential planning boundary and asks a stronger advisor for counsel. The worker keeps ownership of the task: advice is guidance, not a hand-off, and a budget must stop low-value routine consultation. See inspiration requirements for the advisor pattern[^insp-advisor].
+
+#### Implementation
+
+`Advisor` / `AdvisorPolicy` in `mechaharness.advisor` are distinct from `GraphEscalation` (ownership transfer). `DefaultAdvisorPolicy` rate-limits consultations; `consult_advisor` records `AdvisorObservation` and never transfers task ownership. Default DI binds `RejectAdvisor` with an explicit continue fallback.
+
+#### Validation
+
+Kind `sparse_advisor_consult` → `_run_sparse_advisor_consult`. Soft expects: first consultation returns guidance; second blocked by budget; observation recorded. Unit: `tests/test_inspiration_primitives.py`.
+
+#### Footnotes
+
+[^insp-advisor]: [Inspiration requirements (advisor)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 18 — sparse non-binding advisor; executor retains ownership
+
 ### `fangore_tool_gating` — Gate every tool call through deny-by-default access checks
 
-Every tool call — including fused or loop-proposed calls — must pass access control. Uncertain or privileged scopes fail closed. Fangore shows product that a write without grant is refused and that composed packs from `fangore_compound_grants` still apply.
+Every tool call — including fused or loop-proposed calls — must pass access control. Uncertain or privileged scopes fail closed. Soft prompt guidance never replaces these hard grants. Fangore shows product that a write without grant is refused and that composed packs from `fangore_compound_grants` still apply. See inspiration requirements for soft versus hard enforcement[^insp-soft-hard].
 
 #### Implementation
 
@@ -368,7 +730,27 @@ Covers: GAT-01, GAT-02, GAT-03.
 
 #### Validation
 
-Kind `tool_gating` → `_run_tool_gating`. Soft expects: deny without grant, allow with grant. Related: `tests/test_access.py`, grant_gate story.
+Kind `tool_gating` → `_run_tool_gating`. Soft expects: deny without grant, allow with grant. Related: `tests/test_access.py`, grant_gate story, `fangore_consequence_risk_scale`.
+
+#### Footnotes
+
+[^insp-soft-hard]: [Inspiration requirements (soft vs hard)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 9 — soft guidance and hard enforcement are different mechanisms
+
+### `fangore_verification_outcome_gate` — Treat answer generated as distinct from task complete
+
+Fangore's pipeline produces an answer and still needs verification before the task is complete. When verification is required, generating text alone must not count as done; when verification passes, completion can proceed. Complements `fangore_bounded_repair_loop`. See inspiration requirements for verification as part of execution[^insp-verify].
+
+#### Implementation
+
+`OutcomeContract` in `mechaharness.outcome_contract` distinguishes `answer_generated`, `verified`, `complete`, and `failed`. `DefaultVerificationPolicy` selects the strongest sufficient oracle and gates completion through the outcome contract when `require_verification` is set.
+
+#### Validation
+
+Kind `verification_outcome_gate` → `_run_verification_outcome_gate`. Soft expects: answer without verification stays `answer_generated`; verification pass yields `complete`. Unit: `tests/test_inspiration_primitives.py`.
+
+#### Footnotes
+
+[^insp-verify]: [Inspiration requirements (verification)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification policy; answer generated ≠ task complete
 
 ## Taloneth's stories
 
@@ -413,6 +795,54 @@ Covers: JDG-01, JDG-02, JDG-03, JDG-04.
 #### Validation
 
 Kind `fixture_judge_batch` → `_run_fixture_judge_batch`. Unit: `tests/test_judge.py`.
+
+### `taloneth_harness_experiment_retire` — Retire scaffolding that loses a with-versus-without experiment
+
+Taloneth treats a prompt scaffold as a hypothesis: keep it only if the with-intervention arm beats the without arm on the primary metric. When the scaffold hurts, it is retired rather than left as fossil control logic. See inspiration requirements for revisable scaffolding and harness hypotheses[^insp-experiment].
+
+#### Implementation
+
+`HarnessExperiment` / `HarnessExperimentRunner` in `mechaharness.harness_experiment` express interventions as hypotheses with expected metrics, compare with/without arms, and list retirement candidates. Integrates with `ResearchLab` for offline evaluation. Trace fields expose experiment id, harness version, and assignment.
+
+#### Validation
+
+Kind `harness_experiment_retire` → `_run_harness_experiment_retire`. Soft expects: treatment worse than control yields `retired` status and a retirement candidate. Related: `taloneth_atk_research_reject`. Unit: `tests/test_inspiration_primitives.py`.
+
+#### Footnotes
+
+[^insp-experiment]: [Inspiration requirements (harness experiments)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 1 and 14 — revisable scaffolding; harness changes as testable hypotheses
+
+### `taloneth_insp_harness_hypothesis` — Express a harness change as a testable hypothesis
+
+Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].
+
+#### Implementation
+
+`HarnessExperiment` carries hypothesis, intervention, failure_mode, evidence, and `to_trace_fields` for version/assignment on traces.
+
+#### Validation
+
+Kind `harness_experiment_retire`. Soft expects retired when treatment loses (evidence-driven retain/retire).
+
+#### Footnotes
+
+[^insp-r14]: [Inspiration requirements (req 14: harness hypotheses)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 14 — harness hypotheses
+
+### `taloneth_insp_scaffolding_retire` — Retire scaffolding that loses a controlled experiment
+
+Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1[^insp-r01].
+
+#### Implementation
+
+`HarnessExperiment` / `HarnessExperimentRunner` compare intervention arms and list retirement candidates. Hosts remove retired scaffolding without rewriting task goals.
+
+#### Validation
+
+Kind `harness_experiment_retire`. Soft expects retired status when treatment underperforms control.
+
+#### Footnotes
+
+[^insp-r01]: [Inspiration requirements (req 1: revisable scaffolding)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 1 — revisable scaffolding
 
 ### `taloneth_offline_decision_export` — Export decision data without leaking future outcomes
 

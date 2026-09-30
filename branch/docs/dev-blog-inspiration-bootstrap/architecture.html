@@ -200,11 +200,12 @@ hooks <code class="docutils literal notranslate"><span class="pre">get_node_runn
 <p>Before substantive work, <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> runs an injectable
 <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code> (runner kinds, grants, operation binds, stop contracts,
 envelopes, environment). Checkpoints carry a config/graph fingerprint so
-resume refuses incompatible changes. Parameterized <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code>s and
-policies (<code class="docutils literal notranslate"><span class="pre">VerificationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">DelegationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code>) are
-library-owned; hosts such as June instantiate them via Config without
-owning template definitions. See
-<a class="reference internal" href="inspiration/requirements-map.html"><span class="std std-doc">Inspiration requirements map</span></a>.</p>
+resume refuses incompatible changes. Parameterized graph templates live in
+<code class="docutils literal notranslate"><span class="pre">mechaharness.graph_templates</span></code> (see
+<a class="reference internal" href="reference/graph-templates.html"><span class="std std-doc">Graph templates</span></a>); policies
+(<code class="docutils literal notranslate"><span class="pre">VerificationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">DelegationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code>) are library-owned.
+Clients instantiate templates and may retain concrete graphs.
+See <a class="reference internal" href="inspiration/requirements-map.html"><span class="std std-doc">Inspiration requirements map</span></a>.</p>
 </section>
 <section id="host-extension">
 <h2>Host extension<a class="headerlink" href="#host-extension" title="Link to this heading"></a></h2>

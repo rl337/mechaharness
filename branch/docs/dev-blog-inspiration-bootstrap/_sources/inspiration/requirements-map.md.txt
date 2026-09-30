@@ -1,43 +1,38 @@
 # Inspiration requirements map
 
 Maps each requirement in
-[dev-blog-inspiration.md](./dev-blog-inspiration.md) to the MechaHarness
-module that owns it, current gap status, and whether June (orchestrator
-client) or MechaHarness implements the surface.
+[dev-blog-inspiration.md](./dev-blog-inspiration.md) to MechaHarness modules,
+library readiness, and the user-story id that acceptance-tests it (when any).
 
-**Ownership reminder:** MechaHarness owns protocols, DI hooks, and
-parameterized **graph templates**. June owns scheduler, task runner,
-document manager, knowledge graph, and issue tracker — it instantiates
-templates and implements providers; it does not own template definitions.
+**Coverage honesty:** a row marked *surface* means types/hooks exist and unit
+tests cover them; *story* means a persona story exercises the path; *partial*
+means important MUSTs remain open (see Gaps). Req 17 is client-owned.
 
-| Req | Topic | Primary module(s) | Status | Owner |
-|-----|-------|-------------------|--------|-------|
-| 1 | Revisable scaffolding | `harness_experiment.py`, `research.py` | Library experiment surface + retirement hooks | MH; June proposes changes |
-| 2 | Linkage vs DI | `linkage_resolver.py`, `operation_registry.py`, `di.py` | Pre-exec graph resolve distinct from injector | MH |
-| 3 | Dynamic subgraphs | `graph_template.py`, `graph.py`, `graph_executor.py` | Nested graphs + library templates | MH owns templates |
-| 4 | Stop contracts | `stop_contract.py`, `convergence.py` | Required on repeating nodes at linkage | MH |
-| 5 | Verification | `verification_policy.py`, `graph.py` oracles | Selection policy + completion gate | MH |
-| 6 | Scoped context | `context_provider.py`, `context_experiments.py` | Provider protocol; lazy index | MH protocol; June KG/docs implement |
-| 7 | Delegation / envelopes | `capability_envelope.py`, `delegation_policy.py` | Child envelopes; inline vs child policy | MH |
-| 8 | Skills / gotchas | `instruction_component.py` | Trigger metrics; promotion via eval | MH metrics; June proposes |
-| 9 | Soft vs hard | grants, stop, linkage vs prompts | Documented + mechanically enforced | MH |
-| 10 | Independent review | `graph_template.py` review template | Isolated context template | MH |
-| 11 | Fix the process | EventLog + failure attribution | Structured attribution on traces | MH; June mines traces |
-| 12 | Durable resume | `graph.py` GraphStore, fingerprint | Version fingerprint refuse | MH |
-| 13 | Model routing | `routing.py`, envelopes, Completer keys | Node capability needs | MH |
-| 14 | Harness hypotheses | `harness_experiment.py`, `research.py` | With/without + version on traces | MH |
-| 15 | Risk-scaled autonomy | `consequence.py`, access grants | Consequence class on actions | MH; June product policy |
-| 16 | Environment linkage | `core/environment.py`, `linkage_resolver.py` | Env in resolve; repair template | MH |
-| 17 | Persistent goals | — | Out of library | **June only** |
-| 18 | Advisor | `advisor.py`, `advisor_policy.py` | Non-binding; distinct from escalate | MH |
+**Ownership:** MechaHarness owns protocols, DI hooks, and parameterized graph
+template definitions. Clients own scheduling, goals, documents, knowledge
+graphs, issue trackers, and concrete graph realizations.
 
-## June task-runner shape
-
-1. Load persistent goal (June).
-2. Pick a MechaHarness `GraphTemplate` and bind host tools / providers / envelope.
-3. `LinkageResolver.resolve` → fail closed on missing edges.
-4. `GraphExecutor.run` (checkpointed).
-5. On wake: re-resolve environment/linkage, then resume if fingerprint matches.
+| Req | Topic | Modules | Library | Story | Gaps |
+|-----|-------|---------|---------|-------|------|
+| 1 | Revisable scaffolding | `harness_experiment.py`, `research.py` | story | `taloneth_insp_scaffolding_retire` | Online telemetry / automatic retirement suite |
+| 2 | Linkage vs DI | `linkage_resolver.py`, `di.py` | story | `fangore_insp_linkage_preflight` | Operation bind depth; candidate-provider UX polish |
+| 3 | Dynamic subgraphs | `graph_templates/`, `graph_executor.py` | story | `fangore_insp_dynamic_subgraph` | I/O contracts + child budget share on every nest |
+| 4 | Stop contracts | `stop_contract.py`, `convergence.py` | story | `fangore_insp_stop_contract` | Full stop-field validation matrix |
+| 5 | Verification | `verification_policy.py`, `graph.py` | story | `fangore_insp_verification_gate` | Impact-based selection observability |
+| 6 | Scoped context | `context_provider.py`, `context_experiments.py` | story | `fangore_insp_context_provider` | Default harness path always uses providers |
+| 7 | Delegation / envelopes | `capability_envelope.py`, `delegation_policy.py` | story | `fangore_insp_capability_envelope` | Cancel/supersede; coordination cost telemetry |
+| 8 | Skills / gotchas | `instruction_component.py` | story | `fangore_insp_instruction_gotchas` | Eval promotion path depth |
+| 9 | Soft vs hard | grants, stop, linkage | story | `fangore_insp_soft_vs_hard` | — |
+| 10 | Independent review | `graph_templates/independent_review.py` | story | `fangore_insp_independent_review` | Multi-reviewer aggregation runners |
+| 11 | Fix the process | `failure_attribution.py`, EventLog | story | `fangore_insp_failure_attribution` | Cross-run mining beyond unit helpers |
+| 12 | Durable resume | `graph.py`, fingerprint | story | `fangore_insp_durable_resume` | — |
+| 13 | Model routing | `routing.py` | story | `nubble_insp_model_routing` | Cache-transfer / energy frontier |
+| 14 | Harness hypotheses | `harness_experiment.py`, `research.py` | story | `taloneth_insp_harness_hypothesis` | Harness version always on traces |
+| 15 | Risk-scaled autonomy | `consequence.py` | story | `fangore_insp_risk_autonomy` | Wired into AccessControl path |
+| 16 | Environment linkage | `environment.py`, linkage, env template | story | `nubble_insp_environment_linkage` | Secrets/binaries structured failures |
+| 17 | Persistent goals | resume / linkage hooks | partial | `fangore_insp_wake_reresolve` | Goal store remains client-owned |
+| 18 | Advisor | `advisor.py` | story | `fangore_insp_sparse_advisor` | Linkage participation; follow/reject on traces |
+| 19 | Template incubation | `graph_templates/` SoftPoint + stamp | story | `fangore_insp_template_incubation` | Promote/demote evidence workflow |
 
 ## Soft vs hard (req 9)
 

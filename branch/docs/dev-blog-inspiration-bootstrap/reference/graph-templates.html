@@ -1,0 +1,228 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graph templates &mdash; MechaHarness 0.1.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=360bc84d"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Graph templates</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/reference/graph-templates.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="graph-templates">
+<h1>Graph templates<a class="headerlink" href="#graph-templates" title="Link to this heading"></a></h1>
+<p>Reusable parameterized <strong>subgraph skeletons</strong> owned by MechaHarness. Clients
+instantiate a template, bind soft points, and may keep the resulting concrete
+:class:<code class="docutils literal notranslate"><span class="pre">~mechaharness.graph.ExecutionGraph</span></code> in their own repository.
+MechaHarness validates and executes those graphs without taking ownership of
+client-specific realizations.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Surface</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Package</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.graph_templates</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Stability</p></td>
+<td><p>evolving</p></td>
+</tr>
+<tr class="row-even"><td><p>Config hook</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_graph_template_registry()</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="catalog">
+<h2>Catalog<a class="headerlink" href="#catalog" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Template</p></th>
+<th class="head"><p>Module</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/fan-out-aggregate.html"><span class="std std-doc">fan_out_aggregate</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fan_out_aggregate</span></code></p></td>
+<td><p>Plan → parallel branches → reduce</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/verify-repair.html"><span class="std std-doc">verify_repair</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
+<td><p>Produce → verify → bounded repair</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/independent-review.html"><span class="std std-doc">independent_review</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
+<td><p>Isolated reviewers; retain disagreement</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/environment-repair.html"><span class="std std-doc">environment_repair</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">environment_repair</span></code></p></td>
+<td><p>Diagnose → repair env → recheck</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="soft-points">
+<h2>Soft points<a class="headerlink" href="#soft-points" title="Link to this heading"></a></h2>
+<p>Each template declares <code class="docutils literal notranslate"><span class="pre">SoftPoint</span></code>s (tools, providers, prompts, models,
+budgets, persistence, policies, runner kinds, task state). Bindings go in
+<code class="docutils literal notranslate"><span class="pre">GraphTemplateParams.soft_bindings</span></code> (plus <code class="docutils literal notranslate"><span class="pre">inputs</span></code> / <code class="docutils literal notranslate"><span class="pre">branch_payloads</span></code> /
+<code class="docutils literal notranslate"><span class="pre">acceptance</span></code> / <code class="docutils literal notranslate"><span class="pre">stop_contract</span></code> where applicable). Templates MUST NOT embed
+client product policy or durable application state.</p>
+<p>Instantiated graphs are stamped with <code class="docutils literal notranslate"><span class="pre">template_name</span></code>, <code class="docutils literal notranslate"><span class="pre">template_version</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">template_status</span></code> for provenance and deprecation detection.</p>
+</section>
+<section id="usage-sketch">
+<h2>Usage sketch<a class="headerlink" href="#usage-sketch" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_templates</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GraphTemplateParams</span><span class="p">,</span>
+    <span class="n">default_graph_templates</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">default_graph_templates</span><span class="p">()</span>
+<span class="n">template</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fan_out_aggregate"</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span>
+    <span class="n">GraphTemplateParams</span><span class="p">(</span>
+        <span class="n">goal</span><span class="o">=</span><span class="s2">"survey sources"</span><span class="p">,</span>
+        <span class="n">branch_payloads</span><span class="o">=</span><span class="p">[{</span><span class="s2">"index"</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="mi">1</span><span class="p">}],</span>
+        <span class="n">acceptance</span><span class="o">=</span><span class="p">[</span><span class="s2">"all_branches_ok"</span><span class="p">],</span>
+        <span class="n">soft_bindings</span><span class="o">=</span><span class="p">{</span><span class="s2">"fan_in_budget"</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="k">assert</span> <span class="n">graph</span><span class="o">.</span><span class="n">template_name</span> <span class="o">==</span> <span class="s2">"fan_out_aggregate"</span>
+<span class="c1"># Bind runners for plan/branch/reduce kinds via Config, then:</span>
+<span class="c1"># LinkageResolver → GraphExecutor.run(graph)</span>
+</pre></div>
+</div>
+</section>
+<section id="ownership-incubation">
+<h2>Ownership / incubation<a class="headerlink" href="#ownership-incubation" title="Link to this heading"></a></h2>
+<p>See <a class="reference internal" href="../inspiration/requirements-map.html"><span class="std std-doc">Inspiration requirements map</span></a> and
+req 19 in <a class="reference internal" href="../inspiration/dev-blog-inspiration.html"><span class="std std-doc">dev-blog-inspiration</span></a>.
+Generic skeletons live here; host-specific workflows incubate in the client
+until promotion extracts a reusable template.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
