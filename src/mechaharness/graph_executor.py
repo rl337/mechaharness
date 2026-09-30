@@ -233,7 +233,6 @@ class GraphExecutor:
         *,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
-        fingerprint_parts: Mapping[str, Any] | None = None,
     ) -> None:
         self.event_log = event_log
         self.access = access
@@ -243,7 +242,9 @@ class GraphExecutor:
         self.linkage_resolver = linkage_resolver
         self.agent_id = agent_id or str(uuid4())
         self.parent_agent_id = parent_agent_id
-        self.fingerprint_parts = dict(fingerprint_parts or {})
+        # Not a constructor DI param: Mapping[...] | None is not pyiv-injectable
+        # on Python 3.10+ (GenericAlias). Hosts assign after inject when needed.
+        self.fingerprint_parts: dict[str, Any] = {}
         self.store = GraphStore(event_log, agent_id=self.agent_id)
 
     def _emit(self, event_type: type[EventType], payload: dict[str, Any], run_id: str) -> None:
