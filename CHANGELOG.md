@@ -7,10 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+## [0.2.0] — 2026-09-30
 
-- Install `eval_type_backport` on all Python versions so CI (3.12) and the CLI
-  can import `mechaharness.di` (previously gated behind `python_version < '3.10'`).
+Inspiration-aligned library cut for client orchestrators (graph templates,
+budgets, linkage, and related primitives).
+
+### Added
+
+- Parameterized `graph_templates` package (fan-out/aggregate, verify/repair,
+  independent review, environment repair) with soft points, provenance stamp,
+  and demotion; reference docs under `docs/reference/graph-templates/`.
+- `BudgetPolicy` / `Budget` with soft wind-down and hard fail; required on
+  `GraphExecutor.run`; nested subgraph spend rolls into the shared ledger.
+  Stories: `fangore_insp_graph_budget`, `fangore_insp_budget_subgraph_rollup`.
+- Pre-exec `LinkageResolver`, `StopContract`, capability envelopes, context
+  providers, verification / delegation / advisor policies, consequence scaling,
+  harness experiments, instruction gotchas, and failure attribution.
+- Inspiration requirements map and persona stories covering reqs 1–19.
+- Same-lane Completer / JudgeProvider **flavors** via
+  `MechaHarnessConfig.completer_bindings()` / `judge_bindings()` (`Named` tag
+  sets) and host `Annotated[T, Named|Matched]` constructor params. Story:
+  `fangore_completer_flavors`.
 
 ### Changed
 
@@ -21,12 +38,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   replaces the harness kwarg. `InMemoryAccessControl` /
   `InMemoryCostAccountant` require `event_log` (and policy for access).
 
-### Added
+### Fixed
 
-- Same-lane Completer / JudgeProvider **flavors** via
-  `MechaHarnessConfig.completer_bindings()` / `judge_bindings()` (`Named` tag
-  sets) and host `Annotated[T, Named|Matched]` constructor params. Story:
-  `fangore_completer_flavors`.
+- Install `eval_type_backport` on all Python versions so CI (3.12) and the CLI
+  can import `mechaharness.di` (previously gated behind `python_version < '3.10'`).
+- Normalize PEP 604 optional `Named`/`Matched` constructor hints for pyiv on
+  Python 3.12; stop injecting `GraphExecutor.fingerprint_parts` (GenericAlias
+  is not a concrete optional type).
 
 ## [0.1.2] — 2026-09-25
 
