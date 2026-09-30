@@ -232,3 +232,27 @@ def test_expose_ctor_type_hints_preserves_named_annotation() -> None:
     ann = Sample.__init__.__annotations__["inference"]
     assert getattr(ann, "__metadata__", None)
     assert isinstance(ann.__metadata__[0], Named)
+
+
+def test_expose_normalizes_pep604_optional_named() -> None:
+    """``Annotated[T | None, Q]`` must become Optional[Annotated[T, Q]] for pyiv."""
+    from typing import Optional, Union, get_args, get_origin
+
+    from mechaharness.di import _normalize_injection_annotation
+
+    # typing.Union stands in for PEP 604 ``T | None`` (UnionType on 3.10+).
+    raw = Annotated[Union[Completer, None], Matched(required=["reason", "summarize"])]
+    normalized = _normalize_injection_annotation(raw)
+    assert get_origin(normalized) in (Optional, Union)
+    args = [a for a in get_args(normalized) if a is not type(None)]
+    assert len(args) == 1
+    inner = args[0]
+    assert get_origin(inner) is Annotated or getattr(
+        get_origin(inner), "__name__", None
+    ) == "Annotated"
+    assert get_args(inner)[0] is Completer
+    assert isinstance(get_args(inner)[1], Matched)
+
+    _expose_ctor_type_hints(_FlavorHostHarness)
+    exposed = _FlavorHostHarness.__init__.__annotations__["optional_missing"]
+    assert get_origin(exposed) in (Optional, Union)
