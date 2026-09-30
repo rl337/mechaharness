@@ -21,7 +21,17 @@ from __future__ import annotations
 import inspect
 import sys
 from collections.abc import Callable, Sequence
-from typing import Any, ForwardRef, Union, cast, get_type_hints
+from typing import (
+    Annotated,
+    Any,
+    ForwardRef,
+    Optional,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 from eval_type_backport import eval_type_backport
 from pyiv import Config, Stage
@@ -174,6 +184,46 @@ def apply_backend_defaults(settings: Settings) -> Settings:
     return settings.model_copy(update=updates) if updates else settings
 
 
+def _is_union_origin(origin: Any) -> bool:
+    """True for ``typing.Union`` and PEP 604 ``types.UnionType`` (3.10+)."""
+    if origin is Union:
+        return True
+    return getattr(origin, "__name__", None) == "UnionType"
+
+
+def _normalize_injection_annotation(annotation: Any) -> Any:
+    """Rewrite PEP 604 optionals so pyiv 0.4 can peel Named/Matched.
+
+    pyiv's ``is_optional_type`` only recognizes ``typing.Union`` / ``Optional``.
+    On Python 3.10+, ``get_type_hints`` may leave ``T | None`` as
+    ``types.UnionType``, so ``Annotated[T | None, Named(...)]`` fails with
+    "requires a concrete type". Prefer ``Optional[Annotated[T, Q]]``.
+    """
+    origin = get_origin(annotation)
+    if _is_union_origin(origin):
+        args = get_args(annotation)
+        if len(args) == 2 and type(None) in args:
+            non_none = args[0] if args[1] is type(None) else args[1]
+            return Optional[_normalize_injection_annotation(non_none)]
+        return annotation
+    if origin is Annotated or getattr(origin, "__name__", None) == "Annotated":
+        args = get_args(annotation)
+        if not args:
+            return annotation
+        base, metas = args[0], args[1:]
+        base_origin = get_origin(base)
+        if _is_union_origin(base_origin):
+            b_args = get_args(base)
+            if len(b_args) == 2 and type(None) in b_args:
+                inner = b_args[0] if b_args[1] is type(None) else b_args[1]
+                return Optional[Annotated[(inner, *metas)]]
+        normalized_base = _normalize_injection_annotation(base)
+        if normalized_base is base:
+            return annotation
+        return Annotated[(normalized_base, *metas)]
+    return annotation
+
+
 def _expose_ctor_type_hints(cls: type) -> None:
     """Resolve PEP 563 string annotations so pyiv can constructor-inject.
 
@@ -183,7 +233,8 @@ def _expose_ctor_type_hints(cls: type) -> None:
     ``__init__.__annotations__`` exposes real types for the injector.
 
     Uses ``include_extras=True`` so ``Annotated[T, Named|Matched]`` metadata
-    survives for qualified constructor injection.
+    survives for qualified constructor injection. Normalizes ``T | None``
+    optionals for pyiv compatibility on 3.10+.
     """
     init = getattr(cls, "__init__", None)
     if init is None or init is object.__init__:
@@ -205,7 +256,9 @@ def _expose_ctor_type_hints(cls: type) -> None:
             except Exception:  # noqa: BLE001
                 continue
     if hints:
-        init.__annotations__.update(hints)
+        init.__annotations__.update(
+            {name: _normalize_injection_annotation(ann) for name, ann in hints.items()}
+        )
 
 
 class MechaHarnessConfig(Config):
