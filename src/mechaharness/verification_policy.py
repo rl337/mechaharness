@@ -20,7 +20,6 @@ from mechaharness.graph import (
 )
 from mechaharness.outcome_contract import CompletionState, OutcomeContract
 
-
 Verifier = Callable[[GraphNode], tuple[bool, dict[str, Any]]]
 
 

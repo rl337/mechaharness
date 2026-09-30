@@ -9,16 +9,19 @@ from typing import Any
 import pytest
 
 from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.core.access import InMemoryAccessControl, AccessPolicy
+from mechaharness.core.access import AccessPolicy, InMemoryAccessControl
 from mechaharness.core.environment import NoOpInferenceEnvironment
 from mechaharness.core.events import InMemoryEventLog
-from mechaharness.graph import ExecutionGraph, GraphNode
-from mechaharness.graph_executor import CallableGraphNodeRunner, GraphNodeRunnerRegistry, NodeOutcome
-from mechaharness.graph import NodeStatus
+from mechaharness.graph import ExecutionGraph, GraphNode, NodeStatus
+from mechaharness.graph_executor import (
+    CallableGraphNodeRunner,
+    GraphNodeRunnerRegistry,
+    NodeOutcome,
+)
 from mechaharness.linkage_resolver import DefaultLinkageResolver
 from mechaharness.stop_contract import StopContract
 
-CASES_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "linkage_resolver"
+CASES_DIR = Path(__file__).resolve().parent / "fixtures" / "linkage_resolver"
 
 
 def iter_cases() -> list[dict[str, Any]]:

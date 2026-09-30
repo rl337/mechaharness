@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_graph_budget",
+  "persona": "fangore",
+  "title": "Enforce soft and hard spend limits on graph runs",
+  "kind": "graph_budget_limits",
+  "narrative": "Every graph run must declare how much spend is allowed. Crossing the soft limit winds remaining steps down without treating the job as a hard failure. Crossing the hard limit stops the run immediately. Hard can also be unlimited when no ceiling applies. Related: `fangore_insp_budget_subgraph_rollup` for nested spend, and `fangore_insp_stop_contract` for repeating-step ceilings.[^insp-budget]",
+  "implementation": "`BudgetPolicy` / `Budget` in `mechaharness.budget`. `GraphExecutor.run` requires `budget_policy`; each node attempt charges the shared ledger. Soft cancel open nodes → status `soft_exhausted`; hard fail open nodes → `hard_budget_exceeded`. `hard_limit=None` means unlimited.",
+  "validation": "Kind `graph_budget_limits`. Soft expects soft wind-down then hard fail levels. Related fixtures: `tests/fixtures/graph_executor/budget_*.json`, `tests/test_budget.py`.",
+  "footnotes": [
+    {
+      "id": "insp-budget",
+      "label": "Inspiration stop/budget ceilings",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 4 stop contracts and resource budgets on repeating work"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "status": "soft_exhausted",
+  "budget_spent": 2,
+  "budget_level": "soft",
+  "error": "soft_budget_exceeded",
+  "after_status": "cancelled"
+}

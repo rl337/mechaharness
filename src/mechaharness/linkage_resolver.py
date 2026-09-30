@@ -9,7 +9,7 @@ capabilities, and termination paths — before substantive execution.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -197,9 +197,9 @@ class DefaultLinkageResolver(LinkageResolver):
                 )
             )
         else:
-            required_grants = ()
+            required_grants: Sequence[object] = ()
             if hasattr(runner, "required_grants"):
-                required_grants = runner.required_grants()
+                required_grants = tuple(runner.required_grants())
             for grant in required_grants:
                 key = grant_key(grant)
                 if not self.access.allows([grant]):

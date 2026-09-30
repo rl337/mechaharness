@@ -19,6 +19,7 @@ class NodeStatus(str, Enum):
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     BLOCKED = "blocked"
+    CANCELLED = "cancelled"
 
 
 DependencyType = Literal["data", "state", "control", "resource"]

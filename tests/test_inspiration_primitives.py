@@ -6,15 +6,16 @@ import pytest
 from pyiv import get_injector
 
 from mechaharness.advisor import (
-    AdvisorRequest,
     AdvisorContextContract,
+    AdvisorRequest,
     DefaultAdvisorPolicy,
     RejectAdvisor,
     consult_advisor,
 )
+from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.consequence import ConsequencePolicy, ActionConsequence
-from mechaharness.context_provider import StaticContextProvider, ContextProviderRegistry
+from mechaharness.consequence import ActionConsequence, ConsequencePolicy
+from mechaharness.context_provider import ContextProviderRegistry, StaticContextProvider
 from mechaharness.core.access import GraphExecute
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig
@@ -81,7 +82,11 @@ async def test_subgraph_node_runs_nested_graph() -> None:
     inj = get_injector(_TplConfig())
     executor = inj.inject(GraphExecutor)
     # Register a compute runner via mutating registry
-    from mechaharness.graph_executor import CallableGraphNodeRunner, NodeOutcome, GraphNodeRunnerRegistry
+    from mechaharness.graph_executor import (
+        CallableGraphNodeRunner,
+        GraphNodeRunnerRegistry,
+        NodeOutcome,
+    )
 
     async def ok(node, context):
         del context
@@ -95,7 +100,9 @@ async def test_subgraph_node_runs_nested_graph() -> None:
     parent = ExecutionGraph(goal="parent")
     parent.add_node(SubgraphNodeRunner.embed(child, parent_node_id="wrap"))
     # Parent also needs linkage for subgraph kind — register noop subgraph is handled by executor
-    result = await executor.run(parent, skip_linkage=True)
+    result = await executor.run(
+        parent, budget_policy=BudgetPolicy.unlimited(), skip_linkage=True
+    )
     assert result.status == "ok"
     assert parent.nodes["wrap"].status == NodeStatus.SUCCEEDED
     assert parent.nodes["wrap"].payload.get("child_status") == "ok"
@@ -105,7 +112,11 @@ async def test_subgraph_node_runs_nested_graph() -> None:
 async def test_resume_refuses_fingerprint_mismatch() -> None:
     inj = get_injector(_TplConfig())
     executor = inj.inject(GraphExecutor)
-    from mechaharness.graph_executor import CallableGraphNodeRunner, NodeOutcome, GraphNodeRunnerRegistry
+    from mechaharness.graph_executor import (
+        CallableGraphNodeRunner,
+        GraphNodeRunnerRegistry,
+        NodeOutcome,
+    )
 
     async def ok(node, context):
         del context
@@ -116,12 +127,16 @@ async def test_resume_refuses_fingerprint_mismatch() -> None:
 
     graph = ExecutionGraph(goal="fp", version="1")
     graph.add_node(GraphNode(id="a", kind="compute"))
-    first = await executor.run(graph, run_id="fp-run")
+    first = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="fp-run"
+    )
     assert first.status == "ok"
     assert graph.config_fingerprint
 
     executor.fingerprint_parts = {"harness_version": "changed"}
-    resumed = await executor.run(graph, run_id="fp-run", resume=True)
+    resumed = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="fp-run", resume=True
+    )
     assert resumed.status == "failed"
     assert resumed.error and "incompatible_checkpoint_fingerprint" in resumed.error
 

@@ -9,8 +9,18 @@ import httpx
 import pytest
 from pyiv import get_injector
 
+from mechaharness.advisor import (
+    AdvisorContextContract,
+    AdvisorRequest,
+    DefaultAdvisorPolicy,
+    RejectAdvisor,
+    consult_advisor,
+)
 from mechaharness.api_connection import SimpleHttpConnectionConfig
+from mechaharness.budget import BudgetPolicy
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.config import Settings
+from mechaharness.consequence import ActionConsequence, ConsequencePolicy
 from mechaharness.context_experiments import (
     ContextCompiler,
     CtxFlags,
@@ -24,32 +34,8 @@ from mechaharness.context_experiments import (
     fuse_actions,
     reduce_evidence,
 )
-from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
-from mechaharness.advisor import (
-    AdvisorRequest,
-    AdvisorContextContract,
-    DefaultAdvisorPolicy,
-    RejectAdvisor,
-    consult_advisor,
-)
-from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.consequence import ActionConsequence, ConsequencePolicy
-from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.context_provider import StaticContextProvider
-from mechaharness.failure_attribution import attribute_error, detect_repeated_failure_classes
-from mechaharness.graph_templates import (
-    FanOutAggregateTemplate,
-    GraphTemplateParams,
-    IndependentReviewTemplate,
-    SubgraphNodeRunner,
-    default_graph_templates,
-)
-from mechaharness.instruction_component import InstructionCatalog
-from mechaharness.routing import route_for_capability_needs
-from mechaharness.harness_experiment import HarnessExperiment, HarnessExperimentRunner
-from mechaharness.linkage_resolver import DefaultLinkageResolver
-from mechaharness.outcome_contract import OutcomeContract
-from mechaharness.verification_policy import DefaultVerificationPolicy
+from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
 from mechaharness.core.access import (
     Ability,
     AccessControl,
@@ -79,7 +65,9 @@ from mechaharness.decision_surfaces import (
     RulesDecisionBackend,
     reject_invalid_choice,
 )
+from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig
+from mechaharness.failure_attribution import attribute_error, detect_repeated_failure_classes
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -102,9 +90,17 @@ from mechaharness.graph_executor import (
     GraphRunContext,
     NodeOutcome,
 )
+from mechaharness.graph_templates import (
+    FanOutAggregateTemplate,
+    GraphTemplateParams,
+    IndependentReviewTemplate,
+    SubgraphNodeRunner,
+    default_graph_templates,
+)
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
+from mechaharness.harness_experiment import HarnessExperiment, HarnessExperimentRunner
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
     ChoiceOption,
@@ -121,25 +117,30 @@ from mechaharness.inference.judge import (
 )
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.instruction_component import InstructionCatalog
 from mechaharness.judgement_policy import (
     JudgementFacts,
     JudgementPolicy,
     JudgementThreshold,
     decide,
 )
+from mechaharness.linkage_resolver import DefaultLinkageResolver
 from mechaharness.operation_registry import (
     NodeContractBind,
     OperationContract,
     ResourceScope,
     default_operations,
 )
+from mechaharness.outcome_contract import OutcomeContract
 from mechaharness.research import EvalProtocol, ResearchLab
 from mechaharness.routing import (
     activate_scoped_policy,
     route_at_boundary,
+    route_for_capability_needs,
     shadow_decision_backends,
 )
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.verification_policy import DefaultVerificationPolicy
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
@@ -285,6 +286,8 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "capability_need_routing": _run_capability_need_routing,
         "environment_linkage_fail": _run_environment_linkage_fail,
         "wake_reresolve_resume": _run_wake_reresolve_resume,
+        "graph_budget_limits": _run_graph_budget_limits,
+        "graph_budget_subgraph_rollup": _run_graph_budget_subgraph_rollup,
     }
     try:
         runner = runners[kind]
@@ -835,9 +838,15 @@ async def _run_graph_executor_run(case: StoryCase, backend: StoryBackend) -> Non
                 return []
 
         denied_exec = get_injector(DenyConfig()).inject(GraphExecutor)
-        denied = await denied_exec.run(graph.model_copy(deep=True), run_id="story-deny")
+        denied = await denied_exec.run(
+            graph.model_copy(deep=True),
+            budget_policy=BudgetPolicy.unlimited(),
+            run_id="story-deny",
+        )
 
-    result = await executor.run(graph, run_id="story-graph-exec")
+    result = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="story-graph-exec"
+    )
     types = [e.type for e in result.events]
     actual = {
         "status": result.status,
@@ -1448,7 +1457,12 @@ async def _run_dynamic_subgraph_nest(case: StoryCase, backend: StoryBackend) -> 
     child.add_node(GraphNode(id="c1", kind="compute"))
     parent = ExecutionGraph(goal=str(request.get("parent_goal") or "parent"))
     parent.add_node(SubgraphNodeRunner.embed(child, parent_node_id="wrap"))
-    result = await executor.run(parent, skip_linkage=True, run_id="story-subgraph")
+    result = await executor.run(
+        parent,
+        budget_policy=BudgetPolicy.unlimited(),
+        skip_linkage=True,
+        run_id="story-subgraph",
+    )
     wrap = result.graph.nodes["wrap"]
     actual = {
         "status": result.status,
@@ -1565,9 +1579,13 @@ async def _run_checkpoint_fingerprint_refuse(case: StoryCase, backend: StoryBack
     executor = get_injector(Cfg()).inject(GraphExecutor)
     graph = ExecutionGraph(goal=str(request.get("goal") or "fp"), version="1")
     graph.add_node(GraphNode(id="a", kind="compute"))
-    first = await executor.run(graph, run_id="insp-fp")
+    first = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-fp"
+    )
     executor.fingerprint_parts = {"harness_version": "changed"}
-    resumed = await executor.run(graph, run_id="insp-fp", resume=True)
+    resumed = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-fp", resume=True
+    )
     actual = {
         "first_status": first.status,
         "resume_status": resumed.status,
@@ -1665,12 +1683,143 @@ async def _run_wake_reresolve_resume(case: StoryCase, backend: StoryBackend) -> 
     graph = ExecutionGraph(goal=str(request.get("goal") or "wake"))
     graph.add_node(GraphNode(id="a", kind="compute"))
     # Client wake: resolve then run; checkpoint; wake again with matching fingerprint
-    first = await executor.run(graph, run_id="insp-wake")
+    first = await executor.run(
+        graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-wake"
+    )
     resolve = executor.linkage_resolver.resolve(first.graph)
-    resumed = await executor.run(first.graph, run_id="insp-wake", resume=True)
+    resumed = await executor.run(
+        first.graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-wake", resume=True
+    )
     actual = {
         "resolve_ok": resolve.ok,
         "resume_status": resumed.status,
         "fingerprint_nonempty": bool(first.graph.config_fingerprint or resolve.fingerprint),
+    }
+    _assert_expect(actual, expect)
+
+
+def _story_graph_executor(registry: GraphNodeRunnerRegistry) -> GraphExecutor:
+    class Cfg(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            from mechaharness.inference.mock import MockInferenceStrategy
+
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return [GraphExecute]
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return registry
+
+    return get_injector(Cfg()).inject(GraphExecutor)
+
+
+async def _run_graph_budget_limits(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    cost = float(request.get("node_cost", 1))
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(
+            status=NodeStatus.SUCCEEDED,
+            payload={"id": node.id},
+            cost_units=cost,
+        )
+
+    registry = GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
+    executor = _story_graph_executor(registry)
+
+    def _linear() -> ExecutionGraph:
+        g = ExecutionGraph(goal="budget-limits")
+        g.add_node(GraphNode(id="a", kind="compute", payload={"cost_units": cost}))
+        g.add_node(
+            GraphNode(
+                id="b",
+                kind="compute",
+                depends_on=["a"],
+                payload={"cost_units": cost},
+            )
+        )
+        return g
+
+    soft_pol = BudgetPolicy(
+        soft_limit=request["soft_policy"].get("soft_limit"),
+        hard_limit=request["soft_policy"].get("hard_limit"),
+    )
+    soft = await executor.run(_linear(), budget_policy=soft_pol, run_id="story-budget-soft")
+    hard_pol = BudgetPolicy(
+        soft_limit=request["hard_policy"].get("soft_limit"),
+        hard_limit=request["hard_policy"].get("hard_limit"),
+    )
+    hard = await executor.run(_linear(), budget_policy=hard_pol, run_id="story-budget-hard")
+    actual = {
+        "soft_status": soft.status,
+        "soft_error": soft.error,
+        "soft_budget_level": soft.budget_level,
+        "hard_status": hard.status,
+        "hard_error": hard.error,
+        "hard_budget_level": hard.budget_level,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_graph_budget_subgraph_rollup(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    cost = float(request.get("node_cost", 1))
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(
+            status=NodeStatus.SUCCEEDED,
+            payload={"id": node.id},
+            cost_units=cost,
+        )
+
+    registry = GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
+    executor = _story_graph_executor(registry)
+
+    child = ExecutionGraph(goal="child-budget")
+    child.add_node(GraphNode(id="c1", kind="compute", payload={"cost_units": cost}))
+    child.add_node(
+        GraphNode(
+            id="c2",
+            kind="compute",
+            depends_on=["c1"],
+            payload={"cost_units": cost},
+        )
+    )
+    parent = ExecutionGraph(goal="parent-budget")
+    parent.add_node(SubgraphNodeRunner.embed(child, parent_node_id="wrap"))
+    parent.add_node(
+        GraphNode(
+            id="after",
+            kind="compute",
+            depends_on=["wrap"],
+            payload={"cost_units": cost},
+        )
+    )
+    policy = BudgetPolicy(
+        soft_limit=request.get("soft_limit"),
+        hard_limit=request.get("hard_limit"),
+    )
+    result = await executor.run(
+        parent,
+        budget_policy=policy,
+        skip_linkage=True,
+        run_id="story-budget-rollup",
+    )
+    actual = {
+        "status": result.status,
+        "budget_spent": result.budget_spent,
+        "budget_level": result.budget_level,
+        "error": result.error,
+        "after_status": parent.nodes["after"].status.value,
     }
     _assert_expect(actual, expect)

@@ -19,8 +19,8 @@ from eval_type_backport import eval_type_backport
 from pyiv import Config, get_injector
 from pyiv.injector import Injector
 
-from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
 from mechaharness.advisor import Advisor, AdvisorPolicy, DefaultAdvisorPolicy, RejectAdvisor
+from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
 from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.config import Settings
 from mechaharness.context_provider import ContextProviderRegistry
