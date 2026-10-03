@@ -16,6 +16,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.core import events as core_events
 from mechaharness.core.access import (
     AccessControl,
@@ -48,6 +49,25 @@ from mechaharness.core.types import (
     Role,
     ToolCall,
     ToolResult,
+)
+from mechaharness.lifecycle_extension import (
+    AfterInference,
+    AfterTool,
+    AfterTurn,
+    BeforeInference,
+    BeforeTool,
+    BeforeTurn,
+    Block,
+    ExtensionEffect,
+    InterceptionMode,
+    LifecycleBoundary,
+    LifecycleExtensionContext,
+    LifecycleExtensionRegistry,
+    ObserveAfter,
+    ObserveBefore,
+    Replace,
+    Rewrite,
+    empty_lifecycle_extension_registry,
 )
 from mechaharness.tools.base import ToolRegistry
 from mechaharness.tools.subagents import install_subagent_tools
@@ -90,6 +110,8 @@ class AbstractHarness(Completer):
         access: AccessControl,
         cost: CostAccountant,
         environment: InferenceEnvironment,
+        lifecycle_extensions: LifecycleExtensionRegistry | None = None,
+        capability_envelope: CapabilityEnvelope | None = None,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
     ) -> None:
@@ -102,6 +124,12 @@ class AbstractHarness(Completer):
         self.access = access
         self.cost = cost
         self.environment = environment
+        self.lifecycle_extensions = (
+            lifecycle_extensions
+            if lifecycle_extensions is not None
+            else empty_lifecycle_extension_registry()
+        )
+        self.capability_envelope = capability_envelope
         if config.subagent_tools:
             install_subagent_tools(self.tools, self.event_log, self.agent_id)
 
@@ -220,11 +248,25 @@ class AbstractHarness(Completer):
         messages = self._bootstrap_messages(user_input, history)
         turns = 0
 
+        observe_only = frozenset({ObserveBefore, ObserveAfter})
         while turns < self.config.max_turns:
             turns += 1
             self._emit(TurnStart, {"turn": turns}, run_id)
+            self._dispatch_lifecycle(
+                BeforeTurn,
+                run_id=run_id,
+                turn=turns,
+                allow_modes=observe_only,
+            )
 
             request = self.build_request(messages)
+            self._dispatch_lifecycle(
+                BeforeInference,
+                run_id=run_id,
+                turn=turns,
+                payload={"model": request.model},
+                allow_modes=observe_only,
+            )
             response = await self.inference.complete(request)
             nested_cost = response.cost
             if nested_cost is not None and getattr(nested_cost, "entries", None):
@@ -254,8 +296,21 @@ class AbstractHarness(Completer):
             if response.usage is not None:
                 inference_payload["usage"] = response.usage.model_dump()
             self._emit(Inference, inference_payload, run_id)
+            self._dispatch_lifecycle(
+                AfterInference,
+                run_id=run_id,
+                turn=turns,
+                payload=inference_payload,
+                allow_modes=observe_only,
+            )
 
             if self.should_stop(assistant, response.finish_reason):
+                self._dispatch_lifecycle(
+                    AfterTurn,
+                    run_id=run_id,
+                    turn=turns,
+                    allow_modes=observe_only,
+                )
                 return HarnessResult(
                     final_text=self.final_text(assistant),
                     messages=messages,
@@ -267,6 +322,13 @@ class AbstractHarness(Completer):
             tool_results = await self.execute_tools(tool_calls, cost=cost, run_id=run_id)
             for result in tool_results:
                 messages.append(self.tool_result_message(result))
+
+            self._dispatch_lifecycle(
+                AfterTurn,
+                run_id=run_id,
+                turn=turns,
+                allow_modes=observe_only,
+            )
 
             if not tool_results and not self.should_continue_without_tools(assistant):
                 return HarnessResult(
@@ -323,6 +385,59 @@ class AbstractHarness(Completer):
         del turn
         return list(message.tool_calls or [])
 
+    def _lifecycle_context(
+        self,
+        boundary: type[LifecycleBoundary],
+        *,
+        run_id: str,
+        tool_name: str | None = None,
+        tool_call_id: str | None = None,
+        arguments: dict[str, Any] | None = None,
+        turn: int | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> LifecycleExtensionContext:
+        envelope = self.capability_envelope
+        return LifecycleExtensionContext(
+            boundary=boundary.key(),
+            run_id=run_id,
+            agent_id=self.agent_id,
+            parent_agent_id=self.parent_agent_id,
+            tool_name=tool_name,
+            tool_call_id=tool_call_id,
+            arguments=dict(arguments or {}),
+            turn=turn,
+            payload=dict(payload or {}),
+            envelope_grants=list(envelope.grants) if envelope is not None else [],
+        )
+
+    def _dispatch_lifecycle(
+        self,
+        boundary: type[LifecycleBoundary],
+        *,
+        run_id: str,
+        tool_name: str | None = None,
+        tool_call_id: str | None = None,
+        arguments: dict[str, Any] | None = None,
+        turn: int | None = None,
+        payload: dict[str, Any] | None = None,
+        allow_modes: frozenset[type[InterceptionMode]] | None = None,
+    ) -> ExtensionEffect:
+        return self.lifecycle_extensions.dispatch(
+            boundary,
+            self._lifecycle_context(
+                boundary,
+                run_id=run_id,
+                tool_name=tool_name,
+                tool_call_id=tool_call_id,
+                arguments=arguments,
+                turn=turn,
+                payload=payload,
+            ),
+            event_log=self.event_log,
+            envelope=self.capability_envelope,
+            allow_modes=allow_modes,
+        )
+
     async def execute_tools(
         self,
         tool_calls: list[ToolCall],
@@ -331,22 +446,79 @@ class AbstractHarness(Completer):
         cost: CostReport,
     ) -> list[ToolResult]:
         results: list[ToolResult] = []
+        tool_modes = frozenset({ObserveBefore, ObserveAfter, Rewrite, Block, Replace})
+        observe_after = frozenset({ObserveBefore, ObserveAfter})
         for call in tool_calls:
+            before = self._dispatch_lifecycle(
+                BeforeTool,
+                run_id=run_id,
+                tool_name=call.name,
+                tool_call_id=call.id,
+                arguments=dict(call.arguments or {}),
+                allow_modes=tool_modes,
+            )
+            effective_name = before.rewrite_tool_name or call.name
+            effective_args = (
+                dict(before.rewrite_arguments)
+                if before.rewrite_arguments is not None
+                else dict(call.arguments or {})
+            )
             self._emit(
                 core_events.ToolCall,
-                {"name": call.name, "tool_call_id": call.id, "arguments": call.arguments},
+                {
+                    "name": effective_name,
+                    "tool_call_id": call.id,
+                    "arguments": effective_args,
+                },
                 run_id,
             )
-            if call.name not in self.tools:
+            if before.block:
                 result = ToolResult(
                     tool_call_id=call.id,
-                    content=f"Unknown tool: {call.name}",
+                    content=before.block_message
+                    or f"Blocked by lifecycle extension: {effective_name}",
                     is_error=True,
                 )
                 results.append(result)
-                self._emit_tool_result(result, run_id, name=call.name)
+                self._emit_tool_result(result, run_id, name=effective_name)
+                self._dispatch_lifecycle(
+                    AfterTool,
+                    run_id=run_id,
+                    tool_name=effective_name,
+                    tool_call_id=call.id,
+                    arguments=effective_args,
+                    payload={"blocked": True},
+                    allow_modes=observe_after,
+                )
                 continue
-            tool = self.tools.get(call.name)
+            if before.replace_content is not None:
+                result = ToolResult(
+                    tool_call_id=call.id,
+                    content=before.replace_content,
+                    is_error=before.replace_is_error,
+                )
+                results.append(result)
+                self._emit_tool_result(result, run_id, name=effective_name)
+                self._dispatch_lifecycle(
+                    AfterTool,
+                    run_id=run_id,
+                    tool_name=effective_name,
+                    tool_call_id=call.id,
+                    arguments=effective_args,
+                    payload={"replaced": True},
+                    allow_modes=observe_after,
+                )
+                continue
+            if effective_name not in self.tools:
+                result = ToolResult(
+                    tool_call_id=call.id,
+                    content=f"Unknown tool: {effective_name}",
+                    is_error=True,
+                )
+                results.append(result)
+                self._emit_tool_result(result, run_id, name=effective_name)
+                continue
+            tool = self.tools.get(effective_name)
             if tool.grants:
                 self.environment.assert_compatible(required_grants=tool.grants)
                 if any(grant_key(g).startswith("core:media.") for g in tool.grants):
@@ -367,7 +539,7 @@ class AbstractHarness(Completer):
                 results.append(result)
                 self._emit_tool_result(result, run_id, name=tool.name)
                 continue
-            result = await self.tools.execute(call.name, call.arguments, call.id)
+            result = await self.tools.execute(effective_name, effective_args, call.id)
             cost.add(
                 self.cost.price_tool(
                     tool.name,
@@ -379,6 +551,15 @@ class AbstractHarness(Completer):
             )
             results.append(result)
             self._emit_tool_result(result, run_id, name=tool.name)
+            self._dispatch_lifecycle(
+                AfterTool,
+                run_id=run_id,
+                tool_name=tool.name,
+                tool_call_id=call.id,
+                arguments=effective_args,
+                payload={"is_error": result.is_error},
+                allow_modes=observe_after,
+            )
         return results
 
     def _emit_tool_result(self, result: ToolResult, run_id: str, *, name: str) -> None:

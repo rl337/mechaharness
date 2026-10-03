@@ -1,0 +1,6 @@
+{
+  "prompt": "Write a.txt",
+  "grants": [
+    "core:fs.write"
+  ]
+}

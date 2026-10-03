@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.core.access import AccessPolicy, GrantPolicyLike
 from mechaharness.core.completer import Completer
 from mechaharness.core.events import EventLog
@@ -9,6 +10,7 @@ from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.lifecycle_extension import LifecycleExtensionRegistry
 from mechaharness.tools.base import ToolRegistry
 
 
@@ -25,6 +27,8 @@ class ScriptedHarnessConfig(MechaHarnessConfig):
         event_log: EventLog | None = None,
         access_policy: GrantPolicyLike | None = None,
         grants: list[object] | None = None,
+        lifecycle_extensions: LifecycleExtensionRegistry | None = None,
+        capability_envelope: CapabilityEnvelope | None = None,
         include_subagent_tools: bool = False,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
@@ -36,6 +40,8 @@ class ScriptedHarnessConfig(MechaHarnessConfig):
         self._provided_event_log = event_log
         self._access_policy = access_policy
         self._grants = grants
+        self._lifecycle_extensions = lifecycle_extensions
+        self._capability_envelope = capability_envelope
         self._include_subagent_tools = include_subagent_tools
         self._agent_id = agent_id
         self._parent_agent_id = parent_agent_id
@@ -76,6 +82,16 @@ class ScriptedHarnessConfig(MechaHarnessConfig):
             return AccessPolicy(grants=self._grants)
         return super().get_access_policy()
 
+    def get_lifecycle_extension_registry(self) -> LifecycleExtensionRegistry:
+        if self._lifecycle_extensions is not None:
+            return self._lifecycle_extensions
+        return super().get_lifecycle_extension_registry()
+
+    def get_capability_envelope(self) -> CapabilityEnvelope:
+        if self._capability_envelope is not None:
+            return self._capability_envelope
+        return super().get_capability_envelope()
+
     def configure(self) -> None:
         super().configure()
         if isinstance(self._inference, InferenceStrategy):
@@ -103,6 +119,8 @@ def make_harness(
     event_log: EventLog | None = None,
     access_policy: GrantPolicyLike | None = None,
     grants: list[object] | None = None,
+    lifecycle_extensions: LifecycleExtensionRegistry | None = None,
+    capability_envelope: CapabilityEnvelope | None = None,
     include_subagent_tools: bool = False,
     agent_id: str | None = None,
     parent_agent_id: str | None = None,
@@ -117,6 +135,8 @@ def make_harness(
             event_log=event_log,
             access_policy=access_policy,
             grants=grants,
+            lifecycle_extensions=lifecycle_extensions,
+            capability_envelope=capability_envelope,
             include_subagent_tools=include_subagent_tools,
             agent_id=agent_id,
             parent_agent_id=parent_agent_id,

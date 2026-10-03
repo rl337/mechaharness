@@ -157,6 +157,30 @@ class GraphEscalate(CoreGrant):
     name = "graph.escalate"
 
 
+class ExtensionObserve(CoreGrant):
+    """Run observe-mode lifecycle extensions at declared boundaries."""
+
+    name = "extension.observe"
+
+
+class ExtensionRewrite(CoreGrant):
+    """Rewrite arguments / tool name for a single pending action."""
+
+    name = "extension.rewrite"
+
+
+class ExtensionBlock(CoreGrant):
+    """Block a single pending action at a lifecycle boundary."""
+
+    name = "extension.block"
+
+
+class ExtensionReplace(CoreGrant):
+    """Replace a single pending action with a one-step structured outcome."""
+
+    name = "extension.replace"
+
+
 def grant_key(value: object) -> str:
     """Normalize a class or ``namespace:name`` string to the wire key."""
     if isinstance(value, str):

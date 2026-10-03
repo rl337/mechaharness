@@ -44,6 +44,15 @@ from mechaharness.graph import (
     GraphStore,
     NodeStatus,
 )
+from mechaharness.lifecycle_extension import (
+    AfterGraphNode,
+    BeforeGraphNode,
+    LifecycleExtensionContext,
+    LifecycleExtensionRegistry,
+    ObserveAfter,
+    ObserveBefore,
+    empty_lifecycle_extension_registry,
+)
 from mechaharness.linkage_resolver import (
     LinkageError,
     LinkageResolver,
@@ -230,6 +239,7 @@ class GraphExecutor:
         failure_policy: GraphFailurePolicy,
         escalation: GraphEscalation,
         linkage_resolver: LinkageResolver,
+        lifecycle_extensions: LifecycleExtensionRegistry | None = None,
         *,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
@@ -240,6 +250,11 @@ class GraphExecutor:
         self.failure_policy = failure_policy
         self.escalation = escalation
         self.linkage_resolver = linkage_resolver
+        self.lifecycle_extensions = (
+            lifecycle_extensions
+            if lifecycle_extensions is not None
+            else empty_lifecycle_extension_registry()
+        )
         self.agent_id = agent_id or str(uuid4())
         self.parent_agent_id = parent_agent_id
         # Not a constructor DI param: Mapping[...] | None is not pyiv-injectable
@@ -697,10 +712,47 @@ class GraphExecutor:
             {"node_id": node.id, "kind": node.kind, "attempt": node.attempt},
             context.run_id,
         )
+        observe_only = frozenset({ObserveBefore, ObserveAfter})
+        envelope = context.envelope
+        before_ctx = LifecycleExtensionContext(
+            boundary=BeforeGraphNode.key(),
+            run_id=context.run_id,
+            agent_id=self.agent_id,
+            parent_agent_id=self.parent_agent_id,
+            node_id=node.id,
+            node_kind=node.kind,
+            payload=dict(node.payload),
+            envelope_grants=list(envelope.grants) if envelope is not None else [],
+        )
+        self.lifecycle_extensions.dispatch(
+            BeforeGraphNode,
+            before_ctx,
+            event_log=self.event_log,
+            envelope=envelope,
+            allow_modes=observe_only,
+        )
         try:
             outcome = await runner.run(node, context=context)
         except Exception as exc:  # noqa: BLE001 - surface runner failures into policy
             outcome = NodeOutcome(status=NodeStatus.FAILED, error=str(exc))
+
+        after_ctx = LifecycleExtensionContext(
+            boundary=AfterGraphNode.key(),
+            run_id=context.run_id,
+            agent_id=self.agent_id,
+            parent_agent_id=self.parent_agent_id,
+            node_id=node.id,
+            node_kind=node.kind,
+            payload={"status": outcome.status.value, "error": outcome.error},
+            envelope_grants=list(envelope.grants) if envelope is not None else [],
+        )
+        self.lifecycle_extensions.dispatch(
+            AfterGraphNode,
+            after_ctx,
+            event_log=self.event_log,
+            envelope=envelope,
+            allow_modes=observe_only,
+        )
 
         self._apply_outcome(node, outcome)
         self._charge_node(node, outcome, context.budget)

@@ -33,6 +33,7 @@ graphs, issue trackers, and concrete graph realizations.
 | 17 | Persistent goals | resume / linkage hooks | partial | `fangore_insp_wake_reresolve` | Goal store remains client-owned |
 | 18 | Advisor | `advisor.py` | story | `fangore_insp_sparse_advisor` | Linkage participation; follow/reject on traces |
 | 19 | Template incubation | `graph_templates/` SoftPoint + stamp | story | `fangore_insp_template_incubation` | Promote/demote evidence workflow |
+| 20 | Lifecycle interception | `lifecycle_extension.py`, harness/graph seams | story | `fangore_insp_lifecycle_observe`, `…_rewrite`, `…_block`, `…_replace`, `…_graph_observe` | Wrap mode; scaffolding migration into extensions |
 
 ## Soft vs hard (req 9)
 

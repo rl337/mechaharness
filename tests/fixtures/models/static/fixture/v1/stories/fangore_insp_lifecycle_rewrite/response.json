@@ -1,0 +1,11 @@
+{
+  "tool_calls": [
+    {
+      "id": "1",
+      "name": "write_file",
+      "arguments": {
+        "path": "a.txt"
+      }
+    }
+  ]
+}

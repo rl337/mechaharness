@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_lifecycle_observe",
+  "persona": "fangore",
+  "title": "Watch tool calls in a fixed order without changing them",
+  "kind": "lifecycle_extension_observe",
+  "narrative": "Fangore binds two host extensions that watch each tool call before it runs. The first always runs before the second. The tool still executes with the original arguments. The run log records both extensions, their order, and that the default tool action still ran. Accepts inspiration requirement 20[^insp-r20]. Complements `fangore_insp_soft_vs_hard`: watching is not permission.",
+  "implementation": "`LifecycleExtensionRegistry` (Config hook `get_lifecycle_extension_registry`) dispatches ordered observe extensions at `BeforeTool` / `AfterTool` inside `AbstractHarness.execute_tools`, emitting `core:extension_applied` provenance. Mutative modes are not required for this story.",
+  "validation": "Kind `lifecycle_extension_observe`. Soft expects two extension ids in order, default_ran true, and the original tool path in the tool result.",
+  "footnotes": [
+    {
+      "id": "insp-r20",
+      "label": "Inspiration requirements (req 20: lifecycle interception)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 20 \u2014 lifecycle interception"
+    }
+  ]
+}

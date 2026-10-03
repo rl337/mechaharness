@@ -56,9 +56,9 @@ registers `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
 `GraphFailurePolicy`, `GraphEscalation`, `OperationRegistry`,
 `LinkageResolver`, `VerificationPolicy`, `DelegationPolicy`, `Advisor`,
 `AdvisorPolicy`, `GraphTemplateRegistry`, `ContextProviderRegistry`,
-`CapabilityEnvelope`, and `GraphExecutor`. Subclasses override
-`get_inference_class()` and `get_harness_class()` (called from the
-Config constructor). Override `get_access_policy()` (or
+`CapabilityEnvelope`, `LifecycleExtensionRegistry`, and `GraphExecutor`.
+Subclasses override `get_inference_class()` and `get_harness_class()` (called
+from the Config constructor). Override `get_access_policy()` (or
 `get_grants()`) for deny-by-default tool grants; compose reusable sets with
 `CompoundPolicy`. Override `include_subagent_tools()` to set
 `HarnessConfig.subagent_tools` (parent EventLog query tools). Override
@@ -66,7 +66,8 @@ Config constructor). Override `get_access_policy()` (or
 Override `get_judge_connection()` / `get_judge_provider()` for judge HTTP and
 wire adapters. Override `get_node_runner_registry()` /
 `get_graph_failure_policy()` / `get_graph_escalation()` /
-`get_linkage_resolver()` / `get_graph_template_registry()` for plan execution.
+`get_linkage_resolver()` / `get_graph_template_registry()` /
+`get_lifecycle_extension_registry()` for plan execution and lifecycle mods.
 
 **Config ownership:** lane- and provider-specific knobs belong on the owning
 injectable (e.g. `SimpleHttpConnectionConfig.from_env` for `MECHA_JUDGE_*`), not
@@ -129,6 +130,13 @@ registry hosts must PR into.
 
 Protocol vocabularies shared with model APIs (chat `Role`) may stay closed.
 Identity of MechaHarness concepts must not.
+
+**EventLog is not interception.** Append-only `EventLog` records are telemetry.
+Lifecycle interception (inspiration req 20) is a separate ordered
+`LifecycleExtensionRegistry` bound via Config (`get_lifecycle_extension_registry`),
+invoked at declared boundaries such as before/after tool execution. Extensions
+emit provenance events; they do not turn `FanoutEventLog` into a control plane.
+Advisor counsel remains non-binding and distinct from interceptor block/replace.
 
 ## Inference Strategy
 

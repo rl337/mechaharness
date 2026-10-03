@@ -1,0 +1,6 @@
+{
+  "graph_status": "ok",
+  "boundary": "core:before_graph_node",
+  "extension_id": "acme:graph_watch",
+  "default_ran": true
+}
