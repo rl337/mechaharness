@@ -157,9 +157,9 @@ registers <code class="docutils literal notranslate"><span class="pre">Settings<
 <code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>, <code class="docutils literal notranslate"><span class="pre">OperationRegistry</span></code>,
 <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code>, <code class="docutils literal notranslate"><span class="pre">VerificationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">DelegationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">Advisor</span></code>,
 <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">ContextProviderRegistry</span></code>,
-<code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>, and <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code>. Subclasses override
-<code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called from the
-Config constructor). Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>, <code class="docutils literal notranslate"><span class="pre">LifecycleExtensionRegistry</span></code>, and <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code>.
+Subclasses override <code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called
+from the Config constructor). Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (or
 <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>) for deny-by-default tool grants; compose reusable sets with
 <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code>. Override <code class="docutils literal notranslate"><span class="pre">include_subagent_tools()</span></code> to set
 <code class="docutils literal notranslate"><span class="pre">HarnessConfig.subagent_tools</span></code> (parent EventLog query tools). Override
@@ -167,7 +167,8 @@ Config constructor). Override <code class="docutils literal notranslate"><span c
 Override <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> for judge HTTP and
 wire adapters. Override <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code> /
-<code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> for plan execution.</p>
+<code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code> for plan execution and lifecycle mods.</p>
 <p><strong>Config ownership:</strong> lane- and provider-specific knobs belong on the owning
 injectable (e.g. <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> for <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>), not
 as a growing pile of fields on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Providers are never attributes of
@@ -221,6 +222,12 @@ wire. Default name maps in <code class="docutils literal notranslate"><span clas
 registry hosts must PR into.</p>
 <p>Protocol vocabularies shared with model APIs (chat <code class="docutils literal notranslate"><span class="pre">Role</span></code>) may stay closed.
 Identity of MechaHarness concepts must not.</p>
+<p><strong>EventLog is not interception.</strong> Append-only <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> records are telemetry.
+Lifecycle interception (inspiration req 20) is a separate ordered
+<code class="docutils literal notranslate"><span class="pre">LifecycleExtensionRegistry</span></code> bound via Config (<code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry</span></code>),
+invoked at declared boundaries such as before/after tool execution. Extensions
+emit provenance events; they do not turn <code class="docutils literal notranslate"><span class="pre">FanoutEventLog</span></code> into a control plane.
+Advisor counsel remains non-binding and distinct from interceptor block/replace.</p>
 </section>
 <section id="inference-strategy">
 <h2>Inference Strategy<a class="headerlink" href="#inference-strategy" title="Link to this heading"></a></h2>
