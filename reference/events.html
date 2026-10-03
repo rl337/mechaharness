@@ -220,8 +220,15 @@ long as they are namespaced. Bare names (<code class="docutils literal notransla
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GraphNodeEnd</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">core:graph_node_end</span></code></p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ExtensionApplied</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:extension_applied</span></code></p></td>
+</tr>
 </tbody>
 </table>
+<p><code class="docutils literal notranslate"><span class="pre">ExtensionApplied</span></code> lives in <code class="docutils literal notranslate"><span class="pre">mechaharness.lifecycle_extension</span></code> and is emitted by
+<code class="docutils literal notranslate"><span class="pre">LifecycleExtensionRegistry</span></code> (not by EventLog subscribers acting as control
+flow). Payload includes <code class="docutils literal notranslate"><span class="pre">extension_id</span></code>, <code class="docutils literal notranslate"><span class="pre">extension_version</span></code>, <code class="docutils literal notranslate"><span class="pre">boundary</span></code>,
+<code class="docutils literal notranslate"><span class="pre">order</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code>, <code class="docutils literal notranslate"><span class="pre">default_ran</span></code>, and optional rewrite/block/replace flags.</p>
 <p><code class="docutils literal notranslate"><span class="pre">core:access_check</span></code> payload: <code class="docutils literal notranslate"><span class="pre">tool</span></code>, <code class="docutils literal notranslate"><span class="pre">required</span></code>, <code class="docutils literal notranslate"><span class="pre">granted</span></code>, <code class="docutils literal notranslate"><span class="pre">allowed</span></code>.
 <code class="docutils literal notranslate"><span class="pre">core:cost</span></code> may include <code class="docutils literal notranslate"><span class="pre">prompt_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">completion_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">total_tokens</span></code>.
 <code class="docutils literal notranslate"><span class="pre">core:inference</span></code> may include <code class="docutils literal notranslate"><span class="pre">reasoning_content</span></code> and <code class="docutils literal notranslate"><span class="pre">usage</span></code>.

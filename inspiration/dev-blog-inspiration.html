@@ -105,7 +105,7 @@
 <blockquote>
 <div><p>Living design-notes document for the reusable MechaHarness execution library. External developer material is evidence and inspiration, not specification. Host/client orchestrators may keep companion design notes outside this repository.</p>
 </div></blockquote>
-<p>Last reviewed: 2026-09-29</p>
+<p>Last reviewed: 2026-10-03</p>
 <section id="purpose">
 <h2>Purpose<a class="headerlink" href="#purpose" title="Link to this heading"></a></h2>
 <p>This document tracks useful agent-harness ideas from Claude/Anthropic and Cursor and translates them into testable requirements for the reusable MechaHarness execution library. It is deliberately provenance-heavy: every inspiration-derived requirement names the source material that motivated it. The goal is not product compatibility. It is to challenge MechaHarness assumptions against production agent systems and retain only patterns that generalize.</p>
@@ -461,6 +461,28 @@ MechaHarness SHOULD distinguish advisory context, behavioral instruction, execut
 </ul>
 <p>This creates a deliberate incubation path: <strong>client concrete graph → observed stable pattern → abstract reusable template → MechaHarness → client rebinds the promoted template</strong>.</p>
 </section>
+<section id="lifecycle-interception-and-replaceable-extensions-are-first-class">
+<h3>20. Lifecycle interception and replaceable extensions are first-class<a class="headerlink" href="#lifecycle-interception-and-replaceable-extensions-are-first-class" title="Link to this heading"></a></h3>
+<p><strong>Sources</strong></p>
+<ul class="simple">
+<li><p>Claude, <strong>How Anthropic’s sales team rebuilt inbound with Claude Managed Agents</strong> (2026-09-30): https://claude.com/blog/how-anthropics-sales-team-rebuilt-inbound-with-claude-managed-agents</p></li>
+<li><p>Claude, <strong>Customize Claude Code with mods</strong> (2026-10-01): https://claude.com/blog/claude-code-mods</p></li>
+</ul>
+<p><strong>Requirements</strong></p>
+<ul class="simple">
+<li><p>MechaHarness SHOULD expose typed lifecycle events at stable execution boundaries where extensions can observe or alter behavior without patching the core executor.</p></li>
+<li><p>An extension point SHOULD declare which interception modes it permits, including observation before/after an event and, only where safe, rewriting, retrying, replacing, blocking, or wrapping the default behavior.</p></li>
+<li><p>Multiple extensions targeting the same lifecycle event MUST have deterministic, inspectable ordering; ordering MUST NOT depend on incidental discovery or import order.</p></li>
+<li><p>Extensions MUST declare the capabilities and authority they require. An extension MUST NOT silently widen the tool, permission, context, model, filesystem, network, or credential envelope granted to the underlying execution.</p></li>
+<li><p>Framework security invariants and host-supplied hard-deny policy MUST take precedence over ordinary replaceable extensions. Extension ordering MUST NOT permit a later or less-trusted extension to bypass a stronger invariant.</p></li>
+<li><p>Traces SHOULD record extension identity/version, lifecycle event, ordering, inputs/outputs affected, retries/replacements, and whether default behavior ran so extension-induced failures can be attributed.</p></li>
+<li><p>Built-in scaffolding MAY migrate into replaceable extensions when doing so reduces the irreducible core without weakening contracts or safety boundaries.</p></li>
+<li><p>Replaceable built-ins and extensions SHOULD participate in the same hypothesis, versioning, evaluation, rollback, and retirement lifecycle as other harness scaffolding. New model/runtime capability SHOULD trigger tests for whether an extension remains necessary.</p></li>
+<li><p>Client orchestrators MAY provide application-specific extensions through this interface, but MechaHarness MUST own only the generic interception contract, ordering semantics, capability enforcement, and observability rather than the client’s application policy.</p></li>
+<li><p>Escalation or hand-off events SHOULD be representable as structured outcomes that clients can mine as feedback, without embedding domain-specific escalation policy in MechaHarness.</p></li>
+</ul>
+<p><strong>Architectural tension:</strong> replacement hooks increase adaptability but can turn the harness into an implicit second graph if arbitrary extensions rewrite control flow. MechaHarness SHOULD keep extension interception local to declared lifecycle events; multi-step orchestration and durable workflow topology SHOULD remain explicit graph structure.</p>
+</section>
 </section>
 <section id="client-orchestrator-interface-implications">
 <h2>Client-orchestrator interface implications<a class="headerlink" href="#client-orchestrator-interface-implications" title="Link to this heading"></a></h2>
@@ -520,6 +542,8 @@ MechaHarness SHOULD distinguish advisory context, behavioral instruction, execut
 <li><p><strong>Agentic coding is straining CI. Here’s how we scaled test impact analysis at Anthropic</strong> — 2026-09-14 — https://claude.com/blog/agentic-coding-is-straining-ci-heres-how-we-scaled-test-impact-analysis-at-anthropic</p></li>
 <li><p><strong>Coding sessions are longer and use more context. Claude Opus 5.5 is built with that in mind.</strong> — 2026-09-24 — https://claude.com/blog/claude-opus-5-5-built-for-coding-sessions-that-use-more-context</p></li>
 <li><p><strong>Escalate hard decisions with the advisor tool</strong> — Claude Code Docs, reviewed 2026-09-29 — https://code.claude.com/docs/en/advisor</p></li>
+<li><p><strong>How Anthropic’s sales team rebuilt inbound with Claude Managed Agents</strong> — 2026-09-30 — https://claude.com/blog/how-anthropics-sales-team-rebuilt-inbound-with-claude-managed-agents</p></li>
+<li><p><strong>Customize Claude Code with mods</strong> — 2026-10-01 — https://claude.com/blog/claude-code-mods</p></li>
 </ul>
 <p>Watch source: https://claude.com/blog-category/claude-code</p>
 </section>

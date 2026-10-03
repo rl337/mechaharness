@@ -185,6 +185,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MockInferenceStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.openai_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAICompatStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.systemone</span><span class="w"> </span><span class="kn">import</span> <span class="n">SystemOneJudgeProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.lifecycle_extension</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span>
+    <span class="n">empty_lifecycle_extension_registry</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.linkage_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultLinkageResolver</span><span class="p">,</span> <span class="n">LinkageResolver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.operation_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">OperationRegistry</span><span class="p">,</span> <span class="n">default_operations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.tools.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolRegistry</span>
@@ -452,6 +456,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_template_registry</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">ContextProviderRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_provider_registry</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CapabilityEnvelope</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_capability_envelope</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span>
+            <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lifecycle_extension_registry</span><span class="p">()</span>
+        <span class="p">)</span>
 
         <span class="n">inference_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_class</span><span class="p">()</span>
         <span class="n">harness_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_harness_class</span><span class="p">()</span>
@@ -770,6 +777,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_capability_envelope</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CapabilityEnvelope</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Default run envelope from configured grants."""</span>
         <span class="k">return</span> <span class="n">CapabilityEnvelope</span><span class="o">.</span><span class="n">from_grants</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_grants</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_lifecycle_extension_registry">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_lifecycle_extension_registry">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_lifecycle_extension_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifecycleExtensionRegistry</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Ordered lifecycle extensions (default: empty)."""</span>
+        <span class="k">return</span> <span class="n">empty_lifecycle_extension_registry</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.inference_classes">

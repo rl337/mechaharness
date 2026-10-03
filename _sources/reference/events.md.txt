@@ -53,6 +53,12 @@ long as they are namespaced. Bare names (`run_start`) are rejected.
 | `GraphEnd` | `core:graph_end` |
 | `GraphNodeStart` | `core:graph_node_start` |
 | `GraphNodeEnd` | `core:graph_node_end` |
+| `ExtensionApplied` | `core:extension_applied` |
+
+`ExtensionApplied` lives in `mechaharness.lifecycle_extension` and is emitted by
+`LifecycleExtensionRegistry` (not by EventLog subscribers acting as control
+flow). Payload includes `extension_id`, `extension_version`, `boundary`,
+`order`, `mode`, `default_ran`, and optional rewrite/block/replace flags.
 
 `core:access_check` payload: `tool`, `required`, `granted`, `allowed`.
 `core:cost` may include `prompt_tokens` / `completion_tokens` / `total_tokens`.

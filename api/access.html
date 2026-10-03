@@ -431,6 +431,54 @@ membership. Not related to <code class="xref py py-class docutils literal notran
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.ExtensionBlock">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">ExtensionBlock</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#ExtensionBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.ExtensionBlock" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<p>Block a single pending action at a lifecycle boundary.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.ExtensionBlock.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'extension.block'</span></span><a class="headerlink" href="#mechaharness.core.access.ExtensionBlock.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.ExtensionObserve">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">ExtensionObserve</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#ExtensionObserve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.ExtensionObserve" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<p>Run observe-mode lifecycle extensions at declared boundaries.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.ExtensionObserve.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'extension.observe'</span></span><a class="headerlink" href="#mechaharness.core.access.ExtensionObserve.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.ExtensionReplace">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">ExtensionReplace</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#ExtensionReplace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.ExtensionReplace" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<p>Replace a single pending action with a one-step structured outcome.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.ExtensionReplace.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'extension.replace'</span></span><a class="headerlink" href="#mechaharness.core.access.ExtensionReplace.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mechaharness.core.access.ExtensionRewrite">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">ExtensionRewrite</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#ExtensionRewrite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.ExtensionRewrite" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>
+<p>Rewrite arguments / tool name for a single pending action.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mechaharness.core.access.ExtensionRewrite.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ClassVar" title="(in Python v3.14)"><span class="pre">ClassVar</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'extension.rewrite'</span></span><a class="headerlink" href="#mechaharness.core.access.ExtensionRewrite.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="mechaharness.core.access.FsRead">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mechaharness.core.access.</span></span><span class="sig-name descname"><span class="pre">FsRead</span></span><a class="reference internal" href="../_modules/mechaharness/core/access.html#FsRead"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.core.access.FsRead" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mechaharness.core.access.CoreGrant" title="mechaharness.core.access.CoreGrant"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoreGrant</span></code></a></p>

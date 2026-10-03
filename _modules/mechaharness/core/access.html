@@ -310,6 +310,42 @@
 
 
 
+<div class="viewcode-block" id="ExtensionObserve">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ExtensionObserve">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtensionObserve</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Run observe-mode lifecycle extensions at declared boundaries."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"extension.observe"</span></div>
+
+
+
+<div class="viewcode-block" id="ExtensionRewrite">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ExtensionRewrite">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtensionRewrite</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Rewrite arguments / tool name for a single pending action."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"extension.rewrite"</span></div>
+
+
+
+<div class="viewcode-block" id="ExtensionBlock">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ExtensionBlock">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtensionBlock</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Block a single pending action at a lifecycle boundary."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"extension.block"</span></div>
+
+
+
+<div class="viewcode-block" id="ExtensionReplace">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ExtensionReplace">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtensionReplace</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Replace a single pending action with a one-step structured outcome."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"extension.replace"</span></div>
+
+
+
 <div class="viewcode-block" id="grant_key">
 <a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.grant_key">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">grant_key</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
