@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_lifecycle_replace",
+  "persona": "fangore",
+  "title": "Hand off one tool step without a dotted-line graph node",
+  "kind": "lifecycle_extension_replace",
+  "narrative": "For one tool boundary, Fangore may substitute a different single-step outcome instead of running the original tool. That substitution is not a hidden extra node in the execution graph; multi-step repair or fan-out still uses an explicit plan. Complements `fangore_insp_lifecycle_rewrite`. Accepts inspiration requirement 20.",
+  "implementation": "`LifecycleExtension` with replace mode returns `replace_content` at `BeforeTool`; the harness emits that content as the tool result without executing the tool and without adding graph nodes.",
+  "validation": "Kind `lifecycle_extension_replace`. Soft expects replaced content, applied_replace true, and default_ran false.",
+  "footnotes": [
+    {
+      "id": "insp-r20-replace",
+      "label": "Inspiration requirements (req 20: replace mode)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 20 \u2014 replace"
+    }
+  ]
+}

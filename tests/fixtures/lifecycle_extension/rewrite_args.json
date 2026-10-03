@@ -1,0 +1,10 @@
+{
+  "id": "rewrite_args",
+  "description": "Rewrite mutates path args for the same tool",
+  "mode": "rewrite",
+  "expect": {
+    "tool_result_contains": "wrote /sandbox/a.txt",
+    "applied_rewrite": true,
+    "default_ran": true
+  }
+}

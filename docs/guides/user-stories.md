@@ -569,6 +569,86 @@ Kind `instruction_gotcha_metrics`. Soft expects over_trigger recorded and active
 
 [^insp-r08]: [Inspiration requirements (req 8: skills and gotchas)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 8 — skills and gotchas
 
+### `fangore_insp_lifecycle_block` — Skip one tool call without inventing a new plan
+
+Before a dangerous tool runs, Fangore's extension blocks that single call. The default tool does not run; the agent receives a structured skip for that step. Blocking one call does not insert a new step in a durable plan graph and does not bypass host hard-deny rules for other calls. Complements `fangore_insp_lifecycle_observe` and `fangore_insp_soft_vs_hard`. Accepts inspiration requirement 20.
+
+#### Implementation
+
+`LifecycleExtension` with block mode returns block at `BeforeTool`; `AbstractHarness.execute_tools` skips tool execution and emits an error tool result plus `core:extension_applied` with default_ran false.
+
+#### Validation
+
+Kind `lifecycle_extension_block`. Soft expects blocked tool content, applied_block true, and default_ran false.
+
+#### Footnotes
+
+1. [Inspiration requirements (req 20: block mode)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 20 — block
+
+### `fangore_insp_lifecycle_graph_observe` — Watch graph node attempts without replacing failure policy
+
+Fangore binds an observe-only extension around each graph node attempt. The node still runs through the normal runner and failure policy. The log records the extension at the graph-node boundary. This does not invent a second plan graph. Complements `fangore_insp_lifecycle_observe`. Accepts inspiration requirement 20.
+
+#### Implementation
+
+`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole retry brain.
+
+#### Validation
+
+Kind `lifecycle_extension_graph_observe`. Soft expects a before_graph_node extension event and a successful graph run.
+
+#### Footnotes
+
+1. [Inspiration requirements (req 20: graph observe)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 20 — graph observe
+
+### `fangore_insp_lifecycle_observe` — Watch tool calls in a fixed order without changing them
+
+Fangore binds two host extensions that watch each tool call before it runs. The first always runs before the second. The tool still executes with the original arguments. The run log records both extensions, their order, and that the default tool action still ran. Accepts inspiration requirement 20[^insp-r20]. Complements `fangore_insp_soft_vs_hard`: watching is not permission.
+
+#### Implementation
+
+`LifecycleExtensionRegistry` (Config hook `get_lifecycle_extension_registry`) dispatches ordered observe extensions at `BeforeTool` / `AfterTool` inside `AbstractHarness.execute_tools`, emitting `core:extension_applied` provenance. Mutative modes are not required for this story.
+
+#### Validation
+
+Kind `lifecycle_extension_observe`. Soft expects two extension ids in order, default_ran true, and the original tool path in the tool result.
+
+#### Footnotes
+
+[^insp-r20]: [Inspiration requirements (req 20: lifecycle interception)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 20 — lifecycle interception
+
+### `fangore_insp_lifecycle_replace` — Hand off one tool step without a dotted-line graph node
+
+For one tool boundary, Fangore may substitute a different single-step outcome instead of running the original tool. That substitution is not a hidden extra node in the execution graph; multi-step repair or fan-out still uses an explicit plan. Complements `fangore_insp_lifecycle_rewrite`. Accepts inspiration requirement 20.
+
+#### Implementation
+
+`LifecycleExtension` with replace mode returns `replace_content` at `BeforeTool`; the harness emits that content as the tool result without executing the tool and without adding graph nodes.
+
+#### Validation
+
+Kind `lifecycle_extension_replace`. Soft expects replaced content, applied_replace true, and default_ran false.
+
+#### Footnotes
+
+1. [Inspiration requirements (req 20: replace mode)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 20 — replace
+
+### `fangore_insp_lifecycle_rewrite` — Change tool arguments without changing the workflow
+
+Before a write tool runs, Fangore's extension rewrites the path argument into a sandbox directory. The same write tool still runs — only the arguments change. Hard grants still apply to the rewritten call; the extension cannot widen permission by rewriting to a more privileged tool. The log shows that a rewrite ran and that the default tool still ran. Accepts inspiration requirement 20. Complements `fangore_insp_lifecycle_observe`.
+
+#### Implementation
+
+`LifecycleExtension` with rewrite mode returns modified arguments at `BeforeTool`; `AbstractHarness.execute_tools` runs the same tool with rewritten args, then AccessControl still gates the call.
+
+#### Validation
+
+Kind `lifecycle_extension_rewrite`. Soft expects sandbox path in the tool result, applied_rewrite true, and default_ran true.
+
+#### Footnotes
+
+1. [Inspiration requirements (req 20: rewrite mode)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 20 — rewrite
+
 ### `fangore_insp_linkage_preflight` — Resolve graph linkage before any node runs
 
 Fangore's injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2[^insp-r02]. Related: `fangore_insp_stop_contract`.

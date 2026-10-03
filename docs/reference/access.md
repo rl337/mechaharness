@@ -18,8 +18,9 @@ Stability: evolving.
 namespaced keys round-trip; bare names (`fs.write`) are rejected.
 
 Built-in `CoreGrant` leaves (`FsRead`, `FsWrite`, `NetHttp`, `MediaImage`,
-`MediaVideo`, `MediaAudio`, `GraphExecute`, `GraphEscalate`) are conveniences.
-Hosts add types without editing this package:
+`MediaVideo`, `MediaAudio`, `GraphExecute`, `GraphEscalate`,
+`ExtensionObserve`, `ExtensionRewrite`, `ExtensionBlock`, `ExtensionReplace`)
+are conveniences. Hosts add types without editing this package:
 
 ```python
 from mechaharness.core.access import Grant
