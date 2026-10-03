@@ -2,6 +2,36 @@
 
 Prefer deterministic oracles when available; scale effort by consequence and
 uncertainty. Completion may depend on verification state via OutcomeContract.
+
+Claude's verification-loop skills post: “answer generated” ≠ “task complete”.
+Prefer executable/schema oracles; exhaust checks when consequence is high::
+
+    >>> from mechaharness.graph import GraphNode, VerificationOracle
+    >>> from mechaharness.outcome_contract import OutcomeContract
+    >>> from mechaharness.verification_policy import DefaultVerificationPolicy
+    >>> policy = DefaultVerificationPolicy()
+    >>> node = GraphNode(id="page", kind="edit")
+    >>> oracles = [
+    ...     VerificationOracle(name="schema", strength="schema"),
+    ...     VerificationOracle(name="lighthouse", strength="executable"),
+    ... ]
+    >>> plan = policy.plan(node, oracles, confidence=0.95)
+    >>> plan.oracle_names
+    ['lighthouse']
+    >>> plan = policy.plan(node, oracles, consequence="critical")
+    >>> sorted(plan.oracle_names)
+    ['lighthouse', 'schema']
+    >>> result = policy.verify(
+    ...     node,
+    ...     oracles=oracles,
+    ...     verifiers=[lambda _n: (True, {"score": 92})],
+    ...     outcome=OutcomeContract(
+    ...         require_verification=True, acceptance=["score>=90"],
+    ...     ),
+    ...     answer_generated=True,
+    ... )
+    >>> result.passed, result.completion
+    (True, 'complete')
 """
 
 from __future__ import annotations

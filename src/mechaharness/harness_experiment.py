@@ -1,4 +1,30 @@
-"""Harness changes as evaluable hypotheses (reqs 1, 14)."""
+"""Harness changes as evaluable hypotheses (reqs 1, 14).
+
+Cursor's *Continually improving our agent harness* and *CursorBench* treat
+harness edits as experiments with online/offline evidence. Claude's harness
+design post asks “what can I stop doing?” after each model upgrade::
+
+    >>> from mechaharness.harness_experiment import (
+    ...     HarnessExperiment, HarnessExperimentRunner,
+    ... )
+    >>> lab = HarnessExperimentRunner()
+    >>> hyp = lab.propose(HarnessExperiment(
+    ...     hypothesis="dynamic MCP tool loading cuts tokens without hurting success",
+    ...     intervention="mcp_tools_as_discoverable_files",
+    ...     failure_mode="context_bloat",
+    ...     evidence="cursor.com/blog/dynamic-context-discovery",
+    ...     expected_metrics={"task_success_rate": 0.0, "tokens": -0.4},
+    ...     harness_version="2026.09",
+    ... ))
+    >>> hyp.to_trace_fields()["harness_intervention"]
+    'mcp_tools_as_discoverable_files'
+    >>> lab.evaluate(
+    ...     hyp,
+    ...     with_intervention=lambda: {"task_success_rate": 0.86, "tokens": 0.53},
+    ...     without_intervention=lambda: {"task_success_rate": 0.85, "tokens": 1.0},
+    ... ).status
+    'retained'
+"""
 
 from __future__ import annotations
 

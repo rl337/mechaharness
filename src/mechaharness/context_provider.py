@@ -2,6 +2,27 @@
 
 Hosts implement providers (document stores, knowledge graphs, indexes).
 MechaHarness consumes them through envelopes and context compilation.
+
+Cursor *Dynamic context discovery* and Claude skills/context-engineering posts
+prefer short discoverable indices over dumping large payloads up front::
+
+    >>> from mechaharness.context_provider import StaticContextProvider
+    >>> provider = StaticContextProvider(
+    ...     "mcp.github",
+    ...     {
+    ...         "tool:create_issue": "Create a GitHub issue (long schema...)",
+    ...         "tool:list_prs": "List pull requests (long schema...)",
+    ...     },
+    ...     summaries={
+    ...         "tool:create_issue": "create_issue — open an issue",
+    ...         "tool:list_prs": "list_prs — list pull requests",
+    ...     },
+    ... )
+    >>> [e.summary for e in provider.index(query="pull")]
+    ['list_prs — list pull requests']
+    >>> loaded = provider.load(["tool:list_prs"])
+    >>> loaded[0].provider_id, loaded[0].token_estimate > 0
+    ('mcp.github', True)
 """
 
 from __future__ import annotations
