@@ -1,0 +1,10 @@
+{
+  "id": "authority_deny",
+  "description": "Missing required grant skips the extension without rewriting",
+  "mode": "authority_deny",
+  "expect": {
+    "tool_result_contains": "wrote a.txt",
+    "mode": "authority_denied",
+    "applied_rewrite": false
+  }
+}

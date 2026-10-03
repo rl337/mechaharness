@@ -1,0 +1,10 @@
+{
+  "id": "observe_order",
+  "description": "Two before_tool observers run in registration order",
+  "mode": "observe",
+  "expect": {
+    "extension_ids": ["acme:watch_a", "acme:watch_b"],
+    "default_ran": true,
+    "tool_result_contains": "wrote a.txt"
+  }
+}

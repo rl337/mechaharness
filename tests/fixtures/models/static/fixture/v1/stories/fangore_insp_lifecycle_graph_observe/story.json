@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_lifecycle_graph_observe",
+  "persona": "fangore",
+  "title": "Watch graph node attempts without replacing failure policy",
+  "kind": "lifecycle_extension_graph_observe",
+  "narrative": "Fangore binds an observe-only extension around each graph node attempt. The node still runs through the normal runner and failure policy. The log records the extension at the graph-node boundary. This does not invent a second plan graph. Complements `fangore_insp_lifecycle_observe`. Accepts inspiration requirement 20.",
+  "implementation": "`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole retry brain.",
+  "validation": "Kind `lifecycle_extension_graph_observe`. Soft expects a before_graph_node extension event and a successful graph run.",
+  "footnotes": [
+    {
+      "id": "insp-r20-graph",
+      "label": "Inspiration requirements (req 20: graph observe)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 20 \u2014 graph observe"
+    }
+  ]
+}

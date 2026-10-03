@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_lifecycle_block",
+  "persona": "fangore",
+  "title": "Skip one tool call without inventing a new plan",
+  "kind": "lifecycle_extension_block",
+  "narrative": "Before a dangerous tool runs, Fangore's extension blocks that single call. The default tool does not run; the agent receives a structured skip for that step. Blocking one call does not insert a new step in a durable plan graph and does not bypass host hard-deny rules for other calls. Complements `fangore_insp_lifecycle_observe` and `fangore_insp_soft_vs_hard`. Accepts inspiration requirement 20.",
+  "implementation": "`LifecycleExtension` with block mode returns block at `BeforeTool`; `AbstractHarness.execute_tools` skips tool execution and emits an error tool result plus `core:extension_applied` with default_ran false.",
+  "validation": "Kind `lifecycle_extension_block`. Soft expects blocked tool content, applied_block true, and default_ran false.",
+  "footnotes": [
+    {
+      "id": "insp-r20-block",
+      "label": "Inspiration requirements (req 20: block mode)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
+      "note": "Req 20 \u2014 block"
+    }
+  ]
+}

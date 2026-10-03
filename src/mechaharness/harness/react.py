@@ -11,12 +11,14 @@ from __future__ import annotations
 import json
 import re
 
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.core.access import AccessControl, CostAccountant
 from mechaharness.core.completer import Completer
 from mechaharness.core.environment import InferenceEnvironment
 from mechaharness.core.events import EventLog
 from mechaharness.core.types import ChatMessage, CompletionRequest, Role, ToolCall, ToolResult
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
+from mechaharness.lifecycle_extension import LifecycleExtensionRegistry
 from mechaharness.tools.base import ToolRegistry
 
 _ACTION_RE = re.compile(
@@ -51,6 +53,8 @@ class ReactHarness(AbstractHarness):
         access: AccessControl,
         cost: CostAccountant,
         environment: InferenceEnvironment,
+        lifecycle_extensions: LifecycleExtensionRegistry | None = None,
+        capability_envelope: CapabilityEnvelope | None = None,
         agent_id: str | None = None,
         parent_agent_id: str | None = None,
     ) -> None:
@@ -62,6 +66,8 @@ class ReactHarness(AbstractHarness):
             access=access,
             cost=cost,
             environment=environment,
+            lifecycle_extensions=lifecycle_extensions,
+            capability_envelope=capability_envelope,
             agent_id=agent_id,
             parent_agent_id=parent_agent_id,
         )

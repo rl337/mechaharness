@@ -1,0 +1,10 @@
+{
+  "id": "block_call",
+  "description": "Block skips the default tool action",
+  "mode": "block",
+  "expect": {
+    "tool_result_contains": "blocked by host extension",
+    "applied_block": true,
+    "default_ran": false
+  }
+}

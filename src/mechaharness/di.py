@@ -83,6 +83,10 @@ from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.lifecycle_extension import (
+    LifecycleExtensionRegistry,
+    empty_lifecycle_extension_registry,
+)
 from mechaharness.linkage_resolver import DefaultLinkageResolver, LinkageResolver
 from mechaharness.operation_registry import OperationRegistry, default_operations
 from mechaharness.tools.base import ToolRegistry
@@ -340,6 +344,9 @@ class MechaHarnessConfig(Config):
         self.register_instance(GraphTemplateRegistry, self.get_graph_template_registry())
         self.register_instance(ContextProviderRegistry, self.get_context_provider_registry())
         self.register_instance(CapabilityEnvelope, self.get_capability_envelope())
+        self.register_instance(
+            LifecycleExtensionRegistry, self.get_lifecycle_extension_registry()
+        )
 
         inference_cls = self.get_inference_class()
         harness_cls = self.get_harness_class()
@@ -571,6 +578,10 @@ class MechaHarnessConfig(Config):
     def get_capability_envelope(self) -> CapabilityEnvelope:
         """Default run envelope from configured grants."""
         return CapabilityEnvelope.from_grants(self.get_grants())
+
+    def get_lifecycle_extension_registry(self) -> LifecycleExtensionRegistry:
+        """Ordered lifecycle extensions (default: empty)."""
+        return empty_lifecycle_extension_registry()
 
     def inference_classes(self) -> dict[str, type[InferenceStrategy]]:
         """Named backend map. Hosts merge via ``super().inference_classes()``."""
