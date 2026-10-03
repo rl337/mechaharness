@@ -7,18 +7,24 @@ MechaHarness separates **inference** (provider I/O) from **harness policy**
 (agent loops, graphs, grants, verification). Hosts extend via
 :class:`~mechaharness.di.MechaHarnessConfig` rather than patching closed enums.
 
-Many primitives below were pressure-tested against Claude/Anthropic and Cursor
-developer-blog harness patterns (see ``docs/inspiration/``). The doctests here
-are runnable examples — not product-compatibility claims.
+Many primitives below were motivated by ideas in the Claude and Cursor
+developer blogs (see ``docs/inspiration/``). The doctests cite those sources
+and show how MechaHarness expresses the suggestion — not product
+compatibility claims.
 
 Inspiration tour (doctests)
 ===========================
 
 Retire scaffolding that no longer helps
 ---------------------------------------
-Claude's *Agent Harness Design* and Cursor's *Continually improving our agent
-harness* treat harness changes as hypotheses: keep interventions that improve
-outcomes, retire the rest. MechaHarness makes that comparison explicit::
+In *Agent Harness Design: 3 Patterns for Harnessing Claude's Intelligence*,
+the Claude developer blog suggests asking what scaffolding you can stop doing
+as models improve
+(https://claude.com/blog/harnessing-claudes-intelligence).
+In *Continually improving our agent harness*, the Cursor developer blog
+suggests treating harness changes as evaluable hypotheses
+(https://cursor.com/blog/continually-improving-agent-harness).
+MechaHarness makes with/without comparison explicit::
 
     >>> from mechaharness.harness_experiment import (
     ...     HarnessExperiment, HarnessExperimentRunner,
@@ -51,9 +57,14 @@ outcomes, retire the rest. MechaHarness makes that comparison explicit::
 
 Bounded verify-then-repair (loops + verification skills)
 --------------------------------------------------------
-Claude's loop engineering and verification-skill posts emphasize explicit stop
-conditions and closing the feedback loop before declaring done. A reusable
-template plus :class:`~mechaharness.stop_contract.StopContract` encodes that::
+In *Loop engineering: Getting started with loops*, the Claude developer blog
+suggests goal-based loops with explicit stop criteria and turn caps
+(https://claude.com/blog/getting-started-with-loops).
+In *Building verification loops in Claude Code with skills*, it suggests
+encoding checks so completion depends on verification, not generation alone
+(https://claude.com/blog/building-verification-loops-in-claude-code-with-skills).
+A reusable template plus :class:`~mechaharness.stop_contract.StopContract`
+encodes that::
 
     >>> from mechaharness.graph_templates import (
     ...     GraphTemplateParams, VerifyRepairTemplate,
@@ -81,9 +92,14 @@ template plus :class:`~mechaharness.stop_contract.StopContract` encodes that::
 
 Preflight linkage before expensive work
 ---------------------------------------
-Claude Code dynamic workflows compose graphs at runtime; Cursor cloud-agent
-lessons stress environment readiness. Linkage is the pre-execution check —
-distinct from DI construction::
+In *Introducing dynamic workflows in Claude Code*, the Claude developer blog
+suggests runtime-composed multi-agent graphs that stay resumable and checked
+before fold-in
+(https://claude.com/blog/introducing-dynamic-workflows-in-claude-code).
+In *What we've learned building cloud agents*, the Cursor developer blog
+suggests treating environment readiness as part of the execution contract
+(https://cursor.com/blog/cloud-agent-lessons).
+Linkage is the pre-execution check — distinct from DI construction::
 
     >>> from mechaharness.core.access import (
     ...     AccessPolicy, GraphExecute, InMemoryAccessControl,
@@ -118,8 +134,15 @@ distinct from DI construction::
 
 Subagents need narrow envelopes; advisors stay non-binding
 ----------------------------------------------------------
-Claude's subagent guide: children get fresh context and restricted tools.
-The advisor docs: stronger model counsels, caller keeps ownership::
+In *How and when to use subagents in Claude Code*, the Claude developer blog
+suggests isolated child contexts with restricted tools that return synthesis,
+not full history
+(https://claude.com/blog/subagents-in-claude-code).
+In *Escalate hard decisions with the advisor tool*, the Claude Code docs
+suggest sparse, non-binding counsel from a stronger model while the executor
+keeps ownership
+(https://code.claude.com/docs/en/advisor).
+MechaHarness separates those as envelopes versus advisor policy::
 
     >>> from mechaharness.capability_envelope import CapabilityEnvelope
     >>> from mechaharness.delegation_policy import (
@@ -177,9 +200,14 @@ The advisor docs: stronger model counsels, caller keeps ownership::
 
 Independent review + risk-scaled autonomy
 -----------------------------------------
-Migrations and high-stakes work want reviewers that do not share producer
-reasoning (Claude migration / dynamic-workflow posts). Cursor Auto-review
-scales scrutiny by consequence, not a global autonomy switch::
+In *A harness for every task: dynamic workflows in Claude Code*, the Claude
+developer blog suggests adversarial / independent verification so producers
+do not grade their own work in the same accumulated state
+(https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code).
+In *Governing agent autonomy with Auto-review*, the Cursor developer blog
+suggests scaling scrutiny by consequence rather than a global autonomy switch
+(https://cursor.com/blog/agent-autonomy-auto-review).
+MechaHarness expresses both as templates and consequence policy::
 
     >>> from mechaharness.graph_templates import (
     ...     GraphTemplateParams, IndependentReviewTemplate,
@@ -207,8 +235,14 @@ scales scrutiny by consequence, not a global autonomy switch::
 
 Discover context on demand; soft skills vs hard grants
 ------------------------------------------------------
-Cursor *Dynamic context discovery* and Claude skills guidance: index first,
-load just-in-time. Soft instruction never replaces structural enforcement::
+In *Dynamic context discovery*, the Cursor developer blog suggests short
+discoverable indices and just-in-time loading instead of static dump
+(https://cursor.com/blog/dynamic-context-discovery).
+In *Lessons from building Claude Code: How we use skills*, the Claude
+developer blog suggests scarce, progressive skill content with measurable
+trigger behavior
+(https://claude.com/blog/lessons-from-building-claude-code-how-we-use-skills).
+Soft instruction never replaces structural grants::
 
     >>> from mechaharness.context_provider import (
     ...     ContextProviderRegistry, StaticContextProvider,
@@ -241,8 +275,12 @@ load just-in-time. Soft instruction never replaces structural enforcement::
 
 Lifecycle mods with ordered interception
 ----------------------------------------
-Claude Code *mods* rewrite, block, or replace behavior at typed events with
-deterministic ordering and authority checks::
+In *Customize Claude Code with mods*, the Claude developer blog suggests
+typed lifecycle hooks that can observe, rewrite, block, or replace default
+behavior, with deterministic ordering and authority that cannot silently
+widen
+(https://claude.com/blog/claude-code-mods).
+MechaHarness exposes the same shape as ordered lifecycle extensions::
 
     >>> from mechaharness.lifecycle_extension import (
     ...     BeforeTool, Block, ExtensionEffect, LifecycleExtension,
@@ -278,7 +316,7 @@ deterministic ordering and authority checks::
     ...             )
     ...         return ExtensionEffect(mode=Block.key())
     >>> # DenyProd runs before rewrite so production paths are judged on the
-    >>> # original arguments (security mods load early, like Claude Code sec-default).
+    >>> # original arguments (early security extensions win on order).
     >>> reg = LifecycleExtensionRegistry([Audit(), DenyProd(), SandboxPath()])
     >>> ctx = LifecycleExtensionContext(
     ...     boundary=BeforeTool.key(), run_id="r1", agent_id="a1",

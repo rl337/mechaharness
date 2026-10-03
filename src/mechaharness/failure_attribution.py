@@ -1,7 +1,14 @@
 """Structured failure attribution for traces (req 11).
 
-Claude migration / Cursor harness posts: fix the *process* that produced the
-failure. Structured categories let clients mine repeats across runs::
+In *How Anthropic runs large-scale code migrations with Claude Code*, the
+Claude developer blog suggests fixing the process that produced a failure
+rather than only patching one-off outputs
+(https://claude.com/blog/ai-code-migration).
+In *Continually improving our agent harness*, the Cursor developer blog
+suggests retaining enough structure to attribute and re-evaluate harness
+changes
+(https://cursor.com/blog/continually-improving-agent-harness).
+Structured categories let clients mine repeats across runs::
 
     >>> from mechaharness.failure_attribution import (
     ...     attribute_error, detect_repeated_failure_classes,

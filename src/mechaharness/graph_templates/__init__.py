@@ -3,9 +3,15 @@
 Import from this package. The legacy module ``mechaharness.graph_template``
 re-exports the same public surface for compatibility.
 
-Claude *dynamic workflows* and Cursor harness posts describe fan-out, verify/
-repair, and independent review as reusable shapes. Soft points keep client
-bindings (tools, prompts, models) out of the library skeleton::
+In *A harness for every task: dynamic workflows in Claude Code*, the Claude
+developer blog suggests composing reusable shapes such as fan-out-and-
+synthesize, loop-until-done, and adversarial verification
+(https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code).
+In *Continually improving our agent harness*, the Cursor developer blog
+suggests keeping harness scaffolding revisable rather than permanently
+embedding one product's workflow
+(https://cursor.com/blog/continually-improving-agent-harness).
+Soft points keep client bindings out of the library skeleton::
 
     >>> from mechaharness.graph_templates import (
     ...     FanOutAggregateTemplate, GraphTemplateParams,

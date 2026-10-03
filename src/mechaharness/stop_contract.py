@@ -6,9 +6,10 @@ trigger / continuation / success / abort / progress semantics required for
 linkage validation. Repeating nodes without a stop contract (and without
 ``persistent_service``) fail linkage.
 
-Inspired by Claude's *Loop engineering* post: every repeating cycle needs a
-trigger, continuation, success/abort, progress signal, and budgets — not an
-open-ended chat turn::
+In *Loop engineering: Getting started with loops*, the Claude developer blog
+suggests every repeating cycle declare trigger, continuation, success/abort,
+progress, and budgets rather than an open-ended chat turn
+(https://claude.com/blog/getting-started-with-loops)::
 
     >>> from mechaharness.stop_contract import StopContract
     >>> goal = StopContract(
