@@ -4,9 +4,11 @@ A subagent owns delegated work; an advisor observes decision state and returns
 guidance while the caller retains ownership. Model escalation replaces the
 executor; advising lets the existing executor continue.
 
-Claude Code's advisor tool pairs a fast main model with a stronger counselor
-at planning / repeated-failure / completion boundaries. MechaHarness keeps
-that consultation policy-injectable and budgeted::
+In *Escalate hard decisions with the advisor tool*, the Claude Code docs
+suggest pairing a fast main executor with sparse, non-binding counsel from a
+stronger model at planning / repeated-failure / completion boundaries
+(https://code.claude.com/docs/en/advisor).
+MechaHarness keeps that consultation policy-injectable and budgeted::
 
     >>> import asyncio
     >>> from mechaharness.advisor import (

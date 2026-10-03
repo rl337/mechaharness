@@ -3,8 +3,14 @@
 Hosts implement providers (document stores, knowledge graphs, indexes).
 MechaHarness consumes them through envelopes and context compilation.
 
-Cursor *Dynamic context discovery* and Claude skills/context-engineering posts
-prefer short discoverable indices over dumping large payloads up front::
+In *Dynamic context discovery*, the Cursor developer blog suggests short
+discoverable indices and just-in-time loads instead of dumping large payloads
+up front
+(https://cursor.com/blog/dynamic-context-discovery).
+In *The new rules of context engineering for Claude 5 generation models*,
+the Claude developer blog suggests scoped, provenance-bearing retrieval over
+static pre-load
+(https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models)::
 
     >>> from mechaharness.context_provider import StaticContextProvider
     >>> provider = StaticContextProvider(

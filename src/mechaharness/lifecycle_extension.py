@@ -5,8 +5,12 @@ registry hosts bind via ``MechaHarnessConfig.get_lifecycle_extension_registry``.
 Extensions declare modes and required grants; AccessControl / envelopes still
 gate the real tool or node action after any rewrite.
 
-Claude Code *mods* hook typed events (before/after/instead), stack in load
-order, and cannot silently widen authority. A tiny production-safeguard mod::
+In *Customize Claude Code with mods*, the Claude developer blog suggests
+typed lifecycle hooks that observe, rewrite, block, or replace default
+behavior, stack in deterministic load order, and cannot silently widen
+authority
+(https://claude.com/blog/claude-code-mods).
+A tiny production-safeguard extension::
 
     >>> from mechaharness.capability_envelope import CapabilityEnvelope
     >>> from mechaharness.core.access import ExtensionRewrite

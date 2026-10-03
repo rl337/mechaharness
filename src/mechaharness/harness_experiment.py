@@ -1,8 +1,16 @@
 """Harness changes as evaluable hypotheses (reqs 1, 14).
 
-Cursor's *Continually improving our agent harness* and *CursorBench* treat
-harness edits as experiments with online/offline evidence. Claude's harness
-design post asks “what can I stop doing?” after each model upgrade::
+In *Continually improving our agent harness*, the Cursor developer blog
+suggests expressing harness edits as hypotheses with online and offline
+evidence
+(https://cursor.com/blog/continually-improving-agent-harness).
+In *How we compare model quality in Cursor*, it suggests multidimensional
+eval rather than a single frozen benchmark
+(https://cursor.com/blog/cursorbench).
+In *Agent Harness Design: 3 Patterns for Harnessing Claude's Intelligence*,
+the Claude developer blog suggests re-testing what you can stop doing after
+model upgrades
+(https://claude.com/blog/harnessing-claudes-intelligence)::
 
     >>> from mechaharness.harness_experiment import (
     ...     HarnessExperiment, HarnessExperimentRunner,

@@ -4,8 +4,11 @@ Clients may propose gotchas from offline consolidation; promotion to active
 policy requires evaluation. Components distinguish invariants, domain
 knowledge, procedures, and learned gotchas.
 
-Claude skills posts emphasize scarce information gain: short descriptions
-for discovery, full procedures on demand, and appendable gotchas::
+In *Lessons from building Claude Code: How we use skills*, the Claude
+developer blog suggests optimizing instruction bundles for information gain —
+short descriptions for discovery, full procedures on demand, and appendable
+gotchas
+(https://claude.com/blog/lessons-from-building-claude-code-how-we-use-skills)::
 
     >>> from mechaharness.instruction_component import InstructionCatalog
     >>> catalog = InstructionCatalog()

@@ -5,8 +5,14 @@ resolution separately validates that the final graph has satisfiable runners,
 grants, operation contracts, stop contracts, envelopes, environment
 capabilities, and termination paths — before substantive execution.
 
-Dynamic workflows stay intentionally partial until bind time; linkage is the
-gate that fails with structured edges instead of a mid-run surprise::
+In *Introducing dynamic workflows in Claude Code*, the Claude developer blog
+suggests composing graphs after tools, models, and environment are known
+(https://claude.com/blog/introducing-dynamic-workflows-in-claude-code).
+In *What we've learned building cloud agents*, the Cursor developer blog
+suggests failing on missing environment capabilities before dependent work
+runs
+(https://cursor.com/blog/cloud-agent-lessons).
+Linkage is the pre-execution gate with structured edges::
 
     >>> from mechaharness.core.access import (
     ...     AccessPolicy, GraphExecute, InMemoryAccessControl,

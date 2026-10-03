@@ -5,8 +5,14 @@ spend ledger for one graph run (shared with nested subgraphs so cost
 aggregates). Soft breach asks the executor to wind down gracefully; hard
 breach fails the run with prejudice. ``hard_limit=None`` means unlimited.
 
-Dynamic workflows and long agent runs need spend that rolls up across child
-subgraphs — soft wind-down before a hard stop::
+In *Introducing dynamic workflows in Claude Code*, the Claude developer blog
+notes that large multi-agent runs consume substantial tokens and benefit from
+explicit budgets
+(https://claude.com/blog/introducing-dynamic-workflows-in-claude-code).
+In *Improved token efficiency for longer agent runs*, the Cursor developer
+blog discusses containing cost across long trajectories
+(https://cursor.com/blog/improved-token-efficiency).
+Spend rolls up across child subgraphs — soft wind-down before a hard stop::
 
     >>> from mechaharness.budget import Budget, BudgetLevel, BudgetPolicy
     >>> policy = BudgetPolicy(soft_limit=80, hard_limit=100, unit="tokens")

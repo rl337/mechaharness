@@ -4,8 +4,13 @@ An envelope is the hard boundary for a run or child: tools, grants, context
 providers, model class, budgets, escalation, and output contract. Children
 MUST receive an explicit envelope; they do not inherit the parent implicitly.
 
-Mirrors Claude Code subagents (isolated context + restricted tools) and
-Cursor sandbox/autonomy posts (structural boundaries, not prompt hope)::
+In *How and when to use subagents in Claude Code*, the Claude developer blog
+suggests children receive isolated context and restricted tools rather than
+inheriting the parent session
+(https://claude.com/blog/subagents-in-claude-code).
+In *Implementing a secure sandbox for local agents*, the Cursor developer
+blog suggests structural capability boundaries instead of prompt-only hope
+(https://cursor.com/blog/agent-sandboxing)::
 
     >>> from mechaharness.capability_envelope import CapabilityEnvelope
     >>> from mechaharness.core.access import FsRead, FsWrite, GraphExecute

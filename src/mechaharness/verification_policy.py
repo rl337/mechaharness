@@ -3,7 +3,10 @@
 Prefer deterministic oracles when available; scale effort by consequence and
 uncertainty. Completion may depend on verification state via OutcomeContract.
 
-Claude's verification-loop skills post: “answer generated” ≠ “task complete”.
+In *Building verification loops in Claude Code with skills*, the Claude
+developer blog suggests that “answer generated” is not the same as “task
+complete”, and that deterministic checks should close the loop before done
+(https://claude.com/blog/building-verification-loops-in-claude-code-with-skills).
 Prefer executable/schema oracles; exhaust checks when consequence is high::
 
     >>> from mechaharness.graph import GraphNode, VerificationOracle
