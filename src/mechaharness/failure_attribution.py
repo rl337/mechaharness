@@ -1,4 +1,21 @@
-"""Structured failure attribution for traces (req 11)."""
+"""Structured failure attribution for traces (req 11).
+
+Claude migration / Cursor harness posts: fix the *process* that produced the
+failure. Structured categories let clients mine repeats across runs::
+
+    >>> from mechaharness.failure_attribution import (
+    ...     attribute_error, detect_repeated_failure_classes,
+    ... )
+    >>> attrs = [
+    ...     attribute_error("no_runner:explore", node_id="b0"),
+    ...     attribute_error("no_runner:explore", node_id="b1"),
+    ...     attribute_error("permission_denied", node_id="write"),
+    ... ]
+    >>> attrs[0].category
+    'linkage'
+    >>> "no_runner" in detect_repeated_failure_classes(attrs)
+    True
+"""
 
 from __future__ import annotations
 

@@ -75,8 +75,10 @@ mechaharness = ["py.typed"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests"]
-pythonpath = ["."]
+testpaths = ["tests", "src/mechaharness"]
+pythonpath = ["src", "."]
+addopts = ["--doctest-modules"]
+doctest_optionflags = ["ELLIPSIS", "NORMALIZE_WHITESPACE"]
 markers = [
   "story_live: dual-mode user stories against live backends (MECHA_STORY_BACKEND=live)",
 ]

@@ -3,6 +3,24 @@
 Clients may propose gotchas from offline consolidation; promotion to active
 policy requires evaluation. Components distinguish invariants, domain
 knowledge, procedures, and learned gotchas.
+
+Claude skills posts emphasize scarce information gain: short descriptions
+for discovery, full procedures on demand, and appendable gotchas::
+
+    >>> from mechaharness.instruction_component import InstructionCatalog
+    >>> catalog = InstructionCatalog()
+    >>> g = catalog.append_gotcha(
+    ...     "Gen1 bag limit",
+    ...     "Toss unneeded TMs before dungeons — 20 item max.",
+    ...     provenance={"source": "claude.com/blog/harnessing-claudes-intelligence"},
+    ... )
+    >>> g.record_trigger(used=True, appropriate=False)  # over-triggered
+    >>> catalog.metrics()[g.id]["over_trigger"]
+    1.0
+    >>> catalog.promote(g.id)
+    InstructionComponent(...)
+    >>> [c.title for c in catalog.active(kind="gotcha")]
+    ['Gen1 bag limit']
 """
 
 from __future__ import annotations

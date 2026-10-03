@@ -3,6 +3,44 @@
 A subagent owns delegated work; an advisor observes decision state and returns
 guidance while the caller retains ownership. Model escalation replaces the
 executor; advising lets the existing executor continue.
+
+Claude Code's advisor tool pairs a fast main model with a stronger counselor
+at planning / repeated-failure / completion boundaries. MechaHarness keeps
+that consultation policy-injectable and budgeted::
+
+    >>> import asyncio
+    >>> from mechaharness.advisor import (
+    ...     Advisor, AdvisorContextContract, AdvisorGuidance, AdvisorRequest,
+    ...     DefaultAdvisorPolicy, consult_advisor,
+    ... )
+    >>> class PlanAdvisor(Advisor):
+    ...     advisor_id = "host:opus-advisor"
+    ...     async def advise(self, request):
+    ...         return AdvisorGuidance(
+    ...             recommendations=["prefer additive migration"],
+    ...             uncertainty=0.2,
+    ...             assumptions=["tests cover auth"],
+    ...             proposed_next_actions=["run independent_review template"],
+    ...         )
+    >>> policy = DefaultAdvisorPolicy(max_consultations=2, failure_threshold=2)
+    >>> policy.should_consult(repeated_failures=2)
+    True
+    >>> policy.should_consult(uncertainty=0.3)  # below default threshold
+    False
+    >>> ctx = policy.context_for(
+    ...     "repeated_failure",
+    ...     summary="auth tests fail twice",
+    ...     evidence_refs=["log:ci"],
+    ... )
+    >>> ctx.include_full_history
+    False
+    >>> guidance = asyncio.run(consult_advisor(
+    ...     PlanAdvisor(),
+    ...     policy,
+    ...     AdvisorRequest(trigger="repeated_failure", context=ctx),
+    ... ))
+    >>> guidance.recommendations[0]
+    'prefer additive migration'
 """
 
 from __future__ import annotations

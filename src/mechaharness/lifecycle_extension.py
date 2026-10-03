@@ -4,6 +4,45 @@ EventLog remains append-only telemetry. This module is the control-plane
 registry hosts bind via ``MechaHarnessConfig.get_lifecycle_extension_registry``.
 Extensions declare modes and required grants; AccessControl / envelopes still
 gate the real tool or node action after any rewrite.
+
+Claude Code *mods* hook typed events (before/after/instead), stack in load
+order, and cannot silently widen authority. A tiny production-safeguard mod::
+
+    >>> from mechaharness.capability_envelope import CapabilityEnvelope
+    >>> from mechaharness.core.access import ExtensionRewrite
+    >>> from mechaharness.lifecycle_extension import (
+    ...     BeforeTool, ExtensionEffect, LifecycleExtension,
+    ...     LifecycleExtensionContext, LifecycleExtensionRegistry, Rewrite,
+    ... )
+    >>> class NeedsRewriteGrant(LifecycleExtension):
+    ...     extension_id = "acme:rewrite"
+    ...     boundary = BeforeTool
+    ...     modes = frozenset({Rewrite})
+    ...     required_grants = (ExtensionRewrite,)
+    ...     def handle(self, context):
+    ...         return ExtensionEffect(
+    ...             mode=Rewrite.key(),
+    ...             rewrite_arguments={"path": "/safe"},
+    ...         )
+    >>> reg = LifecycleExtensionRegistry([NeedsRewriteGrant()])
+    >>> ctx = LifecycleExtensionContext(
+    ...     boundary=BeforeTool.key(), run_id="r", agent_id="a",
+    ...     tool_name="Write", arguments={"path": "/etc/passwd"},
+    ... )
+    >>> # Without the extension.rewrite grant, the mod is skipped (default runs).
+    >>> denied = reg.dispatch(
+    ...     BeforeTool, ctx, envelope=CapabilityEnvelope(grants=["core:fs.write"]),
+    ... )
+    >>> denied.rewrite_arguments is None
+    True
+    >>> allowed = reg.dispatch(
+    ...     BeforeTool, ctx,
+    ...     envelope=CapabilityEnvelope(
+    ...         grants=["core:fs.write", "core:extension.rewrite"],
+    ...     ),
+    ... )
+    >>> allowed.rewrite_arguments
+    {'path': '/safe'}
 """
 
 from __future__ import annotations
