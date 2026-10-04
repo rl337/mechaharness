@@ -46,6 +46,7 @@ for events and grants ([Architecture](./architecture.md)).
 |------|-------------|
 | [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, pyiv Config |
 | [Inspiration requirements map](./inspiration/requirements-map.md) | Blog-inspired reqs → modules → library vs client ownership |
+| [WalkingLabs Harness Engineering inspiration](./inspiration/walkinglabs-harness-engineering-inspiration.md) | 50-point source-attributed audit of the online book against current MechaHarness |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Junespark](./guides/junespark.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
