@@ -1,0 +1,17 @@
+{
+  "id": "after_reduce_before_checkpoint",
+  "description": "Crash after reduce before next graph checkpoint; resume completes from effect.",
+  "crash_location": "after_reduce_before_checkpoint",
+  "run_id": "tdr-after-reduce",
+  "expect": {
+    "crashed": true,
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 1,
+    "dispatch_count_after_crash": 1,
+    "effect_state_before": "completed",
+    "effect_state_after": "completed",
+    "external_handle_contains": "cursor-job-",
+    "checkpoint_durability": "durable"
+  }
+}

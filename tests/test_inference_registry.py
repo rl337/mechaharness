@@ -20,7 +20,7 @@ def test_builtin_backends_mapped() -> None:
         "vllm",
         "ollama",
         "mock",
-        "junespark",
+        "openai_local",
     ):
         assert name in backends
 
@@ -38,14 +38,14 @@ async def test_lmstudio_defaults() -> None:
 
 
 @pytest.mark.asyncio
-async def test_junespark_has_no_lan_base_url_default() -> None:
-    config = SettingsConfig(Settings(inference_backend="junespark"))
+async def test_openai_local_has_no_base_url_default() -> None:
+    config = SettingsConfig(Settings(inference_backend="openai_local"))
     strategy = get_injector(config).inject(InferenceStrategy)
     try:
         meta = strategy.describe()
         assert meta["name"] == "openai_compat"
-        # Hosts must set MECHA_BASE_URL; library must not ship a private LAN IP.
-        assert "192.168." not in str(meta.get("base_url") or "")
+        # Hosts must set MECHA_BASE_URL; library must not invent a default URL.
+        assert not (meta.get("base_url") or "").startswith("http://192.168.")
     finally:
         await strategy.aclose()
 

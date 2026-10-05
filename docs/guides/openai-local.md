@@ -1,21 +1,21 @@
-# Local OpenAI-compat backend (`junespark`)
+# Local OpenAI-compat backend (`openai_local`)
 
 Convenience backend name for a LAN OpenAI-compatible server (same client as
-`vllm` / `lmstudio`). Profile load/unload and model inventory stay in the host
-app — MechaHarness only issues chat completions.
+`vllm` / `lmstudio` / `openai_compat`). Profile load/unload and model inventory
+stay in the host app — MechaHarness only issues chat completions.
+
+Unlike `vllm` / `lmstudio`, this profile does **not** ship a default
+`base_url`. Set `MECHA_BASE_URL` explicitly for your server.
 
 ## Backend
 
-Set the server URL and served model id explicitly (the library does not ship a
-private LAN default):
-
 ```bash
 export MECHA_BASE_URL=http://127.0.0.1:8000/v1   # or your host's OpenAI-compat URL
-export MECHA_API_KEY=junespark                   # placeholder is fine for local vLLM
+export MECHA_API_KEY=local                       # placeholder is fine for local vLLM
 export MECHA_MODEL=<served-model-id>
 
 mechaharness run "Reply with ok." \
-  --backend junespark \
+  --backend openai_local \
   --family pass_through \
   --model "$MECHA_MODEL"
 ```
@@ -33,7 +33,7 @@ MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen3-30b-thinking \
   pytest -q tests/stories -k nubble_run_cost
 
 # shorthand
-MECHA_LIVE_JUNESPARK=1 MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
+MECHA_LIVE_OPENAI_COMPAT=1 MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
   pytest -q tests/stories -k nubble_run_cost
 ```
 

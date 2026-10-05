@@ -1,0 +1,17 @@
+{
+  "id": "after_final_commit",
+  "description": "Crash after final commit; resume loads terminal durable state.",
+  "crash_location": "after_final_commit",
+  "run_id": "tdr-after-final-commit",
+  "expect": {
+    "crashed": true,
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 1,
+    "dispatch_count_after_crash": 1,
+    "effect_state_before": "completed",
+    "effect_state_after": "completed",
+    "boundary_before": "commit",
+    "checkpoint_durability": "durable"
+  }
+}

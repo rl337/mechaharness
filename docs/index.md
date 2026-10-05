@@ -46,8 +46,9 @@ for events and grants ([Architecture](./architecture.md)).
 |------|-------------|
 | [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, pyiv Config |
 | [Inspiration requirements map](./inspiration/requirements-map.md) | Blog-inspired reqs → modules → library vs client ownership |
+| [Transactional durable resume](./requirements/transactional-durable-resume.md) | CheckpointStore, SQLite, effect reconciliation (DR-01..12) |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
-| [Junespark](./guides/junespark.md) | Named OpenAI-compat LAN backend + live tests |
+| [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
 | [Dependency injection](./guides/dependency-injection.md) | Config hooks vs OpenAPI `run()` |
 | [CLI reference](./reference/cli.md) | `mechaharness` commands |

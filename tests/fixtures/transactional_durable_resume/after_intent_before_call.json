@@ -1,0 +1,17 @@
+{
+  "id": "after_intent_before_call",
+  "description": "Crash after intent commit before external call; resume dispatches once.",
+  "crash_location": "after_intent_before_call",
+  "run_id": "tdr-after-intent",
+  "expect": {
+    "crashed": true,
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 1,
+    "dispatch_count_after_crash": 0,
+    "effect_state_before": "intended",
+    "effect_state_after": "completed",
+    "reconciliation_invoked": true,
+    "checkpoint_durability": "durable"
+  }
+}
