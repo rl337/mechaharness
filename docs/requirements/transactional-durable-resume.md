@@ -139,18 +139,62 @@ Pure/idempotent graph runners MUST NOT be forced to implement external-effect re
 
 The effect protocol SHOULD be opt-in through a runner capability/interface or equivalent injectable abstraction so existing computation nodes retain the current lightweight execution path.
 
-### DR-12: June integration story
+### DR-12: Static-data crash-injection user story
 
-Add a client-oriented acceptance story using a fake external coding-job backend shaped like June's intended Cursor integration:
+Add a first-class static-data user story that rigorously exercises durable resume with a dependency-injected fake external coding-job backend shaped like June's intended Cursor integration.
 
-- a graph dispatches a coding job;
-- the fake backend returns a durable external job handle;
-- the harness crashes at `post_effect_pre_record` or the equivalent executable boundary;
-- a fresh executor process resumes from the same SQLite store;
-- the adapter finds/reconciles the original external job;
-- the graph completes without a second dispatch.
+The story MUST run as a parameterized crash-location matrix. Each case starts from the same deterministic fixture, injects a process-failure/crash at exactly one execution boundary, constructs a fresh executor against the same durable SQLite store, resumes the run, and verifies the recovered result.
 
-The story MUST demonstrate the ownership boundary: June-like code supplies backend-specific reconciliation while MechaHarness supplies durable state, effect identity, and resume control.
+At minimum inject crashes:
+
+1. before durable dispatch intent;
+2. immediately after dispatch-intent commit but before the external call;
+3. immediately after the fake backend accepts the job but before its external handle is durably recorded;
+4. immediately after the external handle is recorded but before node outcome/reduction;
+5. immediately after reduction but before the next graph checkpoint;
+6. during/after final commit, including restart after terminal state is durable.
+
+For every crash location, the fixture MUST assert:
+
+- final graph/node state;
+- persisted recovery boundary and revision;
+- effect state before and after restart;
+- whether reconciliation was invoked;
+- the exact number of calls to external dispatch;
+- the exact external job identity observed after restart;
+- whether the node runner itself was re-entered;
+- emitted failure/recovery diagnostics;
+- that a completed/accepted external effect is never duplicated solely because the process crashed.
+
+The fake backend MUST expose deterministic counters and stable job handles through dependency injection so these assertions require no timing assumptions, network access, or real Cursor service.
+
+The particularly important regression case is:
+
+```text
+persist dispatch intent
+        |
+        v
+fake backend accepts external job   (dispatch_count = 1)
+        |
+        X  injected crash before checkpoint/result record
+        |
+        v
+fresh GraphExecutor + same SQLite store
+        |
+        v
+reconcile existing effect/job
+        |
+        v
+complete graph                       (dispatch_count MUST still = 1)
+```
+
+The test MUST fail if resume reaches the dispatch adapter a second time for an effect already known or recoverable as accepted.
+
+Where acceptance after the external call is genuinely unknowable, the story MUST exercise the explicit uncertain-effect path rather than assuming either success or failure. The expected result may be reconciliation or a needs-attention/escalation state, but MUST NOT be an automatic duplicate dispatch.
+
+The story SHOULD be implemented in the repository's normal static fixture/story mechanism so it participates in the same deterministic acceptance suite as the existing durable-resume stories. It MAY use multiple fixture variants if that keeps each expected result legible.
+
+The story MUST demonstrate the ownership boundary: June-like code supplies backend-specific reconciliation while MechaHarness supplies durable state, effect identity, crash injection, and resume control.
 
 ## Compatibility and migration
 
