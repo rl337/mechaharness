@@ -1,0 +1,23 @@
+{
+  "id": "taloneth_insp_eval_claims",
+  "persona": "taloneth",
+  "title": "Compose typed evaluation claims without opaque scores",
+  "kind": "eval_claims_compose",
+  "narrative": "Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].",
+  "implementation": "`Evidence`, `Claim`, and `compose_claims` in `mechaharness.eval_evidence` provide typed evidence pointers and binary assertion composition.",
+  "validation": "Kind `eval_claims_compose`. Soft expects pass/fail/unknown counts.",
+  "footnotes": [
+    {
+      "id": "anth-evals-claims",
+      "label": "Anthropic Demystifying evals for AI agents",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "note": "Graders and assertions"
+    },
+    {
+      "id": "arxiv-bineval",
+      "label": "BINEVAL binary questions",
+      "url": "https://arxiv.org/abs/2606.27226",
+      "note": "Atomic interpretable claims"
+    }
+  ]
+}

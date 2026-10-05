@@ -70,6 +70,9 @@ from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRe
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
 from mechaharness.approval_interrupt import resume_approval, suspend_for_approval
 from mechaharness.context_layers import GraphSharedState, project_node_context
+from mechaharness.eval_evidence import Claim, compose_claims
+from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
+from mechaharness.evaluator import CallableEvaluator, evaluate_claims
 from mechaharness.failure_attribution import (
     attribute_error,
     attribute_with_repair_target,
@@ -329,6 +332,9 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "targeted_rollback_select": _run_targeted_rollback_select,
         "approval_interrupt_cycle": _run_approval_interrupt_cycle,
         "trace_envelope_complete": _run_trace_envelope_complete,
+        "eval_claims_compose": _run_eval_claims_compose,
+        "evaluator_compose_run": _run_evaluator_compose_run,
+        "trial_reliability_metrics": _run_trial_reliability_metrics,
     }
     try:
         runner = runners[kind]
@@ -2309,4 +2315,47 @@ async def _run_trace_envelope_complete(case: StoryCase, backend: StoryBackend) -
     expect = case.load_json("expect.json")
     env = TraceEnvelope.model_validate(request)
     actual = {"complete": envelope_complete(env), "missing": env.missing_fields()}
+    _assert_expect(actual, expect)
+
+
+async def _run_eval_claims_compose(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    claims = [Claim.model_validate(c) for c in request.get("claims") or []]
+    actual = compose_claims(claims)
+    _assert_expect(actual, expect)
+
+
+async def _run_evaluator_compose_run(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    ev = CallableEvaluator(
+        lambda subject: [
+            Claim(
+                id="exists",
+                statement="exists",
+                status="pass" if subject.get("exists") else "fail",
+            )
+        ],
+        evaluator_id="story:exists",
+        held_out=bool(request.get("held_out")),
+    )
+    result = evaluate_claims(ev, request)
+    actual = {"passed": result.passed, "held_out": result.held_out}
+    _assert_expect(actual, expect)
+
+
+async def _run_trial_reliability_metrics(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    trials = [Trial.model_validate(t) for t in request.get("trials") or []]
+    k = int(request.get("k") or 1)
+    rollup = trial_cost_rollup(trials)
+    actual = {
+        "pass_at_k_positive": pass_at_k(trials, k=k) > 0,
+        "trials": rollup["trials"],
+    }
     _assert_expect(actual, expect)

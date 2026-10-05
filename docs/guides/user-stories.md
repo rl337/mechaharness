@@ -1042,6 +1042,40 @@ Kind `harness_experiment_retire` → `_run_harness_experiment_retire`. Soft expe
 
 [^insp-experiment]: [Inspiration requirements (harness experiments)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 1 and 14 — revisable scaffolding; harness changes as testable hypotheses
 
+### `taloneth_insp_eval_claims` — Compose typed evaluation claims without opaque scores
+
+Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].
+
+#### Implementation
+
+`Evidence`, `Claim`, and `compose_claims` in `mechaharness.eval_evidence` provide typed evidence pointers and binary assertion composition.
+
+#### Validation
+
+Kind `eval_claims_compose`. Soft expects pass/fail/unknown counts.
+
+#### Footnotes
+
+[^anth-evals-claims]: [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Graders and assertions
+[^arxiv-bineval]: [BINEVAL binary questions](https://arxiv.org/abs/2606.27226) — Atomic interpretable claims
+
+### `taloneth_insp_evaluator_compose` — Run a versioned held-out evaluator to claims
+
+Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon].
+
+#### Implementation
+
+`Evaluator`, `CallableEvaluator`, and `evaluate_claims` in `mechaharness.evaluator` compose deterministic claim producers with version and held_out metadata beside VerificationPolicy.
+
+#### Validation
+
+Kind `evaluator_compose_run`. Soft expects passed and held_out true.
+
+#### Footnotes
+
+[^anth-evals-evaluator]: [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Deterministic then model graders
+[^arxiv-verif-horizon]: [Verification Horizon](https://arxiv.org/abs/2606.26300) — Held-out evaluator versioning
+
 ### `taloneth_insp_harness_hypothesis` — Express a harness change as a testable hypothesis
 
 Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].
@@ -1073,6 +1107,24 @@ Kind `harness_experiment_retire`. Soft expects retired status when treatment und
 #### Footnotes
 
 [^insp-r01]: [Inspiration requirements (req 1: revisable scaffolding)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 1 — revisable scaffolding
+
+### `taloneth_insp_trial_reliability` — Separate pass@k capability from pass^k reliability
+
+Taloneth records isolated trials with cost and latency, then reports pass@k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, τ-bench, and HumanEval[^anth-evals-trial][^arxiv-taubench][^arxiv-humaneval].
+
+#### Implementation
+
+`Trial`, `pass_at_k`, `pass_caret_k`, and `trial_cost_rollup` in `mechaharness.eval_trial` aggregate isolated attempts.
+
+#### Validation
+
+Kind `trial_reliability_metrics`. Soft expects positive pass_at_k and rollup trial count.
+
+#### Footnotes
+
+[^anth-evals-trial]: [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — pass@k vs pass^k
+[^arxiv-taubench]: [τ-bench](https://arxiv.org/abs/2406.12045) — Reliability and end-state verification
+[^arxiv-humaneval]: [Evaluating LLMs Trained on Code](https://arxiv.org/abs/2107.03374) — pass@k definition
 
 ### `taloneth_offline_decision_export` — Export decision data without leaking future outcomes
 
