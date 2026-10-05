@@ -236,18 +236,54 @@
 <p>Pure/idempotent graph runners MUST NOT be forced to implement external-effect reconciliation.</p>
 <p>The effect protocol SHOULD be opt-in through a runner capability/interface or equivalent injectable abstraction so existing computation nodes retain the current lightweight execution path.</p>
 </section>
-<section id="dr-12-june-integration-story">
-<h3>DR-12: June integration story<a class="headerlink" href="#dr-12-june-integration-story" title="Link to this heading"></a></h3>
-<p>Add a client-oriented acceptance story using a fake external coding-job backend shaped like June’s intended Cursor integration:</p>
+<section id="dr-12-static-data-crash-injection-user-story">
+<h3>DR-12: Static-data crash-injection user story<a class="headerlink" href="#dr-12-static-data-crash-injection-user-story" title="Link to this heading"></a></h3>
+<p>Add a first-class static-data user story that rigorously exercises durable resume with a dependency-injected fake external coding-job backend shaped like June’s intended Cursor integration.</p>
+<p>The story MUST run as a parameterized crash-location matrix. Each case starts from the same deterministic fixture, injects a process-failure/crash at exactly one execution boundary, constructs a fresh executor against the same durable SQLite store, resumes the run, and verifies the recovered result.</p>
+<p>At minimum inject crashes:</p>
+<ol class="arabic simple">
+<li><p>before durable dispatch intent;</p></li>
+<li><p>immediately after dispatch-intent commit but before the external call;</p></li>
+<li><p>immediately after the fake backend accepts the job but before its external handle is durably recorded;</p></li>
+<li><p>immediately after the external handle is recorded but before node outcome/reduction;</p></li>
+<li><p>immediately after reduction but before the next graph checkpoint;</p></li>
+<li><p>during/after final commit, including restart after terminal state is durable.</p></li>
+</ol>
+<p>For every crash location, the fixture MUST assert:</p>
 <ul class="simple">
-<li><p>a graph dispatches a coding job;</p></li>
-<li><p>the fake backend returns a durable external job handle;</p></li>
-<li><p>the harness crashes at <code class="docutils literal notranslate"><span class="pre">post_effect_pre_record</span></code> or the equivalent executable boundary;</p></li>
-<li><p>a fresh executor process resumes from the same SQLite store;</p></li>
-<li><p>the adapter finds/reconciles the original external job;</p></li>
-<li><p>the graph completes without a second dispatch.</p></li>
+<li><p>final graph/node state;</p></li>
+<li><p>persisted recovery boundary and revision;</p></li>
+<li><p>effect state before and after restart;</p></li>
+<li><p>whether reconciliation was invoked;</p></li>
+<li><p>the exact number of calls to external dispatch;</p></li>
+<li><p>the exact external job identity observed after restart;</p></li>
+<li><p>whether the node runner itself was re-entered;</p></li>
+<li><p>emitted failure/recovery diagnostics;</p></li>
+<li><p>that a completed/accepted external effect is never duplicated solely because the process crashed.</p></li>
 </ul>
-<p>The story MUST demonstrate the ownership boundary: June-like code supplies backend-specific reconciliation while MechaHarness supplies durable state, effect identity, and resume control.</p>
+<p>The fake backend MUST expose deterministic counters and stable job handles through dependency injection so these assertions require no timing assumptions, network access, or real Cursor service.</p>
+<p>The particularly important regression case is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>persist dispatch intent
+        |
+        v
+fake backend accepts external job   (dispatch_count = 1)
+        |
+        X  injected crash before checkpoint/result record
+        |
+        v
+fresh GraphExecutor + same SQLite store
+        |
+        v
+reconcile existing effect/job
+        |
+        v
+complete graph                       (dispatch_count MUST still = 1)
+</pre></div>
+</div>
+<p>The test MUST fail if resume reaches the dispatch adapter a second time for an effect already known or recoverable as accepted.</p>
+<p>Where acceptance after the external call is genuinely unknowable, the story MUST exercise the explicit uncertain-effect path rather than assuming either success or failure. The expected result may be reconciliation or a needs-attention/escalation state, but MUST NOT be an automatic duplicate dispatch.</p>
+<p>The story SHOULD be implemented in the repository’s normal static fixture/story mechanism so it participates in the same deterministic acceptance suite as the existing durable-resume stories. It MAY use multiple fixture variants if that keeps each expected result legible.</p>
+<p>The story MUST demonstrate the ownership boundary: June-like code supplies backend-specific reconciliation while MechaHarness supplies durable state, effect identity, crash injection, and resume control.</p>
 </section>
 </section>
 <section id="compatibility-and-migration">
