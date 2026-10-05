@@ -70,8 +70,11 @@ from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRe
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
 from mechaharness.anchor_evidence import AnchorEvidence, AnchorRequirement, anchors_satisfied
 from mechaharness.approval_interrupt import resume_approval, suspend_for_approval
+from mechaharness.component_ablation import ComponentAblationExperiment, ablation_delta
 from mechaharness.context_compaction import CompactionInput, DefaultStagedCompaction
 from mechaharness.context_layers import GraphSharedState, project_node_context
+from mechaharness.coordination_cost import CoordinationCostMetrics, summarize_coordination_cost
+from mechaharness.environment_delta import EnvironmentSnapshot, apply_deltas, emit_delta
 from mechaharness.eval_evidence import Claim, compose_claims
 from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
 from mechaharness.evaluator import CallableEvaluator, evaluate_claims
@@ -88,13 +91,21 @@ from mechaharness.graph_state_governance import (
     GraphStateGovernance,
     authorize_write,
 )
+from mechaharness.graph_templates import GraphTemplateParams, InitializePreflightTemplate
 from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
+from mechaharness.handoff_record import HandoffRecord
+from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
+from mechaharness.instruction_component import InstructionComponent
 from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
+from mechaharness.loop_health import LoopHealthSignals, should_wind_down
 from mechaharness.model_input_manifest import (
     ModelInputManifest,
     attach_manifest_ref,
     reconstruct_messages,
 )
+from mechaharness.operation_registry import OperationContract
+from mechaharness.resume_cost import ResumeCostMetrics, summarize_resume_cost
+from mechaharness.rule_promotion import PromotionRecord, promote_soft_to_hard
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
 from mechaharness.work_in_progress_policy import WorkInProgressPolicy
 from mechaharness.workspace_isolation import (
@@ -356,6 +367,17 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "context_compaction_staged": _run_context_compaction_staged,
         "state_governance_write": _run_state_governance_write,
         "anchor_evidence_require": _run_anchor_evidence_require,
+        "component_ablation_delta": _run_component_ablation_delta,
+        "resume_cost_summarize": _run_resume_cost_summarize,
+        "coordination_cost_summarize": _run_coordination_cost_summarize,
+        "loop_health_wind_down": _run_loop_health_wind_down,
+        "harness_health_cleanup": _run_harness_health_cleanup,
+        "rule_promotion_hard": _run_rule_promotion_hard,
+        "instruction_scope_metadata": _run_instruction_scope_metadata,
+        "initialize_preflight_template": _run_initialize_preflight_template,
+        "handoff_record_fields": _run_handoff_record_fields,
+        "operation_compensation_meta": _run_operation_compensation_meta,
+        "environment_delta_apply": _run_environment_delta_apply,
     }
     try:
         runner = runners[kind]
@@ -2484,4 +2506,122 @@ async def _run_anchor_evidence_require(case: StoryCase, backend: StoryBackend) -
     )
     anchors = [AnchorEvidence.model_validate(a) for a in request.get("anchors") or []]
     actual = {"satisfied": anchors_satisfied(req, anchors)}
+    _assert_expect(actual, expect)
+
+
+async def _run_component_ablation_delta(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    exp = ComponentAblationExperiment.model_validate(request)
+    actual = {"success_delta": ablation_delta(exp)["success_delta"]}
+    _assert_expect(actual, expect)
+
+
+async def _run_resume_cost_summarize(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    actual = summarize_resume_cost(ResumeCostMetrics.model_validate(request))
+    _assert_expect(actual, expect)
+
+
+async def _run_coordination_cost_summarize(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    actual = summarize_coordination_cost(CoordinationCostMetrics.model_validate(request))
+    _assert_expect(actual, expect)
+
+
+async def _run_loop_health_wind_down(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    actual = {"wind_down": should_wind_down(LoopHealthSignals.model_validate(request))}
+    _assert_expect(actual, expect)
+
+
+async def _run_harness_health_cleanup(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    actual = {"needs_cleanup": needs_cleanup(HarnessHealthSnapshot.model_validate(request))}
+    _assert_expect(actual, expect)
+
+
+async def _run_rule_promotion_hard(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    rec = PromotionRecord(
+        observed_pattern=str(request.get("observed_pattern") or ""),
+        hypothesis=str(request.get("hypothesis") or ""),
+        experiment_ref=request.get("experiment_ref"),
+        soft_instruction_ref=request.get("soft_instruction_ref"),
+    )
+    hard = promote_soft_to_hard(rec, hard_invariant_ref=str(request.get("hard_invariant_ref") or "h"))
+    actual = {"stage": hard.stage}
+    _assert_expect(actual, expect)
+
+
+async def _run_instruction_scope_metadata(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    comp = InstructionComponent(
+        kind="procedure",
+        title=str(request.get("title") or "t"),
+        body=str(request.get("body") or ""),
+        scope=request.get("scope"),
+        authority=request.get("authority"),
+        estimated_context_cost=request.get("estimated_context_cost"),
+    )
+    actual = {
+        "scope": comp.scope,
+        "estimated_context_cost": comp.estimated_context_cost,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_initialize_preflight_template(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    graph = InitializePreflightTemplate().instantiate(
+        GraphTemplateParams(goal=str(request.get("goal") or "preflight"))
+    )
+    actual = {"nodes_include": sorted(graph.nodes)}
+    _assert_expect(actual, expect)
+
+
+async def _run_handoff_record_fields(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    rec = HandoffRecord.model_validate(request)
+    actual = {"next_action": rec.next_action}
+    _assert_expect(actual, expect)
+
+
+async def _run_operation_compensation_meta(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    op = OperationContract.model_validate(request)
+    actual = {
+        "idempotent": op.idempotent,
+        "compensation_strategy": op.compensation_strategy,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_environment_delta_apply(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    before = EnvironmentSnapshot.model_validate(request["before"])
+    after = EnvironmentSnapshot.model_validate(request["after"])
+    rebuilt = apply_deltas(before, [emit_delta(before, after)])
+    actual = {"cwd": rebuilt.data.get("cwd")}
     _assert_expect(actual, expect)

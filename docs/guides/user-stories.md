@@ -80,6 +80,39 @@ Kind `pass_through` on `openai_compat` trees with mock transport. Soft expects: 
 
 1. [OpenAI Chat Completions](https://platform.openai.com/docs/api-reference/chat) — Wire models for reason-lane HTTP
 
+### `nubble_insp_coordination_cost` — Report parallel coordination cost on fan-out
+
+Nubble compares wall-clock critical path, duplicated context, and fan-in review cost so parallelism is measured rather than assumed beneficial. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-coord][^wl-p08-coord].
+
+#### Implementation
+
+`CoordinationCostMetrics` and `summarize_coordination_cost` in `mechaharness.coordination_cost` report fan-out orchestration cost.
+
+#### Validation
+
+Kind `coordination_cost_summarize`. Soft expects branch_count.
+
+#### Footnotes
+
+[^wl-l14-coord]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Coordination cost
+[^wl-p08-coord]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Measure parallelism
+
+### `nubble_insp_environment_delta` — Project environment context as versioned deltas
+
+Nubble sends environment deltas instead of repeating full snapshots while still reconstructing deterministic state. Accepts WalkingLabs Codex guidance[^wl-codex-delta].
+
+#### Implementation
+
+`EnvironmentSnapshot`, `EnvironmentDelta`, `emit_delta`, and `apply_deltas` in `mechaharness.environment_delta`.
+
+#### Validation
+
+Kind `environment_delta_apply`. Soft expects reconstructed cwd.
+
+#### Footnotes
+
+[^wl-codex-delta]: [WalkingLabs Codex harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/) — Environment deltas
+
 ### `nubble_insp_environment_linkage` — Surface environment incompatibility as linkage failure
 
 Missing environment capability must become a structured pre-exec failure, not a mysterious mid-run error. Accepts inspiration requirement 16[^insp-r16].
@@ -128,6 +161,23 @@ Kind `capability_need_routing`. Soft expects selected_model_class matches need.
 #### Footnotes
 
 [^insp-r13]: [Inspiration requirements (req 13: model routing)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 13 — model routing
+
+### `nubble_insp_resume_cost` — Measure wake-to-productive resume cost
+
+Nubble records how expensive resume is — rebuild tokens, tool calls, and wake-to-first-productive time — so continuity work can be optimized. Accepts WalkingLabs L05 and P03 guidance[^wl-l05-resume][^wl-p03-resume].
+
+#### Implementation
+
+`ResumeCostMetrics` and `summarize_resume_cost` in `mechaharness.resume_cost` capture resume telemetry.
+
+#### Validation
+
+Kind `resume_cost_summarize`. Soft expects rebuild_tokens.
+
+#### Footnotes
+
+[^wl-l05-resume]: [WalkingLabs L05 Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/) — Resume cost
+[^wl-p03-resume]: [WalkingLabs P03 Multi-Session Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-03-multi-session-continuity/) — Crash/resume metrics
 
 ### `nubble_insp_trace_envelope` — Require provenance on every trace envelope
 
@@ -704,6 +754,22 @@ Kind `graph_transition_inspect`. Soft expects validation empty and rollback/end 
 [^wl-l14-transitions]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Transitions vs dependencies
 [^wl-p08-transitions]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Explicit transitions
 
+### `fangore_insp_handoff_record` — Capture why across session handoffs
+
+Handoffs preserve completed/pending work, decisions, rationale, rejected alternatives, risks, and next action — hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff].
+
+#### Implementation
+
+`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema; storage remains host-owned.
+
+#### Validation
+
+Kind `handoff_record_fields`. Soft expects next_action.
+
+#### Footnotes
+
+[^wl-l05-handoff]: [WalkingLabs L05 Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/) — HandoffRecord
+
 ### `fangore_insp_independent_review` — Review artifacts in isolated reviewer context
 
 Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10].
@@ -720,6 +786,22 @@ Kind `independent_review_template`. Soft expects isolated payload flags and two 
 
 [^insp-r10]: [Inspiration requirements (req 10: independent review)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 10 — independent review
 
+### `fangore_insp_initialize_preflight` — Run an initialize preflight graph template before work
+
+Fangore starts substantive graphs only after an initialize/preflight template completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].
+
+#### Implementation
+
+`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight` builds linkage → capability → checkpoint → ready.
+
+#### Validation
+
+Kind `initialize_preflight_template`. Soft expects node ids include ready.
+
+#### Footnotes
+
+[^wl-l06-init]: [WalkingLabs L06 Initialization Phase](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-06-why-initialization-needs-its-own-phase/) — Init preflight
+
 ### `fangore_insp_instruction_gotchas` — Measure gotcha trigger rates before promoting them
 
 Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8[^insp-r08].
@@ -735,6 +817,22 @@ Kind `instruction_gotcha_metrics`. Soft expects over_trigger recorded and active
 #### Footnotes
 
 [^insp-r08]: [Inspiration requirements (req 8: skills and gotchas)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 8 — skills and gotchas
+
+### `fangore_insp_instruction_scope` — Scope instruction components with authority and cost
+
+Instruction components declare scope, authority, and estimated context cost so entry files stay routers rather than encyclopedias. Accepts WalkingLabs L04 guidance[^wl-l04-instr].
+
+#### Implementation
+
+`InstructionComponent` fields `scope`, `priority`, `authority`, and `estimated_context_cost` in `mechaharness.instruction_component`.
+
+#### Validation
+
+Kind `instruction_scope_metadata`. Soft expects scope and cost.
+
+#### Footnotes
+
+[^wl-l04-instr]: [WalkingLabs L04 Split Instructions](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-04-why-one-giant-instruction-file-fails/) — Instruction metadata
 
 ### `fangore_insp_isolation_io` — Validate isolation and template I/O contracts
 
@@ -848,6 +946,38 @@ Kind `graph_linkage_preflight`. Soft expects `no_runner` on missing kinds and ok
 #### Footnotes
 
 [^insp-r02]: [Inspiration requirements (req 2: linkage vs DI)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 2 — linkage vs DI
+
+### `fangore_insp_loop_health` — Wind down loops when verification debt grows
+
+Long loops accumulate verification debt; Fangore winds them down when independent verification age or repeated failures exceed host thresholds. Accepts WalkingLabs L13 guidance[^wl-l13-loop].
+
+#### Implementation
+
+`LoopHealthSignals` and `should_wind_down` in `mechaharness.loop_health` expose verification-debt and failure signals.
+
+#### Validation
+
+Kind `loop_health_wind_down`. Soft expects wind_down true.
+
+#### Footnotes
+
+[^wl-l13-loop]: [WalkingLabs L13 Loop Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-13-loop-engineering/) — Loop health
+
+### `fangore_insp_operation_compensation` — Declare operation idempotency and compensation
+
+Cleanup and recovery operations declare idempotency and optional compensation so retries do not double side effects. Accepts WalkingLabs L12 guidance[^wl-l12-idem].
+
+#### Implementation
+
+`OperationContract.idempotent` and `compensation_strategy` in `mechaharness.operation_registry`.
+
+#### Validation
+
+Kind `operation_compensation_meta`. Soft expects idempotent true.
+
+#### Footnotes
+
+[^wl-l12-idem]: [WalkingLabs L12 Clean Session Handoffs](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/) — Idempotency
 
 ### `fangore_insp_risk_autonomy` — Scale controls by action consequence class
 
@@ -1157,6 +1287,23 @@ Kind `harness_experiment_retire` → `_run_harness_experiment_retire`. Soft expe
 
 [^insp-experiment]: [Inspiration requirements (harness experiments)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 1 and 14 — revisable scaffolding; harness changes as testable hypotheses
 
+### `taloneth_insp_component_ablation` — Ablate harness components against a matched corpus
+
+Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance[^wl-l02-ablation][^wl-p01-ablation].
+
+#### Implementation
+
+`ComponentAblationExperiment` and `ablation_delta` in `mechaharness.component_ablation` standardize baseline fingerprint, disabled component IDs, and quality/cost deltas.
+
+#### Validation
+
+Kind `component_ablation_delta`. Soft expects negative success_delta.
+
+#### Footnotes
+
+[^wl-l02-ablation]: [WalkingLabs L02 What a Harness Is](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/) — Ablate components
+[^wl-p01-ablation]: [WalkingLabs P01 Baseline vs Minimal](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/) — Matched corpus
+
 ### `taloneth_insp_eval_claims` — Compose typed evaluation claims without opaque scores
 
 Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].
@@ -1191,6 +1338,23 @@ Kind `evaluator_compose_run`. Soft expects passed and held_out true.
 [^anth-evals-evaluator]: [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Deterministic then model graders
 [^arxiv-verif-horizon]: [Verification Horizon](https://arxiv.org/abs/2606.26300) — Held-out evaluator versioning
 
+### `taloneth_insp_harness_health` — Snapshot harness health for cleanup evidence
+
+Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance[^wl-l02-health][^wl-l12-health].
+
+#### Implementation
+
+`HarnessHealthSnapshot` and `needs_cleanup` in `mechaharness.harness_health` provide the optional health schema.
+
+#### Validation
+
+Kind `harness_health_cleanup`. Soft expects needs_cleanup true.
+
+#### Footnotes
+
+[^wl-l02-health]: [WalkingLabs L02 What a Harness Is](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/) — Harness debt
+[^wl-l12-health]: [WalkingLabs L12 Clean Session Handoffs](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/) — Cleanup evidence
+
 ### `taloneth_insp_harness_hypothesis` — Express a harness change as a testable hypothesis
 
 Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].
@@ -1206,6 +1370,23 @@ Kind `harness_experiment_retire`. Soft expects retired when treatment loses (evi
 #### Footnotes
 
 [^insp-r14]: [Inspiration requirements (req 14: harness hypotheses)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 14 — harness hypotheses
+
+### `taloneth_insp_rule_promotion` — Promote review feedback into a hard invariant with provenance
+
+Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo].
+
+#### Implementation
+
+`PromotionRecord`, `promote_soft_to_hard`, and `rollback_promotion` in `mechaharness.rule_promotion` model the promotion chain.
+
+#### Validation
+
+Kind `rule_promotion_hard`. Soft expects stage hard.
+
+#### Footnotes
+
+[^wl-l10-promo]: [WalkingLabs L10 Full Pipeline Verification](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-10-why-end-to-end-testing-changes-results/) — Promote feedback
+[^wl-l12-promo]: [WalkingLabs L12 Clean Session Handoffs](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/) — Process changes
 
 ### `taloneth_insp_scaffolding_retire` — Retire scaffolding that loses a controlled experiment
 
