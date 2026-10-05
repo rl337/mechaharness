@@ -554,6 +554,23 @@ Kind `graph_budget_limits`. Soft expects soft wind-down then hard fail levels. R
 
 [^insp-budget]: [Inspiration stop/budget ceilings](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 stop contracts and resource budgets on repeating work
 
+### `fangore_insp_graph_transitions` — Declare graph transitions separately from dependencies
+
+Fangore needs success, rollback, and end paths declared as transitions — not inferred from dependency edges alone — so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-transitions][^wl-p08-transitions].
+
+#### Implementation
+
+`TransitionContract` / `GraphTransition` in `mechaharness.graph_transition` declare success, predicate, retry, rollback, escalate, cancel, and end edges orthogonal to `DependencyEdge`. `inspect_transitions` lists possible next steps for a node.
+
+#### Validation
+
+Kind `graph_transition_inspect`. Soft expects validation empty and rollback/end kinds for the verify node.
+
+#### Footnotes
+
+[^wl-l14-transitions]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Transitions vs dependencies
+[^wl-p08-transitions]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Explicit transitions
+
 ### `fangore_insp_independent_review` — Review artifacts in isolated reviewer context
 
 Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10].
