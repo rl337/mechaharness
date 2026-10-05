@@ -1,0 +1,23 @@
+{
+  "id": "fangore_insp_wip_backpressure",
+  "persona": "fangore",
+  "title": "Apply WIP back-pressure without hard-coding WIP=1",
+  "kind": "wip_policy_allows",
+  "narrative": "Fangore limits concurrent active nodes and per-write-scope work so agents cannot overreach, while hosts still choose thresholds rather than a universal WIP=1. Accepts WalkingLabs L07 and L08 guidance[^wl-l07-wip][^wl-l08-wip].",
+  "implementation": "`WorkInProgressPolicy` in `mechaharness.work_in_progress_policy` gates concurrency by active nodes, write scope, resource class, and consequence.",
+  "validation": "Kind `wip_policy_allows`. Soft expects allow then deny when scope saturated.",
+  "footnotes": [
+    {
+      "id": "wl-l07-wip",
+      "label": "WalkingLabs L07 Task Boundaries",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-07-why-agents-overreach-and-under-finish/",
+      "note": "Bound WIP"
+    },
+    {
+      "id": "wl-l08-wip",
+      "label": "WalkingLabs L08 Feature Lists",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/",
+      "note": "Back-pressure"
+    }
+  ]
+}

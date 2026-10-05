@@ -146,6 +146,23 @@ Kind `trace_envelope_complete`. Soft expects complete true and no missing fields
 [^wl-l11-trace]: [WalkingLabs L11 Runtime Observability](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-11-why-observability-belongs-inside-the-harness/) — Trace reconstructs decisions
 [^wl-deepseek-trace]: [WalkingLabs DeepSeek harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/) — Observable execution-affecting state
 
+### `nubble_insp_workspace_isolation` — Acquire workspace isolation through a host provider seam
+
+Nubble asks branches for isolation without hard-coding worktrees or containers — the host provider supplies the mechanism. Accepts WalkingLabs L13 and Codex guidance[^wl-l13-workspace][^wl-codex-workspace].
+
+#### Implementation
+
+`WorkspaceIsolationProvider` and `InMemoryWorkspaceIsolationProvider` in `mechaharness.workspace_isolation` define the acquire/release capability seam.
+
+#### Validation
+
+Kind `workspace_isolation_acquire`. Soft expects memory provider_kind.
+
+#### Footnotes
+
+[^wl-l13-workspace]: [WalkingLabs L13 Autonomous Loops](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-13-loop-engineering/) — Isolation as capability
+[^wl-codex-workspace]: [WalkingLabs Codex harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/) — Sandbox seam
+
 ### `nubble_lane_load_hint` — Refuse work when the wrong inference profile is loaded
 
 Nubble is on call when a refund-routing job fails on the local inference host. The job needs the judge profile, but an earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error. It must tell him, in plain operator language, that this work needs the judge lane and which load command to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile mismatch wastes incident time.
@@ -459,6 +476,22 @@ Covers: POL-04, GAT-04.
 
 Kind `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
 
+### `fangore_insp_anchor_evidence` — Require external anchor evidence on high-autonomy work
+
+High-autonomy graphs must periodically attach labeled external anchors so branches cannot drift on mutually reinforcing model judgments alone. Accepts WalkingLabs L14 guidance[^wl-l14-anchor].
+
+#### Implementation
+
+`AnchorRequirement`, `AnchorEvidence`, and `anchors_satisfied` in `mechaharness.anchor_evidence` label and require anchor kinds.
+
+#### Validation
+
+Kind `anchor_evidence_require`. Soft expects satisfied true.
+
+#### Footnotes
+
+[^wl-l14-anchor]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — External anchors
+
 ### `fangore_insp_approval_interrupt` — Suspend a graph for durable human approval
 
 High-consequence steps must pause on a durable approval interrupt with evidence, timeout policy, and actor provenance — then resume when a human decides. Accepts WalkingLabs P08 and L14 guidance[^wl-p08-approval][^wl-l14-approval].
@@ -507,6 +540,23 @@ Kind `capability_envelope_narrow`. Soft expects narrow ok, widen raises, child d
 #### Footnotes
 
 [^insp-r07]: [Inspiration requirements (req 7: delegation envelopes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 7 — delegation envelopes
+
+### `fangore_insp_context_compaction` — Compact context in staged lossless then lossy steps
+
+Long runs compact context through staged strategies that record which information classes were discarded. Accepts WalkingLabs L05 and Claude Code design guidance[^wl-l05-compact][^wl-claude-compact].
+
+#### Implementation
+
+`ContextCompactionStrategy` and `DefaultStagedCompaction` in `mechaharness.context_compaction` apply lossless dedupe, distill truncation, and optional lossy drops with provenance.
+
+#### Validation
+
+Kind `context_compaction_staged`. Soft expects deduplicated discarded class.
+
+#### Footnotes
+
+[^wl-l05-compact]: [WalkingLabs L05 Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/) — Staged compaction
+[^wl-claude-compact]: [WalkingLabs Claude Code harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/claude-code/) — Pluggable compaction
 
 ### `fangore_insp_context_layers` — Project node-private context from shared graph state
 
@@ -573,6 +623,22 @@ Kind `dynamic_subgraph_nest`. Soft expects parent ok, child_status ok, nested gr
 
 [^insp-r03]: [Inspiration requirements (req 3: dynamic subgraphs)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 3 — dynamic subgraphs
 
+### `fangore_insp_exit_clean_state` — Require clean-state exit before handoff
+
+A run is not done until checkpoint durability, pending-node policy, and optional handoff records satisfy a clean-state exit contract. Accepts WalkingLabs L12 guidance[^wl-l12-exit].
+
+#### Implementation
+
+`CleanStateContract` / `ExitContract` and `evaluate_exit` in `mechaharness.exit_contract` check post-run clean-state invariants.
+
+#### Validation
+
+Kind `exit_clean_state_eval`. Soft expects ok true.
+
+#### Footnotes
+
+[^wl-l12-exit]: [WalkingLabs L12 Clean Session Handoffs](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/) — Clean-state exit
+
 ### `fangore_insp_failure_attribution` — Attribute repeated failures to linkage or tools
 
 When the same failure class repeats, Fangore needs structured attribution so the process can improve — not one-off output patches. Accepts inspiration requirement 11[^insp-r11].
@@ -588,6 +654,22 @@ Kind `failure_attribution_trace`. Soft expects linkage category and repeated cla
 #### Footnotes
 
 [^insp-r11]: [Inspiration requirements (req 11: fix the process)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 11 — fix the process
+
+### `fangore_insp_fan_in_policy` — Accept fan-in with a named quorum policy
+
+Parallel branches rejoin through an explicit fan-in acceptance policy such as quorum rather than an implicit reduce. Accepts WalkingLabs P08 guidance[^wl-p08-fanin].
+
+#### Implementation
+
+`FanInPolicy` and `accept_fan_in` in `mechaharness.fan_in_policy` support ALL/ANY/quorum/weighted/predicate/judge/human/custom strategies.
+
+#### Validation
+
+Kind `fan_in_policy_accept`. Soft expects quorum acceptance true.
+
+#### Footnotes
+
+[^wl-p08-fanin]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Fan-in acceptance
 
 ### `fangore_insp_graph_budget` — Enforce soft and hard spend limits on graph runs
 
@@ -815,6 +897,22 @@ Kind `sparse_advisor_consult`. Soft expects first consult ok, second blocked.
 
 [^insp-r18]: [Inspiration requirements (req 18: advisor)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 18 — advisor
 
+### `fangore_insp_state_governance` — Freeze graph metric ownership against agent writes
+
+Graph quality targets have owners and can be frozen so agents cannot silently mutate success criteria. Accepts WalkingLabs L14 guidance[^wl-l14-gov].
+
+#### Implementation
+
+`GraphStateGovernance`, `FieldGovernance`, and `authorize_write` in `mechaharness.graph_state_governance` enforce owner/writer/mutability rules.
+
+#### Validation
+
+Kind `state_governance_write`. Soft expects frozen field denies writes.
+
+#### Footnotes
+
+[^wl-l14-gov]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Metric ownership
+
 ### `fangore_insp_stop_contract` — Require a stop contract on repeating graph steps
 
 A repeating repair step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration requirement 4[^insp-r04]. Complements `fangore_insp_linkage_preflight` and `fangore_convergence_ceiling`.
@@ -894,6 +992,23 @@ Kind `wake_reresolve_resume`. Soft expects re-resolve ok then successful resume 
 #### Footnotes
 
 [^insp-r17]: [Inspiration requirements (req 17: persistent goals (library hooks))](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 17 — persistent goals (library hooks)
+
+### `fangore_insp_wip_backpressure` — Apply WIP back-pressure without hard-coding WIP=1
+
+Fangore limits concurrent active nodes and per-write-scope work so agents cannot overreach, while hosts still choose thresholds rather than a universal WIP=1. Accepts WalkingLabs L07 and L08 guidance[^wl-l07-wip][^wl-l08-wip].
+
+#### Implementation
+
+`WorkInProgressPolicy` in `mechaharness.work_in_progress_policy` gates concurrency by active nodes, write scope, resource class, and consequence.
+
+#### Validation
+
+Kind `wip_policy_allows`. Soft expects allow then deny when scope saturated.
+
+#### Footnotes
+
+[^wl-l07-wip]: [WalkingLabs L07 Task Boundaries](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-07-why-agents-overreach-and-under-finish/) — Bound WIP
+[^wl-l08-wip]: [WalkingLabs L08 Feature Lists](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/) — Back-pressure
 
 ### `fangore_local_plan_resume` — Resume a durable local plan after a crash
 

@@ -68,16 +68,25 @@ from mechaharness.decision_surfaces import (
 )
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
+from mechaharness.anchor_evidence import AnchorEvidence, AnchorRequirement, anchors_satisfied
 from mechaharness.approval_interrupt import resume_approval, suspend_for_approval
+from mechaharness.context_compaction import CompactionInput, DefaultStagedCompaction
 from mechaharness.context_layers import GraphSharedState, project_node_context
 from mechaharness.eval_evidence import Claim, compose_claims
 from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
 from mechaharness.evaluator import CallableEvaluator, evaluate_claims
+from mechaharness.exit_contract import CleanStateContract, evaluate_exit
 from mechaharness.failure_attribution import (
     attribute_error,
     attribute_with_repair_target,
     detect_repeated_failure_classes,
     select_rollback_target,
+)
+from mechaharness.fan_in_policy import FanInPolicy, accept_fan_in
+from mechaharness.graph_state_governance import (
+    FieldGovernance,
+    GraphStateGovernance,
+    authorize_write,
 )
 from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
 from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
@@ -87,6 +96,11 @@ from mechaharness.model_input_manifest import (
     reconstruct_messages,
 )
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
+from mechaharness.work_in_progress_policy import WorkInProgressPolicy
+from mechaharness.workspace_isolation import (
+    InMemoryWorkspaceIsolationProvider,
+    WorkspaceIsolationRequest,
+)
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -335,6 +349,13 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "eval_claims_compose": _run_eval_claims_compose,
         "evaluator_compose_run": _run_evaluator_compose_run,
         "trial_reliability_metrics": _run_trial_reliability_metrics,
+        "wip_policy_allows": _run_wip_policy_allows,
+        "fan_in_policy_accept": _run_fan_in_policy_accept,
+        "exit_clean_state_eval": _run_exit_clean_state_eval,
+        "workspace_isolation_acquire": _run_workspace_isolation_acquire,
+        "context_compaction_staged": _run_context_compaction_staged,
+        "state_governance_write": _run_state_governance_write,
+        "anchor_evidence_require": _run_anchor_evidence_require,
     }
     try:
         runner = runners[kind]
@@ -2358,4 +2379,109 @@ async def _run_trial_reliability_metrics(case: StoryCase, backend: StoryBackend)
         "pass_at_k_positive": pass_at_k(trials, k=k) > 0,
         "trials": rollup["trials"],
     }
+    _assert_expect(actual, expect)
+
+
+async def _run_wip_policy_allows(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    policy = WorkInProgressPolicy(
+        max_active_nodes=request.get("max_active_nodes"),
+        max_per_write_scope=request.get("max_per_write_scope"),
+    )
+    active = int(request.get("active_nodes") or 0)
+    actual = {
+        "allows_new_scope": policy.allows(
+            active_nodes=active, write_scope="other", active_in_scope=0
+        ),
+        "allows_same_scope": policy.allows(
+            active_nodes=active,
+            write_scope="repo",
+            active_in_scope=int(request.get("active_in_scope") or 0),
+        ),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_fan_in_policy_accept(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    policy = FanInPolicy(
+        strategy=str(request.get("strategy") or "all"),
+        quorum=request.get("quorum"),
+    )
+    actual = {"accepted": accept_fan_in(policy, results=list(request.get("results") or []))}
+    _assert_expect(actual, expect)
+
+
+async def _run_exit_clean_state_eval(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    report = evaluate_exit(
+        CleanStateContract(require_handoff_record=bool(request.get("require_handoff_record"))),
+        pending_nodes=list(request.get("pending_nodes") or []),
+        checkpoint_durable=bool(request.get("checkpoint_durable")),
+        unresolved_effects=list(request.get("unresolved_effects") or []),
+        handoff_record_ref=request.get("handoff_record_ref"),
+    )
+    actual = {"ok": report.ok, "issues": report.issues}
+    _assert_expect(actual, expect)
+
+
+async def _run_workspace_isolation_acquire(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    provider = InMemoryWorkspaceIsolationProvider()
+    handle = provider.acquire(WorkspaceIsolationRequest(label=str(request.get("label") or "x")))
+    provider.release(handle)
+    actual = {"provider_kind": handle.provider_kind, "released": True}
+    _assert_expect(actual, expect)
+
+
+async def _run_context_compaction_staged(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    result = DefaultStagedCompaction().compact(
+        CompactionInput(messages=list(request.get("messages") or []))
+    )
+    actual = {"discarded_include": result.discarded_classes}
+    _assert_expect(actual, expect)
+
+
+async def _run_state_governance_write(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    gov = GraphStateGovernance(
+        fields={
+            "quality_target": FieldGovernance(
+                owner=str(request.get("owner") or "ops"),
+                writers=list(request.get("writers") or []),
+                mutable=bool(request.get("mutable")),
+            )
+        }
+    )
+    actual = {
+        "allowed": authorize_write(
+            gov, field="quality_target", actor=str(request.get("actor") or "agent")
+        )
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_anchor_evidence_require(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    req = AnchorRequirement(
+        kinds=list(request.get("kinds") or []),
+        min_count=int(request.get("min_count") or 1),
+    )
+    anchors = [AnchorEvidence.model_validate(a) for a in request.get("anchors") or []]
+    actual = {"satisfied": anchors_satisfied(req, anchors)}
     _assert_expect(actual, expect)
