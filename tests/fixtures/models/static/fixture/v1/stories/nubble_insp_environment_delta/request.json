@@ -1,0 +1,14 @@
+{
+  "before": {
+    "version": 1,
+    "data": {
+      "cwd": "/app"
+    }
+  },
+  "after": {
+    "version": 2,
+    "data": {
+      "cwd": "/tmp"
+    }
+  }
+}
