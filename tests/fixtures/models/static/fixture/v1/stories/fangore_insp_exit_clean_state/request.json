@@ -1,0 +1,7 @@
+{
+  "require_handoff_record": true,
+  "pending_nodes": [],
+  "checkpoint_durable": true,
+  "unresolved_effects": [],
+  "handoff_record_ref": "handoff:1"
+}
