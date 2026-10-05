@@ -16,7 +16,7 @@ MechaHarness exposes reusable contracts hosts and templates can validate::
     ...     budget_share=0.25,
     ...     cancellable=True,
     ... )
-    >>> iso.validate()
+    >>> iso.validation_issues()
     []
     >>> io = TemplateIOContract(
     ...     inputs={"goal": "string"},
@@ -51,7 +51,7 @@ class IsolationContract(BaseModel):
     supersedable: bool = False
     parent_visible_summary_keys: list[str] = Field(default_factory=list)
 
-    def validate(self) -> list[str]:
+    def validation_issues(self) -> list[str]:
         issues: list[str] = []
         if not (0.0 < self.budget_share <= 1.0):
             issues.append("budget_share must be in (0, 1]")
@@ -75,12 +75,12 @@ class TemplateIOContract(BaseModel):
     budget_semantics: str = "share_parent"
     isolation: IsolationContract | None = None
 
-    def validate(self) -> list[str]:
+    def validation_issues(self) -> list[str]:
         issues: list[str] = []
         if not self.inputs and not self.outputs:
             issues.append("template I/O needs inputs or outputs")
         if self.isolation is not None:
-            issues.extend(self.isolation.validate())
+            issues.extend(self.isolation.validation_issues())
         return issues
 
     def describe(self) -> dict[str, Any]:

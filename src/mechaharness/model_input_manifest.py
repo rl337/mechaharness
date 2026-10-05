@@ -122,7 +122,9 @@ def reconstruct_messages(manifest: ModelInputManifest) -> list[dict[str, Any]]:
     return [dict(item) for item in manifest.messages]
 
 
-def attach_manifest_ref(decision_fields: dict[str, Any], manifest: ModelInputManifest) -> dict[str, Any]:
+def attach_manifest_ref(
+    decision_fields: dict[str, Any], manifest: ModelInputManifest
+) -> dict[str, Any]:
     """Return decision fields with ``context_manifest_ref`` set to the manifest id."""
     out = dict(decision_fields)
     out["context_manifest_ref"] = manifest.manifest_id

@@ -1,5 +1,10 @@
 from mechaharness.context_compaction import CompactionInput, DefaultStagedCompaction
 
-def test_dedupe():
-    r = DefaultStagedCompaction().compact(CompactionInput(messages=[{"role":"user","content":"a"},{"role":"user","content":"a"}]))
-    assert "deduplicated" in r.discarded_classes
+
+def test_dedupe() -> None:
+    messages = [
+        {"role": "user", "content": "a"},
+        {"role": "user", "content": "a"},
+    ]
+    result = DefaultStagedCompaction().compact(CompactionInput(messages=messages))
+    assert "deduplicated" in result.discarded_classes

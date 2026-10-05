@@ -1,4 +1,8 @@
-from mechaharness.workspace_isolation import InMemoryWorkspaceIsolationProvider, WorkspaceIsolationRequest
+from mechaharness.workspace_isolation import (
+    InMemoryWorkspaceIsolationProvider,
+    WorkspaceIsolationRequest,
+)
+
 
 def test_acquire_release():
     p = InMemoryWorkspaceIsolationProvider()

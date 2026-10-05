@@ -16,11 +16,15 @@ from mechaharness.advisor import (
     RejectAdvisor,
     consult_advisor,
 )
+from mechaharness.anchor_evidence import AnchorEvidence, AnchorRequirement, anchors_satisfied
 from mechaharness.api_connection import SimpleHttpConnectionConfig
+from mechaharness.approval_interrupt import resume_approval, suspend_for_approval
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
+from mechaharness.component_ablation import ComponentAblationExperiment, ablation_delta
 from mechaharness.config import Settings
 from mechaharness.consequence import ActionConsequence, ConsequencePolicy
+from mechaharness.context_compaction import CompactionInput, DefaultStagedCompaction
 from mechaharness.context_experiments import (
     ContextCompiler,
     CtxFlags,
@@ -34,8 +38,10 @@ from mechaharness.context_experiments import (
     fuse_actions,
     reduce_evidence,
 )
+from mechaharness.context_layers import GraphSharedState, project_node_context
 from mechaharness.context_provider import StaticContextProvider
 from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
+from mechaharness.coordination_cost import CoordinationCostMetrics, summarize_coordination_cost
 from mechaharness.core.access import (
     Ability,
     AccessControl,
@@ -68,12 +74,6 @@ from mechaharness.decision_surfaces import (
 )
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
-from mechaharness.anchor_evidence import AnchorEvidence, AnchorRequirement, anchors_satisfied
-from mechaharness.approval_interrupt import resume_approval, suspend_for_approval
-from mechaharness.component_ablation import ComponentAblationExperiment, ablation_delta
-from mechaharness.context_compaction import CompactionInput, DefaultStagedCompaction
-from mechaharness.context_layers import GraphSharedState, project_node_context
-from mechaharness.coordination_cost import CoordinationCostMetrics, summarize_coordination_cost
 from mechaharness.environment_delta import EnvironmentSnapshot, apply_deltas, emit_delta
 from mechaharness.eval_evidence import Claim, compose_claims
 from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
@@ -86,32 +86,6 @@ from mechaharness.failure_attribution import (
     select_rollback_target,
 )
 from mechaharness.fan_in_policy import FanInPolicy, accept_fan_in
-from mechaharness.graph_state_governance import (
-    FieldGovernance,
-    GraphStateGovernance,
-    authorize_write,
-)
-from mechaharness.graph_templates import GraphTemplateParams, InitializePreflightTemplate
-from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
-from mechaharness.handoff_record import HandoffRecord
-from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
-from mechaharness.instruction_component import InstructionComponent
-from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
-from mechaharness.loop_health import LoopHealthSignals, should_wind_down
-from mechaharness.model_input_manifest import (
-    ModelInputManifest,
-    attach_manifest_ref,
-    reconstruct_messages,
-)
-from mechaharness.operation_registry import OperationContract
-from mechaharness.resume_cost import ResumeCostMetrics, summarize_resume_cost
-from mechaharness.rule_promotion import PromotionRecord, promote_soft_to_hard
-from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
-from mechaharness.work_in_progress_policy import WorkInProgressPolicy
-from mechaharness.workspace_isolation import (
-    InMemoryWorkspaceIsolationProvider,
-    WorkspaceIsolationRequest,
-)
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -134,17 +108,26 @@ from mechaharness.graph_executor import (
     GraphRunContext,
     NodeOutcome,
 )
+from mechaharness.graph_state_governance import (
+    FieldGovernance,
+    GraphStateGovernance,
+    authorize_write,
+)
 from mechaharness.graph_templates import (
     FanOutAggregateTemplate,
     GraphTemplateParams,
     IndependentReviewTemplate,
+    InitializePreflightTemplate,
     SubgraphNodeRunner,
     default_graph_templates,
 )
+from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
+from mechaharness.handoff_record import HandoffRecord
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.harness_experiment import HarnessExperiment, HarnessExperimentRunner
+from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
     ChoiceOption,
@@ -161,7 +144,8 @@ from mechaharness.inference.judge import (
 )
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
-from mechaharness.instruction_component import InstructionCatalog
+from mechaharness.instruction_component import InstructionCatalog, InstructionComponent
+from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
 from mechaharness.judgement_policy import (
     JudgementFacts,
     JudgementPolicy,
@@ -181,6 +165,12 @@ from mechaharness.lifecycle_extension import (
     Rewrite,
 )
 from mechaharness.linkage_resolver import DefaultLinkageResolver
+from mechaharness.loop_health import LoopHealthSignals, should_wind_down
+from mechaharness.model_input_manifest import (
+    ModelInputManifest,
+    attach_manifest_ref,
+    reconstruct_messages,
+)
 from mechaharness.operation_registry import (
     NodeContractBind,
     OperationContract,
@@ -189,14 +179,22 @@ from mechaharness.operation_registry import (
 )
 from mechaharness.outcome_contract import OutcomeContract
 from mechaharness.research import EvalProtocol, ResearchLab
+from mechaharness.resume_cost import ResumeCostMetrics, summarize_resume_cost
 from mechaharness.routing import (
     activate_scoped_policy,
     route_at_boundary,
     route_for_capability_needs,
     shadow_decision_backends,
 )
+from mechaharness.rule_promotion import PromotionRecord, promote_soft_to_hard
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
 from mechaharness.verification_policy import DefaultVerificationPolicy
+from mechaharness.work_in_progress_policy import WorkInProgressPolicy
+from mechaharness.workspace_isolation import (
+    InMemoryWorkspaceIsolationProvider,
+    WorkspaceIsolationRequest,
+)
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
@@ -2291,7 +2289,7 @@ async def _run_isolation_io_contract(case: StoryCase, backend: StoryBackend) -> 
         outputs=dict(request.get("outputs") or {}),
         isolation=iso,
     )
-    actual = {"issues": io.validate(), "budget_share": iso.budget_share}
+    actual = {"issues": io.validation_issues(), "budget_share": iso.budget_share}
     _assert_expect(actual, expect)
 
 
@@ -2560,7 +2558,8 @@ async def _run_rule_promotion_hard(case: StoryCase, backend: StoryBackend) -> No
         experiment_ref=request.get("experiment_ref"),
         soft_instruction_ref=request.get("soft_instruction_ref"),
     )
-    hard = promote_soft_to_hard(rec, hard_invariant_ref=str(request.get("hard_invariant_ref") or "h"))
+    hard_ref = str(request.get("hard_invariant_ref") or "h")
+    hard = promote_soft_to_hard(rec, hard_invariant_ref=hard_ref)
     actual = {"stage": hard.stage}
     _assert_expect(actual, expect)
 
