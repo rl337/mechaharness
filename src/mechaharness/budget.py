@@ -4,6 +4,27 @@ A :class:`BudgetPolicy` declares thresholds. A :class:`Budget` is the mutable
 spend ledger for one graph run (shared with nested subgraphs so cost
 aggregates). Soft breach asks the executor to wind down gracefully; hard
 breach fails the run with prejudice. ``hard_limit=None`` means unlimited.
+
+In *Introducing dynamic workflows in Claude Code*, the Claude developer blog
+notes that large multi-agent runs consume substantial tokens and benefit from
+explicit budgets
+(https://claude.com/blog/introducing-dynamic-workflows-in-claude-code).
+In *Improved token efficiency for longer agent runs*, the Cursor developer
+blog discusses containing cost across long trajectories
+(https://cursor.com/blog/improved-token-efficiency).
+Spend rolls up across child subgraphs — soft wind-down before a hard stop::
+
+    >>> from mechaharness.budget import Budget, BudgetLevel, BudgetPolicy
+    >>> policy = BudgetPolicy(soft_limit=80, hard_limit=100, unit="tokens")
+    >>> budget = Budget(policy)
+    >>> budget.charge(50) is BudgetLevel.OK
+    True
+    >>> budget.charge(40) is BudgetLevel.SOFT
+    True
+    >>> child = budget.child()
+    >>> _ = child.charge(15)
+    >>> budget.status() is BudgetLevel.HARD
+    True
 """
 
 from __future__ import annotations

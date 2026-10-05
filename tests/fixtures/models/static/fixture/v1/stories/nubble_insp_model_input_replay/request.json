@@ -1,0 +1,8 @@
+{
+  "messages": [
+    {"role": "system", "content": "Prefer repository state."},
+    {"role": "user", "content": "Summarize the diff."}
+  ],
+  "tool_definitions": [{"name": "read_file"}],
+  "instructions": ["Do not invent file contents."]
+}

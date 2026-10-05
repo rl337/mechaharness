@@ -1,0 +1,23 @@
+{
+  "id": "nubble_insp_coordination_cost",
+  "persona": "nubble",
+  "title": "Report parallel coordination cost on fan-out",
+  "kind": "coordination_cost_summarize",
+  "narrative": "Nubble compares wall-clock critical path, duplicated context, and fan-in review cost so parallelism is measured rather than assumed beneficial. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-coord][^wl-p08-coord].",
+  "implementation": "`CoordinationCostMetrics` and `summarize_coordination_cost` in `mechaharness.coordination_cost` report fan-out orchestration cost.",
+  "validation": "Kind `coordination_cost_summarize`. Soft expects branch_count.",
+  "footnotes": [
+    {
+      "id": "wl-l14-coord",
+      "label": "WalkingLabs L14 Graph Engineering",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/",
+      "note": "Coordination cost"
+    },
+    {
+      "id": "wl-p08-coord",
+      "label": "WalkingLabs P08 First Explicit Graph",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/",
+      "note": "Measure parallelism"
+    }
+  ]
+}

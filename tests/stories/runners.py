@@ -16,11 +16,15 @@ from mechaharness.advisor import (
     RejectAdvisor,
     consult_advisor,
 )
+from mechaharness.anchor_evidence import AnchorEvidence, AnchorRequirement, anchors_satisfied
 from mechaharness.api_connection import SimpleHttpConnectionConfig
+from mechaharness.approval_interrupt import resume_approval, suspend_for_approval
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
+from mechaharness.component_ablation import ComponentAblationExperiment, ablation_delta
 from mechaharness.config import Settings
 from mechaharness.consequence import ActionConsequence, ConsequencePolicy
+from mechaharness.context_compaction import CompactionInput, DefaultStagedCompaction
 from mechaharness.context_experiments import (
     ContextCompiler,
     CtxFlags,
@@ -34,8 +38,10 @@ from mechaharness.context_experiments import (
     fuse_actions,
     reduce_evidence,
 )
+from mechaharness.context_layers import GraphSharedState, project_node_context
 from mechaharness.context_provider import StaticContextProvider
 from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
+from mechaharness.coordination_cost import CoordinationCostMetrics, summarize_coordination_cost
 from mechaharness.core.access import (
     Ability,
     AccessControl,
@@ -68,7 +74,18 @@ from mechaharness.decision_surfaces import (
 )
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
-from mechaharness.failure_attribution import attribute_error, detect_repeated_failure_classes
+from mechaharness.environment_delta import EnvironmentSnapshot, apply_deltas, emit_delta
+from mechaharness.eval_evidence import Claim, compose_claims
+from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
+from mechaharness.evaluator import CallableEvaluator, evaluate_claims
+from mechaharness.exit_contract import CleanStateContract, evaluate_exit
+from mechaharness.failure_attribution import (
+    attribute_error,
+    attribute_with_repair_target,
+    detect_repeated_failure_classes,
+    select_rollback_target,
+)
+from mechaharness.fan_in_policy import FanInPolicy, accept_fan_in
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -91,17 +108,26 @@ from mechaharness.graph_executor import (
     GraphRunContext,
     NodeOutcome,
 )
+from mechaharness.graph_state_governance import (
+    FieldGovernance,
+    GraphStateGovernance,
+    authorize_write,
+)
 from mechaharness.graph_templates import (
     FanOutAggregateTemplate,
     GraphTemplateParams,
     IndependentReviewTemplate,
+    InitializePreflightTemplate,
     SubgraphNodeRunner,
     default_graph_templates,
 )
+from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
+from mechaharness.handoff_record import HandoffRecord
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.harness_experiment import HarnessExperiment, HarnessExperimentRunner
+from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
     ChoiceOption,
@@ -118,7 +144,8 @@ from mechaharness.inference.judge import (
 )
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
-from mechaharness.instruction_component import InstructionCatalog
+from mechaharness.instruction_component import InstructionCatalog, InstructionComponent
+from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
 from mechaharness.judgement_policy import (
     JudgementFacts,
     JudgementPolicy,
@@ -138,6 +165,12 @@ from mechaharness.lifecycle_extension import (
     Rewrite,
 )
 from mechaharness.linkage_resolver import DefaultLinkageResolver
+from mechaharness.loop_health import LoopHealthSignals, should_wind_down
+from mechaharness.model_input_manifest import (
+    ModelInputManifest,
+    attach_manifest_ref,
+    reconstruct_messages,
+)
 from mechaharness.operation_registry import (
     NodeContractBind,
     OperationContract,
@@ -146,14 +179,22 @@ from mechaharness.operation_registry import (
 )
 from mechaharness.outcome_contract import OutcomeContract
 from mechaharness.research import EvalProtocol, ResearchLab
+from mechaharness.resume_cost import ResumeCostMetrics, summarize_resume_cost
 from mechaharness.routing import (
     activate_scoped_policy,
     route_at_boundary,
     route_for_capability_needs,
     shadow_decision_backends,
 )
+from mechaharness.rule_promotion import PromotionRecord, promote_soft_to_hard
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
 from mechaharness.verification_policy import DefaultVerificationPolicy
+from mechaharness.work_in_progress_policy import WorkInProgressPolicy
+from mechaharness.workspace_isolation import (
+    InMemoryWorkspaceIsolationProvider,
+    WorkspaceIsolationRequest,
+)
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
@@ -308,6 +349,34 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "lifecycle_extension_replace": _run_lifecycle_extension_replace,
         "lifecycle_extension_graph_observe": _run_lifecycle_extension_graph_observe,
         "transactional_durable_resume_crash_matrix": _run_transactional_durable_resume_crash_matrix,
+        "model_input_manifest_replay": _run_model_input_manifest_replay,
+        "graph_transition_inspect": _run_graph_transition_inspect,
+        "isolation_io_contract": _run_isolation_io_contract,
+        "context_layers_project": _run_context_layers_project,
+        "targeted_rollback_select": _run_targeted_rollback_select,
+        "approval_interrupt_cycle": _run_approval_interrupt_cycle,
+        "trace_envelope_complete": _run_trace_envelope_complete,
+        "eval_claims_compose": _run_eval_claims_compose,
+        "evaluator_compose_run": _run_evaluator_compose_run,
+        "trial_reliability_metrics": _run_trial_reliability_metrics,
+        "wip_policy_allows": _run_wip_policy_allows,
+        "fan_in_policy_accept": _run_fan_in_policy_accept,
+        "exit_clean_state_eval": _run_exit_clean_state_eval,
+        "workspace_isolation_acquire": _run_workspace_isolation_acquire,
+        "context_compaction_staged": _run_context_compaction_staged,
+        "state_governance_write": _run_state_governance_write,
+        "anchor_evidence_require": _run_anchor_evidence_require,
+        "component_ablation_delta": _run_component_ablation_delta,
+        "resume_cost_summarize": _run_resume_cost_summarize,
+        "coordination_cost_summarize": _run_coordination_cost_summarize,
+        "loop_health_wind_down": _run_loop_health_wind_down,
+        "harness_health_cleanup": _run_harness_health_cleanup,
+        "rule_promotion_hard": _run_rule_promotion_hard,
+        "instruction_scope_metadata": _run_instruction_scope_metadata,
+        "initialize_preflight_template": _run_initialize_preflight_template,
+        "handoff_record_fields": _run_handoff_record_fields,
+        "operation_compensation_meta": _run_operation_compensation_meta,
+        "environment_delta_apply": _run_environment_delta_apply,
     }
     try:
         runner = runners[kind]
@@ -2210,3 +2279,387 @@ async def _run_transactional_durable_resume_crash_matrix(
             payload = await run_crash_case(fixture, db_path=db)
             assert_expect(payload["actual"], case_expect)
 
+
+async def _run_model_input_manifest_replay(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    manifest = ModelInputManifest.from_parts(
+        messages=list(request.get("messages") or []),
+        tool_definitions=list(request.get("tool_definitions") or []),
+        instructions=list(request.get("instructions") or []),
+    )
+    reconstructed = reconstruct_messages(manifest)
+    fields = attach_manifest_ref({}, manifest)
+    actual = {
+        "hashes_ok": manifest.verify_hashes(),
+        "reconstructed_equals": reconstructed == list(request.get("messages") or []),
+        "manifest_ref_nonempty": bool(fields.get("context_manifest_ref")),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_graph_transition_inspect(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    contract = TransitionContract(
+        transitions=[GraphTransition.model_validate(t) for t in request.get("transitions") or []]
+    )
+    nodes = set(request.get("nodes") or [])
+    kinds = [t.kind for t in inspect_transitions(contract, "verify")]
+    actual = {
+        "issues": contract.validate_against_nodes(nodes),
+        "verify_kinds_include": kinds,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_isolation_io_contract(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    iso = IsolationContract(
+        effect_scope=str(request.get("effect_scope") or "none"),
+        budget_share=float(request.get("budget_share") or 1.0),
+    )
+    io = TemplateIOContract(
+        inputs=dict(request.get("inputs") or {}),
+        outputs=dict(request.get("outputs") or {}),
+        isolation=iso,
+    )
+    actual = {"issues": io.validation_issues(), "budget_share": iso.budget_share}
+    _assert_expect(actual, expect)
+
+
+async def _run_context_layers_project(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    shared = GraphSharedState(data=dict(request.get("shared") or {}))
+    private = project_node_context(
+        shared, needs=list(request.get("needs") or []), node_id="n1"
+    )
+    private.export_to_shared(shared, dict(request.get("exports") or {}))
+    actual = {
+        "projected_keys_include": list(private.data.keys()),
+        "shared_has_result": "result" in shared.data,
+        "projected_has_notes": "notes" in private.data,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_targeted_rollback_select(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    attr = attribute_with_repair_target(
+        str(request.get("error") or ""),
+        node_id=request.get("node_id"),
+        repair_target=request.get("repair_target"),
+    )
+    contract = TransitionContract(
+        transitions=[GraphTransition.model_validate(t) for t in request.get("transitions") or []]
+    )
+    actual = {
+        "rollback_target": select_rollback_target(attr, contract),
+        "repair_target": attr.repair_target,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_approval_interrupt_cycle(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    pending = suspend_for_approval(
+        reason=str(request.get("reason") or "approve"),
+        suspended_checkpoint_ref=request.get("checkpoint"),
+    )
+    done = resume_approval(
+        pending,
+        decision=str(request.get("decision") or "approve"),
+        actor=str(request.get("actor") or "actor"),
+    )
+    actual = {
+        "initial_status": pending.status,
+        "final_status": done.status,
+        "actor_contains": done.actor_provenance or "",
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_trace_envelope_complete(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    env = TraceEnvelope.model_validate(request)
+    actual = {"complete": envelope_complete(env), "missing": env.missing_fields()}
+    _assert_expect(actual, expect)
+
+
+async def _run_eval_claims_compose(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    claims = [Claim.model_validate(c) for c in request.get("claims") or []]
+    actual = compose_claims(claims)
+    _assert_expect(actual, expect)
+
+
+async def _run_evaluator_compose_run(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    ev = CallableEvaluator(
+        lambda subject: [
+            Claim(
+                id="exists",
+                statement="exists",
+                status="pass" if subject.get("exists") else "fail",
+            )
+        ],
+        evaluator_id="story:exists",
+        held_out=bool(request.get("held_out")),
+    )
+    result = evaluate_claims(ev, request)
+    actual = {"passed": result.passed, "held_out": result.held_out}
+    _assert_expect(actual, expect)
+
+
+async def _run_trial_reliability_metrics(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    trials = [Trial.model_validate(t) for t in request.get("trials") or []]
+    k = int(request.get("k") or 1)
+    rollup = trial_cost_rollup(trials)
+    actual = {
+        "pass_at_k_positive": pass_at_k(trials, k=k) > 0,
+        "trials": rollup["trials"],
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_wip_policy_allows(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    policy = WorkInProgressPolicy(
+        max_active_nodes=request.get("max_active_nodes"),
+        max_per_write_scope=request.get("max_per_write_scope"),
+    )
+    active = int(request.get("active_nodes") or 0)
+    actual = {
+        "allows_new_scope": policy.allows(
+            active_nodes=active, write_scope="other", active_in_scope=0
+        ),
+        "allows_same_scope": policy.allows(
+            active_nodes=active,
+            write_scope="repo",
+            active_in_scope=int(request.get("active_in_scope") or 0),
+        ),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_fan_in_policy_accept(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    policy = FanInPolicy(
+        strategy=str(request.get("strategy") or "all"),
+        quorum=request.get("quorum"),
+    )
+    actual = {"accepted": accept_fan_in(policy, results=list(request.get("results") or []))}
+    _assert_expect(actual, expect)
+
+
+async def _run_exit_clean_state_eval(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    report = evaluate_exit(
+        CleanStateContract(require_handoff_record=bool(request.get("require_handoff_record"))),
+        pending_nodes=list(request.get("pending_nodes") or []),
+        checkpoint_durable=bool(request.get("checkpoint_durable")),
+        unresolved_effects=list(request.get("unresolved_effects") or []),
+        handoff_record_ref=request.get("handoff_record_ref"),
+    )
+    actual = {"ok": report.ok, "issues": report.issues}
+    _assert_expect(actual, expect)
+
+
+async def _run_workspace_isolation_acquire(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    provider = InMemoryWorkspaceIsolationProvider()
+    handle = provider.acquire(WorkspaceIsolationRequest(label=str(request.get("label") or "x")))
+    provider.release(handle)
+    actual = {"provider_kind": handle.provider_kind, "released": True}
+    _assert_expect(actual, expect)
+
+
+async def _run_context_compaction_staged(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    result = DefaultStagedCompaction().compact(
+        CompactionInput(messages=list(request.get("messages") or []))
+    )
+    actual = {"discarded_include": result.discarded_classes}
+    _assert_expect(actual, expect)
+
+
+async def _run_state_governance_write(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    gov = GraphStateGovernance(
+        fields={
+            "quality_target": FieldGovernance(
+                owner=str(request.get("owner") or "ops"),
+                writers=list(request.get("writers") or []),
+                mutable=bool(request.get("mutable")),
+            )
+        }
+    )
+    actual = {
+        "allowed": authorize_write(
+            gov, field="quality_target", actor=str(request.get("actor") or "agent")
+        )
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_anchor_evidence_require(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    req = AnchorRequirement(
+        kinds=list(request.get("kinds") or []),
+        min_count=int(request.get("min_count") or 1),
+    )
+    anchors = [AnchorEvidence.model_validate(a) for a in request.get("anchors") or []]
+    actual = {"satisfied": anchors_satisfied(req, anchors)}
+    _assert_expect(actual, expect)
+
+
+async def _run_component_ablation_delta(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    exp = ComponentAblationExperiment.model_validate(request)
+    actual = {"success_delta": ablation_delta(exp)["success_delta"]}
+    _assert_expect(actual, expect)
+
+
+async def _run_resume_cost_summarize(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    actual = summarize_resume_cost(ResumeCostMetrics.model_validate(request))
+    _assert_expect(actual, expect)
+
+
+async def _run_coordination_cost_summarize(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    actual = summarize_coordination_cost(CoordinationCostMetrics.model_validate(request))
+    _assert_expect(actual, expect)
+
+
+async def _run_loop_health_wind_down(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    actual = {"wind_down": should_wind_down(LoopHealthSignals.model_validate(request))}
+    _assert_expect(actual, expect)
+
+
+async def _run_harness_health_cleanup(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    actual = {"needs_cleanup": needs_cleanup(HarnessHealthSnapshot.model_validate(request))}
+    _assert_expect(actual, expect)
+
+
+async def _run_rule_promotion_hard(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    rec = PromotionRecord(
+        observed_pattern=str(request.get("observed_pattern") or ""),
+        hypothesis=str(request.get("hypothesis") or ""),
+        experiment_ref=request.get("experiment_ref"),
+        soft_instruction_ref=request.get("soft_instruction_ref"),
+    )
+    hard_ref = str(request.get("hard_invariant_ref") or "h")
+    hard = promote_soft_to_hard(rec, hard_invariant_ref=hard_ref)
+    actual = {"stage": hard.stage}
+    _assert_expect(actual, expect)
+
+
+async def _run_instruction_scope_metadata(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    comp = InstructionComponent(
+        kind="procedure",
+        title=str(request.get("title") or "t"),
+        body=str(request.get("body") or ""),
+        scope=request.get("scope"),
+        authority=request.get("authority"),
+        estimated_context_cost=request.get("estimated_context_cost"),
+    )
+    actual = {
+        "scope": comp.scope,
+        "estimated_context_cost": comp.estimated_context_cost,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_initialize_preflight_template(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    graph = InitializePreflightTemplate().instantiate(
+        GraphTemplateParams(goal=str(request.get("goal") or "preflight"))
+    )
+    actual = {"nodes_include": sorted(graph.nodes)}
+    _assert_expect(actual, expect)
+
+
+async def _run_handoff_record_fields(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    rec = HandoffRecord.model_validate(request)
+    actual = {"next_action": rec.next_action}
+    _assert_expect(actual, expect)
+
+
+async def _run_operation_compensation_meta(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    op = OperationContract.model_validate(request)
+    actual = {
+        "idempotent": op.idempotent,
+        "compensation_strategy": op.compensation_strategy,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_environment_delta_apply(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    before = EnvironmentSnapshot.model_validate(request["before"])
+    after = EnvironmentSnapshot.model_validate(request["after"])
+    rebuilt = apply_deltas(before, [emit_delta(before, after)])
+    actual = {"cwd": rebuilt.data.get("cwd")}
+    _assert_expect(actual, expect)

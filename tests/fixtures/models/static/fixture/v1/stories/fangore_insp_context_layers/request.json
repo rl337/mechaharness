@@ -1,0 +1,14 @@
+{
+  "shared": {
+    "goal": "ship",
+    "notes": [
+      "a"
+    ]
+  },
+  "needs": [
+    "goal"
+  ],
+  "exports": {
+    "result": "ok"
+  }
+}

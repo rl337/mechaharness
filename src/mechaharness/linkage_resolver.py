@@ -4,6 +4,44 @@ Primitive DI (pyiv) validates that injectables can be constructed. Linkage
 resolution separately validates that the final graph has satisfiable runners,
 grants, operation contracts, stop contracts, envelopes, environment
 capabilities, and termination paths — before substantive execution.
+
+In *Introducing dynamic workflows in Claude Code*, the Claude developer blog
+suggests composing graphs after tools, models, and environment are known
+(https://claude.com/blog/introducing-dynamic-workflows-in-claude-code).
+In *What we've learned building cloud agents*, the Cursor developer blog
+suggests failing on missing environment capabilities before dependent work
+runs
+(https://cursor.com/blog/cloud-agent-lessons).
+Linkage is the pre-execution gate with structured edges::
+
+    >>> from mechaharness.core.access import (
+    ...     AccessPolicy, GraphExecute, InMemoryAccessControl,
+    ... )
+    >>> from mechaharness.core.environment import NoOpInferenceEnvironment
+    >>> from mechaharness.core.events import InMemoryEventLog
+    >>> from mechaharness.graph import ExecutionGraph, GraphNode, NodeStatus
+    >>> from mechaharness.graph_executor import (
+    ...     CallableGraphNodeRunner, GraphNodeRunnerRegistry, NodeOutcome,
+    ... )
+    >>> from mechaharness.linkage_resolver import DefaultLinkageResolver
+    >>> from mechaharness.stop_contract import StopContract
+    >>> reg = GraphNodeRunnerRegistry()
+    >>> async def ok(node, context):
+    ...     return NodeOutcome(status=NodeStatus.SUCCEEDED)
+    >>> reg.register(CallableGraphNodeRunner(["compute", "repair"], ok))
+    >>> access = InMemoryAccessControl(
+    ...     InMemoryEventLog(), AccessPolicy(grants=[GraphExecute]),
+    ... )
+    >>> resolver = DefaultLinkageResolver(
+    ...     reg, access, NoOpInferenceEnvironment(),
+    ... )
+    >>> graph = ExecutionGraph(goal="ready")
+    >>> _ = graph.add_node(GraphNode(
+    ...     id="repair", kind="repair", repeating=True,
+    ...     stop_contract=StopContract(max_iterations=3).model_dump(mode="json"),
+    ... ))
+    >>> resolver.resolve(graph).ok
+    True
 """
 
 from __future__ import annotations

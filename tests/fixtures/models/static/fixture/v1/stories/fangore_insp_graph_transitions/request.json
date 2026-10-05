@@ -1,0 +1,24 @@
+{
+  "nodes": [
+    "produce",
+    "verify"
+  ],
+  "transitions": [
+    {
+      "from_node": "produce",
+      "kind": "success",
+      "to_node": "verify"
+    },
+    {
+      "from_node": "verify",
+      "kind": "rollback",
+      "to_node": "produce",
+      "reason": "verification_failed"
+    },
+    {
+      "from_node": "verify",
+      "kind": "end",
+      "reason": "accepted"
+    }
+  ]
+}

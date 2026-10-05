@@ -1,0 +1,10 @@
+{
+  "completed": [
+    "a"
+  ],
+  "pending": [
+    "b"
+  ],
+  "rationale": "because",
+  "next_action": "verify"
+}

@@ -1,0 +1,6 @@
+{
+  "reason": "Deploy to production",
+  "decision": "approve",
+  "actor": "ops@acme",
+  "checkpoint": "ckpt:1"
+}

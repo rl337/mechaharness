@@ -1,0 +1,23 @@
+{
+  "id": "taloneth_insp_component_ablation",
+  "persona": "taloneth",
+  "title": "Ablate harness components against a matched corpus",
+  "kind": "component_ablation_delta",
+  "narrative": "Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance[^wl-l02-ablation][^wl-p01-ablation].",
+  "implementation": "`ComponentAblationExperiment` and `ablation_delta` in `mechaharness.component_ablation` standardize baseline fingerprint, disabled component IDs, and quality/cost deltas.",
+  "validation": "Kind `component_ablation_delta`. Soft expects negative success_delta.",
+  "footnotes": [
+    {
+      "id": "wl-l02-ablation",
+      "label": "WalkingLabs L02 What a Harness Is",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/",
+      "note": "Ablate components"
+    },
+    {
+      "id": "wl-p01-ablation",
+      "label": "WalkingLabs P01 Baseline vs Minimal",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/",
+      "note": "Matched corpus"
+    }
+  ]
+}
