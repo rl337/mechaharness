@@ -1,0 +1,23 @@
+{
+  "id": "nubble_insp_model_input_replay",
+  "persona": "nubble",
+  "title": "Replay model-visible inputs from a recorded manifest",
+  "kind": "model_input_manifest_replay",
+  "narrative": "Nubble needs every model call to leave a reconstructible record of what the model saw — messages, tools, and instructions — so offline replay does not depend on hidden memory. Accepts WalkingLabs DeepSeek and P06 observability guidance[^wl-deepseek-manifest][^wl-p06-manifest].",
+  "implementation": "`ModelInputManifest` in `mechaharness.model_input_manifest` records messages, tool definitions, instructions, and content hashes; `reconstruct_messages` rebuilds the call without in-memory state. Decision records may reference the manifest via `context_manifest_ref`.",
+  "validation": "Kind `model_input_manifest_replay`. Soft expects hash verification and reconstructed message equality.",
+  "footnotes": [
+    {
+      "id": "wl-deepseek-manifest",
+      "label": "WalkingLabs DeepSeek harness design",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/",
+      "note": "Model-visible means replayable"
+    },
+    {
+      "id": "wl-p06-manifest",
+      "label": "WalkingLabs P06 runtime observability",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-06-runtime-observability-and-debugging/",
+      "note": "Trace replay tests"
+    }
+  ]
+}

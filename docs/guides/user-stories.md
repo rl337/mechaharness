@@ -96,6 +96,23 @@ Kind `environment_linkage_fail`. Soft expects environment_incompatible code when
 
 [^insp-r16]: [Inspiration requirements (req 16: environment linkage)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 16 — environment linkage
 
+### `nubble_insp_model_input_replay` — Replay model-visible inputs from a recorded manifest
+
+Nubble needs every model call to leave a reconstructible record of what the model saw — messages, tools, and instructions — so offline replay does not depend on hidden memory. Accepts WalkingLabs DeepSeek and P06 observability guidance[^wl-deepseek-manifest][^wl-p06-manifest].
+
+#### Implementation
+
+`ModelInputManifest` in `mechaharness.model_input_manifest` records messages, tool definitions, instructions, and content hashes; `reconstruct_messages` rebuilds the call without in-memory state. Decision records may reference the manifest via `context_manifest_ref`.
+
+#### Validation
+
+Kind `model_input_manifest_replay`. Soft expects hash verification and reconstructed message equality.
+
+#### Footnotes
+
+[^wl-deepseek-manifest]: [WalkingLabs DeepSeek harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/) — Model-visible means replayable
+[^wl-p06-manifest]: [WalkingLabs P06 runtime observability](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-06-runtime-observability-and-debugging/) — Trace replay tests
+
 ### `nubble_insp_model_routing` — Route nodes by declared capability needs
 
 Nubble prefers declaring what a step needs instead of hard-coding a model id, then picking among available classes. Accepts inspiration requirement 13[^insp-r13].

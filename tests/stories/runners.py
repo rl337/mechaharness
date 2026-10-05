@@ -69,6 +69,11 @@ from mechaharness.decision_surfaces import (
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
 from mechaharness.failure_attribution import attribute_error, detect_repeated_failure_classes
+from mechaharness.model_input_manifest import (
+    ModelInputManifest,
+    attach_manifest_ref,
+    reconstruct_messages,
+)
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -307,6 +312,7 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "lifecycle_extension_block": _run_lifecycle_extension_block,
         "lifecycle_extension_replace": _run_lifecycle_extension_replace,
         "lifecycle_extension_graph_observe": _run_lifecycle_extension_graph_observe,
+        "model_input_manifest_replay": _run_model_input_manifest_replay,
     }
     try:
         runner = runners[kind]
@@ -2168,5 +2174,24 @@ async def _run_lifecycle_extension_graph_observe(
         "boundary": before.payload.get("boundary") if before else None,
         "extension_id": before.payload.get("extension_id") if before else None,
         "default_ran": bool(before.payload.get("default_ran")) if before else False,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_model_input_manifest_replay(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    manifest = ModelInputManifest.from_parts(
+        messages=list(request.get("messages") or []),
+        tool_definitions=list(request.get("tool_definitions") or []),
+        instructions=list(request.get("instructions") or []),
+    )
+    reconstructed = reconstruct_messages(manifest)
+    fields = attach_manifest_ref({}, manifest)
+    actual = {
+        "hashes_ok": manifest.verify_hashes(),
+        "reconstructed_equals": reconstructed == list(request.get("messages") or []),
+        "manifest_ref_nonempty": bool(fields.get("context_manifest_ref")),
     }
     _assert_expect(actual, expect)
