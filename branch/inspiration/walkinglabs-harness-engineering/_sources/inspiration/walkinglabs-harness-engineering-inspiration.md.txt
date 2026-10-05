@@ -196,7 +196,7 @@ assembly path.
 
 Scoped context exists, but no generic staged compaction strategy is prominent.
 
-**Verdict:** **gap**
+**Verdict:** **gap** → **implemented** (`fangore_insp_context_compaction`, `context_compaction.py`)
 
 Add a pluggable ContextCompactionStrategy with lossless pruning/deduplication,
 structured extraction/distillation, then optional lossy summarization. Preserve
@@ -258,7 +258,7 @@ unrecorded side effects.
 Dependencies and budgets constrain execution, but no first-class WIP/concurrency
 policy surfaced in the current library.
 
-**Verdict:** **gap**
+**Verdict:** **gap** → **implemented** (`fangore_insp_wip_backpressure`, `work_in_progress_policy.py`)
 
 Add a WorkInProgressPolicy/scheduler concurrency policy limiting active nodes by
 graph, resource class, write scope, consequence, or host work group. Do not
@@ -375,7 +375,7 @@ envelope, verification plan, extension versions, and parent/child lineage.
 DeepSeek's strongest invariant is that anything entering a model request can be
 reconstructed from append-only session state.
 
-**Verdict:** **gap**
+**Verdict:** **gap** → **implemented** (`nubble_insp_model_input_replay`, `model_input_manifest.py`)
 
 Adopt: **Execution-affecting means observable. Model-visible means replayable.**
 
@@ -401,7 +401,7 @@ stable checkpoint without mutating prior history.
 Completion contracts exist, but no generic post-run clean-state contract
 surfaced.
 
-**Verdict:** **gap**
+**Verdict:** **gap** → **implemented** (`fangore_insp_exit_clean_state`, `exit_contract.py`)
 
 Add an optional ExitContract/CleanStateContract for invariants, unresolved
 effects, checkpoint durability, pending-node policy, cleanup hooks, and handoff
@@ -510,7 +510,7 @@ first"; routing answers "where execution goes next."
 Failure attribution can identify category/node, but targeted multi-hop rollback
 is not surfaced as a first-class graph primitive.
 
-**Verdict:** **gap**
+**Verdict:** **gap** → **implemented** (`fangore_insp_targeted_rollback`, `failure_attribution.py`)
 
 Let verification/failure results carry responsible_node/repair_target and let
 routing policy choose the appropriate rollback node, persisting the reason.
@@ -534,7 +534,7 @@ and custom injectable strategies.
 Advisor and escalation exist, but no first-class durable human approval
 interrupt/wait/resume contract was found.
 
-**Verdict:** **gap**
+**Verdict:** **gap** → **implemented** (`fangore_insp_approval_interrupt`, `approval_interrupt.py`)
 
 Add approval request payload, evidence refs, reason, consequence summary,
 allowed decisions, timeout, timeout policy, suspended checkpoint, actor
@@ -573,7 +573,7 @@ spot-check. High-autonomy graphs may require periodic anchors.
 Policies and grants exist, but metric ownership/frozen-target semantics are not
 first-class.
 
-**Verdict:** **gap**
+**Verdict:** **gap** → **implemented** (`fangore_insp_state_governance`, `graph_state_governance.py`)
 
 Add optional graph-state field governance: owner/authority, allowed readers and
 writers, mutable/frozen state, and change preconditions. Reuse capability/grant
