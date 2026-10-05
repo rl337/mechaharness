@@ -38,7 +38,12 @@ ComponentStatus = Literal["proposed", "active", "retired", "rejected"]
 
 
 class InstructionComponent(BaseModel):
-    """Scarce-information instruction bundle unit."""
+    """Scarce-information instruction bundle unit.
+
+    WalkingLabs L04 treats entry instructions as a router with scope,
+    priority/authority, provenance, and estimated context cost
+    (https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-04-why-one-giant-instruction-file-fails/).
+    """
 
     model_config = ConfigDict(extra="allow")
 
@@ -48,6 +53,12 @@ class InstructionComponent(BaseModel):
     body: str
     version: str = "1"
     status: ComponentStatus = "proposed"
+    scope: str | None = None
+    priority: int = 0
+    authority: str | None = None
+    estimated_context_cost: int | None = None
+    expiry: str | None = None
+    review_condition: str | None = None
     trigger_count: int = 0
     use_count: int = 0
     over_trigger_count: int = 0

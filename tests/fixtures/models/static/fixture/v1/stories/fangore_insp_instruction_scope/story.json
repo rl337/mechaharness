@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_instruction_scope",
+  "persona": "fangore",
+  "title": "Scope instruction components with authority and cost",
+  "kind": "instruction_scope_metadata",
+  "narrative": "Instruction components declare scope, authority, and estimated context cost so entry files stay routers rather than encyclopedias. Accepts WalkingLabs L04 guidance[^wl-l04-instr].",
+  "implementation": "`InstructionComponent` fields `scope`, `priority`, `authority`, and `estimated_context_cost` in `mechaharness.instruction_component`.",
+  "validation": "Kind `instruction_scope_metadata`. Soft expects scope and cost.",
+  "footnotes": [
+    {
+      "id": "wl-l04-instr",
+      "label": "WalkingLabs L04 Split Instructions",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-04-why-one-giant-instruction-file-fails/",
+      "note": "Instruction metadata"
+    }
+  ]
+}
