@@ -1,0 +1,23 @@
+{
+  "id": "fangore_insp_context_compaction",
+  "persona": "fangore",
+  "title": "Compact context in staged lossless then lossy steps",
+  "kind": "context_compaction_staged",
+  "narrative": "Long runs compact context through staged strategies that record which information classes were discarded. Accepts WalkingLabs L05 and Claude Code design guidance[^wl-l05-compact][^wl-claude-compact].",
+  "implementation": "`ContextCompactionStrategy` and `DefaultStagedCompaction` in `mechaharness.context_compaction` apply lossless dedupe, distill truncation, and optional lossy drops with provenance.",
+  "validation": "Kind `context_compaction_staged`. Soft expects deduplicated discarded class.",
+  "footnotes": [
+    {
+      "id": "wl-l05-compact",
+      "label": "WalkingLabs L05 Continuity",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/",
+      "note": "Staged compaction"
+    },
+    {
+      "id": "wl-claude-compact",
+      "label": "WalkingLabs Claude Code harness design",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/claude-code/",
+      "note": "Pluggable compaction"
+    }
+  ]
+}
