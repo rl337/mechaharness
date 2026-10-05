@@ -1,0 +1,29 @@
+{
+  "id": "taloneth_insp_trial_reliability",
+  "persona": "taloneth",
+  "title": "Separate pass@k capability from pass^k reliability",
+  "kind": "trial_reliability_metrics",
+  "narrative": "Taloneth records isolated trials with cost and latency, then reports pass@k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, \u03c4-bench, and HumanEval[^anth-evals-trial][^arxiv-taubench][^arxiv-humaneval].",
+  "implementation": "`Trial`, `pass_at_k`, `pass_caret_k`, and `trial_cost_rollup` in `mechaharness.eval_trial` aggregate isolated attempts.",
+  "validation": "Kind `trial_reliability_metrics`. Soft expects positive pass_at_k and rollup trial count.",
+  "footnotes": [
+    {
+      "id": "anth-evals-trial",
+      "label": "Anthropic Demystifying evals for AI agents",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "note": "pass@k vs pass^k"
+    },
+    {
+      "id": "arxiv-taubench",
+      "label": "\u03c4-bench",
+      "url": "https://arxiv.org/abs/2406.12045",
+      "note": "Reliability and end-state verification"
+    },
+    {
+      "id": "arxiv-humaneval",
+      "label": "Evaluating LLMs Trained on Code",
+      "url": "https://arxiv.org/abs/2107.03374",
+      "note": "pass@k definition"
+    }
+  ]
+}

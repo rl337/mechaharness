@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_operation_compensation",
+  "persona": "fangore",
+  "title": "Declare operation idempotency and compensation",
+  "kind": "operation_compensation_meta",
+  "narrative": "Cleanup and recovery operations declare idempotency and optional compensation so retries do not double side effects. Accepts WalkingLabs L12 guidance[^wl-l12-idem].",
+  "implementation": "`OperationContract.idempotent` and `compensation_strategy` in `mechaharness.operation_registry`.",
+  "validation": "Kind `operation_compensation_meta`. Soft expects idempotent true.",
+  "footnotes": [
+    {
+      "id": "wl-l12-idem",
+      "label": "WalkingLabs L12 Clean Session Handoffs",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/",
+      "note": "Idempotency"
+    }
+  ]
+}

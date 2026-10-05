@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "id": "a",
+      "statement": "a",
+      "status": "pass"
+    },
+    {
+      "id": "b",
+      "statement": "b",
+      "status": "fail"
+    },
+    {
+      "id": "c",
+      "statement": "c",
+      "status": "unknown"
+    }
+  ]
+}

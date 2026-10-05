@@ -1,0 +1,23 @@
+{
+  "id": "taloneth_insp_harness_health",
+  "persona": "taloneth",
+  "title": "Snapshot harness health for cleanup evidence",
+  "kind": "harness_health_cleanup",
+  "narrative": "Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance[^wl-l02-health][^wl-l12-health].",
+  "implementation": "`HarnessHealthSnapshot` and `needs_cleanup` in `mechaharness.harness_health` provide the optional health schema.",
+  "validation": "Kind `harness_health_cleanup`. Soft expects needs_cleanup true.",
+  "footnotes": [
+    {
+      "id": "wl-l02-health",
+      "label": "WalkingLabs L02 What a Harness Is",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/",
+      "note": "Harness debt"
+    },
+    {
+      "id": "wl-l12-health",
+      "label": "WalkingLabs L12 Clean Session Handoffs",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/",
+      "note": "Cleanup evidence"
+    }
+  ]
+}

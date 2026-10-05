@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_loop_health",
+  "persona": "fangore",
+  "title": "Wind down loops when verification debt grows",
+  "kind": "loop_health_wind_down",
+  "narrative": "Long loops accumulate verification debt; Fangore winds them down when independent verification age or repeated failures exceed host thresholds. Accepts WalkingLabs L13 guidance[^wl-l13-loop].",
+  "implementation": "`LoopHealthSignals` and `should_wind_down` in `mechaharness.loop_health` expose verification-debt and failure signals.",
+  "validation": "Kind `loop_health_wind_down`. Soft expects wind_down true.",
+  "footnotes": [
+    {
+      "id": "wl-l13-loop",
+      "label": "WalkingLabs L13 Loop Engineering",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-13-loop-engineering/",
+      "note": "Loop health"
+    }
+  ]
+}

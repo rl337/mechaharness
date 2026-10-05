@@ -1,0 +1,23 @@
+{
+  "id": "nubble_insp_resume_cost",
+  "persona": "nubble",
+  "title": "Measure wake-to-productive resume cost",
+  "kind": "resume_cost_summarize",
+  "narrative": "Nubble records how expensive resume is \u2014 rebuild tokens, tool calls, and wake-to-first-productive time \u2014 so continuity work can be optimized. Accepts WalkingLabs L05 and P03 guidance[^wl-l05-resume][^wl-p03-resume].",
+  "implementation": "`ResumeCostMetrics` and `summarize_resume_cost` in `mechaharness.resume_cost` capture resume telemetry.",
+  "validation": "Kind `resume_cost_summarize`. Soft expects rebuild_tokens.",
+  "footnotes": [
+    {
+      "id": "wl-l05-resume",
+      "label": "WalkingLabs L05 Continuity",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/",
+      "note": "Resume cost"
+    },
+    {
+      "id": "wl-p03-resume",
+      "label": "WalkingLabs P03 Multi-Session Continuity",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-03-multi-session-continuity/",
+      "note": "Crash/resume metrics"
+    }
+  ]
+}
