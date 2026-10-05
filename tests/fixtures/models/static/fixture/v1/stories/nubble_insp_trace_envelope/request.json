@@ -1,0 +1,10 @@
+{
+  "config_fingerprint": "cfg:1",
+  "graph_version": "1",
+  "node_id": "a",
+  "routing_decision": "reason",
+  "context_provenance": [
+    "ctx:1"
+  ],
+  "capability_envelope_ref": "env:1"
+}

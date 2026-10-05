@@ -1,4 +1,38 @@
-"""Harness changes as evaluable hypotheses (reqs 1, 14)."""
+"""Harness changes as evaluable hypotheses (reqs 1, 14).
+
+In *Continually improving our agent harness*, the Cursor developer blog
+suggests expressing harness edits as hypotheses with online and offline
+evidence
+(https://cursor.com/blog/continually-improving-agent-harness).
+In *How we compare model quality in Cursor*, it suggests multidimensional
+eval rather than a single frozen benchmark
+(https://cursor.com/blog/cursorbench).
+In *Agent Harness Design: 3 Patterns for Harnessing Claude's Intelligence*,
+the Claude developer blog suggests re-testing what you can stop doing after
+model upgrades
+(https://claude.com/blog/harnessing-claudes-intelligence)::
+
+    >>> from mechaharness.harness_experiment import (
+    ...     HarnessExperiment, HarnessExperimentRunner,
+    ... )
+    >>> lab = HarnessExperimentRunner()
+    >>> hyp = lab.propose(HarnessExperiment(
+    ...     hypothesis="dynamic MCP tool loading cuts tokens without hurting success",
+    ...     intervention="mcp_tools_as_discoverable_files",
+    ...     failure_mode="context_bloat",
+    ...     evidence="cursor.com/blog/dynamic-context-discovery",
+    ...     expected_metrics={"task_success_rate": 0.0, "tokens": -0.4},
+    ...     harness_version="2026.09",
+    ... ))
+    >>> hyp.to_trace_fields()["harness_intervention"]
+    'mcp_tools_as_discoverable_files'
+    >>> lab.evaluate(
+    ...     hyp,
+    ...     with_intervention=lambda: {"task_success_rate": 0.86, "tokens": 0.53},
+    ...     without_intervention=lambda: {"task_success_rate": 0.85, "tokens": 1.0},
+    ... ).status
+    'retained'
+"""
 
 from __future__ import annotations
 

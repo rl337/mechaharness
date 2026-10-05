@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_handoff_record",
+  "persona": "fangore",
+  "title": "Capture why across session handoffs",
+  "kind": "handoff_record_fields",
+  "narrative": "Handoffs preserve completed/pending work, decisions, rationale, rejected alternatives, risks, and next action \u2014 hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff].",
+  "implementation": "`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema; storage remains host-owned.",
+  "validation": "Kind `handoff_record_fields`. Soft expects next_action.",
+  "footnotes": [
+    {
+      "id": "wl-l05-handoff",
+      "label": "WalkingLabs L05 Continuity",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/",
+      "note": "HandoffRecord"
+    }
+  ]
+}

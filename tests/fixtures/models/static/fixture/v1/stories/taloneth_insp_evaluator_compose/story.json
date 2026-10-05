@@ -1,0 +1,23 @@
+{
+  "id": "taloneth_insp_evaluator_compose",
+  "persona": "taloneth",
+  "title": "Run a versioned held-out evaluator to claims",
+  "kind": "evaluator_compose_run",
+  "narrative": "Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon].",
+  "implementation": "`Evaluator`, `CallableEvaluator`, and `evaluate_claims` in `mechaharness.evaluator` compose deterministic claim producers with version and held_out metadata beside VerificationPolicy.",
+  "validation": "Kind `evaluator_compose_run`. Soft expects passed and held_out true.",
+  "footnotes": [
+    {
+      "id": "anth-evals-evaluator",
+      "label": "Anthropic Demystifying evals for AI agents",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "note": "Deterministic then model graders"
+    },
+    {
+      "id": "arxiv-verif-horizon",
+      "label": "Verification Horizon",
+      "url": "https://arxiv.org/abs/2606.26300",
+      "note": "Held-out evaluator versioning"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "nubble_insp_workspace_isolation",
+  "persona": "nubble",
+  "title": "Acquire workspace isolation through a host provider seam",
+  "kind": "workspace_isolation_acquire",
+  "narrative": "Nubble asks branches for isolation without hard-coding worktrees or containers \u2014 the host provider supplies the mechanism. Accepts WalkingLabs L13 and Codex guidance[^wl-l13-workspace][^wl-codex-workspace].",
+  "implementation": "`WorkspaceIsolationProvider` and `InMemoryWorkspaceIsolationProvider` in `mechaharness.workspace_isolation` define the acquire/release capability seam.",
+  "validation": "Kind `workspace_isolation_acquire`. Soft expects memory provider_kind.",
+  "footnotes": [
+    {
+      "id": "wl-l13-workspace",
+      "label": "WalkingLabs L13 Autonomous Loops",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-13-loop-engineering/",
+      "note": "Isolation as capability"
+    },
+    {
+      "id": "wl-codex-workspace",
+      "label": "WalkingLabs Codex harness design",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/",
+      "note": "Sandbox seam"
+    }
+  ]
+}

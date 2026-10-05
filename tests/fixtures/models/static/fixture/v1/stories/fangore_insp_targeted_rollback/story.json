@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_targeted_rollback",
+  "persona": "fangore",
+  "title": "Roll back to the node that caused a verification defect",
+  "kind": "targeted_rollback_select",
+  "narrative": "When verification fails, Fangore wants structured attribution naming the repair target so the graph rolls back to that layer instead of restarting from scratch. Accepts WalkingLabs P08 guidance[^wl-p08-rollback].",
+  "implementation": "`attribute_with_repair_target` and `select_rollback_target` in `mechaharness.failure_attribution` attach `repair_target` / `responsible_node` and choose a matching rollback transition.",
+  "validation": "Kind `targeted_rollback_select`. Soft expects selected rollback target produce.",
+  "footnotes": [
+    {
+      "id": "wl-p08-rollback",
+      "label": "WalkingLabs P08 First Explicit Graph",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/",
+      "note": "Targeted rollback"
+    }
+  ]
+}

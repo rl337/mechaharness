@@ -52,6 +52,7 @@ class OperationContract(BaseModel):
     isolation: str = "none"
     retry_policy: str = "none"
     idempotent: bool = False
+    compensation_strategy: str | None = None
 
 
 class NodeContractBind(BaseModel):

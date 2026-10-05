@@ -1,0 +1,7 @@
+{
+  "projected_keys_include": [
+    "goal"
+  ],
+  "shared_has_result": true,
+  "projected_has_notes": false
+}

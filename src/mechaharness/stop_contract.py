@@ -5,6 +5,31 @@ by :class:`~mechaharness.convergence.ConvergenceContract`, plus explicit
 trigger / continuation / success / abort / progress semantics required for
 linkage validation. Repeating nodes without a stop contract (and without
 ``persistent_service``) fail linkage.
+
+In *Loop engineering: Getting started with loops*, the Claude developer blog
+suggests every repeating cycle declare trigger, continuation, success/abort,
+progress, and budgets rather than an open-ended chat turn
+(https://claude.com/blog/getting-started-with-loops)::
+
+    >>> from mechaharness.stop_contract import StopContract
+    >>> goal = StopContract(
+    ...     trigger="user_or_schedule",
+    ...     continuation_condition="goal_unmet_and_budget_ok",
+    ...     success_condition="lighthouse_score>=90",
+    ...     abort_condition="max_iterations_or_wall_clock",
+    ...     progress_signal="score_delta",
+    ...     carried_state_keys=["best_score", "last_diff"],
+    ...     max_iterations=5,
+    ...     max_elapsed_ms=30 * 60_000,
+    ... )
+    >>> goal.is_bounded()
+    True
+    >>> guard = goal.guard()
+    >>> guard.contract.max_iterations
+    5
+    >>> # Persistent service loops are explicit — they skip bounded validation.
+    >>> StopContract(mode="persistent_service").is_bounded()
+    False
 """
 
 from __future__ import annotations

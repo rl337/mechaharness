@@ -1,0 +1,23 @@
+{
+  "id": "nubble_insp_trace_envelope",
+  "persona": "nubble",
+  "title": "Require provenance on every trace envelope",
+  "kind": "trace_envelope_complete",
+  "narrative": "Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace].",
+  "implementation": "`TraceEnvelope`, `envelope_complete`, and `require_trace_envelope` in `mechaharness.trace_envelope` define required provenance fields for run/node events.",
+  "validation": "Kind `trace_envelope_complete`. Soft expects complete true and no missing fields.",
+  "footnotes": [
+    {
+      "id": "wl-l11-trace",
+      "label": "WalkingLabs L11 Runtime Observability",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-11-why-observability-belongs-inside-the-harness/",
+      "note": "Trace reconstructs decisions"
+    },
+    {
+      "id": "wl-deepseek-trace",
+      "label": "WalkingLabs DeepSeek harness design",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/",
+      "note": "Observable execution-affecting state"
+    }
+  ]
+}

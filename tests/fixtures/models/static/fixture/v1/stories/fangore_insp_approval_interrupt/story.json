@@ -1,0 +1,23 @@
+{
+  "id": "fangore_insp_approval_interrupt",
+  "persona": "fangore",
+  "title": "Suspend a graph for durable human approval",
+  "kind": "approval_interrupt_cycle",
+  "narrative": "High-consequence steps must pause on a durable approval interrupt with evidence, timeout policy, and actor provenance \u2014 then resume when a human decides. Accepts WalkingLabs P08 and L14 guidance[^wl-p08-approval][^wl-l14-approval].",
+  "implementation": "`ApprovalInterrupt`, `suspend_for_approval`, and `resume_approval` in `mechaharness.approval_interrupt` model pending/approved/rejected interrupts with checkpoint refs.",
+  "validation": "Kind `approval_interrupt_cycle`. Soft expects pending then approved with actor.",
+  "footnotes": [
+    {
+      "id": "wl-p08-approval",
+      "label": "WalkingLabs P08 First Explicit Graph",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/",
+      "note": "Human approval interrupt"
+    },
+    {
+      "id": "wl-l14-approval",
+      "label": "WalkingLabs L14 Graph Engineering",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/",
+      "note": "Durable interrupts"
+    }
+  ]
+}

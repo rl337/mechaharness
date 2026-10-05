@@ -1,0 +1,9 @@
+{
+  "baseline_fingerprint": "full",
+  "disabled_component_ids": [
+    "advisor"
+  ],
+  "task_corpus_ref": "c1",
+  "baseline_success_rate": 0.8,
+  "ablated_success_rate": 0.5
+}

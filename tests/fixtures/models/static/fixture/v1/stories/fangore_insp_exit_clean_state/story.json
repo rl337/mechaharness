@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_exit_clean_state",
+  "persona": "fangore",
+  "title": "Require clean-state exit before handoff",
+  "kind": "exit_clean_state_eval",
+  "narrative": "A run is not done until checkpoint durability, pending-node policy, and optional handoff records satisfy a clean-state exit contract. Accepts WalkingLabs L12 guidance[^wl-l12-exit].",
+  "implementation": "`CleanStateContract` / `ExitContract` and `evaluate_exit` in `mechaharness.exit_contract` check post-run clean-state invariants.",
+  "validation": "Kind `exit_clean_state_eval`. Soft expects ok true.",
+  "footnotes": [
+    {
+      "id": "wl-l12-exit",
+      "label": "WalkingLabs L12 Clean Session Handoffs",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/",
+      "note": "Clean-state exit"
+    }
+  ]
+}

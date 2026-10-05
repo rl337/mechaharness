@@ -3,6 +3,27 @@
 Clients may propose gotchas from offline consolidation; promotion to active
 policy requires evaluation. Components distinguish invariants, domain
 knowledge, procedures, and learned gotchas.
+
+In *Lessons from building Claude Code: How we use skills*, the Claude
+developer blog suggests optimizing instruction bundles for information gain —
+short descriptions for discovery, full procedures on demand, and appendable
+gotchas
+(https://claude.com/blog/lessons-from-building-claude-code-how-we-use-skills)::
+
+    >>> from mechaharness.instruction_component import InstructionCatalog
+    >>> catalog = InstructionCatalog()
+    >>> g = catalog.append_gotcha(
+    ...     "Gen1 bag limit",
+    ...     "Toss unneeded TMs before dungeons — 20 item max.",
+    ...     provenance={"source": "claude.com/blog/harnessing-claudes-intelligence"},
+    ... )
+    >>> g.record_trigger(used=True, appropriate=False)  # over-triggered
+    >>> catalog.metrics()[g.id]["over_trigger"]
+    1.0
+    >>> catalog.promote(g.id)
+    InstructionComponent(...)
+    >>> [c.title for c in catalog.active(kind="gotcha")]
+    ['Gen1 bag limit']
 """
 
 from __future__ import annotations
@@ -17,7 +38,12 @@ ComponentStatus = Literal["proposed", "active", "retired", "rejected"]
 
 
 class InstructionComponent(BaseModel):
-    """Scarce-information instruction bundle unit."""
+    """Scarce-information instruction bundle unit.
+
+    WalkingLabs L04 treats entry instructions as a router with scope,
+    priority/authority, provenance, and estimated context cost
+    (https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-04-why-one-giant-instruction-file-fails/).
+    """
 
     model_config = ConfigDict(extra="allow")
 
@@ -27,6 +53,12 @@ class InstructionComponent(BaseModel):
     body: str
     version: str = "1"
     status: ComponentStatus = "proposed"
+    scope: str | None = None
+    priority: int = 0
+    authority: str | None = None
+    estimated_context_cost: int | None = None
+    expiry: str | None = None
+    review_condition: str | None = None
     trigger_count: int = 0
     use_count: int = 0
     over_trigger_count: int = 0

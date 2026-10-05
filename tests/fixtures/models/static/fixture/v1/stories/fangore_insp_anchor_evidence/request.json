@@ -1,0 +1,12 @@
+{
+  "kinds": [
+    "external_observation"
+  ],
+  "min_count": 1,
+  "anchors": [
+    {
+      "kind": "external_observation",
+      "ref": "obs:1"
+    }
+  ]
+}
