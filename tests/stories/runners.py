@@ -68,13 +68,22 @@ from mechaharness.decision_surfaces import (
 )
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
-from mechaharness.failure_attribution import attribute_error, detect_repeated_failure_classes
+from mechaharness.approval_interrupt import resume_approval, suspend_for_approval
+from mechaharness.context_layers import GraphSharedState, project_node_context
+from mechaharness.failure_attribution import (
+    attribute_error,
+    attribute_with_repair_target,
+    detect_repeated_failure_classes,
+    select_rollback_target,
+)
 from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
+from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
 from mechaharness.model_input_manifest import (
     ModelInputManifest,
     attach_manifest_ref,
     reconstruct_messages,
 )
+from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -315,6 +324,11 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "lifecycle_extension_graph_observe": _run_lifecycle_extension_graph_observe,
         "model_input_manifest_replay": _run_model_input_manifest_replay,
         "graph_transition_inspect": _run_graph_transition_inspect,
+        "isolation_io_contract": _run_isolation_io_contract,
+        "context_layers_project": _run_context_layers_project,
+        "targeted_rollback_select": _run_targeted_rollback_select,
+        "approval_interrupt_cycle": _run_approval_interrupt_cycle,
+        "trace_envelope_complete": _run_trace_envelope_complete,
     }
     try:
         runner = runners[kind]
@@ -2212,4 +2226,87 @@ async def _run_graph_transition_inspect(case: StoryCase, backend: StoryBackend) 
         "issues": contract.validate_against_nodes(nodes),
         "verify_kinds_include": kinds,
     }
+    _assert_expect(actual, expect)
+
+
+async def _run_isolation_io_contract(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    iso = IsolationContract(
+        effect_scope=str(request.get("effect_scope") or "none"),
+        budget_share=float(request.get("budget_share") or 1.0),
+    )
+    io = TemplateIOContract(
+        inputs=dict(request.get("inputs") or {}),
+        outputs=dict(request.get("outputs") or {}),
+        isolation=iso,
+    )
+    actual = {"issues": io.validate(), "budget_share": iso.budget_share}
+    _assert_expect(actual, expect)
+
+
+async def _run_context_layers_project(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    shared = GraphSharedState(data=dict(request.get("shared") or {}))
+    private = project_node_context(
+        shared, needs=list(request.get("needs") or []), node_id="n1"
+    )
+    private.export_to_shared(shared, dict(request.get("exports") or {}))
+    actual = {
+        "projected_keys_include": list(private.data.keys()),
+        "shared_has_result": "result" in shared.data,
+        "projected_has_notes": "notes" in private.data,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_targeted_rollback_select(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    attr = attribute_with_repair_target(
+        str(request.get("error") or ""),
+        node_id=request.get("node_id"),
+        repair_target=request.get("repair_target"),
+    )
+    contract = TransitionContract(
+        transitions=[GraphTransition.model_validate(t) for t in request.get("transitions") or []]
+    )
+    actual = {
+        "rollback_target": select_rollback_target(attr, contract),
+        "repair_target": attr.repair_target,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_approval_interrupt_cycle(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    pending = suspend_for_approval(
+        reason=str(request.get("reason") or "approve"),
+        suspended_checkpoint_ref=request.get("checkpoint"),
+    )
+    done = resume_approval(
+        pending,
+        decision=str(request.get("decision") or "approve"),
+        actor=str(request.get("actor") or "actor"),
+    )
+    actual = {
+        "initial_status": pending.status,
+        "final_status": done.status,
+        "actor_contains": done.actor_provenance or "",
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_trace_envelope_complete(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    env = TraceEnvelope.model_validate(request)
+    actual = {"complete": envelope_complete(env), "missing": env.missing_fields()}
     _assert_expect(actual, expect)

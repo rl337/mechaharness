@@ -129,6 +129,23 @@ Kind `capability_need_routing`. Soft expects selected_model_class matches need.
 
 [^insp-r13]: [Inspiration requirements (req 13: model routing)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 13 — model routing
 
+### `nubble_insp_trace_envelope` — Require provenance on every trace envelope
+
+Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace].
+
+#### Implementation
+
+`TraceEnvelope`, `envelope_complete`, and `require_trace_envelope` in `mechaharness.trace_envelope` define required provenance fields for run/node events.
+
+#### Validation
+
+Kind `trace_envelope_complete`. Soft expects complete true and no missing fields.
+
+#### Footnotes
+
+[^wl-l11-trace]: [WalkingLabs L11 Runtime Observability](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-11-why-observability-belongs-inside-the-harness/) — Trace reconstructs decisions
+[^wl-deepseek-trace]: [WalkingLabs DeepSeek harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/) — Observable execution-affecting state
+
 ### `nubble_lane_load_hint` — Refuse work when the wrong inference profile is loaded
 
 Nubble is on call when a refund-routing job fails on the local inference host. The job needs the judge profile, but an earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error. It must tell him, in plain operator language, that this work needs the judge lane and which load command to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile mismatch wastes incident time.
@@ -442,6 +459,23 @@ Covers: POL-04, GAT-04.
 
 Kind `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
 
+### `fangore_insp_approval_interrupt` — Suspend a graph for durable human approval
+
+High-consequence steps must pause on a durable approval interrupt with evidence, timeout policy, and actor provenance — then resume when a human decides. Accepts WalkingLabs P08 and L14 guidance[^wl-p08-approval][^wl-l14-approval].
+
+#### Implementation
+
+`ApprovalInterrupt`, `suspend_for_approval`, and `resume_approval` in `mechaharness.approval_interrupt` model pending/approved/rejected interrupts with checkpoint refs.
+
+#### Validation
+
+Kind `approval_interrupt_cycle`. Soft expects pending then approved with actor.
+
+#### Footnotes
+
+[^wl-p08-approval]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Human approval interrupt
+[^wl-l14-approval]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Durable interrupts
+
 ### `fangore_insp_budget_subgraph_rollup` — Roll nested subgraph spend into the parent budget
 
 When a parent step embeds a child graph, child node costs must count against the same budget the parent is running under. After the child spends enough to hit the soft limit, later parent steps wind down instead of starting. Complements `fangore_insp_graph_budget` and `fangore_insp_dynamic_subgraph`.[^insp-budget-rollup]
@@ -473,6 +507,23 @@ Kind `capability_envelope_narrow`. Soft expects narrow ok, widen raises, child d
 #### Footnotes
 
 [^insp-r07]: [Inspiration requirements (req 7: delegation envelopes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 7 — delegation envelopes
+
+### `fangore_insp_context_layers` — Project node-private context from shared graph state
+
+Fangore keeps durable graph state large and shared while each node receives only the private projection it needs; only explicit exports re-enter shared state. Accepts WalkingLabs L14 and L04 guidance[^wl-l14-layers][^wl-l04-layers].
+
+#### Implementation
+
+`GraphSharedState`, `NodePrivateContext`, and `project_node_context` in `mechaharness.context_layers` formalize shared vs private layers and export-only write-back.
+
+#### Validation
+
+Kind `context_layers_project`. Soft expects projected keys and exported result.
+
+#### Footnotes
+
+[^wl-l14-layers]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Shared vs private context
+[^wl-l04-layers]: [WalkingLabs L04 Split Instructions](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-04-why-one-giant-instruction-file-fails/) — Load context close to use
 
 ### `fangore_insp_context_provider` — Discover context indices before loading large payloads
 
@@ -602,6 +653,23 @@ Kind `instruction_gotcha_metrics`. Soft expects over_trigger recorded and active
 #### Footnotes
 
 [^insp-r08]: [Inspiration requirements (req 8: skills and gotchas)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 8 — skills and gotchas
+
+### `fangore_insp_isolation_io` — Validate isolation and template I/O contracts
+
+Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation].
+
+#### Implementation
+
+`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for templates/subgraphs.
+
+#### Validation
+
+Kind `isolation_io_contract`. Soft expects empty validation issues and budget_share.
+
+#### Footnotes
+
+[^wl-l14-isolation]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Typed I/O and isolation
+[^wl-codex-isolation]: [WalkingLabs Codex harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/) — Child isolation
 
 ### `fangore_insp_lifecycle_block` — Skip one tool call without inventing a new plan
 
@@ -762,6 +830,22 @@ Kind `graph_linkage_preflight` with stop-focused request. Soft expects `missing_
 #### Footnotes
 
 [^insp-r04]: [Inspiration requirements (req 4: stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 — stop contracts
+
+### `fangore_insp_targeted_rollback` — Roll back to the node that caused a verification defect
+
+When verification fails, Fangore wants structured attribution naming the repair target so the graph rolls back to that layer instead of restarting from scratch. Accepts WalkingLabs P08 guidance[^wl-p08-rollback].
+
+#### Implementation
+
+`attribute_with_repair_target` and `select_rollback_target` in `mechaharness.failure_attribution` attach `repair_target` / `responsible_node` and choose a matching rollback transition.
+
+#### Validation
+
+Kind `targeted_rollback_select`. Soft expects selected rollback target produce.
+
+#### Footnotes
+
+[^wl-p08-rollback]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Targeted rollback
 
 ### `fangore_insp_template_incubation` — Stamp template provenance and refuse demoted skeletons
 

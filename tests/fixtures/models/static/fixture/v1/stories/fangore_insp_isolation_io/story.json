@@ -1,0 +1,23 @@
+{
+  "id": "fangore_insp_isolation_io",
+  "persona": "fangore",
+  "title": "Validate isolation and template I/O contracts",
+  "kind": "isolation_io_contract",
+  "narrative": "Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation].",
+  "implementation": "`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for templates/subgraphs.",
+  "validation": "Kind `isolation_io_contract`. Soft expects empty validation issues and budget_share.",
+  "footnotes": [
+    {
+      "id": "wl-l14-isolation",
+      "label": "WalkingLabs L14 Graph Engineering",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/",
+      "note": "Typed I/O and isolation"
+    },
+    {
+      "id": "wl-codex-isolation",
+      "label": "WalkingLabs Codex harness design",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/",
+      "note": "Child isolation"
+    }
+  ]
+}
