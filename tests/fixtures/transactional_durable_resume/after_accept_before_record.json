@@ -1,0 +1,18 @@
+{
+  "id": "after_accept_before_record",
+  "description": "Crash after external accept before handle record; resume reconciles, no redispatch.",
+  "crash_location": "after_accept_before_record",
+  "run_id": "tdr-after-accept-before-record",
+  "expect": {
+    "crashed": true,
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 1,
+    "dispatch_count_after_crash": 1,
+    "effect_state_before": "uncertain",
+    "effect_state_after": "completed",
+    "reconciliation_invoked": true,
+    "external_handle_contains": "cursor-job-",
+    "checkpoint_durability": "durable"
+  }
+}

@@ -4,7 +4,7 @@
 
 MechaHarness already serializes `ExecutionGraph` state, restores the latest graph through `GraphStore`, records recovery-boundary vocabulary, and rejects incompatible configuration fingerprints on resume. Those primitives cover graph reconstruction, but they do not yet guarantee durable recovery around externally visible side effects.
 
-June is a motivating client. A June graph may dispatch a long-running Cursor coding task, lose the MechaHarness process after the remote system accepts that task, and later resume. Replaying the dispatch would create duplicate work. June should not invent a second graph-recovery protocol to solve this. MechaHarness should provide the reusable persistence and effect-reconciliation primitives, while June owns its project/task semantics and external adapter.
+A downstream client is the motivating consumer. That client's graph may dispatch a long-running Cursor coding task, lose the MechaHarness process after the remote system accepts that task, and later resume. Replaying the dispatch would create duplicate work. The downstream client should not invent a second graph-recovery protocol to solve this. MechaHarness should provide the reusable persistence and effect-reconciliation primitives, while the downstream client owns its project/task semantics and external adapter.
 
 ## Ownership boundary
 
@@ -15,7 +15,7 @@ MechaHarness owns:
 - resume/reconciliation rules that prevent an already accepted effect from being silently repeated;
 - transactional guarantees and crash-recovery acceptance tests.
 
-Clients such as June own:
+Downstream clients own:
 - project and task identities;
 - concrete external systems such as Cursor;
 - mapping an external system's run/job handle into the MechaHarness effect contract;
@@ -84,7 +84,7 @@ This creates a recoverable distinction between:
 
 After an external system accepts a dispatch, its external handle MUST be durably associated with the pre-existing `effect_id` before the node can be considered safely checkpointed past dispatch.
 
-For June, an example is a Cursor run identifier. The core contract MUST not assume Cursor.
+For a downstream client, an example is a Cursor run identifier. The core contract MUST not assume Cursor.
 
 ### DR-06: Resume reconciles uncertain effects instead of redispatching
 
@@ -141,7 +141,7 @@ The effect protocol SHOULD be opt-in through a runner capability/interface or eq
 
 ### DR-12: Static-data crash-injection user story
 
-Add a first-class static-data user story that rigorously exercises durable resume with a dependency-injected fake external coding-job backend shaped like June's intended Cursor integration.
+Add a first-class static-data user story that rigorously exercises durable resume with a dependency-injected fake external coding-job backend shaped like a downstream client's intended Cursor integration.
 
 The story MUST run as a parameterized crash-location matrix. Each case starts from the same deterministic fixture, injects a process-failure/crash at exactly one execution boundary, constructs a fresh executor against the same durable SQLite store, resumes the run, and verifies the recovered result.
 
@@ -194,7 +194,7 @@ Where acceptance after the external call is genuinely unknowable, the story MUST
 
 The story SHOULD be implemented in the repository's normal static fixture/story mechanism so it participates in the same deterministic acceptance suite as the existing durable-resume stories. It MAY use multiple fixture variants if that keeps each expected result legible.
 
-The story MUST demonstrate the ownership boundary: June-like code supplies backend-specific reconciliation while MechaHarness supplies durable state, effect identity, crash injection, and resume control.
+The story MUST demonstrate the ownership boundary: downstream-client-like code supplies backend-specific reconciliation while MechaHarness supplies durable state, effect identity, crash injection, and resume control.
 
 ## Compatibility and migration
 
@@ -211,4 +211,4 @@ This requirement is complete when:
 - uncertain effects reconcile rather than automatically redispatch;
 - the crash-window matrix passes with exactly one external dispatch where the first dispatch was accepted;
 - fingerprint incompatibility still refuses resume;
-- a June-shaped external coding-job story passes without adding June-specific policy to MechaHarness core.
+- a downstream-client-shaped external coding-job story passes without adding client-specific policy to MechaHarness core.

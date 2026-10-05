@@ -307,6 +307,7 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "lifecycle_extension_block": _run_lifecycle_extension_block,
         "lifecycle_extension_replace": _run_lifecycle_extension_replace,
         "lifecycle_extension_graph_observe": _run_lifecycle_extension_graph_observe,
+        "transactional_durable_resume_crash_matrix": _run_transactional_durable_resume_crash_matrix,
     }
     try:
         runner = runners[kind]
@@ -2170,3 +2171,42 @@ async def _run_lifecycle_extension_graph_observe(
         "default_ran": bool(before.payload.get("default_ran")) if before else False,
     }
     _assert_expect(actual, expect)
+
+
+async def _run_transactional_durable_resume_crash_matrix(
+    case: StoryCase, backend: StoryBackend
+) -> None:
+    """DR-12: Downstream-client-shaped fake coding-job crash matrix against SQLite."""
+    del backend
+    import tempfile
+    from pathlib import Path
+
+    from tests.support.transactional_durable_resume_cases import (
+        TransactionalDurableResumeCase,
+        assert_expect,
+        run_crash_case,
+    )
+
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    cases_expect = dict(expect.get("cases") or {})
+    locations = list(request.get("crash_locations") or [])
+    assert locations, "request.json must list crash_locations"
+
+    with tempfile.TemporaryDirectory(prefix="mh-tdr-story-") as tmp:
+        for location in locations:
+            case_expect = dict(cases_expect.get(location) or {})
+            fixture = TransactionalDurableResumeCase(
+                path=Path(f"{location}.json"),
+                data={
+                    "id": location,
+                    "crash_location": location,
+                    "run_id": f"{request.get('run_id_prefix', 'story-tdr')}-{location}",
+                    "goal": request.get("goal") or "downstream-coding-job",
+                    "expect": case_expect,
+                },
+            )
+            db = Path(tmp) / f"{location}.sqlite"
+            payload = await run_crash_case(fixture, db_path=db)
+            assert_expect(payload["actual"], case_expect)
+

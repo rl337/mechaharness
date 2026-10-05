@@ -1,8 +1,8 @@
 """Optional host probe for the active inference environment.
 
-Hosts (for example junespark) implement this to refuse runs that need
-capabilities the loaded profile does not provide. The library default is a
-no-op so CLI/mock paths stay unchanged.
+Hosts (for example a LAN OpenAI-compat deploy) implement this to refuse runs
+that need capabilities the loaded profile does not provide. The library
+default is a no-op so CLI/mock paths stay unchanged.
 
 Lanes are open ``str`` identity (``reason``, ``judge``, ``media``, or a host
 namespace). Unknown lanes round-trip; hosts supply load hints.

@@ -1,0 +1,18 @@
+{
+  "id": "after_accept_recorded",
+  "description": "Crash after acceptance handle recorded; resume observes existing job.",
+  "crash_location": "after_accept_recorded",
+  "run_id": "tdr-after-accept-recorded",
+  "expect": {
+    "crashed": true,
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 1,
+    "dispatch_count_after_crash": 1,
+    "effect_state_before": "accepted",
+    "effect_state_after": "completed",
+    "reconciliation_invoked": true,
+    "external_handle_contains": "cursor-job-",
+    "checkpoint_durability": "durable"
+  }
+}
