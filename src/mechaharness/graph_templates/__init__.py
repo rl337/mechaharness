@@ -49,6 +49,7 @@ from mechaharness.graph_templates.catalog import default_graph_templates
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
+from mechaharness.graph_templates.initialize_preflight import InitializePreflightTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
 
 __all__ = [
@@ -58,6 +59,7 @@ __all__ = [
     "GraphTemplateParams",
     "GraphTemplateRegistry",
     "IndependentReviewTemplate",
+    "InitializePreflightTemplate",
     "SoftPoint",
     "SubgraphNodeRunner",
     "VerifyRepairTemplate",
