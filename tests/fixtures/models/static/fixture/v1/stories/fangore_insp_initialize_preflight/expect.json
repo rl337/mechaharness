@@ -1,0 +1,8 @@
+{
+  "nodes_include": [
+    "linkage",
+    "capability_check",
+    "checkpoint_compat",
+    "ready"
+  ]
+}

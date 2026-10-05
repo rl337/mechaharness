@@ -3,6 +3,35 @@
 An envelope is the hard boundary for a run or child: tools, grants, context
 providers, model class, budgets, escalation, and output contract. Children
 MUST receive an explicit envelope; they do not inherit the parent implicitly.
+
+In *How and when to use subagents in Claude Code*, the Claude developer blog
+suggests children receive isolated context and restricted tools rather than
+inheriting the parent session
+(https://claude.com/blog/subagents-in-claude-code).
+In *Implementing a secure sandbox for local agents*, the Cursor developer
+blog suggests structural capability boundaries instead of prompt-only hope
+(https://cursor.com/blog/agent-sandboxing)::
+
+    >>> from mechaharness.capability_envelope import CapabilityEnvelope
+    >>> from mechaharness.core.access import FsRead, FsWrite, GraphExecute
+    >>> parent = CapabilityEnvelope.from_grants(
+    ...     [GraphExecute, FsRead, FsWrite],
+    ...     tool_names=["Read", "Edit"],
+    ...     model_class="reason-fast",
+    ...     resource_budget={"max_tokens": 50_000},
+    ... )
+    >>> explorer = parent.narrow(
+    ...     grants=[GraphExecute, FsRead],
+    ...     tool_names=["Read"],
+    ...     context_provider_ids=["repo.index"],
+    ...     parent_state_version="main@abc",
+    ... )
+    >>> explorer.tool_names, explorer.allows_grant(FsWrite)
+    (['Read'], False)
+    >>> parent.narrow(grants=[GraphExecute, FsRead, "core:net.http"])
+    Traceback (most recent call last):
+        ...
+    ValueError: child envelope widens grants: core:net.http
 """
 
 from __future__ import annotations

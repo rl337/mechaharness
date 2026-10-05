@@ -1,0 +1,23 @@
+{
+  "id": "fangore_insp_context_layers",
+  "persona": "fangore",
+  "title": "Project node-private context from shared graph state",
+  "kind": "context_layers_project",
+  "narrative": "Fangore keeps durable graph state large and shared while each node receives only the private projection it needs; only explicit exports re-enter shared state. Accepts WalkingLabs L14 and L04 guidance[^wl-l14-layers][^wl-l04-layers].",
+  "implementation": "`GraphSharedState`, `NodePrivateContext`, and `project_node_context` in `mechaharness.context_layers` formalize shared vs private layers and export-only write-back.",
+  "validation": "Kind `context_layers_project`. Soft expects projected keys and exported result.",
+  "footnotes": [
+    {
+      "id": "wl-l14-layers",
+      "label": "WalkingLabs L14 Graph Engineering",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/",
+      "note": "Shared vs private context"
+    },
+    {
+      "id": "wl-l04-layers",
+      "label": "WalkingLabs L04 Split Instructions",
+      "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-04-why-one-giant-instruction-file-fails/",
+      "note": "Load context close to use"
+    }
+  ]
+}

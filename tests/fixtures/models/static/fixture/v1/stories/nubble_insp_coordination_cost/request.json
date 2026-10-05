@@ -1,0 +1,7 @@
+{
+  "branch_count": 4,
+  "wall_clock_critical_path_ms": 5000,
+  "aggregate_cost_usd": 0.4,
+  "duplicated_context_tokens": 100,
+  "fan_in_review_cost_usd": 0.05
+}

@@ -2,6 +2,33 @@
 
 Hosts implement providers (document stores, knowledge graphs, indexes).
 MechaHarness consumes them through envelopes and context compilation.
+
+In *Dynamic context discovery*, the Cursor developer blog suggests short
+discoverable indices and just-in-time loads instead of dumping large payloads
+up front
+(https://cursor.com/blog/dynamic-context-discovery).
+In *The new rules of context engineering for Claude 5 generation models*,
+the Claude developer blog suggests scoped, provenance-bearing retrieval over
+static pre-load
+(https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models)::
+
+    >>> from mechaharness.context_provider import StaticContextProvider
+    >>> provider = StaticContextProvider(
+    ...     "mcp.github",
+    ...     {
+    ...         "tool:create_issue": "Create a GitHub issue (long schema...)",
+    ...         "tool:list_prs": "List pull requests (long schema...)",
+    ...     },
+    ...     summaries={
+    ...         "tool:create_issue": "create_issue — open an issue",
+    ...         "tool:list_prs": "list_prs — list pull requests",
+    ...     },
+    ... )
+    >>> [e.summary for e in provider.index(query="pull")]
+    ['list_prs — list pull requests']
+    >>> loaded = provider.load(["tool:list_prs"])
+    >>> loaded[0].provider_id, loaded[0].token_estimate > 0
+    ('mcp.github', True)
 """
 
 from __future__ import annotations

@@ -1,0 +1,9 @@
+{
+  "strategy": "quorum",
+  "quorum": 2,
+  "results": [
+    true,
+    true,
+    false
+  ]
+}

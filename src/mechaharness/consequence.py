@@ -3,6 +3,30 @@
 Soft guidance never substitutes for grants. Consequence classes scale
 verification, envelope narrowing, and approval prompts — grants remain the
 hard gate.
+
+In *Governing agent autonomy with Auto-review*, the Cursor developer blog
+suggests treating autonomy as a dial — low-stakes actions proceed, crossing
+trust boundaries slows the agent — and tracking approval frequency because
+prompt fatigue degrades review
+(https://cursor.com/blog/agent-autonomy-auto-review)::
+
+    >>> from mechaharness.consequence import ActionConsequence, ConsequencePolicy
+    >>> policy = ConsequencePolicy(actions=[
+    ...     ActionConsequence(action="Bash(ls)", consequence="low"),
+    ...     ActionConsequence(
+    ...         action="Bash(curl prod)",
+    ...         consequence="high",
+    ...         trust_boundary="production_network",
+    ...         requires_approval=True,
+    ...     ),
+    ... ])
+    >>> policy.for_action("Bash(ls)").consequence
+    'low'
+    >>> policy.requires_stronger_controls("Bash(curl prod)")
+    True
+    >>> policy.record_approval_prompt(); policy.record_approval_decision()
+    >>> policy.approval_frequency()
+    1.0
 """
 
 from __future__ import annotations

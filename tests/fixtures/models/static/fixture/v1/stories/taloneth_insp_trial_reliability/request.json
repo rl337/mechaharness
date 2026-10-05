@@ -1,0 +1,23 @@
+{
+  "trials": [
+    {
+      "trial_id": "1",
+      "success": true,
+      "cost_usd": 0.01,
+      "latency_ms": 10
+    },
+    {
+      "trial_id": "2",
+      "success": false,
+      "cost_usd": 0.02,
+      "latency_ms": 20
+    },
+    {
+      "trial_id": "3",
+      "success": true,
+      "cost_usd": 0.01,
+      "latency_ms": 15
+    }
+  ],
+  "k": 2
+}
