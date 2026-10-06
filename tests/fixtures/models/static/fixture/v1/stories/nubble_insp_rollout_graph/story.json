@@ -1,0 +1,17 @@
+{
+  "id": "nubble_insp_rollout_graph",
+  "persona": "nubble",
+  "title": "Reconstruct retries and delegated agents as observed rollout branches",
+  "kind": "rollout_graph_build",
+  "narrative": "Nubble needs the observed run topology \u2014 retries, spawned reviewers, and terminals \u2014 as a first-class graph linked back to the intended plan, not only the planned node list. Accepts FineEnvs training-sequence reconstruction[^fineenvs-rollout].",
+  "implementation": "`RolloutGraph`, `RolloutNode`, and `build_rollout_graph` in `mechaharness.rollout_graph` project observed records into roots/parent-child topology with optional `execution_node_id` links.",
+  "validation": "Kind `rollout_graph_build`. Soft expects roots and linked retry. Unit tests in `tests/test_rollout_graph.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-rollout",
+      "label": "FineEnvs multi-harness RL \u2014 training sequences",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#from-calls-to-training-sequences",
+      "note": "MH-MHRL-03"
+    }
+  ]
+}

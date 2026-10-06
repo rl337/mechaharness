@@ -1,0 +1,19 @@
+{
+  "records": [
+    {
+      "id": "root",
+      "kind": "model_call"
+    },
+    {
+      "id": "retry",
+      "kind": "retry",
+      "parent_id": "root",
+      "execution_node_id": "produce",
+      "attempt": 2
+    },
+    {
+      "id": "review",
+      "kind": "delegated_agent"
+    }
+  ]
+}
