@@ -52,6 +52,7 @@ class TraceEnvelope(BaseModel):
     parent_run_id: str | None = None
     child_run_ids: list[str] = Field(default_factory=list)
     model_input_manifest_ref: str | None = None
+    harness_fingerprint: str | None = None
     extra: dict[str, Any] = Field(default_factory=dict)
 
     def missing_fields(self) -> list[str]:

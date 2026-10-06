@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-1",
+  "assignment": "treatment",
+  "consume": [
+    "case-a"
+  ],
+  "corpus": [
+    "case-a",
+    "case-b",
+    "case-c"
+  ]
+}
