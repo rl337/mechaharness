@@ -1,0 +1,17 @@
+{
+  "id": "nubble_insp_efficiency_scorecard",
+  "persona": "nubble",
+  "title": "Keep multidimensional efficiency dimensions observable",
+  "kind": "efficiency_scorecard_build",
+  "narrative": "Nubble needs tool calls, tokens, latency, and coordination cost kept as separate efficiency dimensions rather than a single opaque proxy. Accepts FineEnvs tool-call efficiency observations[^fineenvs-efficiency].",
+  "implementation": "`EfficiencyScorecard` and `build_efficiency_scorecard` in `mechaharness.efficiency_scorecard` compose topology/cost/coordination/resume dimensions without silent collapse.",
+  "validation": "Kind `efficiency_scorecard_build`. Soft expects tool_calls and tokens_out dimensions. Unit tests in `tests/test_efficiency_scorecard.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-efficiency",
+      "label": "FineEnvs multi-harness RL \u2014 tool calls and tokens",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#tool-calls-and-tokens",
+      "note": "MH-MHRL-19"
+    }
+  ]
+}
