@@ -9,7 +9,7 @@ from typing import Literal
 StoryMode = Literal["static", "live"]
 
 _LEGACY_LIVE_MODELS: dict[str, str] = {
-    "MECHA_LIVE_JUNESPARK": "openai_compat/qwen3-30b-thinking",
+    "MECHA_LIVE_OPENAI_COMPAT": "openai_compat/qwen3-30b-thinking",
     "MECHA_LIVE_QWEN": "openai_compat/qwen-qwen3.6-35b-a3b",
     "MECHA_LIVE_JUDGE": "systemone/laya",
     "MECHA_LIVE_DECIDE": "systemone/laya",

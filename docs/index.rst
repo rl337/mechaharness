@@ -74,7 +74,7 @@ Guides
    architecture
    guides/install
    guides/dependency-injection
-   guides/junespark
+   guides/openai-local
    guides/user-stories
 
 Reference
@@ -109,6 +109,10 @@ API
    api/inference
    api/harness
    api/tools
+   api/graph_executor
+   api/checkpoint_store
+   api/sqlite_checkpoint_store
+   api/external_effect
 
 Changelog
 ---------

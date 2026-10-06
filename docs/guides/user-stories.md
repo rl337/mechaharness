@@ -40,7 +40,7 @@ MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
   MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 pytest -q tests/stories -k refund_verdict
 
 # Shorthand aliases (still dual-mode stories, not separate skipif modules)
-MECHA_LIVE_JUNESPARK=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost
+MECHA_LIVE_OPENAI_COMPAT=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost
 MECHA_LIVE_QWEN=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost
 MECHA_LIVE_JUDGE=1 pytest -q tests/stories -k 'refund_verdict or systemone_cassette'
 ```
@@ -647,7 +647,7 @@ Long-running work checkpoints outside chat. If the harness or graph configuratio
 
 #### Implementation
 
-`GraphStore` persists `config_fingerprint`; `GraphExecutor.run(resume=True)` compares fingerprints after re-resolve.
+`CheckpointStore` (default `EventLogCheckpointStore`; durable `SqliteCheckpointStore`) persists `config_fingerprint`; `GraphExecutor.run(resume=True)` compares fingerprints after re-resolve. See also `fangore_transactional_durable_resume` for external-effect crash recovery.
 
 #### Validation
 
@@ -1210,6 +1210,22 @@ Kind `tool_gating` → `_run_tool_gating`. Soft expects: deny without grant, all
 #### Footnotes
 
 [^insp-soft-hard]: [Inspiration requirements (soft vs hard)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 9 — soft guidance and hard enforcement are different mechanisms
+
+### `fangore_transactional_durable_resume` — Resume a coding job after process crash without duplicate dispatch
+
+Fangore's host dispatches a long-running coding job through a durable plan. The MechaHarness process can die after the remote system accepts the job but before the plan records the result. On restart, the same durable store must reconcile the existing job instead of starting a second one. Crash points before intent, after intent, after accept, after reduce, and after final commit are all covered. Complements `fangore_insp_durable_resume` fingerprint refusal. Accepts the transactional durable resume requirements[^tdr-req].
+
+#### Implementation
+
+`GraphExecutor` injects `CheckpointStore` via `MechaHarnessConfig.get_checkpoint_store()` (SQLite reference: `SqliteCheckpointStore`; default EventLog adapter is explicitly `ephemeral`). Opt-in `EffectfulGraphNodeRunner` persists effect intent before dispatch, records external handles, and reconciles uncertain/accepted effects on `run(resume=True)`. `ArmedCrashProbe` / `InjectedProcessCrash` inject process failure at recovery boundaries. EventLog stays observational; fingerprint refusal remains enforced. Module doctests on `checkpoint_store`, `sqlite_checkpoint_store`, `external_effect`, `graph_executor`, and `MechaHarnessConfig.get_checkpoint_store` show the host wiring pattern.
+
+#### Validation
+
+Kind `transactional_durable_resume_crash_matrix`. Soft expects per crash location: final status ok, dispatch_count exactly 1 after an accepted first dispatch, effect state transitions, and reconciliation on uncertain/accepted resumes. Unit matrix in `tests/test_transactional_durable_resume.py`. Pytest `--doctest-modules` covers the pydoc examples under `src/mechaharness/{checkpoint_store,sqlite_checkpoint_store,external_effect,graph_executor,di}.py`.
+
+#### Footnotes
+
+[^tdr-req]: [Transactional durable graph resume requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/transactional-durable-resume.md) — DR-01..DR-12 — checkpoint seam, SQLite, effect reconciliation, crash matrix
 
 ### `fangore_verification_outcome_gate` — Treat answer generated as distinct from task complete
 

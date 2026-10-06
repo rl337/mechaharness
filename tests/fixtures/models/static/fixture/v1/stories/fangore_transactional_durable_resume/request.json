@@ -1,0 +1,12 @@
+{
+  "goal": "downstream-coding-job",
+  "run_id_prefix": "story-tdr",
+  "crash_locations": [
+    "before_intent",
+    "after_intent_before_call",
+    "after_accept_before_record",
+    "after_accept_recorded",
+    "after_reduce_before_checkpoint",
+    "after_final_commit"
+  ]
+}

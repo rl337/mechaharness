@@ -1,0 +1,60 @@
+{
+  "cases": {
+    "before_intent": {
+      "crashed": true,
+      "status": "ok",
+      "node_status": "succeeded",
+      "dispatch_count": 1,
+      "dispatch_count_after_crash": 0,
+      "effect_state_after": "completed"
+    },
+    "after_intent_before_call": {
+      "crashed": true,
+      "status": "ok",
+      "node_status": "succeeded",
+      "dispatch_count": 1,
+      "dispatch_count_after_crash": 0,
+      "effect_state_before": "intended",
+      "effect_state_after": "completed",
+      "reconciliation_invoked": true
+    },
+    "after_accept_before_record": {
+      "crashed": true,
+      "status": "ok",
+      "node_status": "succeeded",
+      "dispatch_count": 1,
+      "dispatch_count_after_crash": 1,
+      "effect_state_before": "uncertain",
+      "effect_state_after": "completed",
+      "reconciliation_invoked": true
+    },
+    "after_accept_recorded": {
+      "crashed": true,
+      "status": "ok",
+      "node_status": "succeeded",
+      "dispatch_count": 1,
+      "dispatch_count_after_crash": 1,
+      "effect_state_before": "accepted",
+      "effect_state_after": "completed",
+      "reconciliation_invoked": true
+    },
+    "after_reduce_before_checkpoint": {
+      "crashed": true,
+      "status": "ok",
+      "node_status": "succeeded",
+      "dispatch_count": 1,
+      "dispatch_count_after_crash": 1,
+      "effect_state_before": "completed",
+      "effect_state_after": "completed"
+    },
+    "after_final_commit": {
+      "crashed": true,
+      "status": "ok",
+      "node_status": "succeeded",
+      "dispatch_count": 1,
+      "dispatch_count_after_crash": 1,
+      "effect_state_after": "completed",
+      "boundary_before": "commit"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "before_intent",
+  "description": "Crash before durable dispatch intent; resume may dispatch once.",
+  "crash_location": "before_intent",
+  "run_id": "tdr-before-intent",
+  "expect": {
+    "crashed": true,
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 1,
+    "dispatch_count_after_crash": 0,
+    "effect_state_before": null,
+    "effect_state_after": "completed",
+    "checkpoint_durability": "durable"
+  }
+}
