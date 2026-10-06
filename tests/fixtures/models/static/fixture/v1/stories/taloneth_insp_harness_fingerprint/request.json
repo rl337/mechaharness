@@ -1,0 +1,30 @@
+{
+  "a": {
+    "model_revision": "model@r1",
+    "harness_family": "react",
+    "harness_version": "2026.10",
+    "config_fingerprint": "cfg:aaa",
+    "tool_surface": [
+      "Read"
+    ],
+    "evaluator_id": "demo:exists",
+    "environment_profile": "local",
+    "task_id": "task-1"
+  },
+  "b": {
+    "model_revision": "model@r1",
+    "harness_family": "react",
+    "harness_version": "2026.10",
+    "config_fingerprint": "cfg:bbb",
+    "tool_surface": [
+      "Read"
+    ],
+    "evaluator_id": "demo:exists",
+    "environment_profile": "local",
+    "task_id": "task-1"
+  },
+  "summary": {
+    "model": "model@r1",
+    "score": 0.9
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_harness_fingerprint",
+  "persona": "taloneth",
+  "title": "Stamp evaluation results with harness configuration identity",
+  "kind": "harness_fingerprint_digest",
+  "narrative": "Taloneth compares the same model and task under two graph configurations and needs each result to carry which harness configuration produced it, not only the model name. Accepts FineEnvs multi-harness RL guidance[^fineenvs-fingerprint].",
+  "implementation": "`HarnessFingerprint`, `build_harness_fingerprint`, and `require_eval_provenance` in `mechaharness.harness_fingerprint` bind model revision, harness family/version, config digests, tool/context surfaces, evaluator, environment, and task identity into a stable digest attached to evaluation summaries.",
+  "validation": "Kind `harness_fingerprint_digest`. Soft expects distinct digests and provenance attachment. Unit tests in `tests/test_harness_fingerprint.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-fingerprint",
+      "label": "FineEnvs multi-harness RL \u2014 harness-attached scores",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#benchmark-scores-now-come-with-a-harness-attached",
+      "note": "MH-MHRL-01"
+    }
+  ]
+}
