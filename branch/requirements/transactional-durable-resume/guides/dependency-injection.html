@@ -20,7 +20,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Local OpenAI-compat backend (junespark)" href="junespark.html" />
+    <link rel="next" title="Local OpenAI-compat backend (openai_local)" href="openai-local.html" />
     <link rel="prev" title="Install &amp; quick start" href="install.html" /> 
 </head>
 
@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -73,6 +73,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -245,7 +249,9 @@ the caller.</p>
 inject deny-by-default tool grants; use <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> to union reusable
 <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
 <p>For durable plans, override <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code>,
-<code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, and optionally
+<code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_checkpoint_store()</span></code> (default ephemeral EventLog adapter; use
+<code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> for process-restart durability), and optionally
 <code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>, then
 <code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>. Include <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and
@@ -280,7 +286,7 @@ concrete graphs. See <a class="reference internal" href="../architecture.html"><
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="install.html" class="btn btn-neutral float-left" title="Install &amp; quick start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="junespark.html" class="btn btn-neutral float-right" title="Local OpenAI-compat backend (junespark)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="openai-local.html" class="btn btn-neutral float-right" title="Local OpenAI-compat backend (openai_local)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

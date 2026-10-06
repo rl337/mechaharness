@@ -46,7 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -71,6 +71,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -105,7 +109,7 @@
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
 <p>MechaHarness already serializes <code class="docutils literal notranslate"><span class="pre">ExecutionGraph</span></code> state, restores the latest graph through <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code>, records recovery-boundary vocabulary, and rejects incompatible configuration fingerprints on resume. Those primitives cover graph reconstruction, but they do not yet guarantee durable recovery around externally visible side effects.</p>
-<p>June is a motivating client. A June graph may dispatch a long-running Cursor coding task, lose the MechaHarness process after the remote system accepts that task, and later resume. Replaying the dispatch would create duplicate work. June should not invent a second graph-recovery protocol to solve this. MechaHarness should provide the reusable persistence and effect-reconciliation primitives, while June owns its project/task semantics and external adapter.</p>
+<p>A downstream client is the motivating consumer. That client’s graph may dispatch a long-running Cursor coding task, lose the MechaHarness process after the remote system accepts that task, and later resume. Replaying the dispatch would create duplicate work. The downstream client should not invent a second graph-recovery protocol to solve this. MechaHarness should provide the reusable persistence and effect-reconciliation primitives, while the downstream client owns its project/task semantics and external adapter.</p>
 </section>
 <section id="ownership-boundary">
 <h2>Ownership boundary<a class="headerlink" href="#ownership-boundary" title="Link to this heading"></a></h2>
@@ -117,7 +121,7 @@
 <li><p>resume/reconciliation rules that prevent an already accepted effect from being silently repeated;</p></li>
 <li><p>transactional guarantees and crash-recovery acceptance tests.</p></li>
 </ul>
-<p>Clients such as June own:</p>
+<p>Downstream clients own:</p>
 <ul class="simple">
 <li><p>project and task identities;</p></li>
 <li><p>concrete external systems such as Cursor;</p></li>
@@ -186,7 +190,7 @@
 <section id="dr-05-record-external-acceptance">
 <h3>DR-05: Record external acceptance<a class="headerlink" href="#dr-05-record-external-acceptance" title="Link to this heading"></a></h3>
 <p>After an external system accepts a dispatch, its external handle MUST be durably associated with the pre-existing <code class="docutils literal notranslate"><span class="pre">effect_id</span></code> before the node can be considered safely checkpointed past dispatch.</p>
-<p>For June, an example is a Cursor run identifier. The core contract MUST not assume Cursor.</p>
+<p>For a downstream client, an example is a Cursor run identifier. The core contract MUST not assume Cursor.</p>
 </section>
 <section id="dr-06-resume-reconciles-uncertain-effects-instead-of-redispatching">
 <h3>DR-06: Resume reconciles uncertain effects instead of redispatching<a class="headerlink" href="#dr-06-resume-reconciles-uncertain-effects-instead-of-redispatching" title="Link to this heading"></a></h3>
@@ -238,7 +242,7 @@
 </section>
 <section id="dr-12-static-data-crash-injection-user-story">
 <h3>DR-12: Static-data crash-injection user story<a class="headerlink" href="#dr-12-static-data-crash-injection-user-story" title="Link to this heading"></a></h3>
-<p>Add a first-class static-data user story that rigorously exercises durable resume with a dependency-injected fake external coding-job backend shaped like June’s intended Cursor integration.</p>
+<p>Add a first-class static-data user story that rigorously exercises durable resume with a dependency-injected fake external coding-job backend shaped like a downstream client’s intended Cursor integration.</p>
 <p>The story MUST run as a parameterized crash-location matrix. Each case starts from the same deterministic fixture, injects a process-failure/crash at exactly one execution boundary, constructs a fresh executor against the same durable SQLite store, resumes the run, and verifies the recovered result.</p>
 <p>At minimum inject crashes:</p>
 <ol class="arabic simple">
@@ -283,7 +287,7 @@ complete graph                       (dispatch_count MUST still = 1)
 <p>The test MUST fail if resume reaches the dispatch adapter a second time for an effect already known or recoverable as accepted.</p>
 <p>Where acceptance after the external call is genuinely unknowable, the story MUST exercise the explicit uncertain-effect path rather than assuming either success or failure. The expected result may be reconciliation or a needs-attention/escalation state, but MUST NOT be an automatic duplicate dispatch.</p>
 <p>The story SHOULD be implemented in the repository’s normal static fixture/story mechanism so it participates in the same deterministic acceptance suite as the existing durable-resume stories. It MAY use multiple fixture variants if that keeps each expected result legible.</p>
-<p>The story MUST demonstrate the ownership boundary: June-like code supplies backend-specific reconciliation while MechaHarness supplies durable state, effect identity, crash injection, and resume control.</p>
+<p>The story MUST demonstrate the ownership boundary: downstream-client-like code supplies backend-specific reconciliation while MechaHarness supplies durable state, effect identity, crash injection, and resume control.</p>
 </section>
 </section>
 <section id="compatibility-and-migration">
@@ -301,7 +305,7 @@ complete graph                       (dispatch_count MUST still = 1)
 <li><p>uncertain effects reconcile rather than automatically redispatch;</p></li>
 <li><p>the crash-window matrix passes with exactly one external dispatch where the first dispatch was accepted;</p></li>
 <li><p>fingerprint incompatibility still refuses resume;</p></li>
-<li><p>a June-shaped external coding-job story passes without adding June-specific policy to MechaHarness core.</p></li>
+<li><p>a downstream-client-shaped external coding-job story passes without adding client-specific policy to MechaHarness core.</p></li>
 </ul>
 </section>
 </section>
