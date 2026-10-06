@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_exposure_discriminative",
+  "persona": "taloneth",
+  "title": "Report unequal exposure and no-learning-signal ties",
+  "kind": "exposure_discriminative_report",
+  "narrative": "Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings[^fineenvs-exposure].",
+  "implementation": "`ExposureLedger` in `mechaharness.exposure_accounting` and `discriminative_report` in `mechaharness.discriminative_value` summarize arm exposure and tie telemetry.",
+  "validation": "Kind `exposure_discriminative_report`. Soft expects unequal model_calls and all_success_tie. Unit tests in `tests/test_exposure_discriminative.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-exposure",
+      "label": "FineEnvs multi-harness RL \u2014 how much each run saw",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#how-much-each-run-saw",
+      "note": "MH-MHRL-14/15"
+    }
+  ]
+}
