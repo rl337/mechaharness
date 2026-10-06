@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-10-06
+
+PyPI cut of the 0.3.0 library (GitHub also tagged `v0.3.0` before auto-bump
+raced the publish).
+
 ## [0.3.0] — 2026-10-06
 
 Evaluation/rollout provenance cut inspired by FineEnvs multi-harness RL,
