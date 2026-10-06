@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_run_parity",
+  "persona": "taloneth",
+  "title": "Surface material train and eval constraint mismatches",
+  "kind": "run_parity_compare",
+  "narrative": "Taloneth needs comparable runs to record and flag mismatches in output caps, tool budgets, timeouts, and sampling so train and eval behavior stay aligned. Accepts FineEnvs train/eval parity findings[^fineenvs-parity].",
+  "implementation": "`ParitySurface`, `parity_from_harness_config`, and `compare_parity` in `mechaharness.run_parity` snapshot constraint surfaces and list material mismatches.",
+  "validation": "Kind `run_parity_compare`. Soft expects material max_tokens mismatch. Unit tests in `tests/test_run_parity.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-parity",
+      "label": "FineEnvs multi-harness RL \u2014 train/eval decline",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-the-two-harbor-runs-declined",
+      "note": "MH-MHRL-12"
+    }
+  ]
+}
