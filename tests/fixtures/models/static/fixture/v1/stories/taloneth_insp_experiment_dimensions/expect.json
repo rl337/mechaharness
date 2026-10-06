@@ -1,0 +1,7 @@
+{
+  "has_digest": true,
+  "varying_tools_include": [
+    "Edit",
+    "Read"
+  ]
+}
