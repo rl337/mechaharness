@@ -60,6 +60,7 @@ from mechaharness.core.environment import (
 )
 from mechaharness.core.events import InMemoryEventLog
 from mechaharness.core.types import ChatMessage, Role, ToolCall
+from mechaharness.cross_harness_failure import classify_cross_harness_failure
 from mechaharness.decision_log import (
     DecisionRecord,
     TopologySpan,
@@ -74,11 +75,20 @@ from mechaharness.decision_surfaces import (
 )
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
+from mechaharness.discriminative_value import discriminative_report
+from mechaharness.efficiency_scorecard import build_efficiency_scorecard
 from mechaharness.environment_delta import EnvironmentSnapshot, apply_deltas, emit_delta
 from mechaharness.eval_evidence import Claim, compose_claims
+from mechaharness.eval_matrix import EvalMatrix
 from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
 from mechaharness.evaluator import CallableEvaluator, evaluate_claims
 from mechaharness.exit_contract import CleanStateContract, evaluate_exit
+from mechaharness.experiment_dimensions import (
+    ExperimentDimensions,
+    require_dimension_trace_fields,
+)
+from mechaharness.experiment_lineage import ExperimentCheckpoint
+from mechaharness.exposure_accounting import ExposureLedger, ExposureSample
 from mechaharness.failure_attribution import (
     attribute_error,
     attribute_with_repair_target,
@@ -127,6 +137,10 @@ from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.harness_experiment import HarnessExperiment, HarnessExperimentRunner
+from mechaharness.harness_fingerprint import (
+    build_harness_fingerprint,
+    require_eval_provenance,
+)
 from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
@@ -144,6 +158,7 @@ from mechaharness.inference.judge import (
 )
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.inference_capture import EvaluationOnlyCapture
 from mechaharness.instruction_component import InstructionCatalog, InstructionComponent
 from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
 from mechaharness.judgement_policy import (
@@ -152,6 +167,7 @@ from mechaharness.judgement_policy import (
     JudgementThreshold,
     decide,
 )
+from mechaharness.learning_export import build_learning_export
 from mechaharness.lifecycle_extension import (
     BeforeGraphNode,
     BeforeTool,
@@ -171,6 +187,7 @@ from mechaharness.model_input_manifest import (
     attach_manifest_ref,
     reconstruct_messages,
 )
+from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
 from mechaharness.operation_registry import (
     NodeContractBind,
     OperationContract,
@@ -180,6 +197,7 @@ from mechaharness.operation_registry import (
 from mechaharness.outcome_contract import OutcomeContract
 from mechaharness.research import EvalProtocol, ResearchLab
 from mechaharness.resume_cost import ResumeCostMetrics, summarize_resume_cost
+from mechaharness.rollout_graph import build_rollout_graph
 from mechaharness.routing import (
     activate_scoped_policy,
     route_at_boundary,
@@ -187,8 +205,10 @@ from mechaharness.routing import (
     shadow_decision_backends,
 )
 from mechaharness.rule_promotion import PromotionRecord, promote_soft_to_hard
+from mechaharness.run_parity import compare_parity, parity_from_harness_config
 from mechaharness.tools.base import ToolRegistry
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
+from mechaharness.trace_reconciliation import ObservationSurface, reconcile_traces
 from mechaharness.verification_policy import DefaultVerificationPolicy
 from mechaharness.work_in_progress_policy import WorkInProgressPolicy
 from mechaharness.workspace_isolation import (
@@ -377,6 +397,21 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "handoff_record_fields": _run_handoff_record_fields,
         "operation_compensation_meta": _run_operation_compensation_meta,
         "environment_delta_apply": _run_environment_delta_apply,
+        "harness_fingerprint_digest": _run_harness_fingerprint_digest,
+        "evaluation_outcome_filter": _run_evaluation_outcome_filter,
+        "objective_policy_aggregate": _run_objective_policy_aggregate,
+        "run_parity_compare": _run_run_parity_compare,
+        "experiment_lineage_resume": _run_experiment_lineage_resume,
+        "rollout_graph_build": _run_rollout_graph_build,
+        "trace_reconciliation_check": _run_trace_reconciliation_check,
+        "eval_matrix_aggregate": _run_eval_matrix_aggregate,
+        "cross_harness_failure_classify": _run_cross_harness_failure_classify,
+        "inference_capture_preflight": _run_inference_capture_preflight,
+        "learning_export_pack": _run_learning_export_pack,
+        "experiment_dimensions_digest": _run_experiment_dimensions_digest,
+        "gated_objective_evaluate": _run_gated_objective_evaluate,
+        "exposure_discriminative_report": _run_exposure_discriminative_report,
+        "efficiency_scorecard_build": _run_efficiency_scorecard_build,
     }
     try:
         runner = runners[kind]
@@ -2662,4 +2697,265 @@ async def _run_environment_delta_apply(case: StoryCase, backend: StoryBackend) -
     after = EnvironmentSnapshot.model_validate(request["after"])
     rebuilt = apply_deltas(before, [emit_delta(before, after)])
     actual = {"cwd": rebuilt.data.get("cwd")}
+    _assert_expect(actual, expect)
+
+
+async def _run_harness_fingerprint_digest(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    a = build_harness_fingerprint(**request["a"])
+    b = build_harness_fingerprint(**request["b"])
+    stamped = require_eval_provenance(request["summary"], fingerprint=a)
+    actual = {
+        "digests_differ": a.digest() != b.digest(),
+        "has_fingerprint": "harness_fingerprint" in stamped,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_evaluation_outcome_filter(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    trials = [Trial.model_validate(t) for t in request.get("trials") or []]
+    k = int(request.get("k") or 1)
+    rollup = trial_cost_rollup(trials)
+    actual = {
+        "task_trials": int(rollup["task_trials"]),
+        "non_task_trials": int(rollup["non_task_trials"]),
+        "pass_at_k_is_one": pass_at_k(trials, k=k) == 1.0,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_objective_policy_aggregate(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    policy = ObjectivePolicy.model_validate(request["policy"])
+    claims = [Claim.model_validate(c) for c in request.get("claims") or []]
+    result = aggregate_objective(policy, claims)
+    actual = {
+        "scored": result.scored,
+        "scalar": result.scalar,
+        "policy_id": result.policy_id,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_run_parity_compare(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    def _surface(raw: dict[str, Any]):
+        cfg = HarnessConfig(
+            model=raw["model"],
+            max_tokens=raw.get("max_tokens"),
+            temperature=raw.get("temperature"),
+            max_turns=int(raw.get("max_turns") or 8),
+        )
+        env = CapabilityEnvelope(tool_names=list(raw.get("tools") or []))
+        return parity_from_harness_config(cfg, envelope=env)
+
+    report = compare_parity(_surface(request["a"]), _surface(request["b"]))
+    actual = {
+        "comparable": report.comparable,
+        "material_mismatches_include": report.material_mismatches,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_experiment_lineage_resume(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    ckpt = ExperimentCheckpoint(
+        experiment_id=request["experiment_id"],
+        assignment=request.get("assignment") or "treatment",
+    )
+    for case_id in request.get("consume") or []:
+        ckpt = ckpt.consume(case_id, evidence_digest=f"digest:{case_id}")
+    duplicate_refused = False
+    try:
+        ckpt.consume((request.get("consume") or ["x"])[0])
+    except ValueError:
+        duplicate_refused = True
+    actual = {
+        "remaining": ckpt.remaining(list(request.get("corpus") or [])),
+        "duplicate_refused": duplicate_refused,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_rollout_graph_build(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    graph = build_rollout_graph(request.get("records") or [])
+    actual = {
+        "roots_include": graph.roots(),
+        "retry_linked": graph.nodes.get("retry") is not None
+        and graph.nodes["retry"].execution_node_id == "produce",
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_trace_reconciliation_check(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    surfaces = [ObservationSurface.model_validate(s) for s in request.get("surfaces") or []]
+    report = reconcile_traces(surfaces)
+    actual = {"status": report.status, "ok": report.ok}
+    _assert_expect(actual, expect)
+
+
+async def _run_eval_matrix_aggregate(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    matrix = EvalMatrix()
+    for raw in request.get("trials") or []:
+        trial = Trial(trial_id=raw["trial_id"], success=bool(raw["success"]))
+        matrix.add_trial(
+            trial,
+            model=raw["model"],
+            harness_fingerprint=raw["harness_fingerprint"],
+            task_family=raw["task_family"],
+        )
+    agg = matrix.aggregate()
+    actual = {
+        "cell_count": agg["cell_count"],
+        "fingerprints_include": [c["harness_fingerprint"] for c in agg["cells"]],
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_cross_harness_failure_classify(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    failure = classify_cross_harness_failure(str(request.get("message") or ""))
+    actual = {"kind": failure.kind}
+    _assert_expect(actual, expect)
+
+
+async def _run_inference_capture_preflight(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    reg = GraphNodeRunnerRegistry()
+
+    async def ok(node, context):  # noqa: ANN001
+        from mechaharness.graph import NodeStatus
+        from mechaharness.graph_executor import NodeOutcome
+
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    reg.register(CallableGraphNodeRunner(["compute"], ok))
+    access = InMemoryAccessControl(
+        InMemoryEventLog(), AccessPolicy(grants=[GraphExecute])
+    )
+    resolver = DefaultLinkageResolver(
+        reg,
+        access,
+        NoOpInferenceEnvironment(),
+        inference_capture=EvaluationOnlyCapture(),
+    )
+    graph = ExecutionGraph(goal="capture")
+    graph.add_node(GraphNode(id="a", kind="compute"))
+    report = resolver.resolve(
+        graph,
+        fingerprint_parts={
+            "required_inference_capture": request.get("required_inference_capture")
+        },
+    )
+    actual = {
+        "ok": report.ok,
+        "codes_include": [e.code for e in report.edges],
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_learning_export_pack(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    pack = build_learning_export(
+        harness_fingerprint=request.get("harness_fingerprint"),
+        rollout_graph_ref=request.get("rollout_graph_ref"),
+        split=request.get("split") or "train",
+    )
+    actual = {
+        "schema_version": pack.schema_version,
+        "harness_fingerprint": pack.harness_fingerprint,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_experiment_dimensions_digest(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    dims = ExperimentDimensions(
+        fixed=dict(request.get("fixed") or {}),
+        varying=dict(request.get("varying") or {}),
+    )
+    fields = require_dimension_trace_fields({}, dimensions=dims)
+    actual = {
+        "has_digest": bool(fields.get("experiment_dimensions_digest")),
+        "varying_tools_include": dims.fingerprint_parts()["varying"].get(
+            "tool_surface", []
+        ),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_gated_objective_evaluate(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    runner = HarnessExperimentRunner()
+    exp = runner.propose(
+        HarnessExperiment(hypothesis="gated", intervention="x", failure_mode="y")
+    )
+    policy = ObjectivePolicy.model_validate(request["policy"])
+    result = runner.evaluate(
+        exp,
+        with_intervention=lambda: dict(request["treatment"]),
+        without_intervention=lambda: dict(request["control"]),
+        objective_policy=policy,
+    )
+    actual = {"status": result.status}
+    _assert_expect(actual, expect)
+
+
+async def _run_exposure_discriminative_report(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    ledger = ExposureLedger()
+    for raw in request.get("exposure") or []:
+        ledger.record(ExposureSample.model_validate(raw))
+    trials = [Trial.model_validate(t) for t in request.get("trials") or []]
+    summary = ledger.summarize()
+    report = discriminative_report(trials)
+    actual = {
+        "treatment_model_calls": int(summary["arms"]["treatment"]["model_calls"]),
+        "all_success_tie": report.all_success_tie,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_efficiency_scorecard_build(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    card = build_efficiency_scorecard(**request)
+    actual = {
+        "tool_calls": card.dimensions.get("tool_calls"),
+        "tokens_out": card.dimensions.get("tokens_out"),
+    }
     _assert_expect(actual, expect)

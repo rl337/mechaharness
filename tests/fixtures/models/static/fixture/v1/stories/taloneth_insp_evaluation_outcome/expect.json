@@ -1,0 +1,5 @@
+{
+  "task_trials": 2,
+  "pass_at_k_is_one": true,
+  "non_task_trials": 1
+}

@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_evaluation_outcome",
+  "persona": "taloneth",
+  "title": "Keep infrastructure failures out of task-success scores",
+  "kind": "evaluation_outcome_filter",
+  "narrative": "Taloneth needs a dead sandbox or broken trace to count as unscorable execution failure, not as proof the model answered incorrectly. Accepts FineEnvs reward separation guidance[^fineenvs-outcome].",
+  "implementation": "`EvaluationOutcome` and `outcome_from_failure` in `mechaharness.evaluation_outcome`, with `task_trials` / `pass_at_k` in `mechaharness.eval_trial` excluding non-task outcomes from denominators.",
+  "validation": "Kind `evaluation_outcome_filter`. Soft expects task trial counts and pass@k ignoring execution failures. Unit tests in `tests/test_evaluation_outcome.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-outcome",
+      "label": "FineEnvs multi-harness RL \u2014 rewards",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards",
+      "note": "MH-MHRL-06"
+    }
+  ]
+}

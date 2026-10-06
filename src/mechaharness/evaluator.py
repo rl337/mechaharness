@@ -58,6 +58,10 @@ class EvaluatorResult(BaseModel):
     claims: list[Claim] = Field(default_factory=list)
     counts: dict[str, int] = Field(default_factory=dict)
     passed: bool = False
+    harness_fingerprint: str | None = None
+    objective_policy_id: str | None = None
+    objective_policy_version: str | None = None
+    objective_scalar: float | None = None
 
 
 def evaluate_claims(evaluator: Evaluator, subject: Mapping[str, Any]) -> EvaluatorResult:

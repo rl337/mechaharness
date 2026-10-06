@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_cross_harness_failure",
+  "persona": "taloneth",
+  "title": "Separate semantic task failure from invalid tool protocol",
+  "kind": "cross_harness_failure_classify",
+  "narrative": "Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes[^fineenvs-xharness].",
+  "implementation": "`CrossHarnessFailure` and `classify_cross_harness_failure` in `mechaharness.cross_harness_failure` emit taxonomy kinds usable as claims inside matrix cells.",
+  "validation": "Kind `cross_harness_failure_classify`. Soft expects invalid_tool_name. Unit tests in `tests/test_cross_harness_failure.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-xharness",
+      "label": "FineEnvs multi-harness RL \u2014 leaving native harness",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#when-a-model-leaves-the-harness-it-was-trained-in",
+      "note": "MH-MHRL-18"
+    }
+  ]
+}

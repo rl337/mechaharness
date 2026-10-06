@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_gated_objective",
+  "persona": "taloneth",
+  "title": "Apply efficiency only after correctness gates pass",
+  "kind": "gated_objective_evaluate",
+  "narrative": "Taloneth needs harness experiments to satisfy correctness first and only then prefer lower token use, matching gated FineEnvs reward design[^fineenvs-gated].",
+  "implementation": "`HarnessExperimentRunner.evaluate` accepts an `ObjectivePolicy` and uses gates plus `compare_lexicographic` so efficiency cannot beat a failed correctness gate.",
+  "validation": "Kind `gated_objective_evaluate`. Soft expects retired when treatment fails correctness. Unit tests in `tests/test_gated_objective.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-gated",
+      "label": "FineEnvs multi-harness RL \u2014 what we rewarded",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-we-rewarded",
+      "note": "MH-MHRL-08"
+    }
+  ]
+}

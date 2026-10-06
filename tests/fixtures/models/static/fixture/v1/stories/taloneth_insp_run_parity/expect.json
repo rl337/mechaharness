@@ -1,0 +1,4 @@
+{
+  "comparable": false,
+  "material_mismatches_include": ["max_tokens"]
+}

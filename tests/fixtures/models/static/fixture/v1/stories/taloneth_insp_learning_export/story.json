@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_learning_export",
+  "persona": "taloneth",
+  "title": "Export provenance-rich trajectories without owning training recipes",
+  "kind": "learning_export_pack",
+  "narrative": "Taloneth needs exportable execution packs that carry harness fingerprint, rollout refs, and outcomes so June can curate SFT or RL corpora without MechaHarness choosing the recipe. Accepts FineEnvs SFT-vs-RL reuse guidance[^fineenvs-export].",
+  "implementation": "`LearningExportPack` and `build_learning_export` in `mechaharness.learning_export` bundle decision exports with fingerprint, rollout, and outcome refs.",
+  "validation": "Kind `learning_export_pack`. Soft expects schema version and fingerprint. Unit tests in `tests/test_learning_export.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-export",
+      "label": "FineEnvs multi-harness RL \u2014 SFT vs RL",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#sft-vs-rl",
+      "note": "MH-MHRL-16"
+    }
+  ]
+}

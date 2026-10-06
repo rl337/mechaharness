@@ -1,0 +1,26 @@
+{
+  "exposure": [
+    {
+      "arm": "treatment",
+      "rollouts": 1,
+      "model_calls": 4,
+      "tokens_out": 800
+    },
+    {
+      "arm": "control",
+      "rollouts": 1,
+      "model_calls": 1,
+      "tokens_out": 100
+    }
+  ],
+  "trials": [
+    {
+      "trial_id": "1",
+      "success": true
+    },
+    {
+      "trial_id": "2",
+      "success": true
+    }
+  ]
+}

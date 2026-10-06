@@ -9,12 +9,20 @@ Anthropic distinguishes ``pass@k`` (capability across attempts) from ``pass^k``
 
 MechaHarness records trials without embedding application rubrics::
 
-    >>> from mechaharness.eval_trial import Trial, pass_at_k, pass_caret_k
+    >>> from mechaharness.eval_trial import Trial, pass_at_k, pass_caret_k, task_trials
+    >>> from mechaharness.evaluation_outcome import EvaluationOutcome
     >>> trials = [
     ...     Trial(trial_id="1", success=True, cost_usd=0.01, latency_ms=100),
     ...     Trial(trial_id="2", success=False, cost_usd=0.02, latency_ms=120),
     ...     Trial(trial_id="3", success=True, cost_usd=0.01, latency_ms=90),
+    ...     Trial(
+    ...         trial_id="4",
+    ...         success=False,
+    ...         outcome=EvaluationOutcome(kind="execution_failure"),
+    ...     ),
     ... ]
+    >>> len(task_trials(trials))
+    3
     >>> pass_at_k(trials, k=2) > 0
     True
     >>> 0.0 <= pass_caret_k(trials, k=2) <= 1.0
@@ -26,9 +34,10 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from mechaharness.eval_evidence import Claim
+from mechaharness.evaluation_outcome import EvaluationOutcome, is_task_scored
 
 
 class Trial(BaseModel):
@@ -43,15 +52,32 @@ class Trial(BaseModel):
     claims: list[Claim] = Field(default_factory=list)
     run_id: str | None = None
     outcome_ref: str | None = None
+    outcome: EvaluationOutcome | None = None
+    harness_fingerprint: str | None = None
     detail: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _sync_success_from_outcome(self) -> Trial:
+        if self.outcome is None:
+            return self
+        derived = self.outcome.success
+        if derived is not None and derived != self.success:
+            object.__setattr__(self, "success", derived)
+        return self
+
+
+def task_trials(trials: list[Trial]) -> list[Trial]:
+    """Trials whose outcomes count toward task-success aggregations."""
+    return [t for t in trials if is_task_scored(t.outcome)]
 
 
 def pass_at_k(trials: list[Trial], *, k: int) -> float:
     """Unbiased pass@k estimator over binary trial successes (HumanEval-style)."""
-    n = len(trials)
+    scored = task_trials(trials)
+    n = len(scored)
     if n == 0 or k < 1:
         return 0.0
-    c = sum(1 for t in trials if t.success)
+    c = sum(1 for t in scored if t.success)
     if n - c < k:
         return 1.0
     # 1 - C(n-c, k) / C(n, k)
@@ -65,17 +91,21 @@ def pass_caret_k(trials: list[Trial], *, k: int) -> float:
     trials are shuffled; here we use the empirical rate^k for stability with
     small n (τ-bench-style reliability signal).
     """
-    if not trials or k < 1:
+    scored = task_trials(trials)
+    if not scored or k < 1:
         return 0.0
-    rate = sum(1 for t in trials if t.success) / len(trials)
+    rate = sum(1 for t in scored if t.success) / len(scored)
     return float(rate**k)
 
 
 def trial_cost_rollup(trials: list[Trial]) -> dict[str, float]:
     costs = [t.cost_usd for t in trials if t.cost_usd is not None]
     latencies = [t.latency_ms for t in trials if t.latency_ms is not None]
+    scored = task_trials(trials)
     return {
         "total_cost_usd": float(sum(costs)) if costs else 0.0,
         "mean_latency_ms": float(sum(latencies) / len(latencies)) if latencies else 0.0,
         "trials": float(len(trials)),
+        "task_trials": float(len(scored)),
+        "non_task_trials": float(len(trials) - len(scored)),
     }

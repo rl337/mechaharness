@@ -42,6 +42,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from mechaharness.objective_policy import ObjectivePolicy, compare_lexicographic
 from mechaharness.research import EvalProtocol, ResearchLab
 
 ExperimentStatus = Literal["proposed", "running", "retained", "retired", "rejected"]
@@ -64,14 +65,24 @@ class HarnessExperiment(BaseModel):
     metrics: dict[str, float] = Field(default_factory=dict)
     control_metrics: dict[str, float] = Field(default_factory=dict)
     notes: str = ""
+    checkpoint_id: str | None = None
+    lineage_digest: str | None = None
+    objective_policy_id: str | None = None
 
     def to_trace_fields(self) -> dict[str, Any]:
-        return {
+        fields = {
             "harness_experiment_id": self.id,
             "harness_version": self.harness_version,
             "harness_assignment": self.assignment,
             "harness_intervention": self.intervention,
         }
+        if self.checkpoint_id:
+            fields["harness_checkpoint_id"] = self.checkpoint_id
+        if self.lineage_digest:
+            fields["harness_lineage_digest"] = self.lineage_digest
+        if self.objective_policy_id:
+            fields["objective_policy_id"] = self.objective_policy_id
+        return fields
 
 
 class HarnessExperimentRunner:
@@ -102,12 +113,53 @@ class HarnessExperimentRunner:
         with_intervention: Callable[[], Mapping[str, float]],
         without_intervention: Callable[[], Mapping[str, float]],
         primary_metric: str = "task_success_rate",
+        objective_policy: ObjectivePolicy | None = None,
+        gate_metric: str | None = None,
     ) -> HarnessExperiment:
         experiment.status = "running"
         treatment = dict(with_intervention())
         control = dict(without_intervention())
         experiment.metrics = treatment
         experiment.control_metrics = control
+        if objective_policy is not None:
+            experiment.objective_policy_id = objective_policy.policy_id
+            gate = gate_metric or (
+                objective_policy.gates[0] if objective_policy.gates else primary_metric
+            )
+            # Gate: both arms must meet correctness/safety before efficiency compares.
+            t_gate = treatment.get(gate)
+            c_gate = control.get(gate)
+            if t_gate is None or c_gate is None:
+                experiment.status = "rejected"
+                return experiment
+            if t_gate < 1.0 and c_gate < 1.0:
+                experiment.status = "rejected"
+                experiment.notes = "gate_failed_both"
+                return experiment
+            if t_gate < 1.0:
+                experiment.status = "retired"
+                experiment.notes = f"gate_failed:{gate}"
+                return experiment
+            if c_gate < 1.0:
+                experiment.status = "retained"
+                experiment.notes = f"control_gate_failed:{gate}"
+                return experiment
+            winner = compare_lexicographic(objective_policy, treatment, control)
+            if winner == "treatment":
+                experiment.status = "retained"
+            elif winner == "control":
+                experiment.status = "retired"
+            else:
+                # Tie on lex order: fall back to primary metric.
+                t = treatment.get(primary_metric)
+                c = control.get(primary_metric)
+                if t is not None and c is not None and t >= c:
+                    experiment.status = "retained"
+                elif t is not None and c is not None:
+                    experiment.status = "retired"
+                else:
+                    experiment.status = "rejected"
+            return experiment
         t = treatment.get(primary_metric)
         c = control.get(primary_metric)
         if t is not None and c is not None and t >= c:
