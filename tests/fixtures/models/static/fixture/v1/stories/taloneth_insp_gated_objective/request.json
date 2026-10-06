@@ -1,0 +1,20 @@
+{
+  "policy": {
+    "policy_id": "lexi",
+    "gates": [
+      "correct"
+    ],
+    "lexicographic": [
+      "correct",
+      "efficiency"
+    ]
+  },
+  "treatment": {
+    "correct": 0.0,
+    "efficiency": 0.9
+  },
+  "control": {
+    "correct": 1.0,
+    "efficiency": 0.5
+  }
+}
