@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_eval_matrix",
+  "persona": "taloneth",
+  "title": "Keep model-harness-task matrix cells for drill-down",
+  "kind": "eval_matrix_aggregate",
+  "narrative": "Taloneth evaluates the same model under multiple harness configurations and must keep every matrix cell so averages cannot hide a catastrophic compatibility failure. Accepts FineEnvs cross-harness matrix practice[^fineenvs-matrix].",
+  "implementation": "`EvalMatrix` and `EvalMatrixCell` in `mechaharness.eval_matrix` index trials by model, harness fingerprint, and task family, and `aggregate` retains cell drill-down.",
+  "validation": "Kind `eval_matrix_aggregate`. Soft expects cell count and retained fingerprints. Unit tests in `tests/test_eval_matrix.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-matrix",
+      "label": "FineEnvs multi-harness RL \u2014 accuracy matrix",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#accuracy",
+      "note": "MH-MHRL-17"
+    }
+  ]
+}
