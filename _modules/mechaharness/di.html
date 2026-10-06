@@ -45,7 +45,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guides/user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -70,6 +70,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -146,6 +150,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Advisor</span><span class="p">,</span> <span class="n">AdvisorPolicy</span><span class="p">,</span> <span class="n">DefaultAdvisorPolicy</span><span class="p">,</span> <span class="n">RejectAdvisor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.api_connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="n">SimpleHttpConnectionConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.capability_envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapabilityEnvelope</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.checkpoint_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckpointStore</span><span class="p">,</span> <span class="n">EventLogCheckpointStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.context_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextProviderRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -165,6 +170,8 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventLog</span><span class="p">,</span> <span class="n">default_event_log</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.delegation_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultDelegationPolicy</span><span class="p">,</span> <span class="n">DelegationPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrashProbe</span><span class="p">,</span> <span class="n">NoopCrashProbe</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_executor</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DefaultGraphFailurePolicy</span><span class="p">,</span>
     <span class="n">GraphEscalation</span><span class="p">,</span>
@@ -270,9 +277,9 @@
     <span class="s2">"openai_compat"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"base_url"</span><span class="p">:</span> <span class="s2">"https://api.openai.com/v1"</span><span class="p">},</span>
     <span class="s2">"lmstudio"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"base_url"</span><span class="p">:</span> <span class="s2">"http://localhost:1234/v1"</span><span class="p">,</span> <span class="s2">"api_key"</span><span class="p">:</span> <span class="s2">"lm-studio"</span><span class="p">},</span>
     <span class="s2">"vllm"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"base_url"</span><span class="p">:</span> <span class="s2">"http://localhost:8000/v1"</span><span class="p">},</span>
-    <span class="s2">"junespark"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="c1"># Hosts set MECHA_BASE_URL / Settings.base_url; no LAN default in the library.</span>
-        <span class="s2">"api_key"</span><span class="p">:</span> <span class="s2">"junespark"</span><span class="p">,</span>
+    <span class="s2">"openai_local"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="c1"># Hosts set MECHA_BASE_URL / Settings.base_url; no localhost default.</span>
+        <span class="s2">"api_key"</span><span class="p">:</span> <span class="s2">"local"</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="s2">"ollama"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"base_url"</span><span class="p">:</span> <span class="s2">"http://localhost:11434/v1"</span><span class="p">,</span> <span class="s2">"api_key"</span><span class="p">:</span> <span class="s2">"ollama"</span><span class="p">},</span>
     <span class="s2">"anthropic"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"base_url"</span><span class="p">:</span> <span class="s2">"https://api.anthropic.com"</span><span class="p">},</span>
@@ -459,6 +466,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span>
             <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lifecycle_extension_registry</span><span class="p">()</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CheckpointStore</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_checkpoint_store</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CrashProbe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_crash_probe</span><span class="p">())</span>
 
         <span class="n">inference_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_class</span><span class="p">()</span>
         <span class="n">harness_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_harness_class</span><span class="p">()</span>
@@ -682,6 +691,51 @@
         <span class="k">return</span> <span class="n">GraphExecutor</span></div>
 
 
+<div class="viewcode-block" id="MechaHarnessConfig.get_checkpoint_store">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_checkpoint_store">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_checkpoint_store</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CheckpointStore</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Authoritative graph/effect persistence (default: ephemeral EventLog).</span>
+
+<span class="sd">        Override to bind the SQLite reference backend (or a host store)::</span>
+
+<span class="sd">            &gt;&gt;&gt; import tempfile</span>
+<span class="sd">            &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">            &gt;&gt;&gt; from mechaharness.checkpoint_store import CheckpointStore</span>
+<span class="sd">            &gt;&gt;&gt; from mechaharness.di import MechaHarnessConfig, get_injector</span>
+<span class="sd">            &gt;&gt;&gt; from mechaharness.harness.pass_through import PassThroughHarness</span>
+<span class="sd">            &gt;&gt;&gt; from mechaharness.inference.mock import MockInferenceStrategy</span>
+<span class="sd">            &gt;&gt;&gt; from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore</span>
+<span class="sd">            &gt;&gt;&gt; path = Path(tempfile.mkdtemp()) / "runs.sqlite"</span>
+<span class="sd">            &gt;&gt;&gt; class DurableConfig(MechaHarnessConfig):</span>
+<span class="sd">            ...     def get_inference_class(self):</span>
+<span class="sd">            ...         return MockInferenceStrategy</span>
+<span class="sd">            ...     def get_harness_class(self):</span>
+<span class="sd">            ...         return PassThroughHarness</span>
+<span class="sd">            ...     def get_checkpoint_store(self):</span>
+<span class="sd">            ...         return SqliteCheckpointStore(path)</span>
+<span class="sd">            &gt;&gt;&gt; store = get_injector(DurableConfig()).inject(CheckpointStore)</span>
+<span class="sd">            &gt;&gt;&gt; store.durability</span>
+<span class="sd">            'durable'</span>
+<span class="sd">        """</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_checkpoint_store"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">event_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">()</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">EventLogCheckpointStore</span><span class="p">(</span>
+                <span class="n">GraphStore</span><span class="p">(</span><span class="n">event_log</span><span class="p">,</span> <span class="n">agent_id</span><span class="o">=</span><span class="s2">"graph"</span><span class="p">),</span>
+                <span class="n">event_log</span><span class="o">=</span><span class="n">event_log</span><span class="p">,</span>
+                <span class="n">agent_id</span><span class="o">=</span><span class="s2">"graph"</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_store</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_crash_probe">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_crash_probe">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_crash_probe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrashProbe</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional crash-injection probe (default: never crash)."""</span>
+        <span class="k">return</span> <span class="n">NoopCrashProbe</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="MechaHarnessConfig.get_node_runner_registry">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_node_runner_registry">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_node_runner_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphNodeRunnerRegistry</span><span class="p">:</span>
@@ -795,7 +849,7 @@
             <span class="s2">"openai_compat"</span><span class="p">:</span> <span class="n">OpenAICompatStrategy</span><span class="p">,</span>
             <span class="s2">"lmstudio"</span><span class="p">:</span> <span class="n">OpenAICompatStrategy</span><span class="p">,</span>
             <span class="s2">"vllm"</span><span class="p">:</span> <span class="n">OpenAICompatStrategy</span><span class="p">,</span>
-            <span class="s2">"junespark"</span><span class="p">:</span> <span class="n">OpenAICompatStrategy</span><span class="p">,</span>
+            <span class="s2">"openai_local"</span><span class="p">:</span> <span class="n">OpenAICompatStrategy</span><span class="p">,</span>
             <span class="s2">"ollama"</span><span class="p">:</span> <span class="n">OpenAICompatStrategy</span><span class="p">,</span>
             <span class="s2">"anthropic"</span><span class="p">:</span> <span class="n">AnthropicStrategy</span><span class="p">,</span>
             <span class="s2">"mock"</span><span class="p">:</span> <span class="n">MockInferenceStrategy</span><span class="p">,</span>

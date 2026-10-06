@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="CLI reference" href="../reference/cli.html" />
-    <link rel="prev" title="Local OpenAI-compat backend (junespark)" href="junespark.html" /> 
+    <link rel="prev" title="Local OpenAI-compat backend (openai_local)" href="openai-local.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User stories</a></li>
 </ul>
 <ul>
@@ -73,6 +73,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -140,7 +144,7 @@ pytest<span class="w"> </span>-q
 <span class="w">  </span><span class="nv">MECHA_JUDGE_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8009<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>refund_verdict
 
 <span class="c1"># Shorthand aliases (still dual-mode stories, not separate skipif modules)</span>
-<span class="nv">MECHA_LIVE_JUNESPARK</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>…<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
+<span class="nv">MECHA_LIVE_OPENAI_COMPAT</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>…<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
 <span class="nv">MECHA_LIVE_QWEN</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>…<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
 <span class="nv">MECHA_LIVE_JUDGE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span><span class="s1">'refund_verdict or systemone_cassette'</span>
 </pre></div>
@@ -731,7 +735,7 @@ pytest<span class="w"> </span>-q
 <p>Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12<a class="footnote-reference brackets" href="#insp-r12" id="id126" role="doc-noteref"><span class="fn-bracket">[</span>31<span class="fn-bracket">]</span></a>.</p>
 <section id="id127">
 <h4>Implementation<a class="headerlink" href="#id127" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> persists <code class="docutils literal notranslate"><span class="pre">config_fingerprint</span></code>; <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run(resume=True)</span></code> compares fingerprints after re-resolve.</p>
+<p><code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> (default <code class="docutils literal notranslate"><span class="pre">EventLogCheckpointStore</span></code>; durable <code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code>) persists <code class="docutils literal notranslate"><span class="pre">config_fingerprint</span></code>; <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run(resume=True)</span></code> compares fingerprints after re-resolve. See also <code class="docutils literal notranslate"><span class="pre">fangore_transactional_durable_resume</span></code> for external-effect crash recovery.</p>
 </section>
 <section id="id128">
 <h4>Validation<a class="headerlink" href="#id128" title="Link to this heading"></a></h4>
@@ -1269,19 +1273,34 @@ pytest<span class="w"> </span>-q
 <h4>Footnotes<a class="headerlink" href="#id263" title="Link to this heading"></a></h4>
 </section>
 </section>
-<section id="fangore-verification-outcome-gate-treat-answer-generated-as-distinct-from-task-complete">
-<h3><code class="docutils literal notranslate"><span class="pre">fangore_verification_outcome_gate</span></code> — Treat answer generated as distinct from task complete<a class="headerlink" href="#fangore-verification-outcome-gate-treat-answer-generated-as-distinct-from-task-complete" title="Link to this heading"></a></h3>
-<p>Fangore’s pipeline produces an answer and still needs verification before the task is complete. When verification is required, generating text alone must not count as done; when verification passes, completion can proceed. Complements <code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code>. See inspiration requirements for verification as part of execution<a class="footnote-reference brackets" href="#insp-verify" id="id264" role="doc-noteref"><span class="fn-bracket">[</span>64<span class="fn-bracket">]</span></a>.</p>
+<section id="fangore-transactional-durable-resume-resume-a-coding-job-after-process-crash-without-duplicate-dispatch">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_transactional_durable_resume</span></code> — Resume a coding job after process crash without duplicate dispatch<a class="headerlink" href="#fangore-transactional-durable-resume-resume-a-coding-job-after-process-crash-without-duplicate-dispatch" title="Link to this heading"></a></h3>
+<p>Fangore’s host dispatches a long-running coding job through a durable plan. The MechaHarness process can die after the remote system accepts the job but before the plan records the result. On restart, the same durable store must reconcile the existing job instead of starting a second one. Crash points before intent, after intent, after accept, after reduce, and after final commit are all covered. Complements <code class="docutils literal notranslate"><span class="pre">fangore_insp_durable_resume</span></code> fingerprint refusal. Accepts the transactional durable resume requirements<a class="footnote-reference brackets" href="#tdr-req" id="id264" role="doc-noteref"><span class="fn-bracket">[</span>64<span class="fn-bracket">]</span></a>.</p>
 <section id="id265">
 <h4>Implementation<a class="headerlink" href="#id265" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">OutcomeContract</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.outcome_contract</span></code> distinguishes <code class="docutils literal notranslate"><span class="pre">answer_generated</span></code>, <code class="docutils literal notranslate"><span class="pre">verified</span></code>, <code class="docutils literal notranslate"><span class="pre">complete</span></code>, and <code class="docutils literal notranslate"><span class="pre">failed</span></code>. <code class="docutils literal notranslate"><span class="pre">DefaultVerificationPolicy</span></code> selects the strongest sufficient oracle and gates completion through the outcome contract when <code class="docutils literal notranslate"><span class="pre">require_verification</span></code> is set.</p>
+<p><code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> injects <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> via <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_checkpoint_store()</span></code> (SQLite reference: <code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code>; default EventLog adapter is explicitly <code class="docutils literal notranslate"><span class="pre">ephemeral</span></code>). Opt-in <code class="docutils literal notranslate"><span class="pre">EffectfulGraphNodeRunner</span></code> persists effect intent before dispatch, records external handles, and reconciles uncertain/accepted effects on <code class="docutils literal notranslate"><span class="pre">run(resume=True)</span></code>. <code class="docutils literal notranslate"><span class="pre">ArmedCrashProbe</span></code> / <code class="docutils literal notranslate"><span class="pre">InjectedProcessCrash</span></code> inject process failure at recovery boundaries. EventLog stays observational; fingerprint refusal remains enforced. Module doctests on <code class="docutils literal notranslate"><span class="pre">checkpoint_store</span></code>, <code class="docutils literal notranslate"><span class="pre">sqlite_checkpoint_store</span></code>, <code class="docutils literal notranslate"><span class="pre">external_effect</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_executor</span></code>, and <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_checkpoint_store</span></code> show the host wiring pattern.</p>
 </section>
 <section id="id266">
 <h4>Validation<a class="headerlink" href="#id266" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">verification_outcome_gate</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_verification_outcome_gate</span></code>. Soft expects: answer without verification stays <code class="docutils literal notranslate"><span class="pre">answer_generated</span></code>; verification pass yields <code class="docutils literal notranslate"><span class="pre">complete</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">transactional_durable_resume_crash_matrix</span></code>. Soft expects per crash location: final status ok, dispatch_count exactly 1 after an accepted first dispatch, effect state transitions, and reconciliation on uncertain/accepted resumes. Unit matrix in <code class="docutils literal notranslate"><span class="pre">tests/test_transactional_durable_resume.py</span></code>. Pytest <code class="docutils literal notranslate"><span class="pre">--doctest-modules</span></code> covers the pydoc examples under <code class="docutils literal notranslate"><span class="pre">src/mechaharness/{checkpoint_store,sqlite_checkpoint_store,external_effect,graph_executor,di}.py</span></code>.</p>
 </section>
 <section id="id267">
 <h4>Footnotes<a class="headerlink" href="#id267" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="fangore-verification-outcome-gate-treat-answer-generated-as-distinct-from-task-complete">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_verification_outcome_gate</span></code> — Treat answer generated as distinct from task complete<a class="headerlink" href="#fangore-verification-outcome-gate-treat-answer-generated-as-distinct-from-task-complete" title="Link to this heading"></a></h3>
+<p>Fangore’s pipeline produces an answer and still needs verification before the task is complete. When verification is required, generating text alone must not count as done; when verification passes, completion can proceed. Complements <code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code>. See inspiration requirements for verification as part of execution<a class="footnote-reference brackets" href="#insp-verify" id="id268" role="doc-noteref"><span class="fn-bracket">[</span>65<span class="fn-bracket">]</span></a>.</p>
+<section id="id269">
+<h4>Implementation<a class="headerlink" href="#id269" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">OutcomeContract</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.outcome_contract</span></code> distinguishes <code class="docutils literal notranslate"><span class="pre">answer_generated</span></code>, <code class="docutils literal notranslate"><span class="pre">verified</span></code>, <code class="docutils literal notranslate"><span class="pre">complete</span></code>, and <code class="docutils literal notranslate"><span class="pre">failed</span></code>. <code class="docutils literal notranslate"><span class="pre">DefaultVerificationPolicy</span></code> selects the strongest sufficient oracle and gates completion through the outcome contract when <code class="docutils literal notranslate"><span class="pre">require_verification</span></code> is set.</p>
+</section>
+<section id="id270">
+<h4>Validation<a class="headerlink" href="#id270" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">verification_outcome_gate</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_verification_outcome_gate</span></code>. Soft expects: answer without verification stays <code class="docutils literal notranslate"><span class="pre">answer_generated</span></code>; verification pass yields <code class="docutils literal notranslate"><span class="pre">complete</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
+</section>
+<section id="id271">
+<h4>Footnotes<a class="headerlink" href="#id271" title="Link to this heading"></a></h4>
 </section>
 </section>
 </section>
@@ -1290,239 +1309,239 @@ pytest<span class="w"> </span>-q
 <section id="taloneth-atk-research-reject-reject-research-candidates-that-fail-verified-success">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_atk_research_reject</span></code> — Reject research candidates that fail verified success<a class="headerlink" href="#taloneth-atk-research-reject-reject-research-candidates-that-fail-verified-success" title="Link to this heading"></a></h3>
 <p>A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code>.</p>
-<section id="id268">
-<h4>Implementation<a class="headerlink" href="#id268" title="Link to this heading"></a></h4>
+<section id="id272">
+<h4>Implementation<a class="headerlink" href="#id272" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> / <code class="docutils literal notranslate"><span class="pre">EvalProtocol</span></code> run bounded research: inspect → hypothesis → isolated experiment → ATK-style search → frozen evaluation protocol → promote/rollback. Production evaluators stay protected.</p>
 <p>Covers: EXP-01, EXP-02, EXP-03, EXP-04.</p>
 </section>
-<section id="id269">
-<h4>Validation<a class="headerlink" href="#id269" title="Link to this heading"></a></h4>
+<section id="id273">
+<h4>Validation<a class="headerlink" href="#id273" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">atk_research_reject</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_atk_research_reject</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_research.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code> — Measure cache-aware prompt layout as an explicit experiment<a class="headerlink" href="#taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment" title="Link to this heading"></a></h3>
 <p>Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.</p>
-<section id="id270">
-<h4>Implementation<a class="headerlink" href="#id270" title="Link to this heading"></a></h4>
+<section id="id274">
+<h4>Implementation<a class="headerlink" href="#id274" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">compile_cache_aware_layout</span></code> / <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code> under <code class="docutils literal notranslate"><span class="pre">CtxFlags.cache_aware_layout</span></code> — an independent experiment toggle with prefix identity diagnostics.</p>
 <p>Covers: CTX-09.</p>
 </section>
-<section id="id271">
-<h4>Validation<a class="headerlink" href="#id271" title="Link to this heading"></a></h4>
+<section id="id275">
+<h4>Validation<a class="headerlink" href="#id275" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">cache_layout_experiment</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_cache_layout_experiment</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-fixture-judge-batch-validate-judge-question-batches-without-a-live-model">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_fixture_judge_batch</span></code> — Validate judge question batches without a live model<a class="headerlink" href="#taloneth-fixture-judge-batch-validate-judge-question-batches-without-a-live-model" title="Link to this heading"></a></h3>
 <p>Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors — including partial failure reporting — without a GPU host.</p>
-<section id="id272">
-<h4>Implementation<a class="headerlink" href="#id272" title="Link to this heading"></a></h4>
+<section id="id276">
+<h4>Implementation<a class="headerlink" href="#id276" title="Link to this heading"></a></h4>
 <p>Provider-neutral judge schema in <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code> (<code class="docutils literal notranslate"><span class="pre">Choice</span></code>/<code class="docutils literal notranslate"><span class="pre">Noul</span></code>/<code class="docutils literal notranslate"><span class="pre">Score</span></code> questions and signals, <code class="docutils literal notranslate"><span class="pre">Judgement</span></code>, <code class="docutils literal notranslate"><span class="pre">JudgeErrorItem</span></code>, provenance). <code class="docutils literal notranslate"><span class="pre">FixtureJudgeProvider</span></code> + <code class="docutils literal notranslate"><span class="pre">judge()</span></code> validate batches and report per-question errors. Semantics cover closed-world answers, partial failure, and calibration/provenance fields adapters must map.</p>
 <p>Covers: JDG-01, JDG-02, JDG-03, JDG-04.</p>
 </section>
-<section id="id273">
-<h4>Validation<a class="headerlink" href="#id273" title="Link to this heading"></a></h4>
+<section id="id277">
+<h4>Validation<a class="headerlink" href="#id277" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">fixture_judge_batch</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_fixture_judge_batch</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_judge.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-harness-experiment-retire-retire-scaffolding-that-loses-a-with-versus-without-experiment">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_harness_experiment_retire</span></code> — Retire scaffolding that loses a with-versus-without experiment<a class="headerlink" href="#taloneth-harness-experiment-retire-retire-scaffolding-that-loses-a-with-versus-without-experiment" title="Link to this heading"></a></h3>
-<p>Taloneth treats a prompt scaffold as a hypothesis: keep it only if the with-intervention arm beats the without arm on the primary metric. When the scaffold hurts, it is retired rather than left as fossil control logic. See inspiration requirements for revisable scaffolding and harness hypotheses<a class="footnote-reference brackets" href="#insp-experiment" id="id274" role="doc-noteref"><span class="fn-bracket">[</span>65<span class="fn-bracket">]</span></a>.</p>
-<section id="id275">
-<h4>Implementation<a class="headerlink" href="#id275" title="Link to this heading"></a></h4>
+<p>Taloneth treats a prompt scaffold as a hypothesis: keep it only if the with-intervention arm beats the without arm on the primary metric. When the scaffold hurts, it is retired rather than left as fossil control logic. See inspiration requirements for revisable scaffolding and harness hypotheses<a class="footnote-reference brackets" href="#insp-experiment" id="id278" role="doc-noteref"><span class="fn-bracket">[</span>66<span class="fn-bracket">]</span></a>.</p>
+<section id="id279">
+<h4>Implementation<a class="headerlink" href="#id279" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> / <code class="docutils literal notranslate"><span class="pre">HarnessExperimentRunner</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.harness_experiment</span></code> express interventions as hypotheses with expected metrics, compare with/without arms, and list retirement candidates. Integrates with <code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> for offline evaluation. Trace fields expose experiment id, harness version, and assignment.</p>
 </section>
-<section id="id276">
-<h4>Validation<a class="headerlink" href="#id276" title="Link to this heading"></a></h4>
+<section id="id280">
+<h4>Validation<a class="headerlink" href="#id280" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">harness_experiment_retire</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_harness_experiment_retire</span></code>. Soft expects: treatment worse than control yields <code class="docutils literal notranslate"><span class="pre">retired</span></code> status and a retirement candidate. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_atk_research_reject</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
 </section>
-<section id="id277">
-<h4>Footnotes<a class="headerlink" href="#id277" title="Link to this heading"></a></h4>
+<section id="id281">
+<h4>Footnotes<a class="headerlink" href="#id281" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-component-ablation-ablate-harness-components-against-a-matched-corpus">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_component_ablation</span></code> — Ablate harness components against a matched corpus<a class="headerlink" href="#taloneth-insp-component-ablation-ablate-harness-components-against-a-matched-corpus" title="Link to this heading"></a></h3>
-<p>Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance<a class="footnote-reference brackets" href="#wl-l02-ablation" id="id278" role="doc-noteref"><span class="fn-bracket">[</span>66<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-p01-ablation" id="id279" role="doc-noteref"><span class="fn-bracket">[</span>67<span class="fn-bracket">]</span></a>.</p>
-<section id="id280">
-<h4>Implementation<a class="headerlink" href="#id280" title="Link to this heading"></a></h4>
+<p>Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance<a class="footnote-reference brackets" href="#wl-l02-ablation" id="id282" role="doc-noteref"><span class="fn-bracket">[</span>67<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-p01-ablation" id="id283" role="doc-noteref"><span class="fn-bracket">[</span>68<span class="fn-bracket">]</span></a>.</p>
+<section id="id284">
+<h4>Implementation<a class="headerlink" href="#id284" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ComponentAblationExperiment</span></code> and <code class="docutils literal notranslate"><span class="pre">ablation_delta</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.component_ablation</span></code> standardize baseline fingerprint, disabled component IDs, and quality/cost deltas.</p>
 </section>
-<section id="id281">
-<h4>Validation<a class="headerlink" href="#id281" title="Link to this heading"></a></h4>
+<section id="id285">
+<h4>Validation<a class="headerlink" href="#id285" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">component_ablation_delta</span></code>. Soft expects negative success_delta.</p>
 </section>
-<section id="id282">
-<h4>Footnotes<a class="headerlink" href="#id282" title="Link to this heading"></a></h4>
+<section id="id286">
+<h4>Footnotes<a class="headerlink" href="#id286" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-eval-claims-compose-typed-evaluation-claims-without-opaque-scores">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_eval_claims</span></code> — Compose typed evaluation claims without opaque scores<a class="headerlink" href="#taloneth-insp-eval-claims-compose-typed-evaluation-claims-without-opaque-scores" title="Link to this heading"></a></h3>
-<p>Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL<a class="footnote-reference brackets" href="#anth-evals-claims" id="id283" role="doc-noteref"><span class="fn-bracket">[</span>68<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-bineval" id="id284" role="doc-noteref"><span class="fn-bracket">[</span>69<span class="fn-bracket">]</span></a>.</p>
-<section id="id285">
-<h4>Implementation<a class="headerlink" href="#id285" title="Link to this heading"></a></h4>
+<p>Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL<a class="footnote-reference brackets" href="#anth-evals-claims" id="id287" role="doc-noteref"><span class="fn-bracket">[</span>69<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-bineval" id="id288" role="doc-noteref"><span class="fn-bracket">[</span>70<span class="fn-bracket">]</span></a>.</p>
+<section id="id289">
+<h4>Implementation<a class="headerlink" href="#id289" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">Evidence</span></code>, <code class="docutils literal notranslate"><span class="pre">Claim</span></code>, and <code class="docutils literal notranslate"><span class="pre">compose_claims</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.eval_evidence</span></code> provide typed evidence pointers and binary assertion composition.</p>
 </section>
-<section id="id286">
-<h4>Validation<a class="headerlink" href="#id286" title="Link to this heading"></a></h4>
+<section id="id290">
+<h4>Validation<a class="headerlink" href="#id290" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">eval_claims_compose</span></code>. Soft expects pass/fail/unknown counts.</p>
 </section>
-<section id="id287">
-<h4>Footnotes<a class="headerlink" href="#id287" title="Link to this heading"></a></h4>
+<section id="id291">
+<h4>Footnotes<a class="headerlink" href="#id291" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-evaluator-compose-run-a-versioned-held-out-evaluator-to-claims">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_evaluator_compose</span></code> — Run a versioned held-out evaluator to claims<a class="headerlink" href="#taloneth-insp-evaluator-compose-run-a-versioned-held-out-evaluator-to-claims" title="Link to this heading"></a></h3>
-<p>Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon<a class="footnote-reference brackets" href="#anth-evals-evaluator" id="id288" role="doc-noteref"><span class="fn-bracket">[</span>70<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-verif-horizon" id="id289" role="doc-noteref"><span class="fn-bracket">[</span>71<span class="fn-bracket">]</span></a>.</p>
-<section id="id290">
-<h4>Implementation<a class="headerlink" href="#id290" title="Link to this heading"></a></h4>
+<p>Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon<a class="footnote-reference brackets" href="#anth-evals-evaluator" id="id292" role="doc-noteref"><span class="fn-bracket">[</span>71<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-verif-horizon" id="id293" role="doc-noteref"><span class="fn-bracket">[</span>72<span class="fn-bracket">]</span></a>.</p>
+<section id="id294">
+<h4>Implementation<a class="headerlink" href="#id294" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">Evaluator</span></code>, <code class="docutils literal notranslate"><span class="pre">CallableEvaluator</span></code>, and <code class="docutils literal notranslate"><span class="pre">evaluate_claims</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.evaluator</span></code> compose deterministic claim producers with version and held_out metadata beside VerificationPolicy.</p>
 </section>
-<section id="id291">
-<h4>Validation<a class="headerlink" href="#id291" title="Link to this heading"></a></h4>
+<section id="id295">
+<h4>Validation<a class="headerlink" href="#id295" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">evaluator_compose_run</span></code>. Soft expects passed and held_out true.</p>
 </section>
-<section id="id292">
-<h4>Footnotes<a class="headerlink" href="#id292" title="Link to this heading"></a></h4>
+<section id="id296">
+<h4>Footnotes<a class="headerlink" href="#id296" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-harness-health-snapshot-harness-health-for-cleanup-evidence">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_harness_health</span></code> — Snapshot harness health for cleanup evidence<a class="headerlink" href="#taloneth-insp-harness-health-snapshot-harness-health-for-cleanup-evidence" title="Link to this heading"></a></h3>
-<p>Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance<a class="footnote-reference brackets" href="#wl-l02-health" id="id293" role="doc-noteref"><span class="fn-bracket">[</span>72<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-l12-health" id="id294" role="doc-noteref"><span class="fn-bracket">[</span>73<span class="fn-bracket">]</span></a>.</p>
-<section id="id295">
-<h4>Implementation<a class="headerlink" href="#id295" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">HarnessHealthSnapshot</span></code> and <code class="docutils literal notranslate"><span class="pre">needs_cleanup</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.harness_health</span></code> provide the optional health schema.</p>
-</section>
-<section id="id296">
-<h4>Validation<a class="headerlink" href="#id296" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_health_cleanup</span></code>. Soft expects needs_cleanup true.</p>
-</section>
-<section id="id297">
-<h4>Footnotes<a class="headerlink" href="#id297" title="Link to this heading"></a></h4>
-</section>
-</section>
-<section id="taloneth-insp-harness-hypothesis-express-a-harness-change-as-a-testable-hypothesis">
-<h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_harness_hypothesis</span></code> — Express a harness change as a testable hypothesis<a class="headerlink" href="#taloneth-insp-harness-hypothesis-express-a-harness-change-as-a-testable-hypothesis" title="Link to this heading"></a></h3>
-<p>Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14<a class="footnote-reference brackets" href="#insp-r14" id="id298" role="doc-noteref"><span class="fn-bracket">[</span>74<span class="fn-bracket">]</span></a>.</p>
+<p>Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance<a class="footnote-reference brackets" href="#wl-l02-health" id="id297" role="doc-noteref"><span class="fn-bracket">[</span>73<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-l12-health" id="id298" role="doc-noteref"><span class="fn-bracket">[</span>74<span class="fn-bracket">]</span></a>.</p>
 <section id="id299">
 <h4>Implementation<a class="headerlink" href="#id299" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> carries hypothesis, intervention, failure_mode, evidence, and <code class="docutils literal notranslate"><span class="pre">to_trace_fields</span></code> for version/assignment on traces.</p>
+<p><code class="docutils literal notranslate"><span class="pre">HarnessHealthSnapshot</span></code> and <code class="docutils literal notranslate"><span class="pre">needs_cleanup</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.harness_health</span></code> provide the optional health schema.</p>
 </section>
 <section id="id300">
 <h4>Validation<a class="headerlink" href="#id300" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_experiment_retire</span></code>. Soft expects retired when treatment loses (evidence-driven retain/retire).</p>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_health_cleanup</span></code>. Soft expects needs_cleanup true.</p>
 </section>
 <section id="id301">
 <h4>Footnotes<a class="headerlink" href="#id301" title="Link to this heading"></a></h4>
 </section>
 </section>
-<section id="taloneth-insp-rule-promotion-promote-review-feedback-into-a-hard-invariant-with-provenance">
-<h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_rule_promotion</span></code> — Promote review feedback into a hard invariant with provenance<a class="headerlink" href="#taloneth-insp-rule-promotion-promote-review-feedback-into-a-hard-invariant-with-provenance" title="Link to this heading"></a></h3>
-<p>Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance<a class="footnote-reference brackets" href="#wl-l10-promo" id="id302" role="doc-noteref"><span class="fn-bracket">[</span>75<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-l12-promo" id="id303" role="doc-noteref"><span class="fn-bracket">[</span>76<span class="fn-bracket">]</span></a>.</p>
+<section id="taloneth-insp-harness-hypothesis-express-a-harness-change-as-a-testable-hypothesis">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_harness_hypothesis</span></code> — Express a harness change as a testable hypothesis<a class="headerlink" href="#taloneth-insp-harness-hypothesis-express-a-harness-change-as-a-testable-hypothesis" title="Link to this heading"></a></h3>
+<p>Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14<a class="footnote-reference brackets" href="#insp-r14" id="id302" role="doc-noteref"><span class="fn-bracket">[</span>75<span class="fn-bracket">]</span></a>.</p>
+<section id="id303">
+<h4>Implementation<a class="headerlink" href="#id303" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> carries hypothesis, intervention, failure_mode, evidence, and <code class="docutils literal notranslate"><span class="pre">to_trace_fields</span></code> for version/assignment on traces.</p>
+</section>
 <section id="id304">
-<h4>Implementation<a class="headerlink" href="#id304" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">PromotionRecord</span></code>, <code class="docutils literal notranslate"><span class="pre">promote_soft_to_hard</span></code>, and <code class="docutils literal notranslate"><span class="pre">rollback_promotion</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.rule_promotion</span></code> model the promotion chain.</p>
+<h4>Validation<a class="headerlink" href="#id304" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_experiment_retire</span></code>. Soft expects retired when treatment loses (evidence-driven retain/retire).</p>
 </section>
 <section id="id305">
-<h4>Validation<a class="headerlink" href="#id305" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">rule_promotion_hard</span></code>. Soft expects stage hard.</p>
-</section>
-<section id="id306">
-<h4>Footnotes<a class="headerlink" href="#id306" title="Link to this heading"></a></h4>
+<h4>Footnotes<a class="headerlink" href="#id305" title="Link to this heading"></a></h4>
 </section>
 </section>
-<section id="taloneth-insp-scaffolding-retire-retire-scaffolding-that-loses-a-controlled-experiment">
-<h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_scaffolding_retire</span></code> — Retire scaffolding that loses a controlled experiment<a class="headerlink" href="#taloneth-insp-scaffolding-retire-retire-scaffolding-that-loses-a-controlled-experiment" title="Link to this heading"></a></h3>
-<p>Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1<a class="footnote-reference brackets" href="#insp-r01" id="id307" role="doc-noteref"><span class="fn-bracket">[</span>77<span class="fn-bracket">]</span></a>.</p>
+<section id="taloneth-insp-rule-promotion-promote-review-feedback-into-a-hard-invariant-with-provenance">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_rule_promotion</span></code> — Promote review feedback into a hard invariant with provenance<a class="headerlink" href="#taloneth-insp-rule-promotion-promote-review-feedback-into-a-hard-invariant-with-provenance" title="Link to this heading"></a></h3>
+<p>Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance<a class="footnote-reference brackets" href="#wl-l10-promo" id="id306" role="doc-noteref"><span class="fn-bracket">[</span>76<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-l12-promo" id="id307" role="doc-noteref"><span class="fn-bracket">[</span>77<span class="fn-bracket">]</span></a>.</p>
 <section id="id308">
 <h4>Implementation<a class="headerlink" href="#id308" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> / <code class="docutils literal notranslate"><span class="pre">HarnessExperimentRunner</span></code> compare intervention arms and list retirement candidates. Hosts remove retired scaffolding without rewriting task goals.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PromotionRecord</span></code>, <code class="docutils literal notranslate"><span class="pre">promote_soft_to_hard</span></code>, and <code class="docutils literal notranslate"><span class="pre">rollback_promotion</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.rule_promotion</span></code> model the promotion chain.</p>
 </section>
 <section id="id309">
 <h4>Validation<a class="headerlink" href="#id309" title="Link to this heading"></a></h4>
-<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_experiment_retire</span></code>. Soft expects retired status when treatment underperforms control.</p>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">rule_promotion_hard</span></code>. Soft expects stage hard.</p>
 </section>
 <section id="id310">
 <h4>Footnotes<a class="headerlink" href="#id310" title="Link to this heading"></a></h4>
 </section>
 </section>
+<section id="taloneth-insp-scaffolding-retire-retire-scaffolding-that-loses-a-controlled-experiment">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_scaffolding_retire</span></code> — Retire scaffolding that loses a controlled experiment<a class="headerlink" href="#taloneth-insp-scaffolding-retire-retire-scaffolding-that-loses-a-controlled-experiment" title="Link to this heading"></a></h3>
+<p>Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1<a class="footnote-reference brackets" href="#insp-r01" id="id311" role="doc-noteref"><span class="fn-bracket">[</span>78<span class="fn-bracket">]</span></a>.</p>
+<section id="id312">
+<h4>Implementation<a class="headerlink" href="#id312" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> / <code class="docutils literal notranslate"><span class="pre">HarnessExperimentRunner</span></code> compare intervention arms and list retirement candidates. Hosts remove retired scaffolding without rewriting task goals.</p>
+</section>
+<section id="id313">
+<h4>Validation<a class="headerlink" href="#id313" title="Link to this heading"></a></h4>
+<p>Kind <code class="docutils literal notranslate"><span class="pre">harness_experiment_retire</span></code>. Soft expects retired status when treatment underperforms control.</p>
+</section>
+<section id="id314">
+<h4>Footnotes<a class="headerlink" href="#id314" title="Link to this heading"></a></h4>
+</section>
+</section>
 <section id="taloneth-insp-trial-reliability-separate-pass-k-capability-from-pass-k-reliability">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_trial_reliability</span></code> — Separate pass&#64;k capability from pass^k reliability<a class="headerlink" href="#taloneth-insp-trial-reliability-separate-pass-k-capability-from-pass-k-reliability" title="Link to this heading"></a></h3>
-<p>Taloneth records isolated trials with cost and latency, then reports pass&#64;k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, τ-bench, and HumanEval<a class="footnote-reference brackets" href="#anth-evals-trial" id="id311" role="doc-noteref"><span class="fn-bracket">[</span>78<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-taubench" id="id312" role="doc-noteref"><span class="fn-bracket">[</span>79<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-humaneval" id="id313" role="doc-noteref"><span class="fn-bracket">[</span>80<span class="fn-bracket">]</span></a>.</p>
-<section id="id314">
-<h4>Implementation<a class="headerlink" href="#id314" title="Link to this heading"></a></h4>
+<p>Taloneth records isolated trials with cost and latency, then reports pass&#64;k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, τ-bench, and HumanEval<a class="footnote-reference brackets" href="#anth-evals-trial" id="id315" role="doc-noteref"><span class="fn-bracket">[</span>79<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-taubench" id="id316" role="doc-noteref"><span class="fn-bracket">[</span>80<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-humaneval" id="id317" role="doc-noteref"><span class="fn-bracket">[</span>81<span class="fn-bracket">]</span></a>.</p>
+<section id="id318">
+<h4>Implementation<a class="headerlink" href="#id318" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">Trial</span></code>, <code class="docutils literal notranslate"><span class="pre">pass_at_k</span></code>, <code class="docutils literal notranslate"><span class="pre">pass_caret_k</span></code>, and <code class="docutils literal notranslate"><span class="pre">trial_cost_rollup</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.eval_trial</span></code> aggregate isolated attempts.</p>
 </section>
-<section id="id315">
-<h4>Validation<a class="headerlink" href="#id315" title="Link to this heading"></a></h4>
+<section id="id319">
+<h4>Validation<a class="headerlink" href="#id319" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">trial_reliability_metrics</span></code>. Soft expects positive pass_at_k and rollup trial count.</p>
 </section>
-<section id="id316">
-<h4>Footnotes<a class="headerlink" href="#id316" title="Link to this heading"></a></h4>
+<section id="id320">
+<h4>Footnotes<a class="headerlink" href="#id320" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_offline_decision_export</span></code> — Export decision data without leaking future outcomes<a class="headerlink" href="#taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes" title="Link to this heading"></a></h3>
 <p>Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.</p>
-<section id="id317">
-<h4>Implementation<a class="headerlink" href="#id317" title="Link to this heading"></a></h4>
+<section id="id321">
+<h4>Implementation<a class="headerlink" href="#id321" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> / <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code> / <code class="docutils literal notranslate"><span class="pre">export_offline_dataset</span></code> persist append-only learning records and versioned exports without default future leakage.</p>
 <p>Covers: OBS-02.</p>
 </section>
-<section id="id318">
-<h4>Validation<a class="headerlink" href="#id318" title="Link to this heading"></a></h4>
+<section id="id322">
+<h4>Validation<a class="headerlink" href="#id322" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">offline_decision_export</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_offline_decision_export</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_log.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_policy_replay</span></code> — Replay product policy from recorded facts and signals<a class="headerlink" href="#taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals" title="Link to this heading"></a></h3>
 <p>Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts.</p>
-<section id="id319">
-<h4>Implementation<a class="headerlink" href="#id319" title="Link to this heading"></a></h4>
+<section id="id323">
+<h4>Implementation<a class="headerlink" href="#id323" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">replay_verdict</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log</span></code> re-runs <code class="docutils literal notranslate"><span class="pre">decide()</span></code> on recorded facts/signals/policy for deterministic audits.</p>
 <p>Covers: OBS-03.</p>
 </section>
-<section id="id320">
-<h4>Validation<a class="headerlink" href="#id320" title="Link to this heading"></a></h4>
+<section id="id324">
+<h4>Validation<a class="headerlink" href="#id324" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">policy_replay</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_policy_replay</span></code>. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.</p>
 </section>
 </section>
 <section id="taloneth-shadow-decision-backends-compare-decision-backends-without-inventing-missing-results">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_shadow_decision_backends</span></code> — Compare decision backends without inventing missing results<a class="headerlink" href="#taloneth-shadow-decision-backends-compare-decision-backends-without-inventing-missing-results" title="Link to this heading"></a></h3>
 <p>Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: <code class="docutils literal notranslate"><span class="pre">nubble_lane_load_hint</span></code>, <code class="docutils literal notranslate"><span class="pre">nubble_model_affinity</span></code>.</p>
-<section id="id321">
-<h4>Implementation<a class="headerlink" href="#id321" title="Link to this heading"></a></h4>
+<section id="id325">
+<h4>Implementation<a class="headerlink" href="#id325" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> / <code class="docutils literal notranslate"><span class="pre">route_at_boundary</span></code> compare candidates at task and phase boundaries and estimate whole-task cost honesty. Unavailable backends stay unavailable.</p>
 <p>Covers: RTE-01, RTE-02.</p>
 </section>
-<section id="id322">
-<h4>Validation<a class="headerlink" href="#id322" title="Link to this heading"></a></h4>
+<section id="id326">
+<h4>Validation<a class="headerlink" href="#id326" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_shadow_decision_backends</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_routing.py</span></code>.</p>
 </section>
 </section>
 <section id="taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_systemone_cassette</span></code> — Pin System One adapter behavior to a versioned cassette<a class="headerlink" href="#taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette" title="Link to this heading"></a></h3>
 <p>A new Laya build changes confidence fields. A versioned cassette must fail the story before silent adapter drift ships.</p>
-<section id="id323">
-<h4>Implementation<a class="headerlink" href="#id323" title="Link to this heading"></a></h4>
+<section id="id327">
+<h4>Implementation<a class="headerlink" href="#id327" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (<code class="docutils literal notranslate"><span class="pre">get_judge_connection</span></code>, <code class="docutils literal notranslate"><span class="pre">get_judge_provider</span></code>).</p>
 <p>Covers: JDG wire map (System One).</p>
 </section>
-<section id="id324">
-<h4>Validation<a class="headerlink" href="#id324" title="Link to this heading"></a></h4>
+<section id="id328">
+<h4>Validation<a class="headerlink" href="#id328" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">systemone_cassette</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_route_refund</span></code> with <code class="docutils literal notranslate"><span class="pre">systemone/laya/v1</span></code> cassette.</p>
 </section>
 </section>
 <section id="taloneth-validator-qualification-qualify-validators-before-they-gate-completion">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code> — Qualify validators before they gate completion<a class="headerlink" href="#taloneth-validator-qualification-qualify-validators-before-they-gate-completion" title="Link to this heading"></a></h3>
 <p>Before a schema validator gates done, known-good, known-bad, and missing fixtures must run — including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>).</p>
-<section id="id325">
-<h4>Implementation<a class="headerlink" href="#id325" title="Link to this heading"></a></h4>
+<section id="id329">
+<h4>Implementation<a class="headerlink" href="#id329" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">VerificationOracle</span></code> / <code class="docutils literal notranslate"><span class="pre">verify_node</span></code> define completion evidence; <code class="docutils literal notranslate"><span class="pre">qualify_validator</span></code> / <code class="docutils literal notranslate"><span class="pre">validator_qualified</span></code> reject always-pass mutants. Judge quality signals remain supplementary to evidence checks.</p>
 <p>Covers: VER-01, VER-04.</p>
 </section>
-<section id="id326">
-<h4>Validation<a class="headerlink" href="#id326" title="Link to this heading"></a></h4>
+<section id="id330">
+<h4>Validation<a class="headerlink" href="#id330" title="Link to this heading"></a></h4>
 <p>Kind <code class="docutils literal notranslate"><span class="pre">validator_qualification</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_validator_qualification</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_graph.py</span></code>.</p>
 </section>
 </section>
@@ -1782,80 +1801,84 @@ pytest<span class="w"> </span>-q
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id260">63</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (soft vs hard)</a> — Req 9 — soft guidance and hard enforcement are different mechanisms</p>
 </aside>
-<aside class="footnote brackets" id="insp-verify" role="doc-footnote">
+<aside class="footnote brackets" id="tdr-req" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id264">64</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/transactional-durable-resume.md">Transactional durable graph resume requirements</a> — DR-01..DR-12 — checkpoint seam, SQLite, effect reconciliation, crash matrix</p>
+</aside>
+<aside class="footnote brackets" id="insp-verify" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id268">65</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (verification)</a> — Req 5 — verification policy; answer generated ≠ task complete</p>
 </aside>
 <aside class="footnote brackets" id="insp-experiment" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id274">65</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id278">66</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (harness experiments)</a> — Reqs 1 and 14 — revisable scaffolding; harness changes as testable hypotheses</p>
 </aside>
 <aside class="footnote brackets" id="wl-l02-ablation" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id278">66</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id282">67</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/">WalkingLabs L02 What a Harness Is</a> — Ablate components</p>
 </aside>
 <aside class="footnote brackets" id="wl-p01-ablation" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id279">67</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id283">68</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/">WalkingLabs P01 Baseline vs Minimal</a> — Matched corpus</p>
 </aside>
 <aside class="footnote brackets" id="anth-evals-claims" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id283">68</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id287">69</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic Demystifying evals for AI agents</a> — Graders and assertions</p>
 </aside>
 <aside class="footnote brackets" id="arxiv-bineval" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id284">69</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id288">70</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://arxiv.org/abs/2606.27226">BINEVAL binary questions</a> — Atomic interpretable claims</p>
 </aside>
 <aside class="footnote brackets" id="anth-evals-evaluator" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id288">70</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id292">71</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic Demystifying evals for AI agents</a> — Deterministic then model graders</p>
 </aside>
 <aside class="footnote brackets" id="arxiv-verif-horizon" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id289">71</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id293">72</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://arxiv.org/abs/2606.26300">Verification Horizon</a> — Held-out evaluator versioning</p>
 </aside>
 <aside class="footnote brackets" id="wl-l02-health" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id293">72</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id297">73</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/">WalkingLabs L02 What a Harness Is</a> — Harness debt</p>
 </aside>
 <aside class="footnote brackets" id="wl-l12-health" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id294">73</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id298">74</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/">WalkingLabs L12 Clean Session Handoffs</a> — Cleanup evidence</p>
 </aside>
 <aside class="footnote brackets" id="insp-r14" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id298">74</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id302">75</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 14: harness hypotheses)</a> — Req 14 — harness hypotheses</p>
 </aside>
 <aside class="footnote brackets" id="wl-l10-promo" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id302">75</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id306">76</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-10-why-end-to-end-testing-changes-results/">WalkingLabs L10 Full Pipeline Verification</a> — Promote feedback</p>
 </aside>
 <aside class="footnote brackets" id="wl-l12-promo" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id303">76</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id307">77</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/">WalkingLabs L12 Clean Session Handoffs</a> — Process changes</p>
 </aside>
 <aside class="footnote brackets" id="insp-r01" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id307">77</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id311">78</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 1: revisable scaffolding)</a> — Req 1 — revisable scaffolding</p>
 </aside>
 <aside class="footnote brackets" id="anth-evals-trial" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id311">78</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id315">79</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic Demystifying evals for AI agents</a> — pass&#64;k vs pass^k</p>
 </aside>
 <aside class="footnote brackets" id="arxiv-taubench" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id312">79</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id316">80</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://arxiv.org/abs/2406.12045">τ-bench</a> — Reliability and end-state verification</p>
 </aside>
 <aside class="footnote brackets" id="arxiv-humaneval" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id313">80</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id317">81</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://arxiv.org/abs/2107.03374">Evaluating LLMs Trained on Code</a> — pass&#64;k definition</p>
 </aside>
 <aside class="footnote brackets" id="loop-vs-graph-executor" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>81<span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span>82<span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://medium.com/&#64;neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23">Loop vs graph engineering</a> — Executor advances durable plans hosts define</p>
 </aside>
 <aside class="footnote brackets" id="loop-vs-graph" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>82<span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span>83<span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://medium.com/&#64;neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23">Loop vs graph engineering</a> — Explicit control flow; MechaHarness extends into execution graphs</p>
 </aside>
 </aside>
@@ -1864,7 +1887,7 @@ pytest<span class="w"> </span>-q
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="junespark.html" class="btn btn-neutral float-left" title="Local OpenAI-compat backend (junespark)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="openai-local.html" class="btn btn-neutral float-left" title="Local OpenAI-compat backend (openai_local)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../reference/cli.html" class="btn btn-neutral float-right" title="CLI reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

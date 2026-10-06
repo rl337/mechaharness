@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mechaharness.external_effect &mdash; MechaHarness 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/user-stories.html">User stories</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mechaharness.external_effect</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mechaharness.external_effect</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""External-effect records, reconciliation, and crash probes (DR-03..07).</span>
+
+<span class="sd">:class:`~mechaharness.graph_executor.EffectfulGraphNodeRunner` lives beside</span>
+<span class="sd">``GraphNodeRunner`` so the registry stays a single injectable type.</span>
+
+<span class="sd">Effect identity is generic — Cursor (or any coding-job backend) is a host</span>
+<span class="sd">adapter detail, not a MechaHarness core type::</span>
+
+<span class="sd">    &gt;&gt;&gt; from mechaharness.external_effect import (</span>
+<span class="sd">    ...     ArmedCrashProbe, EffectRecord, EffectState, InjectedProcessCrash,</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; effect = EffectRecord(</span>
+<span class="sd">    ...     effect_id="run:job:1",</span>
+<span class="sd">    ...     run_id="run",</span>
+<span class="sd">    ...     node_id="job",</span>
+<span class="sd">    ...     node_attempt=1,</span>
+<span class="sd">    ...     backend_id="host.coding_job",</span>
+<span class="sd">    ...     state=EffectState.UNCERTAIN,</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; effect.state.value</span>
+<span class="sd">    'uncertain'</span>
+<span class="sd">    &gt;&gt;&gt; probe = ArmedCrashProbe("after_accept_before_record")</span>
+<span class="sd">    &gt;&gt;&gt; probe.maybe_crash("before_intent")  # not armed here</span>
+<span class="sd">    &gt;&gt;&gt; try:</span>
+<span class="sd">    ...     probe.maybe_crash("after_accept_before_record", effect_id=effect.effect_id)</span>
+<span class="sd">    ... except InjectedProcessCrash as crash:</span>
+<span class="sd">    ...     crash.boundary</span>
+<span class="sd">    'after_accept_before_record'</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uuid</span><span class="w"> </span><span class="kn">import</span> <span class="n">uuid4</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">Field</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecoveryBoundary</span>
+
+
+<div class="viewcode-block" id="EffectState">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.EffectState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EffectState</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Durable lifecycle of an externally visible side effect.</span>
+
+<span class="sd">    Distinguishes (DR-04):</span>
+<span class="sd">    1. no record — dispatch was never intended;</span>
+<span class="sd">    2. ``intended`` — intent committed, external call not started;</span>
+<span class="sd">    3. ``uncertain`` — call may have started; acceptance unknown;</span>
+<span class="sd">    4. ``accepted`` — external system accepted; handle recorded;</span>
+<span class="sd">    5. ``completed`` / ``failed`` — terminal;</span>
+<span class="sd">    6. ``needs_attention`` — host must decide; never silent redispatch.</span>
+<span class="sd">    """</span>
+
+    <span class="n">INTENDED</span> <span class="o">=</span> <span class="s2">"intended"</span>
+    <span class="n">UNCERTAIN</span> <span class="o">=</span> <span class="s2">"uncertain"</span>
+    <span class="n">ACCEPTED</span> <span class="o">=</span> <span class="s2">"accepted"</span>
+    <span class="n">COMPLETED</span> <span class="o">=</span> <span class="s2">"completed"</span>
+    <span class="n">FAILED</span> <span class="o">=</span> <span class="s2">"failed"</span>
+    <span class="n">NEEDS_ATTENTION</span> <span class="o">=</span> <span class="s2">"needs_attention"</span></div>
+
+
+
+<div class="viewcode-block" id="EffectRecord">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.EffectRecord">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EffectRecord</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Persisted external-effect identity (DR-03)."""</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">"allow"</span><span class="p">)</span>
+
+    <span class="n">effect_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid4</span><span class="p">()))</span>
+    <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">node_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">node_attempt</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">backend_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">external_handle</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">EffectState</span> <span class="o">=</span> <span class="n">EffectState</span><span class="o">.</span><span class="n">INTENDED</span>
+    <span class="n">revision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">recovery_boundary</span><span class="p">:</span> <span class="n">RecoveryBoundary</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">created_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">updated_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="EffectReconciliationAction">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EffectReconciliationAction</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Host adapter decision after inspecting an uncertain/accepted effect."""</span>
+
+    <span class="n">DISPATCH</span> <span class="o">=</span> <span class="s2">"dispatch"</span>
+    <span class="n">OBSERVE</span> <span class="o">=</span> <span class="s2">"observe"</span>
+    <span class="n">COMPLETE</span> <span class="o">=</span> <span class="s2">"complete"</span>
+    <span class="n">FAIL</span> <span class="o">=</span> <span class="s2">"fail"</span>
+    <span class="n">NEEDS_ATTENTION</span> <span class="o">=</span> <span class="s2">"needs_attention"</span></div>
+
+
+
+<div class="viewcode-block" id="EffectReconciliation">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.EffectReconciliation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EffectReconciliation</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Result of host-side reconcile (DR-06)."""</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">"allow"</span><span class="p">)</span>
+
+    <span class="n">action</span><span class="p">:</span> <span class="n">EffectReconciliationAction</span>
+    <span class="n">external_handle</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">outcome_payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">outcome_evidence</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="EffectDispatchResult">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.EffectDispatchResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EffectDispatchResult</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return value of an external dispatch once the backend accepts it."""</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">"allow"</span><span class="p">)</span>
+
+    <span class="n">external_handle</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="InjectedProcessCrash">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.InjectedProcessCrash">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InjectedProcessCrash</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Simulated process death at a recovery boundary (acceptance tests)."""</span>
+
+<div class="viewcode-block" id="InjectedProcessCrash.__init__">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.InjectedProcessCrash.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boundary</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">boundary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detail</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">detail</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">"injected_process_crash:</span><span class="si">{</span><span class="n">boundary</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="n">CrashLocation</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span>
+    <span class="s2">"before_intent"</span><span class="p">,</span>
+    <span class="s2">"after_intent_before_call"</span><span class="p">,</span>
+    <span class="s2">"after_accept_before_record"</span><span class="p">,</span>
+    <span class="s2">"after_accept_recorded"</span><span class="p">,</span>
+    <span class="s2">"after_reduce_before_checkpoint"</span><span class="p">,</span>
+    <span class="s2">"after_final_commit"</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="CrashProbe">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.CrashProbe">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CrashProbe</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Optional injectable that raises :class:`InjectedProcessCrash` at a boundary."""</span>
+
+<div class="viewcode-block" id="CrashProbe.maybe_crash">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.CrashProbe.maybe_crash">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maybe_crash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="n">CrashLocation</span><span class="p">,</span> <span class="o">**</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Raise if this probe is armed for ``location``."""</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NoopCrashProbe">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.NoopCrashProbe">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoopCrashProbe</span><span class="p">(</span><span class="n">CrashProbe</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Default: never crash."""</span>
+
+<div class="viewcode-block" id="NoopCrashProbe.maybe_crash">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.NoopCrashProbe.maybe_crash">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maybe_crash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="n">CrashLocation</span><span class="p">,</span> <span class="o">**</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">location</span><span class="p">,</span> <span class="n">ctx</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ArmedCrashProbe">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.ArmedCrashProbe">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ArmedCrashProbe</span><span class="p">(</span><span class="n">CrashProbe</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raise once at a single crash location (for DR-10 / DR-12 matrices)."""</span>
+
+<div class="viewcode-block" id="ArmedCrashProbe.__init__">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.ArmedCrashProbe.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="n">CrashLocation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggered</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="ArmedCrashProbe.maybe_crash">
+<a class="viewcode-back" href="../../api/external_effect.html#mechaharness.external_effect.ArmedCrashProbe.maybe_crash">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maybe_crash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="n">CrashLocation</span><span class="p">,</span> <span class="o">**</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">triggered</span> <span class="ow">or</span> <span class="n">location</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggered</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">raise</span> <span class="n">InjectedProcessCrash</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">ctx</span><span class="p">))</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

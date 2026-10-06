@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="mechaharness.tools.base" href="api/tools.html" /> 
+    <link rel="prev" title="mechaharness.external_effect" href="api/external_effect.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,7 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -72,6 +72,10 @@
 <li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a></li>
@@ -108,13 +112,33 @@
 and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <section id="unreleased">
 <h2>[Unreleased]<a class="headerlink" href="#unreleased" title="Link to this heading"></a></h2>
+<section id="added">
+<h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Transactional durable graph resume: injectable <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> seam,
+<code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> reference backend, opt-in <code class="docutils literal notranslate"><span class="pre">EffectfulGraphNodeRunner</span></code>
+with effect intent/acceptance/reconciliation, and crash-injection probes.
+Story: <code class="docutils literal notranslate"><span class="pre">fangore_transactional_durable_resume</span></code>. Requirements:
+<code class="docutils literal notranslate"><span class="pre">docs/requirements/transactional-durable-resume.md</span></code>. Module doctests (and
+Sphinx API pages) document Config wiring and SQLite restart usage;
+pytest runs <code class="docutils literal notranslate"><span class="pre">--doctest-modules</span></code> over <code class="docutils literal notranslate"><span class="pre">src/mechaharness</span></code>.</p></li>
+</ul>
+</section>
+<section id="changed">
+<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Rename inference backend <code class="docutils literal notranslate"><span class="pre">junespark</span></code> → <code class="docutils literal notranslate"><span class="pre">openai_local</span></code> (same OpenAI-compat
+client, no baked-in <code class="docutils literal notranslate"><span class="pre">base_url</span></code>; set <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>). Live story shorthand
+is <code class="docutils literal notranslate"><span class="pre">MECHA_LIVE_OPENAI_COMPAT</span></code>. Guide: <code class="docutils literal notranslate"><span class="pre">docs/guides/openai-local.md</span></code>.</p></li>
+</ul>
+</section>
 </section>
 <section id="id1">
 <h2>[0.2.0] — 2026-09-30<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <p>Inspiration-aligned library cut for client orchestrators (graph templates,
 budgets, linkage, and related primitives).</p>
-<section id="added">
-<h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
+<section id="id2">
+<h3>Added<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Parameterized <code class="docutils literal notranslate"><span class="pre">graph_templates</span></code> package (fan-out/aggregate, verify/repair,
 independent review, environment repair) with soft points, provenance stamp,
@@ -132,8 +156,8 @@ sets) and host <code class="docutils literal notranslate"><span class="pre">Anno
 <code class="docutils literal notranslate"><span class="pre">fangore_completer_flavors</span></code>.</p></li>
 </ul>
 </section>
-<section id="changed">
-<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
+<section id="id3">
+<h3>Changed<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>pyiv ≥ 0.4.2</strong> — floor bumped for <code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code> constructor injection. Constructor injection for
@@ -154,13 +178,13 @@ is not a concrete optional type).</p></li>
 </ul>
 </section>
 </section>
-<section id="id2">
-<h2>[0.1.2] — 2026-09-25<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<section id="id4">
+<h2>[0.1.2] — 2026-09-25<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
 <p>PyPI cut of the #12 requirements-addendum library (GitHub also tagged <code class="docutils literal notranslate"><span class="pre">v0.1.1</span></code>
 for the intermediate TestPyPI upload; production skipped that number after
 auto-bump raced the publish).</p>
-<section id="id3">
-<h3>Added<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id5">
+<h3>Added<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>REQUIREMENTS.md addendum incorporation: decision plane, convergence, context
 experiments, graph resume/fan-in, validator qualification, OBS export/metrics,
@@ -174,8 +198,8 @@ including gap stories for tool gating, human review, repair loops, and related
 paths; story <code class="docutils literal notranslate"><span class="pre">footnotes</span></code> and generated guide sync</p></li>
 </ul>
 </section>
-<section id="id4">
-<h3>Changed<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id6">
+<h3>Changed<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Keep <code class="docutils literal notranslate"><span class="pre">docs/adr/</span></code> and <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> local-only (gitignored; not published)</p></li>
 <li><p>Story acceptance is story-id primary; former INF/POL codes retired to local
@@ -183,12 +207,12 @@ archaeology mapping</p></li>
 </ul>
 </section>
 </section>
-<section id="id5">
-<h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<section id="id7">
+<h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
 <p>First public library cut: DI-first agent harness with native lanes, cost on the
 run path, built-in EventLog, judge/decide outcomes, and persona user stories.</p>
-<section id="id6">
-<h3>Added<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="id8">
+<h3>Added<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>pyiv DI</strong> — <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> / <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code>; hosts subclass hooks
 (<code class="docutils literal notranslate"><span class="pre">get_inference_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_harness_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_access_policy</span></code>, judge
@@ -214,8 +238,8 @@ dual-mode static cassettes (CI, zero skips) / live via <code class="docutils lit
 principles on the home page; packaging, Trusted Publishing, and auto version bump</p></li>
 </ul>
 </section>
-<section id="id7">
-<h3>Changed<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="id9">
+<h3>Changed<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">junespark</span></code> backend no longer ships a private LAN <code class="docutils literal notranslate"><span class="pre">base_url</span></code> default; set
 <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code></p></li>
@@ -237,7 +261,7 @@ to public release</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api/tools.html" class="btn btn-neutral float-left" title="mechaharness.tools.base" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/external_effect.html" class="btn btn-neutral float-left" title="mechaharness.external_effect" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

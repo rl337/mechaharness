@@ -45,7 +45,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -70,6 +70,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -102,9 +106,9 @@
   <h1>Source code for mechaharness.core.environment</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""Optional host probe for the active inference environment.</span>
 
-<span class="sd">Hosts (for example junespark) implement this to refuse runs that need</span>
-<span class="sd">capabilities the loaded profile does not provide. The library default is a</span>
-<span class="sd">no-op so CLI/mock paths stay unchanged.</span>
+<span class="sd">Hosts (for example a LAN OpenAI-compat deploy) implement this to refuse runs</span>
+<span class="sd">that need capabilities the loaded profile does not provide. The library</span>
+<span class="sd">default is a no-op so CLI/mock paths stay unchanged.</span>
 
 <span class="sd">Lanes are open ``str`` identity (``reason``, ``judge``, ``media``, or a host</span>
 <span class="sd">namespace). Unknown lanes round-trip; hosts supply load hints.</span>
