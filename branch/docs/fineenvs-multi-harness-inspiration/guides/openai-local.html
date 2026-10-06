@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Local OpenAI-compat backend (junespark) &mdash; MechaHarness 0.2.1 documentation</title>
+  <title>Local OpenAI-compat backend (openai_local) &mdash; MechaHarness 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../_static/documentation_options.js?v=e259d695"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -73,6 +73,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -92,9 +96,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</li>
+      <li class="breadcrumb-item active">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/rl337/mechaharness/blob/main/docs/guides/junespark.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/guides/openai-local.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -102,21 +106,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="local-openai-compat-backend-junespark">
-<h1>Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)<a class="headerlink" href="#local-openai-compat-backend-junespark" title="Link to this heading"></a></h1>
+  <section id="local-openai-compat-backend-openai-local">
+<h1>Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)<a class="headerlink" href="#local-openai-compat-backend-openai-local" title="Link to this heading"></a></h1>
 <p>Convenience backend name for a LAN OpenAI-compatible server (same client as
-<code class="docutils literal notranslate"><span class="pre">vllm</span></code> / <code class="docutils literal notranslate"><span class="pre">lmstudio</span></code>). Profile load/unload and model inventory stay in the host
-app — MechaHarness only issues chat completions.</p>
+<code class="docutils literal notranslate"><span class="pre">vllm</span></code> / <code class="docutils literal notranslate"><span class="pre">lmstudio</span></code> / <code class="docutils literal notranslate"><span class="pre">openai_compat</span></code>). Profile load/unload and model inventory
+stay in the host app — MechaHarness only issues chat completions.</p>
+<p>Unlike <code class="docutils literal notranslate"><span class="pre">vllm</span></code> / <code class="docutils literal notranslate"><span class="pre">lmstudio</span></code>, this profile does <strong>not</strong> ship a default
+<code class="docutils literal notranslate"><span class="pre">base_url</span></code>. Set <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code> explicitly for your server.</p>
 <section id="backend">
 <h2>Backend<a class="headerlink" href="#backend" title="Link to this heading"></a></h2>
-<p>Set the server URL and served model id explicitly (the library does not ship a
-private LAN default):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w">   </span><span class="c1"># or your host's OpenAI-compat URL</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_API_KEY</span><span class="o">=</span>junespark<span class="w">                   </span><span class="c1"># placeholder is fine for local vLLM</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_API_KEY</span><span class="o">=</span><span class="nb">local</span><span class="w">                       </span><span class="c1"># placeholder is fine for local vLLM</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_MODEL</span><span class="o">=</span>&lt;served-model-id&gt;
 
 mechaharness<span class="w"> </span>run<span class="w"> </span><span class="s2">"Reply with ok."</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--backend<span class="w"> </span>junespark<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--backend<span class="w"> </span>openai_local<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--family<span class="w"> </span>pass_through<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--model<span class="w"> </span><span class="s2">"</span><span class="nv">$MECHA_MODEL</span><span class="s2">"</span>
 </pre></div>
@@ -131,7 +135,7 @@ the same tests with real HTTP:</p>
 <span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
 
 <span class="c1"># shorthand</span>
-<span class="nv">MECHA_LIVE_JUNESPARK</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w"> </span><span class="se">\</span>
+<span class="nv">MECHA_LIVE_OPENAI_COMPAT</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
 </pre></div>
 </div>

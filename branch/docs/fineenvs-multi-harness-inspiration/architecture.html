@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Architecture &mdash; MechaHarness 0.2.1 documentation</title>
+  <title>Architecture &mdash; MechaHarness 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=37f418d5"></script>
+      <script src="_static/documentation_options.js?v=e259d695"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -48,7 +48,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -73,6 +73,10 @@
 <li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -183,15 +187,20 @@ who pick backends by name.</p>
 <p><strong>Pattern:</strong> Injectable scheduler over durable DAG primitives<br />
 <strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.graph</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.graph_executor</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">ExecutionGraph</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> model nodes, justified edges, checkpoints, and
-verification helpers. <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> walks ready nodes: it requires
-<code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> and a <code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code> on every <code class="docutils literal notranslate"><span class="pre">run()</span></code>, dispatches open
-<code class="docutils literal notranslate"><span class="pre">kind</span></code> strings through a host-populated <code class="docutils literal notranslate"><span class="pre">GraphNodeRunnerRegistry</span></code>, charges a
-shared <code class="docutils literal notranslate"><span class="pre">Budget</span></code> (soft wind-down / hard fail; nested subgraphs aggregate),
-applies <code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code> (retry / escalate / fail), optional
-<code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code> (needs <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code>), and emits <code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> /
-<code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code> plus per-node events. Bind via Config hooks
+verification helpers. <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> depends on an injectable
+<code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> (ephemeral <code class="docutils literal notranslate"><span class="pre">EventLogCheckpointStore</span></code> by default; durable
+<code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> for process-restart recovery). It walks ready nodes:
+it requires <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> and a <code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code> on every <code class="docutils literal notranslate"><span class="pre">run()</span></code>,
+dispatches open <code class="docutils literal notranslate"><span class="pre">kind</span></code> strings through a host-populated
+<code class="docutils literal notranslate"><span class="pre">GraphNodeRunnerRegistry</span></code>, charges a shared <code class="docutils literal notranslate"><span class="pre">Budget</span></code> (soft wind-down / hard
+fail; nested subgraphs aggregate), applies <code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code>
+(retry / escalate / fail), optional <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code> (needs
+<code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code>), and emits <code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code> plus
+per-node events. Effectful nodes opt into <code class="docutils literal notranslate"><span class="pre">EffectfulGraphNodeRunner</span></code> for
+durable intent/acceptance and resume reconciliation. Bind via Config hooks
 <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>,
-<code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get_graph_executor_class()</span></code> — not Settings.</p>
+<code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_checkpoint_store()</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">get_graph_executor_class()</span></code> — not Settings.</p>
 <p>Do not add string registries or a global injector. Domain types stay pyiv-free.</p>
 <p><strong>Lanes vs flavors:</strong> <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment</span></code> lanes (<code class="docutils literal notranslate"><span class="pre">reason</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> /
 <code class="docutils literal notranslate"><span class="pre">media</span></code>) are capability partitions. Same-lane Completer / JudgeProvider

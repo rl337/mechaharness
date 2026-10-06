@@ -86,15 +86,20 @@ who pick backends by name.
 **Code:** `mechaharness.graph`, `mechaharness.graph_executor`
 
 `ExecutionGraph` / `GraphStore` model nodes, justified edges, checkpoints, and
-verification helpers. `GraphExecutor` walks ready nodes: it requires
-`core:graph.execute` and a `BudgetPolicy` on every `run()`, dispatches open
-`kind` strings through a host-populated `GraphNodeRunnerRegistry`, charges a
-shared `Budget` (soft wind-down / hard fail; nested subgraphs aggregate),
-applies `GraphFailurePolicy` (retry / escalate / fail), optional
-`GraphEscalation` (needs `core:graph.escalate`), and emits `core:graph_start` /
-`core:graph_end` plus per-node events. Bind via Config hooks
+verification helpers. `GraphExecutor` depends on an injectable
+`CheckpointStore` (ephemeral `EventLogCheckpointStore` by default; durable
+`SqliteCheckpointStore` for process-restart recovery). It walks ready nodes:
+it requires `core:graph.execute` and a `BudgetPolicy` on every `run()`,
+dispatches open `kind` strings through a host-populated
+`GraphNodeRunnerRegistry`, charges a shared `Budget` (soft wind-down / hard
+fail; nested subgraphs aggregate), applies `GraphFailurePolicy`
+(retry / escalate / fail), optional `GraphEscalation` (needs
+`core:graph.escalate`), and emits `core:graph_start` / `core:graph_end` plus
+per-node events. Effectful nodes opt into `EffectfulGraphNodeRunner` for
+durable intent/acceptance and resume reconciliation. Bind via Config hooks
 `get_node_runner_registry()`, `get_graph_failure_policy()`,
-`get_graph_escalation()`, and `get_graph_executor_class()` — not Settings.
+`get_graph_escalation()`, `get_checkpoint_store()`, and
+`get_graph_executor_class()` — not Settings.
 
 Do not add string registries or a global injector. Domain types stay pyiv-free.
 

@@ -1,0 +1,524 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mechaharness.sqlite_checkpoint_store &mdash; MechaHarness 0.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e259d695"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/user-stories.html">User stories</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mechaharness.sqlite_checkpoint_store</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mechaharness.sqlite_checkpoint_store</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""SQLite reference :class:`~mechaharness.checkpoint_store.CheckpointStore` (DR-02).</span>
+
+<span class="sd">Single-host durable persistence: one database may hold many runs keyed by</span>
+<span class="sd">``run_id``. Schema is initialized/migrated deterministically on open. Writes</span>
+<span class="sd">are transactional; readers use shared locks with serialized writers.</span>
+
+<span class="sd">Survive process restart by reopening the same path::</span>
+
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; from mechaharness.external_effect import EffectRecord, EffectState</span>
+<span class="sd">    &gt;&gt;&gt; from mechaharness.graph import ExecutionGraph, GraphNode, NodeStatus</span>
+<span class="sd">    &gt;&gt;&gt; from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore</span>
+<span class="sd">    &gt;&gt;&gt; path = Path(tempfile.mkdtemp()) / "runs.sqlite"</span>
+<span class="sd">    &gt;&gt;&gt; store = SqliteCheckpointStore(path)</span>
+<span class="sd">    &gt;&gt;&gt; store.durability</span>
+<span class="sd">    'durable'</span>
+<span class="sd">    &gt;&gt;&gt; g = ExecutionGraph(goal="dispatch coding job")</span>
+<span class="sd">    &gt;&gt;&gt; _ = g.add_node(GraphNode(id="job", kind="coding_job", status=NodeStatus.RUNNING))</span>
+<span class="sd">    &gt;&gt;&gt; _ = store.save(g, run_id="run-1", boundary="dispatch", fingerprint="fp")</span>
+<span class="sd">    &gt;&gt;&gt; _ = store.save_effect(EffectRecord(</span>
+<span class="sd">    ...     effect_id="run-1:job:1",</span>
+<span class="sd">    ...     run_id="run-1",</span>
+<span class="sd">    ...     node_id="job",</span>
+<span class="sd">    ...     node_attempt=1,</span>
+<span class="sd">    ...     backend_id="host.cursor",</span>
+<span class="sd">    ...     state=EffectState.ACCEPTED,</span>
+<span class="sd">    ...     external_handle="cursor-run-42",</span>
+<span class="sd">    ... ))</span>
+<span class="sd">    &gt;&gt;&gt; store.close()</span>
+<span class="sd">    &gt;&gt;&gt; # Fresh process against the same file:</span>
+<span class="sd">    &gt;&gt;&gt; again = SqliteCheckpointStore(path)</span>
+<span class="sd">    &gt;&gt;&gt; again.latest(run_id="run-1").nodes["job"].status.value</span>
+<span class="sd">    'running'</span>
+<span class="sd">    &gt;&gt;&gt; again.get_effect("run-1:job:1").external_handle</span>
+<span class="sd">    'cursor-run-42'</span>
+<span class="sd">    &gt;&gt;&gt; again.latest_boundary(run_id="run-1")</span>
+<span class="sd">    'dispatch'</span>
+<span class="sd">    &gt;&gt;&gt; again.close()</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">get_args</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.checkpoint_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckpointDurability</span><span class="p">,</span> <span class="n">CheckpointStore</span><span class="p">,</span> <span class="n">effect_from_mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="n">EffectRecord</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExecutionGraph</span><span class="p">,</span> <span class="n">RecoveryBoundary</span>
+
+<span class="n">_SCHEMA_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">_SCHEMA_SQL</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">CREATE TABLE IF NOT EXISTS meta (</span>
+<span class="s2">    key TEXT PRIMARY KEY,</span>
+<span class="s2">    value TEXT NOT NULL</span>
+<span class="s2">);</span>
+
+<span class="s2">CREATE TABLE IF NOT EXISTS checkpoints (</span>
+<span class="s2">    run_id TEXT NOT NULL,</span>
+<span class="s2">    revision INTEGER NOT NULL,</span>
+<span class="s2">    boundary TEXT,</span>
+<span class="s2">    fingerprint TEXT,</span>
+<span class="s2">    graph_json TEXT NOT NULL,</span>
+<span class="s2">    created_at TEXT NOT NULL,</span>
+<span class="s2">    PRIMARY KEY (run_id, revision)</span>
+<span class="s2">);</span>
+
+<span class="s2">CREATE INDEX IF NOT EXISTS idx_checkpoints_run ON checkpoints(run_id, revision DESC);</span>
+
+<span class="s2">CREATE TABLE IF NOT EXISTS effects (</span>
+<span class="s2">    effect_id TEXT PRIMARY KEY,</span>
+<span class="s2">    run_id TEXT NOT NULL,</span>
+<span class="s2">    node_id TEXT NOT NULL,</span>
+<span class="s2">    node_attempt INTEGER NOT NULL,</span>
+<span class="s2">    backend_id TEXT NOT NULL DEFAULT '',</span>
+<span class="s2">    external_handle TEXT,</span>
+<span class="s2">    state TEXT NOT NULL,</span>
+<span class="s2">    revision INTEGER NOT NULL,</span>
+<span class="s2">    recovery_boundary TEXT,</span>
+<span class="s2">    detail_json TEXT NOT NULL DEFAULT '</span><span class="si">{}</span><span class="s2">',</span>
+<span class="s2">    created_at TEXT NOT NULL,</span>
+<span class="s2">    updated_at TEXT NOT NULL</span>
+<span class="s2">);</span>
+
+<span class="s2">CREATE INDEX IF NOT EXISTS idx_effects_run_node ON effects(run_id, node_id, revision DESC);</span>
+<span class="s2">"""</span>
+
+
+<div class="viewcode-block" id="SqliteCheckpointStore">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SqliteCheckpointStore</span><span class="p">(</span><span class="n">CheckpointStore</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Process-restart-durable checkpoint + effect store."""</span>
+
+    <span class="n">durability</span><span class="p">:</span> <span class="n">CheckpointDurability</span> <span class="o">=</span> <span class="s2">"durable"</span>
+
+<div class="viewcode-block" id="SqliteCheckpointStore.__init__">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"."</span><span class="p">}:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">),</span>
+            <span class="n">check_same_thread</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">isolation_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># explicit BEGIN</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"PRAGMA journal_mode=WAL"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"PRAGMA busy_timeout=5000"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_migrate</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SqliteCheckpointStore.close">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.close">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_migrate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">executescript</span><span class="p">(</span><span class="n">_SCHEMA_SQL</span><span class="p">)</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"SELECT value FROM meta WHERE key = 'schema_version'"</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="s2">"INSERT INTO meta(key, value) VALUES ('schema_version', ?)"</span><span class="p">,</span>
+                    <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">_SCHEMA_VERSION</span><span class="p">),),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"value"</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">version</span> <span class="o">&gt;</span> <span class="n">_SCHEMA_VERSION</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"sqlite checkpoint schema </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> newer than supported </span><span class="si">{</span><span class="n">_SCHEMA_VERSION</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="n">_SCHEMA_VERSION</span><span class="p">:</span>
+                    <span class="c1"># Future migrations land here; v1 is the baseline.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                        <span class="s2">"UPDATE meta SET value = ? WHERE key = 'schema_version'"</span><span class="p">,</span>
+                        <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">_SCHEMA_VERSION</span><span class="p">),),</span>
+                    <span class="p">)</span>
+
+<div class="viewcode-block" id="SqliteCheckpointStore.save">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">graph</span><span class="p">:</span> <span class="n">ExecutionGraph</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">boundary</span><span class="p">:</span> <span class="n">RecoveryBoundary</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fingerprint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">rid</span> <span class="o">=</span> <span class="n">run_id</span> <span class="ow">or</span> <span class="n">graph</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">if</span> <span class="n">fingerprint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">config_fingerprint</span> <span class="o">=</span> <span class="n">fingerprint</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">fingerprint</span> <span class="ow">or</span> <span class="n">graph</span><span class="o">.</span><span class="n">config_fingerprint</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">(),</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"BEGIN IMMEDIATE"</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="s2">"SELECT COALESCE(MAX(revision), 0) AS rev FROM checkpoints WHERE run_id = ?"</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">rid</span><span class="p">,),</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+                <span class="n">rev</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"rev"</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+<span class="w">                    </span><span class="sd">"""</span>
+<span class="sd">                    INSERT INTO checkpoints(</span>
+<span class="sd">                        run_id, revision, boundary, fingerprint, graph_json, created_at</span>
+<span class="sd">                    )</span>
+<span class="sd">                    VALUES (?, ?, ?, ?, ?, ?)</span>
+<span class="sd">                    """</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">rid</span><span class="p">,</span> <span class="n">rev</span><span class="p">,</span> <span class="n">boundary</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">now</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"COMMIT"</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"ROLLBACK"</span><span class="p">)</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">rev</span></div>
+
+
+<div class="viewcode-block" id="SqliteCheckpointStore.latest">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExecutionGraph</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">run_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">"""</span>
+<span class="sd">                SELECT graph_json FROM checkpoints</span>
+<span class="sd">                WHERE run_id = ?</span>
+<span class="sd">                ORDER BY revision DESC</span>
+<span class="sd">                LIMIT 1</span>
+<span class="sd">                """</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">run_id</span><span class="p">,),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"graph_json"</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">ExecutionGraph</span><span class="o">.</span><span class="n">resume</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SqliteCheckpointStore.latest_fingerprint">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest_fingerprint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latest_fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_row</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">"fingerprint"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fp</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"graph_json"</span><span class="p">])</span>
+        <span class="n">nested</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"config_fingerprint"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">nested</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nested</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="SqliteCheckpointStore.latest_boundary">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest_boundary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latest_boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RecoveryBoundary</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_row</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">boundary</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">"boundary"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">boundary</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">boundary</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">RecoveryBoundary</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">boundary</span>  <span class="c1"># type: ignore[return-value]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="SqliteCheckpointStore.latest_revision">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest_revision">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latest_revision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_row</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"revision"</span><span class="p">])</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_latest_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">run_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">"""</span>
+<span class="sd">                SELECT revision, boundary, fingerprint, graph_json</span>
+<span class="sd">                FROM checkpoints</span>
+<span class="sd">                WHERE run_id = ?</span>
+<span class="sd">                ORDER BY revision DESC</span>
+<span class="sd">                LIMIT 1</span>
+<span class="sd">                """</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">run_id</span><span class="p">,),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">row</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="SqliteCheckpointStore.save_effect">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.save_effect">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effect</span><span class="p">:</span> <span class="n">EffectRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EffectRecord</span><span class="p">:</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"BEGIN IMMEDIATE"</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="s2">"SELECT revision, created_at FROM effects WHERE effect_id = ?"</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">effect</span><span class="o">.</span><span class="n">effect_id</span><span class="p">,),</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+                <span class="n">rev</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">existing</span><span class="p">[</span><span class="s2">"revision"</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">existing</span> <span class="k">else</span> <span class="mi">1</span>
+                <span class="n">created</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">existing</span><span class="p">[</span><span class="s2">"created_at"</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">existing</span>
+                    <span class="k">else</span> <span class="p">(</span><span class="n">effect</span><span class="o">.</span><span class="n">created_at</span> <span class="ow">or</span> <span class="n">now</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">detail_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="n">effect</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+<span class="w">                    </span><span class="sd">"""</span>
+<span class="sd">                    INSERT INTO effects(</span>
+<span class="sd">                        effect_id, run_id, node_id, node_attempt, backend_id,</span>
+<span class="sd">                        external_handle, state, revision, recovery_boundary,</span>
+<span class="sd">                        detail_json, created_at, updated_at</span>
+<span class="sd">                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</span>
+<span class="sd">                    ON CONFLICT(effect_id) DO UPDATE SET</span>
+<span class="sd">                        run_id=excluded.run_id,</span>
+<span class="sd">                        node_id=excluded.node_id,</span>
+<span class="sd">                        node_attempt=excluded.node_attempt,</span>
+<span class="sd">                        backend_id=excluded.backend_id,</span>
+<span class="sd">                        external_handle=excluded.external_handle,</span>
+<span class="sd">                        state=excluded.state,</span>
+<span class="sd">                        revision=excluded.revision,</span>
+<span class="sd">                        recovery_boundary=excluded.recovery_boundary,</span>
+<span class="sd">                        detail_json=excluded.detail_json,</span>
+<span class="sd">                        updated_at=excluded.updated_at</span>
+<span class="sd">                    """</span><span class="p">,</span>
+                    <span class="p">(</span>
+                        <span class="n">effect</span><span class="o">.</span><span class="n">effect_id</span><span class="p">,</span>
+                        <span class="n">effect</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                        <span class="n">effect</span><span class="o">.</span><span class="n">node_id</span><span class="p">,</span>
+                        <span class="n">effect</span><span class="o">.</span><span class="n">node_attempt</span><span class="p">,</span>
+                        <span class="n">effect</span><span class="o">.</span><span class="n">backend_id</span><span class="p">,</span>
+                        <span class="n">effect</span><span class="o">.</span><span class="n">external_handle</span><span class="p">,</span>
+                        <span class="n">effect</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="n">rev</span><span class="p">,</span>
+                        <span class="n">effect</span><span class="o">.</span><span class="n">recovery_boundary</span><span class="p">,</span>
+                        <span class="n">detail_json</span><span class="p">,</span>
+                        <span class="n">created</span><span class="p">,</span>
+                        <span class="n">now</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"COMMIT"</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"ROLLBACK"</span><span class="p">)</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">effect</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span>
+            <span class="n">update</span><span class="o">=</span><span class="p">{</span><span class="s2">"revision"</span><span class="p">:</span> <span class="n">rev</span><span class="p">,</span> <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">created</span><span class="p">,</span> <span class="s2">"updated_at"</span><span class="p">:</span> <span class="n">now</span><span class="p">}</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SqliteCheckpointStore.get_effect">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.get_effect">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effect_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EffectRecord</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">"SELECT * FROM effects WHERE effect_id = ?"</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">effect_id</span><span class="p">,),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_to_effect</span><span class="p">(</span><span class="n">row</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SqliteCheckpointStore.list_effects">
+<a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.list_effects">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_effects</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">node_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">EffectRecord</span><span class="p">]:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="s2">"SELECT * FROM effects WHERE run_id = ? ORDER BY revision ASC"</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">run_id</span><span class="p">,),</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+<span class="w">                    </span><span class="sd">"""</span>
+<span class="sd">                    SELECT * FROM effects</span>
+<span class="sd">                    WHERE run_id = ? AND node_id = ?</span>
+<span class="sd">                    ORDER BY revision ASC</span>
+<span class="sd">                    """</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">run_id</span><span class="p">,</span> <span class="n">node_id</span><span class="p">),</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_row_to_effect</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_row_to_effect</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EffectRecord</span><span class="p">:</span>
+        <span class="n">detail_raw</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">"detail_json"</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span>
+        <span class="n">detail</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">detail_raw</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="n">effect_from_mapping</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"effect_id"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"effect_id"</span><span class="p">],</span>
+                <span class="s2">"run_id"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"run_id"</span><span class="p">],</span>
+                <span class="s2">"node_id"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"node_id"</span><span class="p">],</span>
+                <span class="s2">"node_attempt"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"node_attempt"</span><span class="p">],</span>
+                <span class="s2">"backend_id"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"backend_id"</span><span class="p">],</span>
+                <span class="s2">"external_handle"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"external_handle"</span><span class="p">],</span>
+                <span class="s2">"state"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"state"</span><span class="p">],</span>
+                <span class="s2">"revision"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"revision"</span><span class="p">],</span>
+                <span class="s2">"recovery_boundary"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"recovery_boundary"</span><span class="p">],</span>
+                <span class="s2">"detail"</span><span class="p">:</span> <span class="n">detail</span><span class="p">,</span>
+                <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"created_at"</span><span class="p">],</span>
+                <span class="s2">"updated_at"</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"updated_at"</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

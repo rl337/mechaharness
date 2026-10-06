@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; MechaHarness 0.2.1 documentation</title>
+  <title>Index &mdash; MechaHarness 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=37f418d5"></script>
+      <script src="_static/documentation_options.js?v=e259d695"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -45,7 +45,7 @@
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -70,6 +70,10 @@
 <li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -130,9 +134,11 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.__init__">__init__() (mechaharness.core.access.InMemoryAccessControl method)</a>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.__init__">__init__() (mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
 
       <ul>
+        <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.__init__">(mechaharness.core.access.InMemoryAccessControl method)</a>
+</li>
         <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant.__init__">(mechaharness.core.access.InMemoryCostAccountant method)</a>
 </li>
         <li><a href="api/events.html#mechaharness.core.events.FanoutEventLog.__init__">(mechaharness.core.events.FanoutEventLog method)</a>
@@ -145,7 +151,21 @@
 </li>
         <li><a href="api/di.html#mechaharness.di.SettingsConfig.__init__">(mechaharness.di.SettingsConfig method)</a>
 </li>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.ArmedCrashProbe.__init__">(mechaharness.external_effect.ArmedCrashProbe method)</a>
+</li>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.InjectedProcessCrash.__init__">(mechaharness.external_effect.InjectedProcessCrash method)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.CallableGraphNodeRunner.__init__">(mechaharness.graph_executor.CallableGraphNodeRunner method)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphExecutor.__init__">(mechaharness.graph_executor.GraphExecutor method)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunnerRegistry.__init__">(mechaharness.graph_executor.GraphNodeRunnerRegistry method)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.__init__">(mechaharness.graph_executor.GraphRunContext method)</a>
+</li>
         <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.__init__">(mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.__init__">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
 </li>
         <li><a href="api/tools.html#mechaharness.tools.base.Tool.__init__">(mechaharness.tools.base.Tool method)</a>
 </li>
@@ -166,6 +186,8 @@
 </li>
       <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness">AbstractHarness (class in mechaharness.harness.base)</a>
 </li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.ACCEPTED">ACCEPTED (mechaharness.external_effect.EffectState attribute)</a>
+</li>
       <li><a href="api/completer.html#mechaharness.core.completer.Completer.access_policy">access_policy() (mechaharness.core.completer.Completer method)</a>
 
       <ul>
@@ -179,6 +201,8 @@
       <li><a href="api/access.html#mechaharness.core.access.AccessPolicy">AccessPolicy (class in mechaharness.core.access)</a>
 </li>
       <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.aclose">aclose() (mechaharness.inference.base.InferenceStrategy method)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.action">action (mechaharness.external_effect.EffectReconciliation attribute)</a>
 </li>
       <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_capabilities">active_capabilities() (mechaharness.core.environment.InferenceEnvironment method)</a>
 
@@ -208,6 +232,8 @@
 
       <ul>
         <li><a href="api/events.html#mechaharness.core.events.Event.agent_id">(mechaharness.core.events.Event attribute)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.agent_id">(mechaharness.graph_executor.GraphRunContext attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -248,6 +274,8 @@
 </li>
       <li><a href="api/types.html#mechaharness.core.types.ToolCall.arguments">arguments (mechaharness.core.types.ToolCall attribute)</a>
 </li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.ArmedCrashProbe">ArmedCrashProbe (class in mechaharness.external_effect)</a>
+</li>
       <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.assert_compatible">assert_compatible() (mechaharness.core.environment.InferenceEnvironment method)</a>
 
       <ul>
@@ -264,6 +292,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.backend">backend (mechaharness.core.contract.RunRequest attribute)</a>
 </li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.backend_id">backend_id (mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner.backend_id">backend_id() (mechaharness.graph_executor.EffectfulGraphNodeRunner method)</a>
+</li>
       <li><a href="api/config.html#mechaharness.config.Settings.base_url">base_url (mechaharness.config.Settings attribute)</a>
 
       <ul>
@@ -273,6 +305,12 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/access.html#mechaharness.core.access.Ability.BASIC">BASIC (mechaharness.core.access.Ability attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.budget">budget (mechaharness.graph_executor.GraphRunContext attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.budget_level">budget_level (mechaharness.graph_executor.GraphResult attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.budget_spent">budget_spent (mechaharness.graph_executor.GraphResult attribute)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.build_injector">build_injector() (in module mechaharness.di)</a>
 </li>
@@ -284,6 +322,8 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.CallableGraphNodeRunner">CallableGraphNodeRunner (class in mechaharness.graph_executor)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile.capabilities">capabilities (mechaharness.core.access.CapabilityProfile attribute)</a>
 
       <ul>
@@ -306,9 +346,15 @@
 </li>
       <li><a href="api/types.html#mechaharness.core.types.ChatMessage">ChatMessage (class in mechaharness.core.types)</a>
 </li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore">CheckpointStore (class in mechaharness.checkpoint_store)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.checks">checks (mechaharness.core.access.InMemoryAccessControl attribute)</a>
 </li>
+      <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.close">close() (mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.CapabilityKind.CODE">CODE (mechaharness.core.access.CapabilityKind attribute)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction.COMPLETE">COMPLETE (mechaharness.external_effect.EffectReconciliationAction attribute)</a>
 </li>
       <li><a href="api/completer.html#mechaharness.core.completer.Completer.complete">complete() (mechaharness.core.completer.Completer method)</a>
 
@@ -318,6 +364,8 @@
         <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.complete">(mechaharness.inference.base.InferenceStrategy method)</a>
 </li>
       </ul></li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.COMPLETED">COMPLETED (mechaharness.external_effect.EffectState attribute)</a>
+</li>
       <li><a href="api/completer.html#mechaharness.core.completer.Completer">Completer (class in mechaharness.core.completer)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.completer_bindings">completer_bindings() (mechaharness.di.MechaHarnessConfig method)</a>
@@ -337,6 +385,8 @@
       <li><a href="api/types.html#mechaharness.core.types.CompletionResponse">CompletionResponse (class in mechaharness.core.types)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy">CompoundPolicy (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.config_fingerprint">config_fingerprint (mechaharness.graph_executor.GraphRunContext attribute)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.configure">configure() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
@@ -358,11 +408,17 @@
         <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.cost">(mechaharness.harness.base.HarnessResult attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome.cost_units">cost_units (mechaharness.graph_executor.NodeOutcome attribute)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.CostAccountant">CostAccountant (class in mechaharness.core.access)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CostEntry">CostEntry (class in mechaharness.core.access)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CostReport">CostReport (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.CrashProbe">CrashProbe (class in mechaharness.external_effect)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.created_at">created_at (mechaharness.external_effect.EffectRecord attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -370,14 +426,20 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.DefaultGraphFailurePolicy.decide">decide() (mechaharness.graph_executor.DefaultGraphFailurePolicy method)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphFailurePolicy.decide">(mechaharness.graph_executor.GraphFailurePolicy method)</a>
+</li>
+      </ul></li>
       <li><a href="api/access.html#mechaharness.core.access.default_capability_profile">default_capability_profile() (in module mechaharness.core.access)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.default_event_log">default_event_log() (in module mechaharness.core.events)</a>
 </li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.DefaultGraphFailurePolicy">DefaultGraphFailurePolicy (class in mechaharness.graph_executor)</a>
+</li>
       <li><a href="api/tools.html#mechaharness.tools.base.Tool.definition">definition() (mechaharness.tools.base.Tool method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.definitions">definitions() (mechaharness.tools.base.ToolRegistry method)</a>
 </li>
       <li><a href="api/factory.html#mechaharness.factory.describe">describe() (in module mechaharness.factory)</a>
@@ -386,14 +448,56 @@
         <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.describe">(mechaharness.inference.base.InferenceStrategy method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/types.html#mechaharness.core.types.ToolDefinition.description">description (mechaharness.core.types.ToolDefinition attribute)</a>
 </li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectDispatchResult.detail">detail (mechaharness.external_effect.EffectDispatchResult attribute)</a>
+
+      <ul>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.detail">(mechaharness.external_effect.EffectReconciliation attribute)</a>
+</li>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.detail">(mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.diagnostics">diagnostics (mechaharness.graph_executor.GraphResult attribute)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction.DISPATCH">DISPATCH (mechaharness.external_effect.EffectReconciliationAction attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner.dispatch">dispatch() (mechaharness.graph_executor.EffectfulGraphNodeRunner method)</a>
+</li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.durability">durability (mechaharness.checkpoint_store.CheckpointStore attribute)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.durability">(mechaharness.checkpoint_store.EventLogCheckpointStore attribute)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.durability">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.effect_from_mapping">effect_from_mapping() (in module mechaharness.checkpoint_store)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.effect_id">effect_id (mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner.effect_id_for">effect_id_for() (mechaharness.graph_executor.EffectfulGraphNodeRunner method)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectDispatchResult">EffectDispatchResult (class in mechaharness.external_effect)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner">EffectfulGraphNodeRunner (class in mechaharness.graph_executor)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation">EffectReconciliation (class in mechaharness.external_effect)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction">EffectReconciliationAction (class in mechaharness.external_effect)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord">EffectRecord (class in mechaharness.external_effect)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState">EffectState (class in mechaharness.external_effect)</a>
+</li>
       <li><a href="api/events.html#mechaharness.core.events.EventLog.emit">emit() (mechaharness.core.events.EventLog method)</a>
 
       <ul>
@@ -406,21 +510,39 @@
       </ul></li>
       <li><a href="api/access.html#mechaharness.core.access.CostReport.entries">entries (mechaharness.core.access.CostReport attribute)</a>
 </li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.envelope">envelope (mechaharness.graph_executor.GraphRunContext attribute)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.error">error (mechaharness.external_effect.EffectReconciliation attribute)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.error">(mechaharness.graph_executor.GraphResult attribute)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome.error">(mechaharness.graph_executor.NodeOutcome attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphFailureAction.ESCALATE">ESCALATE (mechaharness.graph_executor.GraphFailureAction attribute)</a>
+</li>
       <li><a href="api/events.html#mechaharness.core.events.Event">Event (class in mechaharness.core.events)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/events.html#mechaharness.core.events.event_type_key">event_type_key() (in module mechaharness.core.events)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.EventLog">EventLog (class in mechaharness.core.events)</a>
 </li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore">EventLogCheckpointStore (class in mechaharness.checkpoint_store)</a>
+</li>
       <li><a href="api/contract.html#mechaharness.core.contract.RunResponse.events">events (mechaharness.core.contract.RunResponse attribute)</a>
 
       <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.events">(mechaharness.graph_executor.GraphResult attribute)</a>
+</li>
         <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.events">(mechaharness.harness.base.HarnessResult attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/events.html#mechaharness.core.events.EventType">EventType (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome.evidence">evidence (mechaharness.graph_executor.NodeOutcome attribute)</a>
 </li>
       <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.execute">execute() (mechaharness.tools.base.ToolRegistry method)</a>
 </li>
@@ -434,6 +556,14 @@
 </li>
       <li><a href="api/access.html#mechaharness.core.access.ExtensionRewrite">ExtensionRewrite (class in mechaharness.core.access)</a>
 </li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectDispatchResult.external_handle">external_handle (mechaharness.external_effect.EffectDispatchResult attribute)</a>
+
+      <ul>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.external_handle">(mechaharness.external_effect.EffectReconciliation attribute)</a>
+</li>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.external_handle">(mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/types.html#mechaharness.core.types.ChatMessage.extra">extra (mechaharness.core.types.ChatMessage attribute)</a>
 
       <ul>
@@ -448,6 +578,14 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction.FAIL">FAIL (mechaharness.external_effect.EffectReconciliationAction attribute)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphFailureAction.FAIL">(mechaharness.graph_executor.GraphFailureAction attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.FAILED">FAILED (mechaharness.external_effect.EffectState attribute)</a>
+</li>
       <li><a href="api/contract.html#mechaharness.core.contract.RunRequest.family">family (mechaharness.core.contract.RunRequest attribute)</a>
 
       <ul>
@@ -482,8 +620,12 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.get">get() (mechaharness.tools.base.ToolRegistry method)</a>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunnerRegistry.get">get() (mechaharness.graph_executor.GraphNodeRunnerRegistry method)</a>
+
+      <ul>
+        <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.get">(mechaharness.tools.base.ToolRegistry method)</a>
 </li>
+      </ul></li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_access_control">get_access_control() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_access_policy">get_access_policy() (mechaharness.di.MechaHarnessConfig method)</a>
@@ -494,12 +636,24 @@
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_capability_envelope">get_capability_envelope() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_checkpoint_store">get_checkpoint_store() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_context_provider_registry">get_context_provider_registry() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_cost_accountant">get_cost_accountant() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_crash_probe">get_crash_probe() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_delegation_policy">get_delegation_policy() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.get_effect">get_effect() (mechaharness.checkpoint_store.CheckpointStore method)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.get_effect">(mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.get_effect">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
+      </ul></li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_event_log">get_event_log() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_grants">get_grants() (mechaharness.di.MechaHarnessConfig method)</a>
@@ -520,6 +674,8 @@
       </ul></li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_harness_config">get_harness_config() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_capture">get_inference_capture() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_class">get_inference_class() (mechaharness.di.MechaHarnessConfig method)</a>
 
       <ul>
@@ -530,15 +686,17 @@
 </li>
       <li><a href="api/di.html#mechaharness.di.get_injector">get_injector() (in module mechaharness.di)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_connection">get_judge_connection() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_provider">get_judge_provider() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_lifecycle_extension_registry">get_lifecycle_extension_registry() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_linkage_resolver">get_linkage_resolver() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.get_node_effect">get_node_effect() (mechaharness.checkpoint_store.CheckpointStore method)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_node_runner_registry">get_node_runner_registry() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
@@ -572,15 +730,39 @@
         <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.grants">(mechaharness.core.access.InMemoryAccessControl property)</a>
 </li>
       </ul></li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.graph">graph (mechaharness.graph_executor.GraphResult attribute)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.graph">(mechaharness.graph_executor.GraphRunContext attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.GraphEffectEvent">GraphEffectEvent (class in mechaharness.checkpoint_store)</a>
+</li>
       <li><a href="api/events.html#mechaharness.core.events.GraphEnd">GraphEnd (class in mechaharness.core.events)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.GraphEscalate">GraphEscalate (class in mechaharness.core.access)</a>
 </li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphEscalation">GraphEscalation (class in mechaharness.graph_executor)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.GraphExecute">GraphExecute (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphExecutor">GraphExecutor (class in mechaharness.graph_executor)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphFailureAction">GraphFailureAction (class in mechaharness.graph_executor)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphFailurePolicy">GraphFailurePolicy (class in mechaharness.graph_executor)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.GraphNodeEnd">GraphNodeEnd (class in mechaharness.core.events)</a>
 </li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunner">GraphNodeRunner (class in mechaharness.graph_executor)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunnerRegistry">GraphNodeRunnerRegistry (class in mechaharness.graph_executor)</a>
+</li>
       <li><a href="api/events.html#mechaharness.core.events.GraphNodeStart">GraphNodeStart (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult">GraphResult (class in mechaharness.graph_executor)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext">GraphRunContext (class in mechaharness.graph_executor)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.GraphStart">GraphStart (class in mechaharness.core.events)</a>
 </li>
@@ -590,12 +772,18 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.harness_classes">harness_classes() (mechaharness.di.MechaHarnessConfig method)</a>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphEscalation.handle">handle() (mechaharness.graph_executor.GraphEscalation method)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.RejectGraphEscalation.handle">(mechaharness.graph_executor.RejectGraphEscalation method)</a>
 </li>
-      <li><a href="api/config.html#mechaharness.config.Settings.harness_family">harness_family (mechaharness.config.Settings attribute)</a>
+      </ul></li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.harness_classes">harness_classes() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/config.html#mechaharness.config.Settings.harness_family">harness_family (mechaharness.config.Settings attribute)</a>
+</li>
       <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig">HarnessConfig (class in mechaharness.harness.base)</a>
 </li>
       <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult">HarnessResult (class in mechaharness.harness.base)</a>
@@ -624,15 +812,19 @@
 </li>
       <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironmentError">InferenceEnvironmentError</a>
 </li>
+      <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy">InferenceStrategy (class in mechaharness.inference.base)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy">InferenceStrategy (class in mechaharness.inference.base)</a>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.InjectedProcessCrash">InjectedProcessCrash</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl">InMemoryAccessControl (class in mechaharness.core.access)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant">InMemoryCostAccountant (class in mechaharness.core.access)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.InMemoryEventLog">InMemoryEventLog (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.INTENDED">INTENDED (mechaharness.external_effect.EffectState attribute)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.Ability.INTERMEDIATE">INTERMEDIATE (mechaharness.core.access.Ability attribute)</a>
 </li>
@@ -662,12 +854,20 @@
         <li><a href="api/events.html#mechaharness.core.events.EventType.key">(mechaharness.core.events.EventType class method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/access.html#mechaharness.core.access.Capability.kind">kind (mechaharness.core.access.Capability attribute)</a>
 
       <ul>
         <li><a href="api/access.html#mechaharness.core.access.CostEntry.kind">(mechaharness.core.access.CostEntry attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.CallableGraphNodeRunner.kinds">kinds() (mechaharness.graph_executor.CallableGraphNodeRunner method)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunner.kinds">(mechaharness.graph_executor.GraphNodeRunner method)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunnerRegistry.kinds">(mechaharness.graph_executor.GraphNodeRunnerRegistry method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -682,10 +882,50 @@
 </li>
       <li><a href="api/events.html#mechaharness.core.events.AgentRef.last_ts">last_ts (mechaharness.core.events.AgentRef attribute)</a>
 </li>
-      <li><a href="api/access.html#mechaharness.core.access.Capability.level">level (mechaharness.core.access.Capability attribute)</a>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.latest">latest() (mechaharness.checkpoint_store.CheckpointStore method)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.latest">(mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
 </li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.latest_boundary">latest_boundary() (mechaharness.checkpoint_store.CheckpointStore method)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.latest_boundary">(mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest_boundary">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.latest_fingerprint">latest_fingerprint() (mechaharness.checkpoint_store.CheckpointStore method)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.latest_fingerprint">(mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest_fingerprint">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.latest_revision">latest_revision() (mechaharness.checkpoint_store.CheckpointStore method)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.latest_revision">(mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest_revision">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/access.html#mechaharness.core.access.Capability.level">level (mechaharness.core.access.Capability attribute)</a>
+</li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.list_effects">list_effects() (mechaharness.checkpoint_store.CheckpointStore method)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.list_effects">(mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.list_effects">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
+      </ul></li>
       <li><a href="api/di.html#mechaharness.di.list_harness_families">list_harness_families() (in module mechaharness.di)</a>
 </li>
       <li><a href="api/mechaharness.html#mechaharness.list_inference_backends">list_inference_backends() (in module mechaharness)</a>
@@ -720,6 +960,21 @@
       </ul></li>
       <li><a href="api/events.html#mechaharness.core.events.MaxTurns">MaxTurns (class in mechaharness.core.events)</a>
 </li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.ArmedCrashProbe.maybe_crash">maybe_crash() (mechaharness.external_effect.ArmedCrashProbe method)</a>
+
+      <ul>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.CrashProbe.maybe_crash">(mechaharness.external_effect.CrashProbe method)</a>
+</li>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.NoopCrashProbe.maybe_crash">(mechaharness.external_effect.NoopCrashProbe method)</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.checkpoint_store
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#module-mechaharness.checkpoint_store">module</a>
+</li>
+      </ul></li>
       <li>
     mechaharness.config
 
@@ -777,10 +1032,24 @@
 </li>
       </ul></li>
       <li>
+    mechaharness.external_effect
+
+      <ul>
+        <li><a href="api/external_effect.html#module-mechaharness.external_effect">module</a>
+</li>
+      </ul></li>
+      <li>
     mechaharness.factory
 
       <ul>
         <li><a href="api/factory.html#module-mechaharness.factory">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.graph_executor
+
+      <ul>
+        <li><a href="api/graph_executor.html#module-mechaharness.graph_executor">module</a>
 </li>
       </ul></li>
       <li>
@@ -795,6 +1064,13 @@
 
       <ul>
         <li><a href="api/inference.html#module-mechaharness.inference.base">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.sqlite_checkpoint_store
+
+      <ul>
+        <li><a href="api/sqlite_checkpoint_store.html#module-mechaharness.sqlite_checkpoint_store">module</a>
 </li>
       </ul></li>
       <li>
@@ -871,6 +1147,16 @@
 </li>
         <li><a href="api/types.html#mechaharness.core.types.Usage.model_config">(mechaharness.core.types.Usage attribute)</a>
 </li>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectDispatchResult.model_config">(mechaharness.external_effect.EffectDispatchResult attribute)</a>
+</li>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.model_config">(mechaharness.external_effect.EffectReconciliation attribute)</a>
+</li>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.model_config">(mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.model_config">(mechaharness.graph_executor.GraphResult attribute)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome.model_config">(mechaharness.graph_executor.NodeOutcome attribute)</a>
+</li>
         <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.model_config">(mechaharness.harness.base.HarnessConfig attribute)</a>
 </li>
         <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.model_config">(mechaharness.harness.base.HarnessResult attribute)</a>
@@ -880,6 +1166,8 @@
     module
 
       <ul>
+        <li><a href="api/checkpoint_store.html#module-mechaharness.checkpoint_store">mechaharness.checkpoint_store</a>
+</li>
         <li><a href="api/config.html#module-mechaharness.config">mechaharness.config</a>
 </li>
         <li><a href="api/access.html#module-mechaharness.core.access">mechaharness.core.access</a>
@@ -896,11 +1184,17 @@
 </li>
         <li><a href="api/di.html#module-mechaharness.di">mechaharness.di</a>
 </li>
+        <li><a href="api/external_effect.html#module-mechaharness.external_effect">mechaharness.external_effect</a>
+</li>
         <li><a href="api/factory.html#module-mechaharness.factory">mechaharness.factory</a>
+</li>
+        <li><a href="api/graph_executor.html#module-mechaharness.graph_executor">mechaharness.graph_executor</a>
 </li>
         <li><a href="api/harness.html#module-mechaharness.harness.base">mechaharness.harness.base</a>
 </li>
         <li><a href="api/inference.html#module-mechaharness.inference.base">mechaharness.inference.base</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#module-mechaharness.sqlite_checkpoint_store">mechaharness.sqlite_checkpoint_store</a>
 </li>
         <li><a href="api/tools.html#module-mechaharness.tools.base">mechaharness.tools.base</a>
 </li>
@@ -911,9 +1205,11 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/access.html#mechaharness.core.access.CostEntry.name">name (mechaharness.core.access.CostEntry attribute)</a>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.GraphEffectEvent.name">name (mechaharness.checkpoint_store.GraphEffectEvent attribute)</a>
 
       <ul>
+        <li><a href="api/access.html#mechaharness.core.access.CostEntry.name">(mechaharness.core.access.CostEntry attribute)</a>
+</li>
         <li><a href="api/access.html#mechaharness.core.access.ExtensionBlock.name">(mechaharness.core.access.ExtensionBlock attribute)</a>
 </li>
         <li><a href="api/access.html#mechaharness.core.access.ExtensionObserve.name">(mechaharness.core.access.ExtensionObserve attribute)</a>
@@ -993,7 +1289,21 @@
         <li><a href="api/events.html#mechaharness.core.events.EventType.namespace">(mechaharness.core.events.EventType attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction.NEEDS_ATTENTION">NEEDS_ATTENTION (mechaharness.external_effect.EffectReconciliationAction attribute)</a>
+
+      <ul>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.NEEDS_ATTENTION">(mechaharness.external_effect.EffectState attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/access.html#mechaharness.core.access.NetHttp">NetHttp (class in mechaharness.core.access)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.node_attempt">node_attempt (mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.node_id">node_id (mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome">NodeOutcome (class in mechaharness.graph_executor)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.NoopCrashProbe">NoopCrashProbe (class in mechaharness.external_effect)</a>
 </li>
       <li><a href="api/environment.html#mechaharness.core.environment.NoOpInferenceEnvironment">NoOpInferenceEnvironment (class in mechaharness.core.environment)</a>
 </li>
@@ -1003,7 +1313,17 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction.OBSERVE">OBSERVE (mechaharness.external_effect.EffectReconciliationAction attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner.observe">observe() (mechaharness.graph_executor.EffectfulGraphNodeRunner method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.of">of() (mechaharness.core.access.CompoundPolicy class method)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.outcome_evidence">outcome_evidence (mechaharness.external_effect.EffectReconciliation attribute)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.outcome_payload">outcome_payload (mechaharness.external_effect.EffectReconciliation attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1018,6 +1338,8 @@
       <ul>
         <li><a href="api/events.html#mechaharness.core.events.Event.parent_agent_id">(mechaharness.core.events.Event attribute)</a>
 </li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.parent_agent_id">(mechaharness.graph_executor.GraphRunContext attribute)</a>
+</li>
       </ul></li>
       <li><a href="api/access.html#mechaharness.core.access.Grant.parse">parse() (mechaharness.core.access.Grant class method)</a>
 
@@ -1026,13 +1348,17 @@
 </li>
       </ul></li>
       <li><a href="api/events.html#mechaharness.core.events.Event.payload">payload (mechaharness.core.events.Event attribute)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome.payload">(mechaharness.graph_executor.NodeOutcome attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.policies">policies (mechaharness.core.access.CompoundPolicy attribute)</a>
-</li>
-      <li><a href="api/config.html#mechaharness.config.Settings.port">port (mechaharness.config.Settings attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/config.html#mechaharness.config.Settings.port">port (mechaharness.config.Settings attribute)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.CostAccountant.price_inference">price_inference() (mechaharness.core.access.CostAccountant method)</a>
 
       <ul>
@@ -1087,7 +1413,19 @@
 </li>
       <li><a href="api/types.html#mechaharness.core.types.ChatMessage.reasoning_content">reasoning_content (mechaharness.core.types.ChatMessage attribute)</a>
 </li>
-      <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.register">register() (mechaharness.tools.base.ToolRegistry method)</a>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner.reconcile">reconcile() (mechaharness.graph_executor.EffectfulGraphNodeRunner method)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.recovery_boundary">recovery_boundary (mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunnerRegistry.register">register() (mechaharness.graph_executor.GraphNodeRunnerRegistry method)</a>
+
+      <ul>
+        <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.register">(mechaharness.tools.base.ToolRegistry method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.registry_from_mapping">registry_from_mapping() (in module mechaharness.graph_executor)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.RejectGraphEscalation">RejectGraphEscalation (class in mechaharness.graph_executor)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CostAccountant.report">report() (mechaharness.core.access.CostAccountant method)</a>
 
@@ -1095,10 +1433,20 @@
         <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant.report">(mechaharness.core.access.InMemoryCostAccountant method)</a>
 </li>
       </ul></li>
-      <li><a href="api/types.html#mechaharness.core.types.Role">Role (class in mechaharness.core.types)</a>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.CallableGraphNodeRunner.required_grants">required_grants() (mechaharness.graph_executor.CallableGraphNodeRunner method)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunner.required_grants">(mechaharness.graph_executor.GraphNodeRunner method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphFailureAction.RETRY">RETRY (mechaharness.graph_executor.GraphFailureAction attribute)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.revision">revision (mechaharness.external_effect.EffectRecord attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/types.html#mechaharness.core.types.Role">Role (class in mechaharness.core.types)</a>
+</li>
       <li><a href="api/types.html#mechaharness.core.types.ChatMessage.role">role (mechaharness.core.types.ChatMessage attribute)</a>
 </li>
       <li><a href="api/mechaharness.html#mechaharness.run">run() (in module mechaharness)</a>
@@ -1106,11 +1454,27 @@
       <ul>
         <li><a href="api/factory.html#mechaharness.factory.run">(in module mechaharness.factory)</a>
 </li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.CallableGraphNodeRunner.run">(mechaharness.graph_executor.CallableGraphNodeRunner method)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner.run">(mechaharness.graph_executor.EffectfulGraphNodeRunner method)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphExecutor.run">(mechaharness.graph_executor.GraphExecutor method)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunner.run">(mechaharness.graph_executor.GraphNodeRunner method)</a>
+</li>
         <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.run">(mechaharness.harness.base.AbstractHarness method)</a>
 </li>
       </ul></li>
       <li><a href="api/events.html#mechaharness.core.events.Event.run_id">run_id (mechaharness.core.events.Event attribute)</a>
+
+      <ul>
+        <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.run_id">(mechaharness.external_effect.EffectRecord attribute)</a>
 </li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.run_id">(mechaharness.graph_executor.GraphResult attribute)</a>
+</li>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.run_id">(mechaharness.graph_executor.GraphRunContext attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/events.html#mechaharness.core.events.RunEnd">RunEnd (class in mechaharness.core.events)</a>
 </li>
       <li><a href="api/contract.html#mechaharness.core.contract.RunRequest">RunRequest (class in mechaharness.core.contract)</a>
@@ -1125,6 +1489,22 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.save">save() (mechaharness.checkpoint_store.CheckpointStore method)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.save">(mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.save">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.save_effect">save_effect() (mechaharness.checkpoint_store.CheckpointStore method)</a>
+
+      <ul>
+        <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.save_effect">(mechaharness.checkpoint_store.EventLogCheckpointStore method)</a>
+</li>
+        <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.save_effect">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
+</li>
+      </ul></li>
       <li><a href="api/config.html#mechaharness.config.Settings">Settings (class in mechaharness.config)</a>
 </li>
       <li><a href="api/factory.html#mechaharness.factory.settings_from_request">settings_from_request() (in module mechaharness.factory)</a>
@@ -1137,10 +1517,20 @@
 </li>
       <li><a href="api/access.html#mechaharness.core.access.Ability.SIMPLE">SIMPLE (mechaharness.core.access.Ability attribute)</a>
 </li>
-      <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.stop">stop (mechaharness.core.types.CompletionRequest attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore">SqliteCheckpointStore (class in mechaharness.sqlite_checkpoint_store)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.state">state (mechaharness.external_effect.EffectRecord attribute)</a>
+</li>
+      <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.status">status (mechaharness.graph_executor.GraphResult attribute)</a>
+
+      <ul>
+        <li><a href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome.status">(mechaharness.graph_executor.NodeOutcome attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/types.html#mechaharness.core.types.CompletionRequest.stop">stop (mechaharness.core.types.CompletionRequest attribute)</a>
+</li>
       <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.stream">stream() (mechaharness.inference.base.InferenceStrategy method)</a>
 </li>
       <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.stream_events">stream_events() (mechaharness.harness.base.AbstractHarness method)</a>
@@ -1239,6 +1629,8 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.UNCERTAIN">UNCERTAIN (mechaharness.external_effect.EffectState attribute)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.Ability.units">units (mechaharness.core.access.Ability property)</a>
 
       <ul>
@@ -1250,6 +1642,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile.units">units() (mechaharness.core.access.CapabilityProfile method)</a>
+</li>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.updated_at">updated_at (mechaharness.external_effect.EffectRecord attribute)</a>
 </li>
       <li><a href="api/types.html#mechaharness.core.types.Usage">Usage (class in mechaharness.core.types)</a>
 </li>

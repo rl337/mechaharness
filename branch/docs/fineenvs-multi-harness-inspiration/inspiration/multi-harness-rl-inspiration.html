@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multi-Harness RL Inspiration for MechaHarness &mdash; MechaHarness 0.2.1 documentation</title>
+  <title>Multi-Harness RL Inspiration for MechaHarness &mdash; MechaHarness 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../_static/documentation_options.js?v=e259d695"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -46,7 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -71,6 +71,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -309,17 +313,19 @@ https://fineenvs-multi-harness-rl.hf.space/?__theme=system#the-capture-proxy</p>
 </section>
 <section id="acceptance-direction-sketch">
 <h1>Acceptance-direction sketch<a class="headerlink" href="#acceptance-direction-sketch" title="Link to this heading"></a></h1>
-<p>A future implementation pass should turn accepted requirements into MechaHarness user stories/tests rather than implementing directly from this inspiration document. Useful stories include:</p>
+<p>Accepted <code class="docutils literal notranslate"><span class="pre">MH-MHRL-*</span></code> requirements are promoted into modules and persona stories
+tracked in <a class="reference internal" href="fineenvs-mh-mhrl-requirements-map.html"><span class="std std-doc">fineenvs-mh-mhrl-requirements-map.md</span></a>.
+Representative stories:</p>
 <ul class="simple">
-<li><p>compare the same model/task under two graph configurations and prove which harness/config produced each result;</p></li>
-<li><p>reconstruct a retry and dynamically spawned reviewer as distinct RolloutGraph branches;</p></li>
-<li><p>reject a training-required graph at linkage when the backend is evaluation-only;</p></li>
-<li><p>represent a dead sandbox as execution-failure/unscorable rather than reward zero;</p></li>
-<li><p>require explicit objective policy before collapsing evaluator metrics;</p></li>
-<li><p>invalidate a rollout when independent gateway capture and EventLog disagree;</p></li>
-<li><p>detect repeated task sampling after experiment resume;</p></li>
-<li><p>reveal semantic success but invalid tool protocol under another harness;</p></li>
-<li><p>report unequal token/call exposure despite equal rollout counts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_harness_fingerprint</span></code> — same model/task, two configs, distinct digests;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nubble_insp_rollout_graph</span></code> — retry + delegated reviewer as observed branches;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_inference_capture_preflight</span></code> — training-required capture fails linkage when evaluation-only;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_evaluation_outcome</span></code> — dead sandbox is execution failure, not task fail;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_objective_policy</span></code> / <code class="docutils literal notranslate"><span class="pre">taloneth_insp_gated_objective</span></code> — explicit aggregation and gated efficiency;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nubble_insp_trace_reconciliation</span></code> — independent surfaces must agree;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_experiment_lineage</span></code> — resume does not resample consumed cases;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_cross_harness_failure</span></code> — invalid tool protocol ≠ semantic task failure;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_exposure_discriminative</span></code> — unequal exposure and all-success ties.</p></li>
 </ul>
 </section>
 <section id="attribution">

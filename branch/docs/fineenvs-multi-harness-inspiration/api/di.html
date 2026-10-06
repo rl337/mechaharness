@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.di &mdash; MechaHarness 0.2.1 documentation</title>
+  <title>mechaharness.di &mdash; MechaHarness 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../_static/documentation_options.js?v=e259d695"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
 </ul>
 <ul>
@@ -73,6 +73,10 @@
 <li class="toctree-l1"><a class="reference internal" href="inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -185,6 +189,33 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_checkpoint_store">
+<span class="sig-name descname"><span class="pre">get_checkpoint_store</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore" title="mechaharness.checkpoint_store.CheckpointStore"><span class="pre">CheckpointStore</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_checkpoint_store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_checkpoint_store" title="Link to this definition"></a></dt>
+<dd><p>Authoritative graph/effect persistence (default: ephemeral EventLog).</p>
+<p>Override to bind the SQLite reference backend (or a host store):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.checkpoint_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckpointStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span><span class="p">,</span> <span class="n">get_injector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.pass_through</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassThroughHarness</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MockInferenceStrategy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.sqlite_checkpoint_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqliteCheckpointStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span> <span class="o">/</span> <span class="s2">"runs.sqlite"</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DurableConfig</span><span class="p">(</span><span class="n">MechaHarnessConfig</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">MockInferenceStrategy</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_harness_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">PassThroughHarness</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_checkpoint_store</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">SqliteCheckpointStore</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span> <span class="o">=</span> <span class="n">get_injector</span><span class="p">(</span><span class="n">DurableConfig</span><span class="p">())</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">CheckpointStore</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="o">.</span><span class="n">durability</span>
+<span class="go">'durable'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_context_provider_registry">
 <span class="sig-name descname"><span class="pre">get_context_provider_registry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ContextProviderRegistry</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_context_provider_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_context_provider_registry" title="Link to this definition"></a></dt>
 <dd><p>Host context providers (document/KG adapters bind here).</p>
@@ -194,6 +225,12 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_cost_accountant">
 <span class="sig-name descname"><span class="pre">get_cost_accountant</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="access.html#mechaharness.core.access.CostAccountant" title="mechaharness.core.access.CostAccountant"><span class="pre">mechaharness.core.access.CostAccountant</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_cost_accountant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_cost_accountant" title="Link to this definition"></a></dt>
 <dd><p>Ledger used to price inference and tool invocations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_crash_probe">
+<span class="sig-name descname"><span class="pre">get_crash_probe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="external_effect.html#mechaharness.external_effect.CrashProbe" title="mechaharness.external_effect.CrashProbe"><span class="pre">CrashProbe</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_crash_probe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_crash_probe" title="Link to this definition"></a></dt>
+<dd><p>Optional crash-injection probe (default: never crash).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -216,19 +253,19 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_graph_escalation">
-<span class="sig-name descname"><span class="pre">get_graph_escalation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GraphEscalation</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_graph_escalation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_graph_escalation" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_graph_escalation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="graph_executor.html#mechaharness.graph_executor.GraphEscalation" title="mechaharness.graph_executor.GraphEscalation"><span class="pre">GraphEscalation</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_graph_escalation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_graph_escalation" title="Link to this definition"></a></dt>
 <dd><p>Escalation hook after retries are exhausted (default: reject).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_graph_executor_class">
-<span class="sig-name descname"><span class="pre">get_graph_executor_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="events.html#mechaharness.core.events.Event.type" title="mechaharness.core.events.Event.type"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">GraphExecutor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_graph_executor_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_graph_executor_class" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_graph_executor_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="events.html#mechaharness.core.events.Event.type" title="mechaharness.core.events.Event.type"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="graph_executor.html#mechaharness.graph_executor.GraphExecutor" title="mechaharness.graph_executor.GraphExecutor"><span class="pre">GraphExecutor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_graph_executor_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_graph_executor_class" title="Link to this definition"></a></dt>
 <dd><p>Class bound to <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> (override to specialize).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_graph_failure_policy">
-<span class="sig-name descname"><span class="pre">get_graph_failure_policy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GraphFailurePolicy</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_graph_failure_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_graph_failure_policy" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_graph_failure_policy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="graph_executor.html#mechaharness.graph_executor.GraphFailurePolicy" title="mechaharness.graph_executor.GraphFailurePolicy"><span class="pre">GraphFailurePolicy</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_graph_failure_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_graph_failure_policy" title="Link to this definition"></a></dt>
 <dd><p>Retry / escalate / fail policy for graph node attempts.</p>
 </dd></dl>
 
@@ -248,6 +285,12 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_harness_config">
 <span class="sig-name descname"><span class="pre">get_harness_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="harness.html#mechaharness.harness.base.HarnessConfig" title="mechaharness.harness.base.HarnessConfig"><span class="pre">HarnessConfig</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_harness_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_harness_config" title="Link to this definition"></a></dt>
 <dd><p>Build <code class="docutils literal notranslate"><span class="pre">HarnessConfig</span></code> from <code class="docutils literal notranslate"><span class="pre">get_settings()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_inference_capture">
+<span class="sig-name descname"><span class="pre">get_inference_capture</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">InferenceCapture</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_inference_capture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_inference_capture" title="Link to this definition"></a></dt>
+<dd><p>Optional native inference capture capability (default: evaluation-only).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -288,7 +331,7 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_node_runner_registry">
-<span class="sig-name descname"><span class="pre">get_node_runner_registry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GraphNodeRunnerRegistry</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_node_runner_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_node_runner_registry" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_node_runner_registry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="graph_executor.html#mechaharness.graph_executor.GraphNodeRunnerRegistry" title="mechaharness.graph_executor.GraphNodeRunnerRegistry"><span class="pre">GraphNodeRunnerRegistry</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_node_runner_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_node_runner_registry" title="Link to this definition"></a></dt>
 <dd><p>Node-kind runners for the graph executor (default: empty).</p>
 </dd></dl>
 
