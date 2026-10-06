@@ -1,0 +1,21 @@
+{
+  "trials": [
+    {
+      "trial_id": "1",
+      "success": true
+    },
+    {
+      "trial_id": "2",
+      "success": true
+    },
+    {
+      "trial_id": "3",
+      "success": false,
+      "outcome": {
+        "kind": "execution_failure",
+        "reason": "environment:sandbox_dead"
+      }
+    }
+  ],
+  "k": 1
+}
