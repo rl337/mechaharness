@@ -1,0 +1,6 @@
+{
+  "tool_calls": 3,
+  "tokens_out": 1200,
+  "latency_ms": 4000,
+  "coordination_cost": 1.5
+}

@@ -1,0 +1,11 @@
+{
+  "fixed": {
+    "model_revision": "m@1"
+  },
+  "varying": {
+    "tool_surface": [
+      "Read",
+      "Edit"
+    ]
+  }
+}

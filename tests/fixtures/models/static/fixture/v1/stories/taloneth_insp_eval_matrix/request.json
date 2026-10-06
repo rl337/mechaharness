@@ -1,0 +1,18 @@
+{
+  "trials": [
+    {
+      "trial_id": "1",
+      "success": true,
+      "model": "m1",
+      "harness_fingerprint": "fp:a",
+      "task_family": "math"
+    },
+    {
+      "trial_id": "2",
+      "success": false,
+      "model": "m1",
+      "harness_fingerprint": "fp:b",
+      "task_family": "math"
+    }
+  ]
+}

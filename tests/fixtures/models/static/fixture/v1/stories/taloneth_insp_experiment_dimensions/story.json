@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_experiment_dimensions",
+  "persona": "taloneth",
+  "title": "Declare fixed and varying harness experiment dimensions",
+  "kind": "experiment_dimensions_digest",
+  "narrative": "Taloneth needs every harness experiment to state which configuration axes are fixed and which vary, with a reproducible digest on traces. Accepts FineEnvs harness-overfitting axes guidance[^fineenvs-dims].",
+  "implementation": "`ExperimentDimensions` and `require_dimension_trace_fields` in `mechaharness.experiment_dimensions` canonicalize fixed/varying axes into a digest.",
+  "validation": "Kind `experiment_dimensions_digest`. Soft expects digest present. Unit tests in `tests/test_experiment_dimensions.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-dims",
+      "label": "FineEnvs multi-harness RL \u2014 harness overfitting",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-models-overfit-to-a-single-harness",
+      "note": "MH-MHRL-02"
+    }
+  ]
+}

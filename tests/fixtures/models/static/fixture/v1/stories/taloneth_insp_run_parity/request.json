@@ -1,0 +1,20 @@
+{
+  "a": {
+    "model": "m",
+    "max_tokens": 1024,
+    "temperature": 0.0,
+    "max_turns": 4,
+    "tools": [
+      "Read"
+    ]
+  },
+  "b": {
+    "model": "m",
+    "max_tokens": 512,
+    "temperature": 0.0,
+    "max_turns": 4,
+    "tools": [
+      "Read"
+    ]
+  }
+}

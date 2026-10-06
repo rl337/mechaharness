@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_inference_capture_preflight",
+  "persona": "fangore",
+  "title": "Fail linkage when training-grade capture is unavailable",
+  "kind": "inference_capture_preflight",
+  "narrative": "Fangore needs graphs that require exact token capture to fail before expensive work when the active backend is evaluation-only. Accepts FineEnvs capture probing guidance[^fineenvs-capture].",
+  "implementation": "`InferenceCapture`, `EvaluationOnlyCapture`, and `TrainingGradeCapture` in `mechaharness.inference_capture`, wired through `MechaHarnessConfig.get_inference_capture` and checked by `DefaultLinkageResolver` for `required_inference_capture`.",
+  "validation": "Kind `inference_capture_preflight`. Soft expects inference_capture_unsupported. Unit tests in `tests/test_inference_capture.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-capture",
+      "label": "FineEnvs multi-harness RL \u2014 what gets recorded",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-gets-recorded",
+      "note": "MH-MHRL-04/05/20"
+    }
+  ]
+}
