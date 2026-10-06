@@ -1,0 +1,22 @@
+{
+  "surfaces": [
+    {
+      "name": "executor",
+      "event_ids": [
+        "a"
+      ],
+      "digests": {
+        "a": "1"
+      }
+    },
+    {
+      "name": "gateway",
+      "event_ids": [
+        "a"
+      ],
+      "digests": {
+        "a": "2"
+      }
+    }
+  ]
+}
