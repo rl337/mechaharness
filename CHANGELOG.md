@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Transactional durable graph resume: injectable `CheckpointStore` seam,
+  `SqliteCheckpointStore` reference backend, opt-in `EffectfulGraphNodeRunner`
+  with effect intent/acceptance/reconciliation, and crash-injection probes.
+  Story: `fangore_transactional_durable_resume`. Requirements:
+  `docs/requirements/transactional-durable-resume.md`. Module doctests (and
+  Sphinx API pages) document Config wiring and SQLite restart usage;
+  pytest runs `--doctest-modules` over `src/mechaharness`.
+
+### Changed
+
+- Rename inference backend `junespark` → `openai_local` (same OpenAI-compat
+  client, no baked-in `base_url`; set `MECHA_BASE_URL`). Live story shorthand
+  is `MECHA_LIVE_OPENAI_COMPAT`. Guide: `docs/guides/openai-local.md`.
+
 ## [0.2.0] — 2026-09-30
 
 Inspiration-aligned library cut for client orchestrators (graph templates,

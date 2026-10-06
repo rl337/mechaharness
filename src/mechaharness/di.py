@@ -44,6 +44,7 @@ from pyiv.scope import SingletonScope
 from mechaharness.advisor import Advisor, AdvisorPolicy, DefaultAdvisorPolicy, RejectAdvisor
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
 from mechaharness.capability_envelope import CapabilityEnvelope
+from mechaharness.checkpoint_store import CheckpointStore, EventLogCheckpointStore
 from mechaharness.config import Settings
 from mechaharness.context_provider import ContextProviderRegistry
 from mechaharness.core.access import (
@@ -63,6 +64,8 @@ from mechaharness.core.environment import (
 )
 from mechaharness.core.events import EventLog, default_event_log
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
+from mechaharness.external_effect import CrashProbe, NoopCrashProbe
+from mechaharness.graph import GraphStore
 from mechaharness.graph_executor import (
     DefaultGraphFailurePolicy,
     GraphEscalation,
@@ -168,9 +171,9 @@ _INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
     "openai_compat": {"base_url": "https://api.openai.com/v1"},
     "lmstudio": {"base_url": "http://localhost:1234/v1", "api_key": "lm-studio"},
     "vllm": {"base_url": "http://localhost:8000/v1"},
-    "junespark": {
-        # Hosts set MECHA_BASE_URL / Settings.base_url; no LAN default in the library.
-        "api_key": "junespark",
+    "openai_local": {
+        # Hosts set MECHA_BASE_URL / Settings.base_url; no localhost default.
+        "api_key": "local",
     },
     "ollama": {"base_url": "http://localhost:11434/v1", "api_key": "ollama"},
     "anthropic": {"base_url": "https://api.anthropic.com"},
@@ -347,6 +350,8 @@ class MechaHarnessConfig(Config):
         self.register_instance(
             LifecycleExtensionRegistry, self.get_lifecycle_extension_registry()
         )
+        self.register_instance(CheckpointStore, self.get_checkpoint_store())
+        self.register_instance(CrashProbe, self.get_crash_probe())
 
         inference_cls = self.get_inference_class()
         harness_cls = self.get_harness_class()
@@ -518,6 +523,45 @@ class MechaHarnessConfig(Config):
         """Class bound to ``GraphExecutor`` (override to specialize)."""
         return GraphExecutor
 
+    def get_checkpoint_store(self) -> CheckpointStore:
+        """Authoritative graph/effect persistence (default: ephemeral EventLog).
+
+        Override to bind the SQLite reference backend (or a host store)::
+
+            >>> import tempfile
+            >>> from pathlib import Path
+            >>> from mechaharness.checkpoint_store import CheckpointStore
+            >>> from mechaharness.di import MechaHarnessConfig, get_injector
+            >>> from mechaharness.harness.pass_through import PassThroughHarness
+            >>> from mechaharness.inference.mock import MockInferenceStrategy
+            >>> from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+            >>> path = Path(tempfile.mkdtemp()) / "runs.sqlite"
+            >>> class DurableConfig(MechaHarnessConfig):
+            ...     def get_inference_class(self):
+            ...         return MockInferenceStrategy
+            ...     def get_harness_class(self):
+            ...         return PassThroughHarness
+            ...     def get_checkpoint_store(self):
+            ...         return SqliteCheckpointStore(path)
+            >>> store = get_injector(DurableConfig()).inject(CheckpointStore)
+            >>> store.durability
+            'durable'
+        """
+        existing = getattr(self, "_checkpoint_store", None)
+        if existing is None:
+            event_log = self.get_event_log()
+            existing = EventLogCheckpointStore(
+                GraphStore(event_log, agent_id="graph"),
+                event_log=event_log,
+                agent_id="graph",
+            )
+            self._checkpoint_store = existing
+        return existing
+
+    def get_crash_probe(self) -> CrashProbe:
+        """Optional crash-injection probe (default: never crash)."""
+        return NoopCrashProbe()
+
     def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
         """Node-kind runners for the graph executor (default: empty)."""
         existing = getattr(self, "_node_runner_registry", None)
@@ -590,7 +634,7 @@ class MechaHarnessConfig(Config):
             "openai_compat": OpenAICompatStrategy,
             "lmstudio": OpenAICompatStrategy,
             "vllm": OpenAICompatStrategy,
-            "junespark": OpenAICompatStrategy,
+            "openai_local": OpenAICompatStrategy,
             "ollama": OpenAICompatStrategy,
             "anthropic": AnthropicStrategy,
             "mock": MockInferenceStrategy,
