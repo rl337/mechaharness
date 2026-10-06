@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-06
+
+Evaluation/rollout provenance cut inspired by FineEnvs multi-harness RL,
+plus transactional durable resume and WalkingLabs eval substrate.
+
 ### Added
 
+- FineEnvs `MH-MHRL-*` library surfaces: `HarnessFingerprint`,
+  `EvaluationOutcome`, `ObjectivePolicy`, run parity, experiment lineage,
+  `RolloutGraph`, trace reconciliation, eval matrix, cross-harness failure
+  taxonomy, `InferenceCapture` + linkage preflight, learning export packs,
+  experiment dimensions, exposure/discriminative telemetry, and efficiency
+  scorecards. Map: `docs/inspiration/fineenvs-mh-mhrl-requirements-map.md`.
 - Transactional durable graph resume: injectable `CheckpointStore` seam,
   `SqliteCheckpointStore` reference backend, opt-in `EffectfulGraphNodeRunner`
   with effect intent/acceptance/reconciliation, and crash-injection probes.
@@ -16,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docs/requirements/transactional-durable-resume.md`. Module doctests (and
   Sphinx API pages) document Config wiring and SQLite restart usage;
   pytest runs `--doctest-modules` over `src/mechaharness`.
+- WalkingLabs / eval-research inspiration primitives and persona stories
+  (trace envelope, claims/evaluators/trials, context layers, WIP/fan-in,
+  and related surfaces). Map:
+  `docs/inspiration/walkinglabs-eval-requirements-map.md`.
 
 ### Changed
 
