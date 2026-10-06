@@ -78,6 +78,7 @@ from mechaharness.graph_templates import GraphTemplateRegistry, default_graph_te
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
 from mechaharness.harness.pass_through import PassThroughHarness
+from mechaharness.inference_capture import InferenceCapture, empty_inference_capture
 from mechaharness.harness.react import ReactHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.anthropic import AnthropicStrategy
@@ -339,6 +340,7 @@ class MechaHarnessConfig(Config):
         self.register_instance(GraphFailurePolicy, self.get_graph_failure_policy())
         self.register_instance(GraphEscalation, self.get_graph_escalation())
         self.register_instance(OperationRegistry, self.get_operation_registry())
+        self.register_instance(InferenceCapture, self.get_inference_capture())
         self.register_instance(LinkageResolver, self.get_linkage_resolver())
         self.register_instance(VerificationPolicy, self.get_verification_policy())
         self.register_instance(DelegationPolicy, self.get_delegation_policy())
@@ -586,6 +588,10 @@ class MechaHarnessConfig(Config):
             self._operation_registry = existing
         return existing
 
+    def get_inference_capture(self) -> InferenceCapture:
+        """Optional native inference capture capability (default: evaluation-only)."""
+        return empty_inference_capture()
+
     def get_linkage_resolver(self) -> LinkageResolver:
         """Pre-execution graph wiring validator."""
         return DefaultLinkageResolver(
@@ -593,6 +599,7 @@ class MechaHarnessConfig(Config):
             access=self.get_access_control(),
             environment=self.get_inference_environment(),
             operations=self.get_operation_registry(),
+            inference_capture=self.get_inference_capture(),
         )
 
     def get_verification_policy(self) -> VerificationPolicy:
