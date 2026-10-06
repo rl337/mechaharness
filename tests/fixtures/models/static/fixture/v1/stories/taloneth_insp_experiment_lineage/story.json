@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_experiment_lineage",
+  "persona": "taloneth",
+  "title": "Resume experiments without resampling consumed cases",
+  "kind": "experiment_lineage_resume",
+  "narrative": "Taloneth needs mid-corpus experiment resume to remember which cases were already consumed so a crash cannot replay tasks and contaminate later training. Accepts FineEnvs resume integrity findings[^fineenvs-lineage].",
+  "implementation": "`ExperimentCheckpoint` in `mechaharness.experiment_lineage` persists consumed case ids, sampler state, assignment, checkpoint identity, and evidence digests; `consume` refuses duplicates.",
+  "validation": "Kind `experiment_lineage_resume`. Soft expects remaining cases and duplicate refusal. Unit tests in `tests/test_experiment_lineage.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-lineage",
+      "label": "FineEnvs multi-harness RL \u2014 resume contamination",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-the-two-harbor-runs-declined",
+      "note": "MH-MHRL-13"
+    }
+  ]
+}

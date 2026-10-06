@@ -9,19 +9,19 @@ types exist with unit/doctest coverage; *partial* / *gap* mean incomplete.
 
 | ID | Topic | Modules | Library | Story |
 |----|-------|---------|---------|-------|
-| MH-MHRL-01 | Harness/config evaluation provenance | `harness_fingerprint.py` | gap | — |
+| MH-MHRL-01 | Harness/config evaluation provenance | `harness_fingerprint.py` | story | `taloneth_insp_harness_fingerprint` |
 | MH-MHRL-02 | Experiment fixed vs varying dimensions | `experiment_dimensions.py` | gap | — |
 | MH-MHRL-03 | Observed `RolloutGraph` | `rollout_graph.py` | gap | — |
 | MH-MHRL-04 | Training-grade inference capture | `inference_capture.py` | gap | — |
 | MH-MHRL-05 | Capture capability linkage preflight | `inference_capture.py`, `linkage_resolver.py` | partial | — |
-| MH-MHRL-06 | Evaluation outcome taxonomy | `evaluation_outcome.py` | gap | — |
-| MH-MHRL-07 | Explicit objective / aggregation policy | `objective_policy.py` | gap | — |
+| MH-MHRL-06 | Evaluation outcome taxonomy | `evaluation_outcome.py`, `eval_trial.py` | story | `taloneth_insp_evaluation_outcome` |
+| MH-MHRL-07 | Explicit objective / aggregation policy | `objective_policy.py` | story | `taloneth_insp_objective_policy` |
 | MH-MHRL-08 | Gated / lexicographic objectives | `objective_policy.py`, `harness_experiment.py` | gap | — |
 | MH-MHRL-09 | Independent trace reconciliation | `trace_reconciliation.py` | gap | — |
 | MH-MHRL-10 | Orthogonal task/harness/env/trainer axes | (architecture constraint) | surface | — |
 | MH-MHRL-11 | Trainers consume real MH artifacts | (ownership boundary) | surface | — |
-| MH-MHRL-12 | Train/eval constraint parity | `run_parity.py` | gap | — |
-| MH-MHRL-13 | Experiment resume sampling lineage | `experiment_lineage.py` | gap | — |
+| MH-MHRL-12 | Train/eval constraint parity | `run_parity.py` | story | `taloneth_insp_run_parity` |
+| MH-MHRL-13 | Experiment resume sampling lineage | `experiment_lineage.py` | story | `taloneth_insp_experiment_lineage` |
 | MH-MHRL-14 | Exposure accounting | `exposure_accounting.py` | gap | — |
 | MH-MHRL-15 | Discriminative-value telemetry | `discriminative_value.py` | gap | — |
 | MH-MHRL-16 | Exportable learning trajectories | `learning_export.py` | gap | — |

@@ -76,7 +76,6 @@ from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRe
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
 from mechaharness.environment_delta import EnvironmentSnapshot, apply_deltas, emit_delta
 from mechaharness.eval_evidence import Claim, compose_claims
-from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
 from mechaharness.evaluator import CallableEvaluator, evaluate_claims
 from mechaharness.exit_contract import CleanStateContract, evaluate_exit
 from mechaharness.failure_attribution import (
@@ -188,6 +187,14 @@ from mechaharness.routing import (
 )
 from mechaharness.rule_promotion import PromotionRecord, promote_soft_to_hard
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
+from mechaharness.experiment_lineage import ExperimentCheckpoint
+from mechaharness.harness_fingerprint import (
+    build_harness_fingerprint,
+    require_eval_provenance,
+)
+from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
+from mechaharness.run_parity import compare_parity, parity_from_harness_config
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
 from mechaharness.verification_policy import DefaultVerificationPolicy
 from mechaharness.work_in_progress_policy import WorkInProgressPolicy
@@ -377,6 +384,11 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "handoff_record_fields": _run_handoff_record_fields,
         "operation_compensation_meta": _run_operation_compensation_meta,
         "environment_delta_apply": _run_environment_delta_apply,
+        "harness_fingerprint_digest": _run_harness_fingerprint_digest,
+        "evaluation_outcome_filter": _run_evaluation_outcome_filter,
+        "objective_policy_aggregate": _run_objective_policy_aggregate,
+        "run_parity_compare": _run_run_parity_compare,
+        "experiment_lineage_resume": _run_experiment_lineage_resume,
     }
     try:
         runner = runners[kind]
@@ -2662,4 +2674,93 @@ async def _run_environment_delta_apply(case: StoryCase, backend: StoryBackend) -
     after = EnvironmentSnapshot.model_validate(request["after"])
     rebuilt = apply_deltas(before, [emit_delta(before, after)])
     actual = {"cwd": rebuilt.data.get("cwd")}
+    _assert_expect(actual, expect)
+
+
+async def _run_harness_fingerprint_digest(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    a = build_harness_fingerprint(**request["a"])
+    b = build_harness_fingerprint(**request["b"])
+    stamped = require_eval_provenance(request["summary"], fingerprint=a)
+    actual = {
+        "digests_differ": a.digest() != b.digest(),
+        "has_fingerprint": "harness_fingerprint" in stamped,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_evaluation_outcome_filter(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    trials = [Trial.model_validate(t) for t in request.get("trials") or []]
+    k = int(request.get("k") or 1)
+    rollup = trial_cost_rollup(trials)
+    actual = {
+        "task_trials": int(rollup["task_trials"]),
+        "non_task_trials": int(rollup["non_task_trials"]),
+        "pass_at_k_is_one": pass_at_k(trials, k=k) == 1.0,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_objective_policy_aggregate(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    policy = ObjectivePolicy.model_validate(request["policy"])
+    claims = [Claim.model_validate(c) for c in request.get("claims") or []]
+    result = aggregate_objective(policy, claims)
+    actual = {
+        "scored": result.scored,
+        "scalar": result.scalar,
+        "policy_id": result.policy_id,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_run_parity_compare(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    def _surface(raw: dict[str, Any]):
+        cfg = HarnessConfig(
+            model=raw["model"],
+            max_tokens=raw.get("max_tokens"),
+            temperature=raw.get("temperature"),
+            max_turns=int(raw.get("max_turns") or 8),
+        )
+        env = CapabilityEnvelope(tool_names=list(raw.get("tools") or []))
+        return parity_from_harness_config(cfg, envelope=env)
+
+    report = compare_parity(_surface(request["a"]), _surface(request["b"]))
+    actual = {
+        "comparable": report.comparable,
+        "material_mismatches_include": report.material_mismatches,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_experiment_lineage_resume(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    ckpt = ExperimentCheckpoint(
+        experiment_id=request["experiment_id"],
+        assignment=request.get("assignment") or "treatment",
+    )
+    for case_id in request.get("consume") or []:
+        ckpt = ckpt.consume(case_id, evidence_digest=f"digest:{case_id}")
+    duplicate_refused = False
+    try:
+        ckpt.consume((request.get("consume") or ["x"])[0])
+    except ValueError:
+        duplicate_refused = True
+    actual = {
+        "remaining": ckpt.remaining(list(request.get("corpus") or [])),
+        "duplicate_refused": duplicate_refused,
+    }
     _assert_expect(actual, expect)

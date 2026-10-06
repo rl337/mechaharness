@@ -64,14 +64,21 @@ class HarnessExperiment(BaseModel):
     metrics: dict[str, float] = Field(default_factory=dict)
     control_metrics: dict[str, float] = Field(default_factory=dict)
     notes: str = ""
+    checkpoint_id: str | None = None
+    lineage_digest: str | None = None
 
     def to_trace_fields(self) -> dict[str, Any]:
-        return {
+        fields = {
             "harness_experiment_id": self.id,
             "harness_version": self.harness_version,
             "harness_assignment": self.assignment,
             "harness_intervention": self.intervention,
         }
+        if self.checkpoint_id:
+            fields["harness_checkpoint_id"] = self.checkpoint_id
+        if self.lineage_digest:
+            fields["harness_lineage_digest"] = self.lineage_digest
+        return fields
 
 
 class HarnessExperimentRunner:
