@@ -1,0 +1,7 @@
+{
+  "roots_include": [
+    "review",
+    "root"
+  ],
+  "retry_linked": true
+}
