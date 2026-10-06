@@ -97,6 +97,22 @@ Kind `coordination_cost_summarize`. Soft expects branch_count.
 [^wl-l14-coord]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Coordination cost
 [^wl-p08-coord]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Measure parallelism
 
+### `nubble_insp_efficiency_scorecard` — Keep multidimensional efficiency dimensions observable
+
+Nubble needs tool calls, tokens, latency, and coordination cost kept as separate efficiency dimensions rather than a single opaque proxy. Accepts FineEnvs tool-call efficiency observations[^fineenvs-efficiency].
+
+#### Implementation
+
+`EfficiencyScorecard` and `build_efficiency_scorecard` in `mechaharness.efficiency_scorecard` compose topology/cost/coordination/resume dimensions without silent collapse.
+
+#### Validation
+
+Kind `efficiency_scorecard_build`. Soft expects tool_calls and tokens_out dimensions. Unit tests in `tests/test_efficiency_scorecard.py`.
+
+#### Footnotes
+
+[^fineenvs-efficiency]: [FineEnvs multi-harness RL — tool calls and tokens](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#tool-calls-and-tokens) — MH-MHRL-19
+
 ### `nubble_insp_environment_delta` — Project environment context as versioned deltas
 
 Nubble sends environment deltas instead of repeating full snapshots while still reconstructing deterministic state. Accepts WalkingLabs Codex guidance[^wl-codex-delta].
@@ -179,6 +195,22 @@ Kind `resume_cost_summarize`. Soft expects rebuild_tokens.
 [^wl-l05-resume]: [WalkingLabs L05 Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/) — Resume cost
 [^wl-p03-resume]: [WalkingLabs P03 Multi-Session Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-03-multi-session-continuity/) — Crash/resume metrics
 
+### `nubble_insp_rollout_graph` — Reconstruct retries and delegated agents as observed rollout branches
+
+Nubble needs the observed run topology — retries, spawned reviewers, and terminals — as a first-class graph linked back to the intended plan, not only the planned node list. Accepts FineEnvs training-sequence reconstruction[^fineenvs-rollout].
+
+#### Implementation
+
+`RolloutGraph`, `RolloutNode`, and `build_rollout_graph` in `mechaharness.rollout_graph` project observed records into roots/parent-child topology with optional `execution_node_id` links.
+
+#### Validation
+
+Kind `rollout_graph_build`. Soft expects roots and linked retry. Unit tests in `tests/test_rollout_graph.py`.
+
+#### Footnotes
+
+[^fineenvs-rollout]: [FineEnvs multi-harness RL — training sequences](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#from-calls-to-training-sequences) — MH-MHRL-03
+
 ### `nubble_insp_trace_envelope` — Require provenance on every trace envelope
 
 Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace].
@@ -195,6 +227,22 @@ Kind `trace_envelope_complete`. Soft expects complete true and no missing fields
 
 [^wl-l11-trace]: [WalkingLabs L11 Runtime Observability](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-11-why-observability-belongs-inside-the-harness/) — Trace reconstructs decisions
 [^wl-deepseek-trace]: [WalkingLabs DeepSeek harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/) — Observable execution-affecting state
+
+### `nubble_insp_trace_reconciliation` — Reject rollouts when independent traces disagree
+
+Nubble needs executor events and gateway capture to reconcile before a rollout is accepted for training or self-improvement. Accepts FineEnvs independent trajectory checks[^fineenvs-reconcile].
+
+#### Implementation
+
+`ObservationSurface`, `reconcile_traces`, and `require_reconciled` in `mechaharness.trace_reconciliation` compare event ids and digests across surfaces.
+
+#### Validation
+
+Kind `trace_reconciliation_check`. Soft expects conflict status. Unit tests in `tests/test_trace_reconciliation.py`.
+
+#### Footnotes
+
+[^fineenvs-reconcile]: [FineEnvs multi-harness RL — independent trajectories](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards) — MH-MHRL-09
 
 ### `nubble_insp_workspace_isolation` — Acquire workspace isolation through a host provider seam
 
@@ -786,6 +834,22 @@ Kind `independent_review_template`. Soft expects isolated payload flags and two 
 
 [^insp-r10]: [Inspiration requirements (req 10: independent review)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 10 — independent review
 
+### `fangore_insp_inference_capture_preflight` — Fail linkage when training-grade capture is unavailable
+
+Fangore needs graphs that require exact token capture to fail before expensive work when the active backend is evaluation-only. Accepts FineEnvs capture probing guidance[^fineenvs-capture].
+
+#### Implementation
+
+`InferenceCapture`, `EvaluationOnlyCapture`, and `TrainingGradeCapture` in `mechaharness.inference_capture`, wired through `MechaHarnessConfig.get_inference_capture` and checked by `DefaultLinkageResolver` for `required_inference_capture`.
+
+#### Validation
+
+Kind `inference_capture_preflight`. Soft expects inference_capture_unsupported. Unit tests in `tests/test_inference_capture.py`.
+
+#### Footnotes
+
+[^fineenvs-capture]: [FineEnvs multi-harness RL — what gets recorded](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-gets-recorded) — MH-MHRL-04/05/20
+
 ### `fangore_insp_initialize_preflight` — Run an initialize preflight graph template before work
 
 Fangore starts substantive graphs only after an initialize/preflight template completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].
@@ -1320,6 +1384,22 @@ Kind `component_ablation_delta`. Soft expects negative success_delta.
 [^wl-l02-ablation]: [WalkingLabs L02 What a Harness Is](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/) — Ablate components
 [^wl-p01-ablation]: [WalkingLabs P01 Baseline vs Minimal](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/) — Matched corpus
 
+### `taloneth_insp_cross_harness_failure` — Separate semantic task failure from invalid tool protocol
+
+Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes[^fineenvs-xharness].
+
+#### Implementation
+
+`CrossHarnessFailure` and `classify_cross_harness_failure` in `mechaharness.cross_harness_failure` emit taxonomy kinds usable as claims inside matrix cells.
+
+#### Validation
+
+Kind `cross_harness_failure_classify`. Soft expects invalid_tool_name. Unit tests in `tests/test_cross_harness_failure.py`.
+
+#### Footnotes
+
+[^fineenvs-xharness]: [FineEnvs multi-harness RL — leaving native harness](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#when-a-model-leaves-the-harness-it-was-trained-in) — MH-MHRL-18
+
 ### `taloneth_insp_eval_claims` — Compose typed evaluation claims without opaque scores
 
 Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].
@@ -1337,6 +1417,38 @@ Kind `eval_claims_compose`. Soft expects pass/fail/unknown counts.
 [^anth-evals-claims]: [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Graders and assertions
 [^arxiv-bineval]: [BINEVAL binary questions](https://arxiv.org/abs/2606.27226) — Atomic interpretable claims
 
+### `taloneth_insp_eval_matrix` — Keep model-harness-task matrix cells for drill-down
+
+Taloneth evaluates the same model under multiple harness configurations and must keep every matrix cell so averages cannot hide a catastrophic compatibility failure. Accepts FineEnvs cross-harness matrix practice[^fineenvs-matrix].
+
+#### Implementation
+
+`EvalMatrix` and `EvalMatrixCell` in `mechaharness.eval_matrix` index trials by model, harness fingerprint, and task family, and `aggregate` retains cell drill-down.
+
+#### Validation
+
+Kind `eval_matrix_aggregate`. Soft expects cell count and retained fingerprints. Unit tests in `tests/test_eval_matrix.py`.
+
+#### Footnotes
+
+[^fineenvs-matrix]: [FineEnvs multi-harness RL — accuracy matrix](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#accuracy) — MH-MHRL-17
+
+### `taloneth_insp_evaluation_outcome` — Keep infrastructure failures out of task-success scores
+
+Taloneth needs a dead sandbox or broken trace to count as unscorable execution failure, not as proof the model answered incorrectly. Accepts FineEnvs reward separation guidance[^fineenvs-outcome].
+
+#### Implementation
+
+`EvaluationOutcome` and `outcome_from_failure` in `mechaharness.evaluation_outcome`, with `task_trials` / `pass_at_k` in `mechaharness.eval_trial` excluding non-task outcomes from denominators.
+
+#### Validation
+
+Kind `evaluation_outcome_filter`. Soft expects task trial counts and pass@k ignoring execution failures. Unit tests in `tests/test_evaluation_outcome.py`.
+
+#### Footnotes
+
+[^fineenvs-outcome]: [FineEnvs multi-harness RL — rewards](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards) — MH-MHRL-06
+
 ### `taloneth_insp_evaluator_compose` — Run a versioned held-out evaluator to claims
 
 Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon].
@@ -1353,6 +1465,86 @@ Kind `evaluator_compose_run`. Soft expects passed and held_out true.
 
 [^anth-evals-evaluator]: [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Deterministic then model graders
 [^arxiv-verif-horizon]: [Verification Horizon](https://arxiv.org/abs/2606.26300) — Held-out evaluator versioning
+
+### `taloneth_insp_experiment_dimensions` — Declare fixed and varying harness experiment dimensions
+
+Taloneth needs every harness experiment to state which configuration axes are fixed and which vary, with a reproducible digest on traces. Accepts FineEnvs harness-overfitting axes guidance[^fineenvs-dims].
+
+#### Implementation
+
+`ExperimentDimensions` and `require_dimension_trace_fields` in `mechaharness.experiment_dimensions` canonicalize fixed/varying axes into a digest.
+
+#### Validation
+
+Kind `experiment_dimensions_digest`. Soft expects digest present. Unit tests in `tests/test_experiment_dimensions.py`.
+
+#### Footnotes
+
+[^fineenvs-dims]: [FineEnvs multi-harness RL — harness overfitting](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-models-overfit-to-a-single-harness) — MH-MHRL-02
+
+### `taloneth_insp_experiment_lineage` — Resume experiments without resampling consumed cases
+
+Taloneth needs mid-corpus experiment resume to remember which cases were already consumed so a crash cannot replay tasks and contaminate later training. Accepts FineEnvs resume integrity findings[^fineenvs-lineage].
+
+#### Implementation
+
+`ExperimentCheckpoint` in `mechaharness.experiment_lineage` persists consumed case ids, sampler state, assignment, checkpoint identity, and evidence digests; `consume` refuses duplicates.
+
+#### Validation
+
+Kind `experiment_lineage_resume`. Soft expects remaining cases and duplicate refusal. Unit tests in `tests/test_experiment_lineage.py`.
+
+#### Footnotes
+
+[^fineenvs-lineage]: [FineEnvs multi-harness RL — resume contamination](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-the-two-harbor-runs-declined) — MH-MHRL-13
+
+### `taloneth_insp_exposure_discriminative` — Report unequal exposure and no-learning-signal ties
+
+Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings[^fineenvs-exposure].
+
+#### Implementation
+
+`ExposureLedger` in `mechaharness.exposure_accounting` and `discriminative_report` in `mechaharness.discriminative_value` summarize arm exposure and tie telemetry.
+
+#### Validation
+
+Kind `exposure_discriminative_report`. Soft expects unequal model_calls and all_success_tie. Unit tests in `tests/test_exposure_discriminative.py`.
+
+#### Footnotes
+
+[^fineenvs-exposure]: [FineEnvs multi-harness RL — how much each run saw](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#how-much-each-run-saw) — MH-MHRL-14/15
+
+### `taloneth_insp_gated_objective` — Apply efficiency only after correctness gates pass
+
+Taloneth needs harness experiments to satisfy correctness first and only then prefer lower token use, matching gated FineEnvs reward design[^fineenvs-gated].
+
+#### Implementation
+
+`HarnessExperimentRunner.evaluate` accepts an `ObjectivePolicy` and uses gates plus `compare_lexicographic` so efficiency cannot beat a failed correctness gate.
+
+#### Validation
+
+Kind `gated_objective_evaluate`. Soft expects retired when treatment fails correctness. Unit tests in `tests/test_gated_objective.py`.
+
+#### Footnotes
+
+[^fineenvs-gated]: [FineEnvs multi-harness RL — what we rewarded](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-we-rewarded) — MH-MHRL-08
+
+### `taloneth_insp_harness_fingerprint` — Stamp evaluation results with harness configuration identity
+
+Taloneth compares the same model and task under two graph configurations and needs each result to carry which harness configuration produced it, not only the model name. Accepts FineEnvs multi-harness RL guidance[^fineenvs-fingerprint].
+
+#### Implementation
+
+`HarnessFingerprint`, `build_harness_fingerprint`, and `require_eval_provenance` in `mechaharness.harness_fingerprint` bind model revision, harness family/version, config digests, tool/context surfaces, evaluator, environment, and task identity into a stable digest attached to evaluation summaries.
+
+#### Validation
+
+Kind `harness_fingerprint_digest`. Soft expects distinct digests and provenance attachment. Unit tests in `tests/test_harness_fingerprint.py`.
+
+#### Footnotes
+
+[^fineenvs-fingerprint]: [FineEnvs multi-harness RL — harness-attached scores](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#benchmark-scores-now-come-with-a-harness-attached) — MH-MHRL-01
 
 ### `taloneth_insp_harness_health` — Snapshot harness health for cleanup evidence
 
@@ -1387,6 +1579,38 @@ Kind `harness_experiment_retire`. Soft expects retired when treatment loses (evi
 
 [^insp-r14]: [Inspiration requirements (req 14: harness hypotheses)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 14 — harness hypotheses
 
+### `taloneth_insp_learning_export` — Export provenance-rich trajectories without owning training recipes
+
+Taloneth needs exportable execution packs that carry harness fingerprint, rollout refs, and outcomes so June can curate SFT or RL corpora without MechaHarness choosing the recipe. Accepts FineEnvs SFT-vs-RL reuse guidance[^fineenvs-export].
+
+#### Implementation
+
+`LearningExportPack` and `build_learning_export` in `mechaharness.learning_export` bundle decision exports with fingerprint, rollout, and outcome refs.
+
+#### Validation
+
+Kind `learning_export_pack`. Soft expects schema version and fingerprint. Unit tests in `tests/test_learning_export.py`.
+
+#### Footnotes
+
+[^fineenvs-export]: [FineEnvs multi-harness RL — SFT vs RL](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#sft-vs-rl) — MH-MHRL-16
+
+### `taloneth_insp_objective_policy` — Require an explicit policy before collapsing evaluator signals
+
+Taloneth refuses silent weighted blends of verifier scores and wants gates and formula version written into the result. Accepts FineEnvs reward aggregation guidance[^fineenvs-objective].
+
+#### Implementation
+
+`ObjectivePolicy` and `aggregate_objective` in `mechaharness.objective_policy` record component signals, formula, version, gates, and prerequisites on every scalar objective.
+
+#### Validation
+
+Kind `objective_policy_aggregate`. Soft expects scored scalar with policy identity. Unit tests in `tests/test_objective_policy.py`.
+
+#### Footnotes
+
+[^fineenvs-objective]: [FineEnvs multi-harness RL — rewards aggregation](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards) — MH-MHRL-07
+
 ### `taloneth_insp_rule_promotion` — Promote review feedback into a hard invariant with provenance
 
 Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo].
@@ -1403,6 +1627,22 @@ Kind `rule_promotion_hard`. Soft expects stage hard.
 
 [^wl-l10-promo]: [WalkingLabs L10 Full Pipeline Verification](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-10-why-end-to-end-testing-changes-results/) — Promote feedback
 [^wl-l12-promo]: [WalkingLabs L12 Clean Session Handoffs](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/) — Process changes
+
+### `taloneth_insp_run_parity` — Surface material train and eval constraint mismatches
+
+Taloneth needs comparable runs to record and flag mismatches in output caps, tool budgets, timeouts, and sampling so train and eval behavior stay aligned. Accepts FineEnvs train/eval parity findings[^fineenvs-parity].
+
+#### Implementation
+
+`ParitySurface`, `parity_from_harness_config`, and `compare_parity` in `mechaharness.run_parity` snapshot constraint surfaces and list material mismatches.
+
+#### Validation
+
+Kind `run_parity_compare`. Soft expects material max_tokens mismatch. Unit tests in `tests/test_run_parity.py`.
+
+#### Footnotes
+
+[^fineenvs-parity]: [FineEnvs multi-harness RL — train/eval decline](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-the-two-harbor-runs-declined) — MH-MHRL-12
 
 ### `taloneth_insp_scaffolding_retire` — Retire scaffolding that loses a controlled experiment
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.di &mdash; MechaHarness 0.2.1 documentation</title>
+  <title>mechaharness.di &mdash; MechaHarness 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../_static/documentation_options.js?v=e259d695"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -192,6 +192,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MockInferenceStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.openai_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAICompatStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.systemone</span><span class="w"> </span><span class="kn">import</span> <span class="n">SystemOneJudgeProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference_capture</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceCapture</span><span class="p">,</span> <span class="n">empty_inference_capture</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.lifecycle_extension</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span>
     <span class="n">empty_lifecycle_extension_registry</span><span class="p">,</span>
@@ -455,6 +456,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphFailurePolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_failure_policy</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphEscalation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_escalation</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">OperationRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_operation_registry</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">InferenceCapture</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_capture</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">LinkageResolver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_linkage_resolver</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">VerificationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_verification_policy</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">DelegationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_delegation_policy</span><span class="p">())</span>
@@ -772,6 +774,13 @@
         <span class="k">return</span> <span class="n">existing</span></div>
 
 
+<div class="viewcode-block" id="MechaHarnessConfig.get_inference_capture">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_capture">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_capture</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InferenceCapture</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional native inference capture capability (default: evaluation-only)."""</span>
+        <span class="k">return</span> <span class="n">empty_inference_capture</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="MechaHarnessConfig.get_linkage_resolver">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_linkage_resolver">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_linkage_resolver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LinkageResolver</span><span class="p">:</span>
@@ -781,6 +790,7 @@
             <span class="n">access</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_access_control</span><span class="p">(),</span>
             <span class="n">environment</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_inference_environment</span><span class="p">(),</span>
             <span class="n">operations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_operation_registry</span><span class="p">(),</span>
+            <span class="n">inference_capture</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_inference_capture</span><span class="p">(),</span>
         <span class="p">)</span></div>
 
 
