@@ -57,6 +57,7 @@ from mechaharness.core.access import AccessControl, GraphExecute, grant_key
 from mechaharness.core.environment import InferenceEnvironment
 from mechaharness.core.exceptions import MechaHarnessError
 from mechaharness.graph import ExecutionGraph, GraphNode
+from mechaharness.inference_capture import InferenceCapture, empty_inference_capture
 from mechaharness.operation_registry import OperationRegistry
 from mechaharness.stop_contract import StopContract
 
@@ -149,12 +150,14 @@ class DefaultLinkageResolver(LinkageResolver):
         *,
         operations: OperationRegistry | None = None,
         require_execute_grant: bool = True,
+        inference_capture: InferenceCapture | None = None,
     ) -> None:
         self.runners = runners
         self.access = access
         self.environment = environment
         self.operations = operations
         self.require_execute_grant = require_execute_grant
+        self.inference_capture = inference_capture or empty_inference_capture()
 
     def resolve(
         self,
@@ -202,6 +205,28 @@ class DefaultLinkageResolver(LinkageResolver):
                     candidate_provider="InferenceEnvironment / host profile",
                 )
             )
+
+        required_capture = None
+        if fingerprint_parts:
+            required_capture = fingerprint_parts.get("required_inference_capture")
+        if required_capture is None:
+            required_capture = getattr(graph, "required_inference_capture", None)
+        if required_capture is None and graph.model_extra:
+            required_capture = graph.model_extra.get("required_inference_capture")
+        if required_capture:
+            try:
+                self.inference_capture.assert_compatible(str(required_capture))
+            except Exception as exc:  # noqa: BLE001 - surface as linkage edge
+                edges.append(
+                    UnsatisfiedEdge(
+                        code="inference_capture_unsupported",
+                        message=str(exc),
+                        candidate_provider=(
+                            "InferenceCapture / Config.get_inference_capture"
+                        ),
+                        detail={"required_level": str(required_capture)},
+                    )
+                )
 
         parts = {
             "graph_version": graph.version,
