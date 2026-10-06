@@ -65,11 +65,20 @@ def classify_cross_harness_failure(
         kind = "invalid_tool_schema"
     elif any(tok in lowered for tok in ("malformed", "parse error", "protocol", "role")):
         kind = "malformed_protocol"
-    elif any(tok in lowered for tok in ("did not terminate", "termination", "max turns", "no stop")):
+    elif any(
+        tok in lowered
+        for tok in ("did not terminate", "termination", "max turns", "no stop")
+    ):
         kind = "termination_failure"
-    elif any(tok in lowered for tok in ("context", "compaction", "missing history", "lost state")):
+    elif any(
+        tok in lowered
+        for tok in ("context", "compaction", "missing history", "lost state")
+    ):
         kind = "context_dependence"
-    elif any(tok in lowered for tok in ("unsupported", "capability", "not available", "grant denied")):
+    elif any(
+        tok in lowered
+        for tok in ("unsupported", "capability", "not available", "grant denied")
+    ):
         kind = "unsupported_capability"
     else:
         kind = "semantic_task_failure"

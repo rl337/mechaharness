@@ -57,7 +57,13 @@ class RolloutGraph(BaseModel):
     def roots(self) -> list[str]:
         return sorted(n.id for n in self.nodes.values() if not n.parent_id)
 
-    def link_execution(self, node_id: str, *, execution_node_id: str, attempt: int | None = None) -> None:
+    def link_execution(
+        self,
+        node_id: str,
+        *,
+        execution_node_id: str,
+        attempt: int | None = None,
+    ) -> None:
         node = self.nodes[node_id]
         node.execution_node_id = execution_node_id
         if attempt is not None:
@@ -127,7 +133,9 @@ def rollout_from_events(
                 "id": node_id,
                 "kind": kind,
                 "parent_id": parent_id,
-                "execution_node_id": payload.get("execution_node_id") or payload.get("graph_node_id"),
+                "execution_node_id": (
+                    payload.get("execution_node_id") or payload.get("graph_node_id")
+                ),
                 "attempt": payload.get("attempt"),
                 "status": payload.get("status"),
                 "detail": payload,
