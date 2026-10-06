@@ -187,15 +187,28 @@ from mechaharness.routing import (
 )
 from mechaharness.rule_promotion import PromotionRecord, promote_soft_to_hard
 from mechaharness.tools.base import ToolRegistry
+from mechaharness.cross_harness_failure import classify_cross_harness_failure
+from mechaharness.discriminative_value import discriminative_report
+from mechaharness.efficiency_scorecard import build_efficiency_scorecard
+from mechaharness.eval_matrix import EvalMatrix
 from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
+from mechaharness.experiment_dimensions import (
+    ExperimentDimensions,
+    require_dimension_trace_fields,
+)
 from mechaharness.experiment_lineage import ExperimentCheckpoint
+from mechaharness.exposure_accounting import ExposureLedger, ExposureSample
 from mechaharness.harness_fingerprint import (
     build_harness_fingerprint,
     require_eval_provenance,
 )
+from mechaharness.inference_capture import EvaluationOnlyCapture
+from mechaharness.learning_export import build_learning_export
 from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
+from mechaharness.rollout_graph import build_rollout_graph
 from mechaharness.run_parity import compare_parity, parity_from_harness_config
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
+from mechaharness.trace_reconciliation import ObservationSurface, reconcile_traces
 from mechaharness.verification_policy import DefaultVerificationPolicy
 from mechaharness.work_in_progress_policy import WorkInProgressPolicy
 from mechaharness.workspace_isolation import (
@@ -389,6 +402,16 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "objective_policy_aggregate": _run_objective_policy_aggregate,
         "run_parity_compare": _run_run_parity_compare,
         "experiment_lineage_resume": _run_experiment_lineage_resume,
+        "rollout_graph_build": _run_rollout_graph_build,
+        "trace_reconciliation_check": _run_trace_reconciliation_check,
+        "eval_matrix_aggregate": _run_eval_matrix_aggregate,
+        "cross_harness_failure_classify": _run_cross_harness_failure_classify,
+        "inference_capture_preflight": _run_inference_capture_preflight,
+        "learning_export_pack": _run_learning_export_pack,
+        "experiment_dimensions_digest": _run_experiment_dimensions_digest,
+        "gated_objective_evaluate": _run_gated_objective_evaluate,
+        "exposure_discriminative_report": _run_exposure_discriminative_report,
+        "efficiency_scorecard_build": _run_efficiency_scorecard_build,
     }
     try:
         runner = runners[kind]
@@ -2762,5 +2785,177 @@ async def _run_experiment_lineage_resume(case: StoryCase, backend: StoryBackend)
     actual = {
         "remaining": ckpt.remaining(list(request.get("corpus") or [])),
         "duplicate_refused": duplicate_refused,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_rollout_graph_build(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    graph = build_rollout_graph(request.get("records") or [])
+    actual = {
+        "roots_include": graph.roots(),
+        "retry_linked": graph.nodes.get("retry") is not None
+        and graph.nodes["retry"].execution_node_id == "produce",
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_trace_reconciliation_check(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    surfaces = [ObservationSurface.model_validate(s) for s in request.get("surfaces") or []]
+    report = reconcile_traces(surfaces)
+    actual = {"status": report.status, "ok": report.ok}
+    _assert_expect(actual, expect)
+
+
+async def _run_eval_matrix_aggregate(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    matrix = EvalMatrix()
+    for raw in request.get("trials") or []:
+        trial = Trial(trial_id=raw["trial_id"], success=bool(raw["success"]))
+        matrix.add_trial(
+            trial,
+            model=raw["model"],
+            harness_fingerprint=raw["harness_fingerprint"],
+            task_family=raw["task_family"],
+        )
+    agg = matrix.aggregate()
+    actual = {
+        "cell_count": agg["cell_count"],
+        "fingerprints_include": [c["harness_fingerprint"] for c in agg["cells"]],
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_cross_harness_failure_classify(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    failure = classify_cross_harness_failure(str(request.get("message") or ""))
+    actual = {"kind": failure.kind}
+    _assert_expect(actual, expect)
+
+
+async def _run_inference_capture_preflight(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    reg = GraphNodeRunnerRegistry()
+
+    async def ok(node, context):  # noqa: ANN001
+        from mechaharness.graph import NodeStatus
+        from mechaharness.graph_executor import NodeOutcome
+
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    reg.register(CallableGraphNodeRunner(["compute"], ok))
+    access = InMemoryAccessControl(
+        InMemoryEventLog(), AccessPolicy(grants=[GraphExecute])
+    )
+    resolver = DefaultLinkageResolver(
+        reg,
+        access,
+        NoOpInferenceEnvironment(),
+        inference_capture=EvaluationOnlyCapture(),
+    )
+    graph = ExecutionGraph(goal="capture")
+    graph.add_node(GraphNode(id="a", kind="compute"))
+    report = resolver.resolve(
+        graph,
+        fingerprint_parts={
+            "required_inference_capture": request.get("required_inference_capture")
+        },
+    )
+    actual = {
+        "ok": report.ok,
+        "codes_include": [e.code for e in report.edges],
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_learning_export_pack(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    pack = build_learning_export(
+        harness_fingerprint=request.get("harness_fingerprint"),
+        rollout_graph_ref=request.get("rollout_graph_ref"),
+        split=request.get("split") or "train",
+    )
+    actual = {
+        "schema_version": pack.schema_version,
+        "harness_fingerprint": pack.harness_fingerprint,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_experiment_dimensions_digest(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    dims = ExperimentDimensions(
+        fixed=dict(request.get("fixed") or {}),
+        varying=dict(request.get("varying") or {}),
+    )
+    fields = require_dimension_trace_fields({}, dimensions=dims)
+    actual = {
+        "has_digest": bool(fields.get("experiment_dimensions_digest")),
+        "varying_tools_include": dims.fingerprint_parts()["varying"].get(
+            "tool_surface", []
+        ),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_gated_objective_evaluate(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    runner = HarnessExperimentRunner()
+    exp = runner.propose(
+        HarnessExperiment(hypothesis="gated", intervention="x", failure_mode="y")
+    )
+    policy = ObjectivePolicy.model_validate(request["policy"])
+    result = runner.evaluate(
+        exp,
+        with_intervention=lambda: dict(request["treatment"]),
+        without_intervention=lambda: dict(request["control"]),
+        objective_policy=policy,
+    )
+    actual = {"status": result.status}
+    _assert_expect(actual, expect)
+
+
+async def _run_exposure_discriminative_report(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    ledger = ExposureLedger()
+    for raw in request.get("exposure") or []:
+        ledger.record(ExposureSample.model_validate(raw))
+    trials = [Trial.model_validate(t) for t in request.get("trials") or []]
+    summary = ledger.summarize()
+    report = discriminative_report(trials)
+    actual = {
+        "treatment_model_calls": int(summary["arms"]["treatment"]["model_calls"]),
+        "all_success_tie": report.all_success_tie,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_efficiency_scorecard_build(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    card = build_efficiency_scorecard(**request)
+    actual = {
+        "tool_calls": card.dimensions.get("tool_calls"),
+        "tokens_out": card.dimensions.get("tokens_out"),
     }
     _assert_expect(actual, expect)
