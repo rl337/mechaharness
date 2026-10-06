@@ -270,17 +270,19 @@ In short: **MechaHarness makes execution observable, comparable, reproducible, a
 
 # Acceptance-direction sketch
 
-A future implementation pass should turn accepted requirements into MechaHarness user stories/tests rather than implementing directly from this inspiration document. Useful stories include:
+Accepted `MH-MHRL-*` requirements are promoted into modules and persona stories
+tracked in [fineenvs-mh-mhrl-requirements-map.md](./fineenvs-mh-mhrl-requirements-map.md).
+Representative stories:
 
-- compare the same model/task under two graph configurations and prove which harness/config produced each result;
-- reconstruct a retry and dynamically spawned reviewer as distinct RolloutGraph branches;
-- reject a training-required graph at linkage when the backend is evaluation-only;
-- represent a dead sandbox as execution-failure/unscorable rather than reward zero;
-- require explicit objective policy before collapsing evaluator metrics;
-- invalidate a rollout when independent gateway capture and EventLog disagree;
-- detect repeated task sampling after experiment resume;
-- reveal semantic success but invalid tool protocol under another harness;
-- report unequal token/call exposure despite equal rollout counts.
+- `taloneth_insp_harness_fingerprint` — same model/task, two configs, distinct digests;
+- `nubble_insp_rollout_graph` — retry + delegated reviewer as observed branches;
+- `fangore_insp_inference_capture_preflight` — training-required capture fails linkage when evaluation-only;
+- `taloneth_insp_evaluation_outcome` — dead sandbox is execution failure, not task fail;
+- `taloneth_insp_objective_policy` / `taloneth_insp_gated_objective` — explicit aggregation and gated efficiency;
+- `nubble_insp_trace_reconciliation` — independent surfaces must agree;
+- `taloneth_insp_experiment_lineage` — resume does not resample consumed cases;
+- `taloneth_insp_cross_harness_failure` — invalid tool protocol ≠ semantic task failure;
+- `taloneth_insp_exposure_discriminative` — unequal exposure and all-success ties.
 
 # Attribution
 
