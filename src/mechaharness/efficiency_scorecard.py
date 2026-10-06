@@ -4,7 +4,7 @@ FineEnvs uses tool-call count as a simple efficiency signal; MechaHarness keeps
 tokens, latency, coordination, and resume cost observable as separate dimensions
 (https://fineenvs-multi-harness-rl.hf.space/?__theme=system#tool-calls-and-tokens)::
 
-    >>> from mechaharness.efficiency_scorecard import EfficiencyScorecard, build_efficiency_scorecard
+    >>> from mechaharness.efficiency_scorecard import build_efficiency_scorecard
     >>> card = build_efficiency_scorecard(
     ...     tool_calls=3,
     ...     tokens_out=1200,

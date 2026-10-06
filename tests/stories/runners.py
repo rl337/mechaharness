@@ -60,6 +60,7 @@ from mechaharness.core.environment import (
 )
 from mechaharness.core.events import InMemoryEventLog
 from mechaharness.core.types import ChatMessage, Role, ToolCall
+from mechaharness.cross_harness_failure import classify_cross_harness_failure
 from mechaharness.decision_log import (
     DecisionRecord,
     TopologySpan,
@@ -74,10 +75,20 @@ from mechaharness.decision_surfaces import (
 )
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints, get_injector
+from mechaharness.discriminative_value import discriminative_report
+from mechaharness.efficiency_scorecard import build_efficiency_scorecard
 from mechaharness.environment_delta import EnvironmentSnapshot, apply_deltas, emit_delta
 from mechaharness.eval_evidence import Claim, compose_claims
+from mechaharness.eval_matrix import EvalMatrix
+from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
 from mechaharness.evaluator import CallableEvaluator, evaluate_claims
 from mechaharness.exit_contract import CleanStateContract, evaluate_exit
+from mechaharness.experiment_dimensions import (
+    ExperimentDimensions,
+    require_dimension_trace_fields,
+)
+from mechaharness.experiment_lineage import ExperimentCheckpoint
+from mechaharness.exposure_accounting import ExposureLedger, ExposureSample
 from mechaharness.failure_attribution import (
     attribute_error,
     attribute_with_repair_target,
@@ -126,6 +137,10 @@ from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.harness_experiment import HarnessExperiment, HarnessExperimentRunner
+from mechaharness.harness_fingerprint import (
+    build_harness_fingerprint,
+    require_eval_provenance,
+)
 from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
@@ -143,6 +158,7 @@ from mechaharness.inference.judge import (
 )
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.inference_capture import EvaluationOnlyCapture
 from mechaharness.instruction_component import InstructionCatalog, InstructionComponent
 from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
 from mechaharness.judgement_policy import (
@@ -151,6 +167,7 @@ from mechaharness.judgement_policy import (
     JudgementThreshold,
     decide,
 )
+from mechaharness.learning_export import build_learning_export
 from mechaharness.lifecycle_extension import (
     BeforeGraphNode,
     BeforeTool,
@@ -170,6 +187,7 @@ from mechaharness.model_input_manifest import (
     attach_manifest_ref,
     reconstruct_messages,
 )
+from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
 from mechaharness.operation_registry import (
     NodeContractBind,
     OperationContract,
@@ -179,6 +197,7 @@ from mechaharness.operation_registry import (
 from mechaharness.outcome_contract import OutcomeContract
 from mechaharness.research import EvalProtocol, ResearchLab
 from mechaharness.resume_cost import ResumeCostMetrics, summarize_resume_cost
+from mechaharness.rollout_graph import build_rollout_graph
 from mechaharness.routing import (
     activate_scoped_policy,
     route_at_boundary,
@@ -186,27 +205,8 @@ from mechaharness.routing import (
     shadow_decision_backends,
 )
 from mechaharness.rule_promotion import PromotionRecord, promote_soft_to_hard
-from mechaharness.tools.base import ToolRegistry
-from mechaharness.cross_harness_failure import classify_cross_harness_failure
-from mechaharness.discriminative_value import discriminative_report
-from mechaharness.efficiency_scorecard import build_efficiency_scorecard
-from mechaharness.eval_matrix import EvalMatrix
-from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
-from mechaharness.experiment_dimensions import (
-    ExperimentDimensions,
-    require_dimension_trace_fields,
-)
-from mechaharness.experiment_lineage import ExperimentCheckpoint
-from mechaharness.exposure_accounting import ExposureLedger, ExposureSample
-from mechaharness.harness_fingerprint import (
-    build_harness_fingerprint,
-    require_eval_provenance,
-)
-from mechaharness.inference_capture import EvaluationOnlyCapture
-from mechaharness.learning_export import build_learning_export
-from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
-from mechaharness.rollout_graph import build_rollout_graph
 from mechaharness.run_parity import compare_parity, parity_from_harness_config
+from mechaharness.tools.base import ToolRegistry
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
 from mechaharness.trace_reconciliation import ObservationSurface, reconcile_traces
 from mechaharness.verification_policy import DefaultVerificationPolicy

@@ -97,19 +97,22 @@ class EvalMatrix(BaseModel):
 
     def aggregate(self) -> dict[str, Any]:
         """Aggregate while retaining every cell (no average-only collapse)."""
-        cell_rows = []
+        cell_rows: list[dict[str, Any]] = []
+        rates: list[float] = []
         for cell in self.iter_cells():
+            rate = cell.success_rate
+            if rate is not None:
+                rates.append(rate)
             cell_rows.append(
                 {
                     "model": cell.model,
                     "harness_fingerprint": cell.harness_fingerprint,
                     "task_family": cell.task_family,
                     "trial_count": cell.trial_count,
-                    "success_rate": cell.success_rate,
+                    "success_rate": rate,
                     "trial_ids": [t.trial_id for t in cell.trials],
                 }
             )
-        rates = [r["success_rate"] for r in cell_rows if r["success_rate"] is not None]
         return {
             "cell_count": len(cell_rows),
             "mean_success_rate": (sum(rates) / len(rates)) if rates else None,

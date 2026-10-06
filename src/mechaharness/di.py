@@ -78,7 +78,6 @@ from mechaharness.graph_templates import GraphTemplateRegistry, default_graph_te
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
 from mechaharness.harness.pass_through import PassThroughHarness
-from mechaharness.inference_capture import InferenceCapture, empty_inference_capture
 from mechaharness.harness.react import ReactHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.anthropic import AnthropicStrategy
@@ -87,6 +86,7 @@ from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.inference_capture import InferenceCapture, empty_inference_capture
 from mechaharness.lifecycle_extension import (
     LifecycleExtensionRegistry,
     empty_lifecycle_extension_registry,
