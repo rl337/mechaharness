@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_objective_policy",
+  "persona": "taloneth",
+  "title": "Require an explicit policy before collapsing evaluator signals",
+  "kind": "objective_policy_aggregate",
+  "narrative": "Taloneth refuses silent weighted blends of verifier scores and wants gates and formula version written into the result. Accepts FineEnvs reward aggregation guidance[^fineenvs-objective].",
+  "implementation": "`ObjectivePolicy` and `aggregate_objective` in `mechaharness.objective_policy` record component signals, formula, version, gates, and prerequisites on every scalar objective.",
+  "validation": "Kind `objective_policy_aggregate`. Soft expects scored scalar with policy identity. Unit tests in `tests/test_objective_policy.py`.",
+  "footnotes": [
+    {
+      "id": "fineenvs-objective",
+      "label": "FineEnvs multi-harness RL \u2014 rewards aggregation",
+      "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards",
+      "note": "MH-MHRL-07"
+    }
+  ]
+}
