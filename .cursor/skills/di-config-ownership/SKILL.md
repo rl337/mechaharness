@@ -3,7 +3,8 @@ name: di-config-ownership
 description: >-
   Keep Settings slim: lane/provider knobs belong on owning injectables and
   MechaHarnessConfig hooks. Use when adding Settings fields, backends, lanes,
-  judge/media/reason connections, APIConnectionConfig, or JudgeProvider wiring.
+  judge/media/reason connections, APIConnectionConfig, JudgeProvider wiring,
+  or Agentic Recipe / graph-template configuration.
 ---
 
 # DI config ownership
@@ -15,6 +16,8 @@ MechaHarness is pyiv DI-first. **Settings is not a provider bag.**
 - Adding or changing `Settings` fields
 - Adding a lane (reason / judge / media) or HTTP connection
 - Wiring `JudgeProvider`, `InferenceStrategy`, or future media providers
+- Wiring Agentic Recipes / `GraphTemplateRegistry` (never put recipe catalogs
+  or model picks on Settings)
 - Tempted to put `*_base_url`, OAuth, or provider instances on `Settings`
 
 ## Checklist
@@ -46,5 +49,11 @@ Settings.judge_provider = SystemOneJudgeProvider(...)
 SimpleHttpConnectionConfig.from_env()  # or explicit ctor
 MechaHarnessConfig.get_judge_connection() / get_judge_provider()
 ```
+
+Recipe soft points bind host-owned tools/prompts/models via Config and
+injectables. Model size/provider for a decision recipe is routing policy
+(Completer / JudgeProvider flavors), not Settings fields and not hard-coded
+into the recipe architecture. See
+[`agentic-recipes`](../agentic-recipes/SKILL.md).
 
 See `.cursor/rules/di-first.mdc` and `docs/architecture.md` (Dependency injection).

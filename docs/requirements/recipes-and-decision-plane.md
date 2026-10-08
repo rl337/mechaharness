@@ -26,29 +26,88 @@ A second motivating example is retry. Retry is not merely "run the node again": 
 
 ## Definition
 
-A **recipe** is a reusable, parameterized graph or subgraph that implements a bounded agent-control pattern and can be embedded in a larger execution graph.
+An **Agentic Recipe** is a reusable, parameterized subgraph that implements a
+bounded agent-control pattern and can be embedded in a larger execution graph.
 
-Recipes MUST be composition, not a parallel execution system. A recipe should compile/instantiate into normal MechaHarness graph primitives and inherit graph tracing, persistence, resume, testing, policy, and observability.
+Recipes MUST be composition, not a parallel execution system. A recipe should
+compile/instantiate into normal MechaHarness graph primitives and inherit graph
+tracing, persistence, resume, testing, policy, and observability.
 
-Recipes are analogous to reusable functions in ordinary programming: named graph fragments with explicit inputs, outputs, configuration, and contracts.
+Recipes are analogous to reusable functions in ordinary programming: named
+graph fragments with explicit inputs, outputs, configuration, and contracts.
+
+### Substrate vs concept
+
+The **data structure and factory API remain**
+:class:`~mechaharness.graph_templates.base.GraphTemplate` (and related
+`GraphTemplateParams`, soft points, registry, provenance stamps). MechaHarness
+MUST NOT invent a parallel recipe type system, executor, scheduler, persistence
+layer, event bus, or model gateway.
+
+**Agentic Recipe** is the top-level product concept for concrete, useful
+templates that encode a readable control pattern. Catalog metadata, docs,
+user-story implementation text, and host-facing language SHOULD name recipes
+by stable catalog id (for example `verify_repair`, `decision_plane`).
+
+The boundary between a skeletal template and an Agentic Recipe MAY stay soft
+until a concrete case forces the call. Prefer promoting when a host would want
+to read and reuse the control story as a named unit.
+
+### Human-readable composition (RC-HR)
+
+At the recipe layer, **composition code is a primary readability surface**, not
+only documentation. A reader SHOULD be able to open host or library tiling code
+and understand how recipes combine into the final graph without reconstructing
+the story from opaque node ids or soft-binding dicts alone.
+
+Recipes SHOULD optimize for:
+
+- explicit tiling / embed APIs that read as control flow;
+- stable, namespaced node identities that match the source layout;
+- soft-point names that describe the human decision being bound;
+- hard structure visible in the recipe definition (or an equally readable
+  builder), not hidden behind an opaque compiler blob.
+
+### Promotion from requirements and user stories
+
+As part of refining recipes, MechaHarness MUST review current requirements and
+user stories, formalize recurring control patterns into concrete recipes where
+relevant, and ship those as the first well-documented catalog entries.
+
+Each Agentic Recipe MUST have **at least one user story** that exercises that
+recipe as the unit under test (instantiate and run, or statically validate the
+tiled graph). Unit tests alone are not enough.
+
+When a story is fulfilled by a recipe, the story `implementation` text MUST
+refer to the recipe **by catalog name** so readers learn the recipe vocabulary
+alongside modules and Config hooks. Mechanism-only stories (soft points,
+stamping, demotion) MAY name `GraphTemplate`; pattern stories MUST name the
+recipe.
 
 ## Ownership boundary
 
 MechaHarness owns:
-- the recipe abstraction and composition semantics;
+- the `GraphTemplate` substrate and recipe composition semantics;
 - recipe input/output and configuration contracts;
 - deterministic validation and graph linkage;
-- reference recipes for broadly reusable harness behavior;
+- reference Agentic Recipes for broadly reusable harness behavior;
 - tracing and provenance of recipe expansion/execution;
-- test utilities for recipe behavior.
+- test utilities and documentation for recipes;
+- the audit→promote process that turns story/requirement patterns into catalog
+  recipes.
 
 Applications own:
-- domain-specific recipes;
+- domain-specific recipes (still `GraphTemplate` subclasses);
 - domain-specific prompts, labels, policies, and thresholds;
-- selection of concrete models/providers unless a recipe explicitly accepts a router abstraction;
-- application-specific side effects.
+- selection of concrete models/providers unless a recipe explicitly accepts a
+  router abstraction;
+- application-specific side effects;
+- readable host tiling that composes library and domain recipes.
 
-A downstream project such as June SHOULD be able to define June-specific recipes while reusing MechaHarness recipe primitives. A generally useful recipe born in June SHOULD be extractable back into MechaHarness without changing the recipe model.
+A downstream project such as June SHOULD be able to define June-specific recipes
+while reusing MechaHarness recipe primitives. A generally useful recipe born in
+June SHOULD be extractable back into MechaHarness without changing the recipe
+model.
 
 ## Requirements
 
@@ -112,6 +171,46 @@ A recipe MUST be able to contain both:
 Overrides MUST be constrained by the recipe contract. A caller MUST NOT mutate arbitrary internal structure accidentally.
 
 This permits a reusable MechaHarness recipe to be made concrete by June or another host without forking the recipe.
+
+### RC-07: Substrate is GraphTemplate
+
+Recipe definitions MUST be expressible as `GraphTemplate` (or a thin subclass /
+helper layered on it). Hosts register recipes through the existing graph
+template registry / Config hook path. Renaming the public vocabulary to
+"Agentic Recipe" MUST NOT require a second injectable registry unless a later
+ADR proves the split necessary.
+
+### RC-08: Human-readable tiling
+
+Recipe APIs and reference implementations MUST prefer forms a human can read as
+structure. Opaque expansion that cannot be inspected as ordinary graph nodes
+after instantiate is forbidden. Soft-point and node naming SHOULD be domain-clear
+at the leaf (see unambiguous-names rules).
+
+### RC-09: Recipe ↔ user story linkage
+
+Every shipped Agentic Recipe MUST list at least one owning user-story id in its
+reference documentation. The owning story's `implementation` field MUST name
+the recipe catalog id. Promoting a pattern to a recipe without a story is
+incomplete.
+
+## First-wave catalog candidates
+
+Patterns already present as templates or story clusters SHOULD be evaluated for
+promotion and documentation as Agentic Recipes (names are catalog ids):
+
+| Catalog id | Existing surface | Anchor story candidates |
+|------------|------------------|-------------------------|
+| `fan_out_aggregate` | `FanOutAggregateTemplate` | `fangore_graph_template_soft_points`, `fangore_insp_fan_in_policy`, `nubble_insp_coordination_cost` |
+| `verify_repair` | `VerifyRepairTemplate` | `fangore_bounded_repair_loop` (loop semantics; dedicated tiling story TBD) |
+| `independent_review` | `IndependentReviewTemplate` | `fangore_insp_independent_review` |
+| `environment_repair` | `EnvironmentRepairTemplate` | **gap** — needs a story that instantiates this recipe |
+| `initialize_preflight` | `InitializePreflightTemplate` | `fangore_insp_initialize_preflight` |
+| `decision_plane` | *(new; this document DP-\*)* | new Fangore story; primitives in `fangore_decision_surface_reject` |
+| `bounded_retry` | *(new; this document RT-\*)* | new Fangore story; compose with durable resume |
+
+Next-wave patterns with stories but not yet required as recipes:
+human approval gates, sparse advisor consult, narrowed delegation envelopes.
 
 ## Reference recipe: typed decision plane
 
@@ -282,17 +381,27 @@ Crash/restart tests MUST exercise checkpoints at multiple locations inside an in
 ## Initial implementation scope
 
 A first implementation SHOULD be intentionally small:
-1. recipe definition/instantiation API;
-2. deterministic validation and namespacing;
-3. recipe provenance in graph/traces;
-4. typed-decision reference recipe with batching, valid-action envelopes, and escalation;
-5. bounded-retry reference recipe;
-6. static/DI tests.
+1. strengthen `GraphTemplate` composition (namespacing, I/O contracts, provenance)
+   without a second type system;
+2. deterministic validation and human-readable tiling helpers;
+3. recipe provenance in graph/traces (catalog id + instance fingerprint);
+4. document and story-link first-wave promotions from existing templates;
+5. typed-decision reference recipe (`decision_plane`) with batching,
+   valid-action envelopes, and escalation;
+6. bounded-retry reference recipe (`bounded_retry`) composing with
+   [transactional durable resume](./transactional-durable-resume.md);
+7. static/DI tests plus ≥1 user story per shipped recipe;
+8. skills/docs that treat Agentic Recipes as a top-level project concept.
 
-Do not create a recipe-specific scheduler, persistence layer, event system, or model gateway. Reuse MechaHarness primitives.
+Do not create a recipe-specific scheduler, persistence layer, event system, or
+model gateway. Reuse MechaHarness primitives.
 
 ## Design principle
 
 The harness should spend inference only on uncertainty.
 
-Recipes turn that principle into reusable graph structure: deterministic code handles facts and policy, specialized models answer bounded questions, expensive models receive the genuinely ambiguous remainder, and the entire control flow remains visible and testable.
+Recipes turn that principle into reusable, **human-readable** graph structure:
+deterministic code handles facts and policy, specialized models answer bounded
+questions, expensive models receive the genuinely ambiguous remainder, and the
+entire control flow remains visible and testable — in traces **and** in the
+code that tiles recipes together.

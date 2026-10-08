@@ -1,36 +1,54 @@
-# Graph templates
+# Graph templates and Agentic Recipes
 
-Reusable parameterized **subgraph skeletons** owned by MechaHarness. Clients
-instantiate a template, bind soft points, and may keep the resulting concrete
-:class:`~mechaharness.graph.ExecutionGraph` in their own repository.
-MechaHarness validates and executes those graphs without taking ownership of
-client-specific realizations.
+**Agentic Recipes** are a top-level MechaHarness concept: concrete, reusable
+agent-control patterns hosts tile into larger graphs. The **substrate** is
+always :class:`~mechaharness.graph_templates.base.GraphTemplate` — parameterized
+subgraph factories with soft points, registry merge, and provenance stamps.
+There is no second recipe executor or type system.
+
+Clients instantiate a template/recipe, bind soft points, and may keep the
+resulting concrete :class:`~mechaharness.graph.ExecutionGraph` in their own
+repository. MechaHarness validates and executes those graphs without taking
+ownership of client-specific realizations.
+
+Normative requirements:
+[Reusable graph recipes and typed decision plane](../requirements/recipes-and-decision-plane.md).
 
 | Surface | Value |
 |---------|-------|
 | Package | `mechaharness.graph_templates` |
+| Concept | Agentic Recipe (catalog id) |
+| Substrate | `GraphTemplate` |
 | Stability | evolving |
 | Config hook | `MechaHarnessConfig.get_graph_template_registry()` |
 
 ## Catalog
 
-| Template | Module | Purpose |
-|----------|--------|---------|
+First-wave candidates (existing templates; promote/document as recipes with
+owning user stories):
+
+| Catalog id | Module | Purpose |
+|------------|--------|---------|
 | [fan_out_aggregate](./graph-templates/fan-out-aggregate.md) | `fan_out_aggregate` | Plan → parallel branches → reduce |
 | [verify_repair](./graph-templates/verify-repair.md) | `verify_repair` | Produce → verify → bounded repair |
 | [independent_review](./graph-templates/independent-review.md) | `independent_review` | Isolated reviewers; retain disagreement |
 | [environment_repair](./graph-templates/environment-repair.md) | `environment_repair` | Diagnose → repair env → recheck |
+| initialize_preflight | `initialize_preflight` | Linkage → capability → checkpoint → ready |
+
+Planned reference recipes (see requirements): `decision_plane`, `bounded_retry`.
 
 ## Soft points
 
 Each template declares `SoftPoint`s (tools, providers, prompts, models,
 budgets, persistence, policies, runner kinds, task state). Bindings go in
 `GraphTemplateParams.soft_bindings` (plus `inputs` / `branch_payloads` /
-`acceptance` / `stop_contract` where applicable). Templates MUST NOT embed
-client product policy or durable application state.
+`acceptance` / `stop_contract` where applicable). Soft-point names SHOULD
+describe the human decision being bound. Templates MUST NOT embed client
+product policy or durable application state.
 
 Instantiated graphs are stamped with `template_name`, `template_version`, and
-`template_status` for provenance and deprecation detection.
+`template_status` for provenance and deprecation detection. Optimize tiling
+code for human readability of how recipes compose into the final graph.
 
 ## Usage sketch
 
@@ -60,5 +78,7 @@ assert graph.template_name == "fan_out_aggregate"
 
 See [Inspiration requirements map](../inspiration/requirements-map.md) and
 req 19 in [dev-blog-inspiration](../inspiration/dev-blog-inspiration.md).
-Generic skeletons live here; host-specific workflows incubate in the client
-until promotion extracts a reusable template.
+Generic skeletons and Agentic Recipes live here; host-specific workflows
+incubate in the client until promotion extracts a reusable recipe.
+Every shipped recipe needs ≥1 owning user story that names the catalog id in
+its `implementation` text.

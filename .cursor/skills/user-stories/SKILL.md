@@ -4,8 +4,9 @@ description: >-
   Write and maintain persona user stories with prose narratives under
   docs/guides/user-stories.md and tests/fixtures/models/. Use when adding or
   changing library behavior, adapters, grants, lanes, judge, harness, DI,
-  integration/live tests, cassettes, or when the user mentions user stories,
-  Nubble, Fangore, Taloneth, or story acceptance.
+  Agentic Recipes / graph templates, integration/live tests, cassettes, or
+  when the user mentions user stories, Nubble, Fangore, Taloneth, or story
+  acceptance.
 ---
 
 # User stories (MechaHarness)
@@ -84,6 +85,13 @@ Audience: a **non-technical project manager** who understands features, not code
 **Product / library functionality** that makes the story true — not the test.
 
 - Name modules, classes, Config hooks, and behaviors in `src/mechaharness/…`.
+- When the story is fulfilled by an **Agentic Recipe**, name the recipe by
+  **catalog id** (for example `verify_repair`, `decision_plane`,
+  `fan_out_aggregate`) so readers learn recipes as part of the implementation
+  surface. Mechanism-only stories (soft points, stamping, demotion) may name
+  `GraphTemplate`; pattern stories must name the recipe.
+- Every shipped Agentic Recipe needs ≥1 owning story that exercises that recipe
+  as the unit under test — see [`agentic-recipes`](../agentic-recipes/SKILL.md).
 - Write so a reader can trace “this code exists because of this story.”
 - Do **not** put runner kinds, soft expects, or fixture paths here (those belong in `validation`).
 - New library acceptance maps to a **story id**. Local `REQUIREMENTS.md` cites
@@ -145,7 +153,10 @@ When you **touch** functionality in this repo:
 2. If none fit — add or extend a story under Nubble / Fangore / Taloneth (update
    `personas.json` only if a new persona is truly required).
 3. Update `implementation` and/or `validation` as appropriate; sync twins.
-4. Regenerate the guide; mention story id(s) in the PR summary.
+   If the change promotes or ships an Agentic Recipe, ensure an owning story
+   names that recipe’s catalog id in `implementation`.
+4. Regenerate the guide; mention story id(s) (and recipe catalog ids when
+   relevant) in the PR summary.
 
 Do **not** add skipif live modules. Offline CI must run the story suite with
 **zero skips**; live is the same parametrized tests with `MECHA_STORY_BACKEND=live`.
@@ -201,16 +212,20 @@ Soft expects only. Exact wire text belongs in `response.json` for replay.
 # BAD — putting runner/expect details in implementation (use validation)
 # BAD — putting library design only in validation (use implementation)
 # BAD — cite a capability with no story id / mint new INF-POL codes as primary
+# BAD — pattern story that omits the Agentic Recipe catalog id in implementation
+# BAD — ship a recipe with no owning user story
 # BAD — change kind without runners/expects + validation update
 # BAD — commit story.json without regenerating the guide
 # BAD — As-a bullet as the only story body
 # BAD — new skipif live module for one model
 
 # GOOD — edit story.json (+ twins) → generate guide → --check green
+# GOOD — implementation names verify_repair (recipe) and GraphTemplate (substrate)
 ```
 
 ## Related
 
+- [`agentic-recipes`](../agentic-recipes/SKILL.md) — recipes as top-level concept
 - [`project-docs`](../project-docs/SKILL.md) — defer user-story guide edits to this skill
-- `.cursor/rules/unambiguous-names.mdc`
+- `.cursor/rules/unambiguous-names.mdc`, `.cursor/rules/agentic-recipes.mdc`
 - `tests/stories/`

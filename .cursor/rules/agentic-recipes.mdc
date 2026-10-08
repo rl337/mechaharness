@@ -1,0 +1,31 @@
+---
+description: Agentic Recipes are a top-level concept; GraphTemplate is the substrate
+alwaysApply: true
+---
+
+# Agentic Recipes
+
+**Agentic Recipe** is a top-level MechaHarness product concept: a concrete,
+reusable agent-control pattern hosts tile into graphs.
+
+## Substrate
+
+- The data structure and factory remain `GraphTemplate` /
+  `GraphTemplateParams` / soft points / `GraphTemplateRegistry`.
+- Do **not** add a parallel recipe type system, executor, scheduler,
+  persistence layer, event bus, or model gateway.
+- Register via Config (`get_graph_template_registry()`); hosts merge catalogs.
+
+## Product rules
+
+- Optimize recipe tiling code for **human readability**, not only docs.
+- Catalog ids are stable leaf names (`verify_repair`, `decision_plane`).
+- Soft-point names describe the human decision being bound.
+- Every shipped Agentic Recipe needs ≥1 owning user story; story
+  `implementation` text names the recipe catalog id.
+- Promote patterns from requirements and user stories when hosts would reuse
+  the control story as a named unit; the template/recipe cut may stay soft
+  until a case forces it.
+
+See `.cursor/skills/agentic-recipes/SKILL.md` and
+`docs/requirements/recipes-and-decision-plane.md`.

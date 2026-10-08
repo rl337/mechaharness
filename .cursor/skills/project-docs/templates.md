@@ -58,6 +58,46 @@ Copy the matching template when creating a new page. Replace bracketed placehold
 ```
 ```
 
+## Agentic Recipe page (`docs/reference/graph-templates/<catalog-id>.md`)
+
+Recipes are `GraphTemplate` subclasses. Document the **catalog id** as the
+primary name. Include a readable tiling example and owning story id(s).
+
+````markdown
+# [Human title] (`catalog_id`)
+
+**Agentic Recipe.** [One sentence: control pattern.]
+
+| Surface | Value |
+|---------|-------|
+| Catalog id | `catalog_id` |
+| Module | `mechaharness.graph_templates.…` |
+| Substrate | `GraphTemplate` |
+| Owning stories | `fangore_…` |
+
+## When to use
+
+- [Use]
+- [Do not use when…]
+
+## Soft points
+
+| Name | Kind | Role |
+|------|------|------|
+| `…` | `…` | [Human decision being bound] |
+
+## Tiling example
+
+```python
+# Prefer code a human can read as structure
+```
+
+## Related
+
+- [Graph templates / recipes overview](../graph-templates.md)
+- [Recipes requirements](../../requirements/recipes-and-decision-plane.md)
+````
+
 ## Architecture section addition
 
 When extending `docs/architecture.md`, add a short subsection:
