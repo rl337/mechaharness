@@ -1,0 +1,16 @@
+{
+  "raw_context": {
+    "ticket_id": "T-9",
+    "channel": "email",
+    "body": "charged twice",
+    "secret": "do-not-emit"
+  },
+  "project_keys": [
+    "ticket_id",
+    "channel"
+  ],
+  "facts": {
+    "duplicate_charge": true,
+    "amount_cents": 1200
+  }
+}

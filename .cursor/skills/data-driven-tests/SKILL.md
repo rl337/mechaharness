@@ -4,8 +4,9 @@ description: >-
   Write and convert MechaHarness tests as declarative fixture matrices so
   coverage grows without proliferating near-duplicate test functions. Use when
   adding tests, expanding coverage, parametrizing cases, converting existing
-  unit tests to data-driven form, or when the user mentions fixtures, case
-  matrices, table-driven tests, or test proliferation.
+  unit tests to data-driven form, testing Agentic Recipe expansion matrices, or
+  when the user mentions fixtures, case matrices, table-driven tests, or test
+  proliferation.
 ---
 
 # Data-driven tests
@@ -18,7 +19,13 @@ Canonical example: `tests/fixtures/graph_executor/*.json` +
 `tests/support/graph_executor_cases.py` + `tests/test_graph_executor.py`.
 
 Respect `.cursor/rules/unambiguous-names.mdc`: fixture dirs and support modules
-name the domain (`graph_executor`, not `cases` / `matrix`).
+name the domain (`graph_executor`, `graph_templates`, recipe catalog ids — not
+`cases` / `matrix`).
+
+Agentic Recipe expansion, decision-batching, confidence escalation, and retry
+boundary matrices belong under domain-clear fixture paths (for example
+`tests/fixtures/graph_templates/`) and still need an owning user story per
+[`agentic-recipes`](../agentic-recipes/SKILL.md).
 
 ## When to apply
 

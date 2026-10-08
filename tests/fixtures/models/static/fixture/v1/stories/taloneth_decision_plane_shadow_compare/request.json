@@ -1,0 +1,44 @@
+{
+  "cases": [
+    {
+      "name": "disagree",
+      "production_answers": {
+        "team": "billing"
+      },
+      "shadow_answers": {
+        "team": "technical"
+      },
+      "expect_agreement": false
+    },
+    {
+      "name": "candidate_unavailable",
+      "production_answers": {
+        "team": "billing"
+      },
+      "shadow_answers": null,
+      "expect_unavailable": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "team",
+      "kind": "choice",
+      "options": [
+        {
+          "id": "billing",
+          "label": "Billing"
+        },
+        {
+          "id": "technical",
+          "label": "Technical"
+        }
+      ],
+      "allowed_actions": [
+        "billing",
+        "technical"
+      ]
+    }
+  ],
+  "confidence": 0.9,
+  "confidence_floor": 0.7
+}

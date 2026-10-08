@@ -1,0 +1,5 @@
+{
+  "soft_point_decision_model": true,
+  "ask_model_ref": "flavor:local_decision",
+  "describe_has_param_count": false
+}

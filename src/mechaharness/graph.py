@@ -104,6 +104,10 @@ class ExecutionGraph(BaseModel):
     template_version: str | None = None
     template_status: str | None = None
     source_workflow_ref: str | None = None
+    recipe_instance_id: str | None = None
+    recipe_definition_fingerprint: str | None = None
+    recipe_params_fingerprint: str | None = None
+    recipe_node_map: dict[str, str] = Field(default_factory=dict)
 
     def add_node(self, node: GraphNode) -> GraphNode:
         self.nodes[node.id] = node

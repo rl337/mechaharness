@@ -1,0 +1,13 @@
+{
+  "template_name": "bounded_retry",
+  "nodes_include": [
+    "attempt",
+    "classify",
+    "permit_retry",
+    "backoff",
+    "escalate"
+  ],
+  "attempt_repeating": true,
+  "max_iterations": 3,
+  "requires_effect_reconciliation": true
+}
