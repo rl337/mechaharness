@@ -1,0 +1,7 @@
+{
+  "matching_claim_verified": true,
+  "growth_mismatch_verified": false,
+  "missing_source_verified": false,
+  "uncertain_support_verified": false,
+  "uncertain_support_escalates": true
+}

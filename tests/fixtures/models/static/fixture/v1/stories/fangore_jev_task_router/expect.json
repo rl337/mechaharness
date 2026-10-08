@@ -1,0 +1,6 @@
+{
+  "simple_local_action": "local_small",
+  "complex_action": "frontier",
+  "invalid_escalates": true,
+  "low_confidence_escalates": true
+}

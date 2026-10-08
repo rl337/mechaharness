@@ -1334,6 +1334,87 @@ Kind `wip_policy_allows`. Soft expects allow then deny when scope saturated.
 [^wl-l07-wip]: [WalkingLabs L07 Task Boundaries](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-07-why-agents-overreach-and-under-finish/) — Bound WIP
 [^wl-l08-wip]: [WalkingLabs L08 Feature Lists](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/) — Back-pressure
 
+### `fangore_jev_action_safety` — Let hard grants win over semantic risk classification
+
+Before an agent deletes, pays, or publishes, Fangore runs a semantic risk check and a hard grant check. If the model says the delete looks low risk but the product has no write grant, the action stays denied. Semantic risk may only add review or deny — it never unlocks a privilege the grants do not allow. Related: `fangore_tool_gating`, `fangore_insp_risk_autonomy`, `fangore_decision_plane_policy`.[^jev-us08]
+
+#### Implementation
+
+`AccessPolicy` / grant checks are the hard execution boundary (MH-JEV-05). Agentic Recipe `decision_plane` runtime classifies semantic risk as evidence only. Host composition: deny when grants fail regardless of risk label; high semantic risk on an allowed read may escalate to review without elevating grants.
+
+#### Validation
+
+Kind `action_safety_judgment`. Soft expects: delete without grant denied despite low semantic risk; granted read with high risk escalates to review; granted read with low risk allows; semantic path never elevates grants.
+
+#### Footnotes
+
+[^jev-us08]: [Jev typed-judgment inspiration (MH-JEV-US08)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Agent action safety firewall
+
+### `fangore_jev_citation_check` — Never mark unsupported claims verified from a judge alone
+
+Fangore ships a citation check: a small decision model answers whether a source supports an atomic claim, but product code alone may mark a claim verified. Contradictions, missing sources, and low confidence must stay unverified or escalate. Related: `fangore_decision_plane_policy`, `fangore_refund_verdict`.[^jev-us04][^jev-insp-cite]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate — confidence and envelopes never upgrade unsupported or unavailable answers.
+
+#### Validation
+
+Kind `citation_support_judgment`. Soft expects: matching claim verified; contradicted and unavailable never verified; low confidence escalates without verifying.
+
+#### Footnotes
+
+[^jev-us04]: [Jev typed-judgment inspiration (MH-JEV-US04)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Citation / claim support check
+[^jev-insp-cite]: [Jev decisions in a Pi harness](https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness) — Typed judgments and code-owned policy
+
+### `fangore_jev_context_picker` — Assemble RAG context from scored candidates within a token budget
+
+After retrieval, Fangore asks a decision model for relevance, trust, and freshness scores, then packs only candidates that clear product thresholds into a fixed token budget. Stale, untrusted, or injection-tainted snippets stay out even if they look relevant. When scores are missing, deterministic ranking still fills what it can. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05]
+
+#### Implementation
+
+`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned (DP-04). Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+
+#### Validation
+
+Kind `context_budget_judgment`. Soft expects: high-trust pack within budget; stale and low-trust skipped; injection candidate excluded; missing scores fall back without exceeding budget.
+
+#### Footnotes
+
+[^jev-us05]: [Jev typed-judgment inspiration (MH-JEV-US05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — RAG context selection
+
+### `fangore_jev_requirements_review` — Escalate requirement gaps without treating a judge approve as correctness
+
+Fangore reviews a change against applicable user stories with isolated reviewers and atomic checks. When a check finds a missing requirement or a missing crash-location test in the facts, the harness asks for focused tests or deeper review. A judge saying approve never marks the change correct by itself. Related: `fangore_insp_independent_review`, `fangore_decision_plane_policy`.[^jev-us06]
+
+#### Implementation
+
+Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts (for example missing crash tests) to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+
+#### Validation
+
+Kind `requirements_gap_judgment`. Soft expects: isolated review template present; gap and missing-crash-fact paths escalate to request_tests; approve-without-gap still not marked correct.
+
+#### Footnotes
+
+[^jev-us06]: [Jev typed-judgment inspiration (MH-JEV-US06)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Requirements-aware semantic review
+
+### `fangore_jev_task_router` — Route work to local, frontier, tool, or human with code-owned quality policy
+
+Fangore routes mixed work by asking a small decision model which lane fits — local small model, frontier model, deterministic tool, or human — then product policy accepts only allowed lanes and escalates on low confidence or invalid choices. Cheapest is not enough when quality policy requires a stronger lane. Related: `fangore_decision_plane_model_policy`, `nubble_insp_model_routing`.[^jev-us07]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.
+
+#### Validation
+
+Kind `task_route_judgment`. Soft expects: simple tasks take local_small; high complexity forces frontier; invalid and low-confidence escalate.
+
+#### Footnotes
+
+[^jev-us07]: [Jev typed-judgment inspiration (MH-JEV-US07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Task-specific model/workflow router
+
 ### `fangore_local_plan_resume` — Resume a durable local plan after a crash
 
 A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints — not chat — must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes. Incompatible harness or graph fingerprints must refuse silent continue. See inspiration requirements for durable long-running work[^insp-resume].
