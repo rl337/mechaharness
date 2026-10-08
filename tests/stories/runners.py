@@ -124,11 +124,15 @@ from mechaharness.graph_state_governance import (
     authorize_write,
 )
 from mechaharness.graph_templates import (
+    BoundedRetryTemplate,
+    DecisionPlaneTemplate,
+    EnvironmentRepairTemplate,
     FanOutAggregateTemplate,
     GraphTemplateParams,
     IndependentReviewTemplate,
     InitializePreflightTemplate,
     SubgraphNodeRunner,
+    VerifyRepairTemplate,
     default_graph_templates,
 )
 from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
@@ -394,6 +398,11 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "rule_promotion_hard": _run_rule_promotion_hard,
         "instruction_scope_metadata": _run_instruction_scope_metadata,
         "initialize_preflight_template": _run_initialize_preflight_template,
+        "environment_repair_recipe": _run_environment_repair_recipe,
+        "verify_repair_recipe": _run_verify_repair_recipe,
+        "recipe_namespace_tile": _run_recipe_namespace_tile,
+        "decision_plane_recipe": _run_decision_plane_recipe,
+        "bounded_retry_recipe": _run_bounded_retry_recipe,
         "handoff_record_fields": _run_handoff_record_fields,
         "operation_compensation_meta": _run_operation_compensation_meta,
         "environment_delta_apply": _run_environment_delta_apply,
@@ -2665,6 +2674,128 @@ async def _run_initialize_preflight_template(case: StoryCase, backend: StoryBack
         GraphTemplateParams(goal=str(request.get("goal") or "preflight"))
     )
     actual = {"nodes_include": sorted(graph.nodes)}
+    _assert_expect(actual, expect)
+
+
+async def _run_environment_repair_recipe(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    template = EnvironmentRepairTemplate()
+    graph = template.instantiate(
+        GraphTemplateParams(goal=str(request.get("goal") or "environment_repair"))
+    )
+    actual = {
+        "template_name": graph.template_name,
+        "nodes_include": list(graph.nodes),
+        "recipe_category": template.category,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_verify_repair_recipe(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    graph = VerifyRepairTemplate().instantiate(
+        GraphTemplateParams(goal=str(request.get("goal") or "verify_repair"))
+    )
+    actual = {
+        "template_name": graph.template_name,
+        "nodes_include": list(graph.nodes),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_recipe_namespace_tile(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    registry = default_graph_templates()
+    recipe_name = str(request.get("recipe") or "verify_repair")
+    template = registry.get(recipe_name)
+    assert template is not None
+    keys = list(request.get("instance_keys") or ["left", "right"])
+    parent = ExecutionGraph(goal="parent")
+    children = []
+    embeds = []
+    for key in keys:
+        child, embed = template.tile(
+            GraphTemplateParams(
+                goal=f"{recipe_name}:{key}",
+                instance_key=str(key),
+            ),
+            parent_node_id=f"embed_{key}",
+        )
+        children.append(child)
+        embeds.append(embed)
+        parent.add_node(embed)
+    id_sets = [set(c.nodes) for c in children]
+    overlap = bool(id_sets[0].intersection(*id_sets[1:])) if len(id_sets) > 1 else False
+    left = children[0]
+    prefix_left = f"{recipe_name}/{keys[0]}/"
+    assert any(nid.startswith(prefix_left) for nid in left.nodes)
+    actual = {
+        "instance_count": len(children),
+        "node_id_overlap": overlap,
+        "distinct_instance_ids": len({c.recipe_instance_id for c in children})
+        == len(children),
+        "parent_embed_kinds": [e.kind for e in embeds],
+        "namespaced_prefix_left": prefix_left,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_decision_plane_recipe(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    graph = DecisionPlaneTemplate().instantiate(
+        GraphTemplateParams(
+            goal=str(request.get("goal") or "decision_plane"),
+            inputs={
+                "state_projection": dict(request.get("state_projection") or {}),
+                "facts": dict(request.get("facts") or {}),
+                "questions": list(request.get("questions") or []),
+                "confidence_floor": request.get("confidence_floor", 0.7),
+                "shadow_mode": bool(request.get("shadow_mode", False)),
+            },
+        )
+    )
+    ask = graph.nodes["ask_batch"]
+    project = graph.nodes["project_state"]
+    facts_on_project = "facts" in project.payload and "facts" not in ask.payload
+    actual = {
+        "template_name": graph.template_name,
+        "nodes_include": list(graph.nodes),
+        "ask_batch_question_count": len(ask.payload.get("questions") or []),
+        "facts_on_project_not_ask": facts_on_project,
+        "confidence_floor": ask.payload.get("confidence_floor"),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_bounded_retry_recipe(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    graph = BoundedRetryTemplate().instantiate(
+        GraphTemplateParams(
+            goal=str(request.get("goal") or "bounded_retry"),
+            inputs={"max_attempts": int(request.get("max_attempts") or 3)},
+        )
+    )
+    attempt = graph.nodes["attempt"]
+    stop = attempt.stop_contract or {}
+    actual = {
+        "template_name": graph.template_name,
+        "nodes_include": list(graph.nodes),
+        "attempt_repeating": attempt.repeating,
+        "max_iterations": stop.get("max_iterations"),
+        "requires_effect_reconciliation": attempt.payload.get(
+            "requires_effect_reconciliation"
+        ),
+    }
     _assert_expect(actual, expect)
 
 

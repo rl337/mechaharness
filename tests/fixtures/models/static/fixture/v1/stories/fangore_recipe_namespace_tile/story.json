@@ -1,0 +1,17 @@
+{
+  "id": "fangore_recipe_namespace_tile",
+  "persona": "fangore",
+  "title": "Embed two recipe instances without node-id collisions",
+  "kind": "recipe_namespace_tile",
+  "narrative": "Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution.",
+  "implementation": "`GraphTemplateParams.instance_key` namespaces node ids on instantiate. `GraphTemplate.tile` embeds a recipe graph under a parent node via `SubgraphNodeRunner`. Provenance includes instance id, params fingerprint, and logical-to-concrete node map (RC-01, RC-04, RC-05, RC-08).",
+  "validation": "Kind `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct recipe_instance_id values, and parent embed node kinds subgraph.",
+  "footnotes": [
+    {
+      "id": "rc-namespace",
+      "label": "Recipes requirements (RC-01/04/05/08)",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "Namespaced multi-instance tiling"
+    }
+  ]
+}

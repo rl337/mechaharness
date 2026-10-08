@@ -27,15 +27,19 @@ Normative requirements:
 First-wave candidates (existing templates; promote/document as recipes with
 owning user stories):
 
-| Catalog id | Module | Purpose |
-|------------|--------|---------|
-| [fan_out_aggregate](./graph-templates/fan-out-aggregate.md) | `fan_out_aggregate` | Plan → parallel branches → reduce |
-| [verify_repair](./graph-templates/verify-repair.md) | `verify_repair` | Produce → verify → bounded repair |
-| [independent_review](./graph-templates/independent-review.md) | `independent_review` | Isolated reviewers; retain disagreement |
-| [environment_repair](./graph-templates/environment-repair.md) | `environment_repair` | Diagnose → repair env → recheck |
-| initialize_preflight | `initialize_preflight` | Linkage → capability → checkpoint → ready |
+| Catalog id | Module | Owning story | Purpose |
+|------------|--------|--------------|---------|
+| [fan_out_aggregate](./graph-templates/fan-out-aggregate.md) | `fan_out_aggregate` | `fangore_graph_template_soft_points` | Plan → parallel branches → reduce |
+| [verify_repair](./graph-templates/verify-repair.md) | `verify_repair` | `fangore_verify_repair_recipe` | Produce → verify → bounded repair |
+| [independent_review](./graph-templates/independent-review.md) | `independent_review` | `fangore_insp_independent_review` | Isolated reviewers; retain disagreement |
+| [environment_repair](./graph-templates/environment-repair.md) | `environment_repair` | `fangore_environment_repair_recipe` | Diagnose → repair env → recheck |
+| initialize_preflight | `initialize_preflight` | `fangore_insp_initialize_preflight` | Linkage → capability → checkpoint → ready |
+| [decision_plane](./graph-templates/decision-plane.md) | `decision_plane` | `fangore_decision_plane_recipe` | Batched typed decisions + escalate |
+| [bounded_retry](./graph-templates/bounded-retry.md) | `bounded_retry` | `fangore_bounded_retry_recipe` | Visible classify → permit → backoff → escalate |
 
-Planned reference recipes (see requirements): `decision_plane`, `bounded_retry`.
+Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
+`GraphTemplate.tile` (embed under a parent node). Story:
+`fangore_recipe_namespace_tile`.
 
 ## Soft points
 

@@ -92,13 +92,14 @@ Pattern stories **must** name the recipe catalog id.
 
 | Catalog id | Module / status | Story anchors |
 |------------|-----------------|---------------|
-| `fan_out_aggregate` | existing template | `fangore_graph_template_soft_points`, `fangore_insp_fan_in_policy` |
-| `verify_repair` | existing template | `fangore_bounded_repair_loop` |
-| `independent_review` | existing template | `fangore_insp_independent_review` |
-| `environment_repair` | existing template | **gap** — needs instantiate story |
-| `initialize_preflight` | existing template | `fangore_insp_initialize_preflight` |
-| `decision_plane` | requirements DP-* | planned; primitives in `fangore_decision_surface_reject` |
-| `bounded_retry` | requirements RT-* | planned; durable resume composition |
+| `fan_out_aggregate` | shipped | `fangore_graph_template_soft_points`, … |
+| `verify_repair` | shipped | `fangore_verify_repair_recipe` |
+| `independent_review` | shipped | `fangore_insp_independent_review` |
+| `environment_repair` | shipped | `fangore_environment_repair_recipe` |
+| `initialize_preflight` | shipped | `fangore_insp_initialize_preflight` |
+| `decision_plane` | shipped | `fangore_decision_plane_recipe` |
+| `bounded_retry` | shipped | `fangore_bounded_retry_recipe` |
+| *(composition)* | `instance_key` / `tile` | `fangore_recipe_namespace_tile` |
 
 ## Anti-patterns
 

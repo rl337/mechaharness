@@ -1,0 +1,13 @@
+{
+  "template_name": "decision_plane",
+  "nodes_include": [
+    "project_state",
+    "ask_batch",
+    "apply_policy",
+    "escalate",
+    "shadow_ask"
+  ],
+  "ask_batch_question_count": 2,
+  "facts_on_project_not_ask": true,
+  "confidence_floor": 0.7
+}

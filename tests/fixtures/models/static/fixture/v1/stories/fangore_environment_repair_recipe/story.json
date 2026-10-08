@@ -1,0 +1,17 @@
+{
+  "id": "fangore_environment_repair_recipe",
+  "persona": "fangore",
+  "title": "Instantiate the environment repair Agentic Recipe",
+  "kind": "environment_repair_recipe",
+  "narrative": "Before dependent work continues, Fangore runs the environment-repair Agentic Recipe: diagnose missing substrate, attempt a bounded repair, then recheck. The recipe must expand to a concrete plan without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`.",
+  "implementation": "Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnose → bounded env repair → recheck as an ordinary `ExecutionGraph` with provenance stamps via `GraphTemplate.instantiate`.",
+  "validation": "Kind `environment_repair_recipe`. Soft expects catalog id, diagnose/repair/recheck node ids, and stamped template_name. Unit: `tests/test_graph_templates.py`.",
+  "footnotes": [
+    {
+      "id": "rc-env-repair",
+      "label": "Recipes requirements (first-wave catalog)",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "environment_repair owning story"
+    }
+  ]
+}

@@ -351,6 +351,22 @@ Kind `bounded_repair_loop` → `_run_bounded_repair_loop`. Soft expects: succeed
 
 [^insp-repair]: [Inspiration requirements (verification loops)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification is part of execution; structured enough to route repair
 
+### `fangore_bounded_retry_recipe` — Expand a bounded-retry Agentic Recipe with explicit escalation
+
+Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_transactional_durable_resume`.
+
+#### Implementation
+
+Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt → classify → permit_retry → backoff with a terminal escalate node and a StopContract on the repeating attempt. Attempt payloads carry deliberate attempt context and an effect-reconciliation flag (RT-01..05).
+
+#### Validation
+
+Kind `bounded_retry_recipe`. Soft expects node ids, bounded stop on attempt, escalate terminal present, and requires_effect_reconciliation on attempt payload.
+
+#### Footnotes
+
+1. [Recipes requirements (bounded retry)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — RT-01..05 reference recipe
+
 ### `fangore_capability_envelope_narrow` — Narrow child capability envelopes without silent inheritance
 
 Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent's full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes[^insp-envelope].
@@ -483,6 +499,22 @@ Kind `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_con
 
 [^insp-stop]: [Inspiration requirements (stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 — repeating execution requires an explicit stop contract
 
+### `fangore_decision_plane_recipe` — Run a typed decision-plane Agentic Recipe with batched questions
+
+Fangore projects only the state a decision needs, asks several bounded questions in one model step, keeps exact facts in code, and lets product policy choose the final action — escalating when confidence is too low. Builds on `fangore_decision_surface_reject` for allowed-action envelopes.
+
+#### Implementation
+
+Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state → ask_batch → apply_policy with an escalate exit. Inputs carry a structured state projection, deterministic facts, and a batch of typed questions with valid-action envelopes. Soft points bind runner kinds, confidence floor, and escalation route; shadow_mode adds a non-gating shadow ask node (DP-01..07).
+
+#### Validation
+
+Kind `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Static expansion only (no model call).
+
+#### Footnotes
+
+1. [Recipes requirements (typed decision plane)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — DP-01..07 reference recipe
+
 ### `fangore_decision_surface_reject` — Reject model choices that are not on the allowed list
 
 A triage model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal. Only product judgement policy may unlock the next action — same split as `fangore_refund_verdict`.
@@ -510,6 +542,22 @@ Covers: CTX-06, CTX-07.
 #### Validation
 
 Kind `derived_memory` → `_run_derived_memory`. Unit: `tests/test_context_experiments.py`.
+
+### `fangore_environment_repair_recipe` — Instantiate the environment repair Agentic Recipe
+
+Before dependent work continues, Fangore runs the environment-repair Agentic Recipe: diagnose missing substrate, attempt a bounded repair, then recheck. The recipe must expand to a concrete plan without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`.
+
+#### Implementation
+
+Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnose → bounded env repair → recheck as an ordinary `ExecutionGraph` with provenance stamps via `GraphTemplate.instantiate`.
+
+#### Validation
+
+Kind `environment_repair_recipe`. Soft expects catalog id, diagnose/repair/recheck node ids, and stamped template_name. Unit: `tests/test_graph_templates.py`.
+
+#### Footnotes
+
+1. [Recipes requirements (first-wave catalog)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — environment_repair owning story
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 
@@ -1223,6 +1271,22 @@ Kind `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.p
 [^loop-vs-graph]: [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Explicit control flow; MechaHarness extends into execution graphs
 [^insp-resume]: [Inspiration requirements (durable resume)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 12 — resumable external state; incompatible fingerprint refuse
 
+### `fangore_recipe_namespace_tile` — Embed two recipe instances without node-id collisions
+
+Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution.
+
+#### Implementation
+
+`GraphTemplateParams.instance_key` namespaces node ids on instantiate. `GraphTemplate.tile` embeds a recipe graph under a parent node via `SubgraphNodeRunner`. Provenance includes instance id, params fingerprint, and logical-to-concrete node map (RC-01, RC-04, RC-05, RC-08).
+
+#### Validation
+
+Kind `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct recipe_instance_id values, and parent embed node kinds subgraph.
+
+#### Footnotes
+
+1. [Recipes requirements (RC-01/04/05/08)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Namespaced multi-instance tiling
+
 ### `fangore_refund_verdict` — Keep billing authority in product rules, not the model
 
 A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing — and a high quality score alone must not override missing completion evidence. See also `fangore_decision_surface_reject`.
@@ -1306,6 +1370,22 @@ Kind `verification_outcome_gate` → `_run_verification_outcome_gate`. Soft expe
 #### Footnotes
 
 [^insp-verify]: [Inspiration requirements (verification)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification policy; answer generated ≠ task complete
+
+### `fangore_verify_repair_recipe` — Tile the verify-repair Agentic Recipe into a plan
+
+Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair are visible graph steps with an explicit stop. Complements `fangore_bounded_repair_loop` for loop helper semantics.
+
+#### Implementation
+
+Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) builds produce → verify → bounded repair → complete. Soft points bind runner kinds and stop contracts; instantiate stamps catalog provenance.
+
+#### Validation
+
+Kind `verify_repair_recipe`. Soft expects node ids and template_name `verify_repair`. Related: `fangore_bounded_repair_loop`.
+
+#### Footnotes
+
+1. [Recipes requirements (verify_repair)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — verify_repair tiling story
 
 ## Taloneth's stories
 
