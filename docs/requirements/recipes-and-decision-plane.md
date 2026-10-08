@@ -206,7 +206,7 @@ promotion and documentation as Agentic Recipes (names are catalog ids):
 | `independent_review` | `IndependentReviewTemplate` | `fangore_insp_independent_review` |
 | `environment_repair` | `EnvironmentRepairTemplate` | `fangore_environment_repair_recipe` |
 | `initialize_preflight` | `InitializePreflightTemplate` | `fangore_insp_initialize_preflight` |
-| `decision_plane` | `DecisionPlaneTemplate` + `decision_plane_runtime` | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare` |
+| `decision_plane` | `DecisionPlaneTemplate` + `decision_plane_runtime` | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_check`, `fangore_jev_context_picker`, `fangore_jev_requirements_review`, `fangore_jev_task_router`, `fangore_jev_action_safety` |
 | `bounded_retry` | `BoundedRetryTemplate` | `fangore_bounded_retry_recipe` (+ durable resume composition) |
 
 Composition kernel story: `fangore_recipe_namespace_tile` (`instance_key`, `tile`).

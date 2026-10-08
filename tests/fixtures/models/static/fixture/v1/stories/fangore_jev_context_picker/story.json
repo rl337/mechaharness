@@ -1,0 +1,17 @@
+{
+  "id": "fangore_jev_context_picker",
+  "persona": "fangore",
+  "title": "Assemble RAG context from scored candidates within a token budget",
+  "kind": "context_budget_judgment",
+  "narrative": "After retrieval, Fangore asks a decision model for relevance, trust, and freshness scores, then packs only candidates that clear product thresholds into a fixed token budget. Stale, untrusted, or injection-tainted snippets stay out even if they look relevant. When scores are missing, deterministic ranking still fills what it can. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05]",
+  "implementation": "`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned (DP-04). Agentic Recipe `decision_plane` supplies the typed score batch pattern.",
+  "validation": "Kind `context_budget_judgment`. Soft expects: high-trust pack within budget; stale and low-trust skipped; injection candidate excluded; missing scores fall back without exceeding budget.",
+  "footnotes": [
+    {
+      "id": "jev-us05",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US05)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "RAG context selection"
+    }
+  ]
+}

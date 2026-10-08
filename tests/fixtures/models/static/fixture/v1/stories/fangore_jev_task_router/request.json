@@ -1,0 +1,52 @@
+{
+  "action_question_id": "route",
+  "questions": [
+    {
+      "id": "route",
+      "kind": "choice",
+      "options": [
+        {"id": "local_small", "label": "Local small"},
+        {"id": "frontier", "label": "Frontier"},
+        {"id": "tool", "label": "Deterministic tool"},
+        {"id": "human", "label": "Human"}
+      ],
+      "allowed_actions": ["local_small", "frontier", "tool", "human"]
+    },
+    {
+      "id": "complexity",
+      "kind": "score",
+      "min": 0,
+      "max": 1
+    }
+  ],
+  "cases": [
+    {
+      "name": "simple_local",
+      "answers": {"route": "local_small", "complexity": 0.2},
+      "confidence": 0.9,
+      "confidence_floor": 0.7,
+      "min_complexity_for_frontier": 0.7
+    },
+    {
+      "name": "complex_forces_frontier",
+      "answers": {"route": "local_small", "complexity": 0.85},
+      "confidence": 0.9,
+      "confidence_floor": 0.7,
+      "min_complexity_for_frontier": 0.7
+    },
+    {
+      "name": "invalid_route",
+      "answers": {"route": "mystery_gateway", "complexity": 0.1},
+      "confidence": 0.99,
+      "confidence_floor": 0.7,
+      "min_complexity_for_frontier": 0.7
+    },
+    {
+      "name": "low_confidence",
+      "answers": {"route": "frontier", "complexity": 0.5},
+      "confidence": 0.3,
+      "confidence_floor": 0.7,
+      "min_complexity_for_frontier": 0.7
+    }
+  ]
+}

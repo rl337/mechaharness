@@ -1,0 +1,47 @@
+{
+  "action_question_id": "support",
+  "questions": [
+    {
+      "id": "support",
+      "kind": "choice",
+      "options": [
+        {"id": "supported", "label": "Supported"},
+        {"id": "contradicted", "label": "Contradicted"},
+        {"id": "insufficient", "label": "Insufficient"},
+        {"id": "unavailable", "label": "Unavailable"}
+      ],
+      "allowed_actions": [
+        "supported",
+        "contradicted",
+        "insufficient",
+        "unavailable"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "name": "matching_claim",
+      "answers": {"support": "supported"},
+      "confidence": 0.92,
+      "confidence_floor": 0.7
+    },
+    {
+      "name": "growth_mismatch",
+      "answers": {"support": "contradicted"},
+      "confidence": 0.95,
+      "confidence_floor": 0.7
+    },
+    {
+      "name": "missing_source",
+      "answers": {"support": "unavailable"},
+      "confidence": 0.9,
+      "confidence_floor": 0.7
+    },
+    {
+      "name": "uncertain_support",
+      "answers": {"support": "supported"},
+      "confidence": 0.4,
+      "confidence_floor": 0.7
+    }
+  ]
+}

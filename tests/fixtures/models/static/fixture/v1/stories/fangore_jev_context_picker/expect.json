@@ -1,0 +1,7 @@
+{
+  "budget_pack_ids": ["c", "a"],
+  "filter_selected": ["fresh"],
+  "injection_excluded": true,
+  "fallback_ids": ["ok", "ok2"],
+  "never_exceeds_budget": true
+}

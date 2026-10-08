@@ -1,0 +1,40 @@
+{
+  "reviewer_count": 2,
+  "acceptance": ["stories_covered", "crash_tests_present"],
+  "action_question_id": "coverage",
+  "questions": [
+    {
+      "id": "coverage",
+      "kind": "choice",
+      "options": [
+        {"id": "covered", "label": "Covered"},
+        {"id": "gap", "label": "Gap"},
+        {"id": "unclear", "label": "Unclear"}
+      ],
+      "allowed_actions": ["covered", "gap", "unclear"]
+    }
+  ],
+  "cases": [
+    {
+      "name": "gap_found",
+      "answers": {"coverage": "gap"},
+      "confidence": 0.9,
+      "confidence_floor": 0.7,
+      "facts": {"crash_tests_present": true}
+    },
+    {
+      "name": "approve_but_missing_crash_tests",
+      "answers": {"coverage": "covered"},
+      "confidence": 0.95,
+      "confidence_floor": 0.7,
+      "facts": {"crash_tests_present": false}
+    },
+    {
+      "name": "covered_with_tests",
+      "answers": {"coverage": "covered"},
+      "confidence": 0.9,
+      "confidence_floor": 0.7,
+      "facts": {"crash_tests_present": true}
+    }
+  ]
+}
