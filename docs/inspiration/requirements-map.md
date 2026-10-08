@@ -8,15 +8,18 @@ library readiness, and the user-story id that acceptance-tests it (when any).
 tests cover them; *story* means a persona story exercises the path; *partial*
 means important MUSTs remain open (see Gaps). Req 17 is client-owned.
 
-**Ownership:** MechaHarness owns protocols, DI hooks, and parameterized graph
-template definitions. Clients own scheduling, goals, documents, knowledge
-graphs, issue trackers, and concrete graph realizations.
+**Ownership:** MechaHarness owns protocols, DI hooks, parameterized
+`GraphTemplate` definitions, and **Agentic Recipes** (concrete catalog
+patterns on that substrate). Clients own scheduling, goals, documents,
+knowledge graphs, issue trackers, domain recipes, and concrete graph
+realizations. See
+[Recipes and decision plane](../requirements/recipes-and-decision-plane.md).
 
 | Req | Topic | Modules | Library | Story | Gaps |
 |-----|-------|---------|---------|-------|------|
 | 1 | Revisable scaffolding | `harness_experiment.py`, `research.py` | story | `taloneth_insp_scaffolding_retire` | Online telemetry / automatic retirement suite |
 | 2 | Linkage vs DI | `linkage_resolver.py`, `di.py` | story | `fangore_insp_linkage_preflight` | Operation bind depth; candidate-provider UX polish |
-| 3 | Dynamic subgraphs | `graph_templates/`, `graph_executor.py` | story | `fangore_insp_dynamic_subgraph` | I/O contracts + child budget share on every nest |
+| 3 | Dynamic subgraphs / recipes | `graph_templates/` (Agentic Recipes), `graph_executor.py` | story | `fangore_insp_dynamic_subgraph` | I/O contracts + child budget share; recipe tiling readability |
 | 4 | Stop contracts | `stop_contract.py`, `convergence.py` | story | `fangore_insp_stop_contract` | Full stop-field validation matrix |
 | 5 | Verification | `verification_policy.py`, `graph.py` | story | `fangore_insp_verification_gate` | Impact-based selection observability |
 | 6 | Scoped context | `context_provider.py`, `context_experiments.py` | story | `fangore_insp_context_provider` | Default harness path always uses providers |
@@ -32,7 +35,7 @@ graphs, issue trackers, and concrete graph realizations.
 | 16 | Environment linkage | `environment.py`, linkage, env template | story | `nubble_insp_environment_linkage` | Secrets/binaries structured failures |
 | 17 | Persistent goals | resume / linkage hooks | partial | `fangore_insp_wake_reresolve` | Goal store remains client-owned |
 | 18 | Advisor | `advisor.py` | story | `fangore_insp_sparse_advisor` | Linkage participation; follow/reject on traces |
-| 19 | Template incubation | `graph_templates/` SoftPoint + stamp | story | `fangore_insp_template_incubation` | Promote/demote evidence workflow |
+| 19 | Template / recipe incubation | `graph_templates/` SoftPoint + stamp; Agentic Recipe catalog | story | `fangore_insp_template_incubation` | Promote/demote evidence; story names catalog id |
 | 20 | Lifecycle interception | `lifecycle_extension.py`, harness/graph seams | story | `fangore_insp_lifecycle_observe`, `…_rewrite`, `…_block`, `…_replace`, `…_graph_observe` | Wrap mode; scaffolding migration into extensions |
 
 ## Soft vs hard (req 9)

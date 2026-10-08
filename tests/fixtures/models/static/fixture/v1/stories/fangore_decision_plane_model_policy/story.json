@@ -1,0 +1,17 @@
+{
+  "id": "fangore_decision_plane_model_policy",
+  "persona": "fangore",
+  "title": "Bind a decision model flavor without baking size into the recipe",
+  "kind": "decision_plane_model_policy",
+  "narrative": "Fangore swaps which decision model answers the batch — local small, hosted, or a future class — by host policy and soft binding, not by a parameter-count field inside the recipe. Related: `fangore_completer_flavors`, `fangore_decision_plane_recipe`.[^rc-dp-size]",
+  "implementation": "Agentic Recipe `decision_plane` exposes a `decision_model` soft point (router/flavor ref). Instantiation and runtime treat model identity as routing policy (DP-09); no fixed parameter-count architecture field.",
+  "validation": "Kind `decision_plane_model_policy`. Soft expects soft point present, bound model_ref on ask payload, no param_count field on recipe describe.",
+  "footnotes": [
+    {
+      "id": "rc-dp-size",
+      "label": "Recipes requirements DP-09",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "Model size is policy, not architecture"
+    }
+  ]
+}

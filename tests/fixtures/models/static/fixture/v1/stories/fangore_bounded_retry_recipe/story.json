@@ -1,0 +1,17 @@
+{
+  "id": "fangore_bounded_retry_recipe",
+  "persona": "fangore",
+  "title": "Expand a bounded-retry Agentic Recipe with explicit escalation",
+  "kind": "bounded_retry_recipe",
+  "narrative": "Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_transactional_durable_resume`.",
+  "implementation": "Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt → classify → permit_retry → backoff with a terminal escalate node and a StopContract on the repeating attempt. Attempt payloads carry deliberate attempt context and an effect-reconciliation flag (RT-01..05).",
+  "validation": "Kind `bounded_retry_recipe`. Soft expects node ids, bounded stop on attempt, escalate terminal present, and requires_effect_reconciliation on attempt payload.",
+  "footnotes": [
+    {
+      "id": "rc-bounded-retry",
+      "label": "Recipes requirements (bounded retry)",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "RT-01..05 reference recipe"
+    }
+  ]
+}

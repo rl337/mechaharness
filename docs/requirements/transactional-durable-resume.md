@@ -90,6 +90,10 @@ For a downstream client, an example is a Cursor run identifier. The core contrac
 
 On resume, an effect record in an uncertain or accepted state MUST NOT cause blind re-execution of the dispatch.
 
+The planned Agentic Recipe `bounded_retry` (see
+[Recipes and decision plane](./recipes-and-decision-plane.md) RT-04) MUST compose
+with this reconciliation path rather than reimplementing effect identity.
+
 The executor MUST expose a reconciliation path that allows the host adapter to determine whether the external effect:
 - was never accepted and may be dispatched;
 - exists and should be observed/resumed;

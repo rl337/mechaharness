@@ -1,0 +1,9 @@
+{
+  "template_name": "environment_repair",
+  "nodes_include": [
+    "diagnose",
+    "repair_env",
+    "recheck"
+  ],
+  "recipe_category": "agentic_recipe"
+}

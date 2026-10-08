@@ -1,0 +1,23 @@
+{
+  "id": "fangore_decision_plane_projection",
+  "persona": "fangore",
+  "title": "Project decision state and facts without calling a model",
+  "kind": "decision_plane_projection",
+  "narrative": "Fangore prepares a refund-routing decision by sending only structured ticket state into the decision plane and computing exact amounts in code. He must be able to unit-test that projection and those facts with no model call. Complements `fangore_decision_plane_recipe` and `fangore_refund_verdict`.[^rvania-decision][^rc-dp-proj]",
+  "implementation": "Agentic Recipe `decision_plane` uses `project_decision_state` in `mechaharness.decision_plane_runtime` to build a serializable state projection and attach deterministic facts outside inference (DP-01, DP-03).",
+  "validation": "Kind `decision_plane_projection`. Soft expects projection keys, facts fingerprint present, and no_model_invocation true. Unit: `tests/test_decision_plane_runtime.py`.",
+  "footnotes": [
+    {
+      "id": "rvania-decision",
+      "label": "Move Routine Decisions Off Your Big Model (rvaniaaaa)",
+      "url": "https://x.com/rvaniaaaa/status/2107453108611662172",
+      "note": "Rules 1 and 4 — structured state; exact math in code"
+    },
+    {
+      "id": "rc-dp-proj",
+      "label": "Recipes requirements DP-01 / DP-03",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "Structured projection; deterministic facts"
+    }
+  ]
+}

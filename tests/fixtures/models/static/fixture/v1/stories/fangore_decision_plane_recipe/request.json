@@ -1,0 +1,33 @@
+{
+  "goal": "route refund triage",
+  "state_projection": {
+    "ticket_id": "T-1",
+    "channel": "email"
+  },
+  "facts": {
+    "duplicate_charge": true,
+    "amount_cents": 1200
+  },
+  "questions": [
+    {
+      "id": "team",
+      "kind": "choice",
+      "options": [
+        "billing",
+        "technical"
+      ],
+      "allowed_actions": [
+        "billing",
+        "technical"
+      ]
+    },
+    {
+      "id": "risk",
+      "kind": "score",
+      "min": 0,
+      "max": 1
+    }
+  ],
+  "confidence_floor": 0.7,
+  "shadow_mode": true
+}

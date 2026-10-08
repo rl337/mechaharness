@@ -4,7 +4,7 @@
   "title": "Validate isolation and template I/O contracts",
   "kind": "isolation_io_contract",
   "narrative": "Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation].",
-  "implementation": "`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for templates/subgraphs.",
+  "implementation": "`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for Agentic Recipe / `GraphTemplate` subgraph boundaries.",
   "validation": "Kind `isolation_io_contract`. Soft expects empty validation issues and budget_share.",
   "footnotes": [
     {
