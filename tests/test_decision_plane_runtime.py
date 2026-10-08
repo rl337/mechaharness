@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from mechaharness.decision_plane_runtime import (
+    assemble_context_within_budget,
     build_decision_plane_telemetry,
     compare_shadow_decision,
     project_decision_state,
@@ -99,6 +100,43 @@ def test_telemetry_omits_raw_context() -> None:
     assert "body" not in dumped
     assert "raw_context" not in dumped
     assert tel.projection_fingerprint
+
+
+def test_assemble_context_within_budget_filters_and_packs() -> None:
+    selected = assemble_context_within_budget(
+        [
+            {"id": "a", "tokens": 50, "relevance": 0.9, "trust": 0.9, "freshness": 0.8},
+            {"id": "b", "tokens": 50, "relevance": 0.8, "trust": 0.85, "freshness": 0.7},
+            {"id": "c", "tokens": 50, "relevance": 0.95, "trust": 0.9, "freshness": 0.9},
+            {"id": "bad", "tokens": 10, "relevance": 0.99, "trust": 0.1, "freshness": 0.9},
+        ],
+        token_budget=120,
+        min_relevance=0.5,
+        min_trust=0.5,
+        min_freshness=0.3,
+    )
+    assert selected == ["c", "a"]
+    assert "bad" not in selected
+
+
+@pytest.mark.asyncio
+async def test_policy_honors_action_question_id() -> None:
+    questions = [
+        {
+            "id": "support",
+            "kind": "choice",
+            "options": [{"id": "supported"}, {"id": "contradicted"}],
+            "allowed_actions": ["supported", "contradicted"],
+        }
+    ]
+    ok = await run_decision_plane_policy(
+        questions=questions,
+        answers={"support": "supported"},
+        confidence=0.9,
+        confidence_floor=0.7,
+        action_question_id="support",
+    )
+    assert ok.final_action == "supported"
 
 
 def test_decision_model_soft_point_not_param_count() -> None:

@@ -1,0 +1,17 @@
+{
+  "id": "fangore_jev_task_router",
+  "persona": "fangore",
+  "title": "Route work to local, frontier, tool, or human with code-owned quality policy",
+  "kind": "task_route_judgment",
+  "narrative": "Fangore routes mixed work by asking a small decision model which lane fits — local small model, frontier model, deterministic tool, or human — then product policy accepts only allowed lanes and escalates on low confidence or invalid choices. Cheapest is not enough when quality policy requires a stronger lane. Related: `fangore_decision_plane_model_policy`, `nubble_insp_model_routing`.[^jev-us07]",
+  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.",
+  "validation": "Kind `task_route_judgment`. Soft expects: simple tasks take local_small; high complexity forces frontier; invalid and low-confidence escalate.",
+  "footnotes": [
+    {
+      "id": "jev-us07",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US07)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "Task-specific model/workflow router"
+    }
+  ]
+}

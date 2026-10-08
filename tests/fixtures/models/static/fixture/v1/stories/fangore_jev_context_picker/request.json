@@ -1,0 +1,39 @@
+{
+  "token_budget": 120,
+  "min_relevance": 0.5,
+  "min_trust": 0.5,
+  "min_freshness": 0.3,
+  "scenarios": [
+    {
+      "name": "budget_pack",
+      "candidates": [
+        {"id": "a", "tokens": 50, "relevance": 0.9, "trust": 0.9, "freshness": 0.8},
+        {"id": "b", "tokens": 50, "relevance": 0.8, "trust": 0.85, "freshness": 0.7},
+        {"id": "c", "tokens": 50, "relevance": 0.95, "trust": 0.9, "freshness": 0.9}
+      ]
+    },
+    {
+      "name": "filter_stale_and_untrusted",
+      "candidates": [
+        {"id": "fresh", "tokens": 40, "relevance": 0.7, "trust": 0.8, "freshness": 0.9},
+        {"id": "stale", "tokens": 40, "relevance": 0.95, "trust": 0.9, "freshness": 0.1},
+        {"id": "untrusted", "tokens": 40, "relevance": 0.95, "trust": 0.2, "freshness": 0.9}
+      ]
+    },
+    {
+      "name": "exclude_injection",
+      "candidates": [
+        {"id": "safe", "tokens": 60, "relevance": 0.7, "trust": 0.9, "freshness": 0.8},
+        {"id": "inject", "tokens": 40, "relevance": 0.99, "trust": 0.1, "freshness": 0.9}
+      ]
+    },
+    {
+      "name": "missing_scores_fallback",
+      "candidates": [
+        {"id": "ok", "tokens": 40, "relevance": 0.8, "trust": 0.8, "freshness": 0.8},
+        {"id": "broken", "tokens": 40, "relevance": "n/a", "trust": 0.9, "freshness": 0.9},
+        {"id": "ok2", "tokens": 40, "relevance": 0.75, "trust": 0.7, "freshness": 0.6}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "fangore_jev_citation_check",
+  "persona": "fangore",
+  "title": "Never mark unsupported claims verified from a judge alone",
+  "kind": "citation_support_judgment",
+  "narrative": "Fangore ships a citation check: a small decision model answers whether a source supports an atomic claim, but product code alone may mark a claim verified. Contradictions, missing sources, and low confidence must stay unverified or escalate. Related: `fangore_decision_plane_policy`, `fangore_refund_verdict`.[^jev-us04][^jev-insp-cite]",
+  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate — confidence and envelopes never upgrade unsupported or unavailable answers.",
+  "validation": "Kind `citation_support_judgment`. Soft expects: matching claim verified; contradicted and unavailable never verified; low confidence escalates without verifying.",
+  "footnotes": [
+    {
+      "id": "jev-us04",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US04)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "Citation / claim support check"
+    },
+    {
+      "id": "jev-insp-cite",
+      "label": "Jev decisions in a Pi harness",
+      "url": "https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness",
+      "note": "Typed judgments and code-owned policy"
+    }
+  ]
+}

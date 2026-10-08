@@ -1,0 +1,44 @@
+{
+  "action_question_id": "semantic_risk",
+  "questions": [
+    {
+      "id": "semantic_risk",
+      "kind": "choice",
+      "options": [
+        {"id": "low", "label": "Low"},
+        {"id": "medium", "label": "Medium"},
+        {"id": "high", "label": "High"}
+      ],
+      "allowed_actions": ["low", "medium", "high"]
+    }
+  ],
+  "cases": [
+    {
+      "name": "delete_low_risk_no_grant",
+      "proposed_action": "delete",
+      "required_grants": ["core:fs.write"],
+      "grants": [],
+      "answers": {"semantic_risk": "low"},
+      "confidence": 0.95,
+      "confidence_floor": 0.7
+    },
+    {
+      "name": "read_high_risk_with_grant",
+      "proposed_action": "read",
+      "required_grants": [],
+      "grants": ["core:fs.read"],
+      "answers": {"semantic_risk": "high"},
+      "confidence": 0.9,
+      "confidence_floor": 0.7
+    },
+    {
+      "name": "read_low_risk_with_grant",
+      "proposed_action": "read",
+      "required_grants": [],
+      "grants": ["core:fs.read"],
+      "answers": {"semantic_risk": "low"},
+      "confidence": 0.9,
+      "confidence_floor": 0.7
+    }
+  ]
+}
