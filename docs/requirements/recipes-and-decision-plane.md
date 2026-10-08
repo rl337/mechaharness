@@ -206,7 +206,7 @@ promotion and documentation as Agentic Recipes (names are catalog ids):
 | `independent_review` | `IndependentReviewTemplate` | `fangore_insp_independent_review` |
 | `environment_repair` | `EnvironmentRepairTemplate` | `fangore_environment_repair_recipe` |
 | `initialize_preflight` | `InitializePreflightTemplate` | `fangore_insp_initialize_preflight` |
-| `decision_plane` | `DecisionPlaneTemplate` | `fangore_decision_plane_recipe` (+ surfaces in `fangore_decision_surface_reject`) |
+| `decision_plane` | `DecisionPlaneTemplate` + `decision_plane_runtime` | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare` |
 | `bounded_retry` | `BoundedRetryTemplate` | `fangore_bounded_retry_recipe` (+ durable resume composition) |
 
 Composition kernel story: `fangore_recipe_namespace_tile` (`instance_key`, `tile`).

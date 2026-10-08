@@ -1,0 +1,66 @@
+{
+  "questions": [
+    {
+      "id": "team",
+      "kind": "choice",
+      "options": [
+        {
+          "id": "billing",
+          "label": "Billing"
+        },
+        {
+          "id": "technical",
+          "label": "Technical"
+        }
+      ],
+      "allowed_actions": [
+        "billing",
+        "technical"
+      ]
+    },
+    {
+      "id": "risk",
+      "kind": "score",
+      "min": 0,
+      "max": 1
+    }
+  ],
+  "cases": [
+    {
+      "name": "accept_billing",
+      "answers": {
+        "team": "billing",
+        "risk": 0.2
+      },
+      "confidence": 0.95,
+      "confidence_floor": 0.7,
+      "expect_action": "billing",
+      "expect_escalate": false
+    },
+    {
+      "name": "low_confidence",
+      "answers": {
+        "team": "billing",
+        "risk": 0.2
+      },
+      "confidence": 0.4,
+      "confidence_floor": 0.7,
+      "expect_action": null,
+      "expect_escalate": true,
+      "expect_reason": "confidence_below_floor"
+    },
+    {
+      "name": "invalid_team",
+      "answers": {
+        "team": "legal",
+        "risk": 0.1
+      },
+      "confidence": 0.99,
+      "confidence_floor": 0.7,
+      "expect_action": null,
+      "expect_escalate": true,
+      "expect_reason": "choice_not_allowed"
+    }
+  ],
+  "escalation_route": "host_policy"
+}

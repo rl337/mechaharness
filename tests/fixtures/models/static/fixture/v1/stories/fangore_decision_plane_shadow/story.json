@@ -1,0 +1,17 @@
+{
+  "id": "fangore_decision_plane_shadow",
+  "persona": "fangore",
+  "title": "Shadow a small decision model without giving it control",
+  "kind": "decision_plane_shadow",
+  "narrative": "Before moving refund triage off the production decision path, Fangore runs a candidate small model in shadow: it still answers the same batched questions, but production policy keeps control and both outcomes are kept for comparison. Related: `taloneth_shadow_decision_backends`, `fangore_decision_plane_policy`.[^rc-dp-shadow]",
+  "implementation": "Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mechaharness.decision_plane_runtime` records candidate and production typed results while `controls_execution` stays on the production path (DP-07).",
+  "validation": "Kind `decision_plane_shadow`. Soft expects production_action set, shadow_controls_execution false, both_outcomes_recorded true, agreement bool.",
+  "footnotes": [
+    {
+      "id": "rc-dp-shadow",
+      "label": "Recipes requirements DP-07",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "Small-model shadow / evaluation mode"
+    }
+  ]
+}

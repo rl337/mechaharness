@@ -72,6 +72,13 @@ class DecisionPlaneTemplate(GraphTemplate):
             default=False,
         ),
         SoftPoint(
+            name="decision_model",
+            kind="model",
+            description="Host routing policy / Completer|Judge flavor ref "
+            "(not a parameter count)",
+            required=False,
+        ),
+        SoftPoint(
             name="questions",
             kind="task_state",
             description="Batched typed questions with domains / allowed actions "
@@ -122,6 +129,7 @@ class DecisionPlaneTemplate(GraphTemplate):
         shadow_mode = bool(
             bindings.get("shadow_mode", inputs.get("shadow_mode", False))
         )
+        decision_model = bindings.get("decision_model", inputs.get("decision_model"))
 
         graph = ExecutionGraph(goal=params.goal or self.name, version=self.version)
         project = make_node(
@@ -134,18 +142,21 @@ class DecisionPlaneTemplate(GraphTemplate):
                 "facts": facts,
             },
         )
+        ask_payload: dict[str, Any] = {
+            "phase": "ask_batch",
+            "questions": questions,
+            "allowed_action_envelopes": _envelopes(questions),
+            "confidence_floor": confidence_floor,
+            "inference_mode": "batch",
+        }
+        if decision_model is not None:
+            ask_payload["model_ref"] = str(decision_model)
         ask = make_node(
             id="ask_batch",
             kind=str(bindings.get("ask_kind", "ask_batch")),
             goal="answer batched decision questions",
             depends_on=[project.id],
-            payload={
-                "phase": "ask_batch",
-                "questions": questions,
-                "allowed_action_envelopes": _envelopes(questions),
-                "confidence_floor": confidence_floor,
-                "inference_mode": "batch",
-            },
+            payload=ask_payload,
         )
         policy = make_node(
             id="apply_policy",

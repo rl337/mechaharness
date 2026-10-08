@@ -9,7 +9,8 @@ code, and escalate when confidence is too low.
 | Catalog id | `decision_plane` |
 | Module | `mechaharness.graph_templates.decision_plane` |
 | Substrate | `GraphTemplate` |
-| Owning stories | `fangore_decision_plane_recipe` |
+| Owning stories | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare` |
+| Runtime | `mechaharness.decision_plane_runtime` |
 
 ## When to use
 
@@ -29,6 +30,7 @@ Do not use when the model must invent open-ended commands with no action envelop
 | `shadow_ask_kind` | runner_kind | Non-gating shadow path |
 | `confidence_floor` | policy | Minimum confidence before accept |
 | `shadow_mode` | policy | Add shadow ask without gating execution |
+| `decision_model` | model | Flavor / router ref (DP-09; not param count) |
 | `questions` / `state_projection` / `facts` | task_state | Via `params.inputs` or soft bindings |
 
 ## Tiling example
@@ -61,6 +63,15 @@ graph = DecisionPlaneTemplate().instantiate(
 )
 assert graph.template_name == "decision_plane"
 ```
+
+## Runtime (DP-01..09)
+
+| Helper | Role |
+|--------|------|
+| `project_decision_state` | Structured projection + facts without a model |
+| `evaluate_decision_batch` / `run_decision_plane_policy` | Batched evidence; code-owned action or escalate |
+| `compare_shadow_decision` | Candidate vs production; production controls |
+| `build_decision_plane_telemetry` | Evaluation-ready metrics without raw context |
 
 ## Related
 

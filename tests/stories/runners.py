@@ -123,6 +123,12 @@ from mechaharness.graph_state_governance import (
     GraphStateGovernance,
     authorize_write,
 )
+from mechaharness.decision_plane_runtime import (
+    build_decision_plane_telemetry,
+    compare_shadow_decision,
+    project_decision_state,
+    run_decision_plane_policy,
+)
 from mechaharness.graph_templates import (
     BoundedRetryTemplate,
     DecisionPlaneTemplate,
@@ -402,6 +408,12 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "verify_repair_recipe": _run_verify_repair_recipe,
         "recipe_namespace_tile": _run_recipe_namespace_tile,
         "decision_plane_recipe": _run_decision_plane_recipe,
+        "decision_plane_projection": _run_decision_plane_projection,
+        "decision_plane_policy": _run_decision_plane_policy,
+        "decision_plane_shadow": _run_decision_plane_shadow,
+        "decision_plane_telemetry": _run_decision_plane_telemetry,
+        "decision_plane_model_policy": _run_decision_plane_model_policy,
+        "decision_plane_shadow_compare": _run_decision_plane_shadow_compare,
         "bounded_retry_recipe": _run_bounded_retry_recipe,
         "handoff_record_fields": _run_handoff_record_fields,
         "operation_compensation_meta": _run_operation_compensation_meta,
@@ -2771,6 +2783,175 @@ async def _run_decision_plane_recipe(case: StoryCase, backend: StoryBackend) -> 
         "ask_batch_question_count": len(ask.payload.get("questions") or []),
         "facts_on_project_not_ask": facts_on_project,
         "confidence_floor": ask.payload.get("confidence_floor"),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_decision_plane_projection(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    proj = project_decision_state(
+        dict(request.get("raw_context") or {}),
+        project_keys=list(request.get("project_keys") or []),
+        facts=dict(request.get("facts") or {}),
+    )
+    actual = {
+        "projection": proj.state,
+        "facts_include": list(proj.facts),
+        "projection_has_secret": "secret" in proj.state,
+        "no_model_invocation": True,
+        "facts_fingerprint_nonempty": bool(proj.facts_fingerprint),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_decision_plane_policy(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    questions = list(request.get("questions") or [])
+    route = str(request.get("escalation_route") or "host_policy")
+    by_name: dict[str, Any] = {}
+    for row in list(request.get("cases") or []):
+        result = await run_decision_plane_policy(
+            questions=questions,
+            answers=dict(row.get("answers") or {}),
+            confidence=row.get("confidence"),
+            confidence_floor=float(row.get("confidence_floor") or 0.7),
+            escalation_route=route,
+        )
+        by_name[str(row["name"])] = result
+    accept = by_name["accept_billing"]
+    low = by_name["low_confidence"]
+    invalid = by_name["invalid_team"]
+    actual = {
+        "single_batch_invocation": accept.batch_invocation_count == 1,
+        "accept_billing_action": accept.final_action,
+        "low_confidence_escalates": low.escalate
+        and low.escalation_reason == "confidence_below_floor",
+        "invalid_team_escalates": invalid.escalate
+        and invalid.escalation_reason == "choice_not_allowed",
+        "escalation_route": low.escalation_route,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_decision_plane_shadow(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    cmp = await compare_shadow_decision(
+        questions=list(request.get("questions") or []),
+        production_answers=dict(request.get("production_answers") or {}),
+        shadow_answers=dict(request.get("shadow_answers") or {}),
+        confidence=request.get("confidence"),
+        confidence_floor=float(request.get("confidence_floor") or 0.7),
+    )
+    actual = {
+        "production_action": cmp.production.final_action,
+        "shadow_controls_execution": cmp.shadow_controls_execution,
+        "both_outcomes_recorded": cmp.shadow is not None,
+        "agreement": cmp.agreement,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_decision_plane_telemetry(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    questions = list(request.get("questions") or [])
+    proj = project_decision_state(
+        {**dict(request.get("state_projection") or {}), "body": request.get("raw_body")},
+        project_keys=list((request.get("state_projection") or {}).keys()),
+        facts={},
+    )
+    policy = await run_decision_plane_policy(
+        questions=questions,
+        answers=dict(request.get("answers") or {}),
+        confidence=request.get("confidence"),
+        confidence_floor=0.7,
+    )
+    # Host policy may force final_action for telemetry fixture.
+    if request.get("final_action") and not policy.escalate:
+        policy.final_action = str(request["final_action"])
+    tel = build_decision_plane_telemetry(
+        questions=questions,
+        projection=proj,
+        policy=policy,
+        model_ref=request.get("model_ref"),
+        latency_ms=request.get("latency_ms"),
+        raw_context={"body": request.get("raw_body")},
+    )
+    dumped = tel.model_dump(mode="json")
+    actual = {
+        "has_question_schema_ids": bool(tel.question_schema_ids),
+        "has_projection_fingerprint": bool(tel.projection_fingerprint),
+        "final_action": tel.final_action,
+        "model_ref": tel.model_ref,
+        "latency_ms": tel.latency_ms,
+        "includes_raw_body": "raw_body" in dumped or "body" in dumped,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_decision_plane_model_policy(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    template = DecisionPlaneTemplate()
+    graph = template.instantiate(
+        GraphTemplateParams(
+            goal="model policy",
+            inputs={
+                "state_projection": dict(request.get("state_projection") or {}),
+                "questions": list(request.get("questions") or []),
+            },
+            soft_bindings={"decision_model": request.get("decision_model")},
+        )
+    )
+    describe = template.describe()
+    actual = {
+        "soft_point_decision_model": any(
+            p.get("name") == "decision_model" for p in describe.get("soft_points") or []
+        ),
+        "ask_model_ref": graph.nodes["ask_batch"].payload.get("model_ref"),
+        "describe_has_param_count": "param_count" in describe,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_decision_plane_shadow_compare(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    questions = list(request.get("questions") or [])
+    disagree = None
+    unavailable = None
+    for row in list(request.get("cases") or []):
+        shadow_raw = row.get("shadow_answers")
+        cmp = await compare_shadow_decision(
+            questions=questions,
+            production_answers=dict(row.get("production_answers") or {}),
+            shadow_answers=None if shadow_raw is None else dict(shadow_raw),
+            confidence=request.get("confidence"),
+            confidence_floor=float(request.get("confidence_floor") or 0.7),
+        )
+        if row.get("name") == "disagree":
+            disagree = cmp
+        if row.get("name") == "candidate_unavailable":
+            unavailable = cmp
+    assert disagree is not None and unavailable is not None
+    tel = build_decision_plane_telemetry(
+        questions=questions,
+        policy=disagree.production,
+        shadow=disagree,
+    )
+    actual = {
+        "disagree_agreement": disagree.agreement,
+        "unavailable_candidate": unavailable.shadow_unavailable,
+        "telemetry_has_shadow_action_on_disagree": tel.shadow_action is not None,
     }
     _assert_expect(actual, expect)
 

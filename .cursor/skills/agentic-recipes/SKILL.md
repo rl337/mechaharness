@@ -97,7 +97,7 @@ Pattern stories **must** name the recipe catalog id.
 | `independent_review` | shipped | `fangore_insp_independent_review` |
 | `environment_repair` | shipped | `fangore_environment_repair_recipe` |
 | `initialize_preflight` | shipped | `fangore_insp_initialize_preflight` |
-| `decision_plane` | shipped | `fangore_decision_plane_recipe` |
+| `decision_plane` | shipped (+ runtime) | `fangore_decision_plane_*`, `taloneth_decision_plane_shadow_compare` |
 | `bounded_retry` | shipped | `fangore_bounded_retry_recipe` |
 | *(composition)* | `instance_key` / `tile` | `fangore_recipe_namespace_tile` |
 

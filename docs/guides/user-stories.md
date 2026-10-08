@@ -499,21 +499,103 @@ Kind `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_con
 
 [^insp-stop]: [Inspiration requirements (stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 — repeating execution requires an explicit stop contract
 
+### `fangore_decision_plane_model_policy` — Bind a decision model flavor without baking size into the recipe
+
+Fangore swaps which decision model answers the batch — local small, hosted, or a future class — by host policy and soft binding, not by a parameter-count field inside the recipe. Related: `fangore_completer_flavors`, `fangore_decision_plane_recipe`.[^rc-dp-size]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` exposes a `decision_model` soft point (router/flavor ref). Instantiation and runtime treat model identity as routing policy (DP-09); no fixed parameter-count architecture field.
+
+#### Validation
+
+Kind `decision_plane_model_policy`. Soft expects soft point present, bound model_ref on ask payload, no param_count field on recipe describe.
+
+#### Footnotes
+
+[^rc-dp-size]: [Recipes requirements DP-09](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Model size is policy, not architecture
+
+### `fangore_decision_plane_policy` — Let code own the final decision-plane action with escalation
+
+A small decision model answers several triage questions in one call — which team, how risky — but only allowed teams are exposed, and product policy chooses route or escalate when confidence is low or an answer is off-list. Exact duplicate-charge math stays in facts, not in the model. Related: `fangore_decision_surface_reject`, `fangore_refund_verdict`.[^rvania-policy][^rc-dp-policy]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed questions in one invocation (DP-02); `reject_invalid_choice` / envelopes enforce valid actions (DP-05); `apply_decision_plane_policy` owns the final action or routable escalation from confidence/validity (DP-04, DP-06). Model signals are evidence only.
+
+#### Validation
+
+Kind `decision_plane_policy`. Soft expects single_batch_invocation, final_action billing on high confidence, escalate on low confidence and on invalid team, escalation_route host_policy.
+
+#### Footnotes
+
+[^rvania-policy]: [Move Routine Decisions Off Your Big Model (rvaniaaaa)](https://x.com/rvaniaaaa/status/2107453108611662172) — Rules 2,3,5,6,7 — batch ask; allowed levels; code policy; confidence; valid actions
+[^rc-dp-policy]: [Recipes requirements DP-02 / DP-04 / DP-05 / DP-06](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Batch, evidence vs policy, envelopes, escalation
+
+### `fangore_decision_plane_projection` — Project decision state and facts without calling a model
+
+Fangore prepares a refund-routing decision by sending only structured ticket state into the decision plane and computing exact amounts in code. He must be able to unit-test that projection and those facts with no model call. Complements `fangore_decision_plane_recipe` and `fangore_refund_verdict`.[^rvania-decision][^rc-dp-proj]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` uses `project_decision_state` in `mechaharness.decision_plane_runtime` to build a serializable state projection and attach deterministic facts outside inference (DP-01, DP-03).
+
+#### Validation
+
+Kind `decision_plane_projection`. Soft expects projection keys, facts fingerprint present, and no_model_invocation true. Unit: `tests/test_decision_plane_runtime.py`.
+
+#### Footnotes
+
+[^rvania-decision]: [Move Routine Decisions Off Your Big Model (rvaniaaaa)](https://x.com/rvaniaaaa/status/2107453108611662172) — Rules 1 and 4 — structured state; exact math in code
+[^rc-dp-proj]: [Recipes requirements DP-01 / DP-03](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Structured projection; deterministic facts
+
 ### `fangore_decision_plane_recipe` — Run a typed decision-plane Agentic Recipe with batched questions
 
 Fangore projects only the state a decision needs, asks several bounded questions in one model step, keeps exact facts in code, and lets product policy choose the final action — escalating when confidence is too low. Builds on `fangore_decision_surface_reject` for allowed-action envelopes.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state → ask_batch → apply_policy with an escalate exit. Inputs carry a structured state projection, deterministic facts, and a batch of typed questions with valid-action envelopes. Soft points bind runner kinds, confidence floor, and escalation route; shadow_mode adds a non-gating shadow ask node (DP-01..07).
+Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state → ask_batch → apply_policy with an escalate exit and optional shadow_ask. Structural coverage for DP-01..03 and graph-shaped DP-05..07; runtime policy/telemetry lives in `mechaharness.decision_plane_runtime` and stories `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`.
 
 #### Validation
 
-Kind `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Static expansion only (no model call).
+Kind `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Runtime DP paths: see sibling decision_plane_* stories.
 
 #### Footnotes
 
 1. [Recipes requirements (typed decision plane)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — DP-01..07 reference recipe
+
+### `fangore_decision_plane_shadow` — Shadow a small decision model without giving it control
+
+Before moving refund triage off the production decision path, Fangore runs a candidate small model in shadow: it still answers the same batched questions, but production policy keeps control and both outcomes are kept for comparison. Related: `taloneth_shadow_decision_backends`, `fangore_decision_plane_policy`.[^rc-dp-shadow]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mechaharness.decision_plane_runtime` records candidate and production typed results while `controls_execution` stays on the production path (DP-07).
+
+#### Validation
+
+Kind `decision_plane_shadow`. Soft expects production_action set, shadow_controls_execution false, both_outcomes_recorded true, agreement bool.
+
+#### Footnotes
+
+[^rc-dp-shadow]: [Recipes requirements DP-07](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Small-model shadow / evaluation mode
+
+### `fangore_decision_plane_telemetry` — Export evaluation-ready decision-plane telemetry without raw context
+
+Fangore needs decision metrics — which questions, projection fingerprint, answers, confidence, final policy action, escalation reason, and cost — without dumping the full ticket body into the aggregate stream. Related: `fangore_decision_plane_policy`, `taloneth_offline_decision_export`.[^rc-dp-telemetry]
+
+#### Implementation
+
+`build_decision_plane_telemetry` in `mechaharness.decision_plane_runtime` emits evaluation-ready fields for the `decision_plane` recipe (DP-08) and omits raw sensitive projection payloads from the aggregate record.
+
+#### Validation
+
+Kind `decision_plane_telemetry`. Soft expects schema ids, fingerprints, final_action, no raw_body field, optional latency_ms.
+
+#### Footnotes
+
+[^rc-dp-telemetry]: [Recipes requirements DP-08](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Evaluation-ready decision telemetry
 
 ### `fangore_decision_surface_reject` — Reject model choices that are not on the allowed list
 
@@ -521,7 +603,7 @@ A triage model returns a team name that was never on the allowed set. The produc
 
 #### Implementation
 
-`DecisionSurface` / `reject_invalid_choice` / `RulesDecisionBackend` in `mechaharness.decision_surfaces` name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects. These primitives are the building blocks for the planned `decision_plane` Agentic Recipe (valid-action envelopes before side effects).
+`DecisionSurface` / `reject_invalid_choice` / `RulesDecisionBackend` in `mechaharness.decision_surfaces` name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects. Agentic Recipe `decision_plane` uses these envelopes in `mechaharness.decision_plane_runtime` (`fangore_decision_plane_policy`).
 
 Covers: POL-01.
 
@@ -1416,6 +1498,22 @@ Covers: CTX-09.
 #### Validation
 
 Kind `cache_layout_experiment` → `_run_cache_layout_experiment`. Unit: `tests/test_context_experiments.py`.
+
+### `taloneth_decision_plane_shadow_compare` — Compare shadowed decision-plane answers before promotion
+
+Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: `fangore_decision_plane_shadow`, `taloneth_shadow_decision_backends`.[^rc-dp-shadow-t]
+
+#### Implementation
+
+`compare_shadow_decision` plus `build_decision_plane_telemetry` support promotion evidence for Agentic Recipe `decision_plane` without inventing unavailable candidate results (DP-07, DP-08).
+
+#### Validation
+
+Kind `decision_plane_shadow_compare`. Soft expects agreement false when answers differ, unavailable_candidate stays unavailable, telemetry has shadow_action.
+
+#### Footnotes
+
+[^rc-dp-shadow-t]: [Recipes requirements DP-07 / DP-08](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Shadow comparison for model promotion
 
 ### `taloneth_fixture_judge_batch` — Validate judge question batches without a live model
 

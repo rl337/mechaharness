@@ -4,8 +4,8 @@
   "title": "Run a typed decision-plane Agentic Recipe with batched questions",
   "kind": "decision_plane_recipe",
   "narrative": "Fangore projects only the state a decision needs, asks several bounded questions in one model step, keeps exact facts in code, and lets product policy choose the final action — escalating when confidence is too low. Builds on `fangore_decision_surface_reject` for allowed-action envelopes.",
-  "implementation": "Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state → ask_batch → apply_policy with an escalate exit. Inputs carry a structured state projection, deterministic facts, and a batch of typed questions with valid-action envelopes. Soft points bind runner kinds, confidence floor, and escalation route; shadow_mode adds a non-gating shadow ask node (DP-01..07).",
-  "validation": "Kind `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Static expansion only (no model call).",
+  "implementation": "Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state → ask_batch → apply_policy with an escalate exit and optional shadow_ask. Structural coverage for DP-01..03 and graph-shaped DP-05..07; runtime policy/telemetry lives in `mechaharness.decision_plane_runtime` and stories `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`.",
+  "validation": "Kind `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Runtime DP paths: see sibling decision_plane_* stories.",
   "footnotes": [
     {
       "id": "rc-decision-plane",

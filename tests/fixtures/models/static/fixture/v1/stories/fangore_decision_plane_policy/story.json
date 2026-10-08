@@ -1,0 +1,23 @@
+{
+  "id": "fangore_decision_plane_policy",
+  "persona": "fangore",
+  "title": "Let code own the final decision-plane action with escalation",
+  "kind": "decision_plane_policy",
+  "narrative": "A small decision model answers several triage questions in one call — which team, how risky — but only allowed teams are exposed, and product policy chooses route or escalate when confidence is low or an answer is off-list. Exact duplicate-charge math stays in facts, not in the model. Related: `fangore_decision_surface_reject`, `fangore_refund_verdict`.[^rvania-policy][^rc-dp-policy]",
+  "implementation": "Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed questions in one invocation (DP-02); `reject_invalid_choice` / envelopes enforce valid actions (DP-05); `apply_decision_plane_policy` owns the final action or routable escalation from confidence/validity (DP-04, DP-06). Model signals are evidence only.",
+  "validation": "Kind `decision_plane_policy`. Soft expects single_batch_invocation, final_action billing on high confidence, escalate on low confidence and on invalid team, escalation_route host_policy.",
+  "footnotes": [
+    {
+      "id": "rvania-policy",
+      "label": "Move Routine Decisions Off Your Big Model (rvaniaaaa)",
+      "url": "https://x.com/rvaniaaaa/status/2107453108611662172",
+      "note": "Rules 2,3,5,6,7 — batch ask; allowed levels; code policy; confidence; valid actions"
+    },
+    {
+      "id": "rc-dp-policy",
+      "label": "Recipes requirements DP-02 / DP-04 / DP-05 / DP-06",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "Batch, evidence vs policy, envelopes, escalation"
+    }
+  ]
+}
