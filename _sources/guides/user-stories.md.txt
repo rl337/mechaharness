@@ -86,7 +86,7 @@ Nubble compares wall-clock critical path, duplicated context, and fan-in review 
 
 #### Implementation
 
-`CoordinationCostMetrics` and `summarize_coordination_cost` in `mechaharness.coordination_cost` report fan-out orchestration cost.
+`CoordinationCostMetrics` and `summarize_coordination_cost` in `mechaharness.coordination_cost` report fan-out orchestration cost, including graphs tiled from the `fan_out_aggregate` Agentic Recipe.
 
 #### Validation
 
@@ -339,7 +339,7 @@ After a failed verification, Fangore allows a limited repair-and-retry cycle. Wh
 
 #### Implementation
 
-`bounded_repair` in `mechaharness.graph` runs verify → classify → permitted repair → retry until `max_attempts`. `VerificationPolicy` / `OutcomeContract` select verification and gate completion. Judge scores remain supplementary to verifier evidence.
+Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) expresses produce → verify → bounded repair → complete as a reusable graph. The `bounded_repair` helper in `mechaharness.graph` runs verify → classify → permitted repair → retry until `max_attempts`. `VerificationPolicy` / `OutcomeContract` select verification and gate completion. Judge scores remain supplementary to verifier evidence.
 
 Covers: VER-03.
 
@@ -350,6 +350,22 @@ Kind `bounded_repair_loop` → `_run_bounded_repair_loop`. Soft expects: succeed
 #### Footnotes
 
 [^insp-repair]: [Inspiration requirements (verification loops)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification is part of execution; structured enough to route repair
+
+### `fangore_bounded_retry_recipe` — Expand a bounded-retry Agentic Recipe with explicit escalation
+
+Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_transactional_durable_resume`.
+
+#### Implementation
+
+Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt → classify → permit_retry → backoff with a terminal escalate node and a StopContract on the repeating attempt. Attempt payloads carry deliberate attempt context and an effect-reconciliation flag (RT-01..05).
+
+#### Validation
+
+Kind `bounded_retry_recipe`. Soft expects node ids, bounded stop on attempt, escalate terminal present, and requires_effect_reconciliation on attempt payload.
+
+#### Footnotes
+
+1. [Recipes requirements (bounded retry)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — RT-01..05 reference recipe
 
 ### `fangore_capability_envelope_narrow` — Narrow child capability envelopes without silent inheritance
 
@@ -483,13 +499,111 @@ Kind `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_con
 
 [^insp-stop]: [Inspiration requirements (stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 — repeating execution requires an explicit stop contract
 
+### `fangore_decision_plane_model_policy` — Bind a decision model flavor without baking size into the recipe
+
+Fangore swaps which decision model answers the batch — local small, hosted, or a future class — by host policy and soft binding, not by a parameter-count field inside the recipe. Related: `fangore_completer_flavors`, `fangore_decision_plane_recipe`.[^rc-dp-size]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` exposes a `decision_model` soft point (router/flavor ref). Instantiation and runtime treat model identity as routing policy (DP-09); no fixed parameter-count architecture field.
+
+#### Validation
+
+Kind `decision_plane_model_policy`. Soft expects soft point present, bound model_ref on ask payload, no param_count field on recipe describe.
+
+#### Footnotes
+
+[^rc-dp-size]: [Recipes requirements DP-09](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Model size is policy, not architecture
+
+### `fangore_decision_plane_policy` — Let code own the final decision-plane action with escalation
+
+A small decision model answers several triage questions in one call — which team, how risky — but only allowed teams are exposed, and product policy chooses route or escalate when confidence is low or an answer is off-list. Exact duplicate-charge math stays in facts, not in the model. Related: `fangore_decision_surface_reject`, `fangore_refund_verdict`.[^rvania-policy][^rc-dp-policy]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed questions in one invocation (DP-02); `reject_invalid_choice` / envelopes enforce valid actions (DP-05); `apply_decision_plane_policy` owns the final action or routable escalation from confidence/validity (DP-04, DP-06). Model signals are evidence only.
+
+#### Validation
+
+Kind `decision_plane_policy`. Soft expects single_batch_invocation, final_action billing on high confidence, escalate on low confidence and on invalid team, escalation_route host_policy.
+
+#### Footnotes
+
+[^rvania-policy]: [Move Routine Decisions Off Your Big Model (rvaniaaaa)](https://x.com/rvaniaaaa/status/2107453108611662172) — Rules 2,3,5,6,7 — batch ask; allowed levels; code policy; confidence; valid actions
+[^rc-dp-policy]: [Recipes requirements DP-02 / DP-04 / DP-05 / DP-06](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Batch, evidence vs policy, envelopes, escalation
+
+### `fangore_decision_plane_projection` — Project decision state and facts without calling a model
+
+Fangore prepares a refund-routing decision by sending only structured ticket state into the decision plane and computing exact amounts in code. He must be able to unit-test that projection and those facts with no model call. Complements `fangore_decision_plane_recipe` and `fangore_refund_verdict`.[^rvania-decision][^rc-dp-proj]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` uses `project_decision_state` in `mechaharness.decision_plane_runtime` to build a serializable state projection and attach deterministic facts outside inference (DP-01, DP-03).
+
+#### Validation
+
+Kind `decision_plane_projection`. Soft expects projection keys, facts fingerprint present, and no_model_invocation true. Unit: `tests/test_decision_plane_runtime.py`.
+
+#### Footnotes
+
+[^rvania-decision]: [Move Routine Decisions Off Your Big Model (rvaniaaaa)](https://x.com/rvaniaaaa/status/2107453108611662172) — Rules 1 and 4 — structured state; exact math in code
+[^rc-dp-proj]: [Recipes requirements DP-01 / DP-03](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Structured projection; deterministic facts
+
+### `fangore_decision_plane_recipe` — Run a typed decision-plane Agentic Recipe with batched questions
+
+Fangore projects only the state a decision needs, asks several bounded questions in one model step, keeps exact facts in code, and lets product policy choose the final action — escalating when confidence is too low. Builds on `fangore_decision_surface_reject` for allowed-action envelopes.
+
+#### Implementation
+
+Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state → ask_batch → apply_policy with an escalate exit and optional shadow_ask. Structural coverage for DP-01..03 and graph-shaped DP-05..07; runtime policy/telemetry lives in `mechaharness.decision_plane_runtime` and stories `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`.
+
+#### Validation
+
+Kind `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Runtime DP paths: see sibling decision_plane_* stories.
+
+#### Footnotes
+
+1. [Recipes requirements (typed decision plane)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — DP-01..07 reference recipe
+
+### `fangore_decision_plane_shadow` — Shadow a small decision model without giving it control
+
+Before moving refund triage off the production decision path, Fangore runs a candidate small model in shadow: it still answers the same batched questions, but production policy keeps control and both outcomes are kept for comparison. Related: `taloneth_shadow_decision_backends`, `fangore_decision_plane_policy`.[^rc-dp-shadow]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mechaharness.decision_plane_runtime` records candidate and production typed results while `controls_execution` stays on the production path (DP-07).
+
+#### Validation
+
+Kind `decision_plane_shadow`. Soft expects production_action set, shadow_controls_execution false, both_outcomes_recorded true, agreement bool.
+
+#### Footnotes
+
+[^rc-dp-shadow]: [Recipes requirements DP-07](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Small-model shadow / evaluation mode
+
+### `fangore_decision_plane_telemetry` — Export evaluation-ready decision-plane telemetry without raw context
+
+Fangore needs decision metrics — which questions, projection fingerprint, answers, confidence, final policy action, escalation reason, and cost — without dumping the full ticket body into the aggregate stream. Related: `fangore_decision_plane_policy`, `taloneth_offline_decision_export`.[^rc-dp-telemetry]
+
+#### Implementation
+
+`build_decision_plane_telemetry` in `mechaharness.decision_plane_runtime` emits evaluation-ready fields for the `decision_plane` recipe (DP-08) and omits raw sensitive projection payloads from the aggregate record.
+
+#### Validation
+
+Kind `decision_plane_telemetry`. Soft expects schema ids, fingerprints, final_action, no raw_body field, optional latency_ms.
+
+#### Footnotes
+
+[^rc-dp-telemetry]: [Recipes requirements DP-08](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Evaluation-ready decision telemetry
+
 ### `fangore_decision_surface_reject` — Reject model choices that are not on the allowed list
 
 A triage model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal. Only product judgement policy may unlock the next action — same split as `fangore_refund_verdict`.
 
 #### Implementation
 
-`DecisionSurface` / `reject_invalid_choice` / `RulesDecisionBackend` in `mechaharness.decision_surfaces` name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects.
+`DecisionSurface` / `reject_invalid_choice` / `RulesDecisionBackend` in `mechaharness.decision_surfaces` name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects. Agentic Recipe `decision_plane` uses these envelopes in `mechaharness.decision_plane_runtime` (`fangore_decision_plane_policy`).
 
 Covers: POL-01.
 
@@ -510,6 +624,22 @@ Covers: CTX-06, CTX-07.
 #### Validation
 
 Kind `derived_memory` → `_run_derived_memory`. Unit: `tests/test_context_experiments.py`.
+
+### `fangore_environment_repair_recipe` — Instantiate the environment repair Agentic Recipe
+
+Before dependent work continues, Fangore runs the environment-repair Agentic Recipe: diagnose missing substrate, attempt a bounded repair, then recheck. The recipe must expand to a concrete plan without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`.
+
+#### Implementation
+
+Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnose → bounded env repair → recheck as an ordinary `ExecutionGraph` with provenance stamps via `GraphTemplate.instantiate`.
+
+#### Validation
+
+Kind `environment_repair_recipe`. Soft expects catalog id, diagnose/repair/recheck node ids, and stamped template_name. Unit: `tests/test_graph_templates.py`.
+
+#### Footnotes
+
+1. [Recipes requirements (first-wave catalog)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — environment_repair owning story
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 
@@ -546,11 +676,11 @@ Kind `graph_linkage_preflight` → `_run_graph_linkage_preflight`. Soft expects:
 
 ### `fangore_graph_template_soft_points` — Instantiate a reusable graph template with soft points
 
-Fangore picks a library fan-out template, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which template produced it so later upgrades can detect drift. Independent-review and verify-repair templates follow the same pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates].
+Fangore picks the library fan-out Agentic Recipe, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which recipe produced it so later upgrades can detect drift. Independent-review and verify-repair recipes follow the same GraphTemplate pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates].
 
 #### Implementation
 
-`mechaharness.graph_templates` ships parameterized skeletons (`FanOutAggregateTemplate`, `VerifyRepairTemplate`, `IndependentReviewTemplate`, `EnvironmentRepairTemplate`) with declared `SoftPoint`s. `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.
+Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_templates`. Catalog ids include `fan_out_aggregate` (this story's primary exercise), `verify_repair`, `independent_review`, `environment_repair`, and `initialize_preflight`. Each declares `SoftPoint`s; `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.
 
 #### Validation
 
@@ -707,11 +837,11 @@ Kind `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume faile
 
 ### `fangore_insp_dynamic_subgraph` — Nest a child graph as an observable subgraph
 
-Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`. Accepts inspiration requirement 3[^insp-r03].
+Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`. Hosts use the same nest path when tiling Agentic Recipes into a parent graph. Accepts inspiration requirement 3[^insp-r03].
 
 #### Implementation
 
-`SubgraphNodeRunner.embed` stores a child `ExecutionGraph` on a parent node; `GraphExecutor` runs nested graphs with linked run ids and emits graph lifecycle events for the child.
+`SubgraphNodeRunner.embed` stores a child `ExecutionGraph` on a parent node; `GraphExecutor` runs nested graphs with linked run ids and emits graph lifecycle events for the child. Agentic Recipes instantiate to ordinary graphs that may be embedded this way.
 
 #### Validation
 
@@ -759,7 +889,7 @@ Parallel branches rejoin through an explicit fan-in acceptance policy such as qu
 
 #### Implementation
 
-`FanInPolicy` and `accept_fan_in` in `mechaharness.fan_in_policy` support ALL/ANY/quorum/weighted/predicate/judge/human/custom strategies.
+`FanInPolicy` and `accept_fan_in` in `mechaharness.fan_in_policy` support ALL/ANY/quorum/weighted/predicate/judge/human/custom strategies. The `fan_out_aggregate` Agentic Recipe binds fan-in behavior at its reduce soft point when hosts tile parallel branches.
 
 #### Validation
 
@@ -824,7 +954,7 @@ Independent review must not reuse the producer's accumulated reasoning by defaul
 
 #### Implementation
 
-`IndependentReviewTemplate` builds produce → isolated review_* → aggregate_reviews with omit_producer_reasoning and retain_disagreement.
+Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce → isolated review_* → aggregate_reviews with omit_producer_reasoning and retain_disagreement.
 
 #### Validation
 
@@ -850,13 +980,13 @@ Kind `inference_capture_preflight`. Soft expects inference_capture_unsupported. 
 
 [^fineenvs-capture]: [FineEnvs multi-harness RL — what gets recorded](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-gets-recorded) — MH-MHRL-04/05/20
 
-### `fangore_insp_initialize_preflight` — Run an initialize preflight graph template before work
+### `fangore_insp_initialize_preflight` — Run an initialize preflight recipe before work
 
-Fangore starts substantive graphs only after an initialize/preflight template completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].
+Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].
 
 #### Implementation
 
-`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight` builds linkage → capability → checkpoint → ready.
+Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight`) builds linkage → capability → checkpoint → ready as an ordinary `ExecutionGraph`.
 
 #### Validation
 
@@ -904,7 +1034,7 @@ Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (ef
 
 #### Implementation
 
-`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for templates/subgraphs.
+`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for Agentic Recipe / `GraphTemplate` subgraph boundaries.
 
 #### Validation
 
@@ -937,7 +1067,7 @@ Fangore binds an observe-only extension around each graph node attempt. The node
 
 #### Implementation
 
-`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole retry brain.
+`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole executor-level retry brain (distinct from the planned `bounded_retry` Agentic Recipe, which makes retry a visible subgraph).
 
 #### Validation
 
@@ -1141,11 +1271,11 @@ Kind `targeted_rollback_select`. Soft expects selected rollback target produce.
 
 ### `fangore_insp_template_incubation` — Stamp template provenance and refuse demoted skeletons
 
-Reusable templates expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].
+Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].
 
 #### Implementation
 
-`SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, optional `source_workflow_ref`.
+`GraphTemplate` is the substrate for Agentic Recipes. `SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, and optional `source_workflow_ref` support incubation. This story stamps and demotes via the `fan_out_aggregate` catalog entry.
 
 #### Validation
 
@@ -1222,6 +1352,22 @@ Kind `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.p
 
 [^loop-vs-graph]: [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Explicit control flow; MechaHarness extends into execution graphs
 [^insp-resume]: [Inspiration requirements (durable resume)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 12 — resumable external state; incompatible fingerprint refuse
+
+### `fangore_recipe_namespace_tile` — Embed two recipe instances without node-id collisions
+
+Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution.
+
+#### Implementation
+
+`GraphTemplateParams.instance_key` namespaces node ids on instantiate. `GraphTemplate.tile` embeds a recipe graph under a parent node via `SubgraphNodeRunner`. Provenance includes instance id, params fingerprint, and logical-to-concrete node map (RC-01, RC-04, RC-05, RC-08).
+
+#### Validation
+
+Kind `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct recipe_instance_id values, and parent embed node kinds subgraph.
+
+#### Footnotes
+
+1. [Recipes requirements (RC-01/04/05/08)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Namespaced multi-instance tiling
 
 ### `fangore_refund_verdict` — Keep billing authority in product rules, not the model
 
@@ -1307,6 +1453,22 @@ Kind `verification_outcome_gate` → `_run_verification_outcome_gate`. Soft expe
 
 [^insp-verify]: [Inspiration requirements (verification)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification policy; answer generated ≠ task complete
 
+### `fangore_verify_repair_recipe` — Tile the verify-repair Agentic Recipe into a plan
+
+Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair are visible graph steps with an explicit stop. Complements `fangore_bounded_repair_loop` for loop helper semantics.
+
+#### Implementation
+
+Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) builds produce → verify → bounded repair → complete. Soft points bind runner kinds and stop contracts; instantiate stamps catalog provenance.
+
+#### Validation
+
+Kind `verify_repair_recipe`. Soft expects node ids and template_name `verify_repair`. Related: `fangore_bounded_repair_loop`.
+
+#### Footnotes
+
+1. [Recipes requirements (verify_repair)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — verify_repair tiling story
+
 ## Taloneth's stories
 
 ### `taloneth_atk_research_reject` — Reject research candidates that fail verified success
@@ -1336,6 +1498,22 @@ Covers: CTX-09.
 #### Validation
 
 Kind `cache_layout_experiment` → `_run_cache_layout_experiment`. Unit: `tests/test_context_experiments.py`.
+
+### `taloneth_decision_plane_shadow_compare` — Compare shadowed decision-plane answers before promotion
+
+Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: `fangore_decision_plane_shadow`, `taloneth_shadow_decision_backends`.[^rc-dp-shadow-t]
+
+#### Implementation
+
+`compare_shadow_decision` plus `build_decision_plane_telemetry` support promotion evidence for Agentic Recipe `decision_plane` without inventing unavailable candidate results (DP-07, DP-08).
+
+#### Validation
+
+Kind `decision_plane_shadow_compare`. Soft expects agreement false when answers differ, unavailable_candidate stays unavailable, telemetry has shadow_action.
+
+#### Footnotes
+
+[^rc-dp-shadow-t]: [Recipes requirements DP-07 / DP-08](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Shadow comparison for model promotion
 
 ### `taloneth_fixture_judge_batch` — Validate judge question batches without a live model
 

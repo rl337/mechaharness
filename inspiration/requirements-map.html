@@ -48,6 +48,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
@@ -56,6 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
@@ -112,9 +115,12 @@ library readiness, and the user-story id that acceptance-tests it (when any).</p
 <p><strong>Coverage honesty:</strong> a row marked <em>surface</em> means types/hooks exist and unit
 tests cover them; <em>story</em> means a persona story exercises the path; <em>partial</em>
 means important MUSTs remain open (see Gaps). Req 17 is client-owned.</p>
-<p><strong>Ownership:</strong> MechaHarness owns protocols, DI hooks, and parameterized graph
-template definitions. Clients own scheduling, goals, documents, knowledge
-graphs, issue trackers, and concrete graph realizations.</p>
+<p><strong>Ownership:</strong> MechaHarness owns protocols, DI hooks, parameterized
+<code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> definitions, and <strong>Agentic Recipes</strong> (concrete catalog
+patterns on that substrate). Clients own scheduling, goals, documents,
+knowledge graphs, issue trackers, domain recipes, and concrete graph
+realizations. See
+<a class="reference internal" href="../requirements/recipes-and-decision-plane.html"><span class="std std-doc">Recipes and decision plane</span></a>.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Req</p></th>
@@ -141,11 +147,11 @@ graphs, issue trackers, and concrete graph realizations.</p>
 <td><p>Operation bind depth; candidate-provider UX polish</p></td>
 </tr>
 <tr class="row-even"><td><p>3</p></td>
-<td><p>Dynamic subgraphs</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">graph_templates/</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_executor.py</span></code></p></td>
+<td><p>Dynamic subgraphs / recipes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">graph_templates/</span></code> (Agentic Recipes), <code class="docutils literal notranslate"><span class="pre">graph_executor.py</span></code></p></td>
 <td><p>story</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_dynamic_subgraph</span></code></p></td>
-<td><p>I/O contracts + child budget share on every nest</p></td>
+<td><p>I/O contracts + child budget share; recipe tiling readability</p></td>
 </tr>
 <tr class="row-odd"><td><p>4</p></td>
 <td><p>Stop contracts</p></td>
@@ -253,11 +259,11 @@ graphs, issue trackers, and concrete graph realizations.</p>
 <td><p>Linkage participation; follow/reject on traces</p></td>
 </tr>
 <tr class="row-even"><td><p>19</p></td>
-<td><p>Template incubation</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">graph_templates/</span></code> SoftPoint + stamp</p></td>
+<td><p>Template / recipe incubation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">graph_templates/</span></code> SoftPoint + stamp; Agentic Recipe catalog</p></td>
 <td><p>story</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_template_incubation</span></code></p></td>
-<td><p>Promote/demote evidence workflow</p></td>
+<td><p>Promote/demote evidence; story names catalog id</p></td>
 </tr>
 <tr class="row-odd"><td><p>20</p></td>
 <td><p>Lifecycle interception</p></td>
