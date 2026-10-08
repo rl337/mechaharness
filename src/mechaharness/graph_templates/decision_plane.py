@@ -100,25 +100,18 @@ class DecisionPlaneTemplate(GraphTemplate):
     def build(self, params: GraphTemplateParams) -> ExecutionGraph:
         bindings = params.soft_bindings
         inputs = params.inputs
-        questions = list(
-            bindings.get("questions")
-            if "questions" in bindings
-            else inputs.get("questions")
-            or []
+        questions = _as_list(
+            bindings["questions"] if "questions" in bindings else inputs.get("questions")
         )
         if not questions:
             raise ValueError("decision_plane requires a non-empty questions batch")
-        projection = dict(
-            bindings.get("state_projection")
+        projection = _as_dict(
+            bindings["state_projection"]
             if "state_projection" in bindings
             else inputs.get("state_projection")
-            or {}
         )
-        facts = dict(
-            bindings.get("facts")
-            if "facts" in bindings
-            else inputs.get("facts")
-            or {}
+        facts = _as_dict(
+            bindings["facts"] if "facts" in bindings else inputs.get("facts")
         )
         confidence_floor = float(
             bindings.get(
@@ -229,6 +222,22 @@ class DecisionPlaneTemplate(GraphTemplate):
                 )
             )
         return graph
+
+
+def _as_list(value: Any) -> list[Any]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return list(value)
+    raise TypeError(f"expected list, got {type(value)!r}")
+
+
+def _as_dict(value: Any) -> dict[str, Any]:
+    if value is None:
+        return {}
+    if isinstance(value, dict):
+        return dict(value)
+    raise TypeError(f"expected dict, got {type(value)!r}")
 
 
 def _envelopes(questions: list[Any]) -> dict[str, list[str]]:

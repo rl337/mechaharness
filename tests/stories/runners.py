@@ -68,6 +68,12 @@ from mechaharness.decision_log import (
     export_offline_dataset,
     replay_verdict,
 )
+from mechaharness.decision_plane_runtime import (
+    build_decision_plane_telemetry,
+    compare_shadow_decision,
+    project_decision_state,
+    run_decision_plane_policy,
+)
 from mechaharness.decision_surfaces import (
     DecisionSurface,
     RulesDecisionBackend,
@@ -122,12 +128,6 @@ from mechaharness.graph_state_governance import (
     FieldGovernance,
     GraphStateGovernance,
     authorize_write,
-)
-from mechaharness.decision_plane_runtime import (
-    build_decision_plane_telemetry,
-    compare_shadow_decision,
-    project_decision_state,
-    run_decision_plane_policy,
 )
 from mechaharness.graph_templates import (
     BoundedRetryTemplate,
