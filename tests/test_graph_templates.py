@@ -94,3 +94,38 @@ def test_source_workflow_ref_stamped() -> None:
     )
     assert graph.source_workflow_ref == "client:workflows/review_v3"
     assert graph.template_name == "independent_review"
+
+def test_instance_key_namespaces_and_is_deterministic() -> None:
+    from mechaharness.graph_templates import VerifyRepairTemplate
+
+    template = VerifyRepairTemplate()
+    a = template.instantiate(GraphTemplateParams(goal="g", instance_key="a"))
+    b = template.instantiate(GraphTemplateParams(goal="g", instance_key="a"))
+    assert set(a.nodes) == set(b.nodes)
+    assert a.recipe_params_fingerprint == b.recipe_params_fingerprint
+    assert a.recipe_instance_id == "verify_repair/a"
+    assert "verify_repair/a/produce" in a.nodes
+    other = template.instantiate(GraphTemplateParams(goal="g", instance_key="b"))
+    assert set(a.nodes).isdisjoint(other.nodes)
+
+
+def test_tile_embeds_namespaced_child() -> None:
+    from mechaharness.graph import ExecutionGraph
+    from mechaharness.graph_templates import VerifyRepairTemplate
+
+    template = VerifyRepairTemplate()
+    child, embed = template.tile(
+        GraphTemplateParams(goal="child", instance_key="left"),
+        parent_node_id="embed_left",
+    )
+    parent = ExecutionGraph(goal="parent")
+    parent.add_node(embed)
+    assert embed.kind == "subgraph"
+    assert child.recipe_instance_id == "verify_repair/left"
+    assert embed.payload.get("recipe_instance_id") == child.recipe_instance_id
+
+
+def test_catalog_marks_agentic_recipe_category() -> None:
+    catalog = default_graph_templates().catalog()
+    assert all(row.get("category") == "agentic_recipe" for row in catalog)
+

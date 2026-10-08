@@ -44,6 +44,7 @@ from mechaharness.graph_templates.base import (
     SoftPoint,
     SubgraphNodeRunner,
     make_node,
+    namespace_graph,
 )
 from mechaharness.graph_templates.catalog import default_graph_templates
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
@@ -65,4 +66,5 @@ __all__ = [
     "VerifyRepairTemplate",
     "default_graph_templates",
     "make_node",
+    "namespace_graph",
 ]

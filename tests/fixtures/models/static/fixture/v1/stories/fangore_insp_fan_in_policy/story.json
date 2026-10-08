@@ -4,7 +4,7 @@
   "title": "Accept fan-in with a named quorum policy",
   "kind": "fan_in_policy_accept",
   "narrative": "Parallel branches rejoin through an explicit fan-in acceptance policy such as quorum rather than an implicit reduce. Accepts WalkingLabs P08 guidance[^wl-p08-fanin].",
-  "implementation": "`FanInPolicy` and `accept_fan_in` in `mechaharness.fan_in_policy` support ALL/ANY/quorum/weighted/predicate/judge/human/custom strategies.",
+  "implementation": "`FanInPolicy` and `accept_fan_in` in `mechaharness.fan_in_policy` support ALL/ANY/quorum/weighted/predicate/judge/human/custom strategies. The `fan_out_aggregate` Agentic Recipe binds fan-in behavior at its reduce soft point when hosts tile parallel branches.",
   "validation": "Kind `fan_in_policy_accept`. Soft expects quorum acceptance true.",
   "footnotes": [
     {

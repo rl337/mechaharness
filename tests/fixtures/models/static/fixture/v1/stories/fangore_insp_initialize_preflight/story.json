@@ -1,10 +1,10 @@
 {
   "id": "fangore_insp_initialize_preflight",
   "persona": "fangore",
-  "title": "Run an initialize preflight graph template before work",
+  "title": "Run an initialize preflight recipe before work",
   "kind": "initialize_preflight_template",
-  "narrative": "Fangore starts substantive graphs only after an initialize/preflight template completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].",
-  "implementation": "`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight` builds linkage \u2192 capability \u2192 checkpoint \u2192 ready.",
+  "narrative": "Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].",
+  "implementation": "Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight`) builds linkage → capability → checkpoint → ready as an ordinary `ExecutionGraph`.",
   "validation": "Kind `initialize_preflight_template`. Soft expects node ids include ready.",
   "footnotes": [
     {

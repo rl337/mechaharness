@@ -86,7 +86,7 @@ Nubble compares wall-clock critical path, duplicated context, and fan-in review 
 
 #### Implementation
 
-`CoordinationCostMetrics` and `summarize_coordination_cost` in `mechaharness.coordination_cost` report fan-out orchestration cost.
+`CoordinationCostMetrics` and `summarize_coordination_cost` in `mechaharness.coordination_cost` report fan-out orchestration cost, including graphs tiled from the `fan_out_aggregate` Agentic Recipe.
 
 #### Validation
 
@@ -339,7 +339,7 @@ After a failed verification, Fangore allows a limited repair-and-retry cycle. Wh
 
 #### Implementation
 
-`bounded_repair` in `mechaharness.graph` runs verify → classify → permitted repair → retry until `max_attempts`. `VerificationPolicy` / `OutcomeContract` select verification and gate completion. Judge scores remain supplementary to verifier evidence.
+Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) expresses produce → verify → bounded repair → complete as a reusable graph. The `bounded_repair` helper in `mechaharness.graph` runs verify → classify → permitted repair → retry until `max_attempts`. `VerificationPolicy` / `OutcomeContract` select verification and gate completion. Judge scores remain supplementary to verifier evidence.
 
 Covers: VER-03.
 
@@ -489,7 +489,7 @@ A triage model returns a team name that was never on the allowed set. The produc
 
 #### Implementation
 
-`DecisionSurface` / `reject_invalid_choice` / `RulesDecisionBackend` in `mechaharness.decision_surfaces` name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects.
+`DecisionSurface` / `reject_invalid_choice` / `RulesDecisionBackend` in `mechaharness.decision_surfaces` name the decision plane over judge signal types. Surfaces produce signals; they do not execute side effects. These primitives are the building blocks for the planned `decision_plane` Agentic Recipe (valid-action envelopes before side effects).
 
 Covers: POL-01.
 
@@ -546,11 +546,11 @@ Kind `graph_linkage_preflight` → `_run_graph_linkage_preflight`. Soft expects:
 
 ### `fangore_graph_template_soft_points` — Instantiate a reusable graph template with soft points
 
-Fangore picks a library fan-out template, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which template produced it so later upgrades can detect drift. Independent-review and verify-repair templates follow the same pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates].
+Fangore picks the library fan-out Agentic Recipe, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which recipe produced it so later upgrades can detect drift. Independent-review and verify-repair recipes follow the same GraphTemplate pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates].
 
 #### Implementation
 
-`mechaharness.graph_templates` ships parameterized skeletons (`FanOutAggregateTemplate`, `VerifyRepairTemplate`, `IndependentReviewTemplate`, `EnvironmentRepairTemplate`) with declared `SoftPoint`s. `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.
+Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_templates`. Catalog ids include `fan_out_aggregate` (this story's primary exercise), `verify_repair`, `independent_review`, `environment_repair`, and `initialize_preflight`. Each declares `SoftPoint`s; `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.
 
 #### Validation
 
@@ -707,11 +707,11 @@ Kind `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume faile
 
 ### `fangore_insp_dynamic_subgraph` — Nest a child graph as an observable subgraph
 
-Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`. Accepts inspiration requirement 3[^insp-r03].
+Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`. Hosts use the same nest path when tiling Agentic Recipes into a parent graph. Accepts inspiration requirement 3[^insp-r03].
 
 #### Implementation
 
-`SubgraphNodeRunner.embed` stores a child `ExecutionGraph` on a parent node; `GraphExecutor` runs nested graphs with linked run ids and emits graph lifecycle events for the child.
+`SubgraphNodeRunner.embed` stores a child `ExecutionGraph` on a parent node; `GraphExecutor` runs nested graphs with linked run ids and emits graph lifecycle events for the child. Agentic Recipes instantiate to ordinary graphs that may be embedded this way.
 
 #### Validation
 
@@ -759,7 +759,7 @@ Parallel branches rejoin through an explicit fan-in acceptance policy such as qu
 
 #### Implementation
 
-`FanInPolicy` and `accept_fan_in` in `mechaharness.fan_in_policy` support ALL/ANY/quorum/weighted/predicate/judge/human/custom strategies.
+`FanInPolicy` and `accept_fan_in` in `mechaharness.fan_in_policy` support ALL/ANY/quorum/weighted/predicate/judge/human/custom strategies. The `fan_out_aggregate` Agentic Recipe binds fan-in behavior at its reduce soft point when hosts tile parallel branches.
 
 #### Validation
 
@@ -824,7 +824,7 @@ Independent review must not reuse the producer's accumulated reasoning by defaul
 
 #### Implementation
 
-`IndependentReviewTemplate` builds produce → isolated review_* → aggregate_reviews with omit_producer_reasoning and retain_disagreement.
+Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce → isolated review_* → aggregate_reviews with omit_producer_reasoning and retain_disagreement.
 
 #### Validation
 
@@ -850,13 +850,13 @@ Kind `inference_capture_preflight`. Soft expects inference_capture_unsupported. 
 
 [^fineenvs-capture]: [FineEnvs multi-harness RL — what gets recorded](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-gets-recorded) — MH-MHRL-04/05/20
 
-### `fangore_insp_initialize_preflight` — Run an initialize preflight graph template before work
+### `fangore_insp_initialize_preflight` — Run an initialize preflight recipe before work
 
-Fangore starts substantive graphs only after an initialize/preflight template completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].
+Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].
 
 #### Implementation
 
-`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight` builds linkage → capability → checkpoint → ready.
+Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight`) builds linkage → capability → checkpoint → ready as an ordinary `ExecutionGraph`.
 
 #### Validation
 
@@ -904,7 +904,7 @@ Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (ef
 
 #### Implementation
 
-`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for templates/subgraphs.
+`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for Agentic Recipe / `GraphTemplate` subgraph boundaries.
 
 #### Validation
 
@@ -937,7 +937,7 @@ Fangore binds an observe-only extension around each graph node attempt. The node
 
 #### Implementation
 
-`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole retry brain.
+`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole executor-level retry brain (distinct from the planned `bounded_retry` Agentic Recipe, which makes retry a visible subgraph).
 
 #### Validation
 
@@ -1141,11 +1141,11 @@ Kind `targeted_rollback_select`. Soft expects selected rollback target produce.
 
 ### `fangore_insp_template_incubation` — Stamp template provenance and refuse demoted skeletons
 
-Reusable templates expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].
+Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].
 
 #### Implementation
 
-`SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, optional `source_workflow_ref`.
+`GraphTemplate` is the substrate for Agentic Recipes. `SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, and optional `source_workflow_ref` support incubation. This story stamps and demotes via the `fan_out_aggregate` catalog entry.
 
 #### Validation
 

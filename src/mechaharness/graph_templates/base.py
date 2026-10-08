@@ -1,13 +1,16 @@
-"""Reusable parameterized graph templates (library-owned subgraph skeletons).
+"""Reusable parameterized graph templates (Agentic Recipe substrate).
 
 A template is intentionally incomplete: it exposes soft points for client
 bindings (tools, providers, prompts, models, budgets, persistence, policies).
-Clients instantiate, bind, and may retain the resulting concrete
+Concrete, useful templates are documented as **Agentic Recipes**. Clients
+instantiate, bind, and may retain the resulting concrete
 :class:`~mechaharness.graph.ExecutionGraph` in their own repository.
 """
 
 from __future__ import annotations
 
+import hashlib
+import json
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from typing import Any, Literal
@@ -31,6 +34,7 @@ SoftPointKind = Literal[
     "other",
 ]
 TemplateStatus = Literal["active", "deprecated", "demoted"]
+TemplateCategory = Literal["agentic_recipe", "skeleton"]
 
 
 class SoftPoint(BaseModel):
@@ -58,16 +62,18 @@ class GraphTemplateParams(BaseModel):
     envelope_ref: str | None = None
     soft_bindings: dict[str, Any] = Field(default_factory=dict)
     source_workflow_ref: str | None = None
+    instance_key: str | None = None
     extra: dict[str, Any] = Field(default_factory=dict)
 
 
 class GraphTemplate(ABC):
-    """Reusable parameterized subgraph factory."""
+    """Reusable parameterized subgraph factory (Agentic Recipe substrate)."""
 
     name: str = "template"
     version: str = "1"
     summary: str = ""
     status: TemplateStatus = "active"
+    category: TemplateCategory = "agentic_recipe"
     soft_points: tuple[SoftPoint, ...] = ()
 
     @abstractmethod
@@ -75,23 +81,76 @@ class GraphTemplate(ABC):
         """Construct the skeleton graph (subclasses implement this)."""
 
     def instantiate(self, params: GraphTemplateParams) -> ExecutionGraph:
-        """Build a concrete graph and stamp template provenance."""
+        """Build a concrete graph, namespace if needed, and stamp provenance."""
         if self.status == "demoted":
             raise RuntimeError(
                 f"template {self.name!r} is demoted; move bindings to the client"
             )
+        self.validate_soft_bindings(params)
         graph = self.build(params)
-        return self.stamp(graph, params=params)
+        logical_ids = list(graph.nodes)
+        if params.instance_key:
+            graph = namespace_graph(graph, prefix=f"{self.name}/{params.instance_key}")
+        return self.stamp(graph, params=params, logical_ids=logical_ids)
+
+    def tile(
+        self,
+        params: GraphTemplateParams,
+        *,
+        parent_node_id: str,
+    ) -> tuple[ExecutionGraph, GraphNode]:
+        """Instantiate and embed under ``parent_node_id`` (readable composition)."""
+        child = self.instantiate(params)
+        embed = SubgraphNodeRunner.embed(child, parent_node_id=parent_node_id)
+        return child, embed
+
+    def validate_soft_bindings(self, params: GraphTemplateParams) -> None:
+        """Fail early when required soft points lack binding and default."""
+        missing: list[str] = []
+        for point in self.soft_points:
+            if not point.required:
+                continue
+            if point.name in params.soft_bindings:
+                continue
+            if point.default is not None:
+                continue
+            missing.append(point.name)
+        if missing:
+            raise ValueError(
+                f"recipe {self.name!r} missing required soft points: {missing}"
+            )
 
     def stamp(
-        self, graph: ExecutionGraph, *, params: GraphTemplateParams | None = None
+        self,
+        graph: ExecutionGraph,
+        *,
+        params: GraphTemplateParams | None = None,
+        logical_ids: Sequence[str] | None = None,
     ) -> ExecutionGraph:
-        """Attach template identity for promotion / deprecation detection."""
+        """Attach template / recipe identity for provenance and deprecation."""
         graph.template_name = self.name
         graph.template_version = self.version
         graph.template_status = self.status
-        if params is not None and params.source_workflow_ref:
-            graph.source_workflow_ref = params.source_workflow_ref
+        graph.recipe_definition_fingerprint = definition_fingerprint(
+            name=self.name, version=self.version, summary=self.summary
+        )
+        if params is not None:
+            if params.source_workflow_ref:
+                graph.source_workflow_ref = params.source_workflow_ref
+            graph.recipe_instance_id = (
+                f"{self.name}/{params.instance_key}"
+                if params.instance_key
+                else f"{self.name}#{graph.recipe_definition_fingerprint[:8]}"
+            )
+            graph.recipe_params_fingerprint = params_fingerprint(params)
+            if logical_ids is not None:
+                if params.instance_key:
+                    prefix = f"{self.name}/{params.instance_key}/"
+                    graph.recipe_node_map = {
+                        logical: f"{prefix}{logical}" for logical in logical_ids
+                    }
+                else:
+                    graph.recipe_node_map = {logical: logical for logical in logical_ids}
         return graph
 
     def describe(self) -> dict[str, Any]:
@@ -101,6 +160,7 @@ class GraphTemplate(ABC):
             "version": self.version,
             "summary": self.summary,
             "status": self.status,
+            "category": self.category,
             "soft_points": [p.model_dump(mode="json") for p in self.soft_points],
         }
 
@@ -164,6 +224,51 @@ def make_node(
     )
 
 
+def namespace_graph(graph: ExecutionGraph, *, prefix: str) -> ExecutionGraph:
+    """Rewrite node ids / edges under ``prefix/`` (deterministic, no inference)."""
+    bare = prefix.rstrip("/")
+    mapping = {old: f"{bare}/{old}" for old in graph.nodes}
+    remapped = ExecutionGraph(
+        id=graph.id,
+        goal=graph.goal,
+        version=graph.version,
+        config_fingerprint=graph.config_fingerprint,
+        template_name=graph.template_name,
+        template_version=graph.template_version,
+        template_status=graph.template_status,
+        source_workflow_ref=graph.source_workflow_ref,
+    )
+    for old_id, node in graph.nodes.items():
+        new = node.model_copy(deep=True)
+        new.id = mapping[old_id]
+        new.depends_on = [mapping.get(d, d) for d in node.depends_on]
+        remapped.add_node(new)
+    for edge in graph.edges:
+        remapped.add_dependency(
+            edge.model_copy(
+                update={
+                    "from_node": mapping.get(edge.from_node, edge.from_node),
+                    "to_node": mapping.get(edge.to_node, edge.to_node),
+                }
+            )
+        )
+    return remapped
+
+
+def definition_fingerprint(*, name: str, version: str, summary: str) -> str:
+    payload = json.dumps(
+        {"name": name, "version": version, "summary": summary},
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def params_fingerprint(params: GraphTemplateParams) -> str:
+    payload = json.dumps(params.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
 class SubgraphNodeRunner:
     """Marker helpers for nesting child graphs under a parent node."""
 
@@ -176,5 +281,10 @@ class SubgraphNodeRunner:
             kind=SubgraphNodeRunner.KIND,
             goal=child.goal,
             subgraph=child.checkpoint(),
-            payload={"child_graph_id": child.id, "child_version": child.version},
+            payload={
+                "child_graph_id": child.id,
+                "child_version": child.version,
+                "recipe_instance_id": child.recipe_instance_id,
+                "template_name": child.template_name,
+            },
         )
