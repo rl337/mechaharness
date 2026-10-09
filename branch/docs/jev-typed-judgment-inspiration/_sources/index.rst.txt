@@ -54,9 +54,10 @@ Founding principles
    See :doc:`reference/events`.
 
 **Also in the core model:** deny-by-default tool grants and
-``CompoundPolicy`` (:doc:`reference/access`), plus host-extendable open
-identity for events and grants so third parties compose without patching this
-package (:doc:`architecture`).
+``CompoundPolicy`` (:doc:`reference/access`); host-extendable open identity
+for events and grants (:doc:`architecture`); and **Agentic Recipes** —
+reusable control subgraphs on a ``GraphTemplate`` substrate
+(:doc:`reference/graph-templates`).
 
 Installation
 ------------
@@ -76,6 +77,8 @@ Guides
    guides/dependency-injection
    guides/openai-local
    guides/user-stories
+   requirements/recipes-and-decision-plane
+   requirements/transactional-durable-resume
 
 Reference
 ---------
@@ -89,6 +92,7 @@ Reference
    reference/cost
    reference/access
    reference/judge
+   reference/graph-templates
 
 API
 ---

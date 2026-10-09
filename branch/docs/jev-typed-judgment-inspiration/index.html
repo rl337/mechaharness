@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MechaHarness documentation &mdash; MechaHarness 0.3.1 documentation</title>
+  <title>MechaHarness documentation &mdash; MechaHarness 0.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=4621528c"></script>
+      <script src="_static/documentation_options.js?v=71d9d8e6"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -49,6 +49,8 @@
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a></li>
@@ -57,6 +59,7 @@
 <li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/access.html">Access control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a></li>
@@ -114,7 +117,7 @@ models and policies without rewriting the run path, and so agents cannot
 quietly burn unbounded spend.</p>
 <div class="hero-meta docutils container">
 <div class="version-badge docutils container">
-<p>0.3.1</p>
+<p>0.3.2</p>
 </div>
 <p>pyiv Config · multi-lane inference · cost + EventLog on every run · Python 3.9+</p>
 </div>
@@ -150,9 +153,10 @@ every run. Telemetry is part of the product surface, not a bolt-on sink.
 See <a class="reference internal" href="reference/events.html"><span class="doc">Event log</span></a>.</p></li>
 </ol>
 <p><strong>Also in the core model:</strong> deny-by-default tool grants and
-<code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> (<a class="reference internal" href="reference/access.html"><span class="doc">Access control</span></a>), plus host-extendable open
-identity for events and grants so third parties compose without patching this
-package (<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>).</p>
+<code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> (<a class="reference internal" href="reference/access.html"><span class="doc">Access control</span></a>); host-extendable open identity
+for events and grants (<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>); and <strong>Agentic Recipes</strong> —
+reusable control subgraphs on a <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> substrate
+(<a class="reference internal" href="reference/graph-templates.html"><span class="doc">Graph templates and Agentic Recipes</span></a>).</p>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
@@ -205,6 +209,28 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#taloneth-s-stories">Taloneth’s stories</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#definition">Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#ownership-boundary">Ownership boundary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#first-wave-catalog-candidates">First-wave catalog candidates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#reference-recipe-typed-decision-plane">Reference recipe: typed decision plane</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#reference-recipe-bounded-retry">Reference recipe: bounded retry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#candidate-future-recipes">Candidate future recipes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#testing-requirements">Testing requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#initial-implementation-scope">Initial implementation scope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#design-principle">Design principle</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#ownership-boundary">Ownership boundary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#compatibility-and-migration">Compatibility and migration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#definition-of-done">Definition of done</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -253,6 +279,13 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="reference/judge.html#api">API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/judge.html#judgementpolicy">JudgementPolicy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/judge.html#lanes">Lanes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#catalog">Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#soft-points">Soft points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#usage-sketch">Usage sketch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#ownership-incubation">Ownership / incubation</a></li>
 </ul>
 </li>
 </ul>

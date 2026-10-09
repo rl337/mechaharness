@@ -1,0 +1,241 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bounded retry (bounded_retry) &mdash; MechaHarness 0.3.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/reference/graph-templates/bounded-retry.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bounded-retry-bounded-retry">
+<h1>Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)<a class="headerlink" href="#bounded-retry-bounded-retry" title="Link to this heading"></a></h1>
+<p><strong>Agentic Recipe.</strong> Make retry visible: attempt, classify failure, permit retry
+in code, apply backoff, and escalate when exhausted. Attempt nodes declare
+effect-reconciliation requirements so durable resume is not bypassed.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Surface</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Catalog id</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Module</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.graph_templates.bounded_retry</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Substrate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Owning stories</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="when-to-use">
+<h2>When to use<a class="headerlink" href="#when-to-use" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Retries that need classification, remediation, and an explicit terminal edge</p></li>
+<li><p>Dispatch paths that must compose with durable external-effect recovery</p></li>
+</ul>
+<p>Do not use infinite implicit executor retry as a substitute for this recipe when
+the control flow must be observable.</p>
+</section>
+<section id="soft-points">
+<h2>Soft points<a class="headerlink" href="#soft-points" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Kind</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">attempt_kind</span></code></p></td>
+<td><p>runner_kind</p></td>
+<td><p>Work / dispatch per attempt</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">classify_kind</span></code></p></td>
+<td><p>runner_kind</p></td>
+<td><p>Failure classification</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">permit_kind</span></code></p></td>
+<td><p>runner_kind</p></td>
+<td><p>Deterministic retry permission</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">backoff_kind</span></code></p></td>
+<td><p>runner_kind</p></td>
+<td><p>Remediation / backoff</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">escalate_kind</span></code></p></td>
+<td><p>runner_kind</p></td>
+<td><p>Terminal escalation</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stop_contract</span></code> / <code class="docutils literal notranslate"><span class="pre">max_attempts</span></code></p></td>
+<td><p>budget</p></td>
+<td><p>Bound repeating attempts</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">failure_classifier</span></code></p></td>
+<td><p>policy</p></td>
+<td><p>Soft point for ambiguous failures</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="tiling-example">
+<h2>Tiling example<a class="headerlink" href="#tiling-example" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_templates</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BoundedRetryTemplate</span><span class="p">,</span>
+    <span class="n">GraphTemplateParams</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">BoundedRetryTemplate</span><span class="p">()</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span>
+    <span class="n">GraphTemplateParams</span><span class="p">(</span>
+        <span class="n">goal</span><span class="o">=</span><span class="s2">"dispatch remote job with safe retry"</span><span class="p">,</span>
+        <span class="n">inputs</span><span class="o">=</span><span class="p">{</span><span class="s2">"max_attempts"</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="k">assert</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">"attempt"</span><span class="p">]</span><span class="o">.</span><span class="n">payload</span><span class="p">[</span><span class="s2">"requires_effect_reconciliation"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="related">
+<h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../graph-templates.html"><span class="std std-doc">Graph templates and Agentic Recipes</span></a></p></li>
+<li><p><a class="reference internal" href="../../requirements/recipes-and-decision-plane.html"><span class="std std-doc">Recipes requirements</span></a></p></li>
+<li><p><a class="reference internal" href="../../requirements/transactional-durable-resume.html"><span class="std std-doc">Transactional durable resume</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
