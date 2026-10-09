@@ -1,0 +1,7 @@
+{
+  "recipe": "verify_repair",
+  "instance_keys": [
+    "left",
+    "right"
+  ]
+}

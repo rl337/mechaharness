@@ -1,0 +1,13 @@
+{
+  "projection": {
+    "ticket_id": "T-9",
+    "channel": "email"
+  },
+  "facts_include": [
+    "duplicate_charge",
+    "amount_cents"
+  ],
+  "projection_has_secret": false,
+  "no_model_invocation": true,
+  "facts_fingerprint_nonempty": true
+}

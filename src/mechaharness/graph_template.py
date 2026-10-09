@@ -4,6 +4,8 @@ Deprecated public import path. Update call sites to the package when practical.
 """
 
 from mechaharness.graph_templates import (
+    BoundedRetryTemplate,
+    DecisionPlaneTemplate,
     EnvironmentRepairTemplate,
     FanOutAggregateTemplate,
     GraphTemplate,
@@ -18,6 +20,8 @@ from mechaharness.graph_templates import (
 )
 
 __all__ = [
+    "BoundedRetryTemplate",
+    "DecisionPlaneTemplate",
     "EnvironmentRepairTemplate",
     "FanOutAggregateTemplate",
     "GraphTemplate",

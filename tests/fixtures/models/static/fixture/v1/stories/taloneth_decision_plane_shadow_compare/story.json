@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_decision_plane_shadow_compare",
+  "persona": "taloneth",
+  "title": "Compare shadowed decision-plane answers before promotion",
+  "kind": "decision_plane_shadow_compare",
+  "narrative": "Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: `fangore_decision_plane_shadow`, `taloneth_shadow_decision_backends`.[^rc-dp-shadow-t]",
+  "implementation": "`compare_shadow_decision` plus `build_decision_plane_telemetry` support promotion evidence for Agentic Recipe `decision_plane` without inventing unavailable candidate results (DP-07, DP-08).",
+  "validation": "Kind `decision_plane_shadow_compare`. Soft expects agreement false when answers differ, unavailable_candidate stays unavailable, telemetry has shadow_action.",
+  "footnotes": [
+    {
+      "id": "rc-dp-shadow-t",
+      "label": "Recipes requirements DP-07 / DP-08",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "Shadow comparison for model promotion"
+    }
+  ]
+}

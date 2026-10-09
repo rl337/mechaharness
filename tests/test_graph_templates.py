@@ -8,6 +8,8 @@ from pyiv import get_injector
 from mechaharness.core.access import GraphExecute
 from mechaharness.di import MechaHarnessConfig
 from mechaharness.graph_templates import (
+    BoundedRetryTemplate,
+    DecisionPlaneTemplate,
     FanOutAggregateTemplate,
     GraphTemplateParams,
     GraphTemplateRegistry,
@@ -58,12 +60,68 @@ def test_catalog_describes_soft_points() -> None:
         "verify_repair",
         "independent_review",
         "environment_repair",
+        "decision_plane",
+        "bounded_retry",
     }
     for row in catalog:
         assert row["summary"]
+        assert row.get("category") == "agentic_recipe"
         assert isinstance(row["soft_points"], list)
         assert row["soft_points"], f"{row['name']} must declare soft points"
         SoftPoint.model_validate(row["soft_points"][0])
+
+
+def test_instance_key_namespaces_and_is_deterministic() -> None:
+    from mechaharness.graph_templates import VerifyRepairTemplate
+
+    template = VerifyRepairTemplate()
+    a = template.instantiate(GraphTemplateParams(goal="g", instance_key="a"))
+    b = template.instantiate(GraphTemplateParams(goal="g", instance_key="a"))
+    assert set(a.nodes) == set(b.nodes)
+    assert a.recipe_params_fingerprint == b.recipe_params_fingerprint
+    assert a.recipe_instance_id == "verify_repair/a"
+    assert "verify_repair/a/produce" in a.nodes
+    other = template.instantiate(GraphTemplateParams(goal="g", instance_key="b"))
+    assert set(a.nodes).isdisjoint(other.nodes)
+
+
+def test_decision_plane_batch_and_shadow() -> None:
+    graph = DecisionPlaneTemplate().instantiate(
+        GraphTemplateParams(
+            goal="triage",
+            inputs={
+                "state_projection": {"id": 1},
+                "facts": {"n": 2},
+                "questions": [
+                    {
+                        "id": "team",
+                        "kind": "choice",
+                        "options": ["billing"],
+                        "allowed_actions": ["billing"],
+                    },
+                    {"id": "risk", "kind": "score", "min": 0, "max": 1},
+                ],
+                "shadow_mode": True,
+            },
+        )
+    )
+    assert graph.template_name == "decision_plane"
+    assert len(graph.nodes["ask_batch"].payload["questions"]) == 2
+    assert "shadow_ask" in graph.nodes
+    assert "facts" in graph.nodes["project_state"].payload
+    assert "facts" not in graph.nodes["ask_batch"].payload
+
+
+def test_bounded_retry_effect_flag_and_stop() -> None:
+    graph = BoundedRetryTemplate().instantiate(
+        GraphTemplateParams(goal="job", inputs={"max_attempts": 2})
+    )
+    assert graph.template_name == "bounded_retry"
+    attempt = graph.nodes["attempt"]
+    assert attempt.repeating
+    assert attempt.stop_contract["max_iterations"] == 2
+    assert attempt.payload["requires_effect_reconciliation"] is True
+    assert "escalate" in graph.nodes
 
 
 def test_registry_bound_via_di() -> None:

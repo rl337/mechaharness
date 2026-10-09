@@ -3,15 +3,15 @@
   "persona": "fangore",
   "title": "Stamp template provenance and refuse demoted skeletons",
   "kind": "graph_template_soft_points",
-  "narrative": "Reusable templates expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].",
-  "implementation": "`SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, optional `source_workflow_ref`.",
+  "narrative": "Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].",
+  "implementation": "`GraphTemplate` is the substrate for Agentic Recipes. `SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, and optional `source_workflow_ref` support incubation. This story stamps and demotes via the `fan_out_aggregate` catalog entry.",
   "validation": "Kind `graph_template_soft_points`. Soft expects stamped provenance and demoted refuse.",
   "footnotes": [
     {
       "id": "insp-r19",
       "label": "Inspiration requirements (req 19: template incubation)",
       "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
-      "note": "Req 19 \u2014 template incubation"
+      "note": "Req 19 — template incubation"
     }
   ]
 }
