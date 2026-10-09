@@ -1,0 +1,36 @@
+{
+  "state_projection": {
+    "ticket_id": "T-1",
+    "channel": "email"
+  },
+  "raw_body": "customer wrote a long complaint with PII",
+  "answers": {
+    "team": "billing",
+    "risk": 0.2
+  },
+  "confidence": 0.91,
+  "final_action": "billing",
+  "model_ref": "flavor:local_decision",
+  "latency_ms": 42,
+  "questions": [
+    {
+      "id": "team",
+      "kind": "choice",
+      "options": [
+        {
+          "id": "billing",
+          "label": "Billing"
+        }
+      ],
+      "allowed_actions": [
+        "billing"
+      ]
+    },
+    {
+      "id": "risk",
+      "kind": "score",
+      "min": 0,
+      "max": 1
+    }
+  ]
+}

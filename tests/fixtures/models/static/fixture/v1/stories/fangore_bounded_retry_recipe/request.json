@@ -1,0 +1,4 @@
+{
+  "goal": "dispatch remote job with safe retry",
+  "max_attempts": 3
+}

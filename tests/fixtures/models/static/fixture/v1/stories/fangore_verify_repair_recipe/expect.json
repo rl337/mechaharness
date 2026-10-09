@@ -1,0 +1,9 @@
+{
+  "template_name": "verify_repair",
+  "nodes_include": [
+    "produce",
+    "verify",
+    "repair",
+    "complete"
+  ]
+}

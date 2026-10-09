@@ -1,0 +1,6 @@
+{
+  "production_action": "billing",
+  "shadow_controls_execution": false,
+  "both_outcomes_recorded": true,
+  "agreement": false
+}

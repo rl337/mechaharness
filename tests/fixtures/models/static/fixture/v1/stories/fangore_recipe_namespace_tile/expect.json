@@ -1,0 +1,10 @@
+{
+  "instance_count": 2,
+  "node_id_overlap": false,
+  "distinct_instance_ids": true,
+  "parent_embed_kinds": [
+    "subgraph",
+    "subgraph"
+  ],
+  "namespaced_prefix_left": "verify_repair/left/"
+}

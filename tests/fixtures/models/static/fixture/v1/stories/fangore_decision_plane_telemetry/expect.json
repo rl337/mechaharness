@@ -1,0 +1,8 @@
+{
+  "has_question_schema_ids": true,
+  "has_projection_fingerprint": true,
+  "final_action": "billing",
+  "model_ref": "flavor:local_decision",
+  "latency_ms": 42,
+  "includes_raw_body": false
+}

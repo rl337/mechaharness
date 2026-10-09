@@ -1,0 +1,17 @@
+{
+  "id": "fangore_decision_plane_telemetry",
+  "persona": "fangore",
+  "title": "Export evaluation-ready decision-plane telemetry without raw context",
+  "kind": "decision_plane_telemetry",
+  "narrative": "Fangore needs decision metrics — which questions, projection fingerprint, answers, confidence, final policy action, escalation reason, and cost — without dumping the full ticket body into the aggregate stream. Related: `fangore_decision_plane_policy`, `taloneth_offline_decision_export`.[^rc-dp-telemetry]",
+  "implementation": "`build_decision_plane_telemetry` in `mechaharness.decision_plane_runtime` emits evaluation-ready fields for the `decision_plane` recipe (DP-08) and omits raw sensitive projection payloads from the aggregate record.",
+  "validation": "Kind `decision_plane_telemetry`. Soft expects schema ids, fingerprints, final_action, no raw_body field, optional latency_ms.",
+  "footnotes": [
+    {
+      "id": "rc-dp-telemetry",
+      "label": "Recipes requirements DP-08",
+      "url": "https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md",
+      "note": "Evaluation-ready decision telemetry"
+    }
+  ]
+}

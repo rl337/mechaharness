@@ -114,12 +114,24 @@ Do not add string registries or a global injector. Domain types stay pyiv-free.
 Before substantive work, `GraphExecutor` runs an injectable
 `LinkageResolver` (runner kinds, grants, operation binds, stop contracts,
 envelopes, environment). Checkpoints carry a config/graph fingerprint so
-resume refuses incompatible changes. Parameterized graph templates live in
-`mechaharness.graph_templates` (see
-[Graph templates](./reference/graph-templates.md)); policies
-(`VerificationPolicy`, `DelegationPolicy`, `AdvisorPolicy`) are library-owned.
-Clients instantiate templates and may retain concrete graphs.
-See [Inspiration requirements map](./inspiration/requirements-map.md).
+resume refuses incompatible changes.
+
+(agentic-recipes)=
+### Agentic Recipes
+
+**Pattern:** Parameterized subgraph composition (`GraphTemplate` substrate)  
+**Code:** `mechaharness.graph_templates`  
+**Requirements:** [Recipes and decision plane](./requirements/recipes-and-decision-plane.md)
+
+**Agentic Recipes** are a top-level concept: concrete agent-control patterns
+(fan-out, verify-repair, decision plane, bounded retry, …) that instantiate to
+ordinary `ExecutionGraph` nodes. The factory API remains `GraphTemplate` /
+soft points / registry — not a second executor. Prefer human-readable tiling
+code; every shipped recipe needs an owning user story that names its catalog
+id. Policies (`VerificationPolicy`, `DelegationPolicy`, `AdvisorPolicy`) remain
+library-owned. Clients instantiate recipes and may retain concrete graphs.
+See [Graph templates and Agentic Recipes](./reference/graph-templates.md) and
+[Inspiration requirements map](./inspiration/requirements-map.md).
 
 ## Host extension
 

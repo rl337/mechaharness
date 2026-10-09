@@ -3,7 +3,8 @@ name: project-docs
 description: >-
   Create and maintain MechaHarness project documentation under docs/.
   Use when writing, updating, restructuring, or reviewing docs; when the user
-  mentions documentation, docs/, README sync, architecture notes, guides, or
+  mentions documentation, docs/, README sync, architecture notes, guides,
+  Agentic Recipes / graph templates, requirements under docs/requirements/, or
   API/CLI reference pages for this project.
 ---
 
@@ -25,9 +26,11 @@ usable as the source of truth for humans and agents.
 docs/
   logo.png              # Project logo (canonical asset)
   index.md              # Docs home / table of contents
-  architecture.md       # Design: Strategy + harness hierarchy
+  architecture.md       # Design: Strategy + harness + recipes
   guides/               # How-to guides (install, local models, extend)
-  reference/            # Stable contracts (types, CLI, HTTP API)
+  reference/            # Stable contracts (types, CLI, HTTP API, recipes)
+  requirements/         # Normative library requirements (recipes, resume, …)
+  inspiration/          # Attribution / gap analysis (not specification)
   adr/                  # Architecture Decision Records (optional)
 ```
 
@@ -65,16 +68,22 @@ Docs task:
 
 ### Sync after code changes
 
-When inference backends, harness families, public types, CLI commands, or API
-routes change, update in this order:
+When inference backends, harness families, public types, CLI commands, API
+routes, or Agentic Recipes / graph templates change, update in this order:
 
-1. `docs/reference/` (contract)
+1. `docs/reference/` (contract) — recipe pages under `reference/graph-templates/`
 2. Related `docs/guides/` examples
 3. `docs/architecture.md` if the design shifted
-4. `README.md` only for summary/quick-start impact
+4. `docs/requirements/` when normative MUST/SHOULD text changes
+5. `README.md` only for summary/quick-start impact
+
+**Agentic Recipes** are a top-level concept (substrate: `GraphTemplate`). Treat
+recipe catalog docs as first-class reference pages: catalog id, when to use,
+readable tiling example, soft points, owning user-story id(s). Follow
+[`agentic-recipes`](../agentic-recipes/SKILL.md).
 
 When the change is **user-facing acceptance behavior** (harness runs, grants,
-lanes, judge/verdicts, adapters), defer entirely to the
+lanes, judge/verdicts, adapters, recipes), defer entirely to the
 [`user-stories`](../user-stories/SKILL.md) skill: edit `story.json` (and
 `personas.json` if needed), keep twin copies identical, regenerate
 `docs/guides/user-stories.md` with `scripts/generate_user_stories_md.py`, and
@@ -90,6 +99,7 @@ run `--check`. Do **not** hand-edit the user-stories guide as ordinary markdown.
 - Call out the separation of concerns explicitly:
   - **Inference Strategy** = provider I/O
   - **Harness hierarchy** = agent loop policy
+  - **Agentic Recipes** = reusable control subgraphs (`GraphTemplate` substrate)
 - Env vars use the `MECHA_` prefix.
 - Include the logo with `![MechaHarness](./logo.png)` on `docs/index.md`
   and `![MechaHarness](docs/logo.png)` on `README.md` (path relative to file).
@@ -102,7 +112,9 @@ run `--check`. Do **not** hand-edit the user-stories guide as ordinary markdown.
 | Home / TOC | `docs/index.md` | Navigation + project overview |
 | Architecture | `docs/architecture.md` | Patterns, layering, extension model |
 | Guide | `docs/guides/*.md` | Task-oriented how-tos |
-| Reference | `docs/reference/*.md` | Exact CLI/API/types contracts |
+| Reference | `docs/reference/*.md` | Exact CLI/API/types/recipe contracts |
+| Requirements | `docs/requirements/*.md` | Normative library requirements |
+| Inspiration | `docs/inspiration/*.md` | Attribution / gaps (not specification) |
 | ADR | `docs/adr/NNNN-title.md` (local-only / gitignored) | Decision + context + consequences |
 
 ## Quality checklist
@@ -119,3 +131,5 @@ Before finishing:
 ## Additional resources
 
 - Page templates: [templates.md](templates.md)
+- Agentic Recipes: [`agentic-recipes`](../agentic-recipes/SKILL.md)
+- User stories: [`user-stories`](../user-stories/SKILL.md)

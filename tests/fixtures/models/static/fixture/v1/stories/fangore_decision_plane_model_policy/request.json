@@ -1,0 +1,21 @@
+{
+  "decision_model": "flavor:local_decision",
+  "questions": [
+    {
+      "id": "team",
+      "kind": "choice",
+      "options": [
+        {
+          "id": "billing",
+          "label": "Billing"
+        }
+      ],
+      "allowed_actions": [
+        "billing"
+      ]
+    }
+  ],
+  "state_projection": {
+    "ticket_id": "T-1"
+  }
+}
