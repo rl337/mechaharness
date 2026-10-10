@@ -69,6 +69,7 @@ from mechaharness.decision_log import (
     replay_verdict,
 )
 from mechaharness.decision_plane_runtime import (
+    assemble_context_within_budget,
     build_decision_plane_telemetry,
     compare_shadow_decision,
     project_decision_state,
@@ -414,6 +415,11 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "decision_plane_telemetry": _run_decision_plane_telemetry,
         "decision_plane_model_policy": _run_decision_plane_model_policy,
         "decision_plane_shadow_compare": _run_decision_plane_shadow_compare,
+        "citation_support_judgment": _run_citation_support_judgment,
+        "context_budget_judgment": _run_context_budget_judgment,
+        "requirements_gap_judgment": _run_requirements_gap_judgment,
+        "task_route_judgment": _run_task_route_judgment,
+        "action_safety_judgment": _run_action_safety_judgment,
         "bounded_retry_recipe": _run_bounded_retry_recipe,
         "handoff_record_fields": _run_handoff_record_fields,
         "operation_compensation_meta": _run_operation_compensation_meta,
@@ -2952,6 +2958,208 @@ async def _run_decision_plane_shadow_compare(case: StoryCase, backend: StoryBack
         "disagree_agreement": disagree.agreement,
         "unavailable_candidate": unavailable.shadow_unavailable,
         "telemetry_has_shadow_action_on_disagree": tel.shadow_action is not None,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_citation_support_judgment(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    action_qid = str(request.get("action_question_id") or "support")
+    questions = list(request.get("questions") or [])
+    by_name: dict[str, Any] = {}
+    for row in list(request.get("cases") or []):
+        result = await run_decision_plane_policy(
+            questions=questions,
+            answers=dict(row.get("answers") or {}),
+            confidence=row.get("confidence"),
+            confidence_floor=float(row.get("confidence_floor") or 0.7),
+            action_question_id=action_qid,
+        )
+        claim_verified = (
+            not result.escalate and result.final_action == "supported"
+        )
+        by_name[str(row["name"])] = {
+            "result": result,
+            "claim_verified": claim_verified,
+        }
+    actual = {
+        "matching_claim_verified": by_name["matching_claim"]["claim_verified"],
+        "growth_mismatch_verified": by_name["growth_mismatch"]["claim_verified"],
+        "missing_source_verified": by_name["missing_source"]["claim_verified"],
+        "uncertain_support_verified": by_name["uncertain_support"]["claim_verified"],
+        "uncertain_support_escalates": by_name["uncertain_support"]["result"].escalate,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_context_budget_judgment(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    budget = int(request["token_budget"])
+    min_relevance = float(request.get("min_relevance") or 0.0)
+    min_trust = float(request.get("min_trust") or 0.0)
+    min_freshness = float(request.get("min_freshness") or 0.0)
+    selected: dict[str, list[str]] = {}
+    for row in list(request.get("scenarios") or []):
+        selected[str(row["name"])] = assemble_context_within_budget(
+            list(row.get("candidates") or []),
+            token_budget=budget,
+            min_relevance=min_relevance,
+            min_trust=min_trust,
+            min_freshness=min_freshness,
+        )
+
+    def _tokens_for(name: str) -> int:
+        scenario = next(s for s in request["scenarios"] if s["name"] == name)
+        by_id = {str(c["id"]): c for c in scenario["candidates"]}
+        total = 0
+        for cid in selected[name]:
+            total += int(by_id[cid]["tokens"])
+        return total
+
+    actual = {
+        "budget_pack_ids": selected["budget_pack"],
+        "filter_selected": selected["filter_stale_and_untrusted"],
+        "injection_excluded": "inject" not in selected["exclude_injection"],
+        "fallback_ids": selected["missing_scores_fallback"],
+        "never_exceeds_budget": all(
+            _tokens_for(name) <= budget for name in selected
+        ),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_requirements_gap_judgment(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    review_graph = IndependentReviewTemplate().instantiate(
+        GraphTemplateParams(
+            goal="requirements review",
+            inputs={"reviewer_count": int(request.get("reviewer_count", 1))},
+            acceptance=list(request.get("acceptance") or []),
+        )
+    )
+    reviews = [n for n in review_graph.nodes if n.startswith("review_")]
+    action_qid = str(request.get("action_question_id") or "coverage")
+    questions = list(request.get("questions") or [])
+    outcomes: dict[str, str] = {}
+    for row in list(request.get("cases") or []):
+        result = await run_decision_plane_policy(
+            questions=questions,
+            answers=dict(row.get("answers") or {}),
+            confidence=row.get("confidence"),
+            confidence_floor=float(row.get("confidence_floor") or 0.7),
+            action_question_id=action_qid,
+        )
+        facts = dict(row.get("facts") or {})
+        if result.escalate or result.final_action in {"gap", "unclear"}:
+            outcomes[str(row["name"])] = "request_tests"
+        elif not facts.get("crash_tests_present", True):
+            outcomes[str(row["name"])] = "request_tests"
+        elif result.final_action == "covered":
+            outcomes[str(row["name"])] = "continue_review"
+        else:
+            outcomes[str(row["name"])] = "request_tests"
+    actual = {
+        "template_name": review_graph.template_name,
+        "omit_producer_reasoning": review_graph.nodes[reviews[0]].payload.get(
+            "omit_producer_reasoning"
+        ),
+        "gap_found_action": outcomes["gap_found"],
+        "missing_crash_action": outcomes["approve_but_missing_crash_tests"],
+        "covered_action": outcomes["covered_with_tests"],
+        "never_mark_correct": "mark_correct" not in outcomes.values(),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_task_route_judgment(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    action_qid = str(request.get("action_question_id") or "route")
+    questions = list(request.get("questions") or [])
+    by_name: dict[str, Any] = {}
+    for row in list(request.get("cases") or []):
+        result = await run_decision_plane_policy(
+            questions=questions,
+            answers=dict(row.get("answers") or {}),
+            confidence=row.get("confidence"),
+            confidence_floor=float(row.get("confidence_floor") or 0.7),
+            action_question_id=action_qid,
+        )
+        complexity = float((row.get("answers") or {}).get("complexity") or 0.0)
+        floor = float(row.get("min_complexity_for_frontier") or 0.7)
+        final_action = result.final_action
+        escalate = result.escalate
+        if (
+            not escalate
+            and final_action == "local_small"
+            and complexity >= floor
+        ):
+            final_action = "frontier"
+        by_name[str(row["name"])] = {
+            "final_action": final_action,
+            "escalate": escalate,
+        }
+    actual = {
+        "simple_local_action": by_name["simple_local"]["final_action"],
+        "complex_action": by_name["complex_forces_frontier"]["final_action"],
+        "invalid_escalates": by_name["invalid_route"]["escalate"],
+        "low_confidence_escalates": by_name["low_confidence"]["escalate"],
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_action_safety_judgment(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    action_qid = str(request.get("action_question_id") or "semantic_risk")
+    questions = list(request.get("questions") or [])
+    by_name: dict[str, Any] = {}
+    for row in list(request.get("cases") or []):
+        policy = AccessPolicy(grants=list(row.get("grants") or []))
+        required = list(row.get("required_grants") or [])
+        grants_ok = policy.allows(required) if required else True
+        result = await run_decision_plane_policy(
+            questions=questions,
+            answers=dict(row.get("answers") or {}),
+            confidence=row.get("confidence"),
+            confidence_floor=float(row.get("confidence_floor") or 0.7),
+            action_question_id=action_qid,
+        )
+        risk = result.final_action
+        if not grants_ok:
+            decision = "deny"
+            hard_won = True
+        elif result.escalate or risk == "high":
+            decision = "escalate_review"
+            hard_won = False
+        else:
+            decision = "allow"
+            hard_won = False
+        by_name[str(row["name"])] = {
+            "decision": decision,
+            "hard_won": hard_won,
+            "grants_after": list(policy.grants),
+            "grants_before": list(row.get("grants") or []),
+        }
+    delete = by_name["delete_low_risk_no_grant"]
+    read_high = by_name["read_high_risk_with_grant"]
+    read_low = by_name["read_low_risk_with_grant"]
+    actual = {
+        "delete_denied": delete["decision"] == "deny",
+        "delete_hard_policy_won": delete["hard_won"],
+        "read_high_escalates_review": read_high["decision"] == "escalate_review",
+        "read_low_allows": read_low["decision"] == "allow",
+        "never_elevates_grants": all(
+            row["grants_after"] == row["grants_before"] for row in by_name.values()
+        ),
     }
     _assert_expect(actual, expect)
 

@@ -1,0 +1,17 @@
+{
+  "id": "fangore_jev_action_safety",
+  "persona": "fangore",
+  "title": "Let hard grants win over semantic risk classification",
+  "kind": "action_safety_judgment",
+  "narrative": "Before an agent deletes, pays, or publishes, Fangore runs a semantic risk check and a hard grant check. If the model says the delete looks low risk but the product has no write grant, the action stays denied. Semantic risk may only add review or deny — it never unlocks a privilege the grants do not allow. Related: `fangore_tool_gating`, `fangore_insp_risk_autonomy`, `fangore_decision_plane_policy`.[^jev-us08]",
+  "implementation": "`AccessPolicy` / grant checks are the hard execution boundary (MH-JEV-05). Agentic Recipe `decision_plane` runtime classifies semantic risk as evidence only. Host composition: deny when grants fail regardless of risk label; high semantic risk on an allowed read may escalate to review without elevating grants.",
+  "validation": "Kind `action_safety_judgment`. Soft expects: delete without grant denied despite low semantic risk; granted read with high risk escalates to review; granted read with low risk allows; semantic path never elevates grants.",
+  "footnotes": [
+    {
+      "id": "jev-us08",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US08)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "Agent action safety firewall"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "template_name": "independent_review",
+  "omit_producer_reasoning": true,
+  "gap_found_action": "request_tests",
+  "missing_crash_action": "request_tests",
+  "covered_action": "continue_review",
+  "never_mark_correct": true
+}

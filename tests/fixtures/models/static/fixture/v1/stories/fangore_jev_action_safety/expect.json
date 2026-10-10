@@ -1,0 +1,7 @@
+{
+  "delete_denied": true,
+  "delete_hard_policy_won": true,
+  "read_high_escalates_review": true,
+  "read_low_allows": true,
+  "never_elevates_grants": true
+}

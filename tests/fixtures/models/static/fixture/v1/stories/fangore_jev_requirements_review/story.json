@@ -1,0 +1,17 @@
+{
+  "id": "fangore_jev_requirements_review",
+  "persona": "fangore",
+  "title": "Escalate requirement gaps without treating a judge approve as correctness",
+  "kind": "requirements_gap_judgment",
+  "narrative": "Fangore reviews a change against applicable user stories with isolated reviewers and atomic checks. When a check finds a missing requirement or a missing crash-location test in the facts, the harness asks for focused tests or deeper review. A judge saying approve never marks the change correct by itself. Related: `fangore_insp_independent_review`, `fangore_decision_plane_policy`.[^jev-us06]",
+  "implementation": "Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts (for example missing crash tests) to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.",
+  "validation": "Kind `requirements_gap_judgment`. Soft expects: isolated review template present; gap and missing-crash-fact paths escalate to request_tests; approve-without-gap still not marked correct.",
+  "footnotes": [
+    {
+      "id": "jev-us06",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US06)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "Requirements-aware semantic review"
+    }
+  ]
+}
