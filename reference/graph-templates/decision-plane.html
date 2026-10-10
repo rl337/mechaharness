@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Typed decision plane (decision_plane) &mdash; MechaHarness 0.3.1 documentation</title>
+  <title>Typed decision plane (decision_plane) &mdash; MechaHarness 0.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/documentation_options.js?v=71d9d8e6"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -129,7 +129,7 @@ code, and escalate when confidence is too low.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Owning stories</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_projection</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_telemetry</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_model_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_projection</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_telemetry</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_model_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>Runtime</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.decision_plane_runtime</span></code></p></td>
@@ -239,10 +239,13 @@ code, and escalate when confidence is too low.</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">evaluate_decision_batch</span></code> / <code class="docutils literal notranslate"><span class="pre">run_decision_plane_policy</span></code></p></td>
 <td><p>Batched evidence; code-owned action or escalate</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">compare_shadow_decision</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code></p></td>
+<td><p>Deterministic RAG packing from scored candidates</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">compare_shadow_decision</span></code></p></td>
 <td><p>Candidate vs production; production controls</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">build_decision_plane_telemetry</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">build_decision_plane_telemetry</span></code></p></td>
 <td><p>Evaluation-ready metrics without raw context</p></td>
 </tr>
 </tbody>
