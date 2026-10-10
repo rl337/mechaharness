@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Host kit (`mechaharness.host_kit`): `host_graph_executor()` builds a
+  Config-injected `GraphExecutor` with runners + optional SQLite durability;
+  `SubmitOnceEffectfulRunner` covers the common submit-once / complete-on-accept
+  / never-silent-redispatch effect pattern; `effectful_external_handle()` reads
+  the recorded handle from a `GraphResult` without scraping node maps by hand.
+  Docs: `docs/guides/dependency-injection.md`.
+
 ## [0.3.2] — 2026-10-10
 
 Agentic Recipes / typed decision-plane cut (#23) plus Jev typed-judgment
