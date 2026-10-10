@@ -163,6 +163,37 @@ MechaHarness; clients instantiate them via Config and may retain the resulting
 concrete graphs. See [Architecture](../architecture.md) and
 [Graph templates](../reference/graph-templates.md).
 
+### Host kit (readable GraphExecutor wiring)
+
+Prefer `mechaharness.host_kit.host_graph_executor` when a host only needs to
+register runners and choose checkpoint durability — it subclasses
+`MechaHarnessConfig` and injects for you:
+
+```python
+from mechaharness.host_kit import (
+    SubmitOnceEffectfulRunner,
+    effectful_external_handle,
+    host_graph_executor,
+)
+from mechaharness.external_effect import EffectDispatchResult
+
+async def submit(node, effect, context):
+    return EffectDispatchResult(external_handle="job-1")
+
+runner = SubmitOnceEffectfulRunner(
+    kinds=["coding_job"],
+    backend_id="host.coding",
+    submit=submit,
+)
+executor = host_graph_executor(runners=[runner], checkpoint_path="runs.sqlite")
+# After run: effectful_external_handle(result, "coding_job")
+```
+
+`SubmitOnceEffectfulRunner` encodes the common non-idempotent pattern: dispatch
+once, complete when the backend accepts a handle, never silent-redispatch an
+uncertain effect without a handle. Long-running job observation remains a host
+concern (e.g. June control-loop observe).
+
 ## Verify
 
 - `injector.inject(AbstractHarness)` returns your harness family
