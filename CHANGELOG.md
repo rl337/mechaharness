@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] — 2026-10-10
+
+Agentic Recipes / typed decision-plane cut (#23) plus Jev typed-judgment
+domain stories (#24). GitHub tagged `v0.3.2` from the merge tip before this
+PyPI publish.
+
+### Added
+
+- **Agentic Recipes** as a top-level product concept on the `GraphTemplate`
+  substrate: composition helpers (`instance_key`, `tile`), catalog docs, and
+  requirements in `docs/requirements/recipes-and-decision-plane.md`.
+- Reference recipes `decision_plane` and `bounded_retry`, plus owning stories
+  for `verify_repair`, `environment_repair`, and recipe namespace tiling.
+- `decision_plane_runtime`: structured projection, batched typed questions,
+  code-owned policy with escalation, shadow compare, evaluation telemetry,
+  `assemble_context_within_budget`, and `action_question_id` routing.
+- Jev typed-judgment inspiration + requirements map, with Fangore domain
+  stories: `fangore_jev_citation_check`, `fangore_jev_context_picker`,
+  `fangore_jev_requirements_review`, `fangore_jev_task_router`,
+  `fangore_jev_action_safety`.
+
 ## [0.3.1] — 2026-10-06
 
 PyPI cut of the 0.3.0 library (GitHub also tagged `v0.3.0` before auto-bump
