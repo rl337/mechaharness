@@ -278,6 +278,7 @@ async def run_decision_plane_policy(
     confidence_floor: float,
     escalation_route: str = "host_policy",
     state: Mapping[str, Any] | None = None,
+    action_question_id: str = "team",
 ) -> DecisionPlanePolicyResult:
     results, invocations = await evaluate_decision_batch(
         questions, answers=answers, state=state
@@ -288,8 +289,48 @@ async def run_decision_plane_policy(
         confidence=confidence,
         confidence_floor=confidence_floor,
         escalation_route=escalation_route,
+        action_question_id=action_question_id,
         batch_invocation_count=invocations,
     )
+
+
+def assemble_context_within_budget(
+    candidates: Sequence[Mapping[str, Any]],
+    *,
+    token_budget: int,
+    min_relevance: float = 0.0,
+    min_trust: float = 0.0,
+    min_freshness: float = 0.0,
+) -> list[str]:
+    """Deterministically pack scored retrieval candidates into a token budget.
+
+    Judge scores are inputs only. Thresholds and packing order are owned by
+    caller policy (DP-04). Candidates with missing numeric fields are skipped.
+    """
+    scored: list[tuple[float, float, float, int, str]] = []
+    for raw in candidates:
+        try:
+            relevance = float(raw["relevance"])
+            trust = float(raw["trust"])
+            freshness = float(raw["freshness"])
+            tokens = int(raw["tokens"])
+            cid = str(raw["id"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if tokens <= 0:
+            continue
+        if relevance < min_relevance or trust < min_trust or freshness < min_freshness:
+            continue
+        scored.append((relevance, trust, freshness, tokens, cid))
+    scored.sort(key=lambda row: (row[0], row[1], row[2]), reverse=True)
+    selected: list[str] = []
+    used = 0
+    for _rel, _trust, _fresh, tokens, cid in scored:
+        if used + tokens > token_budget:
+            continue
+        selected.append(cid)
+        used += tokens
+    return selected
 
 
 async def compare_shadow_decision(
