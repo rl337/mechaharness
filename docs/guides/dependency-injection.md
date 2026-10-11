@@ -163,11 +163,78 @@ MechaHarness; clients instantiate them via Config and may retain the resulting
 concrete graphs. See [Architecture](../architecture.md) and
 [Graph templates](../reference/graph-templates.md).
 
+### Host kit (readable GraphExecutor wiring)
+
+Prefer `mechaharness.host_kit` when a host only needs to register runners and
+choose checkpoint durability. It keeps the blessed path
+(`MechaHarnessConfig` → `inject(GraphExecutor)`) without ten-line hand assembly
+of EventLog / access / linkage / checkpoint / crash probe.
+
+Owning acceptance story: `fangore_host_kit_submit_once`. Executable examples
+live as pydoc doctests on `src/mechaharness/host_kit.py` (run via
+`pytest --doctest-modules`) and as the fixture matrix under
+`tests/fixtures/host_kit/`.
+
+```python
+import asyncio
+from mechaharness.budget import BudgetPolicy
+from mechaharness.external_effect import EffectDispatchResult
+from mechaharness.graph import ExecutionGraph, GraphNode
+from mechaharness.host_kit import (
+    SubmitOnceEffectfulRunner,
+    effectful_external_handle,
+    host_graph_executor,
+)
+
+async def submit(node, effect, context):
+    del effect, context
+    return EffectDispatchResult(external_handle=f"job-{node.payload['task_id']}")
+
+runner = SubmitOnceEffectfulRunner(
+    kinds=["coding_job"],
+    backend_id="host.coding",
+    submit=submit,
+)
+executor = host_graph_executor(runners=[runner], checkpoint_path="runs.sqlite")
+graph = ExecutionGraph(goal="dispatch")
+graph.add_node(
+    GraphNode(id="coding_job", kind="coding_job", payload={"task_id": "t1"})
+)
+result = asyncio.run(
+    executor.run(
+        graph,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id="run-1",
+        skip_linkage=True,
+    )
+)
+assert result.status == "ok"
+assert effectful_external_handle(result, "coding_job") == "job-t1"
+```
+
+#### What each helper owns
+
+| Helper | Role |
+|--------|------|
+| `host_graph_executor` | Config subclass + inject; optional SQLite via `checkpoint_path` or a custom `checkpoint_store`; default grants `GraphExecute` / `GraphEscalate` |
+| `SubmitOnceEffectfulRunner` | Non-idempotent external effect: submit once, complete on accept, never silent-redispatch `UNCERTAIN` without a handle |
+| `effectful_external_handle` | Read `external_run_id` / `external_handle` from a `GraphResult` without scraping node maps |
+
+`SubmitOnceEffectfulRunner` completes the **graph node** when the backend
+accepts a handle. Long-running job observation (poll until finished) remains a
+host control-loop concern. Pass `checkpoint_store` **or** `checkpoint_path`,
+not both. Omit both for the default ephemeral EventLog-backed store.
+
+Related: [Transactional durable resume](../requirements/transactional-durable-resume.md)
+(`fangore_transactional_durable_resume`) owns the crash-window contract this kit
+sits on.
+
 ## Verify
 
 - `injector.inject(AbstractHarness)` returns your harness family
 - `injector.inject(GraphExecutor)` returns the bound executor
-- `pytest tests/test_di.py` / `tests/test_graph_executor.py` pass
+- `pytest tests/test_di.py` / `tests/test_graph_executor.py` /
+  `tests/test_host_kit.py` pass
 - Unknown `--backend` / `family` names raise `KeyError` listing known maps
 
 ## Next

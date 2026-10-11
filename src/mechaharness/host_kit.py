@@ -1,0 +1,409 @@
+"""Host-facing helpers for readable GraphExecutor / effectful wiring.
+
+Orchestrator hosts (June and peers) often need two things that are easy to
+get wrong when assembled by hand:
+
+1. A :class:`~mechaharness.graph_executor.GraphExecutor` wired through
+   :class:`~mechaharness.di.MechaHarnessConfig` (grants, runners, checkpoint
+   store, crash probe) — without copying ten-line constructor assembly.
+2. An effectful runner for the common non-idempotent pattern: **submit once**,
+   **complete when the backend accepts a handle**, and **never silent-redispatch**
+   an ``UNCERTAIN`` effect that has no handle.
+
+This module is ergonomics on top of durable resume (DR-03..11). It does **not**
+replace :class:`~mechaharness.graph_executor.EffectfulGraphNodeRunner` or own
+long-running job observation — hosts keep post-accept control loops.
+
+Quick start (doctest / pytest ``--doctest-modules``)::
+
+    >>> import asyncio, tempfile
+    >>> from pathlib import Path
+    >>> from mechaharness.budget import BudgetPolicy
+    >>> from mechaharness.external_effect import EffectDispatchResult
+    >>> from mechaharness.graph import ExecutionGraph, GraphNode
+    >>> from mechaharness.host_kit import (
+    ...     SubmitOnceEffectfulRunner,
+    ...     effectful_external_handle,
+    ...     host_graph_executor,
+    ... )
+    >>> calls = {"n": 0}
+    >>> async def submit(node, effect, context):
+    ...     del effect, context
+    ...     calls["n"] += 1
+    ...     return EffectDispatchResult(
+    ...         external_handle=f"job-{node.payload.get('task_id')}",
+    ...     )
+    >>> runner = SubmitOnceEffectfulRunner(
+    ...     kinds=["coding_job"],
+    ...     backend_id="host.coding",
+    ...     submit=submit,
+    ... )
+    >>> path = Path(tempfile.mkdtemp()) / "runs.sqlite"
+    >>> executor = host_graph_executor(
+    ...     runners=[runner],
+    ...     checkpoint_path=path,
+    ...     agent_id="demo-host",
+    ... )
+    >>> graph = ExecutionGraph(id="g1", goal="dispatch once")
+    >>> _ = graph.add_node(
+    ...     GraphNode(
+    ...         id="coding_job",
+    ...         kind="coding_job",
+    ...         payload={"task_id": "t1"},
+    ...     )
+    ... )
+    >>> result = asyncio.run(
+    ...     executor.run(
+    ...         graph,
+    ...         budget_policy=BudgetPolicy.unlimited(),
+    ...         run_id="run-1",
+    ...         skip_linkage=True,
+    ...     )
+    ... )
+    >>> result.status, calls["n"], effectful_external_handle(result, "coding_job")
+    ('ok', 1, 'job-t1')
+    >>> executor.store.durability
+    'durable'
+
+Ephemeral (no checkpoint path) still injects a working executor::
+
+    >>> executor_e = host_graph_executor(runners=[runner])
+    >>> graph_e = ExecutionGraph(goal="ephemeral")
+    >>> _ = graph_e.add_node(GraphNode(id="coding_job", kind="coding_job"))
+    >>> result_e = asyncio.run(
+    ...     executor_e.run(
+    ...         graph_e,
+    ...         budget_policy=BudgetPolicy.unlimited(),
+    ...         run_id="run-e",
+    ...         skip_linkage=True,
+    ...     )
+    ... )
+    >>> result_e.status, executor_e.store.durability
+    ('ok', 'ephemeral')
+
+See also: ``docs/guides/dependency-injection.md`` (Host kit section) and
+user story ``fangore_host_kit_submit_once``.
+"""
+
+from __future__ import annotations
+
+import inspect
+from collections.abc import Awaitable, Callable, Sequence
+from pathlib import Path
+from typing import Union, cast
+
+from mechaharness.checkpoint_store import CheckpointStore
+from mechaharness.core.access import GraphEscalate, GraphExecute
+from mechaharness.di import MechaHarnessConfig, get_injector
+from mechaharness.external_effect import (
+    CrashProbe,
+    EffectDispatchResult,
+    EffectReconciliation,
+    EffectReconciliationAction,
+    EffectRecord,
+    EffectState,
+    NoopCrashProbe,
+)
+from mechaharness.graph import GraphNode
+from mechaharness.graph_executor import (
+    EffectfulGraphNodeRunner,
+    GraphExecutor,
+    GraphNodeRunner,
+    GraphNodeRunnerRegistry,
+    GraphResult,
+    GraphRunContext,
+)
+from mechaharness.harness.pass_through import PassThroughHarness
+from mechaharness.inference.mock import MockInferenceStrategy
+from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+
+SubmitCallable = Callable[
+    [GraphNode, EffectRecord, GraphRunContext],
+    Union[EffectDispatchResult, Awaitable[EffectDispatchResult]],
+]
+
+
+class SubmitOnceEffectfulRunner(EffectfulGraphNodeRunner):
+    """Effectful runner for non-idempotent submit that completes on accept.
+
+    Hosts supply :meth:`kinds`, :meth:`backend_id`, and a ``submit`` callable
+    (or override :meth:`dispatch`). This encodes the tiny intent:
+
+    * dispatch once when the effect is ``INTENDED`` / first seen;
+    * complete when the backend has accepted a handle (``observe`` / reconcile
+      of ``ACCEPTED`` or ``UNCERTAIN`` **with** a handle);
+    * escalate ``UNCERTAIN`` **without** a handle to ``NEEDS_ATTENTION`` —
+      never silent-redispatch.
+
+    Long-running job completion remains a host control-loop concern; this
+    runner finishes the graph node at **accept**, not at remote job end.
+
+    Reconciliation decisions (sync-friendly via ``asyncio.run``)::
+
+        >>> import asyncio
+        >>> from mechaharness.budget import Budget, BudgetPolicy
+        >>> from mechaharness.external_effect import EffectRecord, EffectState
+        >>> from mechaharness.graph import ExecutionGraph, GraphNode
+        >>> from mechaharness.graph_executor import GraphRunContext
+        >>> from mechaharness.host_kit import SubmitOnceEffectfulRunner
+        >>> runner = SubmitOnceEffectfulRunner(
+        ...     kinds=["coding_job"], backend_id="host.coding",
+        ... )
+        >>> graph = ExecutionGraph(goal="reconcile")
+        >>> node = GraphNode(id="coding_job", kind="coding_job")
+        >>> ctx = GraphRunContext(
+        ...     graph=graph,
+        ...     run_id="r1",
+        ...     agent_id="host",
+        ...     budget=Budget(BudgetPolicy.unlimited()),
+        ... )
+        >>> intended = EffectRecord(
+        ...     effect_id="r1:coding_job:1",
+        ...     run_id="r1",
+        ...     node_id="coding_job",
+        ...     state=EffectState.INTENDED,
+        ... )
+        >>> asyncio.run(runner.reconcile(node, effect=intended, context=ctx)).action.value
+        'dispatch'
+        >>> uncertain_ok = intended.model_copy(
+        ...     update={
+        ...         "state": EffectState.UNCERTAIN,
+        ...         "external_handle": "job-9",
+        ...     }
+        ... )
+        >>> rec = asyncio.run(
+        ...     runner.reconcile(node, effect=uncertain_ok, context=ctx)
+        ... )
+        >>> rec.action.value, rec.external_handle
+        ('complete', 'job-9')
+        >>> uncertain_bad = intended.model_copy(
+        ...     update={"state": EffectState.UNCERTAIN, "external_handle": None}
+        ... )
+        >>> bad = asyncio.run(
+        ...     runner.reconcile(node, effect=uncertain_bad, context=ctx)
+        ... )
+        >>> bad.action.value, bad.error
+        ('needs_attention', 'uncertain_without_handle')
+    """
+
+    def __init__(
+        self,
+        *,
+        kinds: Sequence[str],
+        backend_id: str,
+        submit: SubmitCallable | None = None,
+    ) -> None:
+        if not kinds:
+            raise ValueError("SubmitOnceEffectfulRunner requires at least one kind")
+        self._kinds = list(kinds)
+        self._backend_id = backend_id
+        self._submit = submit
+
+    def kinds(self) -> Sequence[str]:
+        return list(self._kinds)
+
+    def backend_id(self) -> str:
+        return self._backend_id
+
+    async def reconcile(
+        self,
+        node: GraphNode,
+        *,
+        effect: EffectRecord,
+        context: GraphRunContext,
+    ) -> EffectReconciliation:
+        del node, context
+        if effect.state is EffectState.INTENDED:
+            return EffectReconciliation(action=EffectReconciliationAction.DISPATCH)
+        if effect.state is EffectState.UNCERTAIN:
+            if effect.external_handle:
+                return EffectReconciliation(
+                    action=EffectReconciliationAction.COMPLETE,
+                    external_handle=effect.external_handle,
+                    outcome_payload={
+                        "external_run_id": effect.external_handle,
+                        "external_handle": effect.external_handle,
+                        "dispatch_phase": "reconciled_uncertain_accepted",
+                    },
+                )
+            return EffectReconciliation(
+                action=EffectReconciliationAction.NEEDS_ATTENTION,
+                error="uncertain_without_handle",
+            )
+        if effect.state is EffectState.ACCEPTED and effect.external_handle:
+            return EffectReconciliation(
+                action=EffectReconciliationAction.COMPLETE,
+                external_handle=effect.external_handle,
+                outcome_payload={
+                    "external_run_id": effect.external_handle,
+                    "external_handle": effect.external_handle,
+                    "dispatch_phase": "accepted",
+                },
+            )
+        return EffectReconciliation(
+            action=EffectReconciliationAction.NEEDS_ATTENTION,
+            error=f"unexpected_effect_state:{effect.state}",
+        )
+
+    async def dispatch(
+        self,
+        node: GraphNode,
+        *,
+        effect: EffectRecord,
+        context: GraphRunContext,
+    ) -> EffectDispatchResult:
+        if self._submit is None:
+            raise TypeError(
+                "SubmitOnceEffectfulRunner.dispatch requires a submit= callable "
+                "or an override of dispatch()"
+            )
+        result = self._submit(node, effect, context)
+        if inspect.isawaitable(result):
+            result = await result
+        if not isinstance(result, EffectDispatchResult):
+            raise TypeError(
+                f"submit callable must return EffectDispatchResult, got {type(result)!r}"
+            )
+        return result
+
+    async def observe(
+        self,
+        node: GraphNode,
+        *,
+        effect: EffectRecord,
+        context: GraphRunContext,
+    ) -> EffectReconciliation:
+        """Complete once the backend accepts the run — not when the job finishes."""
+        del context
+        handle = effect.external_handle
+        if not handle:
+            return EffectReconciliation(
+                action=EffectReconciliationAction.NEEDS_ATTENTION,
+                error="missing_external_handle",
+            )
+        return EffectReconciliation(
+            action=EffectReconciliationAction.COMPLETE,
+            external_handle=handle,
+            outcome_payload={
+                "external_run_id": handle,
+                "external_handle": handle,
+                "dispatch_phase": "accepted",
+                "task_id": node.payload.get("task_id"),
+                "backend_id": self.backend_id(),
+            },
+            outcome_evidence={"effect_id": effect.effect_id},
+        )
+
+
+def effectful_external_handle(result: GraphResult, node_id: str) -> str | None:
+    """Return the external handle recorded on ``node_id`` after an effectful run.
+
+    Prefers ``external_run_id``, then ``external_handle``, from the node's
+    outcome payload. Returns ``None`` when the node is missing or has no
+    handle::
+
+        >>> from mechaharness.graph import ExecutionGraph, GraphNode
+        >>> from mechaharness.graph_executor import GraphResult
+        >>> from mechaharness.host_kit import effectful_external_handle
+        >>> g = ExecutionGraph(goal="x")
+        >>> n = GraphNode(id="job", kind="coding_job")
+        >>> n.payload = {"external_run_id": "job-42"}
+        >>> _ = g.add_node(n)
+        >>> effectful_external_handle(
+        ...     GraphResult(status="ok", graph=g, run_id="r"), "job"
+        ... )
+        'job-42'
+        >>> effectful_external_handle(
+        ...     GraphResult(status="ok", graph=g, run_id="r"), "missing"
+        ... )
+    """
+    node = result.graph.nodes.get(node_id)
+    if node is None:
+        return None
+    payload = dict(node.payload or {})
+    handle = payload.get("external_run_id") or payload.get("external_handle")
+    return str(handle) if handle else None
+
+
+def host_graph_executor(
+    *,
+    runners: Sequence[GraphNodeRunner] | GraphNodeRunnerRegistry,
+    checkpoint_store: CheckpointStore | None = None,
+    checkpoint_path: str | Path | None = None,
+    grants: Sequence[object] | None = None,
+    crash_probe: CrashProbe | None = None,
+    agent_id: str = "host",
+) -> GraphExecutor:
+    """Build a :class:`GraphExecutor` via Config inject (blessed host path).
+
+    Prefer this over hand-wiring EventLog / AccessControl / LinkageResolver /
+    CheckpointStore / CrashProbe. Pass ``checkpoint_path`` for SQLite durability
+    or ``checkpoint_store`` for a custom backend; omit both for the default
+    ephemeral EventLog adapter.
+
+    Defaults grant ``GraphExecute`` and ``GraphEscalate``. Override with
+    ``grants=`` when the host needs a tighter pack. ``crash_probe`` is for
+    acceptance / crash-window tests (see
+    :class:`~mechaharness.external_effect.ArmedCrashProbe`).
+
+    Mutually exclusive checkpoint knobs::
+
+        >>> import tempfile
+        >>> from pathlib import Path
+        >>> from mechaharness.host_kit import (
+        ...     SubmitOnceEffectfulRunner, host_graph_executor,
+        ... )
+        >>> from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+        >>> runner = SubmitOnceEffectfulRunner(
+        ...     kinds=["coding_job"], backend_id="host.coding",
+        ... )
+        >>> store = SqliteCheckpointStore(Path(tempfile.mkdtemp()) / "x.sqlite")
+        >>> try:
+        ...     host_graph_executor(
+        ...         runners=[runner],
+        ...         checkpoint_path="a.sqlite",
+        ...         checkpoint_store=store,
+        ...     )
+        ... except ValueError as exc:
+        ...     str(exc)
+        'pass checkpoint_store or checkpoint_path, not both'
+    """
+    if checkpoint_store is not None and checkpoint_path is not None:
+        raise ValueError("pass checkpoint_store or checkpoint_path, not both")
+
+    if isinstance(runners, GraphNodeRunnerRegistry):
+        registry = runners
+    else:
+        registry = GraphNodeRunnerRegistry(list(runners))
+
+    grant_list = list(grants) if grants is not None else [GraphExecute, GraphEscalate]
+    store = checkpoint_store
+    if store is None and checkpoint_path is not None:
+        store = SqliteCheckpointStore(str(checkpoint_path))
+    probe = crash_probe if crash_probe is not None else NoopCrashProbe()
+    aid = agent_id
+
+    class _HostKitConfig(MechaHarnessConfig):
+        def get_inference_class(self) -> type:
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return list(grant_list)
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return registry
+
+        def get_checkpoint_store(self) -> CheckpointStore:
+            if store is not None:
+                return store
+            return super().get_checkpoint_store()
+
+        def get_crash_probe(self) -> CrashProbe:
+            return probe
+
+    executor = cast(GraphExecutor, get_injector(_HostKitConfig).inject(GraphExecutor))
+    executor.agent_id = aid
+    return executor

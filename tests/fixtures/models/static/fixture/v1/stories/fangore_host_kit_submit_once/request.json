@@ -1,0 +1,6 @@
+{
+  "scenarios": [
+    "dispatch_durable_ok",
+    "resume_uncertain_with_handle"
+  ]
+}
