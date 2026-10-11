@@ -1,0 +1,571 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reusable graph recipes and typed decision-plane requirements &mdash; MechaHarness 0.3.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Transactional durable graph resume requirements" href="transactional-durable-resume.html" />
+    <link rel="prev" title="User stories" href="../guides/user-stories.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Reusable graph recipes and typed decision-plane requirements</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/recipes-and-decision-plane.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="reusable-graph-recipes-and-typed-decision-plane-requirements">
+<h1>Reusable graph recipes and typed decision-plane requirements<a class="headerlink" href="#reusable-graph-recipes-and-typed-decision-plane-requirements" title="Link to this heading"></a></h1>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
+<p>MechaHarness graphs already provide the primitives for composing deterministic and model-backed execution. A recurring class of agent behavior, however, is smaller than an application graph and larger than a node: a reusable subgraph that implements a well-understood control pattern.</p>
+<p>This document names that unit a <strong>recipe</strong>.</p>
+<p>The immediate source is rvaniaaaa’s 2026 working note, “Move Routine Decisions Off Your Big Model,” which argues that high-volume, well-defined decisions should be moved from expensive general models to small structured decision models, while exact computation and final policy remain deterministic code.</p>
+<p>Source:</p>
+<ul class="simple">
+<li><p>Original X post / working note: https://x.com/rvaniaaaa/status/2107453108611662172</p></li>
+</ul>
+<p>The note’s seven practical rules are:</p>
+<ol class="arabic simple">
+<li><p>send state as structured data;</p></li>
+<li><p>ask multiple compatible questions in one model call;</p></li>
+<li><p>define the allowed answer levels in advance;</p></li>
+<li><p>keep exact mathematics in code;</p></li>
+<li><p>let code make the final policy decision;</p></li>
+<li><p>use a confidence floor to escalate uncertain decisions;</p></li>
+<li><p>expose only valid actions.</p></li>
+</ol>
+<p>MechaHarness already has architectural overlap with these ideas. The requirement here is not to bolt a second decision framework onto the harness. It is to make these patterns reusable and testable as ordinary graph composition.</p>
+<p>A second motivating example is retry. Retry is not merely “run the node again”: a useful retry policy may classify a failure, decide whether retry is permitted, select a remediation, apply backoff, constrain attempts, alter context, and eventually escalate. That is naturally a small graph.</p>
+</section>
+<section id="definition">
+<h2>Definition<a class="headerlink" href="#definition" title="Link to this heading"></a></h2>
+<p>An <strong>Agentic Recipe</strong> is a reusable, parameterized subgraph that implements a
+bounded agent-control pattern and can be embedded in a larger execution graph.</p>
+<p>Recipes MUST be composition, not a parallel execution system. A recipe should
+compile/instantiate into normal MechaHarness graph primitives and inherit graph
+tracing, persistence, resume, testing, policy, and observability.</p>
+<p>Recipes are analogous to reusable functions in ordinary programming: named
+graph fragments with explicit inputs, outputs, configuration, and contracts.</p>
+<section id="substrate-vs-concept">
+<h3>Substrate vs concept<a class="headerlink" href="#substrate-vs-concept" title="Link to this heading"></a></h3>
+<p>The <strong>data structure and factory API remain</strong>
+:class:<code class="docutils literal notranslate"><span class="pre">~mechaharness.graph_templates.base.GraphTemplate</span></code> (and related
+<code class="docutils literal notranslate"><span class="pre">GraphTemplateParams</span></code>, soft points, registry, provenance stamps). MechaHarness
+MUST NOT invent a parallel recipe type system, executor, scheduler, persistence
+layer, event bus, or model gateway.</p>
+<p><strong>Agentic Recipe</strong> is the top-level product concept for concrete, useful
+templates that encode a readable control pattern. Catalog metadata, docs,
+user-story implementation text, and host-facing language SHOULD name recipes
+by stable catalog id (for example <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code>, <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>).</p>
+<p>The boundary between a skeletal template and an Agentic Recipe MAY stay soft
+until a concrete case forces the call. Prefer promoting when a host would want
+to read and reuse the control story as a named unit.</p>
+</section>
+<section id="human-readable-composition-rc-hr">
+<h3>Human-readable composition (RC-HR)<a class="headerlink" href="#human-readable-composition-rc-hr" title="Link to this heading"></a></h3>
+<p>At the recipe layer, <strong>composition code is a primary readability surface</strong>, not
+only documentation. A reader SHOULD be able to open host or library tiling code
+and understand how recipes combine into the final graph without reconstructing
+the story from opaque node ids or soft-binding dicts alone.</p>
+<p>Recipes SHOULD optimize for:</p>
+<ul class="simple">
+<li><p>explicit tiling / embed APIs that read as control flow;</p></li>
+<li><p>stable, namespaced node identities that match the source layout;</p></li>
+<li><p>soft-point names that describe the human decision being bound;</p></li>
+<li><p>hard structure visible in the recipe definition (or an equally readable
+builder), not hidden behind an opaque compiler blob.</p></li>
+</ul>
+</section>
+<section id="promotion-from-requirements-and-user-stories">
+<h3>Promotion from requirements and user stories<a class="headerlink" href="#promotion-from-requirements-and-user-stories" title="Link to this heading"></a></h3>
+<p>As part of refining recipes, MechaHarness MUST review current requirements and
+user stories, formalize recurring control patterns into concrete recipes where
+relevant, and ship those as the first well-documented catalog entries.</p>
+<p>Each Agentic Recipe MUST have <strong>at least one user story</strong> that exercises that
+recipe as the unit under test (instantiate and run, or statically validate the
+tiled graph). Unit tests alone are not enough.</p>
+<p>When a story is fulfilled by a recipe, the story <code class="docutils literal notranslate"><span class="pre">implementation</span></code> text MUST
+refer to the recipe <strong>by catalog name</strong> so readers learn the recipe vocabulary
+alongside modules and Config hooks. Mechanism-only stories (soft points,
+stamping, demotion) MAY name <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code>; pattern stories MUST name the
+recipe.</p>
+</section>
+</section>
+<section id="ownership-boundary">
+<h2>Ownership boundary<a class="headerlink" href="#ownership-boundary" title="Link to this heading"></a></h2>
+<p>MechaHarness owns:</p>
+<ul class="simple">
+<li><p>the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> substrate and recipe composition semantics;</p></li>
+<li><p>recipe input/output and configuration contracts;</p></li>
+<li><p>deterministic validation and graph linkage;</p></li>
+<li><p>reference Agentic Recipes for broadly reusable harness behavior;</p></li>
+<li><p>tracing and provenance of recipe expansion/execution;</p></li>
+<li><p>test utilities and documentation for recipes;</p></li>
+<li><p>the audit→promote process that turns story/requirement patterns into catalog
+recipes.</p></li>
+</ul>
+<p>Applications own:</p>
+<ul class="simple">
+<li><p>domain-specific recipes (still <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> subclasses);</p></li>
+<li><p>domain-specific prompts, labels, policies, and thresholds;</p></li>
+<li><p>selection of concrete models/providers unless a recipe explicitly accepts a
+router abstraction;</p></li>
+<li><p>application-specific side effects;</p></li>
+<li><p>readable host tiling that composes library and domain recipes.</p></li>
+</ul>
+<p>A downstream project such as June SHOULD be able to define June-specific recipes
+while reusing MechaHarness recipe primitives. A generally useful recipe born in
+June SHOULD be extractable back into MechaHarness without changing the recipe
+model.</p>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<section id="rc-01-recipe-is-a-first-class-reusable-subgraph">
+<h3>RC-01: Recipe is a first-class reusable subgraph<a class="headerlink" href="#rc-01-recipe-is-a-first-class-reusable-subgraph" title="Link to this heading"></a></h3>
+<p>MechaHarness MUST provide a first-class way to define a named, versionable, reusable subgraph with:</p>
+<ul class="simple">
+<li><p>typed/validated inputs;</p></li>
+<li><p>typed/validated outputs;</p></li>
+<li><p>explicit configuration;</p></li>
+<li><p>stable internal node identities or deterministic identity derivation;</p></li>
+<li><p>declared entry and exit boundaries.</p></li>
+</ul>
+<p>Instantiating the same recipe multiple times in one parent graph MUST NOT create node-ID collisions.</p>
+</section>
+<section id="rc-02-recipes-compile-to-ordinary-graph-primitives">
+<h3>RC-02: Recipes compile to ordinary graph primitives<a class="headerlink" href="#rc-02-recipes-compile-to-ordinary-graph-primitives" title="Link to this heading"></a></h3>
+<p>Recipe execution MUST NOT require a separate executor.</p>
+<p>Instantiation MUST produce or compose ordinary MechaHarness graph nodes/edges so existing graph behavior applies, including:</p>
+<ul class="simple">
+<li><p>validation;</p></li>
+<li><p>tracing;</p></li>
+<li><p>checkpoint/resume;</p></li>
+<li><p>cancellation;</p></li>
+<li><p>failure handling;</p></li>
+<li><p>model routing;</p></li>
+<li><p>tool/capability restrictions.</p></li>
+</ul>
+<p>The parent graph MUST be able to treat the recipe as a logical unit without hiding the internal execution trace.</p>
+</section>
+<section id="rc-03-recipe-linkage-is-validated-before-execution">
+<h3>RC-03: Recipe linkage is validated before execution<a class="headerlink" href="#rc-03-recipe-linkage-is-validated-before-execution" title="Link to this heading"></a></h3>
+<p>All recipe inputs, outputs, edges, soft-point bindings, required capabilities, and parent-graph connections MUST be resolvable before execution begins.</p>
+<p>Invalid composition MUST fail early with actionable diagnostics rather than discovering missing links midway through a run.</p>
+<p>This validation MUST work after parameterization, because recipe parameters may determine concrete graph linkage.</p>
+</section>
+<section id="rc-04-recipe-provenance-and-observability">
+<h3>RC-04: Recipe provenance and observability<a class="headerlink" href="#rc-04-recipe-provenance-and-observability" title="Link to this heading"></a></h3>
+<p>Every instantiated recipe MUST retain:</p>
+<ul class="simple">
+<li><p>recipe name;</p></li>
+<li><p>recipe version or definition fingerprint;</p></li>
+<li><p>instance identity;</p></li>
+<li><p>parameter/configuration fingerprint;</p></li>
+<li><p>mapping between logical recipe nodes and concrete graph node IDs.</p></li>
+</ul>
+<p>Traces SHOULD make it possible to inspect a recipe as one logical span and expand it to its internal nodes.</p>
+</section>
+<section id="rc-05-recipes-are-deterministic-to-instantiate">
+<h3>RC-05: Recipes are deterministic to instantiate<a class="headerlink" href="#rc-05-recipes-are-deterministic-to-instantiate" title="Link to this heading"></a></h3>
+<p>Given the same recipe definition, version, parameters, and parent binding, graph expansion MUST be deterministic.</p>
+<p>Recipe construction MUST NOT itself require model inference.</p>
+</section>
+<section id="rc-06-recipes-support-hard-structure-and-soft-points">
+<h3>RC-06: Recipes support hard structure and soft points<a class="headerlink" href="#rc-06-recipes-support-hard-structure-and-soft-points" title="Link to this heading"></a></h3>
+<p>A recipe MUST be able to contain both:</p>
+<ul class="simple">
+<li><p>hard nodes/edges that define the invariant control structure; and</p></li>
+<li><p>explicit soft points that a caller may bind or override.</p></li>
+</ul>
+<p>Overrides MUST be constrained by the recipe contract. A caller MUST NOT mutate arbitrary internal structure accidentally.</p>
+<p>This permits a reusable MechaHarness recipe to be made concrete by June or another host without forking the recipe.</p>
+</section>
+<section id="rc-07-substrate-is-graphtemplate">
+<h3>RC-07: Substrate is GraphTemplate<a class="headerlink" href="#rc-07-substrate-is-graphtemplate" title="Link to this heading"></a></h3>
+<p>Recipe definitions MUST be expressible as <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> (or a thin subclass /
+helper layered on it). Hosts register recipes through the existing graph
+template registry / Config hook path. Renaming the public vocabulary to
+“Agentic Recipe” MUST NOT require a second injectable registry unless a later
+ADR proves the split necessary.</p>
+</section>
+<section id="rc-08-human-readable-tiling">
+<h3>RC-08: Human-readable tiling<a class="headerlink" href="#rc-08-human-readable-tiling" title="Link to this heading"></a></h3>
+<p>Recipe APIs and reference implementations MUST prefer forms a human can read as
+structure. Opaque expansion that cannot be inspected as ordinary graph nodes
+after instantiate is forbidden. Soft-point and node naming SHOULD be domain-clear
+at the leaf (see unambiguous-names rules).</p>
+</section>
+<section id="rc-09-recipe-user-story-linkage">
+<h3>RC-09: Recipe ↔ user story linkage<a class="headerlink" href="#rc-09-recipe-user-story-linkage" title="Link to this heading"></a></h3>
+<p>Every shipped Agentic Recipe MUST list at least one owning user-story id in its
+reference documentation. The owning story’s <code class="docutils literal notranslate"><span class="pre">implementation</span></code> field MUST name
+the recipe catalog id. Promoting a pattern to a recipe without a story is
+incomplete.</p>
+</section>
+</section>
+<section id="first-wave-catalog-candidates">
+<h2>First-wave catalog candidates<a class="headerlink" href="#first-wave-catalog-candidates" title="Link to this heading"></a></h2>
+<p>Patterns already present as templates or story clusters SHOULD be evaluated for
+promotion and documentation as Agentic Recipes (names are catalog ids):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Catalog id</p></th>
+<th class="head"><p>Existing surface</p></th>
+<th class="head"><p>Owning / related stories</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fan_out_aggregate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FanOutAggregateTemplate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_graph_template_soft_points</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_fan_in_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">nubble_insp_coordination_cost</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">VerifyRepairTemplate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_verify_repair_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">IndependentReviewTemplate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_independent_review</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">environment_repair</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EnvironmentRepairTemplate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_environment_repair_recipe</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">initialize_preflight</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">InitializePreflightTemplate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_initialize_preflight</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DecisionPlaneTemplate</span></code> + <code class="docutils literal notranslate"><span class="pre">decision_plane_runtime</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_projection</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_telemetry</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_model_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">BoundedRetryTemplate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code> (+ durable resume composition)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Composition kernel story: <code class="docutils literal notranslate"><span class="pre">fangore_recipe_namespace_tile</span></code> (<code class="docutils literal notranslate"><span class="pre">instance_key</span></code>, <code class="docutils literal notranslate"><span class="pre">tile</span></code>).</p>
+<p>Next-wave patterns with stories but not yet required as recipes:
+human approval gates, sparse advisor consult, narrowed delegation envelopes.</p>
+</section>
+<section id="reference-recipe-typed-decision-plane">
+<h2>Reference recipe: typed decision plane<a class="headerlink" href="#reference-recipe-typed-decision-plane" title="Link to this heading"></a></h2>
+<p>MechaHarness SHOULD ship a reference recipe implementing the pattern synthesized in the source working note.</p>
+<section id="dp-01-structured-state-projection">
+<h3>DP-01: Structured state projection<a class="headerlink" href="#dp-01-structured-state-projection" title="Link to this heading"></a></h3>
+<p>The decision recipe MUST accept a deliberate projection of harness state rather than implicitly exposing the full graph context.</p>
+<p>The projection SHOULD be serializable structured data. Hosts MUST be able to test the projection without invoking a model.</p>
+</section>
+<section id="dp-02-batched-decision-questions">
+<h3>DP-02: Batched decision questions<a class="headerlink" href="#dp-02-batched-decision-questions" title="Link to this heading"></a></h3>
+<p>The recipe MUST support evaluating multiple compatible bounded questions in one inference call.</p>
+<p>Each question MUST define its output domain in advance, such as:</p>
+<ul class="simple">
+<li><p>finite choices;</p></li>
+<li><p>boolean/nullable decisions;</p></li>
+<li><p>bounded scores;</p></li>
+<li><p>another explicitly validated typed result.</p></li>
+</ul>
+<p>The recipe MUST NOT require one model call per question.</p>
+</section>
+<section id="dp-03-deterministic-facts-stay-outside-inference">
+<h3>DP-03: Deterministic facts stay outside inference<a class="headerlink" href="#dp-03-deterministic-facts-stay-outside-inference" title="Link to this heading"></a></h3>
+<p>Exact arithmetic, schema checks, capability existence, counters, deadlines, static graph invariants, and other mechanically knowable facts MUST be computed in deterministic code.</p>
+<p>The reference recipe MUST make it natural to feed those facts into a decision call without asking the model to recompute them.</p>
+</section>
+<section id="dp-04-model-output-is-evidence-not-final-policy">
+<h3>DP-04: Model output is evidence, not final policy<a class="headerlink" href="#dp-04-model-output-is-evidence-not-final-policy" title="Link to this heading"></a></h3>
+<p>The decision model MUST return structured signals. Deterministic policy code MUST own the final action when the action can be expressed as deterministic policy over those signals and graph state.</p>
+<p>For example, a model may produce classification, risk score, confidence, and recommended executor. Code may then choose route/retry/escalate according to explicit policy.</p>
+</section>
+<section id="dp-05-valid-action-envelope">
+<h3>DP-05: Valid-action envelope<a class="headerlink" href="#dp-05-valid-action-envelope" title="Link to this heading"></a></h3>
+<p>Every action-like decision question MUST be constrained to actions valid at that decision point.</p>
+<p>The model MUST NOT be asked to invent arbitrary commands and have them validated only after generation when the allowed action set can be enumerated beforehand.</p>
+<p>The action envelope MAY be derived dynamically from current graph state, capabilities, permissions, or policy, but the derived envelope MUST be explicit in the decision request.</p>
+</section>
+<section id="dp-06-confidence-and-escalation">
+<h3>DP-06: Confidence and escalation<a class="headerlink" href="#dp-06-confidence-and-escalation" title="Link to this heading"></a></h3>
+<p>A decision question or batch MUST be able to declare a confidence policy.</p>
+<p>When confidence is below the configured floor, output is invalid, questions disagree in a policy-defined way, or the small model otherwise cannot resolve the decision, the recipe MUST expose an escalation path.</p>
+<p>Escalation SHOULD be routable rather than hard-coded to “the big model.” A host may route to:</p>
+<ul class="simple">
+<li><p>a larger model;</p></li>
+<li><p>a specialized evaluator;</p></li>
+<li><p>another recipe;</p></li>
+<li><p>a human;</p></li>
+<li><p>deterministic safe fallback.</p></li>
+</ul>
+</section>
+<section id="dp-07-small-model-shadow-mode">
+<h3>DP-07: Small-model shadow mode<a class="headerlink" href="#dp-07-small-model-shadow-mode" title="Link to this heading"></a></h3>
+<p>The decision recipe SHOULD support a shadow/evaluation mode in which:</p>
+<ol class="arabic simple">
+<li><p>the candidate small decision model produces its typed result;</p></li>
+<li><p>the existing production decision path still controls execution;</p></li>
+<li><p>both outcomes are recorded for comparison.</p></li>
+</ol>
+<p>This allows a host to establish empirical suitability before moving a decision off a frontier model.</p>
+</section>
+<section id="dp-08-decision-telemetry-is-evaluation-ready">
+<h3>DP-08: Decision telemetry is evaluation-ready<a class="headerlink" href="#dp-08-decision-telemetry-is-evaluation-ready" title="Link to this heading"></a></h3>
+<p>Decision traces SHOULD capture enough structured information to evaluate and improve routing:</p>
+<ul class="simple">
+<li><p>question/schema identity;</p></li>
+<li><p>state-projection fingerprint;</p></li>
+<li><p>selected model/router result;</p></li>
+<li><p>typed answers;</p></li>
+<li><p>confidence;</p></li>
+<li><p>deterministic final policy action;</p></li>
+<li><p>escalation reason;</p></li>
+<li><p>later outcome/verdict when available;</p></li>
+<li><p>latency and usage/cost metadata when available.</p></li>
+</ul>
+<p>Raw sensitive context MUST NOT be required merely to produce aggregate decision metrics.</p>
+</section>
+<section id="dp-09-model-size-is-policy-not-architecture">
+<h3>DP-09: Model size is policy, not architecture<a class="headerlink" href="#dp-09-model-size-is-policy-not-architecture" title="Link to this heading"></a></h3>
+<p>The recipe MUST NOT encode “small” as a fixed parameter count or provider.</p>
+<p>A model qualifies for a decision point because it meets the decision’s quality, latency, throughput, cost, and deployment policy. This allows local models, hosted models, and future model classes to use the same recipe.</p>
+</section>
+</section>
+<section id="reference-recipe-bounded-retry">
+<h2>Reference recipe: bounded retry<a class="headerlink" href="#reference-recipe-bounded-retry" title="Link to this heading"></a></h2>
+<p>Retry SHOULD be the second reference recipe because it demonstrates that recipes are useful beyond decision-model optimization.</p>
+<section id="rt-01-retry-is-an-explicit-subgraph">
+<h3>RT-01: Retry is an explicit subgraph<a class="headerlink" href="#rt-01-retry-is-an-explicit-subgraph" title="Link to this heading"></a></h3>
+<p>The retry recipe MUST make attempts, failure classification, remediation, delay/backoff, retry permission, and terminal escalation visible graph behavior rather than hiding all retry semantics inside an executor loop.</p>
+</section>
+<section id="rt-02-deterministic-retry-policy-where-possible">
+<h3>RT-02: Deterministic retry policy where possible<a class="headerlink" href="#rt-02-deterministic-retry-policy-where-possible" title="Link to this heading"></a></h3>
+<p>Mechanically identifiable failures and exact attempt/backoff calculations MUST be handled in code.</p>
+<p>A model-backed classifier MAY be inserted as a soft point for ambiguous failures.</p>
+</section>
+<section id="rt-03-bounded-attempts-and-explicit-terminal-state">
+<h3>RT-03: Bounded attempts and explicit terminal state<a class="headerlink" href="#rt-03-bounded-attempts-and-explicit-terminal-state" title="Link to this heading"></a></h3>
+<p>A retry recipe MUST require a bounded attempt policy or another explicit termination condition.</p>
+<p>Exhaustion MUST lead to a declared terminal/escalation edge. Infinite implicit retry MUST NOT be the default.</p>
+</section>
+<section id="rt-04-side-effect-safety">
+<h3>RT-04: Side-effect safety<a class="headerlink" href="#rt-04-side-effect-safety" title="Link to this heading"></a></h3>
+<p>Retry MUST compose correctly with durable effect identity and recovery semantics.</p>
+<p>A retry recipe MUST NOT blindly redispatch an externally visible non-idempotent effect whose acceptance is uncertain. It MUST defer to effect reconciliation before another dispatch is permitted.</p>
+</section>
+<section id="rt-05-attempt-context-is-deliberate">
+<h3>RT-05: Attempt context is deliberate<a class="headerlink" href="#rt-05-attempt-context-is-deliberate" title="Link to this heading"></a></h3>
+<p>The recipe MUST allow each attempt to receive:</p>
+<ul class="simple">
+<li><p>prior failure classification;</p></li>
+<li><p>attempt number;</p></li>
+<li><p>selected remediation;</p></li>
+<li><p>relevant prior output/evidence.</p></li>
+</ul>
+<p>It MUST NOT require replaying the entire parent context to every support node.</p>
+</section>
+</section>
+<section id="candidate-future-recipes">
+<h2>Candidate future recipes<a class="headerlink" href="#candidate-future-recipes" title="Link to this heading"></a></h2>
+<p>The abstraction SHOULD be general enough to express, without special executor features:</p>
+<ul class="simple">
+<li><p>evaluator/judge loops;</p></li>
+<li><p>plan -&gt; execute -&gt; verify;</p></li>
+<li><p>tool failure recovery;</p></li>
+<li><p>model escalation cascades;</p></li>
+<li><p>quorum or multi-judge decisions;</p></li>
+<li><p>context compression/summarization;</p></li>
+<li><p>review-before-mutation;</p></li>
+<li><p>speculative candidate generation followed by deterministic filtering;</p></li>
+<li><p>human approval gates.</p></li>
+</ul>
+<p>These are examples, not requirements to implement all recipes in the first change.</p>
+</section>
+<section id="testing-requirements">
+<h2>Testing requirements<a class="headerlink" href="#testing-requirements" title="Link to this heading"></a></h2>
+<section id="test-01-static-recipe-expansion">
+<h3>TEST-01: Static recipe expansion<a class="headerlink" href="#test-01-static-recipe-expansion" title="Link to this heading"></a></h3>
+<p>Tests MUST be able to instantiate and validate recipes without model calls or network access.</p>
+</section>
+<section id="test-02-dependency-injection">
+<h3>TEST-02: Dependency injection<a class="headerlink" href="#test-02-dependency-injection" title="Link to this heading"></a></h3>
+<p>Reference recipe tests MUST use dependency injection for model runners, clocks, sleepers/backoff, effect adapters, and other external behavior rather than patching global state.</p>
+</section>
+<section id="test-03-decision-batching">
+<h3>TEST-03: Decision batching<a class="headerlink" href="#test-03-decision-batching" title="Link to this heading"></a></h3>
+<p>A test MUST prove that several compatible decision questions can be answered by one injected model invocation and independently validated.</p>
+</section>
+<section id="test-04-invalid-decision-output">
+<h3>TEST-04: Invalid decision output<a class="headerlink" href="#test-04-invalid-decision-output" title="Link to this heading"></a></h3>
+<p>Tests MUST cover invalid enum/score/action outputs and prove they cannot bypass deterministic policy.</p>
+</section>
+<section id="test-05-confidence-escalation">
+<h3>TEST-05: Confidence escalation<a class="headerlink" href="#test-05-confidence-escalation" title="Link to this heading"></a></h3>
+<p>Tests MUST prove that below-threshold confidence routes to the configured escalation path and does not silently accept the small-model answer.</p>
+</section>
+<section id="test-06-retry-boundaries">
+<h3>TEST-06: Retry boundaries<a class="headerlink" href="#test-06-retry-boundaries" title="Link to this heading"></a></h3>
+<p>Tests MUST cover success on first attempt, success after retry, non-retryable failure, exhaustion, and ambiguous external-effect state.</p>
+</section>
+<section id="test-07-resume-inside-a-recipe">
+<h3>TEST-07: Resume inside a recipe<a class="headerlink" href="#test-07-resume-inside-a-recipe" title="Link to this heading"></a></h3>
+<p>Crash/restart tests MUST exercise checkpoints at multiple locations inside an instantiated recipe and prove that resume preserves recipe identity and does not restart the recipe from its entry unnecessarily.</p>
+</section>
+</section>
+<section id="initial-implementation-scope">
+<h2>Initial implementation scope<a class="headerlink" href="#initial-implementation-scope" title="Link to this heading"></a></h2>
+<p>A first implementation SHOULD be intentionally small:</p>
+<ol class="arabic simple">
+<li><p>strengthen <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> composition (namespacing, I/O contracts, provenance)
+without a second type system;</p></li>
+<li><p>deterministic validation and human-readable tiling helpers;</p></li>
+<li><p>recipe provenance in graph/traces (catalog id + instance fingerprint);</p></li>
+<li><p>document and story-link first-wave promotions from existing templates;</p></li>
+<li><p>typed-decision reference recipe (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>) with batching,
+valid-action envelopes, and escalation;</p></li>
+<li><p>bounded-retry reference recipe (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>) composing with
+<a class="reference internal" href="transactional-durable-resume.html"><span class="std std-doc">transactional durable resume</span></a>;</p></li>
+<li><p>static/DI tests plus ≥1 user story per shipped recipe;</p></li>
+<li><p>skills/docs that treat Agentic Recipes as a top-level project concept.</p></li>
+</ol>
+<p>Do not create a recipe-specific scheduler, persistence layer, event system, or
+model gateway. Reuse MechaHarness primitives.</p>
+</section>
+<section id="design-principle">
+<h2>Design principle<a class="headerlink" href="#design-principle" title="Link to this heading"></a></h2>
+<p>The harness should spend inference only on uncertainty.</p>
+<p>Recipes turn that principle into reusable, <strong>human-readable</strong> graph structure:
+deterministic code handles facts and policy, specialized models answer bounded
+questions, expensive models receive the genuinely ambiguous remainder, and the
+entire control flow remains visible and testable — in traces <strong>and</strong> in the
+code that tiles recipes together.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../guides/user-stories.html" class="btn btn-neutral float-left" title="User stories" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="transactional-durable-resume.html" class="btn btn-neutral float-right" title="Transactional durable graph resume requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,411 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jev typed-judgment inspiration for MechaHarness &mdash; MechaHarness 0.3.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Jev typed-judgment inspiration for MechaHarness</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jev-typed-judgment-inspiration-for-mechaharness">
+<h1>Jev typed-judgment inspiration for MechaHarness<a class="headerlink" href="#jev-typed-judgment-inspiration-for-mechaharness" title="Link to this heading"></a></h1>
+<blockquote>
+<div><p>Research and candidate user stories. External product claims are attributed;
+Jev is an optional provider, not a dependency. Foundation patterns are
+<strong>implementable on MechaHarness today</strong> via judge types, <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code>,
+and the <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> Agentic Recipe — not a parallel judgment stack.</p>
+</div></blockquote>
+<p>Reviewed: 2026-10-08. Status: <strong>inspiration + story backlog</strong>; promote only
+novel domain packs and calibration depth beyond existing DP/JDG coverage.</p>
+<p>Companion map:
+<a class="reference internal" href="jev-typed-judgment-requirements-map.html"><span class="std std-doc">jev-typed-judgment-requirements-map.md</span></a>.</p>
+<section id="sources-and-attribution">
+<h2>Sources and attribution<a class="headerlink" href="#sources-and-attribution" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Arindam Majumder (&#64;Arindam_1729), September 25, 2026, article <strong>“10 projects
+worth building with JEV”</strong> (article text supplied in the originating
+discussion; original article permalink not provided). All ten examples below
+are attributed to this article; locate and add its canonical permalink before
+treating this as a complete source bibliography.</p></li>
+<li><p>Diogo Almeida (&#64;CompleteSkeptic), September 15, 2026, Jev announcement quoted
+by Majumder (original post permalink not independently verified).</p></li>
+<li><p>TypeSafe, <em>How to setup Jev: From nothing to a call that returns a decision</em>,
+September 2026, page 1 supplied as screenshot. Full paper not verified or
+reviewed.</p></li>
+<li><p>TypeSafe product/API: https://typesafe.ai/ and
+https://api.typesafe.ai/redoc (API contract and availability require
+verification at implementation time).</p></li>
+<li><p>Related internal documentation: <a class="reference internal" href="../reference/graph-templates.html"><span class="std std-doc">graph templates</span></a>,
+<a class="reference internal" href="../reference/graph-templates/decision-plane.html"><span class="std std-doc">typed decision plane</span></a>,
+<a class="reference internal" href="../requirements/recipes-and-decision-plane.html"><span class="std std-doc">recipes and decision plane requirements</span></a>,
+<a class="reference internal" href="dev-blog-inspiration.html"><span class="std std-doc">developer-blog inspiration</span></a>,
+<a class="reference internal" href="requirements-map.html"><span class="std std-doc">inspiration requirements map</span></a>,
+<a class="reference internal" href="multi-harness-rl-inspiration.html"><span class="std std-doc">multi-harness RL inspiration</span></a>.</p></li>
+</ul>
+</section>
+<section id="thesis">
+<h2>Thesis<a class="headerlink" href="#thesis" title="Link to this heading"></a></h2>
+<p>Move frequent narrow semantic judgments out of long-form generation and into
+<strong>typed, bounded, testable decision calls</strong>. Deterministic harness code owns
+authorization, thresholds, actions, recovery, and auditing. A judge model is
+not a security principal, ground-truth oracle, or source of calibrated
+probabilities by default.</p>
+<p>Do not confuse a categorical response with a validated decision. Compare Jev
+with local small models and larger models using the same tasks and fixtures.</p>
+</section>
+<section id="existing-mechaharness-ownership-implementable-now">
+<h2>Existing MechaHarness ownership (implementable now)<a class="headerlink" href="#existing-mechaharness-ownership-implementable-now" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Concern</p></th>
+<th class="head"><p>MechaHarness surface</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Typed questions / signals</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code> (<code class="docutils literal notranslate"><span class="pre">Choice</span></code> / <code class="docutils literal notranslate"><span class="pre">Noul</span></code> / <code class="docutils literal notranslate"><span class="pre">Score</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Batch judgments</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">evaluate_decision_batch</span></code> / multi-question <code class="docutils literal notranslate"><span class="pre">JudgeRequest</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Code-owned policy + abstain</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">apply_decision_plane_policy</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Provenance / replay</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">decision_log</span></code>, decision-plane telemetry</p></td>
+</tr>
+<tr class="row-even"><td><p>Hard gates</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, consequence / approval policies</p></td>
+</tr>
+<tr class="row-odd"><td><p>Escalation + bounded loops</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> escalate exit; <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code> / <code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Static fixtures</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FixtureJudgeProvider</span></code>, story soft expects</p></td>
+</tr>
+<tr class="row-odd"><td><p>Shadow / compare</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">compare_shadow_decision</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>MechaHarness owns generic typed-judgment interfaces, graph skeletons/recipes,
+replay/evaluation, and execution guarantees. June and other clients own domain
+state, concrete tools, user permissions, thresholds, and instantiated
+client-specific graphs. Promote a June-born recipe only after removing domain
+assumptions.</p>
+</section>
+<section id="proposed-foundation-requirements">
+<h2>Proposed foundation requirements<a class="headerlink" href="#proposed-foundation-requirements" title="Link to this heading"></a></h2>
+<p>These map onto shipped DP/JDG/POL surfaces; see the companion requirements map
+for story links and residual gaps (calibration depth, domain packs).</p>
+<ul class="simple">
+<li><p><strong>MH-JEV-01 Typed judgment contract:</strong> Provider-neutral request with bounded
+state, question ID, kind (binary/choice/ordinal score), valid options,
+explicit abstain/uncertain semantics, provenance, and output schema. Validate
+provider responses and expose unsupported capabilities. Do not assume Jev’s
+exact API shape matches the conceptual schema.</p></li>
+<li><p><strong>MH-JEV-02 Batch judgments:</strong> Batch independent questions over shared state
+where supported; preserve per-question identity and failure isolation;
+provide sequential fallback. Explicitly handle dependencies rather than
+pretending all judgments are independent.</p></li>
+<li><p><strong>MH-JEV-03 Calibration and abstention:</strong> Separate raw model scores from
+calibrated probabilities and routing thresholds. Record calibration corpus,
+task class, policy version, and uncertainty. Evaluate selective risk/coverage
+and failure costs; confidence alone never grants authorization.</p></li>
+<li><p><strong>MH-JEV-04 Decision provenance/replay:</strong> Persist state fingerprints or
+protected snapshots, question/schema version, model/provider/version, raw
+outputs, decision policy, graph/node IDs, chosen action, and outcome. Replay
+must never repeat side effects; redact sensitive payloads.</p></li>
+<li><p><strong>MH-JEV-05 Hard execution boundary:</strong> Authorization, approval, schema
+validation, resource limits, and irreversible-action restrictions are
+deterministic hard gates. Semantic risk classification can only add review or
+deny, never elevate privileges.</p></li>
+<li><p><strong>MH-JEV-06 Escalation and bounded loops:</strong> Route uncertainty, contradiction,
+invalid output, repeated failure, or budget exhaustion to a stronger
+model/human/fallback. Bound retries and retain reasons.</p></li>
+<li><p><strong>MH-JEV-07 Static-data tests:</strong> Use injected providers and static fixtures;
+test calibration, provider outages, malformed output, ordering, concurrency,
+checkpoint/restart, and crashes before/after decision persistence and
+before/after side-effect execution. Require idempotency keys or reconciliation
+for external effects.</p></li>
+<li><p><strong>MH-JEV-08 Comparative evaluation:</strong> Benchmark Jev, small local models, and
+stronger models on identical corpora. Measure task accuracy, calibration,
+abstention, end-to-end latency, total cost, escalation load, and downstream
+task success; avoid vendor-reported speedup as an acceptance criterion.</p></li>
+</ul>
+</section>
+<section id="ten-candidate-user-stories-from-majumder-s-article">
+<h2>Ten candidate user stories from Majumder’s article<a class="headerlink" href="#ten-candidate-user-stories-from-majumder-s-article" title="Link to this heading"></a></h2>
+<p>Each story is an example of a reusable pattern, not a requirement to integrate
+a particular SaaS product. High-priority rows have owning MechaHarness persona
+stories that exercise existing <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> / access infrastructure.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ID</p></th>
+<th class="head"><p>Story / example</p></th>
+<th class="head"><p>Generic recipe</p></th>
+<th class="head"><p>Priority</p></th>
+<th class="head"><p>Owning story</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>MH-JEV-US01</p></td>
+<td><p>Support-ticket team, urgency and escalation routing</p></td>
+<td><p>classify → score → route</p></td>
+<td><p>Example</p></td>
+<td><p>Covered by <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code> / <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>MH-JEV-US02</p></td>
+<td><p>Inbound lead fit and priority</p></td>
+<td><p>evaluate criteria → score → dispatch</p></td>
+<td><p>Example</p></td>
+<td><p>Same triage pattern as US01</p></td>
+</tr>
+<tr class="row-even"><td><p>MH-JEV-US03</p></td>
+<td><p>Comment spam/abuse moderation</p></td>
+<td><p>multi-label judge → policy → review</p></td>
+<td><p>Medium</p></td>
+<td><p>Future host pack</p></td>
+</tr>
+<tr class="row-odd"><td><p>MH-JEV-US04</p></td>
+<td><p>Claim/citation support check</p></td>
+<td><p>extract claim/source → entailment → verify</p></td>
+<td><p><strong>High</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>MH-JEV-US05</p></td>
+<td><p>RAG context selection</p></td>
+<td><p>retrieve → relevance/trust/freshness → budget assembly</p></td>
+<td><p><strong>High</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>MH-JEV-US06</p></td>
+<td><p>Semantic PR review against requirements</p></td>
+<td><p>diff/requirements → atomic checks → escalate</p></td>
+<td><p><strong>High</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>MH-JEV-US07</p></td>
+<td><p>Task-specific model/workflow router</p></td>
+<td><p>inspect request → choose model/tool/graph/human</p></td>
+<td><p><strong>High</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>MH-JEV-US08</p></td>
+<td><p>Agent action safety firewall</p></td>
+<td><p>propose action → semantic risk → hard policy</p></td>
+<td><p><strong>High</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>MH-JEV-US09</p></td>
+<td><p>Browser agent reflex controller</p></td>
+<td><p>observe → bounded action → execute</p></td>
+<td><p>Experimental</p></td>
+<td><p>Future</p></td>
+</tr>
+<tr class="row-odd"><td><p>MH-JEV-US10</p></td>
+<td><p>Game-state action selection</p></td>
+<td><p>observe → bounded choice → simulate</p></td>
+<td><p>Benchmark</p></td>
+<td><p>Future</p></td>
+</tr>
+</tbody>
+</table>
+<p>Source for <strong>every row</strong>: Majumder’s September 25 article supplied in the
+conversation, sections 1–10 respectively. Add stable section/post permalinks if
+recovered.</p>
+</section>
+<section id="high-priority-acceptance-story-sketches">
+<h2>High-priority acceptance-story sketches<a class="headerlink" href="#high-priority-acceptance-story-sketches" title="Link to this heading"></a></h2>
+<section id="mh-jev-us04-citation-oracle-fangore-jev-citation-check">
+<h3>MH-JEV-US04: Citation oracle (<code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code>)<a class="headerlink" href="#mh-jev-us04-citation-oracle-fangore-jev-citation-check" title="Link to this heading"></a></h3>
+<p>Given a source snapshot and an atomic claim, when the judge returns
+supported/contradicted/insufficient/unavailable, then the harness preserves
+evidence spans and provenance, flags mismatches, and never upgrades unsupported
+claims to verified. Tests include 12% vs 40% revenue growth, missing source,
+misleading excerpt, and multi-claim sentences.</p>
+</section>
+<section id="mh-jev-us05-context-picker-fangore-jev-context-picker">
+<h3>MH-JEV-US05: Context picker (<code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code>)<a class="headerlink" href="#mh-jev-us05-context-picker-fangore-jev-context-picker" title="Link to this heading"></a></h3>
+<p>Given retrieved candidates and a strict token budget, when
+relevance/trust/freshness judgments are returned, then deterministic code
+assembles a traceable context within budget. Tests include duplicates, stale
+docs, contradictory docs, malicious prompt injections, and fallback when the
+judge fails.</p>
+</section>
+<section id="mh-jev-us06-requirements-aware-code-review-fangore-jev-requirements-review">
+<h3>MH-JEV-US06: Requirements-aware code review (<code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code>)<a class="headerlink" href="#mh-jev-us06-requirements-aware-code-review-fangore-jev-requirements-review" title="Link to this heading"></a></h3>
+<p>Given a PR diff and applicable user stories, when atomic checks identify
+possible requirement/test gaps, then the harness requests focused static tests
+or deeper review; it does not mark the PR correct merely because a judge
+approves.</p>
+</section>
+<section id="mh-jev-us07-model-router-fangore-jev-task-router">
+<h3>MH-JEV-US07: Model router (<code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code>)<a class="headerlink" href="#mh-jev-us07-model-router-fangore-jev-task-router" title="Link to this heading"></a></h3>
+<p>Given a mixed workload, when the router chooses local small model, frontier
+model, deterministic tool, or human, then quality and budget policies are
+respected. Test misroutes, provider unavailability, and escalation.</p>
+</section>
+<section id="mh-jev-us08-action-safety-fangore-jev-action-safety">
+<h3>MH-JEV-US08: Action safety (<code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code>)<a class="headerlink" href="#mh-jev-us08-action-safety-fangore-jev-action-safety" title="Link to this heading"></a></h3>
+<p>Given a proposed delete/send/pay/publish action, when semantic classification
+disagrees with hard policy, then hard policy always wins. Semantic risk may only
+add review or deny — never elevate privileges.</p>
+</section>
+</section>
+<section id="experimental-stories">
+<h2>Experimental stories<a class="headerlink" href="#experimental-stories" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>MH-JEV-EXP01:</strong> Paired benchmark across Jev and local judgment-capable
+models on identical typed tasks.</p></li>
+<li><p><strong>MH-JEV-EXP02:</strong> One broad generative prompt vs decomposed atomic questions.</p></li>
+<li><p><strong>MH-JEV-EXP03:</strong> Browser/game reflex loop with a stronger strategic planner.</p></li>
+<li><p><strong>MH-JEV-EXP04:</strong> Counterfactual replay with side effects disabled.</p></li>
+<li><p><strong>MH-JEV-EXP05:</strong> Crash injection at decision/action boundaries (compose with
+durable-resume requirements).</p></li>
+</ul>
+</section>
+<section id="follow-up-checklist">
+<h2>Follow-up checklist<a class="headerlink" href="#follow-up-checklist" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Recover Majumder’s canonical article permalink and original Jev announcement.</p></li>
+<li><p>Keep the requirements map honest as calibration / domain packs deepen.</p></li>
+<li><p>Prefer host soft-point bindings on <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> before new catalog recipes.</p></li>
+<li><p>Define any Jev-specific adapter only after provider-neutral fixtures exist.</p></li>
+<li><p>Review security, sensitive-data retention, licensing, and provider
+availability before external API experiments.</p></li>
+</ol>
+<p>No credentials or scheduled workflows should be introduced by this
+documentation track alone.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
