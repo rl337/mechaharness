@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-11
+
+Host kit cut (#25). Merge tip auto-bumped to `0.4.0` before this PyPI publish.
+
 ### Added
 
 - Host kit (`mechaharness.host_kit`): `host_graph_executor()` builds a
