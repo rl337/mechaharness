@@ -265,13 +265,89 @@ MechaHarness; clients instantiate them via Config and may retain the resulting
 concrete graphs. See <a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a> and
 <a class="reference internal" href="../reference/graph-templates.html"><span class="std std-doc">Graph templates</span></a>.</p>
 </section>
+<section id="host-kit-readable-graphexecutor-wiring">
+<h3>Host kit (readable GraphExecutor wiring)<a class="headerlink" href="#host-kit-readable-graphexecutor-wiring" title="Link to this heading"></a></h3>
+<p>Prefer <code class="docutils literal notranslate"><span class="pre">mechaharness.host_kit</span></code> when a host only needs to register runners and
+choose checkpoint durability. It keeps the blessed path
+(<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> → <code class="docutils literal notranslate"><span class="pre">inject(GraphExecutor)</span></code>) without ten-line hand assembly
+of EventLog / access / linkage / checkpoint / crash probe.</p>
+<p>Owning acceptance story: <code class="docutils literal notranslate"><span class="pre">fangore_host_kit_submit_once</span></code>. Executable examples
+live as pydoc doctests on <code class="docutils literal notranslate"><span class="pre">src/mechaharness/host_kit.py</span></code> (run via
+<code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--doctest-modules</span></code>) and as the fixture matrix under
+<code class="docutils literal notranslate"><span class="pre">tests/fixtures/host_kit/</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.budget</span><span class="w"> </span><span class="kn">import</span> <span class="n">BudgetPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="n">EffectDispatchResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExecutionGraph</span><span class="p">,</span> <span class="n">GraphNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.host_kit</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SubmitOnceEffectfulRunner</span><span class="p">,</span>
+    <span class="n">effectful_external_handle</span><span class="p">,</span>
+    <span class="n">host_graph_executor</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="k">del</span> <span class="n">effect</span><span class="p">,</span> <span class="n">context</span>
+    <span class="k">return</span> <span class="n">EffectDispatchResult</span><span class="p">(</span><span class="n">external_handle</span><span class="o">=</span><span class="sa">f</span><span class="s2">"job-</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">payload</span><span class="p">[</span><span class="s1">'task_id'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="n">runner</span> <span class="o">=</span> <span class="n">SubmitOnceEffectfulRunner</span><span class="p">(</span>
+    <span class="n">kinds</span><span class="o">=</span><span class="p">[</span><span class="s2">"coding_job"</span><span class="p">],</span>
+    <span class="n">backend_id</span><span class="o">=</span><span class="s2">"host.coding"</span><span class="p">,</span>
+    <span class="n">submit</span><span class="o">=</span><span class="n">submit</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">executor</span> <span class="o">=</span> <span class="n">host_graph_executor</span><span class="p">(</span><span class="n">runners</span><span class="o">=</span><span class="p">[</span><span class="n">runner</span><span class="p">],</span> <span class="n">checkpoint_path</span><span class="o">=</span><span class="s2">"runs.sqlite"</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">ExecutionGraph</span><span class="p">(</span><span class="n">goal</span><span class="o">=</span><span class="s2">"dispatch"</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span>
+    <span class="n">GraphNode</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"coding_job"</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"coding_job"</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s2">"task_id"</span><span class="p">:</span> <span class="s2">"t1"</span><span class="p">})</span>
+<span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">executor</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="n">graph</span><span class="p">,</span>
+        <span class="n">budget_policy</span><span class="o">=</span><span class="n">BudgetPolicy</span><span class="o">.</span><span class="n">unlimited</span><span class="p">(),</span>
+        <span class="n">run_id</span><span class="o">=</span><span class="s2">"run-1"</span><span class="p">,</span>
+        <span class="n">skip_linkage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"ok"</span>
+<span class="k">assert</span> <span class="n">effectful_external_handle</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s2">"coding_job"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"job-t1"</span>
+</pre></div>
+</div>
+<section id="what-each-helper-owns">
+<h4>What each helper owns<a class="headerlink" href="#what-each-helper-owns" title="Link to this heading"></a></h4>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Helper</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">host_graph_executor</span></code></p></td>
+<td><p>Config subclass + inject; optional SQLite via <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> or a custom <code class="docutils literal notranslate"><span class="pre">checkpoint_store</span></code>; default grants <code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SubmitOnceEffectfulRunner</span></code></p></td>
+<td><p>Non-idempotent external effect: submit once, complete on accept, never silent-redispatch <code class="docutils literal notranslate"><span class="pre">UNCERTAIN</span></code> without a handle</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">effectful_external_handle</span></code></p></td>
+<td><p>Read <code class="docutils literal notranslate"><span class="pre">external_run_id</span></code> / <code class="docutils literal notranslate"><span class="pre">external_handle</span></code> from a <code class="docutils literal notranslate"><span class="pre">GraphResult</span></code> without scraping node maps</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">SubmitOnceEffectfulRunner</span></code> completes the <strong>graph node</strong> when the backend
+accepts a handle. Long-running job observation (poll until finished) remains a
+host control-loop concern. Pass <code class="docutils literal notranslate"><span class="pre">checkpoint_store</span></code> <strong>or</strong> <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code>,
+not both. Omit both for the default ephemeral EventLog-backed store.</p>
+<p>Related: <a class="reference internal" href="../requirements/transactional-durable-resume.html"><span class="std std-doc">Transactional durable resume</span></a>
+(<code class="docutils literal notranslate"><span class="pre">fangore_transactional_durable_resume</span></code>) owns the crash-window contract this kit
+sits on.</p>
+</section>
+</section>
 </section>
 <section id="verify">
 <h2>Verify<a class="headerlink" href="#verify" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">injector.inject(AbstractHarness)</span></code> returns your harness family</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code> returns the bound executor</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/test_di.py</span></code> / <code class="docutils literal notranslate"><span class="pre">tests/test_graph_executor.py</span></code> pass</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/test_di.py</span></code> / <code class="docutils literal notranslate"><span class="pre">tests/test_graph_executor.py</span></code> /
+<code class="docutils literal notranslate"><span class="pre">tests/test_host_kit.py</span></code> pass</p></li>
 <li><p>Unknown <code class="docutils literal notranslate"><span class="pre">--backend</span></code> / <code class="docutils literal notranslate"><span class="pre">family</span></code> names raise <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> listing known maps</p></li>
 </ul>
 </section>
