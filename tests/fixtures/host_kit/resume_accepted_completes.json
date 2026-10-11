@@ -1,0 +1,24 @@
+{
+  "id": "resume_accepted_completes",
+  "description": "ACCEPTED + handle resumes by completing without a second submit",
+  "mode": "resume_seeded",
+  "durable": true,
+  "run_id": "hk-accepted",
+  "task_id": "t1",
+  "seed": {
+    "effect_state": "accepted",
+    "external_handle": "job-accepted-1",
+    "node_attempt": 1,
+    "node_status": "running"
+  },
+  "expect": {
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 0,
+    "external_handle": "job-accepted-1",
+    "effect_state": "completed",
+    "effect_handle": "job-accepted-1",
+    "durability": "durable",
+    "reconciliation_invoked": true
+  }
+}
