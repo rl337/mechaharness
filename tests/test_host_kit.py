@@ -1,87 +1,84 @@
-"""Host kit: Config-injected GraphExecutor + submit-once effectful runner."""
+"""Host kit: Config-injected GraphExecutor + submit-once effectful runner.
+
+Pytest examples (readable host wiring)
+--------------------------------------
+
+The doctests on :mod:`mechaharness.host_kit` are the primary worked examples
+(``pytest --doctest-modules``). This module covers the branch matrix and a few
+structural guards hosts hit when wiring incorrectly.
+"""
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 
-from mechaharness.budget import BudgetPolicy
-from mechaharness.external_effect import EffectDispatchResult
-from mechaharness.graph import ExecutionGraph, GraphNode
-from mechaharness.host_kit import (
-    SubmitOnceEffectfulRunner,
-    effectful_external_handle,
-    host_graph_executor,
-)
+import pytest
+
+from mechaharness.host_kit import SubmitOnceEffectfulRunner, host_graph_executor
+from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+from tests.support.host_kit_cases import assert_expect, iter_cases, run_case
+
+_CASES = iter_cases()
 
 
-def test_submit_once_dispatches_once_and_exposes_handle(tmp_path: Path) -> None:
-    calls = {"n": 0}
+def _case_id(case: object) -> str:
+    return getattr(case, "id", "unknown")
 
-    async def submit(node, effect, context):  # noqa: ANN001
-        del effect, context
-        calls["n"] += 1
-        return EffectDispatchResult(
-            external_handle=f"job-{node.payload.get('task_id')}",
-            detail={"backend_id": "test"},
+
+@pytest.mark.parametrize("case", _CASES, ids=_case_id)
+@pytest.mark.asyncio
+async def test_host_kit_case(case: object, tmp_path: Path) -> None:
+    assert _CASES, "expected host_kit fixtures under tests/fixtures/host_kit/"
+    durable = bool(getattr(case, "data", {}).get("durable", True))
+    db = tmp_path / f"{_case_id(case)}.sqlite" if durable else None
+    payload = await run_case(case, db_path=db)  # type: ignore[arg-type]
+    assert_expect(payload["actual"], payload["expect"], case_id=_case_id(case))
+
+
+def test_host_kit_fixture_ids_unique() -> None:
+    ids = [_case_id(c) for c in _CASES]
+    assert len(ids) >= 5
+    assert len(ids) == len(set(ids))
+
+
+def test_submit_once_requires_kinds() -> None:
+    with pytest.raises(ValueError, match="at least one kind"):
+        SubmitOnceEffectfulRunner(kinds=[], backend_id="x")
+
+
+def test_host_graph_executor_rejects_checkpoint_both(tmp_path: Path) -> None:
+    runner = SubmitOnceEffectfulRunner(kinds=["coding_job"], backend_id="x")
+    store = SqliteCheckpointStore(tmp_path / "a.sqlite")
+    with pytest.raises(ValueError, match="not both"):
+        host_graph_executor(
+            runners=[runner],
+            checkpoint_path=tmp_path / "b.sqlite",
+            checkpoint_store=store,
         )
-
-    runner = SubmitOnceEffectfulRunner(
-        kinds=["coding_job"],
-        backend_id="test.coding",
-        submit=submit,
-    )
-    ckpt = tmp_path / "ckpt.sqlite"
-    executor = host_graph_executor(
-        runners=[runner],
-        checkpoint_path=ckpt,
-        agent_id="june-test",
-    )
-    graph = ExecutionGraph(id="g1", goal="dispatch")
-    graph.add_node(
-        GraphNode(
-            id="coding_job",
-            kind="coding_job",
-            goal="submit",
-            payload={"task_id": "t1"},
-        )
-    )
-    result = asyncio.run(
-        executor.run(
-            graph,
-            budget_policy=BudgetPolicy.unlimited(),
-            run_id="run-1",
-            skip_linkage=True,
-        )
-    )
-    assert result.status == "ok"
-    assert calls["n"] == 1
-    assert effectful_external_handle(result, "coding_job") == "job-t1"
-    assert executor.store.durability == "durable"
-    assert ckpt.exists()
+    store.close()
 
 
-def test_host_graph_executor_ephemeral_without_checkpoint() -> None:
-    async def submit(node, effect, context):  # noqa: ANN001
-        del node, effect, context
-        return EffectDispatchResult(external_handle="ephemeral-1")
+@pytest.mark.asyncio
+async def test_submit_once_dispatch_requires_submit_callable() -> None:
+    """Example: subclass or pass submit= — bare runner cannot dispatch."""
+    from mechaharness.budget import Budget, BudgetPolicy
+    from mechaharness.external_effect import EffectRecord, EffectState
+    from mechaharness.graph import ExecutionGraph, GraphNode
+    from mechaharness.graph_executor import GraphRunContext
 
-    runner = SubmitOnceEffectfulRunner(
-        kinds=["coding_job"],
-        backend_id="test",
-        submit=submit,
+    runner = SubmitOnceEffectfulRunner(kinds=["coding_job"], backend_id="x")
+    node = GraphNode(id="coding_job", kind="coding_job")
+    effect = EffectRecord(
+        effect_id="r:coding_job:1",
+        run_id="r",
+        node_id="coding_job",
+        state=EffectState.INTENDED,
     )
-    executor = host_graph_executor(runners=[runner])
-    graph = ExecutionGraph(goal="ephemeral")
-    graph.add_node(GraphNode(id="coding_job", kind="coding_job"))
-    result = asyncio.run(
-        executor.run(
-            graph,
-            budget_policy=BudgetPolicy.unlimited(),
-            run_id="run-e",
-            skip_linkage=True,
-        )
+    ctx = GraphRunContext(
+        graph=ExecutionGraph(goal="x"),
+        run_id="r",
+        agent_id="host",
+        budget=Budget(BudgetPolicy.unlimited()),
     )
-    assert result.status == "ok"
-    assert effectful_external_handle(result, "coding_job") == "ephemeral-1"
-    assert executor.store.durability == "ephemeral"
+    with pytest.raises(TypeError, match="submit="):
+        await runner.dispatch(node, effect=effect, context=ctx)

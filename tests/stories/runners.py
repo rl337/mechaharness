@@ -380,6 +380,7 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "lifecycle_extension_replace": _run_lifecycle_extension_replace,
         "lifecycle_extension_graph_observe": _run_lifecycle_extension_graph_observe,
         "transactional_durable_resume_crash_matrix": _run_transactional_durable_resume_crash_matrix,
+        "host_kit_submit_once": _run_host_kit_submit_once,
         "model_input_manifest_replay": _run_model_input_manifest_replay,
         "graph_transition_inspect": _run_graph_transition_inspect,
         "isolation_io_contract": _run_isolation_io_contract,
@@ -2340,6 +2341,32 @@ async def _run_transactional_durable_resume_crash_matrix(
             db = Path(tmp) / f"{location}.sqlite"
             payload = await run_crash_case(fixture, db_path=db)
             assert_expect(payload["actual"], case_expect)
+
+
+async def _run_host_kit_submit_once(case: StoryCase, backend: StoryBackend) -> None:
+    """Fangore host kit: readable GraphExecutor + submit-once acceptance."""
+    del backend
+    import tempfile
+    from pathlib import Path
+
+    from tests.support.host_kit_cases import assert_expect, iter_cases, run_case
+
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    scenario_expect = dict(expect.get("scenarios") or {})
+    wanted = list(request.get("scenarios") or [])
+    assert wanted, "request.json must list scenarios"
+    by_id = {c.id: c for c in iter_cases()}
+
+    with tempfile.TemporaryDirectory(prefix="mh-host-kit-story-") as tmp:
+        for scenario_id in wanted:
+            fixture = by_id.get(scenario_id)
+            assert fixture is not None, f"missing host_kit fixture {scenario_id!r}"
+            soft = dict(scenario_expect.get(scenario_id) or {})
+            db = Path(tmp) / f"{scenario_id}.sqlite"
+            durable = bool(fixture.data.get("durable", True))
+            payload = await run_case(fixture, db_path=db if durable else None)
+            assert_expect(payload["actual"], soft, case_id=scenario_id)
 
 
 async def _run_model_input_manifest_replay(case: StoryCase, backend: StoryBackend) -> None:

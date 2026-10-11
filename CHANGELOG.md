@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `SubmitOnceEffectfulRunner` covers the common submit-once / complete-on-accept
   / never-silent-redispatch effect pattern; `effectful_external_handle()` reads
   the recorded handle from a `GraphResult` without scraping node maps by hand.
-  Docs: `docs/guides/dependency-injection.md`.
+  Owning story `fangore_host_kit_submit_once`; pydoc doctests +
+  `tests/fixtures/host_kit/` matrix; DI guide host-kit section.
 
 ## [0.3.2] — 2026-10-10
 

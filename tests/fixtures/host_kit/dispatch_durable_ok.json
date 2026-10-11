@@ -1,0 +1,16 @@
+{
+  "id": "dispatch_durable_ok",
+  "description": "Happy path: durable host_graph_executor + submit-once yields one dispatch and a handle",
+  "mode": "dispatch",
+  "durable": true,
+  "run_id": "hk-dispatch-ok",
+  "task_id": "t1",
+  "expect": {
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 1,
+    "external_handle": "job-t1-1",
+    "effect_state": "completed",
+    "durability": "durable"
+  }
+}
