@@ -1,0 +1,24 @@
+{
+  "id": "resume_uncertain_without_handle",
+  "description": "UNCERTAIN without handle escalates; never silent-redispatches",
+  "mode": "resume_seeded",
+  "durable": true,
+  "run_id": "hk-uncertain-bad",
+  "task_id": "t1",
+  "seed": {
+    "effect_state": "uncertain",
+    "external_handle": null,
+    "node_attempt": 1,
+    "node_status": "running"
+  },
+  "expect": {
+    "status": "failed",
+    "node_status": "failed",
+    "dispatch_count": 0,
+    "external_handle": null,
+    "effect_state": "needs_attention",
+    "error": "uncertain_without_handle",
+    "durability": "durable",
+    "reconciliation_invoked": true
+  }
+}

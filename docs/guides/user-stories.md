@@ -690,6 +690,22 @@ Kind `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft ex
 
 [^insp-templates]: [Inspiration requirements (subgraphs & templates)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation
 
+### `fangore_host_kit_submit_once` — Wire a host graph executor and submit an external job once
+
+Fangore builds a host that dispatches a remote coding job from a durable plan. They need a short, readable way to register that job step, choose durable storage, and submit exactly once — including after a crash where the remote system may already have accepted the job. Complements `fangore_graph_executor` (authorized plan walk) and `fangore_transactional_durable_resume` (crash-window reconciliation). Host wiring lives in the dependency-injection guide[^host-kit-di].
+
+#### Implementation
+
+`mechaharness.host_kit.host_graph_executor` subclasses `MechaHarnessConfig` and injects a `GraphExecutor` with host runners, default graph grants, optional `SqliteCheckpointStore` via `checkpoint_path` / `checkpoint_store`, and an injectable `CrashProbe`. `SubmitOnceEffectfulRunner` implements `EffectfulGraphNodeRunner` for submit-once / complete-on-accept / never-silent-redispatch of `UNCERTAIN` without a handle. `effectful_external_handle` reads the recorded handle from a `GraphResult` without scraping node maps. Module doctests document the blessed host path.
+
+#### Validation
+
+Kind `host_kit_submit_once` → `_run_host_kit_submit_once`. Soft expects: durable dispatch status ok with one submit and a handle; resume of uncertain-with-handle completes with zero further submits. Unit matrix: `tests/fixtures/host_kit/*.json` via `tests/test_host_kit.py` and `tests/support/host_kit_cases.py` (ephemeral dispatch, uncertain-without-handle needs attention, accepted resume). Pytest `--doctest-modules` covers pydoc examples on `src/mechaharness/host_kit.py`.
+
+#### Footnotes
+
+[^host-kit-di]: [Dependency injection guide (host kit)](https://github.com/rl337/mechaharness/blob/main/docs/guides/dependency-injection.md) — Blessed Config-injected GraphExecutor + submit-once helpers
+
 ### `fangore_human_review_pending` — Hold mutations until a matching human approval exists
 
 Fangore’s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human — not allow.

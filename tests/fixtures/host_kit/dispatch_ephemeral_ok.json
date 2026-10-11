@@ -1,0 +1,15 @@
+{
+  "id": "dispatch_ephemeral_ok",
+  "description": "Ephemeral host_graph_executor (no checkpoint path) still completes submit-once",
+  "mode": "dispatch",
+  "durable": false,
+  "run_id": "hk-ephemeral",
+  "task_id": "e1",
+  "expect": {
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 1,
+    "external_handle": "job-e1-1",
+    "durability": "ephemeral"
+  }
+}

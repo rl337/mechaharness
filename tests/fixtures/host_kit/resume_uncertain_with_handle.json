@@ -1,0 +1,24 @@
+{
+  "id": "resume_uncertain_with_handle",
+  "description": "UNCERTAIN + handle resumes by completing; never redispatches",
+  "mode": "resume_seeded",
+  "durable": true,
+  "run_id": "hk-uncertain-ok",
+  "task_id": "t1",
+  "seed": {
+    "effect_state": "uncertain",
+    "external_handle": "job-seeded-1",
+    "node_attempt": 1,
+    "node_status": "running"
+  },
+  "expect": {
+    "status": "ok",
+    "node_status": "succeeded",
+    "dispatch_count": 0,
+    "external_handle": "job-seeded-1",
+    "effect_state": "completed",
+    "effect_handle": "job-seeded-1",
+    "durability": "durable",
+    "reconciliation_invoked": true
+  }
+}
