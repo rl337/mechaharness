@@ -41,6 +41,7 @@ from mechaharness.context_experiments import (
 from mechaharness.context_layers import GraphSharedState, project_node_context
 from mechaharness.context_provider import StaticContextProvider
 from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
+from mechaharness.conversational_tool_loop_runner import ConversationalToolLoopRunner
 from mechaharness.coordination_cost import CoordinationCostMetrics, summarize_coordination_cost
 from mechaharness.core.access import (
     Ability,
@@ -53,6 +54,7 @@ from mechaharness.core.access import (
     InMemoryAccessControl,
 )
 from mechaharness.core.completer import Completer
+from mechaharness.core.contract import RunRequest
 from mechaharness.core.environment import (
     InferenceEnvironment,
     InferenceEnvironmentError,
@@ -130,7 +132,6 @@ from mechaharness.graph_state_governance import (
     GraphStateGovernance,
     authorize_write,
 )
-from mechaharness.conversational_tool_loop_runner import ConversationalToolLoopRunner
 from mechaharness.graph_templates import (
     BoundedRetryTemplate,
     ConversationalToolLoopTemplate,
@@ -144,13 +145,6 @@ from mechaharness.graph_templates import (
     VerifyRepairTemplate,
     default_graph_templates,
 )
-from mechaharness.host_kit import host_graph_executor, tapping_event_log
-from mechaharness.node_component import (
-    NODE_COMPONENT_KINDS,
-    embed_recipe_as_tool,
-    node_components_for,
-    traversal_from_events,
-)
 from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
 from mechaharness.handoff_record import HandoffRecord
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
@@ -162,6 +156,7 @@ from mechaharness.harness_fingerprint import (
     require_eval_provenance,
 )
 from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
+from mechaharness.host_kit import host_graph_executor, tapping_event_log
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
     ChoiceOption,
@@ -207,6 +202,12 @@ from mechaharness.model_input_manifest import (
     attach_manifest_ref,
     reconstruct_messages,
 )
+from mechaharness.node_component import (
+    NODE_COMPONENT_KINDS,
+    embed_recipe_as_tool,
+    node_components_for,
+    traversal_from_events,
+)
 from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
 from mechaharness.operation_registry import (
     NodeContractBind,
@@ -215,6 +216,12 @@ from mechaharness.operation_registry import (
     default_operations,
 )
 from mechaharness.outcome_contract import OutcomeContract
+from mechaharness.recipe_runner import (
+    instantiate_recipe,
+    list_recipes,
+    run_backend_describe_recipe,
+    run_harness_recipe,
+)
 from mechaharness.research import EvalProtocol, ResearchLab
 from mechaharness.resume_cost import ResumeCostMetrics, summarize_resume_cost
 from mechaharness.rollout_graph import build_rollout_graph
@@ -395,6 +402,8 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "traversal_contract": _run_traversal_contract,
         "harness_tool_loop_graph": _run_harness_tool_loop_graph,
         "conversational_tool_loop": _run_conversational_tool_loop,
+        "harness_run_recipe": _run_harness_run_recipe,
+        "backend_describe_recipe": _run_backend_describe_recipe,
         "recipe_as_tool": _run_recipe_as_tool,
         "model_input_manifest_replay": _run_model_input_manifest_replay,
         "graph_transition_inspect": _run_graph_transition_inspect,
@@ -2498,6 +2507,72 @@ async def _run_harness_tool_loop_graph(case: StoryCase, backend: StoryBackend) -
             for r in records
             if r.kind in {"inference", "tool_call", "tool_result", "turn_start"}
         ),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_harness_run_recipe(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    catalog = {row["name"] for row in list_recipes()}
+    response = await run_harness_recipe(
+        RunRequest(
+            prompt=str(request["prompt"]),
+            backend=str(request.get("backend") or "mock"),
+            family=str(request.get("family") or "pass_through"),
+            max_turns=int(request.get("max_turns") or 4),
+        )
+    )
+    graph = instantiate_recipe(
+        "harness_run",
+        GraphTemplateParams(
+            goal="harness_run",
+            inputs={"prompt": request["prompt"]},
+            soft_bindings={
+                "prompt": request["prompt"],
+                "backend": request.get("backend") or "mock",
+                "family": request.get("family") or "pass_through",
+            },
+        ),
+    )
+    actual = {
+        "in_catalog": "harness_run" in catalog,
+        "status": "ok",
+        "final_text_nonempty": bool((response.final_text or "").strip()),
+        "turns_min": int(response.turns or 0),
+        "has_prepare": "prepare" in graph.nodes,
+        "has_harness_loop": "harness_loop" in graph.nodes,
+        "has_render": "render" in graph.nodes,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_backend_describe_recipe(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    catalog = {row["name"] for row in list_recipes()}
+    settings_kwargs: dict[str, Any] = {
+        "inference_backend": str(request.get("backend") or "mock"),
+    }
+    for key in ("model", "base_url", "api_key"):
+        if request.get(key) is not None:
+            settings_kwargs[key] = request[key]
+    settings = Settings(**settings_kwargs)
+    description = await run_backend_describe_recipe(settings)
+    graph = instantiate_recipe(
+        "backend_describe",
+        GraphTemplateParams(
+            goal="backend_describe",
+            soft_bindings={"backend": settings.inference_backend},
+        ),
+    )
+    actual = {
+        "in_catalog": "backend_describe" in catalog,
+        "status": "ok",
+        "description_name": description.get("name"),
+        "has_describe_node": "describe" in graph.nodes,
     }
     _assert_expect(actual, expect)
 
