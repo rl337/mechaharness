@@ -127,9 +127,27 @@ def test_bounded_retry_effect_flag_and_stop() -> None:
 
 
 def test_registry_bound_via_di() -> None:
+    from mechaharness.graph_templates import GraphTemplate
+
     inj = get_injector(_TplConfig())
     registry = inj.inject(GraphTemplateRegistry)
+    keys = list(inj.catalog_keys(GraphTemplate))
     assert "fan_out_aggregate" in registry.names()
+    assert "harness_run" in keys
+    assert "backend_describe" in keys
+    assert set(keys) == set(registry.names())
+
+
+def test_default_class_map_matches_di_catalog() -> None:
+    from mechaharness.graph_templates import (
+        GraphTemplate,
+        default_graph_template_classes,
+    )
+
+    classes = default_graph_template_classes()
+    inj = get_injector(_TplConfig())
+    assert set(classes) == set(inj.catalog_keys(GraphTemplate))
+    assert set(classes) == set(default_graph_templates().names())
 
 
 def test_fixture_matrix_nonempty_unique_ids() -> None:

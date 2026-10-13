@@ -153,9 +153,13 @@ For durable plans, override `get_node_runner_registry()`,
 `get_graph_failure_policy()`, `get_graph_escalation()`,
 `get_checkpoint_store()` (default ephemeral EventLog adapter; use
 `SqliteCheckpointStore` for process-restart durability), and optionally
-`get_linkage_resolver()` / `get_graph_template_registry()` /
-`get_capability_envelope()` / `get_lifecycle_extension_registry()`, then
-`injector.inject(GraphExecutor)`. Include `core:graph.execute` (and
+`get_linkage_resolver()` / `get_capability_envelope()` /
+`get_lifecycle_extension_registry()`, then `injector.inject(GraphExecutor)`.
+Agentic Recipe membership is a pyiv map multibind: override
+`graph_template_classes()` (merge via `super()`), discover with
+`catalog_keys(GraphTemplate)`, and inject `GraphTemplateRegistry`. Backend and
+harness family names use the same pattern (`inference_classes` /
+`harness_classes` → `catalog_keys`). Include `core:graph.execute` (and
 `core:graph.escalate` when using escalation) in grants. Ordered lifecycle
 extensions (inspiration req 20) bind via `get_lifecycle_extension_registry()`
 and are distinct from EventLog telemetry. Library templates are owned by

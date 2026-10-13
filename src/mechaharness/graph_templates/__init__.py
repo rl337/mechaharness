@@ -40,7 +40,10 @@ from mechaharness.graph_templates.base import (
     namespace_graph,
 )
 from mechaharness.graph_templates.bounded_retry import BoundedRetryTemplate
-from mechaharness.graph_templates.catalog import default_graph_templates
+from mechaharness.graph_templates.catalog import (
+    default_graph_template_classes,
+    default_graph_templates,
+)
 from mechaharness.graph_templates.conversational_tool_loop import (
     ConversationalToolLoopTemplate,
 )
@@ -68,6 +71,7 @@ __all__ = [
     "SoftPoint",
     "SubgraphNodeRunner",
     "VerifyRepairTemplate",
+    "default_graph_template_classes",
     "default_graph_templates",
     "make_node",
     "namespace_graph",

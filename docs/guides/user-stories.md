@@ -696,7 +696,7 @@ Fangore picks the library fan-out Agentic Recipe, fills only the soft points the
 
 #### Implementation
 
-Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_templates`. Catalog ids include `fan_out_aggregate` (this story's primary exercise), `verify_repair`, `independent_review`, `environment_repair`, and `initialize_preflight`. Each declares `SoftPoint`s; `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.
+Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_templates`. Catalog ids include `fan_out_aggregate` (this story's primary exercise), `verify_repair`, `independent_review`, `environment_repair`, and `initialize_preflight`. Each declares `SoftPoint`s; `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.graph_template_classes()` / DI `catalog_keys(GraphTemplate)`.
 
 #### Validation
 

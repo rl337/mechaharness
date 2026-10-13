@@ -38,18 +38,39 @@ from mechaharness.tools.base import ToolRegistry
 
 def resolve_registry(
     registry: GraphTemplateRegistry | None = None,
+    *,
+    injector: Any | None = None,
 ) -> GraphTemplateRegistry:
-    """Return ``registry`` or the library default catalog."""
-    return registry if registry is not None else default_graph_templates()
+    """Return ``registry``, else the DI ``GraphTemplate`` catalog facade.
+
+    Prefer ``injector.inject(GraphTemplateRegistry)`` / ``catalog_keys`` so
+    membership matches ``MechaHarnessConfig.graph_template_classes()``. The
+    ``default_graph_templates()`` fallback uses the same class map.
+    """
+    if registry is not None:
+        return registry
+    if injector is not None:
+        return injector.inject(GraphTemplateRegistry)
+    try:
+        from mechaharness.di import build_injector
+
+        return build_injector().inject(GraphTemplateRegistry)
+    except Exception:
+        return default_graph_templates()
 
 
 def list_recipes(
     registry: GraphTemplateRegistry | None = None,
     *,
     active_only: bool = True,
+    injector: Any | None = None,
 ) -> list[dict[str, Any]]:
-    """Catalog entries for discovery (CLI ``recipes`` / host UIs)."""
-    reg = resolve_registry(registry)
+    """Catalog entries for discovery (CLI ``recipes`` / host UIs).
+
+    Uses the DI ``GraphTemplate`` map (via :func:`resolve_registry`) so
+    membership matches ``catalog_keys(GraphTemplate)``.
+    """
+    reg = resolve_registry(registry, injector=injector)
     names = reg.active_names() if active_only else reg.names()
     out: list[dict[str, Any]] = []
     for name in names:

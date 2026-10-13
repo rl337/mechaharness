@@ -20,7 +20,7 @@ Normative requirements:
 | Concept | Agentic Recipe (catalog id) |
 | Substrate | `GraphTemplate` |
 | Stability | evolving |
-| Config hook | `MechaHarnessConfig.get_graph_template_registry()` |
+| Config hook | `MechaHarnessConfig.graph_template_classes()` → pyiv `contribute_map` / `catalog_keys(GraphTemplate)`; inject `GraphTemplateRegistry` |
 
 ## Catalog
 

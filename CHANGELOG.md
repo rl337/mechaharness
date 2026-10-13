@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Floor **pyiv ≥ 0.4.3** (catalog introspection / `contribute_map`).
+- Agentic Recipe / backend / harness **membership** is a pyiv map multibind:
+  `graph_template_classes()` / `inference_classes()` / `harness_classes()` →
+  `contribute_map` + `catalog_keys`. `GraphTemplateRegistry` is injected from
+  the `GraphTemplate` map (hosts extend via class-map hooks, not a second list).
 
 ## [0.4.0] — 2026-10-11
 
