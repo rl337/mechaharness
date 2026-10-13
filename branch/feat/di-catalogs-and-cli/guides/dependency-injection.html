@@ -255,9 +255,13 @@ inject deny-by-default tool grants; use <code class="docutils literal notranslat
 <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>,
 <code class="docutils literal notranslate"><span class="pre">get_checkpoint_store()</span></code> (default ephemeral EventLog adapter; use
 <code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> for process-restart durability), and optionally
-<code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> /
-<code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>, then
-<code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>. Include <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and
+<code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>, then <code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>.
+Agentic Recipe membership is a pyiv map multibind: override
+<code class="docutils literal notranslate"><span class="pre">graph_template_classes()</span></code> (merge via <code class="docutils literal notranslate"><span class="pre">super()</span></code>), discover with
+<code class="docutils literal notranslate"><span class="pre">catalog_keys(GraphTemplate)</span></code>, and inject <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>. Backend and
+harness family names use the same pattern (<code class="docutils literal notranslate"><span class="pre">inference_classes</span></code> /
+<code class="docutils literal notranslate"><span class="pre">harness_classes</span></code> → <code class="docutils literal notranslate"><span class="pre">catalog_keys</span></code>). Include <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and
 <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> when using escalation) in grants. Ordered lifecycle
 extensions (inspiration req 20) bind via <code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>
 and are distinct from EventLog telemetry. Library templates are owned by

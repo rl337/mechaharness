@@ -183,7 +183,10 @@
     <span class="n">GraphNodeRunnerRegistry</span><span class="p">,</span>
     <span class="n">RejectGraphEscalation</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="n">default_graph_templates</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_templates</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphTemplate</span><span class="p">,</span> <span class="n">GraphTemplateRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_templates.catalog</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">default_graph_template_classes</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractHarness</span><span class="p">,</span> <span class="n">HarnessConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.families</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnthropicToolsHarness</span><span class="p">,</span> <span class="n">OpenAIToolsHarness</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.harness.pass_through</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassThroughHarness</span>
@@ -465,7 +468,24 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">DelegationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_delegation_policy</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">AdvisorPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_advisor_policy</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">Advisor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_advisor</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_template_registry</span><span class="p">())</span>
+        <span class="c1"># Recipe / backend / family membership: pyiv map multibinds (catalog_keys).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contribute_map_entries</span><span class="p">(</span>
+            <span class="n">GraphTemplate</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">graph_template_classes</span><span class="p">(),</span>
+            <span class="n">on_conflict</span><span class="o">=</span><span class="s2">"error"</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contribute_map_entries</span><span class="p">(</span>
+            <span class="n">InferenceStrategy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inference_classes</span><span class="p">(),</span>
+            <span class="n">on_conflict</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contribute_map_entries</span><span class="p">(</span>
+            <span class="n">AbstractHarness</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">harness_classes</span><span class="p">(),</span>
+            <span class="n">on_conflict</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="n">GraphTemplateRegistry</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">ContextProviderRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_provider_registry</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CapabilityEnvelope</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_capability_envelope</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span>
@@ -825,11 +845,25 @@
         <span class="k">return</span> <span class="n">RejectAdvisor</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="MechaHarnessConfig.graph_template_classes">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.graph_template_classes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">graph_template_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">GraphTemplate</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">"""Catalog id → ``GraphTemplate`` class. Hosts merge via ``super()``."""</span>
+        <span class="k">return</span> <span class="n">default_graph_template_classes</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="MechaHarnessConfig.get_graph_template_registry">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_graph_template_registry">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_graph_template_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphTemplateRegistry</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Library-owned parameterized graph templates."""</span>
-        <span class="k">return</span> <span class="n">default_graph_templates</span><span class="p">()</span></div>
+<span class="w">        </span><span class="sd">"""Non-DI facade over :meth:`graph_template_classes`.</span>
+
+<span class="sd">        Under Config, prefer ``injector.inject(GraphTemplateRegistry)`` (built</span>
+<span class="sd">        from the ``GraphTemplate`` map multibind). Override</span>
+<span class="sd">        :meth:`graph_template_classes` to extend the catalog.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">GraphTemplateRegistry</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">cls</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_template_classes</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_context_provider_registry">
@@ -980,16 +1014,16 @@
 <div class="viewcode-block" id="list_inference_backends">
 <a class="viewcode-back" href="../../api/mechaharness.html#mechaharness.di.list_inference_backends">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">list_inference_backends</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Sorted names from the default ``SettingsConfig.inference_classes()`` map."""</span>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">SettingsConfig</span><span class="p">()</span><span class="o">.</span><span class="n">inference_classes</span><span class="p">())</span></div>
+<span class="w">    </span><span class="sd">"""Sorted backend ids from the DI ``InferenceStrategy`` map multibind."""</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_injector</span><span class="p">(</span><span class="n">SettingsConfig</span><span class="p">())</span><span class="o">.</span><span class="n">catalog_keys</span><span class="p">(</span><span class="n">InferenceStrategy</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="list_harness_families">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.list_harness_families">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">list_harness_families</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Sorted names from the default ``SettingsConfig.harness_classes()`` map."""</span>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">SettingsConfig</span><span class="p">()</span><span class="o">.</span><span class="n">harness_classes</span><span class="p">())</span></div>
+<span class="w">    </span><span class="sd">"""Sorted family ids from the DI ``AbstractHarness`` map multibind."""</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_injector</span><span class="p">(</span><span class="n">SettingsConfig</span><span class="p">())</span><span class="o">.</span><span class="n">catalog_keys</span><span class="p">(</span><span class="n">AbstractHarness</span><span class="p">))</span></div>
 
 
 

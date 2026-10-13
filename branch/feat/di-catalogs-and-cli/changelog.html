@@ -148,6 +148,10 @@ skill/rule require declaring node components on new recipes.</p></li>
 <h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Floor <strong>pyiv ≥ 0.4.3</strong> (catalog introspection / <code class="docutils literal notranslate"><span class="pre">contribute_map</span></code>).</p></li>
+<li><p>Agentic Recipe / backend / harness <strong>membership</strong> is a pyiv map multibind:
+<code class="docutils literal notranslate"><span class="pre">graph_template_classes()</span></code> / <code class="docutils literal notranslate"><span class="pre">inference_classes()</span></code> / <code class="docutils literal notranslate"><span class="pre">harness_classes()</span></code> →
+<code class="docutils literal notranslate"><span class="pre">contribute_map</span></code> + <code class="docutils literal notranslate"><span class="pre">catalog_keys</span></code>. <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code> is injected from
+the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> map (hosts extend via class-map hooks, not a second list).</p></li>
 </ul>
 </section>
 </section>
