@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Node components** (`mechaharness.node_component`): queryable sub-node
+  elements that must render within a parent graph node; kinds project existing
+  events / soft points / nest / stop / budget / effects. Traversal projector
+  and `embed_recipe_as_tool` (HF-08). Docs:
+  `docs/reference/node-components.md`,
+  `docs/requirements/dynamic-tool-graph.md`; June HF inspiration + map.
+- **HF-05:** `host_graph_executor(event_log=)` and `tapping_event_log` /
+  `TappingEventLog` for blessed-path event taps.
+- **HF-07:** Agentic Recipe `conversational_tool_loop` +
+  `ConversationalToolLoopRunner` expanding `tools.subgraph` rounds.
+- Harness emits enrich `turn_start` / `inference` / `tool_call` /
+  `tool_result` with `parent_node_id` and `component_id` for traversal.
+- Stories: `fangore_host_kit_event_tap`, `fangore_node_components`,
+  `fangore_traversal_contract`, `fangore_harness_tool_loop_graph`,
+  `fangore_conversational_tool_loop`, `fangore_recipe_as_tool`,
+  `fangore_harness_run_recipe`, `fangore_backend_describe_recipe`.
+- CLI `recipes` group: `list` / `show` / `render` / `run`. `render` writes an
+  SVG from `recipe_diagram` (ER field tables, harness loop containers,
+  serpentine interiors, fan-out/fan-in stack bands) with explanations below;
+  built on node components + graph structure (not Mermaid).
+- Agentic Recipes `harness_run` and `backend_describe` (CLI `run` /
+  `describe` library paths) with recipe runners.
+- Agent guidance: `.cursor/skills/node-components/SKILL.md`; agentic-recipes
+  skill/rule require declaring node components on new recipes.
+
+### Changed
+
+- Floor **pyiv ≥ 0.4.3** (catalog introspection / `contribute_map`).
+
 ## [0.4.0] — 2026-10-11
 
 Host kit cut (#25). Merge tip auto-bumped to `0.4.0` before this PyPI publish.

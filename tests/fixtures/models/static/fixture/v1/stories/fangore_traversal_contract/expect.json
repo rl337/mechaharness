@@ -1,0 +1,6 @@
+{
+  "record_count_min": 3,
+  "has_inference": true,
+  "has_tool_call": true,
+  "all_have_parent": true
+}

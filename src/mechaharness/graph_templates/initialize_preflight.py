@@ -28,7 +28,21 @@ from mechaharness.graph_templates.base import (
 
 
 class InitializePreflightTemplate(GraphTemplate):
-    """Linkage → capability check → checkpoint compat → ready."""
+    """Linkage → capability check → checkpoint compat → ready.
+
+    Initialization as its own phase before substantive work. Module docstring
+    includes a runnable instantiate example.
+
+    Example:
+        >>> from mechaharness.graph_templates import (
+        ...     GraphTemplateParams, InitializePreflightTemplate,
+        ... )
+        >>> graph = InitializePreflightTemplate().instantiate(
+        ...     GraphTemplateParams(goal="preflight")
+        ... )
+        >>> sorted(graph.nodes)
+        ['capability_check', 'checkpoint_compat', 'linkage', 'ready']
+    """
 
     name = "initialize_preflight"
     version = "1"

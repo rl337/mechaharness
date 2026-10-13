@@ -19,7 +19,28 @@ from mechaharness.graph_templates.base import (
 
 
 class DecisionPlaneTemplate(GraphTemplate):
-    """project_state → ask_batch → apply_policy (+ escalate; optional shadow)."""
+    """project_state → ask_batch → apply_policy (+ escalate; optional shadow).
+
+    Keep deterministic facts in code; one batched model ask; code-owned final
+    policy with routable escalation on low confidence.
+
+    Example:
+        >>> from mechaharness.graph_templates import (
+        ...     DecisionPlaneTemplate, GraphTemplateParams,
+        ... )
+        >>> graph = DecisionPlaneTemplate().instantiate(GraphTemplateParams(
+        ...     goal="triage",
+        ...     inputs={
+        ...         "state_projection": {"ticket": "T-1"},
+        ...         "facts": {"duplicate": True},
+        ...         "questions": [{"id": "team", "kind": "choice",
+        ...                        "options": ["billing"],
+        ...                        "allowed_actions": ["billing"]}],
+        ...     },
+        ... ))
+        >>> graph.template_name
+        'decision_plane'
+    """
 
     name = "decision_plane"
     version = "1"

@@ -17,7 +17,23 @@ from mechaharness.graph_templates.base import (
 
 
 class FanOutAggregateTemplate(GraphTemplate):
-    """Produce N branches then aggregate results."""
+    """Produce N branches then aggregate results.
+
+    Plan → parallel branch nodes → reduce. Bind branch payloads and runner
+    kinds via soft points; hosts supply the node runners.
+
+    Example:
+        >>> from mechaharness.graph_templates import (
+        ...     FanOutAggregateTemplate, GraphTemplateParams,
+        ... )
+        >>> graph = FanOutAggregateTemplate().instantiate(GraphTemplateParams(
+        ...     goal="survey",
+        ...     branch_payloads=[{"index": 0}, {"index": 1}],
+        ...     acceptance=["all_branches_ok"],
+        ... ))
+        >>> graph.template_name
+        'fan_out_aggregate'
+    """
 
     name = "fan_out_aggregate"
     version = "1"

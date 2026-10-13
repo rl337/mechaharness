@@ -92,6 +92,10 @@ Audience: a **non-technical project manager** who understands features, not code
   `GraphTemplate`; pattern stories must name the recipe.
 - Every shipped Agentic Recipe needs ≥1 owning story that exercises that recipe
   as the unit under test — see [`agentic-recipes`](../agentic-recipes/SKILL.md).
+- When the story owns traversal, console lighting, or recipe interiors, name
+  **node-component kinds** (from
+  [`docs/reference/node-components.md`](../../../docs/reference/node-components.md))
+  in `implementation` — see [`node-components`](../node-components/SKILL.md).
 - Write so a reader can trace “this code exists because of this story.”
 - Do **not** put runner kinds, soft expects, or fixture paths here (those belong in `validation`).
 - New library acceptance maps to a **story id**. Local `REQUIREMENTS.md` cites

@@ -1,0 +1,4 @@
+{
+  "template": "conversational_tool_loop",
+  "max_iterations": 3
+}

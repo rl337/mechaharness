@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from mechaharness.graph_templates.backend_describe import BackendDescribeTemplate
 from mechaharness.graph_templates.base import GraphTemplateRegistry
 from mechaharness.graph_templates.bounded_retry import BoundedRetryTemplate
+from mechaharness.graph_templates.conversational_tool_loop import (
+    ConversationalToolLoopTemplate,
+)
 from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
+from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
 from mechaharness.graph_templates.initialize_preflight import InitializePreflightTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
@@ -23,5 +28,8 @@ def default_graph_templates() -> GraphTemplateRegistry:
             InitializePreflightTemplate(),
             DecisionPlaneTemplate(),
             BoundedRetryTemplate(),
+            ConversationalToolLoopTemplate(),
+            HarnessRunTemplate(),
+            BackendDescribeTemplate(),
         ]
     )

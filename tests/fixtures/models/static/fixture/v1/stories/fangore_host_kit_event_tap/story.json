@@ -1,0 +1,17 @@
+{
+  "id": "fangore_host_kit_event_tap",
+  "persona": "fangore",
+  "title": "Tap graph node events from the blessed host executor",
+  "kind": "host_kit_event_tap",
+  "narrative": "Fangore’s console needs live path lighting as a durable plan runs. They want the same short host wiring used for submit-once jobs — not a second hand-built executor — and still receive node start and end events for the active steps. Complements `fangore_host_kit_submit_once` and feeds console zoom stories such as `fangore_conversational_tool_loop`.[^june-hf05-insp]",
+  "implementation": "`mechaharness.host_kit.host_graph_executor` accepts `event_log=`. `tapping_event_log` / `TappingEventLog` forward emits to a host callback while preserving query. Config hook `get_event_log` binds the tap on the blessed inject path (HF-05).",
+  "validation": "Kind `host_kit_event_tap` → `_run_host_kit_event_tap`. Soft expects: run status ok; tapped event types include graph_node_start and graph_node_end. Unit: `tests/test_conversational_tool_loop.py` (tap used with tool-loop runner).",
+  "footnotes": [
+    {
+      "id": "june-hf05-insp",
+      "label": "June host-friction inspiration",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/june-host-friction-inspiration.md",
+      "note": "HF-05 event tap on host_graph_executor"
+    }
+  ]
+}

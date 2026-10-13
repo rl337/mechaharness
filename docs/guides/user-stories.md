@@ -499,6 +499,22 @@ Kind `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_con
 
 [^insp-stop]: [Inspiration requirements (stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 — repeating execution requires an explicit stop contract
 
+### `fangore_conversational_tool_loop` — Expand a conversational tool loop under a tools graph node
+
+Fangore binds the library conversational tool-loop recipe so a chat tools step grows nested rounds — model complete then per-tool calls — inside the tools node’s checkpoint without pre-creating empty max-turn slots. A stop contract bounds the loop. Complements `fangore_insp_stop_contract`, `fangore_node_components`, and `fangore_host_kit_event_tap`.[^june-hf07]
+
+#### Implementation
+
+Agentic Recipe catalog id `conversational_tool_loop` (`ConversationalToolLoopTemplate`). `ConversationalToolLoopRunner` expands `tools.subgraph` with nested `inference` and `tool_call` graph nodes per round. Soft points cover runner kinds, stop/max_iterations, message state, inference and tool dispatch. Bounds use existing `StopContract` / repeating fields.
+
+#### Validation
+
+Kind `conversational_tool_loop` → `_run_conversational_tool_loop`. Soft expects: status ok; subgraph has inference and tool_call node ids; rounds ≥ 1. Unit: `tests/test_conversational_tool_loop.py`.
+
+#### Footnotes
+
+[^june-hf07]: [June host-friction requirements map](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/june-host-friction-requirements-map.md) — HF-07 conversational tool loop
+
 ### `fangore_decision_plane_model_policy` — Bind a decision model flavor without baking size into the recipe
 
 Fangore swaps which decision model answers the batch — local small, hosted, or a future class — by host policy and soft binding, not by a parameter-count field inside the recipe. Related: `fangore_completer_flavors`, `fangore_decision_plane_recipe`.[^rc-dp-size]
@@ -689,6 +705,38 @@ Kind `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft ex
 #### Footnotes
 
 [^insp-templates]: [Inspiration requirements (subgraphs & templates)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation
+
+### `fangore_harness_tool_loop_graph` — See inference and tool calls as node components inside a harness run
+
+Fangore runs a tool-loop harness with one tool then a final answer. The console must treat inference and each tool call as node components under a harness parent — not an opaque blob — using the same kinds as recipe interiors. Complements `fangore_traversal_contract` and `fangore_tool_gating`.[^june-nc-harness]
+
+#### Implementation
+
+`ToolLoopHarness` on `AbstractHarness` emits `turn_start`, `inference`, `tool_call`, and `tool_result` with `parent_node_id` / `component_id`. `node_components_for_harness` lists planned components; `traversal_from_events` recovers them after the run.
+
+#### Validation
+
+Kind `harness_tool_loop_graph` → `_run_harness_tool_loop_graph`. Soft expects: status ok; traversal has inference and tool_call with parent harness.
+
+#### Footnotes
+
+[^june-nc-harness]: [June host-friction inspiration](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/june-host-friction-inspiration.md) — Harness-interior node components
+
+### `fangore_host_kit_event_tap` — Tap graph node events from the blessed host executor
+
+Fangore’s console needs live path lighting as a durable plan runs. They want the same short host wiring used for submit-once jobs — not a second hand-built executor — and still receive node start and end events for the active steps. Complements `fangore_host_kit_submit_once` and feeds console zoom stories such as `fangore_conversational_tool_loop`.[^june-hf05-insp]
+
+#### Implementation
+
+`mechaharness.host_kit.host_graph_executor` accepts `event_log=`. `tapping_event_log` / `TappingEventLog` forward emits to a host callback while preserving query. Config hook `get_event_log` binds the tap on the blessed inject path (HF-05).
+
+#### Validation
+
+Kind `host_kit_event_tap` → `_run_host_kit_event_tap`. Soft expects: run status ok; tapped event types include graph_node_start and graph_node_end. Unit: `tests/test_conversational_tool_loop.py` (tap used with tool-loop runner).
+
+#### Footnotes
+
+[^june-hf05-insp]: [June host-friction inspiration](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/june-host-friction-inspiration.md) — HF-05 event tap on host_graph_executor
 
 ### `fangore_host_kit_submit_once` — Wire a host graph executor and submit an external job once
 
@@ -1450,6 +1498,38 @@ Kind `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.p
 [^loop-vs-graph]: [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Explicit control flow; MechaHarness extends into execution graphs
 [^insp-resume]: [Inspiration requirements (durable resume)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 12 — resumable external state; incompatible fingerprint refuse
 
+### `fangore_node_components` — Query node components inside each graph node for pre-layout
+
+Before a run starts, Fangore’s console must place interior pieces inside each plan step — soft bindings, stop bounds, and nested child handles — so the camera can zoom into a node without inventing a parallel structure graph. Those pieces are node components of a parent graph node, not free-floating world nodes. Complements `fangore_insp_dynamic_subgraph` and `fangore_traversal_contract`.[^june-nc-req]
+
+#### Implementation
+
+`mechaharness.node_component.node_components_for` derives `NodeComponent` rows from an `ExecutionGraph` plus optional template soft points and tool names. Kinds are limited to the closed catalog in `docs/reference/node-components.md` (events, soft points, child_graph, stop_contract, effect_state, budget_level). Every component requires `parent_node_id`. Soft points on Agentic Recipes appear as `soft_point` components.
+
+#### Validation
+
+Kind `node_components` → `_run_node_components`. Soft expects: all components have parent_node_id; kinds ⊆ catalog; stop_contract and soft_point present for `conversational_tool_loop`. Unit: `tests/test_node_component.py`.
+
+#### Footnotes
+
+[^june-nc-req]: [Dynamic tool graph and node components](https://github.com/rl337/mechaharness/blob/main/docs/requirements/dynamic-tool-graph.md) — Vocabulary and kind rule
+
+### `fangore_recipe_as_tool` — Nest a child recipe under a tool_call graph node
+
+Fangore’s generate-image tool should run a child oneshot recipe under that tool step so operators can zoom into prompt → generate → verify without a parallel soft lane. Nested spend shares the parent budget; failure surfaces on the tool node. Complements `fangore_insp_dynamic_subgraph`, `fangore_insp_budget_subgraph_rollup`, and `fangore_conversational_tool_loop`.[^june-hf08]
+
+#### Implementation
+
+`mechaharness.node_component.embed_recipe_as_tool` attaches a child `ExecutionGraph` on a `tool_call` graph node using the same nest shape as `SubgraphNodeRunner.embed`. `GraphExecutor` runs the child with `child_run_id` and shared budget (HF-08). Parent exposes a `child_graph` node component via `node_components_for`.
+
+#### Validation
+
+Kind `recipe_as_tool` → `_run_recipe_as_tool`. Soft expects: status ok; child_run_id nonempty; child_status ok; parent has child_graph component. Unit: `tests/test_conversational_tool_loop.py`.
+
+#### Footnotes
+
+[^june-hf08]: [June host-friction requirements map](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/june-host-friction-requirements-map.md) — HF-08 recipe-as-tool
+
 ### `fangore_recipe_namespace_tile` — Embed two recipe instances without node-id collisions
 
 Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution.
@@ -1533,6 +1613,22 @@ Kind `transactional_durable_resume_crash_matrix`. Soft expects per crash locatio
 #### Footnotes
 
 [^tdr-req]: [Transactional durable graph resume requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/transactional-durable-resume.md) — DR-01..DR-12 — checkpoint seam, SQLite, effect reconciliation, crash matrix
+
+### `fangore_traversal_contract` — Align live traversal with node-component ids from existing events
+
+As a run proceeds, Fangore’s console lights interiors that were laid out ahead of time. Inference and tool events must map to the same node-component identities under a parent graph node so the path lights up without a second observability graph. Complements `fangore_node_components` and `nubble_insp_rollout_graph`.[^june-nc-trav]
+
+#### Implementation
+
+`mechaharness.node_component.traversal_from_events` projects EventLog payloads whose types are existing core events (`inference`, `tool_call`, `tool_result`, `turn_start`, …) into `TraversalRecord` rows with `parent_node_id` and component ids. Harness emits enrich those payloads with `parent_node_id` / `component_id` / `execution_node_id`.
+
+#### Validation
+
+Kind `traversal_contract` → `_run_traversal_contract`. Soft expects: inference and tool_call records present; parents non-empty. Unit: `tests/test_node_component.py`.
+
+#### Footnotes
+
+[^june-nc-trav]: [Node components reference](https://github.com/rl337/mechaharness/blob/main/docs/reference/node-components.md) — Traversal section
 
 ### `fangore_verification_outcome_gate` — Treat answer generated as distinct from task complete
 

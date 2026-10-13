@@ -90,10 +90,11 @@ from __future__ import annotations
 import inspect
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import Union, cast
+from typing import Any, Union, cast
 
 from mechaharness.checkpoint_store import CheckpointStore
 from mechaharness.core.access import GraphEscalate, GraphExecute
+from mechaharness.core.events import EventLog, InMemoryEventLog
 from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.external_effect import (
     CrashProbe,
@@ -116,6 +117,39 @@ from mechaharness.graph_executor import (
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+
+
+class TappingEventLog:
+    """Forward EventLog emits to an optional host callback (HF-05)."""
+
+    def __init__(
+        self,
+        store: EventLog | None = None,
+        *,
+        on_event: Callable[[Any], None] | None = None,
+    ) -> None:
+        self._store = store if store is not None else InMemoryEventLog()
+        self._on_event = on_event
+
+    def emit(self, event: Any) -> None:
+        self._store.emit(event)
+        if self._on_event is not None:
+            self._on_event(event)
+
+    def query(self, **kwargs: Any) -> list[Any]:
+        return self._store.query(**kwargs)
+
+    def agents(self, **kwargs: Any) -> list[Any]:
+        return self._store.agents(**kwargs)
+
+
+def tapping_event_log(
+    store: EventLog | None = None,
+    *,
+    on_event: Callable[[Any], None] | None = None,
+) -> TappingEventLog:
+    """Build a tapping EventLog for ``host_graph_executor(event_log=...)``."""
+    return TappingEventLog(store, on_event=on_event)
 
 SubmitCallable = Callable[
     [GraphNode, EffectRecord, GraphRunContext],
@@ -333,6 +367,7 @@ def host_graph_executor(
     grants: Sequence[object] | None = None,
     crash_probe: CrashProbe | None = None,
     agent_id: str = "host",
+    event_log: EventLog | None = None,
 ) -> GraphExecutor:
     """Build a :class:`GraphExecutor` via Config inject (blessed host path).
 
@@ -340,6 +375,10 @@ def host_graph_executor(
     CheckpointStore / CrashProbe. Pass ``checkpoint_path`` for SQLite durability
     or ``checkpoint_store`` for a custom backend; omit both for the default
     ephemeral EventLog adapter.
+
+    Pass ``event_log=`` (or :func:`tapping_event_log`) so hosts receive
+    ``graph_node_start`` / ``graph_node_end`` without a dual executor path
+    (HF-05).
 
     Defaults grant ``GraphExecute`` and ``GraphEscalate``. Override with
     ``grants=`` when the host needs a tighter pack. ``crash_probe`` is for
@@ -382,6 +421,7 @@ def host_graph_executor(
         store = SqliteCheckpointStore(str(checkpoint_path))
     probe = crash_probe if crash_probe is not None else NoopCrashProbe()
     aid = agent_id
+    elog = event_log
 
     class _HostKitConfig(MechaHarnessConfig):
         def get_inference_class(self) -> type:
@@ -403,6 +443,11 @@ def host_graph_executor(
 
         def get_crash_probe(self) -> CrashProbe:
             return probe
+
+        def get_event_log(self) -> EventLog:
+            if elog is not None:
+                return elog
+            return super().get_event_log()
 
     executor = cast(GraphExecutor, get_injector(_HostKitConfig).inject(GraphExecutor))
     executor.agent_id = aid

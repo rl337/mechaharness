@@ -65,6 +65,8 @@ def test_catalog_describes_soft_points() -> None:
     }
     for row in catalog:
         assert row["summary"]
+        assert row.get("doc"), f"{row['name']} must expose full pydoc via describe()"
+        assert "Example" in row["doc"], f"{row['name']} pydoc must include examples"
         assert row.get("category") == "agentic_recipe"
         assert isinstance(row["soft_points"], list)
         assert row["soft_points"], f"{row['name']} must declare soft points"

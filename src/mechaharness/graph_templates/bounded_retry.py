@@ -18,7 +18,21 @@ from mechaharness.stop_contract import StopContract
 
 
 class BoundedRetryTemplate(GraphTemplate):
-    """attempt → classify → permit_retry → backoff, with terminal escalate."""
+    """attempt → classify → permit_retry → backoff, with terminal escalate.
+
+    Makes retry policy visible as graph structure. Compose with durable
+    effect reconciliation instead of blindly redispatches.
+
+    Example:
+        >>> from mechaharness.graph_templates import (
+        ...     BoundedRetryTemplate, GraphTemplateParams,
+        ... )
+        >>> graph = BoundedRetryTemplate().instantiate(
+        ...     GraphTemplateParams(goal="retry flaky call")
+        ... )
+        >>> graph.template_name
+        'bounded_retry'
+    """
 
     name = "bounded_retry"
     version = "1"

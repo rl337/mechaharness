@@ -10,6 +10,7 @@ instantiate, bind, and may retain the resulting concrete
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
@@ -153,6 +154,27 @@ class GraphTemplate(ABC):
                     graph.recipe_node_map = {logical: logical for logical in logical_ids}
         return graph
 
+    def documentation(self) -> str:
+        """Full pydoc for CLI ``recipes show`` (module + class, with examples).
+
+        Emits the defining module docstring (what / when) then the concrete
+        class docstring (including ``Example:`` blocks). Falls back to
+        :attr:`summary` when neither exists.
+        """
+        cls = type(self)
+        parts: list[str] = []
+        module = inspect.getmodule(cls)
+        if module is not None and module.__doc__:
+            module_doc = inspect.cleandoc(module.__doc__).strip()
+            if module_doc:
+                parts.append(module_doc)
+        class_doc = (inspect.getdoc(cls) or "").strip()
+        if class_doc and class_doc not in parts:
+            parts.append(class_doc)
+        if not parts:
+            return str(self.summary or self.name)
+        return "\n\n".join(parts)
+
     def describe(self) -> dict[str, Any]:
         """Stable metadata for docs, catalogs, and promotion provenance."""
         return {
@@ -161,6 +183,7 @@ class GraphTemplate(ABC):
             "summary": self.summary,
             "status": self.status,
             "category": self.category,
+            "doc": self.documentation(),
             "soft_points": [p.model_dump(mode="json") for p in self.soft_points],
         }
 
