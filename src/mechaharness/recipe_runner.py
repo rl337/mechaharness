@@ -9,7 +9,7 @@ This is **not** a second runtime. Instantiation still yields an ordinary
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, cast
 
 from mechaharness.budget import BudgetPolicy
 from mechaharness.config import Settings
@@ -17,6 +17,7 @@ from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.events import EventLog
 from mechaharness.di import build_injector
 from mechaharness.factory import settings_from_request
+from mechaharness.graph import ExecutionGraph
 from mechaharness.graph_executor import GraphExecutor, GraphNodeRunner, GraphResult
 from mechaharness.graph_templates.base import (
     GraphTemplate,
@@ -50,11 +51,14 @@ def resolve_registry(
     if registry is not None:
         return registry
     if injector is not None:
-        return injector.inject(GraphTemplateRegistry)
+        return cast(GraphTemplateRegistry, injector.inject(GraphTemplateRegistry))
     try:
         from mechaharness.di import build_injector
 
-        return build_injector().inject(GraphTemplateRegistry)
+        return cast(
+            GraphTemplateRegistry,
+            build_injector().inject(GraphTemplateRegistry),
+        )
     except Exception:
         return default_graph_templates()
 
@@ -107,7 +111,7 @@ def instantiate_recipe(
     params: GraphTemplateParams | None = None,
     *,
     registry: GraphTemplateRegistry | None = None,
-):
+) -> ExecutionGraph:
     """Expand a recipe into an :class:`~mechaharness.graph.ExecutionGraph`."""
     template = get_recipe(name, registry=registry)
     return template.instantiate(params or GraphTemplateParams())

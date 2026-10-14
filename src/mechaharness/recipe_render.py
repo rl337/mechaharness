@@ -427,8 +427,8 @@ def build_explanations(
 
     parts.append("## Kind legend")
     parts.append("")
-    kinds_used = sorted({c.kind for c in components})
-    for kind in kinds_used or sorted(_COMPONENT_KIND_DOCS):
+    kinds_used = sorted({str(c.kind) for c in components})
+    for kind in kinds_used or sorted(_COMPONENT_KIND_DOCS.keys()):
         parts.append(f"- **`{kind}`** — {_COMPONENT_KIND_DOCS.get(kind, '')}")
     parts.append("")
     parts.append(
@@ -450,7 +450,7 @@ def render_recipe(
     inputs: Mapping[str, Any] | None = None,
     goal: str | None = None,
     params: GraphTemplateParams | None = None,
-    registry=None,
+    registry: Any = None,
     tool_names: Sequence[str] | None = None,
 ) -> RecipeRender:
     """Instantiate ``name`` and produce SVG + explanation markdown."""
