@@ -15,6 +15,8 @@ from mechaharness.node_component import (
     node_components_for_harness,
     traversal_from_events,
 )
+
+
 def test_node_components_for_soft_points_and_stop() -> None:
     graph = ConversationalToolLoopTemplate().instantiate(
         GraphTemplateParams(goal="chat tools", inputs={"max_iterations": 3})

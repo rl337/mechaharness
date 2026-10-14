@@ -333,6 +333,18 @@ Kind `topology_efficiency` → `_run_topology_efficiency`. Unit: `tests/test_dec
 
 ## Fangore's stories
 
+### `fangore_backend_describe_recipe` — Describe an inference backend through the backend_describe recipe
+
+Before Fangore wires a host, he wants a machine-readable description of a configured backend — name, network behavior, auth — without leaving the recipe catalog. He runs backend_describe with the mock backend and gets the same metadata the classic describe command used to print. Complements `fangore_harness_run_recipe`.
+
+#### Implementation
+
+Agentic Recipe catalog id `backend_describe` (`BackendDescribeTemplate`) with a single describe node. `BackendDescribeRunner` calls `InferenceStrategy.describe()` via DI. `recipe_runner.run_backend_describe_recipe` and CLI `describe` / `recipes run backend_describe` share this path. Soft points: backend (required), model, base_url, api_key, describe_kind.
+
+#### Validation
+
+Kind `backend_describe_recipe` → `_run_backend_describe_recipe`. Soft expects: in_catalog; status ok; description has name. Unit: `tests/test_recipe_runner.py`.
+
 ### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 
 After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed — it does not loop forever. Complements `fangore_convergence_ceiling` for judge loops and `fangore_verification_outcome_gate` for completion versus answer-generated. See inspiration requirements for verification loops[^insp-repair].
@@ -696,7 +708,7 @@ Fangore picks the library fan-out Agentic Recipe, fills only the soft points the
 
 #### Implementation
 
-Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_templates`. Catalog ids include `fan_out_aggregate` (this story's primary exercise), `verify_repair`, `independent_review`, `environment_repair`, and `initialize_preflight`. Each declares `SoftPoint`s; `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.graph_template_classes()` / DI `catalog_keys(GraphTemplate)`.
+Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_templates`. Catalog ids include `fan_out_aggregate` (this story's primary exercise), `verify_repair`, `independent_review`, `environment_repair`, and `initialize_preflight`. Each declares `SoftPoint`s; `GraphTemplate.instantiate` builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.
 
 #### Validation
 
@@ -705,6 +717,18 @@ Kind `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft ex
 #### Footnotes
 
 [^insp-templates]: [Inspiration requirements (subgraphs & templates)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation
+
+### `fangore_harness_run_recipe` — Run a single prompt through the harness_run Agentic Recipe
+
+Fangore wants the classic one-shot harness path to be a named control pattern he can discover beside other recipes, not a special-case CLI only. He lists the catalog, opens harness_run, binds a prompt and mock backend, and gets final text from the same graph executor used for other recipes. Complements `fangore_backend_describe_recipe` and `fangore_conversational_tool_loop`.
+
+#### Implementation
+
+Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`): prepare → harness_loop → render. `mechaharness.recipe_runner` discovers the catalog (`list_recipes` / `describe_recipe`) and executes via `GraphExecutor` / `host_graph_executor` with `HarnessPrepareRunner`, `HarnessLoopRunner`, and `HarnessRenderRunner`. Soft points cover backend, family, model, system prompt, max turns, and runner kinds. CLI `run` and `recipes run harness_run` call `run_harness_recipe`. Node components under `harness_loop` reuse harness `inference` / `tool_call` / `turn_start` kinds.
+
+#### Validation
+
+Kind `harness_run_recipe` → `_run_harness_run_recipe`. Soft expects: catalog lists harness_run; status ok; final_text_nonempty; turns ≥ 1. Unit: `tests/test_recipe_runner.py`.
 
 ### `fangore_harness_tool_loop_graph` — See inference and tool calls as node components inside a harness run
 

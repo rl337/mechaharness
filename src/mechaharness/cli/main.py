@@ -302,7 +302,10 @@ def recipes_run(
                 or ""
             )
             if not prompt:
-                console.print("[red]harness_run requires --soft prompt=... or --input prompt=...[/red]")
+                console.print(
+                    "[red]harness_run requires --soft prompt=... "
+                    "or --input prompt=...[/red]"
+                )
                 raise typer.Exit(code=1)
             request = RunRequest(
                 prompt=prompt,
@@ -350,27 +353,30 @@ def recipes_run(
             soft_bindings=soft_bindings,
             inputs=inputs,
         )
-        result = await run_recipe(
+        graph_result = await run_recipe(
             name,
             params=params,
             runners=default_recipe_runners(),
         )
         payload = {
-            "status": result.status,
-            "error": result.error,
-            "template_name": result.graph.template_name,
+            "status": graph_result.status,
+            "error": graph_result.error,
+            "template_name": graph_result.graph.template_name,
             "nodes": {
                 nid: {"kind": n.kind, "status": n.status.value, "payload": n.payload}
-                for nid, n in result.graph.nodes.items()
+                for nid, n in graph_result.graph.nodes.items()
             },
         }
         if json_out:
             console.print_json(data=payload)
         else:
-            console.print(f"status={result.status} template={result.graph.template_name}")
-            if result.error:
-                console.print(f"[red]{result.error}[/red]")
-            for nid, n in result.graph.nodes.items():
+            console.print(
+                f"status={graph_result.status} "
+                f"template={graph_result.graph.template_name}"
+            )
+            if graph_result.error:
+                console.print(f"[red]{graph_result.error}[/red]")
+            for nid, n in graph_result.graph.nodes.items():
                 console.print(f"  {nid}: {n.kind} → {n.status.value}")
 
     asyncio.run(_run())

@@ -350,19 +350,20 @@ class MechaHarnessConfig(Config):
         self.register_instance(AdvisorPolicy, self.get_advisor_policy())
         self.register_instance(Advisor, self.get_advisor())
         # Recipe / backend / family membership: pyiv map multibinds (catalog_keys).
+        # Cast: pyiv accepts ABC keys; mypy rejects abstract type[T] args.
         self.contribute_map_entries(
-            GraphTemplate,
-            self.graph_template_classes(),
+            cast(type[Any], GraphTemplate),
+            cast(dict[Any, type[Any]], self.graph_template_classes()),
             on_conflict="error",
         )
         self.contribute_map_entries(
-            InferenceStrategy,
-            self.inference_classes(),
+            cast(type[Any], InferenceStrategy),
+            cast(dict[Any, type[Any]], self.inference_classes()),
             on_conflict="replace",
         )
         self.contribute_map_entries(
-            AbstractHarness,
-            self.harness_classes(),
+            cast(type[Any], AbstractHarness),
+            cast(dict[Any, type[Any]], self.harness_classes()),
             on_conflict="replace",
         )
         _expose_ctor_type_hints(GraphTemplateRegistry)
@@ -766,12 +767,16 @@ def _demo_tools() -> ToolRegistry:
 
 def list_inference_backends() -> list[str]:
     """Sorted backend ids from the DI ``InferenceStrategy`` map multibind."""
-    return list(get_injector(SettingsConfig()).catalog_keys(InferenceStrategy))
+    return list(
+        get_injector(SettingsConfig()).catalog_keys(cast(type[Any], InferenceStrategy))
+    )
 
 
 def list_harness_families() -> list[str]:
     """Sorted family ids from the DI ``AbstractHarness`` map multibind."""
-    return list(get_injector(SettingsConfig()).catalog_keys(AbstractHarness))
+    return list(
+        get_injector(SettingsConfig()).catalog_keys(cast(type[Any], AbstractHarness))
+    )
 
 
 def get_injector(
