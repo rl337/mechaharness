@@ -200,6 +200,25 @@ the control flow must be observable.</p>
 </pre></div>
 </div>
 </section>
+<section id="node-components">
+<h2>Node components<a class="headerlink" href="#node-components" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parent graph node</p></th>
+<th class="head"><p>Components</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">attempt</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">stop_contract</span></code> (repeating), <code class="docutils literal notranslate"><span class="pre">effect_state</span></code> when reconciliation required</p></td>
+</tr>
+<tr class="row-odd"><td><p>other phase nodes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> slots from template soft points (via <code class="docutils literal notranslate"><span class="pre">node_components_for</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+<p>See <a class="reference internal" href="../node-components.html"><span class="std std-doc">Node components</span></a>.</p>
+</section>
 <section id="related">
 <h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>
 <ul class="simple">

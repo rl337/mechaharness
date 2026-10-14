@@ -142,7 +142,7 @@ ownership of client-specific realizations.</p>
 <td><p>evolving</p></td>
 </tr>
 <tr class="row-even"><td><p>Config hook</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_graph_template_registry()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.graph_template_classes()</span></code> → pyiv <code class="docutils literal notranslate"><span class="pre">contribute_map</span></code> / <code class="docutils literal notranslate"><span class="pre">catalog_keys(GraphTemplate)</span></code>; inject <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -194,11 +194,18 @@ owning user stories):</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code></p></td>
 <td><p>Visible classify → permit → backoff → escalate</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/conversational-tool-loop.html"><span class="std std-doc">conversational_tool_loop</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_conversational_tool_loop</span></code></p></td>
+<td><p>Expandable tools → inference / tool_call rounds</p></td>
+</tr>
 </tbody>
 </table>
 <p>Composition helpers: <code class="docutils literal notranslate"><span class="pre">GraphTemplateParams.instance_key</span></code> (namespaced ids),
 <code class="docutils literal notranslate"><span class="pre">GraphTemplate.tile</span></code> (embed under a parent node). Story:
 <code class="docutils literal notranslate"><span class="pre">fangore_recipe_namespace_tile</span></code>.</p>
+<p>Node components (sub-node elements inside a graph node):
+<a class="reference internal" href="node-components.html"><span class="std std-doc">Node components</span></a>.</p>
 </section>
 <section id="soft-points">
 <h2>Soft points<a class="headerlink" href="#soft-points" title="Link to this heading"></a></h2>

@@ -131,13 +131,25 @@
 <td><p>List configured harness families</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">run</span></code></p></td>
-<td><p>Run one prompt through a harness</p></td>
+<td><p>Run one prompt via Agentic Recipe <code class="docutils literal notranslate"><span class="pre">harness_run</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">serve</span></code></p></td>
 <td><p>Start the FastAPI server</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">describe</span></code></p></td>
-<td><p>Show metadata for a configured backend</p></td>
+<td><p>Backend metadata via Agentic Recipe <code class="docutils literal notranslate"><span class="pre">backend_describe</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">recipes</span> <span class="pre">list</span></code></p></td>
+<td><p>Catalog ids <strong>and descriptions</strong> (summaries)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">recipes</span> <span class="pre">show</span></code></p></td>
+<td><p>Full pydoc (module + class, including examples) + soft points</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">recipes</span> <span class="pre">render</span></code></p></td>
+<td><p>SVG flowchart (own layout engine) + explanations below</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">recipes</span> <span class="pre">run</span></code></p></td>
+<td><p>Execute a recipe (<code class="docutils literal notranslate"><span class="pre">harness_run</span></code> / <code class="docutils literal notranslate"><span class="pre">backend_describe</span></code> ship runners)</p></td>
 </tr>
 </tbody>
 </table>
@@ -191,6 +203,31 @@
 </tbody>
 </table>
 </section>
+<section id="recipes">
+<h2><code class="docutils literal notranslate"><span class="pre">recipes</span></code><a class="headerlink" href="#recipes" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mechaharness<span class="w"> </span>recipes<span class="w"> </span>list
+mechaharness<span class="w"> </span>recipes<span class="w"> </span>show<span class="w"> </span>harness_run
+mechaharness<span class="w"> </span>recipes<span class="w"> </span>render<span class="w"> </span>harness_run
+mechaharness<span class="w"> </span>recipes<span class="w"> </span>render<span class="w"> </span>harness_run<span class="w"> </span>-o<span class="w"> </span>/tmp/harness_run.svg<span class="w"> </span>--tool<span class="w"> </span>lookup
+mechaharness<span class="w"> </span>recipes<span class="w"> </span>run<span class="w"> </span>harness_run<span class="w"> </span>--soft<span class="w"> </span><span class="nv">prompt</span><span class="o">=</span><span class="s2">"hello"</span><span class="w"> </span>--soft<span class="w"> </span><span class="nv">backend</span><span class="o">=</span>mock
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">list</span></code> prints each catalog id with its human <strong>summary</strong> (what the recipe does).
+<code class="docutils literal notranslate"><span class="pre">show</span></code> prints that summary plus the full template <strong>pydoc</strong> (module + class
+docstrings, including <code class="docutils literal notranslate"><span class="pre">Example:</span></code> blocks) and the soft-point table. <code class="docutils literal notranslate"><span class="pre">--json</span></code>
+includes a <code class="docutils literal notranslate"><span class="pre">doc</span></code> field from <code class="docutils literal notranslate"><span class="pre">GraphTemplate.describe()</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">render</span></code> instantiates the recipe (with safe defaults / <code class="docutils literal notranslate"><span class="pre">--soft</span></code> / <code class="docutils literal notranslate"><span class="pre">--input</span></code>),
+derives <a class="reference internal" href="node-components.html"><span class="std std-doc">node components</span></a>, and writes an <strong>SVG</strong> from
+MechaHarness’s layout engine (<code class="docutils literal notranslate"><span class="pre">recipe_diagram</span></code> — no Mermaid/Graphviz). Default
+output path is <code class="docutils literal notranslate"><span class="pre">NAME.svg</span></code> in the cwd (<code class="docutils literal notranslate"><span class="pre">--out</span></code> / <code class="docutils literal notranslate"><span class="pre">-o</span></code> to override). Outer edges
+are recipe execution (<code class="docutils literal notranslate"><span class="pre">prepare</span></code> → <code class="docutils literal notranslate"><span class="pre">harness_loop</span></code> → <code class="docutils literal notranslate"><span class="pre">render</span></code>), attaching to the
+<strong>container box</strong> whose <strong>title is the graph node name</strong> (e.g. <code class="docutils literal notranslate"><span class="pre">harness_loop</span></code>).
+Interiors use flowchart <strong>start/end circles</strong> and sequential <code class="docutils literal notranslate"><span class="pre">then</span></code> edges, laid
+out about <strong>three steps per row</strong>. Parallel fan-out / fan-in siblings collapse
+into one <strong>stack band</strong> with a single outer arrow (no lines crossing sibling
+boxes). Configuration soft points are <strong>ER-style tables</strong> (<code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">|</span> <span class="pre">type</span> <span class="pre">|</span> <span class="pre">value</span></code>) on leaf nodes. Concrete steps stay <strong>square</strong>. Explanations follow
+<strong>below</strong>. Use <code class="docutils literal notranslate"><span class="pre">--tool</span> <span class="pre">NAME</span></code> to preview planned tool steps.</p>
+</section>
 <section id="serve">
 <h2><code class="docutils literal notranslate"><span class="pre">serve</span></code><a class="headerlink" href="#serve" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
@@ -221,7 +258,7 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mechaharness<span class="w"> </span>describe<span class="w"> </span>lmstudio
 </pre></div>
 </div>
-<p>Prints JSON from <code class="docutils literal notranslate"><span class="pre">InferenceStrategy.describe()</span></code> (name, base_url, model, auth).</p>
+<p>Runs Agentic Recipe <code class="docutils literal notranslate"><span class="pre">backend_describe</span></code> (Strategy <code class="docutils literal notranslate"><span class="pre">describe()</span></code> metadata).</p>
 </section>
 </section>
 

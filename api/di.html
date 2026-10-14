@@ -275,7 +275,10 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 <dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_graph_template_registry">
 <span class="sig-name descname"><span class="pre">get_graph_template_registry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GraphTemplateRegistry</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_graph_template_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_graph_template_registry" title="Link to this definition"></a></dt>
-<dd><p>Library-owned parameterized graph templates.</p>
+<dd><p>Non-DI facade over <a class="reference internal" href="#mechaharness.di.MechaHarnessConfig.graph_template_classes" title="mechaharness.di.MechaHarnessConfig.graph_template_classes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">graph_template_classes()</span></code></a>.</p>
+<p>Under Config, prefer <code class="docutils literal notranslate"><span class="pre">injector.inject(GraphTemplateRegistry)</span></code> (built
+from the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> map multibind). Override
+<a class="reference internal" href="#mechaharness.di.MechaHarnessConfig.graph_template_classes" title="mechaharness.di.MechaHarnessConfig.graph_template_classes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">graph_template_classes()</span></code></a> to extend the catalog.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -360,6 +363,12 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_verification_policy">
 <span class="sig-name descname"><span class="pre">get_verification_policy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">VerificationPolicy</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_verification_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_verification_policy" title="Link to this definition"></a></dt>
 <dd><p>Selects and runs verification for graph/outcome gates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.graph_template_classes">
+<span class="sig-name descname"><span class="pre">graph_template_classes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="events.html#mechaharness.core.events.Event.type" title="mechaharness.core.events.Event.type"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">GraphTemplate</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.graph_template_classes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.graph_template_classes" title="Link to this definition"></a></dt>
+<dd><p>Catalog id → <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> class. Hosts merge via <code class="docutils literal notranslate"><span class="pre">super()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -452,13 +461,13 @@ that alias <code class="docutils literal notranslate"><span class="pre">Inferenc
 <dl class="py function">
 <dt class="sig sig-object py" id="mechaharness.di.list_harness_families">
 <span class="sig-prename descclassname"><span class="pre">mechaharness.di.</span></span><span class="sig-name descname"><span class="pre">list_harness_families</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#list_harness_families"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.list_harness_families" title="Link to this definition"></a></dt>
-<dd><p>Sorted names from the default <code class="docutils literal notranslate"><span class="pre">SettingsConfig.harness_classes()</span></code> map.</p>
+<dd><p>Sorted family ids from the DI <code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code> map multibind.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mechaharness.di.list_inference_backends">
 <span class="sig-prename descclassname"><span class="pre">mechaharness.di.</span></span><span class="sig-name descname"><span class="pre">list_inference_backends</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#list_inference_backends"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.list_inference_backends" title="Link to this definition"></a></dt>
-<dd><p>Sorted names from the default <code class="docutils literal notranslate"><span class="pre">SettingsConfig.inference_classes()</span></code> map.</p>
+<dd><p>Sorted backend ids from the DI <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code> map multibind.</p>
 </dd></dl>
 
 </section>

@@ -255,9 +255,13 @@ inject deny-by-default tool grants; use <code class="docutils literal notranslat
 <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>,
 <code class="docutils literal notranslate"><span class="pre">get_checkpoint_store()</span></code> (default ephemeral EventLog adapter; use
 <code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> for process-restart durability), and optionally
-<code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> /
-<code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>, then
-<code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>. Include <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and
+<code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>, then <code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>.
+Agentic Recipe membership is a pyiv map multibind: override
+<code class="docutils literal notranslate"><span class="pre">graph_template_classes()</span></code> (merge via <code class="docutils literal notranslate"><span class="pre">super()</span></code>), discover with
+<code class="docutils literal notranslate"><span class="pre">catalog_keys(GraphTemplate)</span></code>, and inject <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>. Backend and
+harness family names use the same pattern (<code class="docutils literal notranslate"><span class="pre">inference_classes</span></code> /
+<code class="docutils literal notranslate"><span class="pre">harness_classes</span></code> → <code class="docutils literal notranslate"><span class="pre">catalog_keys</span></code>). Include <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and
 <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> when using escalation) in grants. Ordered lifecycle
 extensions (inspiration req 20) bind via <code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>
 and are distinct from EventLog telemetry. Library templates are owned by
@@ -271,9 +275,10 @@ concrete graphs. See <a class="reference internal" href="../architecture.html"><
 choose checkpoint durability. It keeps the blessed path
 (<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> → <code class="docutils literal notranslate"><span class="pre">inject(GraphExecutor)</span></code>) without ten-line hand assembly
 of EventLog / access / linkage / checkpoint / crash probe.</p>
-<p>Owning acceptance story: <code class="docutils literal notranslate"><span class="pre">fangore_host_kit_submit_once</span></code>. Executable examples
-live as pydoc doctests on <code class="docutils literal notranslate"><span class="pre">src/mechaharness/host_kit.py</span></code> (run via
-<code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--doctest-modules</span></code>) and as the fixture matrix under
+<p>Owning acceptance stories: <code class="docutils literal notranslate"><span class="pre">fangore_host_kit_submit_once</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_host_kit_event_tap</span></code> (HF-05 <code class="docutils literal notranslate"><span class="pre">event_log=</span></code> / <code class="docutils literal notranslate"><span class="pre">tapping_event_log</span></code>).
+Executable examples live as pydoc doctests on <code class="docutils literal notranslate"><span class="pre">src/mechaharness/host_kit.py</span></code>
+(run via <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--doctest-modules</span></code>) and as the fixture matrix under
 <code class="docutils literal notranslate"><span class="pre">tests/fixtures/host_kit/</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.budget</span><span class="w"> </span><span class="kn">import</span> <span class="n">BudgetPolicy</span>
@@ -321,12 +326,15 @@ live as pydoc doctests on <code class="docutils literal notranslate"><span class
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">host_graph_executor</span></code></p></td>
-<td><p>Config subclass + inject; optional SQLite via <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> or a custom <code class="docutils literal notranslate"><span class="pre">checkpoint_store</span></code>; default grants <code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code></p></td>
+<td><p>Config subclass + inject; optional SQLite via <code class="docutils literal notranslate"><span class="pre">checkpoint_path</span></code> or a custom <code class="docutils literal notranslate"><span class="pre">checkpoint_store</span></code>; optional <code class="docutils literal notranslate"><span class="pre">event_log=</span></code> tap; default grants <code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SubmitOnceEffectfulRunner</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tapping_event_log</span></code></p></td>
+<td><p>EventLog wrapper that forwards emits to a host callback (HF-05)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SubmitOnceEffectfulRunner</span></code></p></td>
 <td><p>Non-idempotent external effect: submit once, complete on accept, never silent-redispatch <code class="docutils literal notranslate"><span class="pre">UNCERTAIN</span></code> without a handle</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">effectful_external_handle</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">effectful_external_handle</span></code></p></td>
 <td><p>Read <code class="docutils literal notranslate"><span class="pre">external_run_id</span></code> / <code class="docutils literal notranslate"><span class="pre">external_handle</span></code> from a <code class="docutils literal notranslate"><span class="pre">GraphResult</span></code> without scraping node maps</p></td>
 </tr>
 </tbody>

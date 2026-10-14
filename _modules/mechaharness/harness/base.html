@@ -383,7 +383,16 @@
         <span class="n">observe_only</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">ObserveBefore</span><span class="p">,</span> <span class="n">ObserveAfter</span><span class="p">})</span>
         <span class="k">while</span> <span class="n">turns</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_turns</span><span class="p">:</span>
             <span class="n">turns</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span><span class="n">TurnStart</span><span class="p">,</span> <span class="p">{</span><span class="s2">"turn"</span><span class="p">:</span> <span class="n">turns</span><span class="p">},</span> <span class="n">run_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span>
+                <span class="n">TurnStart</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">"turn"</span><span class="p">:</span> <span class="n">turns</span><span class="p">,</span>
+                    <span class="s2">"parent_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                    <span class="s2">"component_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"harness/turn_start:</span><span class="si">{</span><span class="n">turns</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="s2">"execution_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="n">run_id</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
                 <span class="n">BeforeTurn</span><span class="p">,</span>
                 <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
@@ -422,6 +431,9 @@
                 <span class="s2">"finish_reason"</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">finish_reason</span><span class="p">,</span>
                 <span class="s2">"content"</span><span class="p">:</span> <span class="n">assistant</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
                 <span class="s2">"tool_calls"</span><span class="p">:</span> <span class="p">[</span><span class="n">tc</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="p">(</span><span class="n">assistant</span><span class="o">.</span><span class="n">tool_calls</span> <span class="ow">or</span> <span class="p">[])],</span>
+                <span class="s2">"parent_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                <span class="s2">"component_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"harness/inference:</span><span class="si">{</span><span class="n">turns</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="s2">"execution_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="n">assistant</span><span class="o">.</span><span class="n">reasoning_content</span><span class="p">:</span>
                 <span class="n">inference_payload</span><span class="p">[</span><span class="s2">"reasoning_content"</span><span class="p">]</span> <span class="o">=</span> <span class="n">assistant</span><span class="o">.</span><span class="n">reasoning_content</span>
@@ -619,8 +631,12 @@
                 <span class="n">core_events</span><span class="o">.</span><span class="n">ToolCall</span><span class="p">,</span>
                 <span class="p">{</span>
                     <span class="s2">"name"</span><span class="p">:</span> <span class="n">effective_name</span><span class="p">,</span>
+                    <span class="s2">"tool_name"</span><span class="p">:</span> <span class="n">effective_name</span><span class="p">,</span>
                     <span class="s2">"tool_call_id"</span><span class="p">:</span> <span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
                     <span class="s2">"arguments"</span><span class="p">:</span> <span class="n">effective_args</span><span class="p">,</span>
+                    <span class="s2">"parent_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                    <span class="s2">"component_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"harness/tool_call:</span><span class="si">{</span><span class="n">effective_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="s2">"execution_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
                 <span class="p">},</span>
                 <span class="n">run_id</span><span class="p">,</span>
             <span class="p">)</span>
@@ -720,9 +736,13 @@
             <span class="n">core_events</span><span class="o">.</span><span class="n">ToolResult</span><span class="p">,</span>
             <span class="p">{</span>
                 <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                <span class="s2">"tool_name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
                 <span class="s2">"tool_call_id"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">tool_call_id</span><span class="p">,</span>
                 <span class="s2">"is_error"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">is_error</span><span class="p">,</span>
                 <span class="s2">"content"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
+                <span class="s2">"parent_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                <span class="s2">"component_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"harness/tool_result:</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">tool_call_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="s2">"execution_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">run_id</span><span class="p">,</span>
         <span class="p">)</span>
