@@ -1,0 +1,5 @@
+{
+  "parent_node_id": "generate_image",
+  "tool_name": "generate_image",
+  "child_goal": "oneshot"
+}

@@ -251,7 +251,16 @@ class AbstractHarness(Completer):
         observe_only = frozenset({ObserveBefore, ObserveAfter})
         while turns < self.config.max_turns:
             turns += 1
-            self._emit(TurnStart, {"turn": turns}, run_id)
+            self._emit(
+                TurnStart,
+                {
+                    "turn": turns,
+                    "parent_node_id": "harness",
+                    "component_id": f"harness/turn_start:{turns}",
+                    "execution_node_id": "harness",
+                },
+                run_id,
+            )
             self._dispatch_lifecycle(
                 BeforeTurn,
                 run_id=run_id,
@@ -290,6 +299,9 @@ class AbstractHarness(Completer):
                 "finish_reason": response.finish_reason,
                 "content": assistant.content,
                 "tool_calls": [tc.model_dump() for tc in (assistant.tool_calls or [])],
+                "parent_node_id": "harness",
+                "component_id": f"harness/inference:{turns}",
+                "execution_node_id": "harness",
             }
             if assistant.reasoning_content:
                 inference_payload["reasoning_content"] = assistant.reasoning_content
@@ -467,8 +479,12 @@ class AbstractHarness(Completer):
                 core_events.ToolCall,
                 {
                     "name": effective_name,
+                    "tool_name": effective_name,
                     "tool_call_id": call.id,
                     "arguments": effective_args,
+                    "parent_node_id": "harness",
+                    "component_id": f"harness/tool_call:{effective_name}:{call.id}",
+                    "execution_node_id": "harness",
                 },
                 run_id,
             )
@@ -567,9 +583,13 @@ class AbstractHarness(Completer):
             core_events.ToolResult,
             {
                 "name": name,
+                "tool_name": name,
                 "tool_call_id": result.tool_call_id,
                 "is_error": result.is_error,
                 "content": result.content,
+                "parent_node_id": "harness",
+                "component_id": f"harness/tool_result:{name}:{result.tool_call_id}",
+                "execution_node_id": "harness",
             },
             run_id,
         )

@@ -17,7 +17,21 @@ from mechaharness.stop_contract import StopContract
 
 
 class EnvironmentRepairTemplate(GraphTemplate):
-    """Diagnose → bounded env repair → recheck."""
+    """Diagnose → bounded env repair → recheck.
+
+    Repair missing substrate (secrets, routes, binaries, capacity) before
+    dependent graph work continues.
+
+    Example:
+        >>> from mechaharness.graph_templates import (
+        ...     EnvironmentRepairTemplate, GraphTemplateParams,
+        ... )
+        >>> graph = EnvironmentRepairTemplate().instantiate(
+        ...     GraphTemplateParams(goal="fix env")
+        ... )
+        >>> graph.template_name
+        'environment_repair'
+    """
 
     name = "environment_repair"
     version = "1"

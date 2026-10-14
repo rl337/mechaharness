@@ -74,7 +74,10 @@ from mechaharness.graph_executor import (
     GraphNodeRunnerRegistry,
     RejectGraphEscalation,
 )
-from mechaharness.graph_templates import GraphTemplateRegistry, default_graph_templates
+from mechaharness.graph_templates import GraphTemplate, GraphTemplateRegistry
+from mechaharness.graph_templates.catalog import (
+    default_graph_template_classes,
+)
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.families import AnthropicToolsHarness, OpenAIToolsHarness
 from mechaharness.harness.pass_through import PassThroughHarness
@@ -346,7 +349,24 @@ class MechaHarnessConfig(Config):
         self.register_instance(DelegationPolicy, self.get_delegation_policy())
         self.register_instance(AdvisorPolicy, self.get_advisor_policy())
         self.register_instance(Advisor, self.get_advisor())
-        self.register_instance(GraphTemplateRegistry, self.get_graph_template_registry())
+        # Recipe / backend / family membership: pyiv map multibinds (catalog_keys).
+        self.contribute_map_entries(
+            GraphTemplate,
+            self.graph_template_classes(),
+            on_conflict="error",
+        )
+        self.contribute_map_entries(
+            InferenceStrategy,
+            self.inference_classes(),
+            on_conflict="replace",
+        )
+        self.contribute_map_entries(
+            AbstractHarness,
+            self.harness_classes(),
+            on_conflict="replace",
+        )
+        _expose_ctor_type_hints(GraphTemplateRegistry)
+        self.register(GraphTemplateRegistry, GraphTemplateRegistry)
         self.register_instance(ContextProviderRegistry, self.get_context_provider_registry())
         self.register_instance(CapabilityEnvelope, self.get_capability_envelope())
         self.register_instance(
@@ -618,9 +638,20 @@ class MechaHarnessConfig(Config):
         """Non-binding advisor (default: unavailable / reject)."""
         return RejectAdvisor()
 
+    def graph_template_classes(self) -> dict[str, type[GraphTemplate]]:
+        """Catalog id → ``GraphTemplate`` class. Hosts merge via ``super()``."""
+        return default_graph_template_classes()
+
     def get_graph_template_registry(self) -> GraphTemplateRegistry:
-        """Library-owned parameterized graph templates."""
-        return default_graph_templates()
+        """Non-DI facade over :meth:`graph_template_classes`.
+
+        Under Config, prefer ``injector.inject(GraphTemplateRegistry)`` (built
+        from the ``GraphTemplate`` map multibind). Override
+        :meth:`graph_template_classes` to extend the catalog.
+        """
+        return GraphTemplateRegistry(
+            {name: cls() for name, cls in self.graph_template_classes().items()}
+        )
 
     def get_context_provider_registry(self) -> ContextProviderRegistry:
         """Host context providers (document/KG adapters bind here)."""
@@ -734,13 +765,13 @@ def _demo_tools() -> ToolRegistry:
 
 
 def list_inference_backends() -> list[str]:
-    """Sorted names from the default ``SettingsConfig.inference_classes()`` map."""
-    return sorted(SettingsConfig().inference_classes())
+    """Sorted backend ids from the DI ``InferenceStrategy`` map multibind."""
+    return list(get_injector(SettingsConfig()).catalog_keys(InferenceStrategy))
 
 
 def list_harness_families() -> list[str]:
-    """Sorted names from the default ``SettingsConfig.harness_classes()`` map."""
-    return sorted(SettingsConfig().harness_classes())
+    """Sorted family ids from the DI ``AbstractHarness`` map multibind."""
+    return list(get_injector(SettingsConfig()).catalog_keys(AbstractHarness))
 
 
 def get_injector(

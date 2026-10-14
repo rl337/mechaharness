@@ -1,0 +1,5 @@
+{
+  "prompt": "say hello",
+  "backend": "mock",
+  "family": "pass_through"
+}

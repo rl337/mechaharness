@@ -153,9 +153,13 @@ For durable plans, override `get_node_runner_registry()`,
 `get_graph_failure_policy()`, `get_graph_escalation()`,
 `get_checkpoint_store()` (default ephemeral EventLog adapter; use
 `SqliteCheckpointStore` for process-restart durability), and optionally
-`get_linkage_resolver()` / `get_graph_template_registry()` /
-`get_capability_envelope()` / `get_lifecycle_extension_registry()`, then
-`injector.inject(GraphExecutor)`. Include `core:graph.execute` (and
+`get_linkage_resolver()` / `get_capability_envelope()` /
+`get_lifecycle_extension_registry()`, then `injector.inject(GraphExecutor)`.
+Agentic Recipe membership is a pyiv map multibind: override
+`graph_template_classes()` (merge via `super()`), discover with
+`catalog_keys(GraphTemplate)`, and inject `GraphTemplateRegistry`. Backend and
+harness family names use the same pattern (`inference_classes` /
+`harness_classes` → `catalog_keys`). Include `core:graph.execute` (and
 `core:graph.escalate` when using escalation) in grants. Ordered lifecycle
 extensions (inspiration req 20) bind via `get_lifecycle_extension_registry()`
 and are distinct from EventLog telemetry. Library templates are owned by
@@ -170,9 +174,10 @@ choose checkpoint durability. It keeps the blessed path
 (`MechaHarnessConfig` → `inject(GraphExecutor)`) without ten-line hand assembly
 of EventLog / access / linkage / checkpoint / crash probe.
 
-Owning acceptance story: `fangore_host_kit_submit_once`. Executable examples
-live as pydoc doctests on `src/mechaharness/host_kit.py` (run via
-`pytest --doctest-modules`) and as the fixture matrix under
+Owning acceptance stories: `fangore_host_kit_submit_once`,
+`fangore_host_kit_event_tap` (HF-05 `event_log=` / `tapping_event_log`).
+Executable examples live as pydoc doctests on `src/mechaharness/host_kit.py`
+(run via `pytest --doctest-modules`) and as the fixture matrix under
 `tests/fixtures/host_kit/`.
 
 ```python
@@ -216,7 +221,8 @@ assert effectful_external_handle(result, "coding_job") == "job-t1"
 
 | Helper | Role |
 |--------|------|
-| `host_graph_executor` | Config subclass + inject; optional SQLite via `checkpoint_path` or a custom `checkpoint_store`; default grants `GraphExecute` / `GraphEscalate` |
+| `host_graph_executor` | Config subclass + inject; optional SQLite via `checkpoint_path` or a custom `checkpoint_store`; optional `event_log=` tap; default grants `GraphExecute` / `GraphEscalate` |
+| `tapping_event_log` | EventLog wrapper that forwards emits to a host callback (HF-05) |
 | `SubmitOnceEffectfulRunner` | Non-idempotent external effect: submit once, complete on accept, never silent-redispatch `UNCERTAIN` without a handle |
 | `effectful_external_handle` | Read `external_run_id` / `external_handle` from a `GraphResult` without scraping node maps |
 

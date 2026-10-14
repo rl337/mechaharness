@@ -17,7 +17,23 @@ from mechaharness.graph_templates.base import (
 
 
 class IndependentReviewTemplate(GraphTemplate):
-    """Produce → N isolated reviewers → aggregate (retain disagreement)."""
+    """Produce → N isolated reviewers → aggregate (retain disagreement).
+
+    Reviewers see the artifact and acceptance contract, not producer
+    chain-of-thought, unless the host opts in.
+
+    Example:
+        >>> from mechaharness.graph_templates import (
+        ...     GraphTemplateParams, IndependentReviewTemplate,
+        ... )
+        >>> graph = IndependentReviewTemplate().instantiate(GraphTemplateParams(
+        ...     goal="review draft",
+        ...     branch_payloads=[{"index": 0}, {"index": 1}],
+        ...     acceptance=["policy_ok"],
+        ... ))
+        >>> graph.template_name
+        'independent_review'
+    """
 
     name = "independent_review"
     version = "1"

@@ -79,8 +79,10 @@ routes, or Agentic Recipes / graph templates change, update in this order:
 
 **Agentic Recipes** are a top-level concept (substrate: `GraphTemplate`). Treat
 recipe catalog docs as first-class reference pages: catalog id, when to use,
-readable tiling example, soft points, owning user-story id(s). Follow
-[`agentic-recipes`](../agentic-recipes/SKILL.md).
+readable tiling example, soft points, **Node components** subsection (kinds
+from [`docs/reference/node-components.md`](../../../docs/reference/node-components.md)),
+owning user-story id(s). Follow [`agentic-recipes`](../agentic-recipes/SKILL.md)
+and [`node-components`](../node-components/SKILL.md).
 
 When the change is **user-facing acceptance behavior** (harness runs, grants,
 lanes, judge/verdicts, adapters, recipes), defer entirely to the

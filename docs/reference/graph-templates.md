@@ -20,7 +20,7 @@ Normative requirements:
 | Concept | Agentic Recipe (catalog id) |
 | Substrate | `GraphTemplate` |
 | Stability | evolving |
-| Config hook | `MechaHarnessConfig.get_graph_template_registry()` |
+| Config hook | `MechaHarnessConfig.graph_template_classes()` → pyiv `contribute_map` / `catalog_keys(GraphTemplate)`; inject `GraphTemplateRegistry` |
 
 ## Catalog
 
@@ -36,10 +36,14 @@ owning user stories):
 | initialize_preflight | `initialize_preflight` | `fangore_insp_initialize_preflight` | Linkage → capability → checkpoint → ready |
 | [decision_plane](./graph-templates/decision-plane.md) | `decision_plane` | `fangore_decision_plane_recipe` | Batched typed decisions + escalate |
 | [bounded_retry](./graph-templates/bounded-retry.md) | `bounded_retry` | `fangore_bounded_retry_recipe` | Visible classify → permit → backoff → escalate |
+| [conversational_tool_loop](./graph-templates/conversational-tool-loop.md) | `conversational_tool_loop` | `fangore_conversational_tool_loop` | Expandable tools → inference / tool_call rounds |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
 `GraphTemplate.tile` (embed under a parent node). Story:
 `fangore_recipe_namespace_tile`.
+
+Node components (sub-node elements inside a graph node):
+[Node components](./node-components.md).
 
 ## Soft points
 

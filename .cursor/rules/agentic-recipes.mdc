@@ -26,6 +26,12 @@ reusable agent-control pattern hosts tile into graphs.
 - Promote patterns from requirements and user stories when hosts would reuse
   the control story as a named unit; the template/recipe cut may stay soft
   until a case forces it.
+- New or changed recipes **MUST** declare **node components** per graph node
+  (kinds from `docs/reference/node-components.md` or added in the same change).
+  Soft points are `soft_point` components. Do not invent viz-only kinds or
+  free-floating components without a parent graph node.
 
-See `.cursor/skills/agentic-recipes/SKILL.md` and
-`docs/requirements/recipes-and-decision-plane.md`.
+See `.cursor/skills/agentic-recipes/SKILL.md`,
+`.cursor/skills/node-components/SKILL.md`,
+`docs/requirements/recipes-and-decision-plane.md`, and
+`docs/requirements/dynamic-tool-graph.md`.

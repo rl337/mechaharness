@@ -48,6 +48,15 @@ graph = BoundedRetryTemplate().instantiate(
 assert graph.nodes["attempt"].payload["requires_effect_reconciliation"] is True
 ```
 
+## Node components
+
+| Parent graph node | Components |
+|-------------------|------------|
+| `attempt` | `stop_contract` (repeating), `effect_state` when reconciliation required |
+| other phase nodes | `soft_point` slots from template soft points (via `node_components_for`) |
+
+See [Node components](../node-components.md).
+
 ## Related
 
 - [Graph templates and Agentic Recipes](../graph-templates.md)
