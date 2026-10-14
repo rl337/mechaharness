@@ -18,7 +18,24 @@ from mechaharness.stop_contract import StopContract
 
 
 class VerifyRepairTemplate(GraphTemplate):
-    """Produce → verify → bounded repair → complete."""
+    """Produce → verify → bounded repair → complete.
+
+    Prefer deterministic verify oracles. Repair repeats under a
+    :class:`~mechaharness.stop_contract.StopContract` until accept or budget.
+
+    Example:
+        >>> from mechaharness.graph_templates import (
+        ...     GraphTemplateParams, VerifyRepairTemplate,
+        ... )
+        >>> from mechaharness.stop_contract import StopContract
+        >>> graph = VerifyRepairTemplate().instantiate(GraphTemplateParams(
+        ...     goal="ship artifact",
+        ...     acceptance=["lint_ok"],
+        ...     stop_contract=StopContract(version="1", max_iterations=3),
+        ... ))
+        >>> graph.template_name
+        'verify_repair'
+    """
 
     name = "verify_repair"
     version = "1"

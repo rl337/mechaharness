@@ -1,0 +1,6 @@
+{
+  "status": "ok",
+  "has_inference_node": true,
+  "has_tool_call_node": true,
+  "rounds_min": 1
+}

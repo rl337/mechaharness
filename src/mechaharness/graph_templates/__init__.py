@@ -29,6 +29,7 @@ skeleton::
     ['apply_policy', 'ask_batch', 'escalate', 'project_state']
 """
 
+from mechaharness.graph_templates.backend_describe import BackendDescribeTemplate
 from mechaharness.graph_templates.base import (
     GraphTemplate,
     GraphTemplateParams,
@@ -39,27 +40,38 @@ from mechaharness.graph_templates.base import (
     namespace_graph,
 )
 from mechaharness.graph_templates.bounded_retry import BoundedRetryTemplate
-from mechaharness.graph_templates.catalog import default_graph_templates
+from mechaharness.graph_templates.catalog import (
+    default_graph_template_classes,
+    default_graph_templates,
+)
+from mechaharness.graph_templates.conversational_tool_loop import (
+    ConversationalToolLoopTemplate,
+)
 from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
+from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
 from mechaharness.graph_templates.initialize_preflight import InitializePreflightTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
 
 __all__ = [
+    "BackendDescribeTemplate",
     "BoundedRetryTemplate",
+    "ConversationalToolLoopTemplate",
     "DecisionPlaneTemplate",
     "EnvironmentRepairTemplate",
     "FanOutAggregateTemplate",
     "GraphTemplate",
     "GraphTemplateParams",
     "GraphTemplateRegistry",
+    "HarnessRunTemplate",
     "IndependentReviewTemplate",
     "InitializePreflightTemplate",
     "SoftPoint",
     "SubgraphNodeRunner",
     "VerifyRepairTemplate",
+    "default_graph_template_classes",
     "default_graph_templates",
     "make_node",
     "namespace_graph",

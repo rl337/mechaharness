@@ -10,10 +10,11 @@ instantiate, bind, and may retain the resulting concrete
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
-from typing import Any, Literal
+from collections.abc import Mapping, Sequence  # Mapping used by registry ctor
+from typing import Any, Literal, cast
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -153,6 +154,27 @@ class GraphTemplate(ABC):
                     graph.recipe_node_map = {logical: logical for logical in logical_ids}
         return graph
 
+    def documentation(self) -> str:
+        """Full pydoc for CLI ``recipes show`` (module + class, with examples).
+
+        Emits the defining module docstring (what / when) then the concrete
+        class docstring (including ``Example:`` blocks). Falls back to
+        :attr:`summary` when neither exists.
+        """
+        cls = type(self)
+        parts: list[str] = []
+        module = inspect.getmodule(cls)
+        if module is not None and module.__doc__:
+            module_doc = inspect.cleandoc(module.__doc__).strip()
+            if module_doc:
+                parts.append(module_doc)
+        class_doc = (inspect.getdoc(cls) or "").strip()
+        if class_doc and class_doc not in parts:
+            parts.append(class_doc)
+        if not parts:
+            return str(self.summary or self.name)
+        return "\n\n".join(parts)
+
     def describe(self) -> dict[str, Any]:
         """Stable metadata for docs, catalogs, and promotion provenance."""
         return {
@@ -161,16 +183,30 @@ class GraphTemplate(ABC):
             "summary": self.summary,
             "status": self.status,
             "category": self.category,
+            "doc": self.documentation(),
             "soft_points": [p.model_dump(mode="json") for p in self.soft_points],
         }
 
 
 class GraphTemplateRegistry:
-    """Library + host-merged template map (Config hook)."""
+    """Library + host-merged template map (DI map-multibind facade).
 
-    def __init__(self, templates: Sequence[GraphTemplate] | None = None) -> None:
+    Prefer contributing classes via
+    :meth:`MechaHarnessConfig.graph_template_classes` /
+    ``contribute_map(GraphTemplate, …)``. When constructed by pyiv, ``templates``
+    is the injected ``Dict[str, GraphTemplate]`` catalog. Hand construction may
+    still pass a sequence of instances (tests / ``default_graph_templates``).
+    """
+
+    def __init__(self, templates: dict[str, GraphTemplate]) -> None:
+        # Annotation is dict[str, GraphTemplate] so pyiv injects the map multibind.
+        # Callers may still pass a sequence of instances (runtime Sequence path).
         self._by_name: dict[str, GraphTemplate] = {}
-        for template in templates or []:
+        if isinstance(templates, Mapping):
+            for name, template in templates.items():
+                self._by_name[str(name)] = template
+            return
+        for template in cast(Sequence[GraphTemplate], templates):
             self.register(template)
 
     def register(self, template: GraphTemplate) -> None:

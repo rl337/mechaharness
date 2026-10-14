@@ -41,6 +41,7 @@ from mechaharness.context_experiments import (
 from mechaharness.context_layers import GraphSharedState, project_node_context
 from mechaharness.context_provider import StaticContextProvider
 from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
+from mechaharness.conversational_tool_loop_runner import ConversationalToolLoopRunner
 from mechaharness.coordination_cost import CoordinationCostMetrics, summarize_coordination_cost
 from mechaharness.core.access import (
     Ability,
@@ -53,6 +54,7 @@ from mechaharness.core.access import (
     InMemoryAccessControl,
 )
 from mechaharness.core.completer import Completer
+from mechaharness.core.contract import RunRequest
 from mechaharness.core.environment import (
     InferenceEnvironment,
     InferenceEnvironmentError,
@@ -132,6 +134,7 @@ from mechaharness.graph_state_governance import (
 )
 from mechaharness.graph_templates import (
     BoundedRetryTemplate,
+    ConversationalToolLoopTemplate,
     DecisionPlaneTemplate,
     EnvironmentRepairTemplate,
     FanOutAggregateTemplate,
@@ -153,6 +156,7 @@ from mechaharness.harness_fingerprint import (
     require_eval_provenance,
 )
 from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
+from mechaharness.host_kit import host_graph_executor, tapping_event_log
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
     ChoiceOption,
@@ -198,6 +202,12 @@ from mechaharness.model_input_manifest import (
     attach_manifest_ref,
     reconstruct_messages,
 )
+from mechaharness.node_component import (
+    NODE_COMPONENT_KINDS,
+    embed_recipe_as_tool,
+    node_components_for,
+    traversal_from_events,
+)
 from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
 from mechaharness.operation_registry import (
     NodeContractBind,
@@ -206,6 +216,12 @@ from mechaharness.operation_registry import (
     default_operations,
 )
 from mechaharness.outcome_contract import OutcomeContract
+from mechaharness.recipe_runner import (
+    instantiate_recipe,
+    list_recipes,
+    run_backend_describe_recipe,
+    run_harness_recipe,
+)
 from mechaharness.research import EvalProtocol, ResearchLab
 from mechaharness.resume_cost import ResumeCostMetrics, summarize_resume_cost
 from mechaharness.rollout_graph import build_rollout_graph
@@ -381,6 +397,14 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "lifecycle_extension_graph_observe": _run_lifecycle_extension_graph_observe,
         "transactional_durable_resume_crash_matrix": _run_transactional_durable_resume_crash_matrix,
         "host_kit_submit_once": _run_host_kit_submit_once,
+        "host_kit_event_tap": _run_host_kit_event_tap,
+        "node_components": _run_node_components,
+        "traversal_contract": _run_traversal_contract,
+        "harness_tool_loop_graph": _run_harness_tool_loop_graph,
+        "conversational_tool_loop": _run_conversational_tool_loop,
+        "harness_run_recipe": _run_harness_run_recipe,
+        "backend_describe_recipe": _run_backend_describe_recipe,
+        "recipe_as_tool": _run_recipe_as_tool,
         "model_input_manifest_replay": _run_model_input_manifest_replay,
         "graph_transition_inspect": _run_graph_transition_inspect,
         "isolation_io_contract": _run_isolation_io_contract,
@@ -2367,6 +2391,279 @@ async def _run_host_kit_submit_once(case: StoryCase, backend: StoryBackend) -> N
             durable = bool(fixture.data.get("durable", True))
             payload = await run_case(fixture, db_path=db if durable else None)
             assert_expect(payload["actual"], soft, case_id=scenario_id)
+
+
+async def _run_host_kit_event_tap(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    seen: list[str] = []
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"id": node.id})
+
+    log = tapping_event_log(on_event=lambda e: seen.append(str(getattr(e, "type", ""))))
+    executor = host_graph_executor(
+        runners=[CallableGraphNodeRunner([str(request.get("node_kind") or "compute")], ok)],
+        event_log=log,
+    )
+    graph = ExecutionGraph(goal="tap")
+    graph.add_node(GraphNode(id="n0", kind=str(request.get("node_kind") or "compute")))
+    result = await executor.run(
+        graph,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id=str(request.get("run_id") or "tap-1"),
+        skip_linkage=True,
+    )
+    actual = {
+        "status": result.status,
+        "has_graph_node_start": any("graph_node_start" in t for t in seen),
+        "has_graph_node_end": any("graph_node_end" in t for t in seen),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_node_components(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    template = ConversationalToolLoopTemplate()
+    graph = template.instantiate(
+        GraphTemplateParams(
+            goal="components",
+            inputs={"max_iterations": int(request.get("max_iterations") or 3)},
+        )
+    )
+    comps = node_components_for(graph, template=template)
+    kinds = {c.kind for c in comps}
+    actual = {
+        "all_have_parent": all(bool(c.parent_node_id) for c in comps),
+        "kinds_subset_catalog": kinds <= NODE_COMPONENT_KINDS,
+        "has_stop_contract": "stop_contract" in kinds,
+        "has_soft_point": "soft_point" in kinds,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_traversal_contract(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    records = traversal_from_events(list(request.get("events") or []))
+    kinds = {r.kind for r in records}
+    actual = {
+        "record_count_min": len(records),
+        "has_inference": "inference" in kinds,
+        "has_tool_call": "tool_call" in kinds,
+        "all_have_parent": all(bool(r.parent_node_id) for r in records),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_harness_tool_loop_graph(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    from mechaharness.tools.base import Tool, ToolRegistry
+    from tests.fakes import ScriptedInference
+    from tests.support.di import make_harness
+
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    tool_name = str(request.get("tool_name") or "lookup")
+    registry = ToolRegistry()
+    registry.register(Tool(tool_name, lambda: "ok", description="story tool"))
+    log = InMemoryEventLog()
+    script = ScriptedInference(
+        [
+            ChatMessage(
+                role=Role.ASSISTANT,
+                content=None,
+                tool_calls=[ToolCall(id="c1", name=tool_name, arguments={})],
+            ),
+            ChatMessage(role=Role.ASSISTANT, content="done"),
+        ]
+    )
+    result = await make_harness(
+        script,
+        tools=registry,
+        config=HarnessConfig(model="story", max_turns=4),
+        harness_cls=ToolLoopHarness,
+        event_log=log,
+    ).run(str(request.get("user_input") or "go"))
+    events = result.events or log.query()
+    records = traversal_from_events(
+        [
+            {"type": e.type, "payload": e.payload}
+            for e in events
+        ]
+    )
+    kinds = {r.kind for r in records}
+    actual = {
+        "ok": result.final_text == "done",
+        "has_inference": "inference" in kinds,
+        "has_tool_call": "tool_call" in kinds,
+        "parent_is_harness": all(
+            r.parent_node_id == "harness"
+            for r in records
+            if r.kind in {"inference", "tool_call", "tool_result", "turn_start"}
+        ),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_harness_run_recipe(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    catalog = {row["name"] for row in list_recipes()}
+    response = await run_harness_recipe(
+        RunRequest(
+            prompt=str(request["prompt"]),
+            backend=str(request.get("backend") or "mock"),
+            family=str(request.get("family") or "pass_through"),
+            max_turns=int(request.get("max_turns") or 4),
+        )
+    )
+    graph = instantiate_recipe(
+        "harness_run",
+        GraphTemplateParams(
+            goal="harness_run",
+            inputs={"prompt": request["prompt"]},
+            soft_bindings={
+                "prompt": request["prompt"],
+                "backend": request.get("backend") or "mock",
+                "family": request.get("family") or "pass_through",
+            },
+        ),
+    )
+    actual = {
+        "in_catalog": "harness_run" in catalog,
+        "status": "ok",
+        "final_text_nonempty": bool((response.final_text or "").strip()),
+        "turns_min": int(response.turns or 0),
+        "has_prepare": "prepare" in graph.nodes,
+        "has_harness_loop": "harness_loop" in graph.nodes,
+        "has_render": "render" in graph.nodes,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_backend_describe_recipe(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    catalog = {row["name"] for row in list_recipes()}
+    settings_kwargs: dict[str, Any] = {
+        "inference_backend": str(request.get("backend") or "mock"),
+    }
+    for key in ("model", "base_url", "api_key"):
+        if request.get(key) is not None:
+            settings_kwargs[key] = request[key]
+    settings = Settings(**settings_kwargs)
+    description = await run_backend_describe_recipe(settings)
+    graph = instantiate_recipe(
+        "backend_describe",
+        GraphTemplateParams(
+            goal="backend_describe",
+            soft_bindings={"backend": settings.inference_backend},
+        ),
+    )
+    actual = {
+        "in_catalog": "backend_describe" in catalog,
+        "status": "ok",
+        "description_name": description.get("name"),
+        "has_describe_node": "describe" in graph.nodes,
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_conversational_tool_loop(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    tool_name = str(request.get("tool_name") or "lookup")
+    calls = {"n": 0}
+
+    def complete(messages: list[dict[str, Any]], meta: dict[str, Any]) -> dict[str, Any]:
+        del messages, meta
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return {
+                "role": "assistant",
+                "content": "",
+                "tool_calls": [
+                    {"id": "c1", "function": {"name": tool_name, "arguments": "{}"}}
+                ],
+            }
+        return {"role": "assistant", "content": "done", "tool_calls": []}
+
+    runner = ConversationalToolLoopRunner(
+        complete=complete,
+        dispatch_tool=lambda name, args: f"ok:{name}",
+    )
+    graph = ConversationalToolLoopTemplate().instantiate(
+        GraphTemplateParams(
+            goal="loop",
+            inputs={"max_iterations": int(request.get("max_iterations") or 4)},
+        )
+    )
+    executor = host_graph_executor(runners=[runner])
+    result = await executor.run(
+        graph,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id="story-ctl",
+        skip_linkage=True,
+    )
+    tools = result.graph.nodes["tools"]
+    child = ExecutionGraph.resume(tools.subgraph or {})
+    ids = list(child.nodes)
+    actual = {
+        "status": result.status,
+        "has_inference_node": any(i.endswith("/inference") for i in ids),
+        "has_tool_call_node": any(f"tool_call:{tool_name}" in i for i in ids),
+        "rounds_min": int(tools.payload.get("rounds") or 0),
+    }
+    _assert_expect(actual, expect)
+
+
+async def _run_recipe_as_tool(case: StoryCase, backend: StoryBackend) -> None:
+    del backend
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"id": node.id})
+
+    child = ExecutionGraph(goal=str(request.get("child_goal") or "child"))
+    child.add_node(GraphNode(id="prompt", kind="compute"))
+    child.template_name = "oneshot"
+    parent = ExecutionGraph(goal="parent")
+    parent.add_node(
+        embed_recipe_as_tool(
+            child,
+            parent_node_id=str(request.get("parent_node_id") or "generate_image"),
+            tool_name=str(request.get("tool_name") or "generate_image"),
+        )
+    )
+    executor = host_graph_executor(
+        runners=[CallableGraphNodeRunner(["compute"], ok)],
+    )
+    result = await executor.run(
+        parent,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id="story-rat",
+        skip_linkage=True,
+    )
+    wrap = result.graph.nodes[str(request.get("parent_node_id") or "generate_image")]
+    comps = node_components_for(result.graph)
+    actual = {
+        "status": result.status,
+        "child_run_id_nonempty": bool(wrap.payload.get("child_run_id")),
+        "child_status": wrap.payload.get("child_status"),
+        "has_child_graph_component": any(c.kind == "child_graph" for c in comps),
+    }
+    _assert_expect(actual, expect)
 
 
 async def _run_model_input_manifest_replay(case: StoryCase, backend: StoryBackend) -> None:

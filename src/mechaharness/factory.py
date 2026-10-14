@@ -1,4 +1,4 @@
-"""Non-DI helpers: OpenAPI ``run()`` and listing, backed by a pyiv injector."""
+"""Non-DI helpers: OpenAPI ``run()`` and listing, backed by recipe graphs."""
 
 from __future__ import annotations
 
@@ -7,7 +7,6 @@ from typing import Any
 from mechaharness.config import Settings
 from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.di import build_injector
-from mechaharness.harness.base import AbstractHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.tools.base import ToolRegistry
 
@@ -32,24 +31,14 @@ def settings_from_request(request: RunRequest) -> Settings:
 
 
 async def run(request: RunRequest, *, tools: ToolRegistry | None = None) -> RunResponse:
-    """Run a prompt using the OpenAPI contract (hides the injector)."""
-    settings = settings_from_request(request)
-    injector = build_injector(settings, tools=tools)
-    inference: InferenceStrategy = injector.inject(InferenceStrategy)
-    try:
-        harness: AbstractHarness = injector.inject(AbstractHarness)
-        result = await harness.run(request.prompt)
-        return RunResponse(
-            final_text=result.final_text,
-            turns=result.turns,
-            messages=[m.model_dump(mode="json") for m in result.messages],
-            events=[e.model_dump(mode="json") for e in result.events],
-        )
-    finally:
-        await inference.aclose()
+    """Run a prompt via Agentic Recipe ``harness_run`` (OpenAPI / CLI facade)."""
+    from mechaharness.recipe_runner import run_harness_recipe
+
+    return await run_harness_recipe(request, tools=tools)
 
 
 async def describe(settings: Settings) -> dict[str, Any]:
+    """Describe a backend Strategy (used by recipe runner and legacy callers)."""
     injector = build_injector(settings)
     strategy: InferenceStrategy = injector.inject(InferenceStrategy)
     try:

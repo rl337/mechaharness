@@ -49,7 +49,10 @@ Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
 | [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, recipes, pyiv Config |
 | [Inspiration requirements map](./inspiration/requirements-map.md) | Blog-inspired reqs → modules → library vs client ownership |
 | [Recipes and decision plane](./requirements/recipes-and-decision-plane.md) | Agentic Recipes (`GraphTemplate` substrate), DP/RT reference recipes |
+| [Dynamic tool graph and node components](./requirements/dynamic-tool-graph.md) | Graph node vs node component; HF-05/07/08; kinds ⊆ existing surfaces |
 | [Transactional durable resume](./requirements/transactional-durable-resume.md) | CheckpointStore, SQLite, effect reconciliation (DR-01..12) |
+| [June host-friction inspiration](./inspiration/june-host-friction-inspiration.md) | June HF pack provenance; console consumer vs MH ownership |
+| [June host-friction requirements map](./inspiration/june-host-friction-requirements-map.md) | HF-* → modules → user stories |
 | [WalkingLabs Harness Engineering inspiration](./inspiration/walkinglabs-harness-engineering-inspiration.md) | 50-point source-attributed audit of the online book against current MechaHarness |
 | [Eval research brief](./inspiration/eval-research.md) | Anthropic-inspired research handoff for reusable evaluator/evidence/verdict primitives |
 | [WalkingLabs + eval requirements map](./inspiration/walkinglabs-eval-requirements-map.md) | Backlog IDs → modules → user stories for WalkingLabs P0–P2 and eval substrate |
@@ -68,6 +71,7 @@ Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
 | [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, `core:access_check` |
 | [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
 | [Graph templates and Agentic Recipes](./reference/graph-templates.md) | Recipe catalog + `GraphTemplate` substrate + soft points |
+| [Node components](./reference/node-components.md) | Sub-node kinds (events/soft points/nest); query + traversal |
 
 ## Mental model
 

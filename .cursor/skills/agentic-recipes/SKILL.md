@@ -37,6 +37,8 @@ Requirements:
 | Agentic Recipe | Product concept for a useful, documented, story-backed template |
 | Catalog id | Stable name (`verify_repair`, `decision_plane`, …) |
 | Soft point | Declared host-binding slot; name the human decision |
+| Graph node | `GraphNode` in an `ExecutionGraph` |
+| Node component | Sub-node element that must render within its parent graph node |
 | Tiling | Readable composition of recipes into a parent graph |
 
 The template-versus-recipe boundary may stay soft until a concrete case forces
@@ -61,6 +63,12 @@ named unit.
    inject; do not patch globals (see `di-config-ownership`).
 7. **Host-extend.** Hosts add recipes by subclassing `GraphTemplate` and merging
    the registry via Config — never by forking closed enums in this repo.
+8. **Node components.** For each graph node, declare **node components** drawn
+   only from the closed catalog in
+   [`docs/reference/node-components.md`](../../../docs/reference/node-components.md)
+   (or kinds added in the same change). Soft points are `soft_point` components
+   of the nodes that expose them. Never invent viz-only kinds — see
+   [`node-components`](../node-components/SKILL.md).
 
 ## Promotion workflow
 
@@ -71,11 +79,13 @@ Recipe task:
 - [ ] 1. Find the pattern in requirements and/or user stories
 - [ ] 2. Decide catalog id (unambiguous leaf name)
 - [ ] 3. Implement or harden as GraphTemplate (+ I/O / namespacing as needed)
-- [ ] 4. Write reference docs under docs/reference/graph-templates/ (recipe label)
-- [ ] 5. Ensure ≥1 owning user story; name the catalog id in implementation
-- [ ] 6. Static/DI tests; data-drive matrices when coverage grows
-- [ ] 7. Link story id(s) from the recipe doc; update requirements map if needed
-- [ ] 8. Prefer readable tiling examples in code and docs
+- [ ] 4. List node components per graph node (kinds ⊆ node-components catalog)
+- [ ] 5. Write reference docs under docs/reference/graph-templates/ (recipe label)
+      including a "Node components" subsection
+- [ ] 6. Ensure ≥1 owning user story; name the catalog id in implementation
+- [ ] 7. Static/DI tests; data-drive matrices when coverage grows
+- [ ] 8. Link story id(s) from the recipe doc; update requirements map if needed
+- [ ] 9. Prefer readable tiling examples in code and docs
 ```
 
 ### Story obligation
@@ -99,6 +109,7 @@ Pattern stories **must** name the recipe catalog id.
 | `initialize_preflight` | shipped | `fangore_insp_initialize_preflight` |
 | `decision_plane` | shipped (+ runtime) | `fangore_decision_plane_*`, `taloneth_decision_plane_shadow_compare` |
 | `bounded_retry` | shipped | `fangore_bounded_retry_recipe` |
+| `conversational_tool_loop` | shipped | `fangore_conversational_tool_loop` |
 | *(composition)* | `instance_key` / `tile` | `fangore_recipe_namespace_tile` |
 
 ## Anti-patterns
@@ -110,18 +121,24 @@ Pattern stories **must** name the recipe catalog id.
 # BAD — ship a recipe with only unit tests (no owning user story)
 # BAD — story implementation that describes the pattern but omits catalog id
 # BAD — closed Enum of recipe names hosts must PR into
+# BAD — viz-only node-component kinds with no event / soft point / nest surface
+# BAD — free-floating components with no parent_node_id
 
 # GOOD — GraphTemplate subclass + registry merge via Config
 # GOOD — readable tiling: embed(decision_plane), bind soft points, wire exits
 # GOOD — implementation names verify_repair / decision_plane alongside modules
+# GOOD — recipe doc lists soft_point / stop_contract / child_graph per node
 ```
 
 ## Related
 
+- [`node-components`](../node-components/SKILL.md) — kinds ⊆ existing surfaces
 - [`user-stories`](../user-stories/SKILL.md) — recipe names in `implementation`
 - [`project-docs`](../project-docs/SKILL.md) — recipe reference pages + TOC
 - [`di-config-ownership`](../di-config-ownership/SKILL.md) — no Settings grab-bag
 - [`data-driven-tests`](../data-driven-tests/SKILL.md) — recipe case matrices
 - `.cursor/rules/host-extend.mdc`, `unambiguous-names.mdc`, `di-first.mdc`
 - `docs/reference/graph-templates.md`
+- `docs/reference/node-components.md`
+- `docs/requirements/dynamic-tool-graph.md`
 - `docs/requirements/transactional-durable-resume.md` (retry ↔ effects)
