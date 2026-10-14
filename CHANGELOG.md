@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-10-14
+
+Node components, recipe CLI/SVG render, and pyiv catalog multibinds (#26).
+Patch tip auto-bumped to `0.4.1` before this PyPI publish.
+
 ### Added
 
 - **Node components** (`mechaharness.node_component`): queryable sub-node
