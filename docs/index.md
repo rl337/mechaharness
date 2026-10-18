@@ -49,6 +49,7 @@ Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
 | [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, recipes, pyiv Config |
 | [Inspiration requirements map](./inspiration/requirements-map.md) | Blog-inspired reqs → modules → library vs client ownership |
 | [Recipes and decision plane](./requirements/recipes-and-decision-plane.md) | Agentic Recipes (`GraphTemplate` substrate), DP/RT reference recipes |
+| [Dependency injection](./requirements/dependency-injection.md) | Config bind + inject; no getattr caches or `get_*` composition (DI-01..08) |
 | [Dynamic tool graph and node components](./requirements/dynamic-tool-graph.md) | Graph node vs node component; HF-05/07/08; kinds ⊆ existing surfaces |
 | [Transactional durable resume](./requirements/transactional-durable-resume.md) | CheckpointStore, SQLite, effect reconciliation (DR-01..12) |
 | [June host-friction inspiration](./inspiration/june-host-friction-inspiration.md) | June HF pack provenance; console consumer vs MH ownership |

@@ -358,7 +358,12 @@ Tests MUST be able to instantiate and validate recipes without model calls or ne
 
 ### TEST-02: Dependency injection
 
-Reference recipe tests MUST use dependency injection for model runners, clocks, sleepers/backoff, effect adapters, and other external behavior rather than patching global state.
+Reference recipe tests MUST use dependency injection for model runners, clocks,
+sleepers/backoff, effect adapters, and other external behavior rather than
+patching global state. Collaborators MUST be bound on Config and injected
+(constructor or `inject(T)`); tests MUST NOT rely on Config `get_*` hooks as a
+service locator or on `getattr` lazy caches. See
+[Dependency injection requirements](./dependency-injection.md).
 
 ### TEST-03: Decision batching
 

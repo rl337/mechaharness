@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from mechaharness.core.events import InMemoryEventLog
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -30,7 +31,7 @@ def test_graph_checkpoint_resume_and_verification() -> None:
     ready = graph.ready_nodes()
     assert any(n.id == "fetch" for n in ready)
 
-    store = GraphStore()
+    store = GraphStore(InMemoryEventLog())
     store.save(graph, run_id="r1", boundary="commit")
     restored = store.latest(run_id="r1")
     assert restored is not None

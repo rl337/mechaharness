@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Floor **pyiv ≥ 1.1.0**. Register use-case stdlib injectables on
+  `MechaHarnessConfig` (`Environment`, `DateTimeService`, `Filesystem`,
+  `Clock`, `LoggerFactory`) and route high-residue edges through them:
+  judge `from_env`, checkpoint stamps, `LoggingEventLog`, decision JSONL.
+- Inference and judge HTTP use injectable `AsyncHttpClient`
+  (`AsyncUrllibHttpClient` by default; `MemoryAsyncHttpClient` in tests)
+  instead of raw `httpx`. Dropped runtime `httpx`; keep it as a **dev**
+  extra for FastAPI/Starlette `TestClient` (`tests/test_api.py`).
+
 ## [0.4.1] — 2026-10-14
 
 Node components, recipe CLI/SVG render, and pyiv catalog multibinds (#26).

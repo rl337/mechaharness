@@ -44,7 +44,7 @@ axes. Wiring is **pyiv dependency injection first**. OpenAPI (`RunRequest` /
 
 ## Dependency injection
 
-**Pattern:** Template-method pyiv `Config` + constructor injection (pyiv ≥ 0.4.2)  
+**Pattern:** Template-method pyiv `Config` + constructor injection (pyiv ≥ 1.1)  
 **Code:** `mechaharness.di`
 
 Hosts **must** subclass `MechaHarnessConfig` (or use `run()`). Hand-constructing
@@ -63,7 +63,7 @@ from the Config constructor). Override `get_access_policy()` (or
 `CompoundPolicy`. Override `include_subagent_tools()` to set
 `HarnessConfig.subagent_tools` (parent EventLog query tools). Override
 `get_inference_environment()` for host profile probes.
-Override `get_judge_connection()` / `get_judge_provider()` for judge HTTP and
+Override `get_judge_connection()` / `get_judge_provider()` for judge wiring and
 wire adapters. Override `get_node_runner_registry()` /
 `get_graph_failure_policy()` / `get_graph_escalation()` /
 `get_linkage_resolver()` / `get_graph_template_registry()` /
@@ -72,7 +72,11 @@ wire adapters. Override `get_node_runner_registry()` /
 **Config ownership:** lane- and provider-specific knobs belong on the owning
 injectable (e.g. `SimpleHttpConnectionConfig.from_env` for `MECHA_JUDGE_*`), not
 as a growing pile of fields on `Settings`. Providers are never attributes of
-`Settings`. See `.cursor/rules/di-first.mdc` and the `di-config-ownership` skill.
+`Settings`. Shared edges bind in `configure()` and are consumed by constructor
+injection / `inject(T)` — not via `getattr` lazy caches on Config or sibling
+`get_*` calls that pull collaborators. See `.cursor/rules/di-first.mdc`,
+`docs/requirements/dependency-injection.md`, and the `di-config-ownership`
+skill.
 
 `SettingsConfig` implements the hooks via overridable `inference_classes()` /
 `harness_classes()` maps plus `Settings.inference_backend` /
@@ -108,7 +112,7 @@ Do not add string registries or a global injector. Domain types stay pyiv-free.
 **flavors** are extra pyiv `Named` bindings from
 `MechaHarnessConfig.completer_bindings()` /
 `judge_bindings()`; host constructors select them with
-`Annotated[T, Named(...)]` / `Matched(...)` (pyiv ≥ 0.4.2). See
+`Annotated[T, Named(...)]` / `Matched(...)` (pyiv ≥ 1.1). See
 [Dependency injection](./guides/dependency-injection.md).
 
 Before substantive work, `GraphExecutor` runs an injectable

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # DI-first (pyiv)
 
-Default path is **pyiv ≥ 0.4.1**. New services, backends, harness families, and
+Default path is **pyiv ≥ 1.1**. New services, backends, harness families, and
 CLI/API wiring go through `MechaHarnessConfig` and constructor injection. Do
 not add string registries, service locators, or a global injector. Hosts must
 subclass Config (or use `run()`); do not hand-construct harness families.
@@ -17,9 +17,10 @@ Extend by **subclassing Config**. Override `get_inference_class()` /
 Constructors take types pyiv can inject (`Completer`, `InferenceStrategy`,
 `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`, `AccessControl`,
 `CostAccountant`, `InferenceEnvironment`, `APIConnectionConfig`,
-`JudgeProvider`), not `str`/`dict` bags the injector cannot resolve. Prefer
-`Key` / `Named` / `Matched` when a Config needs multiple bindings of the same
-type (e.g. same-lane Completer flavors).
+`JudgeProvider`, `Environment`, `Filesystem`, `DateTimeService`, `Clock`,
+`LoggerFactory`, `AsyncHttpClient`, …), not `str`/`dict` bags the injector
+cannot resolve. Prefer `Key` / `Named` / `Matched` when a Config needs multiple
+bindings of the same type (e.g. same-lane Completer flavors).
 
 OpenAPI is the **non-DI facade**, not a second architecture. `RunRequest` / `run()`
 may hide the injector; they must still construct a Config and inject. Do not grow
@@ -27,6 +28,22 @@ may hide the injector; they must still construct a Config and inject. Do not gro
 
 Only `mechaharness.di` and `mechaharness.factory.run` import pyiv. Domain types
 stay injector-agnostic so host apps can inject them.
+
+## Bind and inject (no Config locator)
+
+- Register shared services in `configure()` (`register` / `register_instance`).
+- Consume them via constructor injection or `injector.inject(T)`. Unbound → fail.
+- Do **not** memoize services with `getattr(self, "_x", None)` / construct-if-missing.
+- Do **not** obtain collaborators by calling sibling Config `get_*` hooks from
+  other hooks, factories, or domain types. If `get_checkpoint_store` needs an
+  `EventLog`, the store (or its registrar factory) injects `EventLog` — it does
+  not call `self.get_event_log()`.
+- `get_*` hooks declare **what to bind** (class or explicit override instance).
+  They are not a runtime service locator.
+
+When adding a backend, lane, or shared edge, follow
+`.cursor/skills/di-config-ownership/SKILL.md` and
+`docs/requirements/dependency-injection.md`.
 
 ## Config ownership (all lanes)
 
@@ -44,10 +61,7 @@ fields that only one injectable or one lane understands.
 Providers (`JudgeProvider`, completion strategy, future media providers) are
 **Config DI injectables**, never attributes on `Settings`. Env vars may exist
 for operators; bind them on the owning type. Hosts override via Config hooks
-(`get_judge_connection()`, `get_judge_provider()`, later lane config) — not by
-stuffing Settings bags.
-
-When adding a backend or lane, follow `.cursor/skills/di-config-ownership/SKILL.md`.
+that change what `configure()` registers — not by stuffing Settings bags.
 
 ```python
 # BAD — new global registry
@@ -59,11 +73,24 @@ class Settings(BaseSettings):
     media_comfy_url: str | None = None
     judge_provider: object  # never
 
-# GOOD — Config hook + owning injectable
+# BAD — Config locator / lazy cache / get_* composition
+existing = getattr(self, "_event_log", None)
+store = EventLogCheckpointStore(event_log=self.get_event_log(), ...)
+
+# GOOD — Config binds; types inject
 class MyConfig(MechaHarnessConfig):
     def get_inference_class(self):
         return MyStrategy
 
-    def get_judge_connection(self):
-        return SimpleHttpConnectionConfig.from_env()
+    def get_harness_class(self):
+        return MyHarness
+
+# GOOD — composed service takes injectables
+class EventLogCheckpointStore:
+    def __init__(
+        self,
+        event_log: EventLog,
+        datetime_service: DateTimeService,
+        ...
+    ) -> None: ...
 ```
