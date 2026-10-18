@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pyiv.files import MemoryFilesystem
 
+from mechaharness.core.events import InMemoryEventLog
 from mechaharness.decision_log import DecisionLog, DecisionRecord, replay_verdict
 from mechaharness.inference.judge import NoulSignal
 from mechaharness.judgement_policy import (
@@ -80,7 +81,7 @@ def test_ask_human_band_and_approval_reuse() -> None:
 def test_decision_log_jsonl_and_replay() -> None:
     fs = MemoryFilesystem()
     path = "/decisions.jsonl"
-    log = DecisionLog(jsonl_path=path, filesystem=fs)
+    log = DecisionLog(InMemoryEventLog(), jsonl_path=path, filesystem=fs)
     policy = JudgementPolicy(
         version="gate-fixture-v1",
         thresholds=[JudgementThreshold(signal_id="destructive", allow_above=0.5)],

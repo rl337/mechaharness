@@ -98,6 +98,11 @@ run `--check`. Do **not** hand-edit the user-stories guide as ordinary markdown.
 - Document extension points: `MechaHarnessConfig.get_inference_class` /
   `get_harness_class`, `SettingsConfig.inference_classes()`, subclassing
   `AbstractHarness` / `InferenceStrategy`.
+- When documenting DI wiring, show **Config `configure()` bind + constructor
+  / `inject(T)` consume**. Do not teach `getattr(self, "_x", None)` caches or
+  hooks that call sibling `get_*` for collaborators; point at
+  `docs/requirements/dependency-injection.md` and the `di-config-ownership`
+  skill.
 - Call out the separation of concerns explicitly:
   - **Inference Strategy** = provider I/O
   - **Harness hierarchy** = agent loop policy

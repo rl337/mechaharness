@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from typing import Any, ClassVar, Union
 
 from pydantic import BaseModel, Field, field_validator
-from pyiv.log import Logger, LoggerFactory, StdlibLoggerFactory
+from pyiv.log import Logger, LoggerFactory
 
 LOGGER_NAME = "mechaharness.events"
 
@@ -285,9 +285,13 @@ class LoggingEventLog(EventLog):
     ) -> None:
         if logger is not None:
             self._logger = logger
+        elif logger_factory is not None:
+            self._logger = logger_factory.get(LOGGER_NAME)
         else:
-            factory = logger_factory or StdlibLoggerFactory()
-            self._logger = factory.get(LOGGER_NAME)
+            raise TypeError(
+                "LoggingEventLog requires logger= or logger_factory= "
+                "(bind LoggerFactory via Config; do not rely on a silent stdlib default)"
+            )
 
     def emit(self, event: Event) -> None:
         line = json.dumps(event.model_dump(mode="json"), default=str, sort_keys=True)
@@ -342,9 +346,12 @@ class FanoutEventLog(EventLog):
         return self._store.agents(parent_id=parent_id)
 
 
-def default_event_log() -> FanoutEventLog:
-    """In-memory store plus stdlib logging."""
-    return FanoutEventLog(InMemoryEventLog(), LoggingEventLog())
+def default_event_log(*, logger_factory: LoggerFactory) -> FanoutEventLog:
+    """In-memory store plus logging via an injected ``LoggerFactory``."""
+    return FanoutEventLog(
+        InMemoryEventLog(),
+        LoggingEventLog(logger_factory=logger_factory),
+    )
 
 
 def _label_from_payload(payload: dict[str, Any]) -> str | None:

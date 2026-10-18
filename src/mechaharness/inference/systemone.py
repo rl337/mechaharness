@@ -6,12 +6,9 @@ import time
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
-from pyiv.http import AsyncHttpClient, AsyncUrllibHttpClient, HttpError, HttpTimeoutError
+from pyiv.http import AsyncHttpClient, HttpError, HttpTimeoutError
 
-from mechaharness.api_connection import (
-    APIConnectionConfig,
-    SimpleHttpConnectionConfig,
-)
+from mechaharness.api_connection import APIConnectionConfig
 from mechaharness.core.exceptions import InferenceError
 from mechaharness.inference.judge import (
     ADAPTER_VERSION,
@@ -141,33 +138,12 @@ class SystemOneJudgeProvider(JudgeProvider):
 
     def __init__(
         self,
-        connection: APIConnectionConfig | None = None,
-        client: AsyncHttpClient | None = None,
-        *,
-        base_url: str | None = None,
-        model: str | None = None,
-        path: str | None = None,
-        timeout: float | None = None,
+        connection: APIConnectionConfig,
+        client: AsyncHttpClient,
     ) -> None:
-        if connection is not None:
-            self._connection = connection
-        elif any(v is not None for v in (base_url, model, path, timeout)):
-            overrides: dict[str, str | float] = {}
-            if base_url is not None:
-                overrides["base_url"] = base_url
-            if model is not None:
-                overrides["model"] = model
-            if path is not None:
-                overrides["path"] = path
-            if timeout is not None:
-                overrides["timeout"] = timeout
-            self._connection = SimpleHttpConnectionConfig.for_judge(**overrides)
-        else:
-            self._connection = SimpleHttpConnectionConfig.for_judge()
-        self._owns_client = client is None
-        self._client = client or AsyncUrllibHttpClient(
-            timeout=self._connection.timeout_seconds()
-        )
+        self._connection = connection
+        self._owns_client = False
+        self._client = client
 
     async def judge(self, request: JudgeRequest) -> Judgement:
         try:

@@ -9,9 +9,9 @@ from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
-from pyiv.files import Filesystem, RealFilesystem
+from pyiv.files import Filesystem
 
-from mechaharness.core.events import CoreEvent, Event, EventLog, InMemoryEventLog, event_type_key
+from mechaharness.core.events import CoreEvent, Event, EventLog, event_type_key
 from mechaharness.inference.judge import Signal
 from mechaharness.judgement_policy import JudgementFacts, JudgementPolicy, Verdict, decide
 
@@ -86,16 +86,16 @@ class DecisionLog:
 
     def __init__(
         self,
-        event_log: EventLog | None = None,
+        event_log: EventLog,
         *,
+        filesystem: Filesystem,
         jsonl_path: Path | str | None = None,
         agent_id: str = "policy",
-        filesystem: Filesystem | None = None,
     ) -> None:
-        self.event_log = event_log or InMemoryEventLog()
+        self.event_log = event_log
         self.jsonl_path = Path(jsonl_path) if jsonl_path else None
         self.agent_id = agent_id
-        self._fs = filesystem or RealFilesystem()
+        self._fs = filesystem
 
     def _append_jsonl(self, line: str) -> None:
         """Append one JSONL line via ``Filesystem`` (works with Memory doubles)."""

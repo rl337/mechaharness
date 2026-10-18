@@ -74,3 +74,8 @@ def test_missing_base_raises() -> None:
     conn = SimpleHttpConnectionConfig(base_url=None)
     with pytest.raises(ValueError, match="MECHA_JUDGE_BASE_URL"):
         conn.endpoint_url()
+
+
+def test_for_judge_requires_env() -> None:
+    with pytest.raises(TypeError, match="env"):
+        SimpleHttpConnectionConfig.for_judge()

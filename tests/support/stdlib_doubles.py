@@ -1,11 +1,15 @@
 """Shared pyiv 1.1 Memory*/Mock* bindings for unit tests.
 
-Prefer ``stdlib_doubles_config(...)`` (Config hooks) when judge
-``APIConnectionConfig`` must read the same ``Environment``. Use
-``stdlib_doubles_overlay(...)`` with ``pyiv.override(base).with_(overlay)``
-to swap only edge doubles on an existing production Config; rebind
-``APIConnectionConfig`` in the overlay when judge env isolation matters
-(base ``configure()`` may have already stamped a connection from OS env).
+Prefer ``stdlib_doubles_config(...)`` (override hooks that declare what
+``configure()`` binds) when judge ``APIConnectionConfig`` must read the same
+``Environment``. Use ``stdlib_doubles_overlay(...)`` with
+``pyiv.override(base).with_(overlay)`` to swap only edge doubles on an
+existing production Config; rebind ``APIConnectionConfig`` in the overlay
+when judge env isolation matters (base ``configure()`` may have already
+stamped a connection from OS env).
+
+Composed services (``EventLog``, ``CheckpointStore``, …) take collaborators
+via injection — do not call Config ``get_*`` from tests to pull them.
 """
 
 from __future__ import annotations
@@ -51,7 +55,9 @@ def stdlib_doubles_config(
 ) -> MechaHarnessConfig:
     """Build a MechaHarnessConfig with Memory/Mock stdlib edges.
 
-    Judge connection is built from the same ``Environment`` instance.
+    Hooks return instances for ``configure()`` to ``register_instance``.
+    Judge connection is built by the default injector factory from the same
+    ``Environment`` binding.
     """
     env = environment if environment is not None else default_memory_environment()
     dts = (
@@ -138,9 +144,22 @@ def fixed_utc(
     return datetime(year, month, day, hour, minute, second, tzinfo=timezone.utc)
 
 
+def mock_datetime_service(
+    year: int = 2020,
+    month: int = 1,
+    day: int = 2,
+    hour: int = 0,
+    minute: int = 0,
+    second: int = 0,
+) -> MockDateTimeService:
+    """``MockDateTimeService`` fixed at ``fixed_utc(...)``."""
+    return MockDateTimeService(fixed_utc(year, month, day, hour, minute, second))
+
+
 __all__ = [
     "default_memory_environment",
     "fixed_utc",
+    "mock_datetime_service",
     "stdlib_doubles_config",
     "stdlib_doubles_overlay",
 ]

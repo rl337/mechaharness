@@ -13,7 +13,7 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any
 
-from pyiv.http import AsyncHttpClient, AsyncUrllibHttpClient, HttpError
+from pyiv.http import AsyncHttpClient, HttpError
 
 from mechaharness.config import Settings
 from mechaharness.core.exceptions import InferenceError
@@ -166,7 +166,7 @@ class OpenAICompatStrategy(InferenceStrategy):
     def __init__(
         self,
         settings: Settings,
-        client: AsyncHttpClient | None = None,
+        client: AsyncHttpClient,
         *,
         timeout: float = 120.0,
     ) -> None:
@@ -174,8 +174,8 @@ class OpenAICompatStrategy(InferenceStrategy):
         self.api_key = settings.api_key
         self.default_model = settings.model
         self._timeout = timeout
-        self._owns_client = client is None
-        self._client = client or AsyncUrllibHttpClient(timeout=timeout)
+        self._owns_client = False
+        self._client = client
 
     def _build_headers(self, extra: dict[str, str] | None) -> dict[str, str]:
         headers = {"Content-Type": "application/json"}

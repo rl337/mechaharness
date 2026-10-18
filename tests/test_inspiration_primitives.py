@@ -265,8 +265,12 @@ def test_failure_attribution_repeated_classes() -> None:
 def test_checkpoint_store_fingerprint() -> None:
     from mechaharness.checkpoint_store import EventLogCheckpointStore
     from mechaharness.core.events import InMemoryEventLog
+    from tests.support.stdlib_doubles import mock_datetime_service
 
-    store = EventLogCheckpointStore(GraphStore(InMemoryEventLog()))
+    store = EventLogCheckpointStore(
+        GraphStore(InMemoryEventLog()),
+        datetime_service=mock_datetime_service(),
+    )
     graph = ExecutionGraph(goal="g")
     graph.add_node(GraphNode(id="a", kind="compute"))
     store.save(graph, run_id="r1", fingerprint="abc123", boundary="dispatch")

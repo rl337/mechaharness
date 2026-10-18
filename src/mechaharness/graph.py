@@ -170,8 +170,8 @@ class ExecutionGraph(BaseModel):
 class GraphStore:
     """Persist graph checkpoints via EventLog payloads."""
 
-    def __init__(self, event_log: EventLog | None = None, *, agent_id: str = "graph") -> None:
-        self.event_log = event_log or InMemoryEventLog()
+    def __init__(self, event_log: EventLog, *, agent_id: str = "graph") -> None:
+        self.event_log = event_log
         self.agent_id = agent_id
 
     def save(

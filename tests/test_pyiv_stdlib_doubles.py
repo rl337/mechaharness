@@ -1,4 +1,9 @@
-"""pyiv 1.1 use-case doubles wired through MechaHarness edges."""
+"""pyiv 1.1 use-case doubles wired through MechaHarness edges.
+
+Covers DI-TEST-01 (required injectables fail closed), DI-TEST-02 (overlay /
+hook doubles), and DI-TEST-03 (composed services receive rebound collaborators
+via injection).
+"""
 
 from __future__ import annotations
 
@@ -13,9 +18,12 @@ from pyiv.time import Clock, DateTimeService, MockDateTimeService, SyntheticCloc
 
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
 from mechaharness.checkpoint_store import CheckpointStore, EventLogCheckpointStore
+from mechaharness.core.access import AccessControl, GraphExecute
 from mechaharness.core.events import (
     LOGGER_NAME,
+    AccessCheck,
     Event,
+    EventLog,
     InMemoryEventLog,
     LoggingEventLog,
     RunStart,
@@ -31,6 +39,7 @@ from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
 from tests.support.stdlib_doubles import (
     default_memory_environment,
     fixed_utc,
+    mock_datetime_service,
     stdlib_doubles_config,
     stdlib_doubles_overlay,
 )
@@ -123,7 +132,9 @@ def test_from_env_legacy_only_when_judge_keys_absent() -> None:
 
 def test_decision_log_jsonl_via_memory_filesystem() -> None:
     fs = MemoryFilesystem()
-    log = DecisionLog(jsonl_path="/decisions.jsonl", filesystem=fs)
+    log = DecisionLog(
+        InMemoryEventLog(), jsonl_path="/decisions.jsonl", filesystem=fs
+    )
     log.record(
         DecisionRecord(
             eventId="d1",
@@ -215,3 +226,78 @@ def test_logging_event_log_memory_factory() -> None:
     records = factory.get(LOGGER_NAME).records
     assert len(records) == 1
     assert '"core:run_start"' in records[0].message
+
+
+# --- DI-TEST-01: unbound / missing injectables fail closed ---
+
+
+def test_logging_event_log_requires_logger_or_factory() -> None:
+    with pytest.raises(TypeError, match="logger"):
+        LoggingEventLog()
+
+
+def test_for_judge_requires_environment() -> None:
+    with pytest.raises(TypeError, match="env"):
+        SimpleHttpConnectionConfig.for_judge()
+
+
+def test_decision_log_requires_event_log_and_filesystem() -> None:
+    with pytest.raises(TypeError):
+        DecisionLog()  # type: ignore[call-arg]
+
+
+def test_graph_store_requires_event_log() -> None:
+    with pytest.raises(TypeError):
+        GraphStore()  # type: ignore[call-arg]
+
+
+# --- DI-TEST-03: composed services inject rebound collaborators ---
+
+
+def test_event_log_uses_injected_logger_factory() -> None:
+    factory = MemoryLoggerFactory()
+    inj = get_injector(stdlib_doubles_config(logger_factory=factory))
+    log = inj.inject(EventLog)
+    log.emit(
+        Event(
+            type=event_type_key(RunStart),
+            agent_id="a",
+            run_id="r1",
+            payload={"prompt_chars": "1"},
+        )
+    )
+    assert factory.get(LOGGER_NAME).records
+    assert '"core:run_start"' in factory.get(LOGGER_NAME).records[0].message
+
+
+def test_access_control_shares_injected_event_log() -> None:
+    inj = get_injector(stdlib_doubles_config())
+    log = inj.inject(EventLog)
+    access = inj.inject(AccessControl)
+    access.allows([GraphExecute], agent_id="a", run_id="r1")
+    events = log.query(agent_id="a", run_id="r1", types=[AccessCheck])
+    assert len(events) == 1
+    assert events[0].type == event_type_key(AccessCheck)
+
+
+def test_checkpoint_store_uses_injected_datetime_service() -> None:
+    clock = mock_datetime_service(2022, 4, 5, 6, 7, 8)
+    inj = get_injector(stdlib_doubles_config(datetime_service=clock))
+    store = inj.inject(CheckpointStore)
+    assert isinstance(store, EventLogCheckpointStore)
+    effect = store.save_effect(
+        EffectRecord(
+            effect_id="r1:n:1",
+            run_id="r1",
+            node_id="n",
+            node_attempt=1,
+            backend_id="host.test",
+            state=EffectState.INTENDED,
+        )
+    )
+    assert effect.created_at.startswith("2022-04-05T06:07:08")
+    clock.set_time(fixed_utc(2022, 4, 6))
+    again = store.save_effect(
+        effect.model_copy(update={"state": EffectState.ACCEPTED, "external_handle": "h"})
+    )
+    assert again.updated_at.startswith("2022-04-06")

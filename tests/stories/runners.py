@@ -8,6 +8,7 @@ from typing import Annotated, Any
 import pytest
 from pyiv.http import AsyncUrllibHttpClient, MemoryAsyncHttpClient
 from pyiv.key import Matched, Named
+from pyiv.process import OsEnvironment
 
 from mechaharness.advisor import (
     AdvisorContextContract,
@@ -558,7 +559,10 @@ async def _run_route_refund(case: StoryCase, backend: StoryBackend) -> None:
             client.add("POST", connection.endpoint_url(), json=response)
             provider = SystemOneJudgeProvider(connection=connection, client=client)
         else:
-            provider = SystemOneJudgeProvider()
+            provider = SystemOneJudgeProvider(
+                connection=SimpleHttpConnectionConfig.for_judge(env=OsEnvironment()),
+                client=AsyncUrllibHttpClient(),
+            )
             provider_aclose = provider
     else:
         raise ValueError(f"route_refund unsupported adapter {case.adapter!r}")
@@ -924,7 +928,7 @@ async def _run_local_plan_resume(case: StoryCase, backend: StoryBackend) -> None
             evidence_ref="edge:1",
         )
     )
-    store = GraphStore()
+    store = GraphStore(InMemoryEventLog())
     store.save(graph, run_id="story-graph", boundary="dispatch")
     restored = store.latest(run_id="story-graph")
     assert restored is not None

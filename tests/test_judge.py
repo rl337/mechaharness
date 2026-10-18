@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 from pyiv.http import MemoryAsyncHttpClient
 
+from mechaharness.api_connection import SimpleHttpConnectionConfig
 from mechaharness.inference.judge import (
     ChoiceOption,
     ChoiceQuestion,
@@ -143,11 +144,12 @@ async def test_systemone_adapter_maps_wire() -> None:
 
     client = MemoryAsyncHttpClient()
     client.add("POST", "http://decide.test/v1/systemone", json=payload)
-    provider = SystemOneJudgeProvider(
+    connection = SimpleHttpConnectionConfig(
         base_url="http://decide.test",
+        path="/v1/systemone",
         model="laya",
-        client=client,
     )
+    provider = SystemOneJudgeProvider(connection=connection, client=client)
     result = await judge(
         JudgeRequest(
             state="refund",

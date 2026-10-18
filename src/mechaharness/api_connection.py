@@ -15,7 +15,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
-from pyiv.process import Environment, OsEnvironment
+from pyiv.process import Environment
 
 DEFAULT_JUDGE_PATH = "/v1/systemone"
 
@@ -75,18 +75,18 @@ class SimpleHttpConnectionConfig(APIConnectionConfig):
         legacy_prefix: str | None = "MECHA_DECIDE",
         default_path: str = DEFAULT_JUDGE_PATH,
         fallback_api_key_env: str = "MECHA_API_KEY",
-        env: Environment | None = None,
+        env: Environment,
     ) -> SimpleHttpConnectionConfig:
-        """Bind connection knobs from an injectable environment.
+        """Bind connection knobs from an injected ``Environment``.
 
         Reads ``{prefix}_BASE_URL``, ``_PATH``, ``_URL``, ``_MODEL``,
         ``_API_KEY``, ``_TIMEOUT_SECONDS``. When ``legacy_prefix`` is set,
         falls back for base URL / model (judge migration window).
 
-        ``env`` defaults to ``OsEnvironment()`` for standalone use; Config
-        paths should pass the injected ``Environment``.
+        ``env`` is required — bind ``Environment`` via Config and pass it
+        (or use ``OsEnvironment`` / ``MemoryEnvironment`` explicitly).
         """
-        environ = env if env is not None else OsEnvironment()
+        environ = env
 
         def _get(*keys: str) -> str | None:
             for key in keys:
@@ -120,12 +120,16 @@ class SimpleHttpConnectionConfig(APIConnectionConfig):
     def for_judge(cls, **overrides: Any) -> SimpleHttpConnectionConfig:
         """Judge-lane connection from env, with optional constructor overrides.
 
-        Pass ``env=`` (a pyiv ``Environment``) to avoid reading ``os.environ``.
-        Other keys (``base_url``, ``path``, ``model``, …) override the env-built
-        connection.
+        ``env=`` (a pyiv ``Environment``) is required. Other keys (``base_url``,
+        ``path``, ``model``, …) override the env-built connection.
         """
         env = overrides.pop("env", None)
-        if env is not None and not isinstance(env, Environment):
+        if env is None:
+            raise TypeError(
+                "for_judge requires env= (inject Environment via Config; "
+                "do not fall back to OsEnvironment)"
+            )
+        if not isinstance(env, Environment):
             raise TypeError("for_judge(env=...) expects a pyiv Environment")
         conn = cls.from_env(env=env)
         if not overrides:
