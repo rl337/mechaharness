@@ -5,9 +5,10 @@ Host apps **must** wire MechaHarness through pyiv (`MechaHarnessConfig` →
 not a supported host path. Prefer the OpenAPI-shaped `run()` helper only when
 you want the facade that builds a Config under the hood.
 
-Requires **pyiv ≥ 0.4.2** (`Named` / `Matched` / `Key`, plus `Annotated[...]`
-constructor injection). Prefer `from mechaharness.di import get_injector` so
-Named Completer aliases bind correctly.
+Requires **pyiv ≥ 1.1** (`Named` / `Matched` / `Key`, `Annotated[...]`
+constructor injection, injectable `AsyncHttpClient`, and use-case stdlib
+doubles). Prefer `from mechaharness.di import get_injector` so Named Completer
+aliases bind correctly.
 
 ## Prerequisites
 
@@ -144,6 +145,71 @@ print(result.final_text)
 
 `run()` still constructs a `SettingsConfig` and injects; it only hides pyiv from
 the caller.
+
+### HTTP transport (`AsyncHttpClient`)
+
+`MechaHarnessConfig` registers a shared pyiv `AsyncHttpClient`
+(`AsyncUrllibHttpClient` by default). Inference and judge adapters
+(`OpenAICompatStrategy`, `AnthropicStrategy`, `SystemOneJudgeProvider`) take it
+as a constructor dependency and send absolute URLs with per-request headers —
+endpoint ownership stays on `Settings` / `APIConnectionConfig`.
+
+In tests, bind a double instead of hitting the network:
+
+```python
+from pyiv.http import AsyncHttpClient, MemoryAsyncHttpClient
+
+from mechaharness.di import MechaHarnessConfig
+
+
+class TestConfig(MechaHarnessConfig):
+    def configure(self):
+        super().configure()
+        client = MemoryAsyncHttpClient()
+        client.add(
+            "POST",
+            "http://api.test/v1/chat/completions",
+            json={"choices": [{"message": {"role": "assistant", "content": "ok"}}]},
+        )
+        self.register_instance(AsyncHttpClient, client)
+```
+
+Hosts may register any `AsyncHttpClient` implementation (including a custom
+httpx-backed client) without changing adapters.
+
+### Stdlib doubles (`Environment`, time, files, log)
+
+`MechaHarnessConfig` also registers pyiv use-case injectables (pyiv ≥ 1.1):
+
+| Interface | Default | Typical test double |
+|-----------|---------|---------------------|
+| `Environment` | `OsEnvironment` | `MemoryEnvironment` |
+| `DateTimeService` | `PythonDateTimeService` | `MockDateTimeService` |
+| `Filesystem` | `RealFilesystem` | `MemoryFilesystem` |
+| `Clock` | `RealClock` | `SyntheticClock` |
+| `LoggerFactory` | `StdlibLoggerFactory` | `MemoryLoggerFactory` |
+
+Judge `SimpleHttpConnectionConfig.from_env` / `for_judge` read through an
+injected `Environment`. Checkpoint effect stamps use an injected
+`DateTimeService`. `LoggingEventLog` takes `LoggerFactory`. `DecisionLog`
+JSONL I/O takes `Filesystem`. Composed services (`EventLog`,
+`AccessControl`, `CheckpointStore`, judge connection, …) MUST take these as
+constructor dependencies (or injector factories) — not by calling sibling
+Config `get_*` hooks.
+
+In tests, rebind with `register_instance` after `super().configure()`,
+subclass hooks that change what `configure()` registers, or
+`pyiv.override(base).with_(overlay)`. Do not monkeypatch `os.environ`, freeze
+time, or touch disk when an injectable exists. Missing bindings must fail at
+`inject()` time.
+
+Test helpers live in `tests/support/stdlib_doubles.py`:
+`stdlib_doubles_config(...)` for a full Config with Memory/Mock edges, and
+`stdlib_doubles_overlay(...)` for `pyiv.override(base).with_(overlay)` (set
+`rebind_judge_connection=True` when the overlay must rebuild
+`APIConnectionConfig` from the Memory environment).
+
+Normative rules: [Dependency injection requirements](../requirements/dependency-injection.md).
 
 Override `get_access_policy()` / `get_grants()` (or `get_access_control()`) to
 inject deny-by-default tool grants; use `CompoundPolicy` to union reusable

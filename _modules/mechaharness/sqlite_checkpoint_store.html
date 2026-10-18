@@ -117,11 +117,13 @@
 
 <span class="sd">    &gt;&gt;&gt; import tempfile</span>
 <span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; from pyiv.time import PythonDateTimeService</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.external_effect import EffectRecord, EffectState</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.graph import ExecutionGraph, GraphNode, NodeStatus</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore</span>
 <span class="sd">    &gt;&gt;&gt; path = Path(tempfile.mkdtemp()) / "runs.sqlite"</span>
-<span class="sd">    &gt;&gt;&gt; store = SqliteCheckpointStore(path)</span>
+<span class="sd">    &gt;&gt;&gt; clock = PythonDateTimeService()</span>
+<span class="sd">    &gt;&gt;&gt; store = SqliteCheckpointStore(path, datetime_service=clock)</span>
 <span class="sd">    &gt;&gt;&gt; store.durability</span>
 <span class="sd">    'durable'</span>
 <span class="sd">    &gt;&gt;&gt; g = ExecutionGraph(goal="dispatch coding job")</span>
@@ -138,7 +140,7 @@
 <span class="sd">    ... ))</span>
 <span class="sd">    &gt;&gt;&gt; store.close()</span>
 <span class="sd">    &gt;&gt;&gt; # Fresh process against the same file:</span>
-<span class="sd">    &gt;&gt;&gt; again = SqliteCheckpointStore(path)</span>
+<span class="sd">    &gt;&gt;&gt; again = SqliteCheckpointStore(path, datetime_service=clock)</span>
 <span class="sd">    &gt;&gt;&gt; again.latest(run_id="run-1").nodes["job"].status.value</span>
 <span class="sd">    'running'</span>
 <span class="sd">    &gt;&gt;&gt; again.get_effect("run-1:job:1").external_handle</span>
@@ -153,9 +155,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">get_args</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">DateTimeService</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.checkpoint_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckpointDurability</span><span class="p">,</span> <span class="n">CheckpointStore</span><span class="p">,</span> <span class="n">effect_from_mapping</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="n">EffectRecord</span>
@@ -209,8 +212,14 @@
 
 <div class="viewcode-block" id="SqliteCheckpointStore.__init__">
 <a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">datetime_service</span><span class="p">:</span> <span class="n">DateTimeService</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datetime</span> <span class="o">=</span> <span class="n">datetime_service</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"."</span><span class="p">}:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
@@ -270,7 +279,7 @@
         <span class="k">if</span> <span class="n">fingerprint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">graph</span><span class="o">.</span><span class="n">config_fingerprint</span> <span class="o">=</span> <span class="n">fingerprint</span>
         <span class="n">fp</span> <span class="o">=</span> <span class="n">fingerprint</span> <span class="ow">or</span> <span class="n">graph</span><span class="o">.</span><span class="n">config_fingerprint</span>
-        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datetime</span><span class="o">.</span><span class="n">now_utc_iso</span><span class="p">()</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">(),</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"BEGIN IMMEDIATE"</span><span class="p">)</span>
@@ -373,7 +382,7 @@
 <div class="viewcode-block" id="SqliteCheckpointStore.save_effect">
 <a class="viewcode-back" href="../../api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.save_effect">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effect</span><span class="p">:</span> <span class="n">EffectRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EffectRecord</span><span class="p">:</span>
-        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datetime</span><span class="o">.</span><span class="n">now_utc_iso</span><span class="p">()</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"BEGIN IMMEDIATE"</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
