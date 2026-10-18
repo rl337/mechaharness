@@ -152,18 +152,16 @@ class SystemOneJudgeProvider(JudgeProvider):
         if connection is not None:
             self._connection = connection
         elif any(v is not None for v in (base_url, model, path, timeout)):
-            self._connection = SimpleHttpConnectionConfig.for_judge(
-                **{
-                    k: v
-                    for k, v in {
-                        "base_url": base_url,
-                        "model": model,
-                        "path": path,
-                        "timeout": timeout,
-                    }.items()
-                    if v is not None
-                }
-            )
+            overrides: dict[str, str | float] = {}
+            if base_url is not None:
+                overrides["base_url"] = base_url
+            if model is not None:
+                overrides["model"] = model
+            if path is not None:
+                overrides["path"] = path
+            if timeout is not None:
+                overrides["timeout"] = timeout
+            self._connection = SimpleHttpConnectionConfig.for_judge(**overrides)
         else:
             self._connection = SimpleHttpConnectionConfig.for_judge()
         self._owns_client = client is None

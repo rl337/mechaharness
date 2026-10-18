@@ -117,13 +117,16 @@ class SimpleHttpConnectionConfig(APIConnectionConfig):
         )
 
     @classmethod
-    def for_judge(
-        cls,
-        *,
-        env: Environment | None = None,
-        **overrides: Any,
-    ) -> SimpleHttpConnectionConfig:
-        """Judge-lane connection from env, with optional constructor overrides."""
+    def for_judge(cls, **overrides: Any) -> SimpleHttpConnectionConfig:
+        """Judge-lane connection from env, with optional constructor overrides.
+
+        Pass ``env=`` (a pyiv ``Environment``) to avoid reading ``os.environ``.
+        Other keys (``base_url``, ``path``, ``model``, …) override the env-built
+        connection.
+        """
+        env = overrides.pop("env", None)
+        if env is not None and not isinstance(env, Environment):
+            raise TypeError("for_judge(env=...) expects a pyiv Environment")
         conn = cls.from_env(env=env)
         if not overrides:
             return conn
