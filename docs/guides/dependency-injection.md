@@ -5,9 +5,10 @@ Host apps **must** wire MechaHarness through pyiv (`MechaHarnessConfig` →
 not a supported host path. Prefer the OpenAPI-shaped `run()` helper only when
 you want the facade that builds a Config under the hood.
 
-Requires **pyiv ≥ 0.4.2** (`Named` / `Matched` / `Key`, plus `Annotated[...]`
-constructor injection). Prefer `from mechaharness.di import get_injector` so
-Named Completer aliases bind correctly.
+Requires **pyiv ≥ 1.0** (`Named` / `Matched` / `Key`, `Annotated[...]`
+constructor injection, and injectable `AsyncHttpClient`). Prefer
+`from mechaharness.di import get_injector` so Named Completer aliases bind
+correctly.
 
 ## Prerequisites
 
@@ -144,6 +145,37 @@ print(result.final_text)
 
 `run()` still constructs a `SettingsConfig` and injects; it only hides pyiv from
 the caller.
+
+### HTTP transport (`AsyncHttpClient`)
+
+`MechaHarnessConfig` registers a shared pyiv `AsyncHttpClient`
+(`AsyncUrllibHttpClient` by default). Inference and judge adapters
+(`OpenAICompatStrategy`, `AnthropicStrategy`, `SystemOneJudgeProvider`) take it
+as a constructor dependency and send absolute URLs with per-request headers —
+endpoint ownership stays on `Settings` / `APIConnectionConfig`.
+
+In tests, bind a double instead of hitting the network:
+
+```python
+from pyiv.http import AsyncHttpClient, MemoryAsyncHttpClient
+
+from mechaharness.di import MechaHarnessConfig
+
+
+class TestConfig(MechaHarnessConfig):
+    def configure(self):
+        super().configure()
+        client = MemoryAsyncHttpClient()
+        client.add(
+            "POST",
+            "http://api.test/v1/chat/completions",
+            json={"choices": [{"message": {"role": "assistant", "content": "ok"}}]},
+        )
+        self.register_instance(AsyncHttpClient, client)
+```
+
+Hosts may register any `AsyncHttpClient` implementation (including a custom
+httpx-backed client) without changing adapters.
 
 Override `get_access_policy()` / `get_grants()` (or `get_access_control()`) to
 inject deny-by-default tool grants; use `CompoundPolicy` to union reusable

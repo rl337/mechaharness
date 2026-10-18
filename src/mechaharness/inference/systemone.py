@@ -5,8 +5,8 @@ from __future__ import annotations
 import time
 from typing import Any
 
-import httpx
 from pydantic import BaseModel, ConfigDict, Field
+from pyiv.http import AsyncHttpClient, AsyncUrllibHttpClient, HttpError, HttpTimeoutError
 
 from mechaharness.api_connection import (
     APIConnectionConfig,
@@ -142,12 +142,12 @@ class SystemOneJudgeProvider(JudgeProvider):
     def __init__(
         self,
         connection: APIConnectionConfig | None = None,
+        client: AsyncHttpClient | None = None,
         *,
         base_url: str | None = None,
         model: str | None = None,
         path: str | None = None,
         timeout: float | None = None,
-        client: httpx.AsyncClient | None = None,
     ) -> None:
         if connection is not None:
             self._connection = connection
@@ -166,7 +166,10 @@ class SystemOneJudgeProvider(JudgeProvider):
             )
         else:
             self._connection = SimpleHttpConnectionConfig.for_judge()
-        self._client = client
+        self._owns_client = client is None
+        self._client = client or AsyncUrllibHttpClient(
+            timeout=self._connection.timeout_seconds()
+        )
 
     async def judge(self, request: JudgeRequest) -> Judgement:
         try:
@@ -180,25 +183,19 @@ class SystemOneJudgeProvider(JudgeProvider):
             questions=wire_questions,
         )
         started = time.perf_counter()
-        owns_client = self._client is None
-        client = self._client or httpx.AsyncClient(
-            timeout=self._connection.timeout_seconds()
-        )
         try:
-            response = await client.post(
+            response = await self._client.post(
                 url,
                 json=body.model_dump(mode="json", exclude_none=True),
                 headers=self._connection.headers(),
+                timeout=self._connection.timeout_seconds(),
             )
             response.raise_for_status()
             payload = response.json()
-        except httpx.TimeoutException as exc:
+        except HttpTimeoutError as exc:
             raise JudgeError("timeout contacting System One") from exc
-        except httpx.HTTPError as exc:
+        except HttpError as exc:
             raise InferenceError(f"System One HTTP error: {exc}") from exc
-        finally:
-            if owns_client:
-                await client.aclose()
         elapsed = (time.perf_counter() - started) * 1000.0
         parsed = SystemOneResponseWire.model_validate(payload)
         signals: list[Signal] = []
@@ -230,3 +227,7 @@ class SystemOneJudgeProvider(JudgeProvider):
             raw=payload if isinstance(payload, dict) else {"payload": payload},
             request_id=request.trace_id,
         )
+
+    async def aclose(self) -> None:
+        if self._owns_client:
+            await self._client.aclose()

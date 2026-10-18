@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Floor **pyiv ≥ 1.0.0**. Inference and judge HTTP use injectable
+  `AsyncHttpClient` (`AsyncUrllibHttpClient` by default; `MemoryAsyncHttpClient`
+  in tests) instead of raw `httpx`. Adapters own absolute URLs / headers from
+  `Settings` / `APIConnectionConfig`; `MechaHarnessConfig` registers the shared
+  transport. Dropped the direct `httpx` dependency.
+
 ## [0.4.1] — 2026-10-14
 
 Node components, recipe CLI/SVG render, and pyiv catalog multibinds (#26).

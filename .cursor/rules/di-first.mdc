@@ -5,7 +5,7 @@ alwaysApply: true
 
 # DI-first (pyiv)
 
-Default path is **pyiv ≥ 0.4.1**. New services, backends, harness families, and
+Default path is **pyiv ≥ 1.0**. New services, backends, harness families, and
 CLI/API wiring go through `MechaHarnessConfig` and constructor injection. Do
 not add string registries, service locators, or a global injector. Hosts must
 subclass Config (or use `run()`); do not hand-construct harness families.

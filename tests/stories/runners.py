@@ -5,8 +5,8 @@ from __future__ import annotations
 import os
 from typing import Annotated, Any
 
-import httpx
 import pytest
+from pyiv.http import AsyncUrllibHttpClient, MemoryAsyncHttpClient
 from pyiv.key import Matched, Named
 
 from mechaharness.advisor import (
@@ -501,23 +501,15 @@ async def _run_pass_through(case: StoryCase, backend: StoryBackend) -> None:
             api_key=os.environ.get("MECHA_API_KEY", "story"),
             max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "256")),
         )
-        client: httpx.AsyncClient | None
+        base = (settings.base_url or "http://story.invalid/v1").rstrip("/")
         if backend.mode == "static":
-            payload = response
-
-            def handler(http_request: httpx.Request) -> httpx.Response:
-                return httpx.Response(200, json=payload)
-
-            client = httpx.AsyncClient(
-                base_url=settings.base_url or "http://story.invalid/v1",
-                transport=httpx.MockTransport(handler),
-                headers={"Authorization": f"Bearer {settings.api_key}"},
-            )
+            client = MemoryAsyncHttpClient()
+            client.add("POST", f"{base}/chat/completions", json=response)
         else:
             if not os.environ.get("MECHA_BASE_URL"):
                 pytest.fail("MECHA_BASE_URL is required for live openai_compat stories")
-            client = None
-        strategy = OpenAICompatStrategy(settings, timeout=180.0, client=client)
+            client = AsyncUrllibHttpClient(timeout=180.0)
+        strategy = OpenAICompatStrategy(settings, client=client, timeout=180.0)
         harness = make_harness(
             strategy,
             config=HarnessConfig(
@@ -551,26 +543,23 @@ async def _run_route_refund(case: StoryCase, backend: StoryBackend) -> None:
     state = request["state"]
     questions = _build_questions(request["questions"])
     policy = _policy_from_request(request.get("policy"))
-    client: httpx.AsyncClient | None = None
+    provider_aclose = None
 
     if case.adapter == "in_process":
         provider = FixtureJudgeProvider(response.get("answers", {}))
     elif case.adapter == "systemone":
         if backend.mode == "static":
-            payload = response
-
-            def handler(http_request: httpx.Request) -> httpx.Response:
-                return httpx.Response(200, json=payload)
-
-            client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
             connection = SimpleHttpConnectionConfig(
                 base_url="http://story.invalid",
                 path="/v1/systemone",
                 model="laya",
             )
+            client = MemoryAsyncHttpClient()
+            client.add("POST", connection.endpoint_url(), json=response)
             provider = SystemOneJudgeProvider(connection=connection, client=client)
         else:
             provider = SystemOneJudgeProvider()
+            provider_aclose = provider
     else:
         raise ValueError(f"route_refund unsupported adapter {case.adapter!r}")
 
@@ -585,8 +574,8 @@ async def _run_route_refund(case: StoryCase, backend: StoryBackend) -> None:
             provider=provider,
         )
     finally:
-        if client is not None:
-            await client.aclose()
+        if provider_aclose is not None:
+            await provider_aclose.aclose()
 
     by_id = {a.id: a for a in judgement.answers}
     route = by_id.get("route")

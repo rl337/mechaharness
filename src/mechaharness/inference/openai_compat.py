@@ -13,7 +13,7 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any
 
-import httpx
+from pyiv.http import AsyncHttpClient, AsyncUrllibHttpClient, HttpError
 
 from mechaharness.config import Settings
 from mechaharness.core.exceptions import InferenceError
@@ -166,19 +166,16 @@ class OpenAICompatStrategy(InferenceStrategy):
     def __init__(
         self,
         settings: Settings,
+        client: AsyncHttpClient | None = None,
         *,
         timeout: float = 120.0,
-        client: httpx.AsyncClient | None = None,
     ) -> None:
         self.base_url = (settings.base_url or "https://api.openai.com/v1").rstrip("/")
         self.api_key = settings.api_key
         self.default_model = settings.model
+        self._timeout = timeout
         self._owns_client = client is None
-        self._client = client or httpx.AsyncClient(
-            base_url=self.base_url,
-            timeout=timeout,
-            headers=self._build_headers(None),
-        )
+        self._client = client or AsyncUrllibHttpClient(timeout=timeout)
 
     def _build_headers(self, extra: dict[str, str] | None) -> dict[str, str]:
         headers = {"Content-Type": "application/json"}
@@ -187,6 +184,9 @@ class OpenAICompatStrategy(InferenceStrategy):
         if extra:
             headers.update(extra)
         return headers
+
+    def _completions_url(self) -> str:
+        return f"{self.base_url}/chat/completions"
 
     def describe(self) -> dict[str, Any]:
         return {
@@ -210,9 +210,14 @@ class OpenAICompatStrategy(InferenceStrategy):
     async def complete(self, request: CompletionRequest) -> CompletionResponse:
         body = self._build_body(request)
         try:
-            resp = await self._client.post("/chat/completions", json=body)
+            resp = await self._client.post(
+                self._completions_url(),
+                json=body,
+                headers=self._build_headers(None),
+                timeout=self._timeout,
+            )
             resp.raise_for_status()
-        except httpx.HTTPError as exc:
+        except HttpError as exc:
             raise InferenceError(f"OpenAI-compat request failed: {exc}") from exc
 
         try:
@@ -228,7 +233,13 @@ class OpenAICompatStrategy(InferenceStrategy):
     async def stream(self, request: CompletionRequest) -> AsyncIterator[str]:
         body = self._build_body(request, stream=True)
         try:
-            async with self._client.stream("POST", "/chat/completions", json=body) as resp:
+            async with self._client.stream(
+                "POST",
+                self._completions_url(),
+                json=body,
+                headers=self._build_headers(None),
+                timeout=self._timeout,
+            ) as resp:
                 resp.raise_for_status()
                 async for line in resp.aiter_lines():
                     if not line.startswith("data: "):
@@ -245,7 +256,7 @@ class OpenAICompatStrategy(InferenceStrategy):
                     text = chunk.choices[0].delta.content
                     if text:
                         yield text
-        except httpx.HTTPError as exc:
+        except HttpError as exc:
             raise InferenceError(f"OpenAI-compat stream failed: {exc}") from exc
 
     async def aclose(self) -> None:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-import httpx
+from pyiv.http import AsyncHttpClient, AsyncUrllibHttpClient, HttpError
 
 from mechaharness.config import Settings
 from mechaharness.core.exceptions import InferenceError
@@ -88,21 +88,28 @@ def _tools_to_anthropic(tools: list[ToolDefinition] | None) -> list[dict[str, An
 class AnthropicStrategy(InferenceStrategy):
     name = "anthropic"
 
-    def __init__(self, settings: Settings, *, timeout: float = 120.0) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        client: AsyncHttpClient | None = None,
+        *,
+        timeout: float = 120.0,
+    ) -> None:
         if not settings.api_key:
             raise InferenceError("Anthropic requires an API key (MECHA_API_KEY)")
         self.api_key = settings.api_key
         self.base_url = (settings.base_url or "https://api.anthropic.com").rstrip("/")
         self.default_model = settings.model
-        self._client = httpx.AsyncClient(
-            base_url=self.base_url,
-            timeout=timeout,
-            headers={
-                "x-api-key": self.api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-        )
+        self._timeout = timeout
+        self._owns_client = client is None
+        self._client = client or AsyncUrllibHttpClient(timeout=timeout)
+
+    def _headers(self) -> dict[str, str]:
+        return {
+            "x-api-key": self.api_key,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        }
 
     def describe(self) -> dict[str, Any]:
         return {
@@ -132,9 +139,14 @@ class AnthropicStrategy(InferenceStrategy):
             body.update(request.extra)
 
         try:
-            resp = await self._client.post("/v1/messages", json=body)
+            resp = await self._client.post(
+                f"{self.base_url}/v1/messages",
+                json=body,
+                headers=self._headers(),
+                timeout=self._timeout,
+            )
             resp.raise_for_status()
-        except httpx.HTTPError as exc:
+        except HttpError as exc:
             raise InferenceError(f"Anthropic request failed: {exc}") from exc
 
         data = resp.json()
@@ -173,4 +185,5 @@ class AnthropicStrategy(InferenceStrategy):
         )
 
     async def aclose(self) -> None:
-        await self._client.aclose()
+        if self._owns_client:
+            await self._client.aclose()

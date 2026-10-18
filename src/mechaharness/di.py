@@ -35,6 +35,7 @@ from typing import (
 
 from eval_type_backport import eval_type_backport
 from pyiv import Config, Stage
+from pyiv.http import AsyncHttpClient, AsyncUrllibHttpClient
 from pyiv.injector import Injector
 from pyiv.injector import get_injector as _pyiv_get_injector
 from pyiv.key import Key, Named
@@ -376,6 +377,10 @@ class MechaHarnessConfig(Config):
         self.register_instance(CheckpointStore, self.get_checkpoint_store())
         self.register_instance(CrashProbe, self.get_crash_probe())
 
+        # Shared transport for inference / judge adapters (absolute URLs +
+        # per-request headers). Hosts override with MemoryAsyncHttpClient in tests.
+        self.register(AsyncHttpClient, AsyncUrllibHttpClient, singleton=True)
+
         inference_cls = self.get_inference_class()
         harness_cls = self.get_harness_class()
         graph_executor_cls = self.get_graph_executor_class()
@@ -384,6 +389,7 @@ class MechaHarnessConfig(Config):
         _expose_ctor_type_hints(AbstractHarness)
         _expose_ctor_type_hints(graph_executor_cls)
         _expose_ctor_type_hints(GraphExecutor)
+        _expose_ctor_type_hints(SystemOneJudgeProvider)
 
         def make_inference(injector: Injector) -> InferenceStrategy:
             self._bind_mh_providers(injector)
@@ -485,9 +491,13 @@ class MechaHarnessConfig(Config):
             self._judge_connection = existing
         return existing
 
-    def get_judge_provider(self) -> JudgeProvider:
-        """Judge backend (default: System One over ``get_judge_connection()``)."""
-        return SystemOneJudgeProvider(connection=self.get_judge_connection())
+    def get_judge_provider(self) -> type[JudgeProvider] | JudgeProvider:
+        """Judge backend class or instance (default: ``SystemOneJudgeProvider``).
+
+        Prefer returning a class so pyiv injects ``APIConnectionConfig`` and
+        ``AsyncHttpClient``. Instance returns still work for host overrides.
+        """
+        return SystemOneJudgeProvider
 
     def completer_bindings(self) -> Sequence[CompleterBinding]:
         """Named Completer flavors (lane + host tags).
