@@ -44,7 +44,7 @@ axes. Wiring is **pyiv dependency injection first**. OpenAPI (`RunRequest` /
 
 ## Dependency injection
 
-**Pattern:** Template-method pyiv `Config` + constructor injection (pyiv ≥ 1.0)  
+**Pattern:** Template-method pyiv `Config` + constructor injection (pyiv ≥ 1.1)  
 **Code:** `mechaharness.di`
 
 Hosts **must** subclass `MechaHarnessConfig` (or use `run()`). Hand-constructing
@@ -108,7 +108,7 @@ Do not add string registries or a global injector. Domain types stay pyiv-free.
 **flavors** are extra pyiv `Named` bindings from
 `MechaHarnessConfig.completer_bindings()` /
 `judge_bindings()`; host constructors select them with
-`Annotated[T, Named(...)]` / `Matched(...)` (pyiv ≥ 1.0). See
+`Annotated[T, Named(...)]` / `Matched(...)` (pyiv ≥ 1.1). See
 [Dependency injection](./guides/dependency-injection.md).
 
 Before substantive work, `GraphExecutor` runs an injectable

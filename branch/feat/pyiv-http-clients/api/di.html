@@ -219,6 +219,12 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_clock">
+<span class="sig-name descname"><span class="pre">get_clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Clock</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_clock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_clock" title="Link to this definition"></a></dt>
+<dd><p>Monotonic / sleep surface for coordination (default: real clock).</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_context_provider_registry">
 <span class="sig-name descname"><span class="pre">get_context_provider_registry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ContextProviderRegistry</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_context_provider_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_context_provider_registry" title="Link to this definition"></a></dt>
 <dd><p>Host context providers (document/KG adapters bind here).</p>
@@ -237,15 +243,33 @@ Not <code class="xref py py-class docutils literal notranslate"><span class="pre
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_datetime_service">
+<span class="sig-name descname"><span class="pre">get_datetime_service</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DateTimeService</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_datetime_service"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_datetime_service" title="Link to this definition"></a></dt>
+<dd><p>UTC timestamps for checkpoints and stamps (default: wall clock).</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_delegation_policy">
 <span class="sig-name descname"><span class="pre">get_delegation_policy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DelegationPolicy</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_delegation_policy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_delegation_policy" title="Link to this definition"></a></dt>
 <dd><p>Chooses inline versus child/subgraph execution.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_environment">
+<span class="sig-name descname"><span class="pre">get_environment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Environment</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_environment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_environment" title="Link to this definition"></a></dt>
+<dd><p>Process environment for <code class="docutils literal notranslate"><span class="pre">from_env</span></code> / host knobs (default: OS).</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_event_log">
 <span class="sig-name descname"><span class="pre">get_event_log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="events.html#mechaharness.core.events.EventLog" title="mechaharness.core.events.EventLog"><span class="pre">mechaharness.core.events.EventLog</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_event_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_event_log" title="Link to this definition"></a></dt>
 <dd><p>Shared <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> for harnesses and access/cost policies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_filesystem">
+<span class="sig-name descname"><span class="pre">get_filesystem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Filesystem</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_filesystem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_filesystem" title="Link to this definition"></a></dt>
+<dd><p>File I/O for decision JSONL and host paths (default: real disk).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -335,6 +359,12 @@ from the <code class="docutils literal notranslate"><span class="pre">GraphTempl
 <dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_linkage_resolver">
 <span class="sig-name descname"><span class="pre">get_linkage_resolver</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">LinkageResolver</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_linkage_resolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_linkage_resolver" title="Link to this definition"></a></dt>
 <dd><p>Pre-execution graph wiring validator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mechaharness.di.MechaHarnessConfig.get_logger_factory">
+<span class="sig-name descname"><span class="pre">get_logger_factory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">LoggerFactory</span></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#MechaHarnessConfig.get_logger_factory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.MechaHarnessConfig.get_logger_factory" title="Link to this definition"></a></dt>
+<dd><p>Logger factory for <code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code> (default: stdlib hierarchy).</p>
 </dd></dl>
 
 <dl class="py method">

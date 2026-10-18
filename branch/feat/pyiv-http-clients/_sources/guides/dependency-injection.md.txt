@@ -5,10 +5,10 @@ Host apps **must** wire MechaHarness through pyiv (`MechaHarnessConfig` →
 not a supported host path. Prefer the OpenAPI-shaped `run()` helper only when
 you want the facade that builds a Config under the hood.
 
-Requires **pyiv ≥ 1.0** (`Named` / `Matched` / `Key`, `Annotated[...]`
-constructor injection, and injectable `AsyncHttpClient`). Prefer
-`from mechaharness.di import get_injector` so Named Completer aliases bind
-correctly.
+Requires **pyiv ≥ 1.1** (`Named` / `Matched` / `Key`, `Annotated[...]`
+constructor injection, injectable `AsyncHttpClient`, and use-case stdlib
+doubles). Prefer `from mechaharness.di import get_injector` so Named Completer
+aliases bind correctly.
 
 ## Prerequisites
 
@@ -176,6 +176,31 @@ class TestConfig(MechaHarnessConfig):
 
 Hosts may register any `AsyncHttpClient` implementation (including a custom
 httpx-backed client) without changing adapters.
+
+### Stdlib doubles (`Environment`, time, files, log)
+
+`MechaHarnessConfig` also registers pyiv use-case injectables (pyiv ≥ 1.1):
+
+| Interface | Default | Typical test double |
+|-----------|---------|---------------------|
+| `Environment` | `OsEnvironment` | `MemoryEnvironment` |
+| `DateTimeService` | `PythonDateTimeService` | `MockDateTimeService` |
+| `Filesystem` | `RealFilesystem` | `MemoryFilesystem` |
+| `Clock` | `RealClock` | `SyntheticClock` |
+| `LoggerFactory` | `StdlibLoggerFactory` | `MemoryLoggerFactory` |
+
+Judge `SimpleHttpConnectionConfig.from_env` / `for_judge` read through
+`Environment`. Checkpoint effect stamps use `DateTimeService`.
+`LoggingEventLog` uses `LoggerFactory`. `DecisionLog` JSONL I/O uses
+`Filesystem`. Override the `get_*` hooks (or `register_instance` after
+`super().configure()`) so tests avoid monkeypatching `os.environ`, freezing
+time, or touching disk.
+
+Test helpers live in `tests/support/stdlib_doubles.py`:
+`stdlib_doubles_config(...)` for a full Config with Memory/Mock edges, and
+`stdlib_doubles_overlay(...)` for `pyiv.override(base).with_(overlay)` (set
+`rebind_judge_connection=True` when the overlay must rebuild
+`APIConnectionConfig` from the Memory environment).
 
 Override `get_access_policy()` / `get_grants()` (or `get_access_control()`) to
 inject deny-by-default tool grants; use `CompoundPolicy` to union reusable

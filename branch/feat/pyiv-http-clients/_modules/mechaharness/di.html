@@ -144,12 +144,16 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">eval_type_backport</span><span class="w"> </span><span class="kn">import</span> <span class="n">eval_type_backport</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">Stage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.files</span><span class="w"> </span><span class="kn">import</span> <span class="n">Filesystem</span><span class="p">,</span> <span class="n">RealFilesystem</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncHttpClient</span><span class="p">,</span> <span class="n">AsyncUrllibHttpClient</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.injector</span><span class="w"> </span><span class="kn">import</span> <span class="n">Injector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.injector</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_injector</span> <span class="k">as</span> <span class="n">_pyiv_get_injector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.key</span><span class="w"> </span><span class="kn">import</span> <span class="n">Key</span><span class="p">,</span> <span class="n">Named</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerFactory</span><span class="p">,</span> <span class="n">StdlibLoggerFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.process</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">OsEnvironment</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstanceProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.scope</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingletonScope</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Clock</span><span class="p">,</span> <span class="n">DateTimeService</span><span class="p">,</span> <span class="n">PythonDateTimeService</span><span class="p">,</span> <span class="n">RealClock</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Advisor</span><span class="p">,</span> <span class="n">AdvisorPolicy</span><span class="p">,</span> <span class="n">DefaultAdvisorPolicy</span><span class="p">,</span> <span class="n">RejectAdvisor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.api_connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="n">SimpleHttpConnectionConfig</span>
@@ -172,7 +176,7 @@
     <span class="n">InferenceEnvironment</span><span class="p">,</span>
     <span class="n">NoOpInferenceEnvironment</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventLog</span><span class="p">,</span> <span class="n">default_event_log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventLog</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.delegation_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultDelegationPolicy</span><span class="p">,</span> <span class="n">DelegationPolicy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrashProbe</span><span class="p">,</span> <span class="n">NoopCrashProbe</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphStore</span>
@@ -496,6 +500,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CheckpointStore</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_checkpoint_store</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CrashProbe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_crash_probe</span><span class="p">())</span>
 
+        <span class="c1"># Use-case stdlib injectables (pyiv ≥ 1.1). Hosts overlay Memory* /</span>
+        <span class="c1"># Synthetic* / Mock* doubles in tests without monkeypatching.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">Environment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_environment</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">DateTimeService</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_datetime_service</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">Filesystem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_filesystem</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">Clock</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">LoggerFactory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_logger_factory</span><span class="p">())</span>
+
         <span class="c1"># Shared transport for inference / judge adapters (absolute URLs +</span>
         <span class="c1"># per-request headers). Hosts override with MemoryAsyncHttpClient in tests.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AsyncHttpClient</span><span class="p">,</span> <span class="n">AsyncUrllibHttpClient</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -576,7 +588,12 @@
 <span class="w">        </span><span class="sd">"""Shared ``EventLog`` for harnesses and access/cost policies."""</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_event_log"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">existing</span> <span class="o">=</span> <span class="n">default_event_log</span><span class="p">()</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">FanoutEventLog</span><span class="p">,</span> <span class="n">InMemoryEventLog</span><span class="p">,</span> <span class="n">LoggingEventLog</span>
+
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">FanoutEventLog</span><span class="p">(</span>
+                <span class="n">InMemoryEventLog</span><span class="p">(),</span>
+                <span class="n">LoggingEventLog</span><span class="p">(</span><span class="n">logger_factory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_logger_factory</span><span class="p">()),</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span> <span class="o">=</span> <span class="n">existing</span>
         <span class="k">return</span> <span class="n">existing</span></div>
 
@@ -621,13 +638,68 @@
         <span class="k">return</span> <span class="n">NoOpInferenceEnvironment</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="MechaHarnessConfig.get_environment">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_environment">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_environment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Environment</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Process environment for ``from_env`` / host knobs (default: OS)."""</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_environment"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">OsEnvironment</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_environment</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_datetime_service">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_datetime_service">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_datetime_service</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DateTimeService</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""UTC timestamps for checkpoints and stamps (default: wall clock)."""</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_datetime_service"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">PythonDateTimeService</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_datetime_service</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_filesystem">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_filesystem">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_filesystem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Filesystem</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""File I/O for decision JSONL and host paths (default: real disk)."""</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_filesystem"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">RealFilesystem</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filesystem</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_clock">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_clock">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_clock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Clock</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Monotonic / sleep surface for coordination (default: real clock)."""</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_clock"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">RealClock</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clock</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_logger_factory">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_logger_factory">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_logger_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoggerFactory</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Logger factory for ``LoggingEventLog`` (default: stdlib hierarchy)."""</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_logger_factory"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">StdlibLoggerFactory</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger_factory</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
 <div class="viewcode-block" id="MechaHarnessConfig.get_judge_connection">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_connection">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIConnectionConfig</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""HTTP connection for the judge lane (override for OAuth, etc.)."""</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_judge_connection"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">existing</span> <span class="o">=</span> <span class="n">SimpleHttpConnectionConfig</span><span class="o">.</span><span class="n">for_judge</span><span class="p">()</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">SimpleHttpConnectionConfig</span><span class="o">.</span><span class="n">for_judge</span><span class="p">(</span><span class="n">env</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_environment</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_judge_connection</span> <span class="o">=</span> <span class="n">existing</span>
         <span class="k">return</span> <span class="n">existing</span></div>
 
@@ -760,6 +832,7 @@
                 <span class="n">GraphStore</span><span class="p">(</span><span class="n">event_log</span><span class="p">,</span> <span class="n">agent_id</span><span class="o">=</span><span class="s2">"graph"</span><span class="p">),</span>
                 <span class="n">event_log</span><span class="o">=</span><span class="n">event_log</span><span class="p">,</span>
                 <span class="n">agent_id</span><span class="o">=</span><span class="s2">"graph"</span><span class="p">,</span>
+                <span class="n">datetime_service</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_datetime_service</span><span class="p">(),</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_store</span> <span class="o">=</span> <span class="n">existing</span>
         <span class="k">return</span> <span class="n">existing</span></div>

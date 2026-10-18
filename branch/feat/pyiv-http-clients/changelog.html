@@ -118,12 +118,14 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <section id="changed">
 <h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Floor <strong>pyiv ≥ 1.0.0</strong>. Inference and judge HTTP use injectable
-<code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code> (<code class="docutils literal notranslate"><span class="pre">AsyncUrllibHttpClient</span></code> by default; <code class="docutils literal notranslate"><span class="pre">MemoryAsyncHttpClient</span></code>
-in tests) instead of raw <code class="docutils literal notranslate"><span class="pre">httpx</span></code>. Adapters own absolute URLs / headers from
-<code class="docutils literal notranslate"><span class="pre">Settings</span></code> / <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code>; <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> registers the shared
-transport. Dropped runtime <code class="docutils literal notranslate"><span class="pre">httpx</span></code>; keep it as a <strong>dev</strong> extra for
-FastAPI/Starlette <code class="docutils literal notranslate"><span class="pre">TestClient</span></code> (<code class="docutils literal notranslate"><span class="pre">tests/test_api.py</span></code>).</p></li>
+<li><p>Floor <strong>pyiv ≥ 1.1.0</strong>. Register use-case stdlib injectables on
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (<code class="docutils literal notranslate"><span class="pre">Environment</span></code>, <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>, <code class="docutils literal notranslate"><span class="pre">Filesystem</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Clock</span></code>, <code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code>) and route high-residue edges through them:
+judge <code class="docutils literal notranslate"><span class="pre">from_env</span></code>, checkpoint stamps, <code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code>, decision JSONL.</p></li>
+<li><p>Inference and judge HTTP use injectable <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>
+(<code class="docutils literal notranslate"><span class="pre">AsyncUrllibHttpClient</span></code> by default; <code class="docutils literal notranslate"><span class="pre">MemoryAsyncHttpClient</span></code> in tests)
+instead of raw <code class="docutils literal notranslate"><span class="pre">httpx</span></code>. Dropped runtime <code class="docutils literal notranslate"><span class="pre">httpx</span></code>; keep it as a <strong>dev</strong>
+extra for FastAPI/Starlette <code class="docutils literal notranslate"><span class="pre">TestClient</span></code> (<code class="docutils literal notranslate"><span class="pre">tests/test_api.py</span></code>).</p></li>
 </ul>
 </section>
 </section>

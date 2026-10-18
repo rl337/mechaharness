@@ -153,7 +153,7 @@ axes. Wiring is <strong>pyiv dependency injection first</strong>. OpenAPI (<code
 </div>
 <section id="dependency-injection">
 <h2>Dependency injection<a class="headerlink" href="#dependency-injection" title="Link to this heading"></a></h2>
-<p><strong>Pattern:</strong> Template-method pyiv <code class="docutils literal notranslate"><span class="pre">Config</span></code> + constructor injection (pyiv ≥ 1.0)<br />
+<p><strong>Pattern:</strong> Template-method pyiv <code class="docutils literal notranslate"><span class="pre">Config</span></code> + constructor injection (pyiv ≥ 1.1)<br />
 <strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.di</span></code></p>
 <p>Hosts <strong>must</strong> subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (or use <code class="docutils literal notranslate"><span class="pre">run()</span></code>). Hand-constructing
 harness families is unsupported. <code class="docutils literal notranslate"><span class="pre">configure()</span></code> class-binds <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>
@@ -210,7 +210,7 @@ durable intent/acceptance and resume reconciliation. Bind via Config hooks
 <strong>flavors</strong> are extra pyiv <code class="docutils literal notranslate"><span class="pre">Named</span></code> bindings from
 <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.completer_bindings()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">judge_bindings()</span></code>; host constructors select them with
-<code class="docutils literal notranslate"><span class="pre">Annotated[T,</span> <span class="pre">Named(...)]</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched(...)</span></code> (pyiv ≥ 1.0). See
+<code class="docutils literal notranslate"><span class="pre">Annotated[T,</span> <span class="pre">Named(...)]</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched(...)</span></code> (pyiv ≥ 1.1). See
 <a class="reference internal" href="guides/dependency-injection.html"><span class="std std-doc">Dependency injection</span></a>.</p>
 <p>Before substantive work, <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> runs an injectable
 <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code> (runner kinds, grants, operation binds, stop contracts,

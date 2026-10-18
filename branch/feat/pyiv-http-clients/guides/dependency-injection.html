@@ -115,10 +115,10 @@
 <code class="docutils literal notranslate"><span class="pre">get_injector</span></code> → <code class="docutils literal notranslate"><span class="pre">inject(...)</span></code>). Manual <code class="docutils literal notranslate"><span class="pre">ToolLoopHarness(...)</span></code> construction is
 not a supported host path. Prefer the OpenAPI-shaped <code class="docutils literal notranslate"><span class="pre">run()</span></code> helper only when
 you want the facade that builds a Config under the hood.</p>
-<p>Requires <strong>pyiv ≥ 1.0</strong> (<code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code>, <code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code>
-constructor injection, and injectable <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>). Prefer
-<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mechaharness.di</span> <span class="pre">import</span> <span class="pre">get_injector</span></code> so Named Completer aliases bind
-correctly.</p>
+<p>Requires <strong>pyiv ≥ 1.1</strong> (<code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code>, <code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code>
+constructor injection, injectable <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>, and use-case stdlib
+doubles). Prefer <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mechaharness.di</span> <span class="pre">import</span> <span class="pre">get_injector</span></code> so Named Completer
+aliases bind correctly.</p>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <ul class="simple">
@@ -277,6 +277,51 @@ endpoint ownership stays on <code class="docutils literal notranslate"><span cla
 </div>
 <p>Hosts may register any <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code> implementation (including a custom
 httpx-backed client) without changing adapters.</p>
+</section>
+<section id="stdlib-doubles-environment-time-files-log">
+<h3>Stdlib doubles (<code class="docutils literal notranslate"><span class="pre">Environment</span></code>, time, files, log)<a class="headerlink" href="#stdlib-doubles-environment-time-files-log" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> also registers pyiv use-case injectables (pyiv ≥ 1.1):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Interface</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Typical test double</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Environment</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OsEnvironment</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MemoryEnvironment</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PythonDateTimeService</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MockDateTimeService</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Filesystem</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RealFilesystem</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MemoryFilesystem</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Clock</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RealClock</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SyntheticClock</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">StdlibLoggerFactory</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MemoryLoggerFactory</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Judge <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> / <code class="docutils literal notranslate"><span class="pre">for_judge</span></code> read through
+<code class="docutils literal notranslate"><span class="pre">Environment</span></code>. Checkpoint effect stamps use <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>.
+<code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code> uses <code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code>. <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code> JSONL I/O uses
+<code class="docutils literal notranslate"><span class="pre">Filesystem</span></code>. Override the <code class="docutils literal notranslate"><span class="pre">get_*</span></code> hooks (or <code class="docutils literal notranslate"><span class="pre">register_instance</span></code> after
+<code class="docutils literal notranslate"><span class="pre">super().configure()</span></code>) so tests avoid monkeypatching <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>, freezing
+time, or touching disk.</p>
+<p>Test helpers live in <code class="docutils literal notranslate"><span class="pre">tests/support/stdlib_doubles.py</span></code>:
+<code class="docutils literal notranslate"><span class="pre">stdlib_doubles_config(...)</span></code> for a full Config with Memory/Mock edges, and
+<code class="docutils literal notranslate"><span class="pre">stdlib_doubles_overlay(...)</span></code> for <code class="docutils literal notranslate"><span class="pre">pyiv.override(base).with_(overlay)</span></code> (set
+<code class="docutils literal notranslate"><span class="pre">rebind_judge_connection=True</span></code> when the overlay must rebuild
+<code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> from the Memory environment).</p>
 <p>Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> (or <code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code>) to
 inject deny-by-default tool grants; use <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> to union reusable
 <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
