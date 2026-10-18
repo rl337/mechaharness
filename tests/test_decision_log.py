@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from pyiv.files import MemoryFilesystem
+
+from mechaharness.core.events import InMemoryEventLog
 from mechaharness.decision_log import (
     DecisionLog,
     DecisionRecord,
@@ -12,7 +15,7 @@ from mechaharness.decision_log import (
 
 
 def test_offline_export_excludes_future_outcomes() -> None:
-    log = DecisionLog()
+    log = DecisionLog(InMemoryEventLog(), filesystem=MemoryFilesystem())
     rec = DecisionRecord(
         eventId="d1",
         stateHash="h",

@@ -9,11 +9,14 @@ Hosts bind a store through ``MechaHarnessConfig.get_checkpoint_store()``.
 Inspect ``durability`` so ephemeral EventLog adapters are never mistaken for
 process-restart safety::
 
+    >>> from pyiv.time import PythonDateTimeService
     >>> from mechaharness.checkpoint_store import EventLogCheckpointStore
     >>> from mechaharness.core.events import InMemoryEventLog
     >>> from mechaharness.graph import ExecutionGraph, GraphNode, GraphStore
     >>> log = InMemoryEventLog()
-    >>> store = EventLogCheckpointStore(GraphStore(log))
+    >>> store = EventLogCheckpointStore(
+    ...     GraphStore(log), datetime_service=PythonDateTimeService()
+    ... )
     >>> store.durability
     'ephemeral'
     >>> g = ExecutionGraph(goal="plan")
@@ -32,8 +35,9 @@ process-restart safety::
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
 from typing import Any, Literal
+
+from pyiv.time import DateTimeService
 
 from mechaharness.core.events import CoreEvent, Event, EventLog, event_type_key
 from mechaharness.external_effect import EffectRecord, EffectState
@@ -125,11 +129,15 @@ class EventLogCheckpointStore(CheckpointStore):
 
     Persist an effect intent before a non-idempotent external call::
 
+        >>> from pyiv.time import PythonDateTimeService
         >>> from mechaharness.checkpoint_store import EventLogCheckpointStore
         >>> from mechaharness.core.events import InMemoryEventLog
         >>> from mechaharness.external_effect import EffectRecord, EffectState
         >>> from mechaharness.graph import GraphStore
-        >>> store = EventLogCheckpointStore(GraphStore(InMemoryEventLog()))
+        >>> store = EventLogCheckpointStore(
+        ...     GraphStore(InMemoryEventLog()),
+        ...     datetime_service=PythonDateTimeService(),
+        ... )
         >>> effect = store.save_effect(EffectRecord(
         ...     effect_id="r1:job:1",
         ...     run_id="r1",
@@ -150,12 +158,14 @@ class EventLogCheckpointStore(CheckpointStore):
         self,
         store: GraphStore,
         *,
+        datetime_service: DateTimeService,
         event_log: EventLog | None = None,
         agent_id: str | None = None,
     ) -> None:
         self.store = store
         self.event_log = event_log if event_log is not None else store.event_log
         self.agent_id = agent_id or store.agent_id
+        self._datetime = datetime_service
         self._effects: dict[str, EffectRecord] = {}
         self._revisions: dict[str, int] = {}
         self._boundaries: dict[str, RecoveryBoundary | None] = {}
@@ -202,7 +212,7 @@ class EventLogCheckpointStore(CheckpointStore):
         return self._revisions.get(run_id)
 
     def save_effect(self, effect: EffectRecord) -> EffectRecord:
-        now = datetime.now(timezone.utc).isoformat()
+        now = self._datetime.now_utc_iso()
         existing = self._effects.get(effect.effect_id)
         rev = (existing.revision if existing else 0) + 1
         stored = effect.model_copy(

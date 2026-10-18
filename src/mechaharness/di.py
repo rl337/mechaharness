@@ -35,11 +35,16 @@ from typing import (
 
 from eval_type_backport import eval_type_backport
 from pyiv import Config, Stage
+from pyiv.files import Filesystem, RealFilesystem
+from pyiv.http import AsyncHttpClient, AsyncUrllibHttpClient
 from pyiv.injector import Injector
 from pyiv.injector import get_injector as _pyiv_get_injector
 from pyiv.key import Key, Named
+from pyiv.log import LoggerFactory, StdlibLoggerFactory
+from pyiv.process import Environment, OsEnvironment
 from pyiv.provider import InstanceProvider
 from pyiv.scope import SingletonScope
+from pyiv.time import Clock, DateTimeService, PythonDateTimeService, RealClock
 
 from mechaharness.advisor import Advisor, AdvisorPolicy, DefaultAdvisorPolicy, RejectAdvisor
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
@@ -62,7 +67,7 @@ from mechaharness.core.environment import (
     InferenceEnvironment,
     NoOpInferenceEnvironment,
 )
-from mechaharness.core.events import EventLog, default_event_log
+from mechaharness.core.events import EventLog, FanoutEventLog, InMemoryEventLog, LoggingEventLog
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
 from mechaharness.external_effect import CrashProbe, NoopCrashProbe
 from mechaharness.graph import GraphStore
@@ -329,26 +334,126 @@ class MechaHarnessConfig(Config):
             key_impl = self._implementation_for_key(impl, alias_to=alias_to)
             self.register_key(Key(abstract, named), key_impl, scope=scope)
 
+    def _register_binding(
+        self, abstract: type, impl: Any, *, singleton: bool = True
+    ) -> None:
+        """Register a class (singleton) or a concrete instance from a hook."""
+        if isinstance(impl, type):
+            self.register(abstract, impl, singleton=singleton)
+        else:
+            self.register_instance(abstract, impl)
+
+    def _register_override_or_factory(
+        self,
+        abstract: type,
+        override: Any | None,
+        factory: Callable[..., Any],
+    ) -> None:
+        """Host/test override instance/class, else injector factory."""
+        if override is not None:
+            self._register_binding(abstract, override)
+        else:
+            self.register(abstract, factory, singleton=True)
+
     def configure(self) -> None:
-        event_log = self.get_event_log()
+        # Leaf edges first so composed factories can inject them.
+        self._register_binding(Environment, self.get_environment())
+        self._register_binding(DateTimeService, self.get_datetime_service())
+        self._register_binding(Filesystem, self.get_filesystem())
+        self._register_binding(Clock, self.get_clock())
+        self._register_binding(LoggerFactory, self.get_logger_factory())
+        self.register(AsyncHttpClient, AsyncUrllibHttpClient, singleton=True)
+
         self.register_instance(Settings, self.get_settings())
         self.register_instance(HarnessConfig, self.get_harness_config())
         self.register_instance(ToolRegistry, self.get_tools())
-        self.register_instance(EventLog, event_log)
-        self.register_instance(AccessControl, self.get_access_control())
-        self.register_instance(CostAccountant, self.get_cost_accountant())
-        self.register_instance(InferenceEnvironment, self.get_inference_environment())
-        self.register_instance(APIConnectionConfig, self.get_judge_connection())
-        self.register_instance(GraphNodeRunnerRegistry, self.get_node_runner_registry())
-        self.register_instance(GraphFailurePolicy, self.get_graph_failure_policy())
-        self.register_instance(GraphEscalation, self.get_graph_escalation())
-        self.register_instance(OperationRegistry, self.get_operation_registry())
-        self.register_instance(InferenceCapture, self.get_inference_capture())
-        self.register_instance(LinkageResolver, self.get_linkage_resolver())
-        self.register_instance(VerificationPolicy, self.get_verification_policy())
-        self.register_instance(DelegationPolicy, self.get_delegation_policy())
-        self.register_instance(AdvisorPolicy, self.get_advisor_policy())
-        self.register_instance(Advisor, self.get_advisor())
+        self._register_binding(
+            InferenceEnvironment, self.get_inference_environment()
+        )
+        self._register_binding(
+            GraphNodeRunnerRegistry, self.get_node_runner_registry()
+        )
+        self._register_binding(GraphFailurePolicy, self.get_graph_failure_policy())
+        self._register_binding(GraphEscalation, self.get_graph_escalation())
+        self._register_binding(OperationRegistry, self.get_operation_registry())
+        self._register_binding(InferenceCapture, self.get_inference_capture())
+        self._register_binding(VerificationPolicy, self.get_verification_policy())
+        self._register_binding(DelegationPolicy, self.get_delegation_policy())
+        self._register_binding(AdvisorPolicy, self.get_advisor_policy())
+        self._register_binding(Advisor, self.get_advisor())
+        self._register_binding(
+            ContextProviderRegistry, self.get_context_provider_registry()
+        )
+        self.register_instance(CapabilityEnvelope, self.get_capability_envelope())
+        self._register_binding(
+            LifecycleExtensionRegistry, self.get_lifecycle_extension_registry()
+        )
+        self._register_binding(CrashProbe, self.get_crash_probe())
+
+        def make_event_log(injector: Injector) -> EventLog:
+            return FanoutEventLog(
+                InMemoryEventLog(),
+                LoggingEventLog(logger_factory=injector.inject(LoggerFactory)),
+            )
+
+        self._register_override_or_factory(
+            EventLog, self.get_event_log(), make_event_log
+        )
+
+        def make_access_control(injector: Injector) -> AccessControl:
+            return InMemoryAccessControl(
+                event_log=injector.inject(EventLog),
+                policy=self.get_access_policy(),
+            )
+
+        self._register_override_or_factory(
+            AccessControl, self.get_access_control(), make_access_control
+        )
+
+        def make_cost_accountant(injector: Injector) -> CostAccountant:
+            return InMemoryCostAccountant(event_log=injector.inject(EventLog))
+
+        self._register_override_or_factory(
+            CostAccountant, self.get_cost_accountant(), make_cost_accountant
+        )
+
+        def make_judge_connection(injector: Injector) -> APIConnectionConfig:
+            return SimpleHttpConnectionConfig.for_judge(
+                env=injector.inject(Environment)
+            )
+
+        self._register_override_or_factory(
+            APIConnectionConfig,
+            self.get_judge_connection(),
+            make_judge_connection,
+        )
+
+        def make_checkpoint_store(injector: Injector) -> CheckpointStore:
+            event_log = injector.inject(EventLog)
+            return EventLogCheckpointStore(
+                GraphStore(event_log, agent_id="graph"),
+                event_log=event_log,
+                agent_id="graph",
+                datetime_service=injector.inject(DateTimeService),
+            )
+
+        self._register_override_or_factory(
+            CheckpointStore, self.get_checkpoint_store(), make_checkpoint_store
+        )
+
+        def make_linkage_resolver(injector: Injector) -> LinkageResolver:
+            return DefaultLinkageResolver(
+                injector.inject(GraphNodeRunnerRegistry),
+                injector.inject(AccessControl),
+                injector.inject(InferenceEnvironment),
+                operations=injector.inject(OperationRegistry),
+                inference_capture=injector.inject(InferenceCapture),
+            )
+
+        self._register_override_or_factory(
+            LinkageResolver, self.get_linkage_resolver(), make_linkage_resolver
+        )
+
         # Recipe / backend / family membership: pyiv map multibinds (catalog_keys).
         # Cast: pyiv accepts ABC keys; mypy rejects abstract type[T] args.
         self.contribute_map_entries(
@@ -368,13 +473,6 @@ class MechaHarnessConfig(Config):
         )
         _expose_ctor_type_hints(GraphTemplateRegistry)
         self.register(GraphTemplateRegistry, GraphTemplateRegistry)
-        self.register_instance(ContextProviderRegistry, self.get_context_provider_registry())
-        self.register_instance(CapabilityEnvelope, self.get_capability_envelope())
-        self.register_instance(
-            LifecycleExtensionRegistry, self.get_lifecycle_extension_registry()
-        )
-        self.register_instance(CheckpointStore, self.get_checkpoint_store())
-        self.register_instance(CrashProbe, self.get_crash_probe())
 
         inference_cls = self.get_inference_class()
         harness_cls = self.get_harness_class()
@@ -384,6 +482,7 @@ class MechaHarnessConfig(Config):
         _expose_ctor_type_hints(AbstractHarness)
         _expose_ctor_type_hints(graph_executor_cls)
         _expose_ctor_type_hints(GraphExecutor)
+        _expose_ctor_type_hints(SystemOneJudgeProvider)
 
         def make_inference(injector: Injector) -> InferenceStrategy:
             self._bind_mh_providers(injector)
@@ -441,24 +540,13 @@ class MechaHarnessConfig(Config):
         """Settings instance registered for this config (override to customize)."""
         return Settings()
 
-    def get_event_log(self) -> EventLog:
-        """Shared ``EventLog`` for harnesses and access/cost policies."""
-        existing = getattr(self, "_event_log", None)
-        if existing is None:
-            existing = default_event_log()
-            self._event_log = existing
-        return existing
+    def get_event_log(self) -> EventLog | type[EventLog] | None:
+        """Optional ``EventLog`` override. ``None`` → default Fanout factory."""
+        return None
 
-    def get_access_control(self) -> AccessControl:
-        """Deny-by-default access control bound into harnesses."""
-        existing = getattr(self, "_access_control", None)
-        if existing is None:
-            existing = InMemoryAccessControl(
-                event_log=self.get_event_log(),
-                policy=self.get_access_policy(),
-            )
-            self._access_control = existing
-        return existing
+    def get_access_control(self) -> AccessControl | type[AccessControl] | None:
+        """Optional ``AccessControl`` override. ``None`` → inject ``EventLog``."""
+        return None
 
     def get_access_policy(self) -> GrantPolicyLike:
         """Grant policy for harness tool gates.
@@ -473,21 +561,41 @@ class MechaHarnessConfig(Config):
         """Deny-by-default grant list. Hosts override; unknown namespaced keys ok."""
         return []
 
-    def get_inference_environment(self) -> InferenceEnvironment:
+    def get_inference_environment(self) -> InferenceEnvironment | type[InferenceEnvironment]:
         """Host probe for the active inference profile (default: no-op)."""
-        return NoOpInferenceEnvironment()
+        return NoOpInferenceEnvironment
 
-    def get_judge_connection(self) -> APIConnectionConfig:
-        """HTTP connection for the judge lane (override for OAuth, etc.)."""
-        existing = getattr(self, "_judge_connection", None)
-        if existing is None:
-            existing = SimpleHttpConnectionConfig.for_judge()
-            self._judge_connection = existing
-        return existing
+    def get_environment(self) -> type[Environment] | Environment:
+        """Process environment class/instance for ``from_env`` / host knobs."""
+        return OsEnvironment
 
-    def get_judge_provider(self) -> JudgeProvider:
-        """Judge backend (default: System One over ``get_judge_connection()``)."""
-        return SystemOneJudgeProvider(connection=self.get_judge_connection())
+    def get_datetime_service(self) -> type[DateTimeService] | DateTimeService:
+        """UTC timestamps for checkpoints and stamps."""
+        return PythonDateTimeService
+
+    def get_filesystem(self) -> type[Filesystem] | Filesystem:
+        """File I/O for decision JSONL and host paths."""
+        return RealFilesystem
+
+    def get_clock(self) -> type[Clock] | Clock:
+        """Monotonic / sleep surface for coordination."""
+        return RealClock
+
+    def get_logger_factory(self) -> type[LoggerFactory] | LoggerFactory:
+        """Logger factory for ``LoggingEventLog``."""
+        return StdlibLoggerFactory
+
+    def get_judge_connection(self) -> APIConnectionConfig | type[APIConnectionConfig] | None:
+        """Optional judge connection override. ``None`` → ``for_judge(env=inject)``."""
+        return None
+
+    def get_judge_provider(self) -> type[JudgeProvider] | JudgeProvider:
+        """Judge backend class or instance (default: ``SystemOneJudgeProvider``).
+
+        Prefer returning a class so pyiv injects ``APIConnectionConfig`` and
+        ``AsyncHttpClient``. Instance returns still work for host overrides.
+        """
+        return SystemOneJudgeProvider
 
     def completer_bindings(self) -> Sequence[CompleterBinding]:
         """Named Completer flavors (lane + host tags).
@@ -514,9 +622,9 @@ class MechaHarnessConfig(Config):
         """When True, parent harnesses get list_subagents / get_subagent_events."""
         return False
 
-    def get_cost_accountant(self) -> CostAccountant:
-        """Ledger used to price inference and tool invocations."""
-        return InMemoryCostAccountant(event_log=self.get_event_log())
+    def get_cost_accountant(self) -> CostAccountant | type[CostAccountant] | None:
+        """Optional cost ledger override. ``None`` → inject ``EventLog``."""
+        return None
 
     def get_inference_class(self) -> type[InferenceStrategy]:
         """Required override: class bound to ``InferenceStrategy``."""
@@ -546,13 +654,15 @@ class MechaHarnessConfig(Config):
         """Class bound to ``GraphExecutor`` (override to specialize)."""
         return GraphExecutor
 
-    def get_checkpoint_store(self) -> CheckpointStore:
-        """Authoritative graph/effect persistence (default: ephemeral EventLog).
+    def get_checkpoint_store(self) -> CheckpointStore | type[CheckpointStore] | None:
+        """Optional checkpoint store override.
 
-        Override to bind the SQLite reference backend (or a host store)::
+        ``None`` → ephemeral ``EventLogCheckpointStore`` factory (injects
+        ``EventLog`` + ``DateTimeService``). Override to bind SQLite::
 
             >>> import tempfile
             >>> from pathlib import Path
+            >>> from pyiv.time import PythonDateTimeService
             >>> from mechaharness.checkpoint_store import CheckpointStore
             >>> from mechaharness.di import MechaHarnessConfig, get_injector
             >>> from mechaharness.harness.pass_through import PassThroughHarness
@@ -565,79 +675,64 @@ class MechaHarnessConfig(Config):
             ...     def get_harness_class(self):
             ...         return PassThroughHarness
             ...     def get_checkpoint_store(self):
-            ...         return SqliteCheckpointStore(path)
+            ...         return SqliteCheckpointStore(
+            ...             path, datetime_service=PythonDateTimeService()
+            ...         )
             >>> store = get_injector(DurableConfig()).inject(CheckpointStore)
             >>> store.durability
             'durable'
         """
-        existing = getattr(self, "_checkpoint_store", None)
-        if existing is None:
-            event_log = self.get_event_log()
-            existing = EventLogCheckpointStore(
-                GraphStore(event_log, agent_id="graph"),
-                event_log=event_log,
-                agent_id="graph",
-            )
-            self._checkpoint_store = existing
-        return existing
+        return None
 
-    def get_crash_probe(self) -> CrashProbe:
+    def get_crash_probe(self) -> CrashProbe | type[CrashProbe]:
         """Optional crash-injection probe (default: never crash)."""
-        return NoopCrashProbe()
+        return NoopCrashProbe
 
-    def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+    def get_node_runner_registry(
+        self,
+    ) -> GraphNodeRunnerRegistry | type[GraphNodeRunnerRegistry]:
         """Node-kind runners for the graph executor (default: empty)."""
-        existing = getattr(self, "_node_runner_registry", None)
-        if existing is None:
-            existing = GraphNodeRunnerRegistry()
-            self._node_runner_registry = existing
-        return existing
+        return GraphNodeRunnerRegistry
 
-    def get_graph_failure_policy(self) -> GraphFailurePolicy:
+    def get_graph_failure_policy(
+        self,
+    ) -> GraphFailurePolicy | type[GraphFailurePolicy]:
         """Retry / escalate / fail policy for graph node attempts."""
-        return DefaultGraphFailurePolicy()
+        return DefaultGraphFailurePolicy
 
-    def get_graph_escalation(self) -> GraphEscalation:
+    def get_graph_escalation(self) -> GraphEscalation | type[GraphEscalation]:
         """Escalation hook after retries are exhausted (default: reject)."""
-        return RejectGraphEscalation()
+        return RejectGraphEscalation
 
-    def get_operation_registry(self) -> OperationRegistry:
+    def get_operation_registry(self) -> OperationRegistry | type[OperationRegistry]:
         """Shared operation contracts for linkage / compilers."""
-        existing = getattr(self, "_operation_registry", None)
-        if existing is None:
-            existing = default_operations()
-            self._operation_registry = existing
-        return existing
+        return default_operations()
 
-    def get_inference_capture(self) -> InferenceCapture:
+    def get_inference_capture(self) -> InferenceCapture | type[InferenceCapture]:
         """Optional native inference capture capability (default: evaluation-only)."""
         return empty_inference_capture()
 
-    def get_linkage_resolver(self) -> LinkageResolver:
-        """Pre-execution graph wiring validator."""
-        return DefaultLinkageResolver(
-            runners=self.get_node_runner_registry(),
-            access=self.get_access_control(),
-            environment=self.get_inference_environment(),
-            operations=self.get_operation_registry(),
-            inference_capture=self.get_inference_capture(),
-        )
+    def get_linkage_resolver(self) -> LinkageResolver | type[LinkageResolver] | None:
+        """Optional linkage override. ``None`` → inject runners/access/env/…."""
+        return None
 
-    def get_verification_policy(self) -> VerificationPolicy:
+    def get_verification_policy(
+        self,
+    ) -> VerificationPolicy | type[VerificationPolicy]:
         """Selects and runs verification for graph/outcome gates."""
-        return DefaultVerificationPolicy()
+        return DefaultVerificationPolicy
 
-    def get_delegation_policy(self) -> DelegationPolicy:
+    def get_delegation_policy(self) -> DelegationPolicy | type[DelegationPolicy]:
         """Chooses inline versus child/subgraph execution."""
-        return DefaultDelegationPolicy()
+        return DefaultDelegationPolicy
 
-    def get_advisor_policy(self) -> AdvisorPolicy:
+    def get_advisor_policy(self) -> AdvisorPolicy | type[AdvisorPolicy]:
         """Sparse advisor consultation policy."""
-        return DefaultAdvisorPolicy()
+        return DefaultAdvisorPolicy
 
-    def get_advisor(self) -> Advisor:
+    def get_advisor(self) -> Advisor | type[Advisor]:
         """Non-binding advisor (default: unavailable / reject)."""
-        return RejectAdvisor()
+        return RejectAdvisor
 
     def graph_template_classes(self) -> dict[str, type[GraphTemplate]]:
         """Catalog id → ``GraphTemplate`` class. Hosts merge via ``super()``."""
@@ -654,9 +749,11 @@ class MechaHarnessConfig(Config):
             {name: cls() for name, cls in self.graph_template_classes().items()}
         )
 
-    def get_context_provider_registry(self) -> ContextProviderRegistry:
+    def get_context_provider_registry(
+        self,
+    ) -> ContextProviderRegistry | type[ContextProviderRegistry]:
         """Host context providers (document/KG adapters bind here)."""
-        return ContextProviderRegistry()
+        return ContextProviderRegistry
 
     def get_capability_envelope(self) -> CapabilityEnvelope:
         """Default run envelope from configured grants."""

@@ -13,6 +13,7 @@ side effects get durable intent/acceptance and resume reconciliation
 
     >>> import asyncio, tempfile
     >>> from pathlib import Path
+    >>> from pyiv.time import PythonDateTimeService
     >>> from mechaharness.budget import BudgetPolicy
     >>> from mechaharness.checkpoint_store import CheckpointStore
     >>> from mechaharness.core.access import GraphExecute
@@ -67,7 +68,9 @@ side effects get durable intent/acceptance and resume reconciliation
     ...     def get_node_runner_registry(self):
     ...         return GraphNodeRunnerRegistry([runner])
     ...     def get_checkpoint_store(self):
-    ...         return SqliteCheckpointStore(path)
+    ...         return SqliteCheckpointStore(
+    ...             path, datetime_service=PythonDateTimeService()
+    ...         )
     >>> executor = get_injector(Cfg()).inject(GraphExecutor)
     >>> graph = ExecutionGraph(goal="ship feature")
     >>> _ = graph.add_node(GraphNode(id="job", kind="coding_job"))

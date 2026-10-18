@@ -27,8 +27,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "pyiv>=0.4.3",
-  "httpx>=0.27",
+  "pyiv>=1.1.0",
   "pydantic>=2.7",
   "pydantic-settings>=2.3",
   "typer>=0.12",
@@ -48,6 +47,8 @@ dev = [
   # Exact pin: mypy 2.x requires Python >=3.10, and floating majors caused
   # CI (3.12) vs local (3.9) to disagree on what passes. Bump deliberately.
   "mypy==1.19.1",
+  # FastAPI/Starlette TestClient (tests/test_api.py); not used by inference.
+  "httpx>=0.27",
   "build>=1.2",
   "twine>=5.0",
 ]

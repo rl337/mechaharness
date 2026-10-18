@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from mechaharness.core.events import CoreEvent, Event, EventLog, InMemoryEventLog, event_type_key
+from mechaharness.core.events import CoreEvent, Event, EventLog, event_type_key
 
 
 class NodeStatus(str, Enum):
@@ -170,8 +170,8 @@ class ExecutionGraph(BaseModel):
 class GraphStore:
     """Persist graph checkpoints via EventLog payloads."""
 
-    def __init__(self, event_log: EventLog | None = None, *, agent_id: str = "graph") -> None:
-        self.event_log = event_log or InMemoryEventLog()
+    def __init__(self, event_log: EventLog, *, agent_id: str = "graph") -> None:
+        self.event_log = event_log
         self.agent_id = agent_id
 
     def save(
