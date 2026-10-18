@@ -137,7 +137,7 @@ collaborator once the DI-04 rewrite lands.
 ## Related
 
 - Guide: [Dependency injection](../guides/dependency-injection.md)
-- Architecture: [Dependency injection](../architecture.md#dependency-injection)
+- Architecture: [Architecture — Dependency injection](../architecture.md)
 - Skill: `.cursor/skills/di-config-ownership/SKILL.md`
 - Rule: `.cursor/rules/di-first.mdc`
-- Recipe tests: [TEST-02](./recipes-and-decision-plane.md#test-02-dependency-injection)
+- Recipe tests: [TEST-02 in recipes and decision plane](./recipes-and-decision-plane.md)

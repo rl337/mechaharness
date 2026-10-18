@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from mechaharness.core.events import CoreEvent, Event, EventLog, InMemoryEventLog, event_type_key
+from mechaharness.core.events import CoreEvent, Event, EventLog, event_type_key
 
 
 class NodeStatus(str, Enum):

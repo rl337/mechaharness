@@ -92,11 +92,11 @@ from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Any, Union, cast
 
-from mechaharness.checkpoint_store import CheckpointStore
-from mechaharness.core.access import GraphEscalate, GraphExecute
 from pyiv.injector import Injector
 from pyiv.time import DateTimeService
 
+from mechaharness.checkpoint_store import CheckpointStore
+from mechaharness.core.access import GraphEscalate, GraphExecute
 from mechaharness.core.events import EventLog, InMemoryEventLog
 from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.external_effect import (
