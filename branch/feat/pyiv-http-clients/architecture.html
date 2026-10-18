@@ -179,7 +179,11 @@ wire adapters. Override <code class="docutils literal notranslate"><span class="
 <p><strong>Config ownership:</strong> lane- and provider-specific knobs belong on the owning
 injectable (e.g. <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> for <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>), not
 as a growing pile of fields on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Providers are never attributes of
-<code class="docutils literal notranslate"><span class="pre">Settings</span></code>. See <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code> and the <code class="docutils literal notranslate"><span class="pre">di-config-ownership</span></code> skill.</p>
+<code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Shared edges bind in <code class="docutils literal notranslate"><span class="pre">configure()</span></code> and are consumed by constructor
+injection / <code class="docutils literal notranslate"><span class="pre">inject(T)</span></code> — not via <code class="docutils literal notranslate"><span class="pre">getattr</span></code> lazy caches on Config or sibling
+<code class="docutils literal notranslate"><span class="pre">get_*</span></code> calls that pull collaborators. See <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code>,
+<code class="docutils literal notranslate"><span class="pre">docs/requirements/dependency-injection.md</span></code>, and the <code class="docutils literal notranslate"><span class="pre">di-config-ownership</span></code>
+skill.</p>
 <p><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> implements the hooks via overridable <code class="docutils literal notranslate"><span class="pre">inference_classes()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">harness_classes()</span></code> maps plus <code class="docutils literal notranslate"><span class="pre">Settings.inference_backend</span></code> /
 <code class="docutils literal notranslate"><span class="pre">Settings.harness_family</span></code>. That is the configuration path for CLI/HTTP callers

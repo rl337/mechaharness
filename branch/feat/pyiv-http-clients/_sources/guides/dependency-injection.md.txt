@@ -189,18 +189,27 @@ httpx-backed client) without changing adapters.
 | `Clock` | `RealClock` | `SyntheticClock` |
 | `LoggerFactory` | `StdlibLoggerFactory` | `MemoryLoggerFactory` |
 
-Judge `SimpleHttpConnectionConfig.from_env` / `for_judge` read through
-`Environment`. Checkpoint effect stamps use `DateTimeService`.
-`LoggingEventLog` uses `LoggerFactory`. `DecisionLog` JSONL I/O uses
-`Filesystem`. Override the `get_*` hooks (or `register_instance` after
-`super().configure()`) so tests avoid monkeypatching `os.environ`, freezing
-time, or touching disk.
+Judge `SimpleHttpConnectionConfig.from_env` / `for_judge` read through an
+injected `Environment`. Checkpoint effect stamps use an injected
+`DateTimeService`. `LoggingEventLog` takes `LoggerFactory`. `DecisionLog`
+JSONL I/O takes `Filesystem`. Composed services (`EventLog`,
+`AccessControl`, `CheckpointStore`, judge connection, …) MUST take these as
+constructor dependencies (or injector factories) — not by calling sibling
+Config `get_*` hooks.
+
+In tests, rebind with `register_instance` after `super().configure()`,
+subclass hooks that change what `configure()` registers, or
+`pyiv.override(base).with_(overlay)`. Do not monkeypatch `os.environ`, freeze
+time, or touch disk when an injectable exists. Missing bindings must fail at
+`inject()` time.
 
 Test helpers live in `tests/support/stdlib_doubles.py`:
 `stdlib_doubles_config(...)` for a full Config with Memory/Mock edges, and
 `stdlib_doubles_overlay(...)` for `pyiv.override(base).with_(overlay)` (set
 `rebind_judge_connection=True` when the overlay must rebuild
 `APIConnectionConfig` from the Memory environment).
+
+Normative rules: [Dependency injection requirements](../requirements/dependency-injection.md).
 
 Override `get_access_policy()` / `get_grants()` (or `get_access_control()`) to
 inject deny-by-default tool grants; use `CompoundPolicy` to union reusable

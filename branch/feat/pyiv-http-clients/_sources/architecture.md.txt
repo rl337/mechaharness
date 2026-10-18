@@ -72,7 +72,11 @@ wire adapters. Override `get_node_runner_registry()` /
 **Config ownership:** lane- and provider-specific knobs belong on the owning
 injectable (e.g. `SimpleHttpConnectionConfig.from_env` for `MECHA_JUDGE_*`), not
 as a growing pile of fields on `Settings`. Providers are never attributes of
-`Settings`. See `.cursor/rules/di-first.mdc` and the `di-config-ownership` skill.
+`Settings`. Shared edges bind in `configure()` and are consumed by constructor
+injection / `inject(T)` — not via `getattr` lazy caches on Config or sibling
+`get_*` calls that pull collaborators. See `.cursor/rules/di-first.mdc`,
+`docs/requirements/dependency-injection.md`, and the `di-config-ownership`
+skill.
 
 `SettingsConfig` implements the hooks via overridable `inference_classes()` /
 `harness_classes()` maps plus `Settings.inference_backend` /

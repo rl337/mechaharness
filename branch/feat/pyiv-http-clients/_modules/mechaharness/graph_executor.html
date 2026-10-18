@@ -122,6 +122,7 @@
 
 <span class="sd">    &gt;&gt;&gt; import asyncio, tempfile</span>
 <span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; from pyiv.time import PythonDateTimeService</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.budget import BudgetPolicy</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.checkpoint_store import CheckpointStore</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.core.access import GraphExecute</span>
@@ -176,7 +177,9 @@
 <span class="sd">    ...     def get_node_runner_registry(self):</span>
 <span class="sd">    ...         return GraphNodeRunnerRegistry([runner])</span>
 <span class="sd">    ...     def get_checkpoint_store(self):</span>
-<span class="sd">    ...         return SqliteCheckpointStore(path)</span>
+<span class="sd">    ...         return SqliteCheckpointStore(</span>
+<span class="sd">    ...             path, datetime_service=PythonDateTimeService()</span>
+<span class="sd">    ...         )</span>
 <span class="sd">    &gt;&gt;&gt; executor = get_injector(Cfg()).inject(GraphExecutor)</span>
 <span class="sd">    &gt;&gt;&gt; graph = ExecutionGraph(goal="ship feature")</span>
 <span class="sd">    &gt;&gt;&gt; _ = graph.add_node(GraphNode(id="job", kind="coding_job"))</span>

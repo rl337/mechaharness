@@ -311,17 +311,24 @@ httpx-backed client) without changing adapters.</p>
 </tr>
 </tbody>
 </table>
-<p>Judge <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> / <code class="docutils literal notranslate"><span class="pre">for_judge</span></code> read through
-<code class="docutils literal notranslate"><span class="pre">Environment</span></code>. Checkpoint effect stamps use <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>.
-<code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code> uses <code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code>. <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code> JSONL I/O uses
-<code class="docutils literal notranslate"><span class="pre">Filesystem</span></code>. Override the <code class="docutils literal notranslate"><span class="pre">get_*</span></code> hooks (or <code class="docutils literal notranslate"><span class="pre">register_instance</span></code> after
-<code class="docutils literal notranslate"><span class="pre">super().configure()</span></code>) so tests avoid monkeypatching <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>, freezing
-time, or touching disk.</p>
+<p>Judge <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> / <code class="docutils literal notranslate"><span class="pre">for_judge</span></code> read through an
+injected <code class="docutils literal notranslate"><span class="pre">Environment</span></code>. Checkpoint effect stamps use an injected
+<code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>. <code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code> takes <code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code>. <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code>
+JSONL I/O takes <code class="docutils literal notranslate"><span class="pre">Filesystem</span></code>. Composed services (<code class="docutils literal notranslate"><span class="pre">EventLog</span></code>,
+<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code>, judge connection, …) MUST take these as
+constructor dependencies (or injector factories) — not by calling sibling
+Config <code class="docutils literal notranslate"><span class="pre">get_*</span></code> hooks.</p>
+<p>In tests, rebind with <code class="docutils literal notranslate"><span class="pre">register_instance</span></code> after <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code>,
+subclass hooks that change what <code class="docutils literal notranslate"><span class="pre">configure()</span></code> registers, or
+<code class="docutils literal notranslate"><span class="pre">pyiv.override(base).with_(overlay)</span></code>. Do not monkeypatch <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>, freeze
+time, or touch disk when an injectable exists. Missing bindings must fail at
+<code class="docutils literal notranslate"><span class="pre">inject()</span></code> time.</p>
 <p>Test helpers live in <code class="docutils literal notranslate"><span class="pre">tests/support/stdlib_doubles.py</span></code>:
 <code class="docutils literal notranslate"><span class="pre">stdlib_doubles_config(...)</span></code> for a full Config with Memory/Mock edges, and
 <code class="docutils literal notranslate"><span class="pre">stdlib_doubles_overlay(...)</span></code> for <code class="docutils literal notranslate"><span class="pre">pyiv.override(base).with_(overlay)</span></code> (set
 <code class="docutils literal notranslate"><span class="pre">rebind_judge_connection=True</span></code> when the overlay must rebuild
 <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> from the Memory environment).</p>
+<p>Normative rules: <a class="reference internal" href="../requirements/dependency-injection.html"><span class="std std-doc">Dependency injection requirements</span></a>.</p>
 <p>Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> (or <code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code>) to
 inject deny-by-default tool grants; use <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> to union reusable
 <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
