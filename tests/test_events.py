@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import json
-import logging
 
 import pytest
+from pyiv.log import MemoryLoggerFactory
 
 from mechaharness.core.events import (
     LOGGER_NAME,
@@ -100,28 +100,30 @@ def test_agents_lists_children_of_parent() -> None:
     assert children[0].parent_agent_id == "parent"
 
 
-def test_logging_event_log_writes_json(caplog) -> None:  # type: ignore[no-untyped-def]
-    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
-    log = LoggingEventLog()
+def test_logging_event_log_writes_json() -> None:
+    factory = MemoryLoggerFactory()
+    log = LoggingEventLog(logger_factory=factory)
     log.emit(_event("a", RunStart, payload={"prompt_chars": "3"}))
     assert log.query() == []
     assert log.agents() == []
-    assert len(caplog.records) == 1
-    body = json.loads(caplog.records[0].message)
+    records = factory.get(LOGGER_NAME).records
+    assert len(records) == 1
+    body = json.loads(records[0].message)
     assert body["type"] == "core:run_start"
     assert body["agent_id"] == "a"
     assert body["payload"]["prompt_chars"] == "3"
 
 
-def test_fanout_queries_memory_and_logs(caplog) -> None:  # type: ignore[no-untyped-def]
-    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+def test_fanout_queries_memory_and_logs() -> None:
+    factory = MemoryLoggerFactory()
     memory = InMemoryEventLog()
-    log = FanoutEventLog(memory, LoggingEventLog())
+    log = FanoutEventLog(memory, LoggingEventLog(logger_factory=factory))
     log.emit(_event("a", ToolCall, payload={"name": "add"}))
     found = log.query(agent_id="a")
     assert len(found) == 1
     assert found[0].payload["name"] == "add"
-    assert json.loads(caplog.records[0].message)["type"] == "core:tool_call"
+    body = json.loads(factory.get(LOGGER_NAME).records[0].message)
+    assert body["type"] == "core:tool_call"
 
 
 class WidgetDone(EventType):

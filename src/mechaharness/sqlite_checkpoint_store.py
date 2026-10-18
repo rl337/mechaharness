@@ -44,9 +44,10 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, get_args
+
+from pyiv.time import DateTimeService, PythonDateTimeService
 
 from mechaharness.checkpoint_store import CheckpointDurability, CheckpointStore, effect_from_mapping
 from mechaharness.external_effect import EffectRecord
@@ -96,8 +97,14 @@ class SqliteCheckpointStore(CheckpointStore):
 
     durability: CheckpointDurability = "durable"
 
-    def __init__(self, path: str | Path) -> None:
+    def __init__(
+        self,
+        path: str | Path,
+        *,
+        datetime_service: DateTimeService | None = None,
+    ) -> None:
         self.path = Path(path)
+        self._datetime = datetime_service or PythonDateTimeService()
         if self.path.parent and str(self.path.parent) not in {"", "."}:
             self.path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
@@ -151,7 +158,7 @@ class SqliteCheckpointStore(CheckpointStore):
         if fingerprint is not None:
             graph.config_fingerprint = fingerprint
         fp = fingerprint or graph.config_fingerprint
-        now = datetime.now(timezone.utc).isoformat()
+        now = self._datetime.now_utc_iso()
         payload = json.dumps(graph.checkpoint(), separators=(",", ":"), sort_keys=True)
         with self._lock:
             self._conn.execute("BEGIN IMMEDIATE")
@@ -239,7 +246,7 @@ class SqliteCheckpointStore(CheckpointStore):
         return row if isinstance(row, sqlite3.Row) else None
 
     def save_effect(self, effect: EffectRecord) -> EffectRecord:
-        now = datetime.now(timezone.utc).isoformat()
+        now = self._datetime.now_utc_iso()
         with self._lock:
             self._conn.execute("BEGIN IMMEDIATE")
             try:

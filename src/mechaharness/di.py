@@ -35,12 +35,16 @@ from typing import (
 
 from eval_type_backport import eval_type_backport
 from pyiv import Config, Stage
+from pyiv.files import Filesystem, RealFilesystem
 from pyiv.http import AsyncHttpClient, AsyncUrllibHttpClient
 from pyiv.injector import Injector
 from pyiv.injector import get_injector as _pyiv_get_injector
 from pyiv.key import Key, Named
+from pyiv.log import LoggerFactory, StdlibLoggerFactory
+from pyiv.process import Environment, OsEnvironment
 from pyiv.provider import InstanceProvider
 from pyiv.scope import SingletonScope
+from pyiv.time import Clock, DateTimeService, PythonDateTimeService, RealClock
 
 from mechaharness.advisor import Advisor, AdvisorPolicy, DefaultAdvisorPolicy, RejectAdvisor
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
@@ -63,7 +67,7 @@ from mechaharness.core.environment import (
     InferenceEnvironment,
     NoOpInferenceEnvironment,
 )
-from mechaharness.core.events import EventLog, default_event_log
+from mechaharness.core.events import EventLog
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
 from mechaharness.external_effect import CrashProbe, NoopCrashProbe
 from mechaharness.graph import GraphStore
@@ -377,6 +381,14 @@ class MechaHarnessConfig(Config):
         self.register_instance(CheckpointStore, self.get_checkpoint_store())
         self.register_instance(CrashProbe, self.get_crash_probe())
 
+        # Use-case stdlib injectables (pyiv ≥ 1.1). Hosts overlay Memory* /
+        # Synthetic* / Mock* doubles in tests without monkeypatching.
+        self.register_instance(Environment, self.get_environment())
+        self.register_instance(DateTimeService, self.get_datetime_service())
+        self.register_instance(Filesystem, self.get_filesystem())
+        self.register_instance(Clock, self.get_clock())
+        self.register_instance(LoggerFactory, self.get_logger_factory())
+
         # Shared transport for inference / judge adapters (absolute URLs +
         # per-request headers). Hosts override with MemoryAsyncHttpClient in tests.
         self.register(AsyncHttpClient, AsyncUrllibHttpClient, singleton=True)
@@ -451,7 +463,12 @@ class MechaHarnessConfig(Config):
         """Shared ``EventLog`` for harnesses and access/cost policies."""
         existing = getattr(self, "_event_log", None)
         if existing is None:
-            existing = default_event_log()
+            from mechaharness.core.events import FanoutEventLog, InMemoryEventLog, LoggingEventLog
+
+            existing = FanoutEventLog(
+                InMemoryEventLog(),
+                LoggingEventLog(logger_factory=self.get_logger_factory()),
+            )
             self._event_log = existing
         return existing
 
@@ -483,11 +500,51 @@ class MechaHarnessConfig(Config):
         """Host probe for the active inference profile (default: no-op)."""
         return NoOpInferenceEnvironment()
 
+    def get_environment(self) -> Environment:
+        """Process environment for ``from_env`` / host knobs (default: OS)."""
+        existing = getattr(self, "_environment", None)
+        if existing is None:
+            existing = OsEnvironment()
+            self._environment = existing
+        return existing
+
+    def get_datetime_service(self) -> DateTimeService:
+        """UTC timestamps for checkpoints and stamps (default: wall clock)."""
+        existing = getattr(self, "_datetime_service", None)
+        if existing is None:
+            existing = PythonDateTimeService()
+            self._datetime_service = existing
+        return existing
+
+    def get_filesystem(self) -> Filesystem:
+        """File I/O for decision JSONL and host paths (default: real disk)."""
+        existing = getattr(self, "_filesystem", None)
+        if existing is None:
+            existing = RealFilesystem()
+            self._filesystem = existing
+        return existing
+
+    def get_clock(self) -> Clock:
+        """Monotonic / sleep surface for coordination (default: real clock)."""
+        existing = getattr(self, "_clock", None)
+        if existing is None:
+            existing = RealClock()
+            self._clock = existing
+        return existing
+
+    def get_logger_factory(self) -> LoggerFactory:
+        """Logger factory for ``LoggingEventLog`` (default: stdlib hierarchy)."""
+        existing = getattr(self, "_logger_factory", None)
+        if existing is None:
+            existing = StdlibLoggerFactory()
+            self._logger_factory = existing
+        return existing
+
     def get_judge_connection(self) -> APIConnectionConfig:
         """HTTP connection for the judge lane (override for OAuth, etc.)."""
         existing = getattr(self, "_judge_connection", None)
         if existing is None:
-            existing = SimpleHttpConnectionConfig.for_judge()
+            existing = SimpleHttpConnectionConfig.for_judge(env=self.get_environment())
             self._judge_connection = existing
         return existing
 
@@ -587,6 +644,7 @@ class MechaHarnessConfig(Config):
                 GraphStore(event_log, agent_id="graph"),
                 event_log=event_log,
                 agent_id="graph",
+                datetime_service=self.get_datetime_service(),
             )
             self._checkpoint_store = existing
         return existing

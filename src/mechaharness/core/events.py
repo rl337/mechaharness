@@ -8,13 +8,13 @@ or injector imports.
 from __future__ import annotations
 
 import json
-import logging
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from typing import Any, ClassVar, Union
 
 from pydantic import BaseModel, Field, field_validator
+from pyiv.log import Logger, LoggerFactory, StdlibLoggerFactory
 
 LOGGER_NAME = "mechaharness.events"
 
@@ -273,10 +273,21 @@ class LoggingEventLog(EventLog):
     """Write adapter: one JSON line per event on ``mechaharness.events``.
 
     Not a store: ``query`` / ``agents`` return empty lists.
+    Prefer an injectable pyiv ``Logger`` / ``LoggerFactory`` so tests can bind
+    ``MemoryLoggerFactory`` without patching ``logging``.
     """
 
-    def __init__(self, logger: logging.Logger | None = None) -> None:
-        self._logger = logger or logging.getLogger(LOGGER_NAME)
+    def __init__(
+        self,
+        logger: Logger | None = None,
+        *,
+        logger_factory: LoggerFactory | None = None,
+    ) -> None:
+        if logger is not None:
+            self._logger = logger
+        else:
+            factory = logger_factory or StdlibLoggerFactory()
+            self._logger = factory.get(LOGGER_NAME)
 
     def emit(self, event: Event) -> None:
         line = json.dumps(event.model_dump(mode="json"), default=str, sort_keys=True)

@@ -6,14 +6,16 @@
 via Config hooks without proliferating URL-only and auth-only types.
 
 Judge-lane env knobs (``MECHA_JUDGE_*``) bind here via ``from_env`` — not on
-``Settings``.
+``Settings``. Prefer an injectable pyiv ``Environment`` so tests use
+``MemoryEnvironment`` without mutating ``os.environ``.
 """
 
 from __future__ import annotations
 
-import os
 from abc import ABC, abstractmethod
 from typing import Any
+
+from pyiv.process import Environment, OsEnvironment
 
 DEFAULT_JUDGE_PATH = "/v1/systemone"
 
@@ -73,17 +75,22 @@ class SimpleHttpConnectionConfig(APIConnectionConfig):
         legacy_prefix: str | None = "MECHA_DECIDE",
         default_path: str = DEFAULT_JUDGE_PATH,
         fallback_api_key_env: str = "MECHA_API_KEY",
+        env: Environment | None = None,
     ) -> SimpleHttpConnectionConfig:
-        """Bind connection knobs from the process environment.
+        """Bind connection knobs from an injectable environment.
 
         Reads ``{prefix}_BASE_URL``, ``_PATH``, ``_URL``, ``_MODEL``,
         ``_API_KEY``, ``_TIMEOUT_SECONDS``. When ``legacy_prefix`` is set,
         falls back for base URL / model (judge migration window).
+
+        ``env`` defaults to ``OsEnvironment()`` for standalone use; Config
+        paths should pass the injected ``Environment``.
         """
+        environ = env if env is not None else OsEnvironment()
 
         def _get(*keys: str) -> str | None:
             for key in keys:
-                value = os.environ.get(key)
+                value = environ.get(key)
                 if value is not None and value != "":
                     return value
             return None
@@ -110,9 +117,14 @@ class SimpleHttpConnectionConfig(APIConnectionConfig):
         )
 
     @classmethod
-    def for_judge(cls, **overrides: Any) -> SimpleHttpConnectionConfig:
+    def for_judge(
+        cls,
+        *,
+        env: Environment | None = None,
+        **overrides: Any,
+    ) -> SimpleHttpConnectionConfig:
         """Judge-lane connection from env, with optional constructor overrides."""
-        conn = cls.from_env()
+        conn = cls.from_env(env=env)
         if not overrides:
             return conn
         return cls(

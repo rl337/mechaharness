@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from pyiv.files import MemoryFilesystem
 
 from mechaharness.decision_log import DecisionLog, DecisionRecord, replay_verdict
 from mechaharness.inference.judge import NoulSignal
@@ -77,9 +77,10 @@ def test_ask_human_band_and_approval_reuse() -> None:
     assert ok.kind == "ALLOW"
 
 
-def test_decision_log_jsonl_and_replay(tmp_path: Path) -> None:
-    path = tmp_path / "decisions.jsonl"
-    log = DecisionLog(jsonl_path=path)
+def test_decision_log_jsonl_and_replay() -> None:
+    fs = MemoryFilesystem()
+    path = "/decisions.jsonl"
+    log = DecisionLog(jsonl_path=path, filesystem=fs)
     policy = JudgementPolicy(
         version="gate-fixture-v1",
         thresholds=[JudgementThreshold(signal_id="destructive", allow_above=0.5)],
@@ -100,6 +101,8 @@ def test_decision_log_jsonl_and_replay(tmp_path: Path) -> None:
     rows = list(log.iter_jsonl())
     assert len(rows) == 1
     assert rows[0].verdict == verdict.kind
+    assert rows[0].event_id == "d17"
+    assert "d17" in fs.read_text(path)
     replayed = replay_verdict(
         facts=JudgementFacts(action="x"), signals=signals, policy=policy
     )

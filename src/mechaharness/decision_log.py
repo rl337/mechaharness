@@ -9,6 +9,7 @@ from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
+from pyiv.files import Filesystem, RealFilesystem
 
 from mechaharness.core.events import CoreEvent, Event, EventLog, InMemoryEventLog, event_type_key
 from mechaharness.inference.judge import Signal
@@ -89,10 +90,26 @@ class DecisionLog:
         *,
         jsonl_path: Path | str | None = None,
         agent_id: str = "policy",
+        filesystem: Filesystem | None = None,
     ) -> None:
         self.event_log = event_log or InMemoryEventLog()
         self.jsonl_path = Path(jsonl_path) if jsonl_path else None
         self.agent_id = agent_id
+        self._fs = filesystem or RealFilesystem()
+
+    def _append_jsonl(self, line: str) -> None:
+        """Append one JSONL line via ``Filesystem`` (works with Memory doubles)."""
+        assert self.jsonl_path is not None
+        path = str(self.jsonl_path)
+        parent = str(self.jsonl_path.parent)
+        if parent not in {"", "."}:
+            self._fs.mkdir(parent, parents=True, exist_ok=True)
+        # Read-modify-write so MemoryFilesystem (append mode is overwrite-only)
+        # and RealFilesystem behave the same.
+        existing = ""
+        if self._fs.exists(path) and self._fs.is_file(path):
+            existing = self._fs.read_text(path)
+        self._fs.write_text(path, existing + line)
 
     def record(self, record: DecisionRecord | Mapping[str, Any]) -> Event:
         rec = (
@@ -109,21 +126,22 @@ class DecisionLog:
         )
         self.event_log.emit(event)
         if self.jsonl_path is not None:
-            self.jsonl_path.parent.mkdir(parents=True, exist_ok=True)
-            with self.jsonl_path.open("a", encoding="utf-8") as fh:
-                fh.write(json.dumps(payload, sort_keys=True) + "\n")
+            self._append_jsonl(json.dumps(payload, sort_keys=True) + "\n")
         return event
 
     def iter_jsonl(self) -> Iterable[DecisionRecord]:
-        if self.jsonl_path is None or not self.jsonl_path.is_file():
+        if self.jsonl_path is None:
             yield from ()
             return
-        with self.jsonl_path.open(encoding="utf-8") as fh:
-            for line in fh:
-                line = line.strip()
-                if not line:
-                    continue
-                yield DecisionRecord.model_validate(json.loads(line))
+        path = str(self.jsonl_path)
+        if not (self._fs.exists(path) and self._fs.is_file(path)):
+            yield from ()
+            return
+        for line in self._fs.read_text(path).splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            yield DecisionRecord.model_validate(json.loads(line))
 
 
 def replay_verdict(
