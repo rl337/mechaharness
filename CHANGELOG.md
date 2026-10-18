@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `AsyncHttpClient` (`AsyncUrllibHttpClient` by default; `MemoryAsyncHttpClient`
   in tests) instead of raw `httpx`. Adapters own absolute URLs / headers from
   `Settings` / `APIConnectionConfig`; `MechaHarnessConfig` registers the shared
-  transport. Dropped the direct `httpx` dependency.
+  transport. Dropped runtime `httpx`; keep it as a **dev** extra for
+  FastAPI/Starlette `TestClient` (`tests/test_api.py`).
 
 ## [0.4.1] — 2026-10-14
 
