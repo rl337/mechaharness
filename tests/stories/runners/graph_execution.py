@@ -6,7 +6,6 @@ from typing import Any
 
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
 from mechaharness.core.access import (
     AccessPolicy,
     GraphExecute,
@@ -14,14 +13,9 @@ from mechaharness.core.access import (
 )
 from mechaharness.core.environment import (
     InferenceEnvironment,
-    NoOpInferenceEnvironment,
 )
 from mechaharness.core.events import InMemoryEventLog
 from mechaharness.di import MechaHarnessConfig, get_injector
-from mechaharness.failure_attribution import (
-    attribute_with_repair_target,
-    select_rollback_target,
-)
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -42,7 +36,6 @@ from mechaharness.graph_executor import (
 from mechaharness.graph_templates import (
     SubgraphNodeRunner,
 )
-from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
 from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
@@ -53,27 +46,9 @@ from mechaharness.operation_registry import (
     ResourceScope,
     default_operations,
 )
-from mechaharness.rollout_graph import build_rollout_graph
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
 from tests.stories.runners._support import StoryRunner, _assert_expect, _story_graph_executor
-
-
-async def _run_convergence_ceiling(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-    contract = ConvergenceContract(**request["contract"])
-    guard = ConvergenceGuard(contract)
-    fingerprints = list(request.get("fingerprints", []))
-    for fp in fingerprints:
-        guard.tick(fingerprint=fp, elapsed_ms=float(request.get("elapsed_ms_per_tick", 1)))
-    actual = {
-        "terminal_in": guard.state.terminal,
-        "reason_in": guard.state.reason,
-        "success": guard.state.terminal == "success",
-    }
-    _assert_expect(actual, expect)
 
 
 async def _run_local_plan_resume(case: StoryCase, backend: StoryBackend) -> None:
@@ -158,51 +133,6 @@ async def _run_local_plan_resume(case: StoryCase, backend: StoryBackend) -> None
         "merge_conflicts_include": merged["conflicts"],
         "recovery_boundary_in": store.latest_boundary(run_id="story-graph"),
     }
-    _assert_expect(actual, expect)
-
-
-async def _run_graph_linkage_preflight(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-
-    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
-        del context
-        return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"id": node.id})
-
-    registry = GraphNodeRunnerRegistry(
-        [CallableGraphNodeRunner(["compute"], ok), CallableGraphNodeRunner(["loop"], ok)]
-    )
-    access = InMemoryAccessControl(
-        event_log=InMemoryEventLog(),
-        policy=AccessPolicy(grants=[GraphExecute]),
-    )
-    resolver = DefaultLinkageResolver(
-        runners=registry,
-        access=access,
-        environment=NoOpInferenceEnvironment(),
-    )
-
-    actual: dict[str, Any] = {}
-    if request.get("check_missing_runner", True):
-        g = ExecutionGraph(goal="missing")
-        g.add_node(GraphNode(id="x", kind="unregistered"))
-        report = resolver.resolve(g)
-        actual["missing_runner_ok"] = report.ok
-        actual["missing_runner_codes_include"] = [e.code for e in report.edges]
-    if request.get("check_missing_stop", True):
-        g = ExecutionGraph(goal="loop")
-        g.add_node(GraphNode(id="loop", kind="loop", repeating=True))
-        report = resolver.resolve(g)
-        actual["missing_stop_ok"] = report.ok
-        actual["missing_stop_codes_include"] = [e.code for e in report.edges]
-    if request.get("check_ok_linear", True):
-        g = ExecutionGraph(goal="ok")
-        g.add_node(GraphNode(id="a", kind="compute"))
-        g.add_node(GraphNode(id="b", kind="compute", depends_on=["a"]))
-        report = resolver.resolve(g)
-        actual["ok_linear_ok"] = report.ok
-        actual["ok_linear_fingerprint_nonempty"] = bool(report.fingerprint)
     _assert_expect(actual, expect)
 
 
@@ -533,54 +463,6 @@ async def _run_transactional_durable_resume_crash_matrix(
             assert_expect(payload["actual"], case_expect)
 
 
-async def _run_graph_transition_inspect(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-    contract = TransitionContract(
-        transitions=[GraphTransition.model_validate(t) for t in request.get("transitions") or []]
-    )
-    nodes = set(request.get("nodes") or [])
-    kinds = [t.kind for t in inspect_transitions(contract, "verify")]
-    actual = {
-        "issues": contract.validate_against_nodes(nodes),
-        "verify_kinds_include": kinds,
-    }
-    _assert_expect(actual, expect)
-
-
-async def _run_targeted_rollback_select(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-    attr = attribute_with_repair_target(
-        str(request.get("error") or ""),
-        node_id=request.get("node_id"),
-        repair_target=request.get("repair_target"),
-    )
-    contract = TransitionContract(
-        transitions=[GraphTransition.model_validate(t) for t in request.get("transitions") or []]
-    )
-    actual = {
-        "rollback_target": select_rollback_target(attr, contract),
-        "repair_target": attr.repair_target,
-    }
-    _assert_expect(actual, expect)
-
-
-async def _run_rollout_graph_build(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-    graph = build_rollout_graph(request.get("records") or [])
-    actual = {
-        "roots_include": graph.roots(),
-        "retry_linked": graph.nodes.get("retry") is not None
-        and graph.nodes["retry"].execution_node_id == "produce",
-    }
-    _assert_expect(actual, expect)
-
-
 async def _run_decision_conflict_neighbor_revisit(
     case: StoryCase, backend: StoryBackend
 ) -> None:
@@ -628,9 +510,7 @@ async def _run_decision_conflict_neighbor_revisit(
 
 
 RUNNERS: dict[str, StoryRunner] = {
-    "convergence_ceiling": _run_convergence_ceiling,
     "local_plan_resume": _run_local_plan_resume,
-    "graph_linkage_preflight": _run_graph_linkage_preflight,
     "dynamic_subgraph_nest": _run_dynamic_subgraph_nest,
     "checkpoint_fingerprint_refuse": _run_checkpoint_fingerprint_refuse,
     "environment_linkage_fail": _run_environment_linkage_fail,
@@ -638,8 +518,5 @@ RUNNERS: dict[str, StoryRunner] = {
     "graph_budget_limits": _run_graph_budget_limits,
     "graph_budget_subgraph_rollup": _run_graph_budget_subgraph_rollup,
     "transactional_durable_resume_crash_matrix": _run_transactional_durable_resume_crash_matrix,
-    "graph_transition_inspect": _run_graph_transition_inspect,
-    "targeted_rollback_select": _run_targeted_rollback_select,
-    "rollout_graph_build": _run_rollout_graph_build,
     "decision_conflict_neighbor_revisit": _run_decision_conflict_neighbor_revisit,
 }

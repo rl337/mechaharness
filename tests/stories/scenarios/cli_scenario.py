@@ -23,8 +23,13 @@ from mechaharness.cli_diagnostic_verbs import (
 )
 from mechaharness.cli_graph_verbs import (
     BoundedRepairLoopCommand,
+    ConvergenceCeilingCommand,
     GraphEventCorrelatorsCommand,
     GraphExecutorRunCommand,
+    GraphLinkagePreflightCommand,
+    GraphTransitionInspectCommand,
+    RolloutGraphBuildCommand,
+    TargetedRollbackSelectCommand,
     TopologyEfficiencyCommand,
     ValidatorQualificationCommand,
 )
@@ -101,6 +106,21 @@ class CliExpect(BaseModel):
     child_parent_run_ids: list[str] | None = None
     child_nest_depths: list[int] | None = None
     node_attempt_rows: list[list[Any]] | None = None
+    missing_runner_ok: bool | None = None
+    missing_runner_codes_exactly: list[str] | None = None
+    missing_stop_ok: bool | None = None
+    missing_stop_codes_exactly: list[str] | None = None
+    ok_linear_ok: bool | None = None
+    ok_linear_fingerprint_nonempty: bool | None = None
+    issues: list[Any] | None = None
+    verify_kinds_exactly: list[str] | None = None
+    rollback_target: str | None = None
+    repair_target: str | None = None
+    roots_exactly: list[str] | None = None
+    retry_linked: bool | None = None
+    terminal: str | None = None
+    reason: str | None = None
+    success: bool | None = None
 
     @model_validator(mode="after")
     def _at_least_one(self) -> CliExpect:
@@ -134,6 +154,11 @@ class CliScenarioCommand(BaseModel):
     bounded_repair_loop: BoundedRepairLoopCommand | None = None
     graph_executor_run: GraphExecutorRunCommand | None = None
     graph_event_correlators: GraphEventCorrelatorsCommand | None = None
+    graph_linkage_preflight: GraphLinkagePreflightCommand | None = None
+    graph_transition_inspect: GraphTransitionInspectCommand | None = None
+    targeted_rollback_select: TargetedRollbackSelectCommand | None = None
+    rollout_graph_build: RolloutGraphBuildCommand | None = None
+    convergence_ceiling: ConvergenceCeilingCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
     expect: CliExpect | None = None
@@ -158,6 +183,11 @@ class CliScenarioCommand(BaseModel):
             self.bounded_repair_loop,
             self.graph_executor_run,
             self.graph_event_correlators,
+            self.graph_linkage_preflight,
+            self.graph_transition_inspect,
+            self.targeted_rollback_select,
+            self.rollout_graph_build,
+            self.convergence_ceiling,
             self.set_clock,
             self.advance_clock,
         ]

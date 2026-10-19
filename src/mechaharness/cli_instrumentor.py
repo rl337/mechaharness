@@ -43,13 +43,23 @@ from mechaharness.cli_diagnostic_verbs import (
 )
 from mechaharness.cli_graph_verbs import (
     BoundedRepairLoopCommand,
+    ConvergenceCeilingCommand,
     GraphEventCorrelatorsCommand,
     GraphExecutorRunCommand,
+    GraphLinkagePreflightCommand,
+    GraphTransitionInspectCommand,
+    RolloutGraphBuildCommand,
+    TargetedRollbackSelectCommand,
     TopologyEfficiencyCommand,
     ValidatorQualificationCommand,
     run_bounded_repair_loop,
+    run_convergence_ceiling,
     run_graph_event_correlators,
     run_graph_executor_run,
+    run_graph_linkage_preflight,
+    run_graph_transition_inspect,
+    run_rollout_graph_build,
+    run_targeted_rollback_select,
     run_topology_efficiency,
     run_validator_qualification,
 )
@@ -190,6 +200,11 @@ class CliCommand(BaseModel):
     bounded_repair_loop: BoundedRepairLoopCommand | None = None
     graph_executor_run: GraphExecutorRunCommand | None = None
     graph_event_correlators: GraphEventCorrelatorsCommand | None = None
+    graph_linkage_preflight: GraphLinkagePreflightCommand | None = None
+    graph_transition_inspect: GraphTransitionInspectCommand | None = None
+    targeted_rollback_select: TargetedRollbackSelectCommand | None = None
+    rollout_graph_build: RolloutGraphBuildCommand | None = None
+    convergence_ceiling: ConvergenceCeilingCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
 
@@ -213,6 +228,11 @@ class CliCommand(BaseModel):
             ("bounded_repair_loop", self.bounded_repair_loop),
             ("graph_executor_run", self.graph_executor_run),
             ("graph_event_correlators", self.graph_event_correlators),
+            ("graph_linkage_preflight", self.graph_linkage_preflight),
+            ("graph_transition_inspect", self.graph_transition_inspect),
+            ("targeted_rollback_select", self.targeted_rollback_select),
+            ("rollout_graph_build", self.rollout_graph_build),
+            ("convergence_ceiling", self.convergence_ceiling),
             ("set_clock", self.set_clock),
             ("advance_clock", self.advance_clock),
         ]
@@ -243,6 +263,11 @@ class CliCommand(BaseModel):
             "bounded_repair_loop",
             "graph_executor_run",
             "graph_event_correlators",
+            "graph_linkage_preflight",
+            "graph_transition_inspect",
+            "targeted_rollback_select",
+            "rollout_graph_build",
+            "convergence_ceiling",
             "set_clock",
             "advance_clock",
         ):
@@ -617,6 +642,31 @@ class CliInstrumentor:
                 probe=await run_graph_event_correlators(
                     command.graph_event_correlators
                 ),
+            )
+        if command.graph_linkage_preflight is not None:
+            return CliStepResult(
+                verb="graph_linkage_preflight",
+                probe=run_graph_linkage_preflight(command.graph_linkage_preflight),
+            )
+        if command.graph_transition_inspect is not None:
+            return CliStepResult(
+                verb="graph_transition_inspect",
+                probe=run_graph_transition_inspect(command.graph_transition_inspect),
+            )
+        if command.targeted_rollback_select is not None:
+            return CliStepResult(
+                verb="targeted_rollback_select",
+                probe=run_targeted_rollback_select(command.targeted_rollback_select),
+            )
+        if command.rollout_graph_build is not None:
+            return CliStepResult(
+                verb="rollout_graph_build",
+                probe=run_rollout_graph_build(command.rollout_graph_build),
+            )
+        if command.convergence_ceiling is not None:
+            return CliStepResult(
+                verb="convergence_ceiling",
+                probe=run_convergence_ceiling(command.convergence_ceiling),
             )
         assert command.infer is not None
         body = command.infer
