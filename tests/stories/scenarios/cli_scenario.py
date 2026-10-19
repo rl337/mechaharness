@@ -37,7 +37,11 @@ class CliExpect(BaseModel):
     traversal_kinds_exactly: list[str] | None = None
     component_parents_exactly: list[str] | None = None
     rounds: int | None = None
+    turns: int | None = None
+    recipe_in_catalog: bool | None = None
+    description_name: str | None = None
     subgraph_node_ids_exactly: list[str] | None = None
+    graph_node_ids_exactly: list[str] | None = None
 
     @model_validator(mode="after")
     def _at_least_one(self) -> CliExpect:

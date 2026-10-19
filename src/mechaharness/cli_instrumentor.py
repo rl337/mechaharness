@@ -21,9 +21,11 @@ from pyiv.time import DateTimeService, MockDateTimeService
 from mechaharness.budget import BudgetPolicy
 from mechaharness.cli_infer_runner import CliInferRunner
 from mechaharness.cli_universe import CLI_INFER_NODE_ID, build_cli_universe_graph
+from mechaharness.config import Settings
 from mechaharness.conversational_tool_loop_runner import ConversationalToolLoopRunner
 from mechaharness.core.access import CostAccountant, InMemoryCostAccountant
 from mechaharness.core.completer import Completer
+from mechaharness.core.contract import RunRequest
 from mechaharness.core.events import (
     AgentRef,
     Event,
@@ -41,6 +43,12 @@ from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.host_kit import host_graph_executor, tapping_event_log
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.node_component import traversal_from_events
+from mechaharness.recipe_runner import (
+    instantiate_recipe,
+    list_recipes,
+    run_backend_describe_recipe,
+    run_harness_recipe,
+)
 from mechaharness.tools.base import Tool, ToolRegistry
 
 
@@ -102,8 +110,13 @@ class RunRecipeCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
+    prompt: str | None = None
+    backend: str = "mock"
+    family: str = "pass_through"
+    max_turns: int = 4
     max_iterations: int = 4
     tool_name: str = "lookup"
+    model: str | None = None
 
 
 class SetClockCommand(BaseModel):
@@ -183,6 +196,9 @@ class CliStepResult(BaseModel):
     traversal_kinds: list[str] = Field(default_factory=list)
     component_parent_ids: list[str] = Field(default_factory=list)
     rounds: int | None = None
+    turns: int | None = None
+    recipe_in_catalog: bool | None = None
+    description_name: str | None = None
     subgraph_node_ids: list[str] = Field(default_factory=list)
 
     def as_expect_dict(self) -> dict[str, Any]:
@@ -202,8 +218,13 @@ class CliStepResult(BaseModel):
             "component_parent_ids": list(self.component_parent_ids),
             "component_parents_exactly": list(self.component_parent_ids),
             "rounds": self.rounds,
+            "turns": self.turns,
+            "recipe_in_catalog": self.recipe_in_catalog,
+            "description_name": self.description_name,
             "subgraph_node_ids": list(self.subgraph_node_ids),
             "subgraph_node_ids_exactly": list(self.subgraph_node_ids),
+            "graph_node_ids_exactly": list(self.subgraph_node_ids),
+            "text_nonempty": bool(self.text and str(self.text).strip()),
         }
 
 
@@ -222,6 +243,9 @@ class CliRunResult(BaseModel):
     traversal_kinds: list[str] = Field(default_factory=list)
     component_parent_ids: list[str] = Field(default_factory=list)
     rounds: int | None = None
+    turns: int | None = None
+    recipe_in_catalog: bool | None = None
+    description_name: str | None = None
     subgraph_node_ids: list[str] = Field(default_factory=list)
 
     def as_expect_dict(self) -> dict[str, Any]:
@@ -242,8 +266,12 @@ class CliRunResult(BaseModel):
             "component_parent_ids": list(self.component_parent_ids),
             "component_parents_exactly": list(self.component_parent_ids),
             "rounds": self.rounds,
+            "turns": self.turns,
+            "recipe_in_catalog": self.recipe_in_catalog,
+            "description_name": self.description_name,
             "subgraph_node_ids": list(self.subgraph_node_ids),
             "subgraph_node_ids_exactly": list(self.subgraph_node_ids),
+            "graph_node_ids_exactly": list(self.subgraph_node_ids),
         }
 
 
@@ -351,6 +379,9 @@ class CliInstrumentor:
         last_traversal: list[str] = []
         last_parents: list[str] = []
         last_rounds: int | None = None
+        last_turns: int | None = None
+        last_in_catalog: bool | None = None
+        last_description: str | None = None
         last_subgraph_ids: list[str] = []
         for command in script.commands:
             step = await self._run_command(command)
@@ -365,6 +396,12 @@ class CliInstrumentor:
                 last_parents = list(step.component_parent_ids)
             if step.rounds is not None:
                 last_rounds = step.rounds
+            if step.turns is not None:
+                last_turns = step.turns
+            if step.recipe_in_catalog is not None:
+                last_in_catalog = step.recipe_in_catalog
+            if step.description_name is not None:
+                last_description = step.description_name
             if step.subgraph_node_ids:
                 last_subgraph_ids = list(step.subgraph_node_ids)
         all_events = self._log.query(agent_id=self._agent_id)
@@ -388,6 +425,9 @@ class CliInstrumentor:
             traversal_kinds=last_traversal,
             component_parent_ids=last_parents,
             rounds=last_rounds,
+            turns=last_turns,
+            recipe_in_catalog=last_in_catalog,
+            description_name=last_description,
             subgraph_node_ids=last_subgraph_ids,
         )
 
@@ -502,12 +542,96 @@ class CliInstrumentor:
         *,
         before: int,
     ) -> CliStepResult:
-        if body.name != "conversational_tool_loop":
-            raise ValueError(
-                f"run_recipe does not yet support recipe {body.name!r} "
-                "(Wave 2: conversational_tool_loop only)"
-            )
-        return await self._run_conversational_tool_loop(body, before=before)
+        if body.name == "conversational_tool_loop":
+            return await self._run_conversational_tool_loop(body, before=before)
+        if body.name == "harness_run":
+            return await self._run_harness_run_recipe(body, before=before)
+        if body.name == "backend_describe":
+            return await self._run_backend_describe_recipe(body, before=before)
+        raise ValueError(
+            f"run_recipe does not yet support recipe {body.name!r}"
+        )
+
+    async def _run_harness_run_recipe(
+        self,
+        body: RunRecipeCommand,
+        *,
+        before: int,
+    ) -> CliStepResult:
+        if not body.prompt:
+            raise ValueError("run_recipe harness_run requires prompt=")
+        catalog = {row["name"] for row in list_recipes()}
+        response = await run_harness_recipe(
+            RunRequest(
+                prompt=body.prompt,
+                backend=body.backend,
+                family=body.family,
+                model=body.model or self._model,
+                max_turns=body.max_turns,
+            ),
+            tools=self._tools if len(self._tools) else None,
+            event_log=self._log,
+        )
+        graph = instantiate_recipe(
+            "harness_run",
+            GraphTemplateParams(
+                goal="harness_run",
+                inputs={"prompt": body.prompt},
+                soft_bindings={
+                    "prompt": body.prompt,
+                    "backend": body.backend,
+                    "family": body.family,
+                },
+            ),
+        )
+        after_events = self._log.query()[before:]
+        units = sum(
+            float(e.payload.get("units") or 0)
+            for e in after_events
+            if e.type == "core:cost"
+        )
+        return CliStepResult(
+            verb="run_recipe",
+            text=response.final_text,
+            status="ok",
+            event_types=[e.type for e in after_events],
+            events=[_event_dict(e) for e in after_events],
+            cost_units=units,
+            clock_iso=self._datetime.now_utc_iso(),
+            turns=int(response.turns or 0),
+            recipe_in_catalog="harness_run" in catalog,
+            subgraph_node_ids=list(graph.nodes),
+        )
+
+    async def _run_backend_describe_recipe(
+        self,
+        body: RunRecipeCommand,
+        *,
+        before: int,
+    ) -> CliStepResult:
+        del before
+        catalog = {row["name"] for row in list_recipes()}
+        settings = Settings(
+            inference_backend=body.backend,
+            model=body.model or self._model,
+        )
+        description = await run_backend_describe_recipe(settings)
+        graph = instantiate_recipe(
+            "backend_describe",
+            GraphTemplateParams(
+                goal="backend_describe",
+                soft_bindings={"backend": body.backend},
+            ),
+        )
+        return CliStepResult(
+            verb="run_recipe",
+            text=None,
+            status="ok",
+            clock_iso=self._datetime.now_utc_iso(),
+            recipe_in_catalog="backend_describe" in catalog,
+            description_name=str(description.get("name") or ""),
+            subgraph_node_ids=list(graph.nodes),
+        )
 
     async def _run_conversational_tool_loop(
         self,
