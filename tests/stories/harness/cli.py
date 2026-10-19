@@ -10,12 +10,16 @@ from pyiv.time import MockDateTimeService
 
 from mechaharness.cli_instrumentor import CliInstrumentor
 from mechaharness.config import Settings
-from mechaharness.core.types import ChatMessage, Role, Usage
+from mechaharness.core.types import ChatMessage, Role, ToolCall, Usage
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
-from tests.stories.scenarios.cli_scenario import load_cli_scenario, run_cli_scenario
+from tests.stories.scenarios.cli_scenario import (
+    CliScenario,
+    load_cli_scenario,
+    run_cli_scenario,
+)
 
 
 class CliHarness:
@@ -31,7 +35,7 @@ class CliHarness:
         if path is None or not path.is_file():
             raise AssertionError(f"{case.label}: missing CLI scenario YAML")
         scenario = load_cli_scenario(path)
-        instrumentor = self._build_instrumentor(case, backend)
+        instrumentor = self._build_instrumentor(case, backend, scenario)
         result = await run_cli_scenario(scenario, instrumentor)
         scenario.assert_expect(result, label=case.label)
 
@@ -39,6 +43,7 @@ class CliHarness:
         self,
         case: StoryCase,
         backend: StoryBackend,
+        scenario: CliScenario,
     ) -> CliInstrumentor:
         response_path = case.path("response.json")
         response: dict = {}
@@ -54,19 +59,53 @@ class CliHarness:
         clock = MockDateTimeService(
             datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
         )
+        tool_loop = next(
+            (cmd.tool_loop for cmd in scenario.commands if cmd.tool_loop is not None),
+            None,
+        )
+        run_recipe = next(
+            (cmd.run_recipe for cmd in scenario.commands if cmd.run_recipe is not None),
+            None,
+        )
+        scripted_tool_name: str | None = None
+        if tool_loop is not None:
+            scripted_tool_name = tool_loop.tool_name
+        elif (
+            run_recipe is not None
+            and run_recipe.name == "conversational_tool_loop"
+        ):
+            scripted_tool_name = run_recipe.tool_name
 
         if case.adapter == "in_process":
-            content = str(response.get("content") or "ok")
-            usage_raw = response.get("usage") or {}
-            usage = Usage(
-                prompt_tokens=usage_raw.get("prompt_tokens"),
-                completion_tokens=usage_raw.get("completion_tokens"),
-                total_tokens=usage_raw.get("total_tokens"),
-            )
-            completer = ScriptedInference(
-                [ChatMessage(role=Role.ASSISTANT, content=content)],
-                usages=[usage],
-            )
+            if scripted_tool_name is not None:
+                completer = ScriptedInference(
+                    [
+                        ChatMessage(
+                            role=Role.ASSISTANT,
+                            content=None,
+                            tool_calls=[
+                                ToolCall(
+                                    id="c1",
+                                    name=scripted_tool_name,
+                                    arguments={},
+                                )
+                            ],
+                        ),
+                        ChatMessage(role=Role.ASSISTANT, content="done"),
+                    ]
+                )
+            else:
+                content = str(response.get("content") or "ok")
+                usage_raw = response.get("usage") or {}
+                usage = Usage(
+                    prompt_tokens=usage_raw.get("prompt_tokens"),
+                    completion_tokens=usage_raw.get("completion_tokens"),
+                    total_tokens=usage_raw.get("total_tokens"),
+                )
+                completer = ScriptedInference(
+                    [ChatMessage(role=Role.ASSISTANT, content=content)],
+                    usages=[usage],
+                )
             return CliInstrumentor(
                 completer,
                 datetime_service=clock,
