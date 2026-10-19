@@ -1,4 +1,5 @@
 {
+  "op": "rule_promotion",
   "observed_pattern": "missing changelog",
   "hypothesis": "require check",
   "experiment_ref": "e1",

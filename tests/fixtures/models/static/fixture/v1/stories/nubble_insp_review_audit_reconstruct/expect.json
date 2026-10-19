@@ -1,0 +1,83 @@
+{
+  "scenarios": {
+    "fully_attested": {
+      "reconstructable": true,
+      "missing": [],
+      "approvals": [
+        "appr:1"
+      ],
+      "denials": [],
+      "effects": [
+        "fx:1"
+      ],
+      "policy": [
+        "p1",
+        "rev-7"
+      ]
+    },
+    "denied_without_reason": {
+      "reconstructable": false,
+      "missing": [
+        "denial_reasons",
+        "denial_ids"
+      ],
+      "approvals": [],
+      "denials": [],
+      "effects": [],
+      "policy": [
+        "p1",
+        "rev-7"
+      ]
+    },
+    "denied_with_reason": {
+      "reconstructable": true,
+      "missing": [],
+      "approvals": [],
+      "denials": [
+        "den:1"
+      ],
+      "effects": [],
+      "policy": [
+        "p1",
+        "rev-7"
+      ]
+    },
+    "asked_human_unapproved": {
+      "reconstructable": false,
+      "missing": [
+        "approval_ids"
+      ],
+      "approvals": [],
+      "denials": [],
+      "effects": [],
+      "policy": [
+        "p1",
+        "rev-7"
+      ]
+    },
+    "effect_not_recorded": {
+      "reconstructable": false,
+      "missing": [
+        "effect_ids"
+      ],
+      "approvals": [],
+      "denials": [],
+      "effects": [],
+      "policy": [
+        "p1",
+        "rev-7"
+      ]
+    },
+    "envelope_fills_gaps": {
+      "reconstructable": true,
+      "missing": [],
+      "approvals": [],
+      "denials": [],
+      "effects": [],
+      "policy": [
+        "p1",
+        "rev-8"
+      ]
+    }
+  }
+}

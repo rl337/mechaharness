@@ -53,6 +53,17 @@ class TraceEnvelope(BaseModel):
     child_run_ids: list[str] = Field(default_factory=list)
     model_input_manifest_ref: str | None = None
     harness_fingerprint: str | None = None
+    # Review-audit dimensions (MH-PA-08 / MH-DOTS-09); all optional.
+    recipe_id: str | None = None
+    recipe_version: str | None = None
+    # Warehouse correlators; same names as ``graph_trace_context`` keys.
+    graph_id: str | None = None
+    authorization_epoch: int | None = None
+    freshness_summary: dict[str, int] = Field(default_factory=dict)
+    policy_revision: str | None = None
+    approval_ids: list[str] = Field(default_factory=list)
+    denial_ids: list[str] = Field(default_factory=list)
+    effect_ids: list[str] = Field(default_factory=list)
     extra: dict[str, Any] = Field(default_factory=dict)
 
     def missing_fields(self) -> list[str]:

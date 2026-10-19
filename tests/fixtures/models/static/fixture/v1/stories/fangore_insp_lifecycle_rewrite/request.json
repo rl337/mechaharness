@@ -1,4 +1,5 @@
 {
+  "op": "lifecycle_extension_rewrite",
   "prompt": "Write a.txt",
   "grants": [
     "core:fs.write"

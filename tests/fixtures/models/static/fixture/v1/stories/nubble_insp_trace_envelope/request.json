@@ -1,4 +1,5 @@
 {
+  "op": "trace_envelope_complete",
   "config_fingerprint": "cfg:1",
   "graph_version": "1",
   "node_id": "a",

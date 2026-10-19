@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_denial_equivalence",
+  "persona": "fangore",
+  "title": "Persist denials and block equivalent actions across retries",
+  "kind": "access_authority",
+  "narrative": "Denied intents and side-effect classes survive graph retries and delegated paths. A denied send cannot be retried through a second provider or tool without new explicit authorization. Native deny/allow paths: `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].",
+  "implementation": "`DenialStore` (ABC) with `InMemoryDenialStore` keys denials by `equivalent_action_digest(effect_class, target, ...)`, which ignores tool/provider names. `AuthorityGate` consults the store first (`prior_denial`) and records policy `DENY` verdicts. `lift()` is the explicit new-authorization path. Hosts bind a durable store; the in-memory store is not restart-durable.",
+  "validation": "Harness `access_authority` op `denial_store_equivalence`. Hard expects a DENY verdict recorded, retries through other tools to the same target refused even when approved, a different target unaffected, and the action allowed again only after `lift`.",
+  "footnotes": [
+    {
+      "id": "insp-dots-05",
+      "label": "OpenAI Dots agent safety (MH-DOTS-05)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
+      "note": "Denial persistence and equivalent-action detection"
+    }
+  ]
+}

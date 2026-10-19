@@ -1,0 +1,11 @@
+{
+  "violations": {
+    "pure_tiling": [],
+    "free_form": [
+      "free_form_node:adhoc_shell"
+    ],
+    "forged_version": [
+      "unregistered_recipe:verify_repair@99"
+    ]
+  }
+}

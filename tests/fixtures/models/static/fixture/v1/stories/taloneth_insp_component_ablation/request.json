@@ -1,4 +1,5 @@
 {
+  "op": "component_ablation_delta",
   "baseline_fingerprint": "full",
   "disabled_component_ids": [
     "advisor"

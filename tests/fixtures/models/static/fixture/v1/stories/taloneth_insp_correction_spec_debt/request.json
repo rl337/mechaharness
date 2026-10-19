@@ -1,0 +1,13 @@
+{
+  "op": "specification_debt",
+  "correction": "Reply on the original thread, never a new one.",
+  "failing_scenarios": [
+    "scenario:reply-thread",
+    "scenario:cc-list"
+  ],
+  "promotion": {
+    "record_id": "promo:42",
+    "observed_pattern": "reply sent as a new thread"
+  },
+  "host_test_ref": "tests/test_reply.py::test_same_thread"
+}

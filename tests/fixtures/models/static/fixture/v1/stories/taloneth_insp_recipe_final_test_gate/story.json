@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_recipe_final_test_gate",
+  "persona": "taloneth",
+  "title": "Require an untouched final test set before recipe promotion",
+  "kind": "graph_recipes",
+  "narrative": "A leading candidate must pass a separate untouched final test before it can be released, and that test must not be used as a tuning signal. Promotion is refused when no final-test result is supplied, when the result did not come from a held-out evaluator, or when it failed; only a passing held-out result opens the gate. The same rule guards both the research workflow and the recipe catalog's active pointer. Evaluator held-out labelling already exists (`taloneth_insp_evaluator_compose`). Tracks MH-SR-07[^insp-sr-07].",
+  "implementation": "`require_held_out_final_test()` and `FinalTestGateError` in `evaluator.py`; `ResearchLab.promote(candidate, final_test=...)` enforces it whenever `EvalProtocol.held_out_protected` (the default); `GraphTemplateRegistry.promote_with_final_test()` applies it before moving the active pointer and attaches the held-out result as an evaluation. Plain `GraphTemplateRegistry.promote()` stays an ungated pointer move for hosts that run their own gate.",
+  "validation": "Harness `graph_recipes` op `recipe_final_test_gate`. Hard expects refusal for a missing, non-held-out, and failed result for both the research lab and the registry, promotion for a passing held-out result, an unmoved pointer after refusals, and that an unprotected protocol skips the gate. Unit tests: `tests/test_final_test_gate.py`.",
+  "footnotes": [
+    {
+      "id": "insp-sr-07",
+      "label": "Self-revising recipe evolution (MH-SR-07)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "Held-out final-test release gate"
+    }
+  ]
+}

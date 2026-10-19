@@ -1,4 +1,5 @@
 {
+  "op": "exposure_discriminative_report",
   "exposure": [
     {
       "arm": "treatment",

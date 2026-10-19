@@ -1,4 +1,12 @@
 {
-  "flavor_tags": ["reason", "code", "deep"],
-  "matched_required": ["reason", "code"]
+  "op": "completer_flavors",
+  "flavor_tags": [
+    "reason",
+    "code",
+    "deep"
+  ],
+  "matched_required": [
+    "reason",
+    "code"
+  ]
 }

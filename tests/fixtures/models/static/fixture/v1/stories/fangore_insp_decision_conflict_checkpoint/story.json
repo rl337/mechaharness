@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_decision_conflict_checkpoint",
+  "persona": "fangore",
+  "title": "Checkpoint after conflict-free decisions without revisiting cleared cycles",
+  "kind": "graph_execution",
+  "narrative": "After a decision is settled, the nodes it still conflicts with are revisited, and nodes already visited are not revisited so a circular conflict cannot loop forever. A checkpoint is taken only when the decision has no remaining conflicts; a conflict blocked only by the visited set is reported instead of silently saved. The conflicts themselves are still the write-scope conflicts the product already detects (`fangore_transactional_durable_resume`, `fangore_decision_plane_policy`); this adds the revisit-and-checkpoint rule on top. Tracks MH-SR-08[^insp-sr-08].",
+  "implementation": "`neighbors_from_write_conflicts()` and `neighbor_revisit()` in `decision_conflict_checkpoint.py` are pure functions over `ExecutionGraph.concurrent_write_conflicts` output and a visited set: they return the next nodes to revisit, the skipped visited neighbors, `checkpoint` (conflicts cleared) and `cycle_blocked`. Not a second conflict-resolution engine; hosts still checkpoint through `CheckpointStore` and halt via `StopContract`.",
+  "validation": "Harness `graph_execution` op `decision_conflict_neighbor_revisit`. Hard expects, over a chain of write-scope conflicts, the visit order, that a cyclic conflict terminates without a checkpoint and reports the cycle block, and that a cleared decision checkpoints. Unit tests: `tests/test_decision_conflict_checkpoint.py`.",
+  "footnotes": [
+    {
+      "id": "insp-sr-08",
+      "label": "Self-revising recipe evolution (MH-SR-08)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "Conflict neighbors, cycles, and checkpoints"
+    }
+  ]
+}

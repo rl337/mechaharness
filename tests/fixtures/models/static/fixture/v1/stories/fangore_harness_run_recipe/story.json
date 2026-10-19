@@ -2,9 +2,9 @@
   "id": "fangore_harness_run_recipe",
   "persona": "fangore",
   "title": "Run a single prompt through the harness_run Agentic Recipe",
-  "kind": "harness_run_recipe",
+  "kind": "harness_runs",
   "narrative": "Fangore wants the classic one-shot harness path to be a named control pattern he can discover beside other recipes, not a special-case CLI only. He lists the catalog, opens harness_run, binds a prompt and mock backend, and gets final text from the same graph executor used for other recipes. Complements `fangore_backend_describe_recipe` and `fangore_conversational_tool_loop`.",
-  "implementation": "Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`): prepare → harness_loop → render. `mechaharness.recipe_runner` discovers the catalog (`list_recipes` / `describe_recipe`) and executes via `GraphExecutor` / `host_graph_executor` with `HarnessPrepareRunner`, `HarnessLoopRunner`, and `HarnessRenderRunner`. Soft points cover backend, family, model, system prompt, max turns, and runner kinds. CLI `run` and `recipes run harness_run` call `run_harness_recipe`. Node components under `harness_loop` reuse harness `inference` / `tool_call` / `turn_start` kinds.",
-  "validation": "Kind `harness_run_recipe` → `_run_harness_run_recipe`. Soft expects: catalog lists harness_run; status ok; final_text_nonempty; turns ≥ 1. Unit: `tests/test_recipe_runner.py`.",
+  "implementation": "Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`): prepare \u2192 harness_loop \u2192 render. `mechaharness.recipe_runner` discovers the catalog (`list_recipes` / `describe_recipe`) and executes via `GraphExecutor` / `host_graph_executor` with `HarnessPrepareRunner`, `HarnessLoopRunner`, and `HarnessRenderRunner`. Soft points cover backend, family, model, system prompt, max turns, and runner kinds. CLI `run` and `recipes run harness_run` call `run_harness_recipe`. Node components under `harness_loop` reuse harness `inference` / `tool_call` / `turn_start` kinds.",
+  "validation": "Harness `harness_runs` op `harness_run_recipe` \u2192 `_run_harness_run_recipe`. Soft expects: catalog lists harness_run; status ok; final_text_nonempty; turns \u2265 1. Unit: `tests/test_recipe_runner.py`.",
   "footnotes": []
 }

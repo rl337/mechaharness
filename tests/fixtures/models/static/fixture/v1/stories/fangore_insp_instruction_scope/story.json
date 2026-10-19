@@ -2,10 +2,10 @@
   "id": "fangore_insp_instruction_scope",
   "persona": "fangore",
   "title": "Scope instruction components with authority and cost",
-  "kind": "instruction_scope_metadata",
+  "kind": "context_management",
   "narrative": "Instruction components declare scope, authority, and estimated context cost so entry files stay routers rather than encyclopedias. Accepts WalkingLabs L04 guidance[^wl-l04-instr].",
   "implementation": "`InstructionComponent` fields `scope`, `priority`, `authority`, and `estimated_context_cost` in `mechaharness.instruction_component`.",
-  "validation": "Kind `instruction_scope_metadata`. Soft expects scope and cost.",
+  "validation": "Harness `context_management` op `instruction_scope_metadata`. Soft expects scope and cost.",
   "footnotes": [
     {
       "id": "wl-l04-instr",

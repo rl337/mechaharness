@@ -1,4 +1,11 @@
 {
+  "op": "handoff_record",
+  "goals": [
+    "ship report"
+  ],
+  "exclusions": [
+    "do not email the customer"
+  ],
   "completed": [
     "a"
   ],
@@ -6,5 +13,9 @@
     "b"
   ],
   "rationale": "because",
-  "next_action": "verify"
+  "next_action": "verify",
+  "verdict": {
+    "kind": "ASK_HUMAN",
+    "policyVersion": "1"
+  }
 }

@@ -1,4 +1,5 @@
 {
+  "op": "wip_policy",
   "max_active_nodes": 2,
   "max_per_write_scope": 1,
   "active_nodes": 1,

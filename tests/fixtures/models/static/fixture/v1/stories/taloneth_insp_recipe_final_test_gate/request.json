@@ -1,0 +1,30 @@
+{
+  "op": "recipe_final_test_gate",
+  "attempts": [
+    {
+      "id": "missing",
+      "final_test": null
+    },
+    {
+      "id": "not_held_out",
+      "final_test": {
+        "held_out": false,
+        "passed": true
+      }
+    },
+    {
+      "id": "held_out_failed",
+      "final_test": {
+        "held_out": true,
+        "passed": false
+      }
+    },
+    {
+      "id": "held_out_passed",
+      "final_test": {
+        "held_out": true,
+        "passed": true
+      }
+    }
+  ]
+}

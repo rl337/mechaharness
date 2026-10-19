@@ -19,7 +19,9 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from mechaharness.evaluator import EvaluatorResult, require_held_out_final_test
 from mechaharness.graph import ExecutionGraph, GraphNode
+from mechaharness.isolation.isolation_contract import TemplateIOContract
 from mechaharness.stop_contract import StopContract
 
 SoftPointKind = Literal[
@@ -48,6 +50,9 @@ class SoftPoint(BaseModel):
     description: str = ""
     required: bool = False
     default: Any = None
+    # Only soft points marked evolvable may be rewritten by an optimizer
+    # (MH-SR-03); everything else is hard-immutable structure.
+    evolvable: bool = False
 
 
 class GraphTemplateParams(BaseModel):
@@ -76,6 +81,8 @@ class GraphTemplate(ABC):
     status: TemplateStatus = "active"
     category: TemplateCategory = "agentic_recipe"
     soft_points: tuple[SoftPoint, ...] = ()
+    # Optional typed ports; ``recipe_port_search`` matches on these (MH-SR-04).
+    io_contract: TemplateIOContract | None = None
 
     @abstractmethod
     def build(self, params: GraphTemplateParams) -> ExecutionGraph:
@@ -175,6 +182,19 @@ class GraphTemplate(ABC):
             return str(self.summary or self.name)
         return "\n\n".join(parts)
 
+    def evolvable_soft_point_names(self) -> list[str]:
+        """Soft points an optimizer may rewrite (the declared evolution allowlist)."""
+        return [p.name for p in self.soft_points if p.evolvable]
+
+    def assert_evolution_allowed(self, changed: Sequence[str]) -> None:
+        """Refuse optimizer edits outside the evolvable soft-point allowlist."""
+        allowed = set(self.evolvable_soft_point_names())
+        blocked = sorted(set(changed) - allowed)
+        if blocked:
+            raise ValueError(
+                f"recipe {self.name!r} forbids evolving non-evolvable fields: {blocked}"
+            )
+
     def describe(self) -> dict[str, Any]:
         """Stable metadata for docs, catalogs, and promotion provenance."""
         return {
@@ -196,42 +216,238 @@ class GraphTemplateRegistry:
     ``contribute_map(GraphTemplate, …)``. When constructed by pyiv, ``templates``
     is the injected ``Dict[str, GraphTemplate]`` catalog. Hand construction may
     still pass a sequence of instances (tests / ``default_graph_templates``).
+
+    Entries are versioned: :meth:`register` activates the template (legacy
+    replace-by-name behavior); :meth:`add_version` stores an immutable
+    candidate without activating it. :meth:`promote` moves the active pointer
+    and :meth:`rollback` returns it to the previous target::
+
+        >>> from mechaharness.graph_templates import (
+        ...     GraphTemplateRegistry, VerifyRepairTemplate,
+        ... )
+        >>> class VerifyRepairV2(VerifyRepairTemplate):
+        ...     version = "2"
+        >>> registry = GraphTemplateRegistry([VerifyRepairTemplate()])
+        >>> registry.add_version(VerifyRepairV2())
+        >>> registry.get("verify_repair").version
+        '1'
+        >>> registry.promote("verify_repair", "2")
+        >>> registry.get("verify_repair").version
+        '2'
+        >>> registry.rollback("verify_repair")
+        '1'
+        >>> registry.versions("verify_repair")
+        ['1', '2']
+
+    Lineage and evaluation results ride on immutable versions::
+
+        >>> registry.lineage("verify_repair")
+        {'1': None, '2': None}
+        >>> registry.attach_evaluation("verify_repair", "2", {"pass_rate": 0.9})
+        >>> registry.evaluations("verify_repair", "2")
+        [{'pass_rate': 0.9}]
     """
 
     def __init__(self, templates: dict[str, GraphTemplate]) -> None:
         # Annotation is dict[str, GraphTemplate] so pyiv injects the map multibind.
         # Callers may still pass a sequence of instances (runtime Sequence path).
-        self._by_name: dict[str, GraphTemplate] = {}
+        self._versions: dict[str, dict[str, GraphTemplate]] = {}
+        self._active: dict[str, str] = {}
+        self._pointer_history: dict[str, list[str]] = {}
+        self._lineage: dict[str, dict[str, str | None]] = {}
+        self._evaluations: dict[str, dict[str, list[dict[str, Any]]]] = {}
         if isinstance(templates, Mapping):
             for name, template in templates.items():
-                self._by_name[str(name)] = template
+                self._store(str(name), template, activate=True)
             return
         for template in cast(Sequence[GraphTemplate], templates):
             self.register(template)
 
-    def register(self, template: GraphTemplate) -> None:
-        self._by_name[template.name] = template
+    def _store(
+        self,
+        name: str,
+        template: GraphTemplate,
+        *,
+        activate: bool,
+        parent_version: str | None = None,
+    ) -> None:
+        self._versions.setdefault(name, {})[template.version] = template
+        self._lineage.setdefault(name, {}).setdefault(template.version, parent_version)
+        if activate or name not in self._active:
+            self._set_active(name, template.version)
 
-    def get(self, name: str) -> GraphTemplate | None:
-        return self._by_name.get(name)
+    def _set_active(self, name: str, version: str) -> None:
+        current = self._active.get(name)
+        if current is not None and current != version:
+            self._pointer_history.setdefault(name, []).append(current)
+        self._active[name] = version
+
+    def register(self, template: GraphTemplate) -> None:
+        """Register and activate ``template`` (replaces the same name+version)."""
+        self._store(template.name, template, activate=True)
+
+    def add_version(
+        self, template: GraphTemplate, *, parent_version: str | None = None
+    ) -> None:
+        """Add an immutable candidate version; it does not become active.
+
+        ``parent_version`` records lineage (which stored version this one was
+        derived from).
+        """
+        existing = self._versions.get(template.name, {}).get(template.version)
+        if existing is not None and existing is not template:
+            raise ValueError(
+                f"recipe {template.name!r} version {template.version!r} is immutable"
+            )
+        if parent_version is not None and parent_version not in self._versions.get(
+            template.name, {}
+        ):
+            raise KeyError(f"unknown parent version {template.name}@{parent_version}")
+        self._store(
+            template.name, template, activate=False, parent_version=parent_version
+        )
+
+    def lineage(self, name: str) -> dict[str, str | None]:
+        """Version → parent version (``None`` for roots): the recipe lineage DAG."""
+        return dict(self._lineage.get(name, {}))
+
+    def attach_evaluation(
+        self, name: str, version: str, result: Mapping[str, Any]
+    ) -> None:
+        """Attach an evaluation result to an immutable stored version."""
+        if version not in self._versions.get(name, {}):
+            raise KeyError(f"unknown recipe version {name}@{version}")
+        self._evaluations.setdefault(name, {}).setdefault(version, []).append(
+            dict(result)
+        )
+
+    def evaluations(self, name: str, version: str) -> list[dict[str, Any]]:
+        return [dict(r) for r in self._evaluations.get(name, {}).get(version, [])]
+
+    def composition_violations(self, graph: ExecutionGraph) -> list[str]:
+        """List reasons ``graph`` is not composed only from registered recipes.
+
+        A graph stamped by a recipe must name a stored ``name@version``. An
+        unstamped graph is a pure tiling container: every node must embed a
+        child graph, which is checked recursively. Free-form nodes are
+        violations (MH-SR-02).
+        """
+        issues: list[str] = []
+        if graph.template_name is not None:
+            if self.get(graph.template_name, graph.template_version) is None:
+                issues.append(
+                    f"unregistered_recipe:{graph.template_name}@{graph.template_version}"
+                )
+        for node_id, node in graph.nodes.items():
+            if node.subgraph:
+                issues.extend(
+                    self.composition_violations(ExecutionGraph.resume(node.subgraph))
+                )
+            elif graph.template_name is None:
+                issues.append(f"free_form_node:{node_id}")
+        return issues
+
+    def assert_registry_composed(self, graph: ExecutionGraph) -> None:
+        issues = self.composition_violations(graph)
+        if issues:
+            raise ValueError(f"graph is not registry-composed: {', '.join(issues)}")
+
+    def versions(self, name: str) -> list[str]:
+        return sorted(self._versions.get(name, {}))
+
+    def active_version(self, name: str) -> str | None:
+        return self._active.get(name)
+
+    def promote(self, name: str, version: str) -> None:
+        """Point ``name`` at an existing ``version`` (reversible via rollback)."""
+        if version not in self._versions.get(name, {}):
+            raise KeyError(f"unknown recipe version {name}@{version}")
+        self._set_active(name, version)
+
+    def promote_with_final_test(
+        self, name: str, version: str, *, final_test: EvaluatorResult | None
+    ) -> None:
+        """Promote only after a passing held-out final-test result (MH-SR-07).
+
+        The result is attached as an evaluation of ``name@version`` once the gate
+        opens. Plain :meth:`promote` stays a pointer move for hosts that run
+        their own gate.
+        """
+        if version not in self._versions.get(name, {}):
+            raise KeyError(f"unknown recipe version {name}@{version}")
+        require_held_out_final_test(final_test)
+        if final_test is not None:  # always true once the gate has passed
+            self.attach_evaluation(
+                name,
+                version,
+                {"gate": "final_test", **final_test.model_dump(mode="json")},
+            )
+        self._set_active(name, version)
+
+    def search_compatible(
+        self,
+        required_inputs: Mapping[str, Any] | None = None,
+        required_outputs: Mapping[str, Any] | None = None,
+    ) -> list[str]:
+        """Catalog ids of active recipes whose typed ports fit the request (MH-SR-04).
+
+        Delegates to ``recipe_lifecycle.recipe_port_search.search_compatible_recipes``.
+        """
+        # Lazy: port search imports this module's registry type.
+        from mechaharness.recipe_lifecycle.recipe_port_search import (
+            search_compatible_recipes,
+        )
+
+        return search_compatible_recipes(self, required_inputs, required_outputs)
+
+    def rollback(self, name: str) -> str:
+        """Restore the previously active version; return it."""
+        history = self._pointer_history.get(name) or []
+        if not history:
+            raise ValueError(f"recipe {name!r} has no previous version to roll back to")
+        previous = history.pop()
+        self._active[name] = previous
+        return previous
+
+    def get(self, name: str, version: str | None = None) -> GraphTemplate | None:
+        """Return the active template, or a specific ``version`` when given."""
+        by_version = self._versions.get(name)
+        if not by_version:
+            return None
+        if version is not None:
+            return by_version.get(version)
+        return by_version.get(self._active[name])
 
     def names(self) -> list[str]:
-        return sorted(self._by_name)
+        return sorted(self._versions)
 
     def active_names(self) -> list[str]:
         return sorted(
-            n for n, t in self._by_name.items() if t.status == "active"
+            n for n in self._versions if (t := self.get(n)) is not None and t.status == "active"
         )
 
     def merge(self, other: GraphTemplateRegistry) -> GraphTemplateRegistry:
         for name in other.names():
-            template = other.get(name)
-            if template is not None:
-                self.register(template)
+            for version in other.versions(name):
+                template = other.get(name, version)
+                if template is not None:
+                    self._store(
+                        name,
+                        template,
+                        activate=False,
+                        parent_version=other.lineage(name).get(version),
+                    )
+                    for result in other.evaluations(name, version):
+                        self.attach_evaluation(name, version, result)
+            active = other.active_version(name)
+            if active is not None:
+                self._set_active(name, active)
         return self
 
     def catalog(self) -> list[dict[str, Any]]:
-        return [self._by_name[n].describe() for n in self.names()]
+        return [
+            t.describe() for n in self.names() if (t := self.get(n)) is not None
+        ]
 
 
 def make_node(

@@ -1,4 +1,5 @@
 {
+  "op": "instruction_scope_metadata",
   "title": "Router",
   "body": "See details on demand",
   "scope": "entry",

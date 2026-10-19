@@ -1,4 +1,5 @@
 {
+  "op": "capability_need_routing",
   "capability_needs": [
     "model:reason-large"
   ],

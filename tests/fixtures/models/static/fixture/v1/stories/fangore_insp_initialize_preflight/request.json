@@ -1,3 +1,4 @@
 {
+  "op": "initialize_preflight_template",
   "goal": "preflight"
 }

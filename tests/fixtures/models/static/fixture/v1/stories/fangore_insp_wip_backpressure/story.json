@@ -2,10 +2,10 @@
   "id": "fangore_insp_wip_backpressure",
   "persona": "fangore",
   "title": "Apply WIP back-pressure without hard-coding WIP=1",
-  "kind": "wip_policy_allows",
+  "kind": "pure_api",
   "narrative": "Fangore limits concurrent active nodes and per-write-scope work so agents cannot overreach, while hosts still choose thresholds rather than a universal WIP=1. Accepts WalkingLabs L07 and L08 guidance[^wl-l07-wip][^wl-l08-wip].",
   "implementation": "`WorkInProgressPolicy` in `mechaharness.work_in_progress_policy` gates concurrency by active nodes, write scope, resource class, and consequence.",
-  "validation": "Kind `wip_policy_allows`. Soft expects allow then deny when scope saturated.",
+  "validation": "Harness `pure_api` op `wip_policy`. Soft expects allow then deny when scope saturated.",
   "footnotes": [
     {
       "id": "wl-l07-wip",

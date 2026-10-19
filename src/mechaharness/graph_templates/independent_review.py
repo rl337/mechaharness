@@ -14,6 +14,7 @@ from mechaharness.graph_templates.base import (
     SoftPoint,
     make_node,
 )
+from mechaharness.isolation.isolation_contract import TemplateIOContract
 
 
 class IndependentReviewTemplate(GraphTemplate):
@@ -42,6 +43,10 @@ class IndependentReviewTemplate(GraphTemplate):
         "artifact and acceptance contract, not producer chain-of-thought, unless "
         "the client opts in."
     )
+    io_contract = TemplateIOContract(
+        inputs={"artifact": "object", "acceptance": "list"},
+        outputs={"review_findings": "object"},
+    )
     soft_points = (
         SoftPoint(
             name="produce_kind",
@@ -66,6 +71,7 @@ class IndependentReviewTemplate(GraphTemplate):
             kind="budget",
             description="Number of independent reviewers",
             default=1,
+            evolvable=True,
         ),
         SoftPoint(
             name="omit_producer_reasoning",

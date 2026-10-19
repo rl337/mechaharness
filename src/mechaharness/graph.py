@@ -100,6 +100,9 @@ class ExecutionGraph(BaseModel):
     edges: list[DependencyEdge] = Field(default_factory=list)
     version: str = "1"
     config_fingerprint: str | None = None
+    # Authorization epoch stamped from the live CapabilityEnvelope at checkpoint
+    # time; missing on pre-epoch checkpoints means 0 (MH-DOTS-06).
+    authorization_epoch: int = 0
     template_name: str | None = None
     template_version: str | None = None
     template_status: str | None = None

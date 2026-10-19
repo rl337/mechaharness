@@ -1,0 +1,11 @@
+{
+  "decisions": {
+    "read_low": "allow",
+    "send_asks": "ask_human:consequence_requires_approval",
+    "send_approved": "allow",
+    "forwarded_send": "deny:untrusted_source",
+    "no_grant": "deny:access_denied",
+    "expired_envelope": "deny:envelope_expired",
+    "policy_deny": "deny:verdict_deny"
+  }
+}

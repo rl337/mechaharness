@@ -48,6 +48,7 @@ from pyiv.time import Clock, DateTimeService, PythonDateTimeService, RealClock
 
 from mechaharness.advisor import Advisor, AdvisorPolicy, DefaultAdvisorPolicy, RejectAdvisor
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
+from mechaharness.authority_gate import AuthorityGate
 from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.checkpoint_store import CheckpointStore, EventLogCheckpointStore
 from mechaharness.config import Settings
@@ -69,6 +70,7 @@ from mechaharness.core.environment import (
 )
 from mechaharness.core.events import EventLog, FanoutEventLog, InMemoryEventLog, LoggingEventLog
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
+from mechaharness.denial_store import DenialStore, InMemoryDenialStore
 from mechaharness.external_effect import CrashProbe, NoopCrashProbe
 from mechaharness.graph import GraphStore
 from mechaharness.graph_executor import (
@@ -101,6 +103,15 @@ from mechaharness.lifecycle_extension import (
 )
 from mechaharness.linkage_resolver import DefaultLinkageResolver, LinkageResolver
 from mechaharness.operation_registry import OperationRegistry, default_operations
+from mechaharness.recipe_lifecycle.evolution_campaign_hooks import (
+    EvolutionCampaignHooks,
+    NoopEvolutionCampaignHooks,
+)
+from mechaharness.recipe_lifecycle.recipe_promotion_policy import (
+    NoopRecipePromotionPolicy,
+    RecipePromotionPolicy,
+)
+from mechaharness.tool_result_freshness import ToolResultFreshnessPolicy
 from mechaharness.tools.base import ToolRegistry
 from mechaharness.verification_policy import DefaultVerificationPolicy, VerificationPolicy
 
@@ -389,6 +400,16 @@ class MechaHarnessConfig(Config):
             LifecycleExtensionRegistry, self.get_lifecycle_extension_registry()
         )
         self._register_binding(CrashProbe, self.get_crash_probe())
+        self._register_binding(
+            RecipePromotionPolicy, self.get_recipe_promotion_policy()
+        )
+        self._register_binding(
+            EvolutionCampaignHooks, self.get_evolution_campaign_hooks()
+        )
+        self._register_binding(DenialStore, self.get_denial_store())
+        self._register_binding(
+            ToolResultFreshnessPolicy, self.get_tool_result_freshness_policy()
+        )
 
         def make_event_log(injector: Injector) -> EventLog:
             return FanoutEventLog(
@@ -452,6 +473,16 @@ class MechaHarnessConfig(Config):
 
         self._register_override_or_factory(
             LinkageResolver, self.get_linkage_resolver(), make_linkage_resolver
+        )
+
+        def make_authority_gate(injector: Injector) -> AuthorityGate:
+            return AuthorityGate(
+                access=injector.inject(AccessControl),
+                denials=injector.inject(DenialStore),
+            )
+
+        self._register_override_or_factory(
+            AuthorityGate, self.get_authority_gate(), make_authority_gate
         )
 
         # Recipe / backend / family membership: pyiv map multibinds (catalog_keys).
@@ -733,6 +764,37 @@ class MechaHarnessConfig(Config):
     def get_advisor(self) -> Advisor | type[Advisor]:
         """Non-binding advisor (default: unavailable / reject)."""
         return RejectAdvisor
+
+    def get_recipe_promotion_policy(self) -> RecipePromotionPolicy:
+        """Host policy for promoting recipe versions (default: no host opinion)."""
+        return NoopRecipePromotionPolicy()
+
+    def get_evolution_campaign_hooks(self) -> EvolutionCampaignHooks:
+        """Host-owned evolution campaign seams (default: no-op)."""
+        return NoopEvolutionCampaignHooks()
+
+    def get_denial_store(self) -> DenialStore:
+        """Denial memory shared by the authority gate (default: process-local).
+
+        Hosts bind a durable store; the in-memory default is not restart-durable.
+        """
+        existing = getattr(self, "_denial_store", None)
+        if existing is None:
+            existing = InMemoryDenialStore()
+            self._denial_store = existing
+        return existing
+
+    def get_authority_gate(self) -> AuthorityGate | type[AuthorityGate] | None:
+        """Optional ``AuthorityGate`` override. ``None`` → inject AccessControl + DenialStore.
+
+        No consequence policy by default; hosts override the hook or re-register
+        a factory that passes ``consequence=``.
+        """
+        return None
+
+    def get_tool_result_freshness_policy(self) -> ToolResultFreshnessPolicy:
+        """Staleness rules for tool evidence (default: honor ``expires_at`` only)."""
+        return ToolResultFreshnessPolicy()
 
     def graph_template_classes(self) -> dict[str, type[GraphTemplate]]:
         """Catalog id → ``GraphTemplate`` class. Hosts merge via ``super()``."""

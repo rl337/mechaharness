@@ -1,0 +1,8 @@
+{
+  "op": "evolution_ownership_split",
+  "workloads": [
+    "nightly",
+    "regression"
+  ],
+  "budget": 25.0
+}

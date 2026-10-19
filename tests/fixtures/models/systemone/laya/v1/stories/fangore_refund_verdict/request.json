@@ -1,4 +1,5 @@
 {
+  "op": "route_refund",
   "state": "Customer was charged twice and wants a refund.",
   "question_set_version": "story-route-v1",
   "questions": [

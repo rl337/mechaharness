@@ -1,0 +1,21 @@
+{
+  "ladder": [
+    "log",
+    "surface",
+    "surface",
+    "propose",
+    "propose"
+  ],
+  "override_ladder": [
+    "surface",
+    "propose"
+  ],
+  "counter_walk": [
+    "log",
+    "surface",
+    "surface",
+    "propose",
+    "propose"
+  ],
+  "unordered_refused": true
+}

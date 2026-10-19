@@ -2,10 +2,10 @@
   "id": "taloneth_insp_evaluator_compose",
   "persona": "taloneth",
   "title": "Run a versioned held-out evaluator to claims",
-  "kind": "evaluator_compose_run",
-  "narrative": "Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon].",
+  "kind": "evaluation_research",
+  "narrative": "Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon]. Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: `taloneth_insp_recipe_final_test_gate`[^insp-sr-07-eval].",
   "implementation": "`Evaluator`, `CallableEvaluator`, and `evaluate_claims` in `mechaharness.evaluator` compose deterministic claim producers with version and held_out metadata beside VerificationPolicy.",
-  "validation": "Kind `evaluator_compose_run`. Soft expects passed and held_out true.",
+  "validation": "Harness `evaluation_research` op `evaluator_compose_run`. Soft expects passed and held_out true.",
   "footnotes": [
     {
       "id": "anth-evals-evaluator",
@@ -18,6 +18,12 @@
       "label": "Verification Horizon",
       "url": "https://arxiv.org/abs/2606.26300",
       "note": "Held-out evaluator versioning"
+    },
+    {
+      "id": "insp-sr-07-eval",
+      "label": "Self-revising recipe map (MH-SR-07 held_out)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md",
+      "note": "held_out metadata; final-test gate is taloneth_insp_recipe_final_test_gate"
     }
   ]
 }

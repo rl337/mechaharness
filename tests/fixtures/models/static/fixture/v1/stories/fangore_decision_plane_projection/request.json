@@ -1,4 +1,5 @@
 {
+  "op": "decision_plane_projection",
   "raw_context": {
     "ticket_id": "T-9",
     "channel": "email",

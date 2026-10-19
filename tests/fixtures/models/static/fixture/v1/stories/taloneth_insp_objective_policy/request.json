@@ -1,4 +1,5 @@
 {
+  "op": "objective_policy_aggregate",
   "policy": {
     "policy_id": "demo:lexi",
     "version": "1",

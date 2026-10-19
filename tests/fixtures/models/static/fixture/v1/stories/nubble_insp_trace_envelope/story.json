@@ -2,10 +2,10 @@
   "id": "nubble_insp_trace_envelope",
   "persona": "nubble",
   "title": "Require provenance on every trace envelope",
-  "kind": "trace_envelope_complete",
-  "narrative": "Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace].",
+  "kind": "evaluation_research",
+  "narrative": "Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace]. Trace audit substrate for personal-agent MH-PA-08[^insp-pa-08-trace].",
   "implementation": "`TraceEnvelope`, `envelope_complete`, and `require_trace_envelope` in `mechaharness.trace_envelope` define required provenance fields for run/node events.",
-  "validation": "Kind `trace_envelope_complete`. Soft expects complete true and no missing fields.",
+  "validation": "Harness `evaluation_research` op `trace_envelope_complete`. Soft expects complete true and no missing fields.",
   "footnotes": [
     {
       "id": "wl-l11-trace",
@@ -18,6 +18,12 @@
       "label": "WalkingLabs DeepSeek harness design",
       "url": "https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/",
       "note": "Observable execution-affecting state"
+    },
+    {
+      "id": "insp-pa-08-trace",
+      "label": "Personal agent reliability map (MH-PA-08 trace)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md",
+      "note": "Trace envelope audit substrate"
     }
   ]
 }

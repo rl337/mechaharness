@@ -1,4 +1,5 @@
 {
+  "op": "eval_claims_compose",
   "claims": [
     {
       "id": "a",

@@ -2,10 +2,10 @@
   "id": "taloneth_insp_rule_promotion",
   "persona": "taloneth",
   "title": "Promote review feedback into a hard invariant with provenance",
-  "kind": "rule_promotion_hard",
-  "narrative": "Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant \u2014 always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo].",
+  "kind": "pure_api",
+  "narrative": "Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant \u2014 always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo]. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (`taloneth_insp_correction_spec_debt`)[^insp-pa-07-promo] and self-revising MH-SR-05 (`fangore_insp_recipe_lineage_promote`)[^insp-sr-05-promo].",
   "implementation": "`PromotionRecord`, `promote_soft_to_hard`, and `rollback_promotion` in `mechaharness.rule_promotion` model the promotion chain.",
-  "validation": "Kind `rule_promotion_hard`. Soft expects stage hard.",
+  "validation": "Harness `pure_api` op `rule_promotion`. Soft expects stage hard.",
   "footnotes": [
     {
       "id": "wl-l10-promo",
@@ -18,6 +18,18 @@
       "label": "WalkingLabs L12 Clean Session Handoffs",
       "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/",
       "note": "Process changes"
+    },
+    {
+      "id": "insp-pa-07-promo",
+      "label": "Personal agent reliability map (MH-PA-07 promotion)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md",
+      "note": "Soft-to-hard promotion substrate"
+    },
+    {
+      "id": "insp-sr-05-promo",
+      "label": "Self-revising recipe map (MH-SR-05 promotion)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md",
+      "note": "Promotion pattern; recipe lineage is fangore_insp_recipe_lineage_promote"
     }
   ]
 }

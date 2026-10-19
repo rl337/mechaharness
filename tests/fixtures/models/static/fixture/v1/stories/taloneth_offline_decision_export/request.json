@@ -1,4 +1,5 @@
 {
+  "op": "offline_decision_export",
   "split": "train",
   "include_outcomes": false,
   "records": [
@@ -8,8 +9,13 @@
       "policyVersion": "p1",
       "verdict": "ALLOW",
       "outcomeId": "late-success",
-      "allowedCandidates": ["a", "b"],
-      "excludedCandidates": {"c": "unauthorized"}
+      "allowedCandidates": [
+        "a",
+        "b"
+      ],
+      "excludedCandidates": {
+        "c": "unauthorized"
+      }
     },
     {
       "eventId": "d2",

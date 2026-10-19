@@ -8,6 +8,9 @@ from typing import Any, Union
 
 from mechaharness.core.access import Ability, grant_key
 from mechaharness.core.types import ToolDefinition, ToolResult
+from mechaharness.operation_registry import ToolPhase
+
+__all__ = ["Tool", "ToolHandler", "ToolPhase", "ToolRegistry"]
 
 ToolHandler = Callable[..., Union[str, Awaitable[str]]]
 
@@ -24,6 +27,7 @@ class Tool:
         parameters: dict[str, Any] | None = None,
         grants: Sequence[object] | None = None,
         ability: Ability = Ability.SIMPLE,
+        tool_phase: ToolPhase = "execute",
     ) -> None:
         self.name = name
         self.handler = handler
@@ -31,6 +35,7 @@ class Tool:
         self.parameters = parameters or {"type": "object", "properties": {}}
         self.grants = [grant_key(item) for item in (grants or [])]
         self.ability = ability
+        self.tool_phase: ToolPhase = tool_phase
 
     def definition(self) -> ToolDefinition:
         return ToolDefinition(
@@ -77,6 +82,7 @@ class ToolRegistry:
         parameters: dict[str, Any] | None = None,
         grants: Sequence[object] | None = None,
         ability: Ability = Ability.SIMPLE,
+        tool_phase: ToolPhase = "execute",
     ) -> Callable[[ToolHandler], ToolHandler]:
         """Decorator that registers the wrapped function as a tool."""
 
@@ -90,6 +96,7 @@ class ToolRegistry:
                     parameters=parameters,
                     grants=grants,
                     ability=ability,
+                    tool_phase=tool_phase,
                 )
             )
             return fn

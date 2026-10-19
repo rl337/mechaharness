@@ -1,4 +1,5 @@
 {
+  "op": "graph_linkage_preflight",
   "check_missing_runner": true,
   "check_missing_stop": false,
   "check_ok_linear": true

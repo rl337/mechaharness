@@ -1,4 +1,5 @@
 {
+  "op": "sparse_advisor",
   "max_consultations": 1,
   "trigger": "consequential_planning"
 }
