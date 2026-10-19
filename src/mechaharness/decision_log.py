@@ -1,4 +1,29 @@
-"""Decision observability: EventLog subtype + decisions.jsonl (OBS-*)."""
+"""Decision observability: EventLog subtype + decisions.jsonl (OBS-*).
+
+Review audit (MH-PA-08 / MH-DOTS-09)
+------------------------------------
+
+An audit must reconstruct a review without model memory: which recipe ran,
+what the policy decided and under which revision, how trusted the source was,
+what scope was delegated, why something was denied, who approved it, and which
+side effects actually happened. :class:`ReviewAuditRecord` composes the
+optional audit fields on :class:`~mechaharness.decision_log.DecisionRecord` and
+:class:`~mechaharness.trace_envelope.TraceEnvelope` into one flat record and
+names whatever is still missing::
+
+    >>> from mechaharness.decision_log import DecisionRecord, ReviewAuditRecord
+    >>> decision = DecisionRecord(
+    ...     eventId="e1", stateHash="h", policyVersion="p1", verdict="ALLOW",
+    ...     recipeId="independent_review", recipeVersion="1",
+    ...     approvalIds=["appr:1"], effectIds=["fx:1"],
+    ... )
+    >>> audit = ReviewAuditRecord.from_records(
+    ...     decision, source_trust="trusted", delegated_scope="env:child-1",
+    ...     policy_revision="rev-7",
+    ... )
+    >>> audit.missing_dimensions()
+    []
+"""
 
 from __future__ import annotations
 
@@ -14,6 +39,7 @@ from pyiv.files import Filesystem
 from mechaharness.core.events import CoreEvent, Event, EventLog, event_type_key
 from mechaharness.inference.judge import Signal
 from mechaharness.judgement_policy import JudgementFacts, JudgementPolicy, Verdict, decide
+from mechaharness.trace_envelope import TraceEnvelope
 
 
 class DecisionRecorded(CoreEvent):
@@ -72,6 +98,19 @@ class DecisionRecord(BaseModel):
     resource_conditions: dict[str, Any] = Field(
         default_factory=dict, alias="resourceConditions"
     )
+    # Review-audit dimensions (MH-PA-08 / MH-DOTS-09); all optional.
+    recipe_id: str | None = Field(default=None, alias="recipeId")
+    recipe_version: str | None = Field(default=None, alias="recipeVersion")
+    # Warehouse correlators (event-analytics-schema OBS-A01..A06); match graph events.
+    graph_id: str | None = Field(default=None, alias="graphId")
+    authorization_epoch: int | None = Field(default=None, alias="authorizationEpoch")
+    parent_run_id: str | None = Field(default=None, alias="parentRunId")
+    freshness_summary: dict[str, int] = Field(
+        default_factory=dict, alias="freshnessSummary"
+    )
+    approval_ids: list[str] = Field(default_factory=list, alias="approvalIds")
+    denial_ids: list[str] = Field(default_factory=list, alias="denialIds")
+    effect_ids: list[str] = Field(default_factory=list, alias="effectIds")
 
 
 def signals_to_map(signals: Sequence[Signal]) -> dict[str, Any]:
@@ -251,3 +290,114 @@ def compute_topology_metrics(
         observed_concurrency=concurrency,
         notes=notes,
     )
+
+
+class ReviewAuditRecord(BaseModel):
+    """Everything an auditor needs to rebuild one review decision."""
+
+    model_config = ConfigDict(extra="allow")
+
+    version: str = "1"
+    decision_event_id: str
+    run_id: str | None = None
+    node_id: str | None = None
+    verdict: str
+    reason_codes: list[str] = Field(default_factory=list)
+    policy_version: str | None = None
+    policy_revision: str | None = None
+    recipe_id: str | None = None
+    recipe_version: str | None = None
+    source_trust: str | None = None
+    delegated_scope: str | None = None
+    denial_reasons: list[str] = Field(default_factory=list)
+    denial_ids: list[str] = Field(default_factory=list)
+    approval_ids: list[str] = Field(default_factory=list)
+    effect_ids: list[str] = Field(default_factory=list)
+    executed_action: str | None = None
+    freshness_summary: dict[str, int] = Field(default_factory=dict)
+    detail: dict[str, Any] = Field(default_factory=dict)
+
+    @classmethod
+    def from_records(
+        cls,
+        decision: DecisionRecord,
+        envelope: TraceEnvelope | None = None,
+        *,
+        source_trust: str | None = None,
+        delegated_scope: str | None = None,
+        policy_revision: str | None = None,
+        denial_reasons: Sequence[str] = (),
+    ) -> ReviewAuditRecord:
+        """Compose ``decision`` and optional ``envelope`` (decision wins on overlap)."""
+        env = envelope or TraceEnvelope()
+        return cls(
+            decision_event_id=decision.event_id,
+            run_id=decision.run_id,
+            node_id=decision.node_id or env.node_id,
+            verdict=decision.verdict,
+            reason_codes=list(decision.reason_codes),
+            policy_version=decision.policy_version,
+            policy_revision=policy_revision or env.policy_revision,
+            recipe_id=decision.recipe_id or env.recipe_id,
+            recipe_version=decision.recipe_version or env.recipe_version,
+            source_trust=source_trust,
+            delegated_scope=delegated_scope or env.capability_envelope_ref,
+            denial_reasons=list(denial_reasons),
+            denial_ids=list(decision.denial_ids or env.denial_ids),
+            approval_ids=list(decision.approval_ids or env.approval_ids),
+            effect_ids=list(decision.effect_ids or env.effect_ids),
+            executed_action=decision.executed_action,
+            freshness_summary=dict(decision.freshness_summary or env.freshness_summary),
+        )
+
+    def missing_dimensions(self) -> list[str]:
+        """Audit dimensions that cannot be reconstructed from this record."""
+        required = {
+            "recipe_id": self.recipe_id,
+            "recipe_version": self.recipe_version,
+            "policy_revision": self.policy_revision,
+            "source_trust": self.source_trust,
+            "delegated_scope": self.delegated_scope,
+        }
+        missing = [name for name, value in required.items() if not value]
+        if self.verdict == "DENY":
+            if not self.denial_reasons:
+                missing.append("denial_reasons")
+            if not self.denial_ids:
+                missing.append("denial_ids")
+        if self.verdict == "ASK_HUMAN" and not self.approval_ids:
+            missing.append("approval_ids")
+        if self.executed_action and not self.effect_ids:
+            missing.append("effect_ids")
+        return missing
+
+    def reconstructable(self) -> bool:
+        return not self.missing_dimensions()
+
+
+class RecipeAuditRow(BaseModel):
+    """Per-recipe rollup for quarterly audits (no transcripts needed)."""
+
+    recipe_id: str
+    recipe_version: str | None = None
+    decisions: int = 0
+    verdicts: dict[str, int] = Field(default_factory=dict)
+    stale_evidence: int = 0
+    fresh_evidence: int = 0
+
+
+def summarize_recipe_audit(records: Sequence[DecisionRecord]) -> list[RecipeAuditRow]:
+    """Group decisions by recipe selection and roll up verdicts and freshness."""
+    rows: dict[tuple[str, str | None], RecipeAuditRow] = {}
+    for record in records:
+        if not record.recipe_id:
+            continue
+        key = (record.recipe_id, record.recipe_version)
+        row = rows.setdefault(
+            key, RecipeAuditRow(recipe_id=record.recipe_id, recipe_version=record.recipe_version)
+        )
+        row.decisions += 1
+        row.verdicts[record.verdict] = row.verdicts.get(record.verdict, 0) + 1
+        row.stale_evidence += record.freshness_summary.get("stale", 0)
+        row.fresh_evidence += record.freshness_summary.get("fresh", 0)
+    return [rows[k] for k in sorted(rows, key=lambda k: (k[0], k[1] or ""))]

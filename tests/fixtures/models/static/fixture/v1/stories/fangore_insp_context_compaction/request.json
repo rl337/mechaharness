@@ -1,4 +1,5 @@
 {
+  "op": "context_compaction_staged",
   "messages": [
     {
       "role": "user",

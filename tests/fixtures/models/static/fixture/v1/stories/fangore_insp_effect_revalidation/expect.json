@@ -1,0 +1,10 @@
+{
+  "results": {
+    "fresh": "ok",
+    "revoked": "authorization_epoch_advanced:2!=3",
+    "grant_dropped": "envelope_grant_missing:core:net.http"
+  },
+  "graph_status": "failed",
+  "node_error_contains": "revalidation_failed:authorization_epoch_advanced:2!=3",
+  "effect_calls": 0
+}

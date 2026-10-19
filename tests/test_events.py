@@ -40,22 +40,48 @@ def _event(
     )
 
 
-def test_query_filters_by_agent() -> None:
+@pytest.mark.parametrize(
+    ("case_id", "emit", "query", "expect_agents", "expect_types"),
+    [
+        (
+            "by_agent",
+            [
+                ("a", TurnStart, "run-1"),
+                ("b", TurnStart, "run-1"),
+            ],
+            {"agent_id": "a"},
+            ["a"],
+            None,
+        ),
+        (
+            "by_run_and_type",
+            [
+                ("a", TurnStart, "r1"),
+                ("a", Inference, "r1"),
+                ("a", TurnStart, "r2"),
+            ],
+            {"run_id": "r1", "types": [Inference]},
+            ["a"],
+            [Inference.key()],
+        ),
+    ],
+    ids=["by_agent", "by_run_and_type"],
+)
+def test_query_filters(
+    case_id: str,
+    emit: list[tuple[str, object, str]],
+    query: dict,
+    expect_agents: list[str],
+    expect_types: list[str] | None,
+) -> None:
+    del case_id
     log = InMemoryEventLog()
-    log.emit(_event("a", TurnStart))
-    log.emit(_event("b", TurnStart))
-    found = log.query(agent_id="a")
-    assert [e.agent_id for e in found] == ["a"]
-
-
-def test_query_filters_by_run_and_type() -> None:
-    log = InMemoryEventLog()
-    log.emit(_event("a", TurnStart, run_id="r1"))
-    log.emit(_event("a", Inference, run_id="r1"))
-    log.emit(_event("a", TurnStart, run_id="r2"))
-    found = log.query(run_id="r1", types=[Inference])
-    assert len(found) == 1
-    assert found[0].type == Inference.key()
+    for agent_id, event_type, run_id in emit:
+        log.emit(_event(agent_id, event_type, run_id=run_id))  # type: ignore[arg-type]
+    found = log.query(**query)
+    assert [e.agent_id for e in found] == expect_agents
+    if expect_types is not None:
+        assert [e.type for e in found] == expect_types
 
 
 def test_descendants_include_parent_and_children() -> None:

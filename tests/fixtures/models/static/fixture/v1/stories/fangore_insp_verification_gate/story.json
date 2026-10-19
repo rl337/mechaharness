@@ -2,10 +2,10 @@
   "id": "fangore_insp_verification_gate",
   "persona": "fangore",
   "title": "Keep answer-generated distinct from task-complete",
-  "kind": "verification_outcome_gate",
+  "kind": "pure_api",
   "narrative": "Producing an answer is not the same as finishing the task when verification is required. Accepts inspiration requirement 5[^insp-r05].",
-  "implementation": "`OutcomeContract` and `DefaultVerificationPolicy` gate completion on verification state.",
-  "validation": "Kind `verification_outcome_gate`. Soft expects answer_generated then complete after verify.",
+  "implementation": "`OutcomeContract` in `mechaharness.outcome_contract` distinguishes `answer_generated`, `verified`, `complete`, and `failed`. `DefaultVerificationPolicy` selects the strongest sufficient oracle and gates completion through the outcome contract when `require_verification` is set.",
+  "validation": "Harness `pure_api` op `verification_outcome`. Soft expects: answer without verification stays `answer_generated`; verification pass yields `complete`. Unit: `tests/test_inspiration_primitives.py`.",
   "footnotes": [
     {
       "id": "insp-r05",

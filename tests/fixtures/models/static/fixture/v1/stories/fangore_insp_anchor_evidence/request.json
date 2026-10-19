@@ -1,4 +1,5 @@
 {
+  "op": "anchor_evidence_require",
   "kinds": [
     "external_observation"
   ],

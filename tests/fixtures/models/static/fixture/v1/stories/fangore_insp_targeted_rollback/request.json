@@ -1,4 +1,5 @@
 {
+  "op": "targeted_rollback_select",
   "error": "verification_failed",
   "node_id": "verify",
   "repair_target": "produce",

@@ -1,4 +1,5 @@
 {
+  "op": "eval_matrix_aggregate",
   "trials": [
     {
       "trial_id": "1",

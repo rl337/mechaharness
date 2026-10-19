@@ -53,6 +53,10 @@ from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTempla
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
 from mechaharness.graph_templates.initialize_preflight import InitializePreflightTemplate
+from mechaharness.graph_templates.produce_critique_refine import (
+    ProduceCritiqueRefineTemplate,
+)
+from mechaharness.graph_templates.safety_eval import SafetyEvalTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
 
 __all__ = [
@@ -68,6 +72,8 @@ __all__ = [
     "HarnessRunTemplate",
     "IndependentReviewTemplate",
     "InitializePreflightTemplate",
+    "ProduceCritiqueRefineTemplate",
+    "SafetyEvalTemplate",
     "SoftPoint",
     "SubgraphNodeRunner",
     "VerifyRepairTemplate",

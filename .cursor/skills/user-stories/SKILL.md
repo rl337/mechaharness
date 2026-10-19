@@ -48,26 +48,39 @@ Bios live in `personas.json` and are rendered into the guide.
 
 ```json
 {
-  "id": "fangore_compound_grants",
+  "id": "fangore_insp_wip_backpressure",
   "persona": "fangore",
-  "title": "Compose read-only and write permission packs",
-  "kind": "grant_gate_write",
+  "title": "Apply WIP back-pressure without hard-coding WIP=1",
+  "kind": "pure_api",
   "narrative": "PM-facing prose; may cite `other_story_id` or [^footnote-id]…",
   "implementation": "Library modules/classes that fulfill the feature…",
-  "validation": "Story runner kind, expects, related unit tests…",
-  "footnotes": [
-    {
-      "id": "pyiv",
-      "label": "pyiv",
-      "url": "https://rl337.org/pyiv/",
-      "note": "Config-hook DI"
-    }
-  ]
+  "validation": "Harness `pure_api` op `wip_policy`; expect keys…",
+  "footnotes": []
 }
 ```
 
+`request.json` must include `"op"` (surface within that harness); remaining keys
+are inputs. Example: `{ "op": "wip_policy", "max_active_nodes": 2, … }`.
+
 `footnotes` is **required** (use `[]` when none). Each entry needs `id`, `label`, and
 `url`; `note` is optional.
+
+### `kind` = harness family (not a per-story runner)
+
+`kind` names a **reusable story harness** under `tests/stories/harness/`
+(`pure_api`, `access_authority`, `graph_execution`, `graph_recipes`,
+`harness_runs`, `decision_plane`, `context_management`, `evaluation_research`,
+`lifecycle_extensions`). Catalog validation rejects unknown kinds/ops.
+
+| Want to cover… | Do this |
+|----------------|---------|
+| Same API, new inputs/expects | New story dir + `request`/`expect` only; **reuse** `kind` + `op` |
+| New public helper, same build/call/assert shape | Register one `op` on the harness; then fixtures |
+| New execution substrate (graph, recipe, HTTP, lifecycle) | Add/extend a **harness family** — never invent a per-story kind |
+| Unique structural unit check | Focused `tests/test_*.py`; do not force a story |
+
+**Litmus:** if you are about to add a new `kind` string or a new `_run_*` for one
+story, stop — you need an `op` or a harness, not a story-specific entry point.
 
 ### `narrative` (required)
 
@@ -120,9 +133,11 @@ footnote defs when the narrative contains matching `[^id]` markers).
 
 **How the story is proven** — technical, like `implementation`, but about tests.
 
-- Story `kind` → `tests/stories/runners.py` entry, fixture `expect.json` soft asserts.
+- Cite harness family + `op` (e.g. `Harness \`pure_api\` op \`wip_policy\``), plus
+  `expect.json` asserts.
 - Cassette / live dual-mode notes when relevant.
 - Related unit test modules under `tests/`.
+- Execution: `tests/stories/harness/` (see also [`data-driven-tests`](../data-driven-tests/SKILL.md)).
 
 ### `title`
 
@@ -135,8 +150,8 @@ Literal feature outcome (not metaphor). Must match what `narrative` claims.
    `systemone/…` must share identical `title`, `narrative`, `implementation`,
    `validation`, `persona`, `kind`, and `footnotes`. Catalog validation fails
    the PR on drift.
-3. **Sibling coherence.** If `kind` or acceptance intent changes, update
-   `request.json` / `expect.json` / `tests/stories/runners.py` in the same
+3. **Sibling coherence.** If harness/`op` or acceptance intent changes, update
+   `request.json` / `expect.json` / the owning harness op registry in the same
    change. Narrative must not claim an outcome expects do not cover;
    `validation` must describe the updated proof.
 4. **Regenerate every time.** After fixture edits: generate + `--check`; commit
@@ -173,11 +188,12 @@ tests/fixtures/models/
   <family>/<model>/<version>/
     manifest.json
     stories/<story_id>/
-      story.json      # id, persona, title, kind, narrative, implementation, validation, footnotes
-      request.json
+      story.json      # kind = harness family; narrative fields
+      request.json    # required "op" + inputs
       response.json
       expect.json
-tests/stories/        # catalog, backend, runners, schema tests
+tests/stories/harness/  # reusable interpreters (kind → harness)
+tests/stories/runners/  # interim domain ops for OpDispatchHarness
 scripts/generate_user_stories_md.py
 docs/guides/user-stories.md   # GENERATED
 ```
@@ -231,5 +247,6 @@ Soft expects only. Exact wire text belongs in `response.json` for replay.
 
 - [`agentic-recipes`](../agentic-recipes/SKILL.md) — recipes as top-level concept
 - [`project-docs`](../project-docs/SKILL.md) — defer user-story guide edits to this skill
+- [`event-observability`](../event-observability/SKILL.md) — stories that assert event correlators (OBS-A*)
 - `.cursor/rules/unambiguous-names.mdc`, `.cursor/rules/agentic-recipes.mdc`
 - `tests/stories/`

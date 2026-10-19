@@ -1,4 +1,5 @@
 {
+  "op": "harness_experiment_retire",
   "hypothesis": "remove cache hint",
   "intervention": "drop_cache_hint",
   "treatment_success": 0.6,

@@ -1,4 +1,5 @@
 {
+  "op": "config_access_policy",
   "layers": [
     [
       "core:fs.read"

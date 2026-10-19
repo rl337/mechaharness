@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_evolution_ownership_split",
+  "persona": "fangore",
+  "title": "Keep recipe validation in the library and evolution campaigns in the host",
+  "kind": "graph_recipes",
+  "narrative": "MechaHarness validates, executes, versions, and safety-gates recipes; the host (for example June) owns which workloads to run, how much to spend, and whether a candidate should be promoted. Two named hooks carry that split: one for evolution campaigns and one for promotion policy. Both default to doing nothing, a host can replace either, a host veto stops a promotion even when every test passed, and the library's final-test gate still applies when the host has no opinion (`taloneth_insp_recipe_final_test_gate`). Tracks MH-SR-09[^insp-sr-09].",
+  "implementation": "`MechaHarnessConfig.get_recipe_promotion_policy()` (`RecipePromotionPolicy`, default `NoopRecipePromotionPolicy`) and `get_evolution_campaign_hooks()` (`EvolutionCampaignHooks`, default `NoopEvolutionCampaignHooks`) are registered in `configure()` as injectables, not `Settings`. `promote_recipe()` in `recipe_promotion_policy.py` lets the host policy decide, then the registry applies `promote_with_final_test`; when given the Config-bound hooks it calls `EvolutionCampaignHooks.on_promotion` after (and only after) a successful pointer move. Registry validation, evolvable allowlists, and the final-test gate stay in the library.",
+  "validation": "Harness `graph_recipes` op `evolution_ownership_split`. Hard expects default no-op hooks via the injector, host overrides through a subclassed Config, a host veto that leaves the active recipe version unchanged, the final-test gate refusing a no-opinion promotion without a result, promotion once the gate passes, and the `on_promotion` hook observing only that successful move. Unit tests: `tests/test_evolution_ownership_hooks.py`.",
+  "footnotes": [
+    {
+      "id": "insp-sr-09",
+      "label": "Self-revising recipe evolution (MH-SR-09)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "June versus MechaHarness ownership for evolution"
+    }
+  ]
+}

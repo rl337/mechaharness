@@ -1,4 +1,5 @@
 {
+  "op": "efficiency_scorecard_build",
   "tool_calls": 3,
   "tokens_out": 1200,
   "latency_ms": 4000,

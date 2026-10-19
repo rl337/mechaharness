@@ -1,4 +1,5 @@
 {
+  "op": "pass_through",
   "prompt": "Say hello.",
   "model": "qwen3-30b-thinking"
 }

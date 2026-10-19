@@ -41,6 +41,12 @@ class ToolResult(BaseModel):
     tool_call_id: str
     content: str
     is_error: bool = False
+    # Optional provenance/freshness (ISO-8601 or opaque). See
+    # ``mechaharness.tool_result_freshness`` for staleness checks.
+    source: str | None = None
+    observed_at: str | None = None
+    fetched_at: str | None = None
+    expires_at: str | None = None
 
 
 class ChatMessage(BaseModel):

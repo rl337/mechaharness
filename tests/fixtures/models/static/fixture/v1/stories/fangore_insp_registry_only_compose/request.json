@@ -1,0 +1,40 @@
+{
+  "op": "registry_only_compose",
+  "scenarios": [
+    {
+      "id": "pure_tiling",
+      "tiles": [
+        {
+          "recipe": "verify_repair",
+          "key": "a"
+        },
+        {
+          "recipe": "independent_review",
+          "key": "b"
+        }
+      ]
+    },
+    {
+      "id": "free_form",
+      "tiles": [
+        {
+          "recipe": "verify_repair",
+          "key": "a"
+        }
+      ],
+      "free_form_nodes": [
+        "adhoc_shell"
+      ]
+    },
+    {
+      "id": "forged_version",
+      "tiles": [
+        {
+          "recipe": "verify_repair",
+          "key": "a",
+          "forge_version": "99"
+        }
+      ]
+    }
+  ]
+}

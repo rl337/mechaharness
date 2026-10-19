@@ -1,0 +1,30 @@
+{
+  "candidate_bindings": [
+    {
+      "max_rounds": 3
+    },
+    {
+      "critique_prompt": "be strict about unsupported claims"
+    }
+  ],
+  "rejected": [
+    [
+      "refine_kind",
+      "soft_point_not_evolvable:refine_kind"
+    ],
+    [
+      "reviewer_count",
+      "soft_point_not_allowlisted:reviewer_count"
+    ],
+    [
+      "x",
+      "unknown_recipe:ghost_recipe"
+    ]
+  ],
+  "deterministic": true,
+  "graphs_synthesized": false,
+  "selected_bindings": {
+    "critique_prompt": "be strict about unsupported claims"
+  },
+  "selected_over_baseline": null
+}

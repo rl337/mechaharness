@@ -1,4 +1,5 @@
 {
+  "op": "fixture_judge_batch",
   "state": {
     "ticket": "double charge"
   },

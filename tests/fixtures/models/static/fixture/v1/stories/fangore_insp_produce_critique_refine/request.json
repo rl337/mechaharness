@@ -1,0 +1,10 @@
+{
+  "op": "produce_critique_refine_recipe",
+  "goal": "draft release notes",
+  "acceptance": [
+    "no_unverified_claims"
+  ],
+  "soft_bindings": {
+    "max_rounds": 3
+  }
+}

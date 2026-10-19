@@ -1,4 +1,5 @@
 {
+  "op": "graph_template_soft_points",
   "template": "fan_out_aggregate",
   "goal": "incubate",
   "branch_count": 2,

@@ -6,7 +6,7 @@ import pytest
 
 from tests.stories.backend import resolve_story_backend
 from tests.stories.catalog import StoryCase, iter_story_cases
-from tests.stories.runners import run_story
+from tests.stories.harness import run_story
 
 _BACKEND = resolve_story_backend()
 _CASES = iter_story_cases(model_filter=_BACKEND.model_filter)

@@ -1,4 +1,5 @@
 {
+  "op": "experiment_dimensions_digest",
   "fixed": {
     "model_revision": "m@1"
   },

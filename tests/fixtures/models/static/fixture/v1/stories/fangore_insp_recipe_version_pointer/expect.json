@@ -1,0 +1,18 @@
+{
+  "active_version": "1",
+  "versions": [
+    "1",
+    "2"
+  ],
+  "lineage": {
+    "1": null,
+    "2": "1"
+  },
+  "evaluation_counts": {
+    "1": 0,
+    "2": 0
+  },
+  "errors": [
+    "promote:KeyError"
+  ]
+}

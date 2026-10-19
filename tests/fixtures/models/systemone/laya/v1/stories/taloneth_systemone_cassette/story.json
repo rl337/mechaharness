@@ -2,9 +2,9 @@
   "id": "taloneth_systemone_cassette",
   "persona": "taloneth",
   "title": "Pin System One adapter behavior to a versioned cassette",
-  "kind": "systemone_cassette",
+  "kind": "harness_runs",
   "narrative": "A new Laya build changes confidence fields. A versioned cassette must fail the story before silent adapter drift ships.",
   "implementation": "`SystemOneJudgeProvider` maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (`get_judge_connection`, `get_judge_provider`).\n\nCovers: JDG wire map (System One).",
-  "validation": "Kind `systemone_cassette` \u2192 `_run_route_refund` with `systemone/laya/v1` cassette.",
+  "validation": "Harness `harness_runs` op `systemone_cassette` \u2192 `_run_route_refund` with `systemone/laya/v1` cassette.",
   "footnotes": []
 }

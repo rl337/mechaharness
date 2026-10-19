@@ -1,4 +1,5 @@
 {
+  "op": "traversal_contract",
   "events": [
     {
       "type": "core:turn_start",

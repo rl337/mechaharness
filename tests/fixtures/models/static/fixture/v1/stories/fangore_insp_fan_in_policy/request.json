@@ -1,4 +1,5 @@
 {
+  "op": "fan_in_policy",
   "strategy": "quorum",
   "quorum": 2,
   "results": [

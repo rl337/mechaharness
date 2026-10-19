@@ -1,4 +1,5 @@
 {
+  "op": "harness_tool_loop_graph",
   "tool_name": "lookup",
   "user_input": "find it"
 }

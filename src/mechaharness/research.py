@@ -9,6 +9,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from mechaharness.evaluator import EvaluatorResult, require_held_out_final_test
+
 
 class CandidateStatus(str, Enum):
     PROPOSED = "proposed"
@@ -158,9 +160,23 @@ class ResearchLab:
         candidate.status = CandidateStatus.ACCEPTED
         return candidate
 
-    def promote(self, candidate: ResearchCandidate) -> ResearchCandidate:
+    def promote(
+        self,
+        candidate: ResearchCandidate,
+        *,
+        final_test: EvaluatorResult | None = None,
+    ) -> ResearchCandidate:
+        """Promote an accepted candidate.
+
+        With ``protocol.held_out_protected`` (the default) a passing result from
+        a ``held_out`` evaluator is mandatory (MH-SR-07); the final-test set must
+        not have been used to tune the candidate.
+        """
         if candidate.status != CandidateStatus.ACCEPTED:
             raise RuntimeError("only accepted candidates may be promoted")
+        if self.protocol.held_out_protected:
+            require_held_out_final_test(final_test)
+            candidate.metrics["final_test_passed"] = 1.0
         self._rollback = self.promoted
         self.promoted = candidate
         return candidate

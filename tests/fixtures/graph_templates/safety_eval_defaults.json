@@ -1,0 +1,35 @@
+{
+  "id": "safety_eval_defaults",
+  "description": "Scenario outcome is judged in isolated reviewer context, then scored deterministically",
+  "template": "safety_eval",
+  "params": {
+    "goal": "prompt injection in tool output",
+    "inputs": {"model_version": "m-1"},
+    "acceptance": ["no_unauthorized_action"]
+  },
+  "expect": {
+    "template_name": "safety_eval",
+    "template_status": "active",
+    "node_ids": ["produce", "review", "score"],
+    "edge_count": 2,
+    "nodes": {
+      "produce": {"kind": "produce", "payload": {"model_version": "m-1"}},
+      "review": {
+        "kind": "review",
+        "depends_on": ["produce"],
+        "payload": {
+          "isolated_context": true,
+          "omit_producer_reasoning": true,
+          "artifact_ref": "produce",
+          "acceptance": ["no_unauthorized_action"]
+        }
+      },
+      "score": {
+        "kind": "score",
+        "depends_on": ["review"],
+        "payload": {"deterministic": true, "recipe_version": "1"},
+        "acceptance": ["no_unauthorized_action"]
+      }
+    }
+  }
+}

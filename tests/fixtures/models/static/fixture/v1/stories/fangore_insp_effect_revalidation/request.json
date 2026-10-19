@@ -1,0 +1,30 @@
+{
+  "op": "effect_revalidation_check",
+  "now": "2026-10-18T12:00:00Z",
+  "envelope": {
+    "grants": [
+      "core:graph.execute",
+      "core:fs.read"
+    ],
+    "authorization_epoch": 2,
+    "expires_at": "2026-10-18T13:00:00Z"
+  },
+  "checks": [
+    {
+      "id": "fresh",
+      "live_authorization_epoch": 2
+    },
+    {
+      "id": "revoked",
+      "live_authorization_epoch": 3
+    },
+    {
+      "id": "grant_dropped",
+      "required_grants": [
+        "core:net.http"
+      ],
+      "live_authorization_epoch": 2
+    }
+  ],
+  "revoked_epoch": 3
+}

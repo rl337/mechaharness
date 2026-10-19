@@ -1,4 +1,5 @@
 {
+  "op": "harness_fingerprint_digest",
   "a": {
     "model_revision": "model@r1",
     "harness_family": "react",

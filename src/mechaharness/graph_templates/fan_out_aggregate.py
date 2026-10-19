@@ -14,6 +14,7 @@ from mechaharness.graph_templates.base import (
     SoftPoint,
     make_node,
 )
+from mechaharness.isolation.isolation_contract import TemplateIOContract
 
 
 class FanOutAggregateTemplate(GraphTemplate):
@@ -40,6 +41,10 @@ class FanOutAggregateTemplate(GraphTemplate):
     summary = (
         "Plan → fan-out independent branches → reduce/aggregate. "
         "Use for parallel research, multi-path exploration, or map-reduce style work."
+    )
+    io_contract = TemplateIOContract(
+        inputs={"goal": "string", "branch_payloads": "list"},
+        outputs={"aggregate": "object"},
     )
     soft_points = (
         SoftPoint(

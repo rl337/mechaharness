@@ -157,14 +157,47 @@ def collect_canonical_stories() -> dict[str, dict[str, Any]]:
 
 
 def validate_story_fixtures() -> list[str]:
-    """Validate required fields, twin parity, and id uniqueness."""
+    """Validate required fields, twin parity, harness kinds/ops, and id uniqueness."""
+    # Lazy import: harness → runners → catalog would cycle at module load.
+    from tests.stories.harness.registry import HARNESSES, known_ops_for
+
     errors: list[str] = []
     by_id: dict[str, list[tuple[Path, dict[str, Any]]]] = defaultdict(list)
+    seen_cases: set[str] = set()
     for case in iter_story_cases():
         path = case.path("story.json")
         data = case.load_json("story.json")
         errors.extend(validate_story_payload(data, path=path))
         by_id[str(data.get("id") or case.story_id)].append((path, data))
+
+        # Harness family + op (once per story id under static when possible).
+        kind = data.get("kind")
+        case_key = f"{case.family}/{case.model}/{case.story_id}"
+        if case_key in seen_cases:
+            continue
+        seen_cases.add(case_key)
+        if not isinstance(kind, str) or not kind.strip():
+            continue
+        if kind not in HARNESSES:
+            errors.append(
+                f"{path}: kind {kind!r} is not a registered story harness; "
+                f"known: {sorted(HARNESSES)}"
+            )
+            continue
+        req_path = case.path("request.json")
+        if not req_path.is_file():
+            errors.append(f"{req_path}: missing request.json (required for harness op)")
+            continue
+        request = case.load_json("request.json")
+        op = request.get("op")
+        ops = known_ops_for(kind) or frozenset()
+        if not isinstance(op, str) or not op.strip():
+            errors.append(f"{req_path}: missing non-empty string 'op' for harness {kind!r}")
+        elif op not in ops:
+            errors.append(
+                f"{req_path}: unknown op {op!r} for harness {kind!r}; "
+                f"known: {sorted(ops)}"
+            )
 
     for story_id, copies in sorted(by_id.items()):
         if len(copies) < 2:

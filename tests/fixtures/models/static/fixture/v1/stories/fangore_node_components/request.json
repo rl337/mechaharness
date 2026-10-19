@@ -1,4 +1,5 @@
 {
+  "op": "node_components",
   "template": "conversational_tool_loop",
   "max_iterations": 3
 }

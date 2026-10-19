@@ -2,10 +2,10 @@
   "id": "fangore_node_components",
   "persona": "fangore",
   "title": "Query node components inside each graph node for pre-layout",
-  "kind": "node_components",
-  "narrative": "Before a run starts, Fangore’s console must place interior pieces inside each plan step — soft bindings, stop bounds, and nested child handles — so the camera can zoom into a node without inventing a parallel structure graph. Those pieces are node components of a parent graph node, not free-floating world nodes. Complements `fangore_insp_dynamic_subgraph` and `fangore_traversal_contract`.[^june-nc-req]",
+  "kind": "graph_recipes",
+  "narrative": "Before a run starts, Fangore\u2019s console must place interior pieces inside each plan step \u2014 soft bindings, stop bounds, and nested child handles \u2014 so the camera can zoom into a node without inventing a parallel structure graph. Those pieces are node components of a parent graph node, not free-floating world nodes. Complements `fangore_insp_dynamic_subgraph` and `fangore_traversal_contract`.[^june-nc-req]",
   "implementation": "`mechaharness.node_component.node_components_for` derives `NodeComponent` rows from an `ExecutionGraph` plus optional template soft points and tool names. Kinds are limited to the closed catalog in `docs/reference/node-components.md` (events, soft points, child_graph, stop_contract, effect_state, budget_level). Every component requires `parent_node_id`. Soft points on Agentic Recipes appear as `soft_point` components.",
-  "validation": "Kind `node_components` → `_run_node_components`. Soft expects: all components have parent_node_id; kinds ⊆ catalog; stop_contract and soft_point present for `conversational_tool_loop`. Unit: `tests/test_node_component.py`.",
+  "validation": "Harness `graph_recipes` op `node_components` \u2192 `_run_node_components`. Soft expects: all components have parent_node_id; kinds \u2286 catalog; stop_contract and soft_point present for `conversational_tool_loop`. Unit: `tests/test_node_component.py`.",
   "footnotes": [
     {
       "id": "june-nc-req",

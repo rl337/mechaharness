@@ -1,0 +1,12 @@
+{
+  "op": "graph_event_correlators",
+  "graph_id": "corr-graph",
+  "goal": "ship the report",
+  "recipe_id": "verify_repair",
+  "recipe_version": "1",
+  "authorization_epoch": 3,
+  "nodes": [
+    "a",
+    "b"
+  ]
+}

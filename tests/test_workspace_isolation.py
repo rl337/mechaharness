@@ -1,4 +1,4 @@
-from mechaharness.workspace_isolation import (
+from mechaharness.isolation.workspace_isolation import (
     InMemoryWorkspaceIsolationProvider,
     WorkspaceIsolationRequest,
 )

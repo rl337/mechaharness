@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_cross_task_isolation",
+  "persona": "fangore",
+  "title": "Prevent intervening tasks from contaminating authority and evidence",
+  "kind": "access_authority",
+  "narrative": "Task-local evidence, policy, memory references, and approvals must not bleed across intervening tasks unless an explicit typed handoff shares them. Related contracts: `fangore_insp_isolation_io`, `fangore_insp_handoff_record`. Tracks MH-DOTS-07[^insp-dots-07].",
+  "implementation": "`CrossTaskIsolationGuard` scopes visible refs per task from `IsolationContract.input_context_refs`; `publish` makes a ref task-local, and `share` is the only path to another task, requiring a `HandoffRecord` whose `evidence_refs` the source can read. Zero, five, and ten intervening tasks never see the published refs. Workspace and effect isolation stay in `workspace_isolation` and `IsolationContract`.",
+  "validation": "Harness `access_authority` op `cross_task_isolation_bleed`. Hard expects no bleed after 0/5/10 intervening tasks, the receiver reading only handed-off refs, and a handoff naming an unreadable ref refused.",
+  "footnotes": [
+    {
+      "id": "insp-dots-07",
+      "label": "OpenAI Dots agent safety (MH-DOTS-07)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
+      "note": "Cross-task context isolation"
+    }
+  ]
+}

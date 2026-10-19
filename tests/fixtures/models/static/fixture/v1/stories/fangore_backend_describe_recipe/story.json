@@ -2,9 +2,9 @@
   "id": "fangore_backend_describe_recipe",
   "persona": "fangore",
   "title": "Describe an inference backend through the backend_describe recipe",
-  "kind": "backend_describe_recipe",
-  "narrative": "Before Fangore wires a host, he wants a machine-readable description of a configured backend — name, network behavior, auth — without leaving the recipe catalog. He runs backend_describe with the mock backend and gets the same metadata the classic describe command used to print. Complements `fangore_harness_run_recipe`.",
+  "kind": "harness_runs",
+  "narrative": "Before Fangore wires a host, he wants a machine-readable description of a configured backend \u2014 name, network behavior, auth \u2014 without leaving the recipe catalog. He runs backend_describe with the mock backend and gets the same metadata the classic describe command used to print. Complements `fangore_harness_run_recipe`.",
   "implementation": "Agentic Recipe catalog id `backend_describe` (`BackendDescribeTemplate`) with a single describe node. `BackendDescribeRunner` calls `InferenceStrategy.describe()` via DI. `recipe_runner.run_backend_describe_recipe` and CLI `describe` / `recipes run backend_describe` share this path. Soft points: backend (required), model, base_url, api_key, describe_kind.",
-  "validation": "Kind `backend_describe_recipe` → `_run_backend_describe_recipe`. Soft expects: in_catalog; status ok; description has name. Unit: `tests/test_recipe_runner.py`.",
+  "validation": "Harness `harness_runs` op `backend_describe_recipe` \u2192 `_run_backend_describe_recipe`. Soft expects: in_catalog; status ok; description has name. Unit: `tests/test_recipe_runner.py`.",
   "footnotes": []
 }

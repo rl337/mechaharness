@@ -7,6 +7,102 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Story harness redesign:** `story.json` `kind` is now a reusable harness
+  family (`pure_api`, `access_authority`, `graph_execution`, …) under
+  `tests/stories/harness/`; `request.json` requires `op` for the surface within
+  that family. New acceptance coverage should be fixtures-only by default —
+  register a new `op` or harness only when the execution *shape* changes, never
+  a per-story kind. Catalog validation rejects unknown kinds/ops.
+- **Unit tests table-driven where cheap:** `test_api_connection`, access-policy /
+  grant-key matrices, tool-phase effect matrix (assert + registry in one loop),
+  event query filters, and recipe evolvable-allowlist cases use `@parametrize`
+  over structs instead of near-clone functions.
+
+### Added
+
+- **Customer-facing agent skills** under `agent-skills/` (`use-mechaharness`,
+  `mechaharness-observability`, `mechaharness.mdc`) plus
+  [Agent skills for your project](docs/guides/agent-skills.md) with GitHub raw
+  links on `main`, and [Host integration requirements](docs/requirements/host-integration.md)
+  (HOST-01..07). Maintainer requirement: keep them in sync when public host
+  APIs / correlators / promote guidance change (see `project-docs` skill).
+  Docs index has a **Downstream consumers** section.
+
+- **Dots / personal-agent safety primitives:** `CapabilityEnvelope` execution-token
+  fields (`principal`, `expires_at`, `trust_origin`, `authorization_epoch`) with
+  attenuation-only `narrow()`; `ToolPhase` (`observe` / `prepare` / `execute`)
+  on `Tool` and `OperationContract`; authorization epoch persisted on graph
+  checkpoints and checked on `GraphExecutor.run(resume=True)`;
+  `ToolResult` provenance/freshness fields + `tool_result_freshness`;
+  `effect_revalidation`, `AuthorityGate`, `DenialStore`, `CrossTaskIsolationGuard`;
+  `HandoffRecord` `goals` / `exclusions` / `verdict`.
+- **Self-revising recipe substrate:** `GraphTemplateRegistry` versions, active
+  pointer, `promote` / `rollback`, lineage, evaluation attachments, and
+  `composition_violations`; `SoftPoint.evolvable` allowlist; Agentic Recipe
+  `produce_critique_refine`.
+- **Alerts, correction debt, conflict checkpoints (phase 4):**
+  `AlertEscalationPolicy` (once/log → repeated/surface → persistent/propose,
+  deterministic); `SpecificationDebtRecord` / `SpecificationDebtLedger` /
+  `capture_correction` (schema only; hosts generate tests) with optional
+  `PromotionRecord.record_id`; `decision_conflict_checkpoint` neighbor-revisit
+  helpers over `concurrent_write_conflicts` (no second CR engine).
+- **Eval, evolution, safety, port search (phase 5):** held-out final-test gate
+  (`require_held_out_final_test`, `FinalTestGateError`) mandatory on
+  `ResearchLab.promote` when `held_out_protected` and available as
+  `GraphTemplateRegistry.promote_with_final_test`; `recipe_evolution`
+  (trace summaries → registry-bounded soft-binding candidates → objective
+  selection, no model calls); Agentic Recipe `safety_eval`;
+  `GraphTemplate.io_contract` and `recipe_port_search.search_compatible_recipes`
+  (catalog ids only).
+- **Audit and ownership hooks (phase 6):** optional `recipe_id`,
+  `recipe_version`, `freshness_summary`, approval / denial / effect ids on
+  `DecisionRecord` and `TraceEnvelope` (+ `policy_revision`); `ReviewAuditRecord`
+  and `summarize_recipe_audit`; `summarize_freshness`;
+  `MechaHarnessConfig.get_recipe_promotion_policy()` and
+  `get_evolution_campaign_hooks()` (no-op defaults, DI-first).
+
+- **Inspiration surface consistency pass:**
+  - *Observability:* `GraphExecutor` merges `graph_id`, `graph_goal`,
+    `recipe_id` / `recipe_version` / `recipe_instance_id`, `authorization_epoch`
+    (and `live_authorization_epoch`), and nested `parent_run_id` / `nest_depth`
+    into every `core:graph_*` lifecycle event; `GraphExecutor.run(parent_run_id=)`;
+    `mechaharness.event_correlators` (`graph_trace_context`,
+    `project_node_attempt_rows`); `DecisionRecord` / `TraceEnvelope` gain matching
+    `graph_id` / `authorization_epoch` fields. Contract:
+    `docs/requirements/event-analytics-schema.md` (OBS-A01..A06) and the
+    `event-observability` skill.
+  - *Host wiring:* `MechaHarnessConfig.get_authority_gate()`, `get_denial_store()`,
+    `get_tool_result_freshness_policy()`; `host_kit.host_authority_gate` /
+    `host_denial_store`; `mechaharness.host_apis` re-export catalog;
+    `promote_recipe(..., hooks=)` calls `EvolutionCampaignHooks.on_promotion`
+    after a successful pointer move; `GraphTemplateRegistry.search_compatible`.
+  - *Shared helper:* `CapabilityEnvelope.authority_issue` is now the single source
+    of envelope reason codes for `AuthorityGate` and `revalidate_before_effect`.
+
+### Changed
+
+- **Module layout (shims keep old imports working):** `isolation/` package
+  (`isolation_contract`, `workspace_isolation`, `cross_task_isolation`),
+  `recipe_lifecycle/` package (`recipe_evolution`, `recipe_promotion_policy`,
+  `evolution_campaign_hooks`, `recipe_port_search`); `tool_phase` folded into
+  `operation_registry`, `specification_debt` into `rule_promotion`,
+  `review_audit` into `decision_log`; `graph_template` shim now re-exports the
+  full `graph_templates` surface (`ProduceCritiqueRefineTemplate`,
+  `SafetyEvalTemplate`, ...).
+- **Story hygiene:** removed native/insp twin stories
+  (`fangore_tool_gating`, `fangore_consequence_risk_scale`,
+  `fangore_sparse_advisor_consult`, `fangore_verification_outcome_gate`,
+  `taloneth_harness_experiment_retire`, `fangore_insp_capability_envelope`)
+  keeping one story per concept with the richer implementation text; dead
+  `inspiration_delta_contract` runner removed; `tests/stories/runners.py` split
+  into a `tests/stories/runners/` package of domain modules with a thin
+  `run_story` dispatcher; new story `nubble_graph_event_correlators`; deleted
+  eight 5–9 line unit tests that only duplicated insp stories.
+- `ResearchLab.promote` now requires `final_test=` (a passing held-out
+  `EvaluatorResult`) unless the `EvalProtocol` sets `held_out_protected=False`.
+
 ## [0.5.0] — 2026-10-18
 
 pyiv 1.1 HTTP + stdlib DI cut (#30). Manual minor after a squash merge

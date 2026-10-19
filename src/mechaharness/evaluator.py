@@ -76,6 +76,40 @@ def evaluate_claims(evaluator: Evaluator, subject: Mapping[str, Any]) -> Evaluat
     )
 
 
+class FinalTestGateError(RuntimeError):
+    """Raised when a promotion lacks a passing held-out final-test result."""
+
+
+def require_held_out_final_test(result: EvaluatorResult | None) -> None:
+    """Refuse promotion unless an untouched held-out evaluation passed (MH-SR-07).
+
+    The final-test set must not be a tuning signal, so only a result produced by
+    a ``held_out`` evaluator that ``passed`` opens the release gate.
+
+        >>> from mechaharness.evaluator import EvaluatorResult, require_held_out_final_test
+        >>> require_held_out_final_test(
+        ...     EvaluatorResult(evaluator_id="e", version="1", held_out=True, passed=True)
+        ... )
+        >>> try:
+        ...     require_held_out_final_test(
+        ...         EvaluatorResult(evaluator_id="e", version="1", held_out=False, passed=True)
+        ...     )
+        ... except FinalTestGateError as exc:
+        ...     print(exc)
+        final-test gate: evaluator 'e' is not held out
+    """
+    if result is None:
+        raise FinalTestGateError("final-test gate: a held-out evaluator result is required")
+    if not result.held_out:
+        raise FinalTestGateError(
+            f"final-test gate: evaluator {result.evaluator_id!r} is not held out"
+        )
+    if not result.passed:
+        raise FinalTestGateError(
+            f"final-test gate: held-out evaluator {result.evaluator_id!r} did not pass"
+        )
+
+
 class CallableEvaluator(Evaluator):
     """Adapter turning a claim-producing callable into an Evaluator."""
 

@@ -1,4 +1,5 @@
 {
+  "op": "isolation_io_contract",
   "effect_scope": "workspace:branch",
   "budget_share": 0.25,
   "inputs": {
