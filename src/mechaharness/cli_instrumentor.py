@@ -1,9 +1,9 @@
 """Host CLI instrumentor over the concrete ``cli_universe`` graph.
 
-Verb-led commands (``infer``, ``tool_loop``, ``set_clock``, ``advance_clock``)
-with optional parameterization and good defaults. Story YAML may attach
-test-only ``expect`` blocks; this module returns observations and does not
-assert.
+Verb-led commands (``infer``, ``tool_loop``, ``run_recipe``, diagnostics,
+``set_clock``, ``advance_clock``) with optional parameterization and good
+defaults. Story YAML may attach test-only ``expect`` blocks; this module
+returns observations and does not assert.
 
 See ``docs/reference/cli-universe.md``.
 """
@@ -19,6 +19,18 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pyiv.time import DateTimeService, MockDateTimeService
 
 from mechaharness.budget import BudgetPolicy
+from mechaharness.cli_diagnostic_verbs import (
+    CheckModelAffinityCommand,
+    CompareRunParityCommand,
+    ReplayModelInputCommand,
+    RouteCapabilitiesCommand,
+    ShadowDecisionBackendsCommand,
+    run_check_model_affinity,
+    run_compare_run_parity,
+    run_replay_model_input,
+    run_route_capabilities,
+    run_shadow_decision_backends,
+)
 from mechaharness.cli_infer_runner import CliInferRunner
 from mechaharness.cli_universe import CLI_INFER_NODE_ID, build_cli_universe_graph
 from mechaharness.config import Settings
@@ -141,6 +153,11 @@ class CliCommand(BaseModel):
     infer: InferCommand | None = None
     tool_loop: ToolLoopCommand | None = None
     run_recipe: RunRecipeCommand | None = None
+    replay_model_input: ReplayModelInputCommand | None = None
+    route_capabilities: RouteCapabilitiesCommand | None = None
+    check_model_affinity: CheckModelAffinityCommand | None = None
+    compare_run_parity: CompareRunParityCommand | None = None
+    shadow_decision_backends: ShadowDecisionBackendsCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
 
@@ -150,6 +167,11 @@ class CliCommand(BaseModel):
             ("infer", self.infer),
             ("tool_loop", self.tool_loop),
             ("run_recipe", self.run_recipe),
+            ("replay_model_input", self.replay_model_input),
+            ("route_capabilities", self.route_capabilities),
+            ("check_model_affinity", self.check_model_affinity),
+            ("compare_run_parity", self.compare_run_parity),
+            ("shadow_decision_backends", self.shadow_decision_backends),
             ("set_clock", self.set_clock),
             ("advance_clock", self.advance_clock),
         ]
@@ -162,15 +184,21 @@ class CliCommand(BaseModel):
 
     @property
     def verb(self) -> str:
-        if self.infer is not None:
-            return "infer"
-        if self.tool_loop is not None:
-            return "tool_loop"
-        if self.run_recipe is not None:
-            return "run_recipe"
-        if self.set_clock is not None:
-            return "set_clock"
-        return "advance_clock"
+        for name in (
+            "infer",
+            "tool_loop",
+            "run_recipe",
+            "replay_model_input",
+            "route_capabilities",
+            "check_model_affinity",
+            "compare_run_parity",
+            "shadow_decision_backends",
+            "set_clock",
+            "advance_clock",
+        ):
+            if getattr(self, name) is not None:
+                return name
+        raise RuntimeError("CliCommand missing verb")
 
 
 class CliScript(BaseModel):
@@ -200,9 +228,10 @@ class CliStepResult(BaseModel):
     recipe_in_catalog: bool | None = None
     description_name: str | None = None
     subgraph_node_ids: list[str] = Field(default_factory=list)
+    probe: dict[str, Any] = Field(default_factory=dict)
 
     def as_expect_dict(self) -> dict[str, Any]:
-        return {
+        data = {
             "verb": self.verb,
             "text": self.text,
             "status": self.status,
@@ -226,6 +255,8 @@ class CliStepResult(BaseModel):
             "graph_node_ids_exactly": list(self.subgraph_node_ids),
             "text_nonempty": bool(self.text and str(self.text).strip()),
         }
+        data.update(self.probe)
+        return data
 
 
 class CliRunResult(BaseModel):
@@ -247,9 +278,10 @@ class CliRunResult(BaseModel):
     recipe_in_catalog: bool | None = None
     description_name: str | None = None
     subgraph_node_ids: list[str] = Field(default_factory=list)
+    probe: dict[str, Any] = Field(default_factory=dict)
 
     def as_expect_dict(self) -> dict[str, Any]:
-        return {
+        data = {
             "event_types": list(self.event_types),
             "event_types_exactly": list(self.event_types),
             "tapped_event_types": list(self.tapped_event_types),
@@ -273,6 +305,8 @@ class CliRunResult(BaseModel):
             "subgraph_node_ids_exactly": list(self.subgraph_node_ids),
             "graph_node_ids_exactly": list(self.subgraph_node_ids),
         }
+        data.update(self.probe)
+        return data
 
 
 class _CliToolLoopConfig(MechaHarnessConfig):
@@ -383,6 +417,7 @@ class CliInstrumentor:
         last_in_catalog: bool | None = None
         last_description: str | None = None
         last_subgraph_ids: list[str] = []
+        last_probe: dict[str, Any] = {}
         for command in script.commands:
             step = await self._run_command(command)
             steps.append(step)
@@ -404,6 +439,8 @@ class CliInstrumentor:
                 last_description = step.description_name
             if step.subgraph_node_ids:
                 last_subgraph_ids = list(step.subgraph_node_ids)
+            if step.probe:
+                last_probe = dict(step.probe)
         all_events = self._log.query(agent_id=self._agent_id)
         # Tool-loop harness may emit under a different filter; fall back to all.
         if not all_events:
@@ -429,6 +466,7 @@ class CliInstrumentor:
             recipe_in_catalog=last_in_catalog,
             description_name=last_description,
             subgraph_node_ids=last_subgraph_ids,
+            probe=last_probe,
         )
 
     async def _run_command(self, command: CliCommand) -> CliStepResult:
@@ -449,6 +487,31 @@ class CliInstrumentor:
             return await self._run_tool_loop(command.tool_loop, before=before)
         if command.run_recipe is not None:
             return await self._run_recipe(command.run_recipe, before=before)
+        if command.replay_model_input is not None:
+            return CliStepResult(
+                verb="replay_model_input",
+                probe=run_replay_model_input(command.replay_model_input),
+            )
+        if command.route_capabilities is not None:
+            return CliStepResult(
+                verb="route_capabilities",
+                probe=run_route_capabilities(command.route_capabilities),
+            )
+        if command.check_model_affinity is not None:
+            return CliStepResult(
+                verb="check_model_affinity",
+                probe=run_check_model_affinity(command.check_model_affinity),
+            )
+        if command.compare_run_parity is not None:
+            return CliStepResult(
+                verb="compare_run_parity",
+                probe=run_compare_run_parity(command.compare_run_parity),
+            )
+        if command.shadow_decision_backends is not None:
+            return CliStepResult(
+                verb="shadow_decision_backends",
+                probe=run_shadow_decision_backends(command.shadow_decision_backends),
+            )
         assert command.infer is not None
         body = command.infer
         graph = build_cli_universe_graph(prompt=body.prompt, system=body.system)

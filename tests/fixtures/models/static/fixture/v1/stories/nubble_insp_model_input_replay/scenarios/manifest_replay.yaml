@@ -1,0 +1,19 @@
+# Reconstruct model-visible inputs from a recorded manifest
+kind: cli
+
+commands:
+  - replay_model_input:
+      messages:
+        - role: system
+          content: Prefer repository state.
+        - role: user
+          content: Summarize the diff.
+      tool_definitions:
+        - name: read_file
+      instructions:
+        - Do not invent file contents.
+
+expect:
+  hashes_ok: true
+  reconstructed_equals: true
+  manifest_ref_nonempty: true

@@ -2,9 +2,9 @@
   "id": "nubble_model_affinity",
   "persona": "nubble",
   "title": "Keep model affinity inside a coherent work loop",
-  "kind": "harness_runs",
+  "kind": "cli",
   "narrative": "Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch. Random lane thrash must not win on unit price alone.",
-  "implementation": "`route_at_boundary` selects lanes at task/phase boundaries; `activate_scoped_policy` activates judgement policy only when calibration criteria are met \u2014 affinity and activation stay behind evaluation, not cheapest unit price.\n\nCovers: RTE-03.",
-  "validation": "Harness `harness_runs` op `model_affinity` \u2192 `_run_model_affinity`. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: `tests/test_routing.py`.",
+  "implementation": "`route_at_boundary` and `activate_scoped_policy` in `mechaharness.routing` keep affinity inside a coherent work loop; uncalibrated policies do not activate. `CliInstrumentor` verb `check_model_affinity` exposes the diagnostic.",
+  "validation": "Harness `cli` scenario `affinity_lane.yaml`: hard `selected_lane` and `uncalibrated_is_null`.",
   "footnotes": []
 }

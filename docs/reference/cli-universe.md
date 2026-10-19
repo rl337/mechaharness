@@ -17,7 +17,7 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 |---------|--------|
 | Graph factory | `build_cli_universe_graph` (`cli:infer` node) |
 | Infer runner | `CliInferRunner` (reason-lane `Completer`, `core:inference` + `core:cost`) |
-| Instrumentor | `CliInstrumentor` (`infer`, `tool_loop`, `run_recipe`, `set_clock`, `advance_clock`, …) |
+| Instrumentor | `CliInstrumentor` + `cli_diagnostic_verbs` (`infer`, `tool_loop`, `run_recipe`, routing/parity/manifest probes, clocks, …) |
 | Event stamps | `StampingEventLog` over injectable `DateTimeService` |
 | Event tap | `tapping_event_log` on the blessed executor path (HF-05) |
 

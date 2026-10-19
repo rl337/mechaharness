@@ -2,10 +2,10 @@
   "id": "nubble_insp_model_routing",
   "persona": "nubble",
   "title": "Route nodes by declared capability needs",
-  "kind": "harness_runs",
+  "kind": "cli",
   "narrative": "Nubble prefers declaring what a step needs instead of hard-coding a model id, then picking among available classes. Accepts inspiration requirement 13[^insp-r13].",
-  "implementation": "`route_for_capability_needs` in `mechaharness.routing` selects a model class from `model:` needs.",
-  "validation": "Harness `harness_runs` op `capability_need_routing`. Soft expects selected_model_class matches need.",
+  "implementation": "`route_for_capability_needs` in `mechaharness.routing` selects a model class from declared needs and available classes. `CliInstrumentor` verb `route_capabilities` exposes the host diagnostic.",
+  "validation": "Harness `cli` scenario `capability_route.yaml`: hard `selected_model_class`.",
   "footnotes": [
     {
       "id": "insp-r13",

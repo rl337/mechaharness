@@ -121,8 +121,10 @@ expect:
   units_positive: true
 ```
 
-Verbs today: `infer`, `tool_loop`, `run_recipe`, `set_clock`, `advance_clock`.
-Add verbs only when a migrating story needs them. See
+Verbs today: `infer`, `tool_loop`, `run_recipe`, `replay_model_input`,
+`route_capabilities`, `check_model_affinity`, `compare_run_parity`,
+`shadow_decision_backends`, `set_clock`, `advance_clock`. Add verbs only when a
+migrating story needs them. See
 [`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
 
 Live: `MECHA_STORY_BACKEND=live`, `MECHA_BASE_URL`, `MECHA_MODEL` (served id).
