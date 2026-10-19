@@ -192,9 +192,8 @@ needed:</p>
 <ol class="arabic simple">
 <li><p>Observability / one-shot infer (OBS-*) — started (<code class="docutils literal notranslate"><span class="pre">nubble_run_cost_events</span></code>)</p></li>
 <li><p>Remaining harness_runs / pass-through / tool-loop / cassettes — in progress
-(<code class="docutils literal notranslate"><span class="pre">nubble_ci_static_smoke</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_host_kit_event_tap</span></code>,
-<code class="docutils literal notranslate"><span class="pre">fangore_harness_tool_loop_graph</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_conversational_tool_loop</span></code>;
-next: recipe catalog pair + remaining probes)</p></li>
+(smoke, tap, tool-loop, conversational, <code class="docutils literal notranslate"><span class="pre">harness_run</span></code>, <code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>;
+delete op runners when their stories leave; next: remaining harness_runs probes)</p></li>
 <li><p>Graph execution + recipe catalog</p></li>
 <li><p>Decision plane / judge</p></li>
 <li><p>pure_api + context/eval surface</p></li>

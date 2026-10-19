@@ -407,11 +407,11 @@ Before Fangore wires a host, he wants a machine-readable description of a config
 
 #### Implementation
 
-Agentic Recipe catalog id `backend_describe` (`BackendDescribeTemplate`) with a single describe node. `BackendDescribeRunner` calls `InferenceStrategy.describe()` via DI. `recipe_runner.run_backend_describe_recipe` and CLI `describe` / `recipes run backend_describe` share this path. Soft points: backend (required), model, base_url, api_key, describe_kind.
+Agentic Recipe catalog id `backend_describe` (`BackendDescribeTemplate`) with a single describe node. `BackendDescribeRunner` calls `InferenceStrategy.describe()` via DI. `CliInstrumentor` verb `run_recipe` calls `recipe_runner.run_backend_describe_recipe`. CLI `describe` / `recipes run backend_describe` share this path. Soft points: backend (required), model, base_url, api_key, describe_kind.
 
 #### Validation
 
-Harness `harness_runs` op `backend_describe_recipe` → `_run_backend_describe_recipe`. Soft expects: in_catalog; status ok; description has name. Unit: `tests/test_recipe_runner.py`.
+Harness `cli` scenario `describe_mock.yaml`: hard `recipe_in_catalog`, `status`, `description_name`, `graph_node_ids_exactly`. Unit: `tests/test_recipe_runner.py`.
 
 ### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 
@@ -785,11 +785,11 @@ Fangore wants the classic one-shot harness path to be a named control pattern he
 
 #### Implementation
 
-Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`): prepare → harness_loop → render. `mechaharness.recipe_runner` discovers the catalog (`list_recipes` / `describe_recipe`) and executes via `GraphExecutor` / `host_graph_executor` with `HarnessPrepareRunner`, `HarnessLoopRunner`, and `HarnessRenderRunner`. Soft points cover backend, family, model, system prompt, max turns, and runner kinds. CLI `run` and `recipes run harness_run` call `run_harness_recipe`. Node components under `harness_loop` reuse harness `inference` / `tool_call` / `turn_start` kinds.
+Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`): prepare → harness_loop → render. `CliInstrumentor` verb `run_recipe` calls `recipe_runner.run_harness_recipe` / `list_recipes` with `HarnessPrepareRunner`, `HarnessLoopRunner`, and `HarnessRenderRunner`. Soft points cover backend, family, model, system prompt, max turns, and runner kinds. CLI `run` and `recipes run harness_run` share this path. Node components under `harness_loop` reuse harness `inference` / `tool_call` / `turn_start` kinds.
 
 #### Validation
 
-Harness `harness_runs` op `harness_run_recipe` → `_run_harness_run_recipe`. Soft expects: catalog lists harness_run; status ok; final_text_nonempty; turns ≥ 1. Unit: `tests/test_recipe_runner.py`.
+Harness `cli` scenario `catalog_and_run.yaml`: hard `recipe_in_catalog`, `status`, `text_nonempty`, exact `turns`, `graph_node_ids_exactly`. Unit: `tests/test_recipe_runner.py`.
 
 ### `fangore_harness_tool_loop_graph` — See inference and tool calls as node components inside a harness run
 
