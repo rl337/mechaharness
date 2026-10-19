@@ -13,7 +13,9 @@ from mechaharness.cli_instrumentor import (
     CliInstrumentor,
     CliRunResult,
     InferCommand,
+    RunRecipeCommand,
     SetClockCommand,
+    ToolLoopCommand,
     script_from_mapping,
 )
 
@@ -24,12 +26,18 @@ class CliExpect(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     event_types_exactly: list[str] | None = None
+    tapped_event_types_exactly: list[str] | None = None
     units_positive: bool | None = None
     text_nonempty: bool | None = None
     text: str | None = None
+    status: str | None = None
     inference_ts: str | None = None
     cost_ts: str | None = None
     cost_units: float | None = None
+    traversal_kinds_exactly: list[str] | None = None
+    component_parents_exactly: list[str] | None = None
+    rounds: int | None = None
+    subgraph_node_ids_exactly: list[str] | None = None
 
     @model_validator(mode="after")
     def _at_least_one(self) -> CliExpect:
@@ -47,16 +55,25 @@ class CliScenarioCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     infer: InferCommand | None = None
+    tool_loop: ToolLoopCommand | None = None
+    run_recipe: RunRecipeCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
     expect: CliExpect | None = None
 
     @model_validator(mode="after")
     def _one_verb(self) -> CliScenarioCommand:
-        verbs = [self.infer, self.set_clock, self.advance_clock]
+        verbs = [
+            self.infer,
+            self.tool_loop,
+            self.run_recipe,
+            self.set_clock,
+            self.advance_clock,
+        ]
         if sum(1 for v in verbs if v is not None) != 1:
             raise ValueError(
-                "each command needs exactly one of infer/set_clock/advance_clock"
+                "each command needs exactly one of "
+                "infer/tool_loop/run_recipe/set_clock/advance_clock"
             )
         return self
 

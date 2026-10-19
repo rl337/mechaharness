@@ -125,7 +125,7 @@ from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
 
 
-class TappingEventLog:
+class TappingEventLog(EventLog):
     """Forward EventLog emits to an optional host callback (HF-05)."""
 
     def __init__(

@@ -1,0 +1,20 @@
+# HF-05: tapping_event_log on host_graph_executor sees node start/end
+kind: cli
+
+commands:
+  - infer:
+      prompt: light the path.
+
+expect:
+  status: ok
+  tapped_event_types_exactly:
+    - core:access_check
+    - core:graph_start
+    - core:graph_node
+    - core:graph_node_start
+    - core:cost
+    - core:inference
+    - core:graph_node_end
+    - core:graph_node
+    - core:graph_node
+    - core:graph_end

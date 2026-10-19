@@ -1,15 +1,17 @@
 """Host CLI instrumentor over the concrete ``cli_universe`` graph.
 
-Verb-led commands (``infer``, ``set_clock``, ``advance_clock``) with optional
-parameterization and good defaults. Story YAML may attach test-only ``expect``
-blocks; this module returns observations and does not assert.
+Verb-led commands (``infer``, ``tool_loop``, ``set_clock``, ``advance_clock``)
+with optional parameterization and good defaults. Story YAML may attach
+test-only ``expect`` blocks; this module returns observations and does not
+assert.
 
 See ``docs/reference/cli-universe.md``.
 """
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import json
+from collections.abc import Mapping, Sequence
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -19,6 +21,7 @@ from pyiv.time import DateTimeService, MockDateTimeService
 from mechaharness.budget import BudgetPolicy
 from mechaharness.cli_infer_runner import CliInferRunner
 from mechaharness.cli_universe import CLI_INFER_NODE_ID, build_cli_universe_graph
+from mechaharness.conversational_tool_loop_runner import ConversationalToolLoopRunner
 from mechaharness.core.access import CostAccountant, InMemoryCostAccountant
 from mechaharness.core.completer import Completer
 from mechaharness.core.events import (
@@ -28,8 +31,17 @@ from mechaharness.core.events import (
     EventTypeRef,
     InMemoryEventLog,
 )
+from mechaharness.core.types import ChatMessage, CompletionRequest, Role
+from mechaharness.di import MechaHarnessConfig, get_injector
+from mechaharness.graph import ExecutionGraph
 from mechaharness.graph_executor import GraphNodeRunnerRegistry
-from mechaharness.host_kit import host_graph_executor
+from mechaharness.graph_templates import ConversationalToolLoopTemplate, GraphTemplateParams
+from mechaharness.harness.base import AbstractHarness, HarnessConfig
+from mechaharness.harness.tool_loop import ToolLoopHarness
+from mechaharness.host_kit import host_graph_executor, tapping_event_log
+from mechaharness.inference.base import InferenceStrategy
+from mechaharness.node_component import traversal_from_events
+from mechaharness.tools.base import Tool, ToolRegistry
 
 
 class StampingEventLog(EventLog):
@@ -75,6 +87,25 @@ class InferCommand(BaseModel):
     model: str | None = None
 
 
+class ToolLoopCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    prompt: str
+    tool_name: str = "lookup"
+    max_turns: int = 4
+    model: str | None = None
+
+
+class RunRecipeCommand(BaseModel):
+    """Execute a catalog recipe through the CLI instrumentor (Wave 2+)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    max_iterations: int = 4
+    tool_name: str = "lookup"
+
+
 class SetClockCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -95,6 +126,8 @@ class CliCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     infer: InferCommand | None = None
+    tool_loop: ToolLoopCommand | None = None
+    run_recipe: RunRecipeCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
 
@@ -102,6 +135,8 @@ class CliCommand(BaseModel):
     def _one_verb(self) -> CliCommand:
         verbs = [
             ("infer", self.infer),
+            ("tool_loop", self.tool_loop),
+            ("run_recipe", self.run_recipe),
             ("set_clock", self.set_clock),
             ("advance_clock", self.advance_clock),
         ]
@@ -116,6 +151,10 @@ class CliCommand(BaseModel):
     def verb(self) -> str:
         if self.infer is not None:
             return "infer"
+        if self.tool_loop is not None:
+            return "tool_loop"
+        if self.run_recipe is not None:
+            return "run_recipe"
         if self.set_clock is not None:
             return "set_clock"
         return "advance_clock"
@@ -141,6 +180,10 @@ class CliStepResult(BaseModel):
     events: list[dict[str, Any]] = Field(default_factory=list)
     cost_units: float = 0.0
     clock_iso: str | None = None
+    traversal_kinds: list[str] = Field(default_factory=list)
+    component_parent_ids: list[str] = Field(default_factory=list)
+    rounds: int | None = None
+    subgraph_node_ids: list[str] = Field(default_factory=list)
 
     def as_expect_dict(self) -> dict[str, Any]:
         return {
@@ -154,6 +197,13 @@ class CliStepResult(BaseModel):
             "clock_iso": self.clock_iso,
             "inference_ts": _first_ts(self.events, "core:inference"),
             "cost_ts": _first_ts(self.events, "core:cost"),
+            "traversal_kinds": list(self.traversal_kinds),
+            "traversal_kinds_exactly": list(self.traversal_kinds),
+            "component_parent_ids": list(self.component_parent_ids),
+            "component_parents_exactly": list(self.component_parent_ids),
+            "rounds": self.rounds,
+            "subgraph_node_ids": list(self.subgraph_node_ids),
+            "subgraph_node_ids_exactly": list(self.subgraph_node_ids),
         }
 
 
@@ -164,21 +214,82 @@ class CliRunResult(BaseModel):
 
     steps: list[CliStepResult] = Field(default_factory=list)
     event_types: list[str] = Field(default_factory=list)
+    tapped_event_types: list[str] = Field(default_factory=list)
     events: list[dict[str, Any]] = Field(default_factory=list)
     cost_units: float = 0.0
     text: str | None = None
+    status: str | None = None
+    traversal_kinds: list[str] = Field(default_factory=list)
+    component_parent_ids: list[str] = Field(default_factory=list)
+    rounds: int | None = None
+    subgraph_node_ids: list[str] = Field(default_factory=list)
 
     def as_expect_dict(self) -> dict[str, Any]:
         return {
             "event_types": list(self.event_types),
             "event_types_exactly": list(self.event_types),
+            "tapped_event_types": list(self.tapped_event_types),
+            "tapped_event_types_exactly": list(self.tapped_event_types),
             "cost_units": self.cost_units,
             "units_positive": self.cost_units > 0,
             "text": self.text,
             "text_nonempty": bool(self.text and str(self.text).strip()),
+            "status": self.status,
             "inference_ts": _first_ts(self.events, "core:inference"),
             "cost_ts": _first_ts(self.events, "core:cost"),
+            "traversal_kinds": list(self.traversal_kinds),
+            "traversal_kinds_exactly": list(self.traversal_kinds),
+            "component_parent_ids": list(self.component_parent_ids),
+            "component_parents_exactly": list(self.component_parent_ids),
+            "rounds": self.rounds,
+            "subgraph_node_ids": list(self.subgraph_node_ids),
+            "subgraph_node_ids_exactly": list(self.subgraph_node_ids),
         }
+
+
+class _CliToolLoopConfig(MechaHarnessConfig):
+    """Bind a host-supplied Completer + tools for the ``tool_loop`` verb."""
+
+    def __init__(
+        self,
+        completer: Completer,
+        *,
+        tools: ToolRegistry,
+        harness_config: HarnessConfig,
+        event_log: EventLog,
+        agent_id: str,
+    ) -> None:
+        self._completer = completer
+        self._tools = tools
+        self._harness_config = harness_config
+        self._provided_event_log = event_log
+        self._agent_id = agent_id
+        super().__init__()
+
+    def get_inference_class(self) -> type[InferenceStrategy]:
+        if isinstance(self._completer, InferenceStrategy):
+            return type(self._completer)
+        from mechaharness.inference.mock import MockInferenceStrategy
+
+        return MockInferenceStrategy
+
+    def get_harness_class(self) -> type[AbstractHarness]:
+        return ToolLoopHarness
+
+    def get_tools(self) -> ToolRegistry:
+        return self._tools
+
+    def get_harness_config(self) -> HarnessConfig:
+        return self._harness_config
+
+    def get_event_log(self) -> EventLog | None:
+        return self._provided_event_log
+
+    def configure(self) -> None:
+        super().configure()
+        if isinstance(self._completer, InferenceStrategy):
+            self.register_instance(InferenceStrategy, self._completer)
+        self.register_instance(Completer, self._completer)
 
 
 class CliInstrumentor:
@@ -192,15 +303,22 @@ class CliInstrumentor:
         datetime_service: DateTimeService | None = None,
         model: str = "cli-default",
         agent_id: str = "cli",
+        tools: ToolRegistry | None = None,
     ) -> None:
         self._completer = completer
         self._model = model
         self._agent_id = agent_id
-        self._raw_log = event_log or InMemoryEventLog()
+        self._tools = tools if tools is not None else ToolRegistry()
+        self._tapped_types: list[str] = []
         self._datetime: DateTimeService = datetime_service or MockDateTimeService(
             datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
         )
-        self._log: EventLog = StampingEventLog(self._raw_log, self._datetime)
+        store = event_log or InMemoryEventLog()
+        stamped = StampingEventLog(store, self._datetime)
+        self._log: EventLog = tapping_event_log(
+            stamped,
+            on_event=lambda e: self._tapped_types.append(str(getattr(e, "type", ""))),
+        )
         self._cost: CostAccountant = InMemoryCostAccountant(self._log)
         self._runner = CliInferRunner(
             self._completer,
@@ -222,15 +340,37 @@ class CliInstrumentor:
     def datetime_service(self) -> DateTimeService:
         return self._datetime
 
+    @property
+    def tapped_event_types(self) -> list[str]:
+        return list(self._tapped_types)
+
     async def run(self, script: CliScript) -> CliRunResult:
         steps: list[CliStepResult] = []
         last_text: str | None = None
+        last_status: str | None = None
+        last_traversal: list[str] = []
+        last_parents: list[str] = []
+        last_rounds: int | None = None
+        last_subgraph_ids: list[str] = []
         for command in script.commands:
             step = await self._run_command(command)
             steps.append(step)
             if step.text is not None:
                 last_text = step.text
+            if step.status is not None:
+                last_status = step.status
+            if step.traversal_kinds:
+                last_traversal = list(step.traversal_kinds)
+            if step.component_parent_ids:
+                last_parents = list(step.component_parent_ids)
+            if step.rounds is not None:
+                last_rounds = step.rounds
+            if step.subgraph_node_ids:
+                last_subgraph_ids = list(step.subgraph_node_ids)
         all_events = self._log.query(agent_id=self._agent_id)
+        # Tool-loop harness may emit under a different filter; fall back to all.
+        if not all_events:
+            all_events = self._log.query()
         types = [e.type for e in all_events]
         units = sum(
             float(e.payload.get("units") or 0)
@@ -240,13 +380,19 @@ class CliInstrumentor:
         return CliRunResult(
             steps=steps,
             event_types=types,
+            tapped_event_types=list(self._tapped_types),
             events=[_event_dict(e) for e in all_events],
             cost_units=units,
             text=last_text,
+            status=last_status,
+            traversal_kinds=last_traversal,
+            component_parent_ids=last_parents,
+            rounds=last_rounds,
+            subgraph_node_ids=last_subgraph_ids,
         )
 
     async def _run_command(self, command: CliCommand) -> CliStepResult:
-        before = len(self._log.query(agent_id=self._agent_id))
+        before = len(self._log.query())
         if command.set_clock is not None:
             self._set_clock(command.set_clock.at)
             return CliStepResult(
@@ -259,6 +405,10 @@ class CliInstrumentor:
                 verb="advance_clock",
                 clock_iso=self._datetime.now_utc_iso(),
             )
+        if command.tool_loop is not None:
+            return await self._run_tool_loop(command.tool_loop, before=before)
+        if command.run_recipe is not None:
+            return await self._run_recipe(command.run_recipe, before=before)
         assert command.infer is not None
         body = command.infer
         graph = build_cli_universe_graph(prompt=body.prompt, system=body.system)
@@ -268,7 +418,7 @@ class CliInstrumentor:
             graph,
             budget_policy=BudgetPolicy.unlimited(),
         )
-        after_events = self._log.query(agent_id=self._agent_id)[before:]
+        after_events = self._log.query()[before:]
         node = result.graph.nodes.get(CLI_INFER_NODE_ID)
         text = None
         if node is not None:
@@ -286,6 +436,168 @@ class CliInstrumentor:
             events=[_event_dict(e) for e in after_events],
             cost_units=units,
             clock_iso=self._datetime.now_utc_iso(),
+        )
+
+    async def _run_tool_loop(
+        self,
+        body: ToolLoopCommand,
+        *,
+        before: int,
+    ) -> CliStepResult:
+        tools = ToolRegistry()
+        for definition in self._tools.definitions():
+            tools.register(self._tools.get(definition.name))
+        if body.tool_name not in tools:
+            tools.register(
+                Tool(body.tool_name, lambda: "ok", description="cli tool")
+            )
+        config = _CliToolLoopConfig(
+            self._completer,
+            tools=tools,
+            harness_config=HarnessConfig(
+                model=body.model or self._model,
+                max_turns=body.max_turns,
+            ),
+            event_log=self._log,
+            agent_id=self._agent_id,
+        )
+        harness = get_injector(config).inject(
+            AbstractHarness,
+            agent_id=self._agent_id,
+        )
+        result = await harness.run(body.prompt)
+        after_events = self._log.query()[before:]
+        if not after_events and result.events:
+            after_events = list(result.events)
+        records = traversal_from_events(
+            [{"type": e.type, "payload": e.payload} for e in after_events]
+        )
+        kinds = [r.kind for r in records]
+        parents = [
+            str(r.parent_node_id)
+            for r in records
+            if r.kind in {"inference", "tool_call", "tool_result", "turn_start"}
+            and r.parent_node_id is not None
+        ]
+        units = sum(
+            float(e.payload.get("units") or 0)
+            for e in after_events
+            if e.type == "core:cost"
+        )
+        return CliStepResult(
+            verb="tool_loop",
+            text=result.final_text,
+            status="ok" if (result.final_text or "").strip() else "failed",
+            event_types=[e.type for e in after_events],
+            events=[_event_dict(e) for e in after_events],
+            cost_units=units,
+            clock_iso=self._datetime.now_utc_iso(),
+            traversal_kinds=kinds,
+            component_parent_ids=parents,
+        )
+
+    async def _run_recipe(
+        self,
+        body: RunRecipeCommand,
+        *,
+        before: int,
+    ) -> CliStepResult:
+        if body.name != "conversational_tool_loop":
+            raise ValueError(
+                f"run_recipe does not yet support recipe {body.name!r} "
+                "(Wave 2: conversational_tool_loop only)"
+            )
+        return await self._run_conversational_tool_loop(body, before=before)
+
+    async def _run_conversational_tool_loop(
+        self,
+        body: RunRecipeCommand,
+        *,
+        before: int,
+    ) -> CliStepResult:
+        tools = ToolRegistry()
+        for definition in self._tools.definitions():
+            tools.register(self._tools.get(definition.name))
+        if body.tool_name not in tools:
+            tools.register(
+                Tool(body.tool_name, lambda: "ok", description="cli tool")
+            )
+
+        async def complete(
+            messages: list[dict[str, Any]],
+            meta: Mapping[str, Any],
+        ) -> dict[str, Any]:
+            del messages, meta
+            response = await self._completer.complete(
+                CompletionRequest(
+                    model=self._model,
+                    messages=[ChatMessage(role=Role.USER, content="continue")],
+                )
+            )
+            message = response.message
+            out: dict[str, Any] = {
+                "role": "assistant",
+                "content": message.content or "",
+            }
+            if message.tool_calls:
+                out["tool_calls"] = [
+                    {
+                        "id": call.id,
+                        "function": {
+                            "name": call.name,
+                            "arguments": json.dumps(call.arguments),
+                        },
+                    }
+                    for call in message.tool_calls
+                ]
+            return out
+
+        def dispatch_tool(name: str, args: Any) -> str:
+            del args
+            if name in tools:
+                return f"ok:{name}"
+            return f"ok:{name}"
+
+        runner = ConversationalToolLoopRunner(
+            complete=complete,
+            dispatch_tool=dispatch_tool,
+        )
+        graph = ConversationalToolLoopTemplate().instantiate(
+            GraphTemplateParams(
+                goal="loop",
+                inputs={"max_iterations": body.max_iterations},
+            )
+        )
+        executor = host_graph_executor(
+            runners=[runner],
+            event_log=self._log,
+            agent_id=self._agent_id,
+        )
+        result = await executor.run(
+            graph,
+            budget_policy=BudgetPolicy.unlimited(),
+            run_id="cli:conversational_tool_loop",
+            skip_linkage=True,
+        )
+        tools_node = result.graph.nodes["tools"]
+        child = ExecutionGraph.resume(tools_node.subgraph or {})
+        node_ids = list(child.nodes)
+        after_events = self._log.query()[before:]
+        units = sum(
+            float(e.payload.get("units") or 0)
+            for e in after_events
+            if e.type == "core:cost"
+        )
+        return CliStepResult(
+            verb="run_recipe",
+            text=str(tools_node.payload.get("final_text") or "") or None,
+            status=result.status,
+            event_types=[e.type for e in after_events],
+            events=[_event_dict(e) for e in after_events],
+            cost_units=units,
+            clock_iso=self._datetime.now_utc_iso(),
+            rounds=int(tools_node.payload.get("rounds") or 0),
+            subgraph_node_ids=node_ids,
         )
 
     def _set_clock(self, at: str) -> None:
@@ -353,7 +665,9 @@ __all__ = [
     "CliScript",
     "CliStepResult",
     "InferCommand",
+    "RunRecipeCommand",
     "SetClockCommand",
     "StampingEventLog",
+    "ToolLoopCommand",
     "script_from_mapping",
 ]
