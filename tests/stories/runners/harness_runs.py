@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from pyiv.http import AsyncUrllibHttpClient, MemoryAsyncHttpClient
 from pyiv.key import Matched, Named
 from pyiv.process import OsEnvironment
 
 from mechaharness.api_connection import SimpleHttpConnectionConfig
-from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.core.access import (
     AccessPolicy,
     GraphExecute,
@@ -29,14 +28,13 @@ from mechaharness.graph_executor import (
     CallableGraphNodeRunner,
     GraphNodeRunnerRegistry,
 )
-from mechaharness.harness.base import AbstractHarness, HarnessConfig
+from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import (
     ChoiceSignal,
     FixtureJudgeProvider,
     JudgeRequest,
-    NoulSignal,
     hash_state,
     judge,
 )
@@ -44,23 +42,9 @@ from mechaharness.inference.systemone import SystemOneJudgeProvider
 from mechaharness.inference_capture import EvaluationOnlyCapture
 from mechaharness.judgement_policy import (
     JudgementFacts,
-    JudgementPolicy,
-    JudgementThreshold,
     decide,
 )
 from mechaharness.linkage_resolver import DefaultLinkageResolver
-from mechaharness.model_input_manifest import (
-    ModelInputManifest,
-    attach_manifest_ref,
-    reconstruct_messages,
-)
-from mechaharness.routing import (
-    activate_scoped_policy,
-    route_at_boundary,
-    route_for_capability_needs,
-    shadow_decision_backends,
-)
-from mechaharness.run_parity import compare_parity, parity_from_harness_config
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
@@ -187,58 +171,6 @@ async def _run_completer_flavors(case: StoryCase, backend: StoryBackend) -> None
     }
     _assert_expect(actual, expect)
 
-async def _run_shadow_decision_backends(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-    report = shadow_decision_backends(
-        state_hash=request.get("state_hash", "h"),
-        candidate_actions=request.get("candidate_actions", []),
-        evidence_refs=request.get("evidence_refs", []),
-        backends=request.get("backends", {}),
-    )
-    by_kind = {c.kind: c for c in report.candidates}
-    unavailable = [
-        k for k, c in by_kind.items() if not c.available and c.latency_ms is None
-    ]
-    actual = {
-        "unavailable_include": unavailable,
-        "available_include": [k for k, c in by_kind.items() if c.available],
-        "matched_actions_include": report.matched_inputs.get("candidate_actions", []),
-    }
-    _assert_expect(actual, expect)
-
-async def _run_model_affinity(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    expect = case.load_json("expect.json")
-    decision = route_at_boundary(boundary="task_entry", task_kind="judge")
-    policy = JudgementPolicy(
-        version="v1",
-        thresholds=[JudgementThreshold(signal_id="e", allow_above=0.5)],
-    )
-    uncalibrated = activate_scoped_policy(
-        facts=JudgementFacts(),
-        signals=[NoulSignal(id="e", p_true=0.9)],
-        policy=policy,
-        calibrated=False,
-    )
-    actual = {
-        "selected_lane": decision.selected.lane,
-        "uncalibrated_is_null": uncalibrated is None,
-    }
-    _assert_expect(actual, expect)
-
-async def _run_capability_need_routing(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-    route = route_for_capability_needs(
-        capability_needs=list(request.get("capability_needs") or []),
-        available_model_classes=list(request.get("available_model_classes") or []),
-    )
-    actual = {"selected_model_class": route["selected_model_class"]}
-    _assert_expect(actual, expect)
-
 async def _run_host_kit_submit_once(case: StoryCase, backend: StoryBackend) -> None:
     """Fangore host kit: readable GraphExecutor + submit-once acceptance."""
     del backend
@@ -263,46 +195,6 @@ async def _run_host_kit_submit_once(case: StoryCase, backend: StoryBackend) -> N
             durable = bool(fixture.data.get("durable", True))
             payload = await run_case(fixture, db_path=db if durable else None)
             assert_expect(payload["actual"], soft, case_id=scenario_id)
-
-async def _run_model_input_manifest_replay(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-    manifest = ModelInputManifest.from_parts(
-        messages=list(request.get("messages") or []),
-        tool_definitions=list(request.get("tool_definitions") or []),
-        instructions=list(request.get("instructions") or []),
-    )
-    reconstructed = reconstruct_messages(manifest)
-    fields = attach_manifest_ref({}, manifest)
-    actual = {
-        "hashes_ok": manifest.verify_hashes(),
-        "reconstructed_equals": reconstructed == list(request.get("messages") or []),
-        "manifest_ref_nonempty": bool(fields.get("context_manifest_ref")),
-    }
-    _assert_expect(actual, expect)
-
-async def _run_run_parity_compare(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-
-    def _surface(raw: dict[str, Any]):
-        cfg = HarnessConfig(
-            model=raw["model"],
-            max_tokens=raw.get("max_tokens"),
-            temperature=raw.get("temperature"),
-            max_turns=int(raw.get("max_turns") or 8),
-        )
-        env = CapabilityEnvelope(tool_names=list(raw.get("tools") or []))
-        return parity_from_harness_config(cfg, envelope=env)
-
-    report = compare_parity(_surface(request["a"]), _surface(request["b"]))
-    actual = {
-        "comparable": report.comparable,
-        "material_mismatches_include": report.material_mismatches,
-    }
-    _assert_expect(actual, expect)
 
 async def _run_inference_capture_preflight(case: StoryCase, backend: StoryBackend) -> None:
     del backend
@@ -344,11 +236,6 @@ RUNNERS: dict[str, StoryRunner] = {
     "route_refund": _run_route_refund,
     "systemone_cassette": _run_route_refund,
     "completer_flavors": _run_completer_flavors,
-    "shadow_decision_backends": _run_shadow_decision_backends,
-    "model_affinity": _run_model_affinity,
-    "capability_need_routing": _run_capability_need_routing,
     "host_kit_submit_once": _run_host_kit_submit_once,
-    "model_input_manifest_replay": _run_model_input_manifest_replay,
-    "run_parity_compare": _run_run_parity_compare,
     "inference_capture_preflight": _run_inference_capture_preflight,
 }

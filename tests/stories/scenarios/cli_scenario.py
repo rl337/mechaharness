@@ -8,6 +8,13 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from mechaharness.cli_diagnostic_verbs import (
+    CheckModelAffinityCommand,
+    CompareRunParityCommand,
+    ReplayModelInputCommand,
+    RouteCapabilitiesCommand,
+    ShadowDecisionBackendsCommand,
+)
 from mechaharness.cli_instrumentor import (
     AdvanceClockCommand,
     CliInstrumentor,
@@ -42,6 +49,17 @@ class CliExpect(BaseModel):
     description_name: str | None = None
     subgraph_node_ids_exactly: list[str] | None = None
     graph_node_ids_exactly: list[str] | None = None
+    hashes_ok: bool | None = None
+    reconstructed_equals: bool | None = None
+    manifest_ref_nonempty: bool | None = None
+    selected_model_class: str | None = None
+    selected_lane: str | None = None
+    uncalibrated_is_null: bool | None = None
+    comparable: bool | None = None
+    material_mismatches_exactly: list[str] | None = None
+    unavailable_exactly: list[str] | None = None
+    available_exactly: list[str] | None = None
+    matched_actions_exactly: list[str] | None = None
 
     @model_validator(mode="after")
     def _at_least_one(self) -> CliExpect:
@@ -54,13 +72,18 @@ class CliExpect(BaseModel):
 
 
 class CliScenarioCommand(BaseModel):
-    """CLI verb plus optional per-command expect (unused in Wave 1)."""
+    """CLI verb plus optional per-command expect."""
 
     model_config = ConfigDict(extra="forbid")
 
     infer: InferCommand | None = None
     tool_loop: ToolLoopCommand | None = None
     run_recipe: RunRecipeCommand | None = None
+    replay_model_input: ReplayModelInputCommand | None = None
+    route_capabilities: RouteCapabilitiesCommand | None = None
+    check_model_affinity: CheckModelAffinityCommand | None = None
+    compare_run_parity: CompareRunParityCommand | None = None
+    shadow_decision_backends: ShadowDecisionBackendsCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
     expect: CliExpect | None = None
@@ -71,14 +94,16 @@ class CliScenarioCommand(BaseModel):
             self.infer,
             self.tool_loop,
             self.run_recipe,
+            self.replay_model_input,
+            self.route_capabilities,
+            self.check_model_affinity,
+            self.compare_run_parity,
+            self.shadow_decision_backends,
             self.set_clock,
             self.advance_clock,
         ]
         if sum(1 for v in verbs if v is not None) != 1:
-            raise ValueError(
-                "each command needs exactly one of "
-                "infer/tool_loop/run_recipe/set_clock/advance_clock"
-            )
+            raise ValueError("each command needs exactly one CLI verb")
         return self
 
 
