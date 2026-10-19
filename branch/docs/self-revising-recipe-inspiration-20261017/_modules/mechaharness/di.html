@@ -160,6 +160,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.authority_gate</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthorityGate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.capability_envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapabilityEnvelope</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.checkpoint_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckpointStore</span><span class="p">,</span> <span class="n">EventLogCheckpointStore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.cli_verb</span><span class="w"> </span><span class="kn">import</span> <span class="n">CliVerb</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.context_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextProviderRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -611,8 +612,13 @@
             <span class="n">AuthorityGate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_authority_gate</span><span class="p">(),</span> <span class="n">make_authority_gate</span>
         <span class="p">)</span>
 
-        <span class="c1"># Recipe / backend / family membership: pyiv map multibinds (catalog_keys).</span>
+        <span class="c1"># Recipe / backend / family / CLI verb membership: pyiv map multibinds.</span>
         <span class="c1"># Cast: pyiv accepts ABC keys; mypy rejects abstract type[T] args.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contribute_map_entries</span><span class="p">(</span>
+            <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">CliVerb</span><span class="p">),</span>
+            <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli_verb_classes</span><span class="p">()),</span>
+            <span class="n">on_conflict</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contribute_map_entries</span><span class="p">(</span>
             <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">GraphTemplate</span><span class="p">),</span>
             <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_template_classes</span><span class="p">()),</span>
@@ -1067,6 +1073,15 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_tool_result_freshness_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolResultFreshnessPolicy</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Staleness rules for tool evidence (default: honor ``expires_at`` only)."""</span>
         <span class="k">return</span> <span class="n">ToolResultFreshnessPolicy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.cli_verb_classes">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.cli_verb_classes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cli_verb_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">CliVerb</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">"""CLI verb name → ``CliVerb`` class. Hosts merge via ``super()``."""</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.cli_host_verbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_cli_verb_classes</span>
+
+        <span class="k">return</span> <span class="n">default_cli_verb_classes</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.graph_template_classes">
