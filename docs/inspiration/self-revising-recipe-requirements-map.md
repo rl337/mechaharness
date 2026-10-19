@@ -33,3 +33,4 @@ JuneSpark may supply inference for proposals/evals within local budgets.
 
 - [Personal agent reliability](./personal-agent-reliability-inspiration.md) — recipe contracts, correction feedback
 - [OpenAI Dots agent safety](./openai-dots-agent-safety-inspiration.md) — safety evaluation recipes
+- [Durable graph generators (IoC)](./durable-graph-generators-inversion-of-control.md) — how an active recipe run is driven across yields and drivers (orthogonal to offline recipe evolution)

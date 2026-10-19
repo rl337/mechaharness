@@ -1,0 +1,8 @@
+{
+  "op": "durable_complete_on_start",
+  "recipe": "verify_repair",
+  "inputs": {
+    "goal": "trivial"
+  },
+  "controller_id": "story"
+}

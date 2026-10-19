@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_guidance_resume_idempotent",
+  "persona": "fangore",
+  "title": "Make guidance resume idempotent and reject stale sequences",
+  "kind": "durable_graph_generator",
+  "narrative": "Duplicate resume with the same idempotency key returns the committed result; a conflicting or stale sequence fails safely so drivers can retry without double-applying advice. Tracks R-IOC-IDEMPOTENT[^insp-ioc-06].",
+  "implementation": "`DurableGraphGenerator.resume` stores results under `idempotency_key` and compares `expected_sequence` to the run record.",
+  "validation": "Harness `durable_graph_generator` op `durable_resume_idempotent`. Hard expects duplicate key same sequence and stale rejection.",
+  "footnotes": [
+    {
+      "id": "insp-ioc-06",
+      "label": "Durable graph generators (R-IOC-IDEMPOTENT)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md",
+      "note": "R-IOC-IDEMPOTENT sequence and idempotency"
+    }
+  ]
+}

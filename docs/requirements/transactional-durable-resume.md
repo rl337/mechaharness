@@ -206,6 +206,15 @@ Existing in-memory/EventLog-backed execution SHOULD continue to work for ephemer
 
 The public API SHOULD make the difference between ephemeral checkpointing and durable checkpointing inspectable/documented.
 
+## Composition with durable graph generators
+
+Guidance suspension (`advice_requested` yields from
+[`DurableGraphGenerator`](./durable-graph-generators.md)) is a first-class
+continuation that **uses** `CheckpointStore` / `GeneratorRunStore` and the
+effect-reconciliation rules above. It MUST NOT invent a second recovery
+protocol. Pending guidance MUST rehydrate with the same `request_id` after
+process restart when durable persistence is bound.
+
 ## Definition of done
 
 This requirement is complete when:

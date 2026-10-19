@@ -60,6 +60,7 @@ docs = [
 
 [project.scripts]
 mechaharness = "mechaharness.cli.main:app"
+mechaharness-generator = "mechaharness.mcp_graph_driver:main"
 
 [project.urls]
 Homepage = "https://rl337.org/mechaharness/"

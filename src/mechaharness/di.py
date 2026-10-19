@@ -71,6 +71,13 @@ from mechaharness.core.environment import (
 from mechaharness.core.events import EventLog, FanoutEventLog, InMemoryEventLog, LoggingEventLog
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
 from mechaharness.denial_store import DenialStore, InMemoryDenialStore
+from mechaharness.durable_graph_generator import (
+    DurableGraphGenerator,
+    GeneratorControllerAuth,
+    GeneratorRunStore,
+    InMemoryGeneratorRunStore,
+    LeaseControllerAuth,
+)
 from mechaharness.external_effect import CrashProbe, NoopCrashProbe
 from mechaharness.graph import GraphStore
 from mechaharness.graph_executor import (
@@ -567,6 +574,35 @@ class MechaHarnessConfig(Config):
         self.register(AbstractHarness, harness_cls, singleton=True)
         self.register(GraphExecutor, graph_executor_cls, singleton=True)
 
+        self._register_binding(
+            GeneratorControllerAuth, self.get_generator_controller_auth()
+        )
+
+        def make_generator_run_store(injector: Injector) -> GeneratorRunStore:
+            return InMemoryGeneratorRunStore()
+
+        self._register_override_or_factory(
+            GeneratorRunStore,
+            self.get_generator_run_store(),
+            make_generator_run_store,
+        )
+
+        def make_durable_graph_generator(injector: Injector) -> DurableGraphGenerator:
+            return DurableGraphGenerator(
+                registry=injector.inject(GraphTemplateRegistry),
+                run_store=injector.inject(GeneratorRunStore),
+                event_log=injector.inject(EventLog),
+                datetime_service=injector.inject(DateTimeService),
+                controller_auth=injector.inject(GeneratorControllerAuth),
+                checkpoint_store=injector.inject(CheckpointStore),
+            )
+
+        self._register_override_or_factory(
+            DurableGraphGenerator,
+            self.get_durable_graph_generator(),
+            make_durable_graph_generator,
+        )
+
     def get_settings(self) -> Settings:
         """Settings instance registered for this config (override to customize)."""
         return Settings()
@@ -820,6 +856,20 @@ class MechaHarnessConfig(Config):
     def get_capability_envelope(self) -> CapabilityEnvelope:
         """Default run envelope from configured grants."""
         return CapabilityEnvelope.from_grants(self.get_grants())
+
+    def get_generator_controller_auth(self) -> GeneratorControllerAuth:
+        """Controller lease strategy for durable generator ops."""
+        return LeaseControllerAuth()
+
+    def get_generator_run_store(self) -> GeneratorRunStore | type[GeneratorRunStore] | None:
+        """Optional :class:`GeneratorRunStore` override. ``None`` → in-memory."""
+        return None
+
+    def get_durable_graph_generator(
+        self,
+    ) -> DurableGraphGenerator | type[DurableGraphGenerator] | None:
+        """Optional :class:`DurableGraphGenerator` override. ``None`` → factory."""
+        return None
 
     def get_lifecycle_extension_registry(self) -> LifecycleExtensionRegistry:
         """Ordered lifecycle extensions (default: empty)."""

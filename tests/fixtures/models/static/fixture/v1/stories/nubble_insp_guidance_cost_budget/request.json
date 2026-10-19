@@ -1,0 +1,24 @@
+{
+  "op": "durable_cost_budget",
+  "recipe": "verify_repair",
+  "inputs": {
+    "guidance": [
+      {
+        "request_id": "req-cost",
+        "question": "Budget?",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A"
+          }
+        ]
+      }
+    ]
+  },
+  "responses": [
+    {
+      "request_id": "req-cost",
+      "choice_id": "a"
+    }
+  ]
+}

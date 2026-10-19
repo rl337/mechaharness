@@ -228,3 +228,7 @@ docs/adr/
 
 # Local docs tooling install (sandbox-friendly target dir)
 .docs-venv/
+.mechaharness/
+
+# Local Cursor MCP overrides (absolute paths)
+.cursor/mcp.json

@@ -32,6 +32,7 @@ NodeComponentKind = Literal[
     "stop_contract",
     "budget_level",
     "effect_state",
+    "guidance_request",
 ]
 
 NODE_COMPONENT_KINDS: frozenset[str] = frozenset(
@@ -49,6 +50,7 @@ NODE_COMPONENT_KINDS: frozenset[str] = frozenset(
         "stop_contract",
         "budget_level",
         "effect_state",
+        "guidance_request",
     }
 )
 
@@ -62,6 +64,7 @@ _EVENT_KIND_MAP: dict[str, NodeComponentKind] = {
     "cost": "cost",
     "access_check": "access_check",
     "extension_applied": "extension_applied",
+    "graph_yield": "guidance_request",
 }
 
 
@@ -201,6 +204,19 @@ def _soft_point_components(
                 detail={"required": sp.required, "description": sp.description},
             )
         )
+        if sp.kind == "guidance":
+            comps.append(
+                NodeComponent(
+                    id=f"{parent}/guidance_request:{sp.name}",
+                    kind="guidance_request",
+                    parent_node_id=parent,
+                    label=sp.name,
+                    executable=True,
+                    soft_point_name=sp.name,
+                    soft_point_kind=sp.kind,
+                    detail={"required": sp.required, "description": sp.description},
+                )
+            )
     return comps
 
 

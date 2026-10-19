@@ -163,6 +163,22 @@ Harness `graph_execution` op `environment_linkage_fail`. Soft expects environmen
 
 [^insp-r16]: [Inspiration requirements (req 16: environment linkage)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 16 — environment linkage
 
+### `nubble_insp_guidance_cost_budget` — Count local steps and guidance frequency on generator runs
+
+Operators need to see how often a frontier driver was asked for advice versus how much local work ran, so they can optimize verified useful work per intervention. Tracks R-IOC-BUDGET[^insp-ioc-08].
+
+#### Implementation
+
+`GeneratorCostCounters` on `GeneratorRunRecord` exposed via `inspect().cost` (local_steps, guidance_yields, resumes, rejected_resumes).
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_cost_budget`. Hard expects guidance_yields and resumes matching the scripted cycle.
+
+#### Footnotes
+
+[^insp-ioc-08]: [Durable graph generators (R-IOC-BUDGET)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-BUDGET local work versus guidance frequency
+
 ### `nubble_insp_model_input_replay` — Replay model-visible inputs from a recorded manifest
 
 Nubble needs every model call to leave a reconstructible record of what the model saw — messages, tools, and instructions — so offline replay does not depend on hidden memory. Accepts WalkingLabs DeepSeek and P06 observability guidance[^wl-deepseek-manifest][^wl-p06-manifest].
@@ -1038,6 +1054,38 @@ Harness `access_authority` op `denial_store_equivalence`. Hard expects a DENY ve
 
 [^insp-dots-05]: [OpenAI Dots agent safety (MH-DOTS-05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Denial persistence and equivalent-action detection
 
+### `fangore_insp_driver_session_resume` — Resume guidance in a later driver call without recursive callbacks
+
+Frontier and other MCP-capable clients cannot reenter a model session during a pending tool call. Guidance therefore returns as an ordinary tool result; the same driving session calls resume later with the answer. Tracks R-IOC-SESSION[^insp-ioc-03].
+
+#### Implementation
+
+`DurableGraphGenerator.start` returns a committed `GraphYield`; `resume` is a separate operation with `expected_sequence`. No recursive callback into an outstanding tool call is required. MCP mapping is documented for M2 (`fangore_insp_mcp_graph_driver`).
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_session_resume`. Hard expects start advice_requested, resume completed, distinct sequences.
+
+#### Footnotes
+
+[^insp-ioc-03]: [Durable graph generators (R-IOC-SESSION)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-SESSION caller-session resume
+
+### `fangore_insp_durable_graph_generator` — Drive a registered recipe to completion as a durable generator
+
+Long-running judgment-bearing work is started as a durable generator over a registered recipe. When no external guidance is required, the first start call returns completion — the driver does not invent a second harness or free-form graph. Complements offline recipe evolution (`taloneth_insp_recipe_evolution_loop`) which chooses which recipe is active. Tracks R-IOC-GENERATOR[^insp-ioc-01].
+
+#### Implementation
+
+`DurableGraphGenerator.start` / `list_recipes` in `durable_graph_generator.py` resolve only `GraphTemplateRegistry` catalog ids, advance to an ordered `GraphYield`, and persist via `GeneratorRunStore` / `CheckpointStore`. Host entry: `host_kit.host_durable_graph_generator`. Node component kind `guidance_request` is reserved for guidance soft points; this story exercises zero-advice completion.
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_complete_on_start`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.
+
+#### Footnotes
+
+[^insp-ioc-01]: [Durable graph generators (R-IOC-GENERATOR)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-GENERATOR durable ordered yields
+
 ### `fangore_insp_durable_resume` — Refuse resume when the harness fingerprint changed
 
 Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_transactional_durable_resume`[^insp-pa-05-fingerprint].
@@ -1183,6 +1231,22 @@ Harness `graph_execution` op `graph_budget_limits`. Soft expects soft wind-down 
 
 [^insp-budget]: [Inspiration stop/budget ceilings](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 4 stop contracts and resource budgets on repeating work
 
+### `fangore_insp_graph_guidance_yield` — Yield typed guidance and resume without treating advice as approval
+
+When a run needs higher-level judgment, start returns an advice yield with a typed question and choices. The driver answers in a later call; the run completes. This is not a human approval interrupt (`fangore_insp_approval_interrupt`) and not an in-process sparse advisor consult (`fangore_insp_sparse_advisor`). Tracks R-IOC-GUIDANCE[^insp-ioc-02].
+
+#### Implementation
+
+`GuidanceRequest` / `GuidanceResponse` / `GraphYield` with kind `advice_requested`; `DurableGraphGenerator.resume` validates request_id, choice schema, and rejects `requested_authority=final_approval` so ordinary advice cannot unlock approval-only mutations.
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_guidance_cycle`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.
+
+#### Footnotes
+
+[^insp-ioc-02]: [Durable graph generators (R-IOC-GUIDANCE)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-GUIDANCE typed guidance suspension
+
 ### `fangore_insp_graph_transitions` — Declare graph transitions separately from dependencies
 
 Fangore needs success, rollback, and end paths declared as transitions — not inferred from dependency edges alone — so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-transitions][^wl-p08-transitions].
@@ -1199,6 +1263,54 @@ Harness `graph_execution` op `graph_transition_inspect`. Soft expects validation
 
 [^wl-l14-transitions]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Transitions vs dependencies
 [^wl-p08-transitions]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Explicit transitions
+
+### `fangore_insp_guidance_controller_auth` — Enforce controller ownership and keep advice distinct from approval
+
+Possession of a run id alone must not confer control. An intruder controller cannot resume; ordinary guidance cannot satisfy final-approval authority — that remains `fangore_insp_approval_interrupt`. Tracks R-IOC-AUTH[^insp-ioc-07].
+
+#### Implementation
+
+`LeaseControllerAuth` / `GeneratorControllerAuth` on resume/cancel; `requested_authority=final_approval` raises PermissionError pointing hosts at ApprovalInterrupt.
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_controller_auth`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.
+
+#### Footnotes
+
+[^insp-ioc-07]: [Durable graph generators (R-IOC-AUTH)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-AUTH controller lease; advice versus approval
+
+### `fangore_insp_guidance_resume_idempotent` — Make guidance resume idempotent and reject stale sequences
+
+Duplicate resume with the same idempotency key returns the committed result; a conflicting or stale sequence fails safely so drivers can retry without double-applying advice. Tracks R-IOC-IDEMPOTENT[^insp-ioc-06].
+
+#### Implementation
+
+`DurableGraphGenerator.resume` stores results under `idempotency_key` and compares `expected_sequence` to the run record.
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_resume_idempotent`. Hard expects duplicate key same sequence and stale rejection.
+
+#### Footnotes
+
+[^insp-ioc-06]: [Durable graph generators (R-IOC-IDEMPOTENT)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-IDEMPOTENT sequence and idempotency
+
+### `fangore_insp_guidance_survive_restart` — Rehydrate the same pending guidance after a process restart
+
+A suspended generator run must survive executor or MCP process restart and present the identical pending question. Uses the CheckpointStore / run-store seam from durable resume (`fangore_insp_durable_resume`, `fangore_transactional_durable_resume`) rather than a second recovery protocol. Tracks R-IOC-RESUME[^insp-ioc-05].
+
+#### Implementation
+
+`GeneratorRunStore` (in-memory shared instance or checkpoint-backed) rehydrates `GeneratorRunRecord.pending_request` for a new `DurableGraphGenerator` instance.
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_survive_restart`. Hard expects identical pending question and request_id after rehydrate.
+
+#### Footnotes
+
+[^insp-ioc-05]: [Durable graph generators (R-IOC-RESUME)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-RESUME survive restart
 
 ### `fangore_insp_handoff_record` — Capture why across session handoffs
 
@@ -1430,6 +1542,22 @@ Harness `pure_api` op `loop_health`. Soft expects wind_down true.
 
 [^wl-l13-loop]: [WalkingLabs L13 Loop Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-13-loop-engineering/) — Loop health
 
+### `fangore_insp_mcp_graph_driver` — Expose the generator contract through a stdio MCP adapter
+
+Cursor, Codex, and other MCP clients should drive the same start/resume/inspect/cancel/list_recipes contract over piped stdio without embedding core semantics in the transport. Stdout stays protocol; diagnostics go to stderr. Tracks R-IOC-MCP[^insp-ioc-09].
+
+#### Implementation
+
+`mechaharness.mcp_graph_driver.GeneratorMcpServer` is a stdio MCP adapter (newline-delimited JSON-RPC, with Content-Length fallback) mapping `generator_start` / `generator_resume` / `generator_inspect` / `generator_cancel` / `generator_list_recipes` onto `DurableGraphGenerator`. Run with `python -m mechaharness.mcp_graph_driver`. File-backed `FileGeneratorRunStore` keeps state outside the MCP process. End-to-end IoC example lives in the module doctest (pytest `--doctest-modules`).
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_mcp_gap`. Hard expects mcp_adapter_shipped true. Pytest `--doctest-modules` on `mechaharness.mcp_graph_driver` covers start → advice → store restart → resume → completed plus NDJSON initialize/tools/list. Unit framing cases: `tests/test_mcp_graph_driver.py`.
+
+#### Footnotes
+
+[^insp-ioc-09]: [Durable graph generators (R-IOC-MCP)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-MCP stdio MCP adapter
+
 ### `fangore_insp_operation_compensation` — Declare operation idempotency and compensation
 
 Cleanup and recovery operations declare idempotency and optional compensation so retries do not double side effects. Accepts WalkingLabs L12 guidance[^wl-l12-idem].
@@ -1542,6 +1670,22 @@ Harness `access_authority` op `consequence_risk_scale`. Soft expects: high-conse
 
 [^insp-r15]: [Inspiration requirements (req 15: risk-scaled autonomy)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 15 — risk-scaled autonomy
 [^insp-pa-02-risk]: [Personal agent reliability map (MH-PA-02 consequence)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Consequence axis of authority gate; compose in fangore_insp_authority_gate
+
+### `fangore_insp_shared_driver_contract` — Share one generator contract across agent, CLI, and scripted drivers
+
+Agent, human CLI/TUI, and scripted tests must use the same tool protocol and graph definitions so fixtures and production drivers cannot drift. Core ops and the stdio MCP adapter ship now; human CLI/TUI remains a milestone. Tracks R-IOC-DRIVERS[^insp-ioc-10].
+
+#### Implementation
+
+`DurableGraphGenerator` public ops, `ScriptedDriver`, and `mechaharness.mcp_graph_driver` (stdio MCP). Human CLI/TUI clients remain gap.
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_shared_driver_contract`. Hard expects core ops, ScriptedDriver, and MCP adapter present; cli_client_gap true.
+
+#### Footnotes
+
+[^insp-ioc-10]: [Durable graph generators (R-IOC-DRIVERS)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-DRIVERS shared driver contract
 
 ### `fangore_insp_soft_evolution_allowlist` — Declare which soft recipe fields may evolve under optimization
 
@@ -2387,6 +2531,22 @@ Harness `evaluation_research` op `harness_experiment_retire`. Soft expects: trea
 #### Footnotes
 
 [^insp-r01]: [Inspiration requirements (req 1: revisable scaffolding)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 1 — revisable scaffolding
+
+### `taloneth_insp_scripted_driver_replay` — Replay advisory decisions with a strict scripted driver
+
+Evaluation and CI need a first-class scripted driver that asserts expected yield kinds and fails when unexpected advice appears. Tracks R-IOC-REPLAY and R-IOC-OFFLINE[^insp-ioc-04].
+
+#### Implementation
+
+`ScriptedDriver` in `durable_graph_generator.py` runs `start`/`resume` loops with fixture responses, optional `expected_kinds`, and `strict_unexpected_advice`.
+
+#### Validation
+
+Harness `durable_graph_generator` op `durable_scripted_replay`. Hard expects unexpected-advice failure when responses are empty under strict mode.
+
+#### Footnotes
+
+[^insp-ioc-04]: [Durable graph generators (R-IOC-REPLAY)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-REPLAY ScriptedDriver strict fixtures
 
 ### `taloneth_insp_trial_reliability` — Separate pass@k capability from pass^k reliability
 
