@@ -147,10 +147,13 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">CliInferRunner</span></code> (reason-lane <code class="docutils literal notranslate"><span class="pre">Completer</span></code>, <code class="docutils literal notranslate"><span class="pre">core:inference</span></code> + <code class="docutils literal notranslate"><span class="pre">core:cost</span></code>)</p></td>
 </tr>
 <tr class="row-even"><td><p>Instrumentor</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">set_clock</span></code>, <code class="docutils literal notranslate"><span class="pre">advance_clock</span></code>, …)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">set_clock</span></code>, <code class="docutils literal notranslate"><span class="pre">advance_clock</span></code>, …)</p></td>
 </tr>
 <tr class="row-odd"><td><p>Event stamps</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">StampingEventLog</span></code> over injectable <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Event tap</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tapping_event_log</span></code> on the blessed executor path (HF-05)</p></td>
 </tr>
 </tbody>
 </table>
@@ -188,7 +191,10 @@ legacy soft expects blindly. See <code class="docutils literal notranslate"><spa
 needed:</p>
 <ol class="arabic simple">
 <li><p>Observability / one-shot infer (OBS-*) — started (<code class="docutils literal notranslate"><span class="pre">nubble_run_cost_events</span></code>)</p></li>
-<li><p>Remaining harness_runs / pass-through / tool-loop / cassettes</p></li>
+<li><p>Remaining harness_runs / pass-through / tool-loop / cassettes — in progress
+(<code class="docutils literal notranslate"><span class="pre">nubble_ci_static_smoke</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_host_kit_event_tap</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_harness_tool_loop_graph</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_conversational_tool_loop</span></code>;
+next: recipe catalog pair + remaining probes)</p></li>
 <li><p>Graph execution + recipe catalog</p></li>
 <li><p>Decision plane / judge</p></li>
 <li><p>pure_api + context/eval surface</p></li>

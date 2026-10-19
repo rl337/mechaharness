@@ -68,13 +68,13 @@ The local inference host is offline, but a pull request still needs green CI. Nu
 
 #### Implementation
 
-`OpenAICompatStrategy` implements Chat Completions HTTP for reason-lane backends. Cassette replay exercises the real client path so adapter wire shape stays honest in CI.
+`OpenAICompatStrategy` implements Chat Completions HTTP for reason-lane backends. CLI universe `cli:infer` via `CliInstrumentor` / `CliInferRunner` runs that strategy so cassette replay exercises the real client path and the same EventLog baseline as other one-shot runs.
 
 Covers: offline CI / OpenAI-compat smoke.
 
 #### Validation
 
-Harness `harness_runs` op `pass_through` on `openai_compat` trees with mock transport. Soft expects: non-empty assistant text. Live: `MECHA_STORY_BACKEND=live`.
+Harness `cli` scenario `cassette_smoke.yaml`: nonempty assistant text, positive cost units, exact baseline EventLog types. Cassette `response.json`. Live: `MECHA_STORY_BACKEND=live`.
 
 #### Footnotes
 
@@ -574,11 +574,11 @@ Fangore binds the library conversational tool-loop recipe so a chat tools step g
 
 #### Implementation
 
-Agentic Recipe catalog id `conversational_tool_loop` (`ConversationalToolLoopTemplate`). `ConversationalToolLoopRunner` expands `tools.subgraph` with nested `inference` and `tool_call` graph nodes per round. Soft points cover runner kinds, stop/max_iterations, message state, inference and tool dispatch. Bounds use existing `StopContract` / repeating fields.
+Agentic Recipe catalog id `conversational_tool_loop` (`ConversationalToolLoopTemplate`). `CliInstrumentor` verb `run_recipe` executes it via `ConversationalToolLoopRunner`, which expands `tools.subgraph` with nested `inference` and `tool_call` graph nodes per round. Soft points cover runner kinds, stop/max_iterations, message state, inference and tool dispatch. Bounds use existing `StopContract` / repeating fields.
 
 #### Validation
 
-Harness `harness_runs` op `conversational_tool_loop` → `_run_conversational_tool_loop`. Soft expects: status ok; subgraph has inference and tool_call node ids; rounds ≥ 1. Unit: `tests/test_conversational_tool_loop.py`.
+Harness `cli` scenario `expanded_rounds.yaml`: hard `status`, exact `rounds`, and `subgraph_node_ids_exactly`. Unit: `tests/test_conversational_tool_loop.py`.
 
 #### Footnotes
 
@@ -797,11 +797,11 @@ Fangore runs a tool-loop harness with one tool then a final answer. The console 
 
 #### Implementation
 
-`ToolLoopHarness` on `AbstractHarness` emits `turn_start`, `inference`, `tool_call`, and `tool_result` with `parent_node_id` / `component_id`. `node_components_for_harness` lists planned components; `traversal_from_events` recovers them after the run.
+`CliInstrumentor` verb `tool_loop` runs `ToolLoopHarness` on the stamped/tapped EventLog. The harness emits `turn_start`, `inference`, `tool_call`, and `tool_result` with `parent_node_id` / `component_id`. `node_components_for_harness` lists planned components; `traversal_from_events` recovers them after the run.
 
 #### Validation
 
-Harness `harness_runs` op `harness_tool_loop_graph` → `_run_harness_tool_loop_graph`. Soft expects: status ok; traversal has inference and tool_call with parent harness.
+Harness `cli` scenario `harness_components.yaml`: hard `text`/`status`, exact `traversal_kinds_exactly`, and `component_parents_exactly` all `harness`.
 
 #### Footnotes
 
@@ -813,11 +813,11 @@ Fangore’s console needs live path lighting as a durable plan runs. They want t
 
 #### Implementation
 
-`mechaharness.host_kit.host_graph_executor` accepts `event_log=`. `tapping_event_log` / `TappingEventLog` forward emits to a host callback while preserving query. Config hook `get_event_log` binds the tap on the blessed inject path (HF-05).
+`mechaharness.host_kit.host_graph_executor` accepts `event_log=`. `tapping_event_log` / `TappingEventLog` forward emits to a host callback while preserving query. `CliInstrumentor` stamps then taps the blessed executor log so consoles see `core:graph_node_start` / `core:graph_node_end` on the same path as CLI infer (HF-05).
 
 #### Validation
 
-Harness `harness_runs` op `host_kit_event_tap` → `_run_host_kit_event_tap`. Soft expects: run status ok; tapped event types include graph_node_start and graph_node_end. Unit: `tests/test_conversational_tool_loop.py` (tap used with tool-loop runner).
+Harness `cli` scenario `tapped_node_lifecycle.yaml`: hard `tapped_event_types_exactly` includes node start/end (and full tap order). Unit: `tests/test_conversational_tool_loop.py` (tap used with tool-loop runner).
 
 #### Footnotes
 
