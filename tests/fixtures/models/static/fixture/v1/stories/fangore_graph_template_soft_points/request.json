@@ -1,7 +1,10 @@
 {
+  "op": "graph_template_soft_points",
   "template": "fan_out_aggregate",
   "goal": "compare drafts",
   "branch_count": 2,
-  "acceptance": ["merged"],
+  "acceptance": [
+    "merged"
+  ],
   "source_workflow_ref": "host:workflows/compare_v1"
 }

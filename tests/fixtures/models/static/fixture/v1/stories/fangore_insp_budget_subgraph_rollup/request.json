@@ -1,4 +1,5 @@
 {
+  "op": "graph_budget_subgraph_rollup",
   "soft_limit": 2,
   "hard_limit": null,
   "node_cost": 1

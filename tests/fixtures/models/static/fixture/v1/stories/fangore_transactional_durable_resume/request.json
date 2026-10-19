@@ -1,4 +1,5 @@
 {
+  "op": "transactional_durable_resume_crash_matrix",
   "goal": "downstream-coding-job",
   "run_id_prefix": "story-tdr",
   "crash_locations": [

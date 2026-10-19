@@ -2,10 +2,10 @@
   "id": "taloneth_insp_eval_claims",
   "persona": "taloneth",
   "title": "Compose typed evaluation claims without opaque scores",
-  "kind": "eval_claims_compose",
+  "kind": "evaluation_research",
   "narrative": "Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].",
   "implementation": "`Evidence`, `Claim`, and `compose_claims` in `mechaharness.eval_evidence` provide typed evidence pointers and binary assertion composition.",
-  "validation": "Kind `eval_claims_compose`. Soft expects pass/fail/unknown counts.",
+  "validation": "Harness `evaluation_research` op `eval_claims_compose`. Soft expects pass/fail/unknown counts.",
   "footnotes": [
     {
       "id": "anth-evals-claims",

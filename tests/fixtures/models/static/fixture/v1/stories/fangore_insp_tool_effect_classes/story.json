@@ -2,10 +2,10 @@
   "id": "fangore_insp_tool_effect_classes",
   "persona": "fangore",
   "title": "Separate observe, prepare, and execute tool classes",
-  "kind": "tool_phase_effect_guard",
+  "kind": "access_authority",
   "narrative": "Read-only observers must not invoke mutating tools; preparation returns typed proposals; execution alone gates mutating calls. An operation registered under a different name must not smuggle write or external effects into an observe or prepare phase. Lifecycle observe hooks exist (`fangore_insp_lifecycle_observe`) but are not a tool-class taxonomy. Tracks MH-DOTS-03[^insp-dots-03].",
   "implementation": "`ToolPhase` (`observe` / `prepare` / `execute`) lives on `Tool` and `OperationContract` (default `execute`). `assert_tool_phase_allows_effects` refuses write, external, and unknown effects outside `execute`; `OperationRegistry.register` and `register_contract` call it, so a contract cannot be registered under an alias with a weaker phase.",
-  "validation": "Kind `tool_phase_effect_guard`. Hard expects observe/prepare contracts with write/external/unknown effects refused at registration, read-only observe and execute-phase writes registered.",
+  "validation": "Harness `access_authority` op `tool_phase_effect_guard`. Hard expects observe/prepare contracts with write/external/unknown effects refused at registration, read-only observe and execute-phase writes registered.",
   "footnotes": [
     {
       "id": "insp-dots-03",

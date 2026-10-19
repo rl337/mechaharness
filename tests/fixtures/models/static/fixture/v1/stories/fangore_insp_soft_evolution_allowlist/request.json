@@ -1,4 +1,5 @@
 {
+  "op": "soft_point_evolution_allowlist",
   "recipes": [
     "produce_critique_refine",
     "independent_review",

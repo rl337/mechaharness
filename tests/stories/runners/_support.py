@@ -32,6 +32,7 @@ from mechaharness.judgement_policy import (
 )
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
+from tests.stories.harness.base import assert_expect
 
 StoryRunner = Callable[[StoryCase, StoryBackend], Awaitable[None]]
 
@@ -55,27 +56,8 @@ class _LaneEnvironment(InferenceEnvironment):
 
 
 def _assert_expect(actual: dict[str, Any], expect: dict[str, Any]) -> None:
-    for key, wanted in expect.items():
-        if key not in actual:
-            raise AssertionError(f"missing actual key {key!r}; got {sorted(actual)}")
-        got = actual[key]
-        if key.endswith("_include") and isinstance(wanted, list):
-            missing = [item for item in wanted if item not in got]
-            assert not missing, f"{key}: missing {missing} in {got}"
-        elif key.endswith("_in") and isinstance(wanted, list):
-            assert got in wanted, f"{key}: {got!r} not in {wanted!r}"
-        elif key.endswith("_contains") and isinstance(wanted, str):
-            assert wanted in str(got), f"{key}: {wanted!r} not in {got!r}"
-        elif key.startswith("min_") and isinstance(wanted, (int, float)):
-            assert got >= wanted, f"{key}: {got} < {wanted}"
-        elif key.endswith("_min") and isinstance(wanted, (int, float)):
-            assert got >= wanted, f"{key}: {got} < {wanted}"
-        elif key.endswith("_nonempty"):
-            assert bool(got) is bool(wanted), f"{key}: {got!r} vs {wanted!r}"
-            if wanted:
-                assert str(got).strip(), f"{key}: empty value"
-        else:
-            assert got == wanted, f"{key}: {got!r} != {wanted!r}"
+    """Deprecated alias — prefer ``tests.stories.harness.base.assert_expect``."""
+    assert_expect(actual, expect)
 
 
 def _build_questions(raw: list[dict[str, Any]]) -> list[Any]:

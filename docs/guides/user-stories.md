@@ -74,7 +74,7 @@ Covers: offline CI / OpenAI-compat smoke.
 
 #### Validation
 
-Kind `pass_through` on `openai_compat` trees with mock transport. Soft expects: non-empty assistant text. Live: `MECHA_STORY_BACKEND=live`.
+Harness `harness_runs` op `pass_through` on `openai_compat` trees with mock transport. Soft expects: non-empty assistant text. Live: `MECHA_STORY_BACKEND=live`.
 
 #### Footnotes
 
@@ -92,7 +92,7 @@ Covers: OBS-A01, OBS-A02, OBS-A03.
 
 #### Validation
 
-Kind `graph_event_correlators`. Hard expects every parent-run event to carry the graph id, recipe stamp, and epoch; node events to carry `node_id`; nested-run events to carry `parent_run_id` and `nest_depth`; and node-attempt rows to project one per node.
+Harness `graph_execution` op `graph_event_correlators`. Hard expects every parent-run event to carry the graph id, recipe stamp, and epoch; node events to carry `node_id`; nested-run events to carry `parent_run_id` and `nest_depth`; and node-attempt rows to project one per node.
 
 #### Footnotes
 
@@ -108,7 +108,7 @@ Nubble compares wall-clock critical path, duplicated context, and fan-in review 
 
 #### Validation
 
-Kind `coordination_cost_summarize`. Soft expects branch_count.
+Harness `pure_api` op `coordination_cost`. Soft expects branch_count.
 
 #### Footnotes
 
@@ -125,7 +125,7 @@ Nubble needs tool calls, tokens, latency, and coordination cost kept as separate
 
 #### Validation
 
-Kind `efficiency_scorecard_build`. Soft expects tool_calls and tokens_out dimensions.
+Harness `evaluation_research` op `efficiency_scorecard_build`. Soft expects tool_calls and tokens_out dimensions.
 
 #### Footnotes
 
@@ -141,7 +141,7 @@ Nubble sends environment deltas instead of repeating full snapshots while still 
 
 #### Validation
 
-Kind `environment_delta_apply`. Soft expects reconstructed cwd.
+Harness `pure_api` op `environment_delta`. Soft expects reconstructed cwd.
 
 #### Footnotes
 
@@ -157,7 +157,7 @@ Missing environment capability must become a structured pre-exec failure, not a 
 
 #### Validation
 
-Kind `environment_linkage_fail`. Soft expects environment_incompatible code when grants are required but absent.
+Harness `graph_execution` op `environment_linkage_fail`. Soft expects environment_incompatible code when grants are required but absent.
 
 #### Footnotes
 
@@ -173,7 +173,7 @@ Nubble needs every model call to leave a reconstructible record of what the mode
 
 #### Validation
 
-Kind `model_input_manifest_replay`. Soft expects hash verification and reconstructed message equality.
+Harness `harness_runs` op `model_input_manifest_replay`. Soft expects hash verification and reconstructed message equality.
 
 #### Footnotes
 
@@ -190,7 +190,7 @@ Nubble prefers declaring what a step needs instead of hard-coding a model id, th
 
 #### Validation
 
-Kind `capability_need_routing`. Soft expects selected_model_class matches need.
+Harness `harness_runs` op `capability_need_routing`. Soft expects selected_model_class matches need.
 
 #### Footnotes
 
@@ -206,7 +206,7 @@ Optional `recipe_id`, `recipe_version`, and `freshness_summary` (plus approval, 
 
 #### Validation
 
-Kind `recipe_audit_dimensions`. Hard expects per-recipe rows with decision counts, verdict splits, and fresh/stale evidence totals computed from tool-result timestamps, that undeclared decisions are skipped, and that the envelope carries the recipe and stays complete. Unit tests: `tests/test_review_audit.py`.
+Harness `access_authority` op `recipe_audit_dimensions`. Hard expects per-recipe rows with decision counts, verdict splits, and fresh/stale evidence totals computed from tool-result timestamps, that undeclared decisions are skipped, and that the envelope carries the recipe and stays complete. Unit tests: `tests/test_review_audit.py`.
 
 #### Footnotes
 
@@ -222,7 +222,7 @@ Nubble records how expensive resume is — rebuild tokens, tool calls, and wake-
 
 #### Validation
 
-Kind `resume_cost_summarize`. Soft expects rebuild_tokens.
+Harness `pure_api` op `resume_cost`. Soft expects rebuild_tokens.
 
 #### Footnotes
 
@@ -239,7 +239,7 @@ An auditor can rebuild a review from the saved decision log and trace alone: whi
 
 #### Validation
 
-Kind `review_audit_reconstruct`. Hard expects records rebuilt from persisted decision-log event payloads: a fully attested allow is reconstructable, and denied, asked-human, and executed-without-effect records report exactly the missing dimensions; an envelope fills gaps. Unit tests: `tests/test_review_audit.py`.
+Harness `access_authority` op `review_audit_reconstruct`. Hard expects records rebuilt from persisted decision-log event payloads: a fully attested allow is reconstructable, and denied, asked-human, and executed-without-effect records report exactly the missing dimensions; an envelope fills gaps. Unit tests: `tests/test_review_audit.py`.
 
 #### Footnotes
 
@@ -255,7 +255,7 @@ Nubble needs the observed run topology — retries, spawned reviewers, and termi
 
 #### Validation
 
-Kind `rollout_graph_build`. Soft expects roots and linked retry. Unit tests in `tests/test_rollout_graph.py`.
+Harness `graph_execution` op `rollout_graph_build`. Soft expects roots and linked retry. Unit tests in `tests/test_rollout_graph.py`.
 
 #### Footnotes
 
@@ -271,7 +271,7 @@ Nubble rejects incomplete traces that omit config fingerprint, routing, context 
 
 #### Validation
 
-Kind `trace_envelope_complete`. Soft expects complete true and no missing fields.
+Harness `evaluation_research` op `trace_envelope_complete`. Soft expects complete true and no missing fields.
 
 #### Footnotes
 
@@ -289,7 +289,7 @@ Nubble needs executor events and gateway capture to reconcile before a rollout i
 
 #### Validation
 
-Kind `trace_reconciliation_check`. Soft expects conflict status. Unit tests in `tests/test_trace_reconciliation.py`.
+Harness `evaluation_research` op `trace_reconciliation_check`. Soft expects conflict status. Unit tests in `tests/test_trace_reconciliation.py`.
 
 #### Footnotes
 
@@ -306,7 +306,7 @@ Nubble asks branches for isolation without hard-coding worktrees or containers �
 
 #### Validation
 
-Kind `workspace_isolation_acquire`. Soft expects memory provider_kind.
+Harness `access_authority` op `workspace_isolation_acquire`. Soft expects memory provider_kind.
 
 #### Footnotes
 
@@ -325,7 +325,7 @@ Covers: INF-02.
 
 #### Validation
 
-Kind `wrong_lane_deny` → `_run_wrong_lane_deny`. Soft expects: non-empty error naming the required lane / load hint. Unit: `tests/test_environment.py`.
+Harness `access_authority` op `wrong_lane_deny` → `_run_wrong_lane_deny`. Soft expects: non-empty error naming the required lane / load hint. Unit: `tests/test_environment.py`.
 
 ### `nubble_model_affinity` — Keep model affinity inside a coherent work loop
 
@@ -339,7 +339,7 @@ Covers: RTE-03.
 
 #### Validation
 
-Kind `model_affinity` → `_run_model_affinity`. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: `tests/test_routing.py`.
+Harness `harness_runs` op `model_affinity` → `_run_model_affinity`. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: `tests/test_routing.py`.
 
 ### `nubble_repo_topology` — Budget repository topology maps and fall back when stale
 
@@ -353,7 +353,7 @@ Covers: CTX-08.
 
 #### Validation
 
-Kind `repo_topology` → `_run_repo_topology`. Unit: `tests/test_context_experiments.py`.
+Harness `context_management` op `repo_topology` → `_run_repo_topology`. Unit: `tests/test_context_experiments.py`.
 
 ### `nubble_run_cost_events` — Record cost and inference events for every harness run
 
@@ -367,7 +367,7 @@ Covers: OBS-01.
 
 #### Validation
 
-Kind `pass_through` → `_run_pass_through`. Soft expects: inference and cost events with non-zero units. Related: `tests/test_events.py`, `tests/test_pass_through.py`.
+Harness `harness_runs` op `pass_through` → `_run_pass_through`. Soft expects: inference and cost events with non-zero units. Related: `tests/test_events.py`, `tests/test_pass_through.py`.
 
 ### `nubble_topology_efficiency` — Separate wall-clock speedup from total work and queue wait
 
@@ -381,7 +381,7 @@ Covers: OBS-04.
 
 #### Validation
 
-Kind `topology_efficiency` → `_run_topology_efficiency`. Unit: `tests/test_decision_log.py`.
+Harness `graph_execution` op `topology_efficiency` → `_run_topology_efficiency`. Unit: `tests/test_decision_log.py`.
 
 ## Fangore's stories
 
@@ -395,7 +395,7 @@ Agentic Recipe catalog id `backend_describe` (`BackendDescribeTemplate`) with a 
 
 #### Validation
 
-Kind `backend_describe_recipe` → `_run_backend_describe_recipe`. Soft expects: in_catalog; status ok; description has name. Unit: `tests/test_recipe_runner.py`.
+Harness `harness_runs` op `backend_describe_recipe` → `_run_backend_describe_recipe`. Soft expects: in_catalog; status ok; description has name. Unit: `tests/test_recipe_runner.py`.
 
 ### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 
@@ -409,7 +409,7 @@ Covers: VER-03.
 
 #### Validation
 
-Kind `bounded_repair_loop` → `_run_bounded_repair_loop`. Soft expects: succeeds within budget or fails after max attempts. Unit: `tests/test_graph.py`. Related: `fangore_insp_verification_gate`.
+Harness `graph_execution` op `bounded_repair_loop` → `_run_bounded_repair_loop`. Soft expects: succeeds within budget or fails after max attempts. Unit: `tests/test_graph.py`. Related: `fangore_insp_verification_gate`.
 
 #### Footnotes
 
@@ -425,7 +425,7 @@ Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt → class
 
 #### Validation
 
-Kind `bounded_retry_recipe`. Soft expects node ids, bounded stop on attempt, escalate terminal present, and requires_effect_reconciliation on attempt payload.
+Harness `graph_recipes` op `bounded_retry_recipe`. Soft expects node ids, bounded stop on attempt, escalate terminal present, and requires_effect_reconciliation on attempt payload.
 
 #### Footnotes
 
@@ -441,7 +441,7 @@ Fangore delegates a child plan with fewer tools and grants than the parent. The 
 
 #### Validation
 
-Kind `capability_envelope_narrow` → `_run_capability_envelope_narrow`. Soft expects: narrowed grants subset; widen raises; delegation chooses child when independence is required. Unit: `tests/test_inspiration_primitives.py`.
+Harness `access_authority` op `capability_envelope_narrow` → `_run_capability_envelope_narrow`. Soft expects: narrowed grants subset; widen raises; delegation chooses child when independence is required. Unit: `tests/test_inspiration_primitives.py`.
 
 #### Footnotes
 
@@ -460,7 +460,7 @@ Covers: same-lane Completer flavors via pyiv Named/Matched.
 
 #### Validation
 
-Kind `completer_flavors` → `_run_completer_flavors`. Unit: `tests/test_di.py`.
+Harness `harness_runs` op `completer_flavors` → `_run_completer_flavors`. Unit: `tests/test_di.py`.
 
 #### Footnotes
 
@@ -478,7 +478,7 @@ Covers: host compound grants.
 
 #### Validation
 
-Kind `grant_gate_write` → `_run_grant_gate_write`. Unit: `tests/test_access.py`.
+Harness `access_authority` op `grant_gate_write` → `_run_grant_gate_write`. Unit: `tests/test_access.py`.
 
 #### Footnotes
 
@@ -496,7 +496,7 @@ Covers: host DI access policy.
 
 #### Validation
 
-Kind `config_access_policy` → `_run_config_access_policy`. Unit: `tests/test_di.py`.
+Harness `access_authority` op `config_access_policy` → `_run_config_access_policy`. Unit: `tests/test_di.py`.
 
 #### Footnotes
 
@@ -514,7 +514,7 @@ Covers: CTX-05.
 
 #### Validation
 
-Kind `context_compiler_deficit` → `_run_context_compiler_deficit`. Unit: `tests/test_context_experiments.py`.
+Harness `context_management` op `context_compiler_deficit` → `_run_context_compiler_deficit`. Unit: `tests/test_context_experiments.py`.
 
 #### Footnotes
 
@@ -532,7 +532,7 @@ Covers: CTX-01, CTX-02, CTX-03, CTX-04.
 
 #### Validation
 
-Kind `context_observation_chain` → `_run_context_observation_chain`. Unit: `tests/test_context_experiments.py`.
+Harness `context_management` op `context_observation_chain` → `_run_context_observation_chain`. Unit: `tests/test_context_experiments.py`.
 
 ### `fangore_convergence_ceiling` — Stop agent loops that make no progress
 
@@ -546,7 +546,7 @@ Covers: POL-03.
 
 #### Validation
 
-Kind `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_convergence.py`. Linkage stop enforcement: `fangore_graph_linkage_preflight`.
+Harness `graph_execution` op `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_convergence.py`. Linkage stop enforcement: `fangore_graph_linkage_preflight`.
 
 #### Footnotes
 
@@ -562,7 +562,7 @@ Agentic Recipe catalog id `conversational_tool_loop` (`ConversationalToolLoopTem
 
 #### Validation
 
-Kind `conversational_tool_loop` → `_run_conversational_tool_loop`. Soft expects: status ok; subgraph has inference and tool_call node ids; rounds ≥ 1. Unit: `tests/test_conversational_tool_loop.py`.
+Harness `harness_runs` op `conversational_tool_loop` → `_run_conversational_tool_loop`. Soft expects: status ok; subgraph has inference and tool_call node ids; rounds ≥ 1. Unit: `tests/test_conversational_tool_loop.py`.
 
 #### Footnotes
 
@@ -578,7 +578,7 @@ Agentic Recipe `decision_plane` exposes a `decision_model` soft point (router/fl
 
 #### Validation
 
-Kind `decision_plane_model_policy`. Soft expects soft point present, bound model_ref on ask payload, no param_count field on recipe describe.
+Harness `decision_plane` op `decision_plane_model_policy`. Soft expects soft point present, bound model_ref on ask payload, no param_count field on recipe describe.
 
 #### Footnotes
 
@@ -594,7 +594,7 @@ Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed
 
 #### Validation
 
-Kind `decision_plane_policy`. Soft expects single_batch_invocation, final_action billing on high confidence, escalate on low confidence and on invalid team, escalation_route host_policy.
+Harness `decision_plane` op `decision_plane_policy`. Soft expects single_batch_invocation, final_action billing on high confidence, escalate on low confidence and on invalid team, escalation_route host_policy.
 
 #### Footnotes
 
@@ -613,7 +613,7 @@ Agentic Recipe `decision_plane` uses `project_decision_state` in `mechaharness.d
 
 #### Validation
 
-Kind `decision_plane_projection`. Soft expects projection keys, facts fingerprint present, and no_model_invocation true. Unit: `tests/test_decision_plane_runtime.py`.
+Harness `decision_plane` op `decision_plane_projection`. Soft expects projection keys, facts fingerprint present, and no_model_invocation true. Unit: `tests/test_decision_plane_runtime.py`.
 
 #### Footnotes
 
@@ -630,7 +630,7 @@ Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state �
 
 #### Validation
 
-Kind `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Runtime DP paths: see sibling decision_plane_* stories.
+Harness `decision_plane` op `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Runtime DP paths: see sibling decision_plane_* stories.
 
 #### Footnotes
 
@@ -646,7 +646,7 @@ Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mecha
 
 #### Validation
 
-Kind `decision_plane_shadow`. Soft expects production_action set, shadow_controls_execution false, both_outcomes_recorded true, agreement bool.
+Harness `decision_plane` op `decision_plane_shadow`. Soft expects production_action set, shadow_controls_execution false, both_outcomes_recorded true, agreement bool.
 
 #### Footnotes
 
@@ -662,7 +662,7 @@ Fangore needs decision metrics — which questions, projection fingerprint, answ
 
 #### Validation
 
-Kind `decision_plane_telemetry`. Soft expects schema ids, fingerprints, final_action, no raw_body field, optional latency_ms.
+Harness `decision_plane` op `decision_plane_telemetry`. Soft expects schema ids, fingerprints, final_action, no raw_body field, optional latency_ms.
 
 #### Footnotes
 
@@ -681,7 +681,7 @@ Covers: POL-01.
 
 #### Validation
 
-Kind `decision_surface_reject` → `_run_decision_surface_reject`.
+Harness `decision_plane` op `decision_surface_reject` → `_run_decision_surface_reject`.
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 
@@ -695,7 +695,7 @@ Covers: CTX-06, CTX-07.
 
 #### Validation
 
-Kind `derived_memory` → `_run_derived_memory`. Unit: `tests/test_context_experiments.py`.
+Harness `context_management` op `derived_memory` → `_run_derived_memory`. Unit: `tests/test_context_experiments.py`.
 
 ### `fangore_environment_repair_recipe` — Instantiate the environment repair Agentic Recipe
 
@@ -707,7 +707,7 @@ Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnos
 
 #### Validation
 
-Kind `environment_repair_recipe`. Soft expects catalog id, diagnose/repair/recheck node ids, and stamped template_name. Unit: `tests/test_graph_templates.py`.
+Harness `graph_recipes` op `environment_repair_recipe`. Soft expects catalog id, diagnose/repair/recheck node ids, and stamped template_name. Unit: `tests/test_graph_templates.py`.
 
 #### Footnotes
 
@@ -723,7 +723,7 @@ Fangore ships a host app with a produce → repair → consume plan. After linka
 
 #### Validation
 
-Kind `graph_executor_run` → `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py`. Related: `fangore_graph_linkage_preflight`.
+Harness `graph_execution` op `graph_executor_run` → `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py`. Related: `fangore_graph_linkage_preflight`.
 
 #### Footnotes
 
@@ -740,7 +740,7 @@ Fangore composes a plan that still names a step the host has not wired, and anot
 
 #### Validation
 
-Kind `graph_linkage_preflight` → `_run_graph_linkage_preflight`. Soft expects: missing-runner linkage fails with `no_runner`; repeating node without stop fails with `missing_stop_contract`; valid linear graph reports `ok` with a fingerprint. Unit: `tests/test_linkage_resolver.py`, fixtures under `tests/fixtures/linkage_resolver/`.
+Harness `graph_execution` op `graph_linkage_preflight` → `_run_graph_linkage_preflight`. Soft expects: missing-runner linkage fails with `no_runner`; repeating node without stop fails with `missing_stop_contract`; valid linear graph reports `ok` with a fingerprint. Unit: `tests/test_linkage_resolver.py`, fixtures under `tests/fixtures/linkage_resolver/`.
 
 #### Footnotes
 
@@ -756,7 +756,7 @@ Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_t
 
 #### Validation
 
-Kind `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft expects: fan-out node ids, stamped provenance, soft-point catalog nonempty, demoted template raises. Unit: `tests/test_graph_templates.py`, fixtures under `tests/fixtures/graph_templates/`.
+Harness `graph_recipes` op `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft expects: fan-out node ids, stamped provenance, soft-point catalog nonempty, demoted template raises. Unit: `tests/test_graph_templates.py`, fixtures under `tests/fixtures/graph_templates/`.
 
 #### Footnotes
 
@@ -773,7 +773,7 @@ Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`): prepare → harn
 
 #### Validation
 
-Kind `harness_run_recipe` → `_run_harness_run_recipe`. Soft expects: catalog lists harness_run; status ok; final_text_nonempty; turns ≥ 1. Unit: `tests/test_recipe_runner.py`.
+Harness `harness_runs` op `harness_run_recipe` → `_run_harness_run_recipe`. Soft expects: catalog lists harness_run; status ok; final_text_nonempty; turns ≥ 1. Unit: `tests/test_recipe_runner.py`.
 
 ### `fangore_harness_tool_loop_graph` — See inference and tool calls as node components inside a harness run
 
@@ -785,7 +785,7 @@ Fangore runs a tool-loop harness with one tool then a final answer. The console 
 
 #### Validation
 
-Kind `harness_tool_loop_graph` → `_run_harness_tool_loop_graph`. Soft expects: status ok; traversal has inference and tool_call with parent harness.
+Harness `harness_runs` op `harness_tool_loop_graph` → `_run_harness_tool_loop_graph`. Soft expects: status ok; traversal has inference and tool_call with parent harness.
 
 #### Footnotes
 
@@ -801,7 +801,7 @@ Fangore’s console needs live path lighting as a durable plan runs. They want t
 
 #### Validation
 
-Kind `host_kit_event_tap` → `_run_host_kit_event_tap`. Soft expects: run status ok; tapped event types include graph_node_start and graph_node_end. Unit: `tests/test_conversational_tool_loop.py` (tap used with tool-loop runner).
+Harness `harness_runs` op `host_kit_event_tap` → `_run_host_kit_event_tap`. Soft expects: run status ok; tapped event types include graph_node_start and graph_node_end. Unit: `tests/test_conversational_tool_loop.py` (tap used with tool-loop runner).
 
 #### Footnotes
 
@@ -817,7 +817,7 @@ Fangore builds a host that dispatches a remote coding job from a durable plan. T
 
 #### Validation
 
-Kind `host_kit_submit_once` → `_run_host_kit_submit_once`. Soft expects: durable dispatch status ok with one submit and a handle; resume of uncertain-with-handle completes with zero further submits. Unit matrix: `tests/fixtures/host_kit/*.json` via `tests/test_host_kit.py` and `tests/support/host_kit_cases.py` (ephemeral dispatch, uncertain-without-handle needs attention, accepted resume). Pytest `--doctest-modules` covers pydoc examples on `src/mechaharness/host_kit.py`.
+Harness `harness_runs` op `host_kit_submit_once` → `_run_host_kit_submit_once`. Soft expects: durable dispatch status ok with one submit and a handle; resume of uncertain-with-handle completes with zero further submits. Unit matrix: `tests/fixtures/host_kit/*.json` via `tests/test_host_kit.py` and `tests/support/host_kit_cases.py` (ephemeral dispatch, uncertain-without-handle needs attention, accepted resume). Pytest `--doctest-modules` covers pydoc examples on `src/mechaharness/host_kit.py`.
 
 #### Footnotes
 
@@ -835,7 +835,7 @@ Covers: POL-04, GAT-04.
 
 #### Validation
 
-Kind `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
+Harness `access_authority` op `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
 
 #### Footnotes
 
@@ -852,7 +852,7 @@ Models may suggest what to do about an alert, but fixed rules decide how far it 
 
 #### Validation
 
-Kind `alert_escalation_stages`. Hard expects the stage ladder for default thresholds, a per-alert override, the counter walk, and refusal of unordered thresholds. Unit tests: `tests/test_alert_escalation.py`.
+Harness `access_authority` op `alert_escalation_stages`. Hard expects the stage ladder for default thresholds, a per-alert override, the counter walk, and refusal of unordered thresholds. Unit tests: `tests/test_alert_escalation.py`.
 
 #### Footnotes
 
@@ -868,7 +868,7 @@ High-autonomy graphs must periodically attach labeled external anchors so branch
 
 #### Validation
 
-Kind `anchor_evidence_require`. Soft expects satisfied true.
+Harness `context_management` op `anchor_evidence_require`. Soft expects satisfied true.
 
 #### Footnotes
 
@@ -884,7 +884,7 @@ High-consequence steps must pause on a durable approval interrupt with evidence,
 
 #### Validation
 
-Kind `approval_interrupt_cycle`. Soft expects pending then approved with actor.
+Harness `access_authority` op `approval_interrupt_cycle`. Soft expects pending then approved with actor.
 
 #### Footnotes
 
@@ -901,7 +901,7 @@ Checkpoints carry the authorization epoch so crash recovery after revocation doe
 
 #### Validation
 
-Kind `auth_epoch_resume_refuse`. Hard expects first run ok with epoch persisted, resume under an advanced epoch failed with `authorization_epoch_mismatch`, and no runner re-entered.
+Harness `access_authority` op `auth_epoch_resume_refuse`. Hard expects first run ok with epoch persisted, resume under an advanced epoch failed with `authorization_epoch_mismatch`, and no runner re-entered.
 
 #### Footnotes
 
@@ -917,7 +917,7 @@ Hard rules for consequential actions live outside model text. Untrusted forwarde
 
 #### Validation
 
-Kind `authority_gate_evaluate`. Hard expects low-consequence actions allowed, high-consequence actions asking until approved, untrusted-source sends denied even when approved, and envelope/access/verdict denials with reason codes.
+Harness `access_authority` op `authority_gate_evaluate`. Hard expects low-consequence actions allowed, high-consequence actions asking until approved, untrusted-source sends denied even when approved, and envelope/access/verdict denials with reason codes.
 
 #### Footnotes
 
@@ -933,7 +933,7 @@ When a parent step embeds a child graph, child node costs must count against the
 
 #### Validation
 
-Kind `graph_budget_subgraph_rollup`. Soft expects aggregated spent, soft level, and cancelled downstream parent node.
+Harness `graph_execution` op `graph_budget_subgraph_rollup`. Soft expects aggregated spent, soft level, and cancelled downstream parent node.
 
 #### Footnotes
 
@@ -949,7 +949,7 @@ Long runs compact context through staged strategies that record which informatio
 
 #### Validation
 
-Kind `context_compaction_staged`. Soft expects deduplicated discarded class.
+Harness `context_management` op `context_compaction_staged`. Soft expects deduplicated discarded class.
 
 #### Footnotes
 
@@ -966,7 +966,7 @@ Fangore keeps durable graph state large and shared while each node receives only
 
 #### Validation
 
-Kind `context_layers_project`. Soft expects projected keys and exported result.
+Harness `context_management` op `context_layers_project`. Soft expects projected keys and exported result.
 
 #### Footnotes
 
@@ -983,7 +983,7 @@ Fangore's host memory source must advertise what it can supply before dumping la
 
 #### Validation
 
-Kind `context_provider_discovery`. Soft expects index before load and provider attribution.
+Harness `context_management` op `context_provider_discovery`. Soft expects index before load and provider attribution.
 
 #### Footnotes
 
@@ -1000,7 +1000,7 @@ Task-local evidence, policy, memory references, and approvals must not bleed acr
 
 #### Validation
 
-Kind `cross_task_isolation_bleed`. Hard expects no bleed after 0/5/10 intervening tasks, the receiver reading only handed-off refs, and a handoff naming an unreadable ref refused.
+Harness `access_authority` op `cross_task_isolation_bleed`. Hard expects no bleed after 0/5/10 intervening tasks, the receiver reading only handed-off refs, and a handoff naming an unreadable ref refused.
 
 #### Footnotes
 
@@ -1016,7 +1016,7 @@ After a decision is settled, the nodes it still conflicts with are revisited, an
 
 #### Validation
 
-Kind `decision_conflict_neighbor_revisit`. Hard expects, over a chain of write-scope conflicts, the visit order, that a cyclic conflict terminates without a checkpoint and reports the cycle block, and that a cleared decision checkpoints. Unit tests: `tests/test_decision_conflict_checkpoint.py`.
+Harness `graph_execution` op `decision_conflict_neighbor_revisit`. Hard expects, over a chain of write-scope conflicts, the visit order, that a cyclic conflict terminates without a checkpoint and reports the cycle block, and that a cleared decision checkpoints. Unit tests: `tests/test_decision_conflict_checkpoint.py`.
 
 #### Footnotes
 
@@ -1032,7 +1032,7 @@ Denied intents and side-effect classes survive graph retries and delegated paths
 
 #### Validation
 
-Kind `denial_store_equivalence`. Hard expects a DENY verdict recorded, retries through other tools to the same target refused even when approved, a different target unaffected, and the action allowed again only after `lift`.
+Harness `access_authority` op `denial_store_equivalence`. Hard expects a DENY verdict recorded, retries through other tools to the same target refused even when approved, a different target unaffected, and the action allowed again only after `lift`.
 
 #### Footnotes
 
@@ -1048,7 +1048,7 @@ Long-running work checkpoints outside chat. If the harness or graph configuratio
 
 #### Validation
 
-Kind `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume failed with incompatible fingerprint.
+Harness `graph_execution` op `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume failed with incompatible fingerprint.
 
 #### Footnotes
 
@@ -1065,7 +1065,7 @@ Fangore embeds a child plan under a parent step. The child must run as its own g
 
 #### Validation
 
-Kind `dynamic_subgraph_nest`. Soft expects parent ok, child_status ok, nested graph events present.
+Harness `graph_execution` op `dynamic_subgraph_nest`. Soft expects parent ok, child_status ok, nested graph events present.
 
 #### Footnotes
 
@@ -1081,7 +1081,7 @@ Authority is rechecked when a consequential action actually runs — not only at
 
 #### Validation
 
-Kind `effect_revalidation_check`. Hard expects fresh authority to pass, expired/advanced-epoch/missing-grant checks to fail with typed reasons, and a graph with a revoked epoch to fail without running the publish effect.
+Harness `access_authority` op `effect_revalidation_check`. Hard expects fresh authority to pass, expired/advanced-epoch/missing-grant checks to fail with typed reasons, and a graph with a revoked epoch to fail without running the publish effect.
 
 #### Footnotes
 
@@ -1097,7 +1097,7 @@ MechaHarness validates, executes, versions, and safety-gates recipes; the host (
 
 #### Validation
 
-Kind `evolution_ownership_split`. Hard expects default no-op hooks via the injector, host overrides through a subclassed Config, a host veto that leaves the active recipe version unchanged, the final-test gate refusing a no-opinion promotion without a result, promotion once the gate passes, and the `on_promotion` hook observing only that successful move. Unit tests: `tests/test_evolution_ownership_hooks.py`.
+Harness `graph_recipes` op `evolution_ownership_split`. Hard expects default no-op hooks via the injector, host overrides through a subclassed Config, a host veto that leaves the active recipe version unchanged, the final-test gate refusing a no-opinion promotion without a result, promotion once the gate passes, and the `on_promotion` hook observing only that successful move. Unit tests: `tests/test_evolution_ownership_hooks.py`.
 
 #### Footnotes
 
@@ -1113,7 +1113,7 @@ Every graph run needs a capability-scoped execution token: principal, expiry, tr
 
 #### Validation
 
-Kind `execution_token_narrow`. Hard expects widening attempts refused by reason and attenuation attempts accepted with principal and epoch inherited.
+Harness `access_authority` op `execution_token_narrow`. Hard expects widening attempts refused by reason and attenuation attempts accepted with principal and epoch inherited.
 
 #### Footnotes
 
@@ -1129,7 +1129,7 @@ A run is not done until checkpoint durability, pending-node policy, and optional
 
 #### Validation
 
-Kind `exit_clean_state_eval`. Soft expects ok true.
+Harness `pure_api` op `exit_clean_state`. Soft expects ok true.
 
 #### Footnotes
 
@@ -1145,7 +1145,7 @@ When the same failure class repeats, Fangore needs structured attribution so the
 
 #### Validation
 
-Kind `failure_attribution_trace`. Soft expects linkage category and repeated class detection.
+Harness `evaluation_research` op `failure_attribution_trace`. Soft expects linkage category and repeated class detection.
 
 #### Footnotes
 
@@ -1161,7 +1161,7 @@ Parallel branches rejoin through an explicit fan-in acceptance policy such as qu
 
 #### Validation
 
-Kind `fan_in_policy_accept`. Soft expects quorum acceptance true.
+Harness `pure_api` op `fan_in_policy`. Soft expects quorum acceptance true.
 
 #### Footnotes
 
@@ -1177,7 +1177,7 @@ Every graph run must declare how much spend is allowed. Crossing the soft limit 
 
 #### Validation
 
-Kind `graph_budget_limits`. Soft expects soft wind-down then hard fail levels. Related fixtures: `tests/fixtures/graph_executor/budget_*.json`, `tests/test_budget.py`.
+Harness `graph_execution` op `graph_budget_limits`. Soft expects soft wind-down then hard fail levels. Related fixtures: `tests/fixtures/graph_executor/budget_*.json`, `tests/test_budget.py`.
 
 #### Footnotes
 
@@ -1193,7 +1193,7 @@ Fangore needs success, rollback, and end paths declared as transitions — not i
 
 #### Validation
 
-Kind `graph_transition_inspect`. Soft expects validation empty and rollback/end kinds for the verify node.
+Harness `graph_execution` op `graph_transition_inspect`. Soft expects validation empty and rollback/end kinds for the verify node.
 
 #### Footnotes
 
@@ -1210,7 +1210,7 @@ Handoffs preserve goals, exclusions, completed/pending work, decisions, rational
 
 #### Validation
 
-Kind `handoff_record_fields`. Hard expects next_action, goals, exclusions, and verdict kind round-tripped as typed fields.
+Harness `pure_api` op `handoff_record`. Hard expects next_action, goals, exclusions, and verdict kind round-tripped as typed fields.
 
 #### Footnotes
 
@@ -1228,7 +1228,7 @@ Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce
 
 #### Validation
 
-Kind `independent_review_template`. Soft expects isolated payload flags and two reviewers.
+Harness `graph_recipes` op `independent_review_template`. Soft expects isolated payload flags and two reviewers.
 
 #### Footnotes
 
@@ -1245,7 +1245,7 @@ Fangore needs graphs that require exact token capture to fail before expensive w
 
 #### Validation
 
-Kind `inference_capture_preflight`. Soft expects inference_capture_unsupported. Unit tests in `tests/test_inference_capture.py`.
+Harness `harness_runs` op `inference_capture_preflight`. Soft expects inference_capture_unsupported. Unit tests in `tests/test_inference_capture.py`.
 
 #### Footnotes
 
@@ -1261,7 +1261,7 @@ Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaha
 
 #### Validation
 
-Kind `initialize_preflight_template`. Soft expects node ids include ready.
+Harness `graph_recipes` op `initialize_preflight_template`. Soft expects node ids include ready.
 
 #### Footnotes
 
@@ -1277,7 +1277,7 @@ Scarce instruction components distinguish invariants from learned gotchas. Over-
 
 #### Validation
 
-Kind `instruction_gotcha_metrics`. Soft expects over_trigger recorded and active after promote.
+Harness `context_management` op `instruction_gotcha_metrics`. Soft expects over_trigger recorded and active after promote.
 
 #### Footnotes
 
@@ -1293,7 +1293,7 @@ Instruction components declare scope, authority, and estimated context cost so e
 
 #### Validation
 
-Kind `instruction_scope_metadata`. Soft expects scope and cost.
+Harness `context_management` op `instruction_scope_metadata`. Soft expects scope and cost.
 
 #### Footnotes
 
@@ -1309,7 +1309,7 @@ Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (ef
 
 #### Validation
 
-Kind `isolation_io_contract`. Soft expects empty validation issues and budget_share.
+Harness `access_authority` op `isolation_io_contract`. Soft expects empty validation issues and budget_share.
 
 #### Footnotes
 
@@ -1328,7 +1328,7 @@ Before a dangerous tool runs, Fangore's extension blocks that single call. The d
 
 #### Validation
 
-Kind `lifecycle_extension_block`. Soft expects blocked tool content, applied_block true, and default_ran false.
+Harness `lifecycle_extensions` op `lifecycle_extension_block`. Soft expects blocked tool content, applied_block true, and default_ran false.
 
 #### Footnotes
 
@@ -1344,7 +1344,7 @@ Fangore binds an observe-only extension around each graph node attempt. The node
 
 #### Validation
 
-Kind `lifecycle_extension_graph_observe`. Soft expects a before_graph_node extension event and a successful graph run.
+Harness `lifecycle_extensions` op `lifecycle_extension_graph_observe`. Soft expects a before_graph_node extension event and a successful graph run.
 
 #### Footnotes
 
@@ -1360,7 +1360,7 @@ Fangore binds two host extensions that watch each tool call before it runs. The 
 
 #### Validation
 
-Kind `lifecycle_extension_observe`. Soft expects two extension ids in order, default_ran true, and the original tool path in the tool result.
+Harness `lifecycle_extensions` op `lifecycle_extension_observe`. Soft expects two extension ids in order, default_ran true, and the original tool path in the tool result.
 
 #### Footnotes
 
@@ -1376,7 +1376,7 @@ For one tool boundary, Fangore may substitute a different single-step outcome in
 
 #### Validation
 
-Kind `lifecycle_extension_replace`. Soft expects replaced content, applied_replace true, and default_ran false.
+Harness `lifecycle_extensions` op `lifecycle_extension_replace`. Soft expects replaced content, applied_replace true, and default_ran false.
 
 #### Footnotes
 
@@ -1392,7 +1392,7 @@ Before a write tool runs, Fangore's extension rewrites the path argument into a 
 
 #### Validation
 
-Kind `lifecycle_extension_rewrite`. Soft expects sandbox path in the tool result, applied_rewrite true, and default_ran true.
+Harness `lifecycle_extensions` op `lifecycle_extension_rewrite`. Soft expects sandbox path in the tool result, applied_rewrite true, and default_ran true.
 
 #### Footnotes
 
@@ -1408,7 +1408,7 @@ Fangore's injector can build services while a plan still names an unwired step. 
 
 #### Validation
 
-Kind `graph_linkage_preflight`. Soft expects `no_runner` on missing kinds and ok+fingerprint on a wired linear graph.
+Harness `graph_execution` op `graph_linkage_preflight`. Soft expects `no_runner` on missing kinds and ok+fingerprint on a wired linear graph.
 
 #### Footnotes
 
@@ -1424,7 +1424,7 @@ Long loops accumulate verification debt; Fangore winds them down when independen
 
 #### Validation
 
-Kind `loop_health_wind_down`. Soft expects wind_down true.
+Harness `pure_api` op `loop_health`. Soft expects wind_down true.
 
 #### Footnotes
 
@@ -1440,7 +1440,7 @@ Cleanup and recovery operations declare idempotency and optional compensation so
 
 #### Validation
 
-Kind `operation_compensation_meta`. Soft expects idempotent true.
+Harness `pure_api` op `operation_compensation`. Soft expects idempotent true.
 
 #### Footnotes
 
@@ -1456,7 +1456,7 @@ Agentic Recipe `produce_critique_refine` (`ProduceCritiqueRefineTemplate`) build
 
 #### Validation
 
-Kind `produce_critique_refine_recipe`. Hard expects template stamp, node ids, an isolated critic, refine bounded by `max_rounds`, node components attached to the right parents, and the evolvable allowlist.
+Harness `graph_recipes` op `produce_critique_refine_recipe`. Hard expects template stamp, node ids, an isolated critic, refine bounded by `max_rounds`, node components attached to the right parents, and the evolvable allowlist.
 
 #### Footnotes
 
@@ -1472,7 +1472,7 @@ New recipe versions are immutable artifacts with provenance, lineage, test resul
 
 #### Validation
 
-Kind `recipe_registry_versions`. Hard expects a v1→v2→v3 lineage, evaluations attached to v2, promotion to v3, rollback to v2, and an unknown parent refused.
+Harness `graph_recipes` op `recipe_registry_versions`. Hard expects a v1→v2→v3 lineage, evaluations attached to v2, promotion to v3, rollback to v2, and an unknown parent refused.
 
 #### Footnotes
 
@@ -1488,7 +1488,7 @@ Candidate compositions are found by searching only the registered recipes for on
 
 #### Validation
 
-Kind `recipe_port_search`. Hard expects the catalog ids returned for output-only, input-only, combined, wildcard, wrong-type, and unknown-port queries, that every result is a registered catalog id, and that recipes without ports are never returned. Unit tests: `tests/test_recipe_port_search.py`.
+Harness `graph_recipes` op `recipe_port_search`. Hard expects the catalog ids returned for output-only, input-only, combined, wildcard, wrong-type, and unknown-port queries, that every result is a registered catalog id, and that recipes without ports are never returned. Unit tests: `tests/test_recipe_port_search.py`.
 
 #### Footnotes
 
@@ -1504,7 +1504,7 @@ Recipe execution policies are versioned, testable, replaceable artifacts with a 
 
 #### Validation
 
-Kind `recipe_registry_versions`. Hard expects a candidate to stay inactive until promoted, rollback to restore the earlier version, and promoting an unknown version to fail without moving the pointer.
+Harness `graph_recipes` op `recipe_registry_versions`. Hard expects a candidate to stay inactive until promoted, rollback to restore the earlier version, and promoting an unknown version to fail without moving the pointer.
 
 #### Footnotes
 
@@ -1520,7 +1520,7 @@ Production graphs are composed from registered recipes (including nested recipes
 
 #### Validation
 
-Kind `registry_only_compose`. Hard expects pure tiling of registered recipes to pass, a free-form shell node and a forged recipe version to be reported.
+Harness `graph_recipes` op `registry_only_compose`. Hard expects pure tiling of registered recipes to pass, a free-form shell node and a forged recipe version to be reported.
 
 #### Footnotes
 
@@ -1536,7 +1536,7 @@ High-consequence writes demand stronger controls and visible approval frequency;
 
 #### Validation
 
-Kind `consequence_risk_scale`. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: `tests/test_inspiration_primitives.py`. Related grants: `fangore_insp_soft_vs_hard`.
+Harness `access_authority` op `consequence_risk_scale`. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: `tests/test_inspiration_primitives.py`. Related grants: `fangore_insp_soft_vs_hard`.
 
 #### Footnotes
 
@@ -1553,7 +1553,7 @@ Hard nodes and trusted contracts are never silently rewritten by an optimizer; o
 
 #### Validation
 
-Kind `soft_point_evolution_allowlist`. Hard expects allowlisted edits allowed, runner-kind and policy edits refused, and `verify_repair` having no evolvable points.
+Harness `graph_recipes` op `soft_point_evolution_allowlist`. Hard expects allowlisted edits allowed, runner-kind and policy edits refused, and `verify_repair` having no evolvable points.
 
 #### Footnotes
 
@@ -1571,7 +1571,7 @@ Covers: GAT-01, GAT-02, GAT-03.
 
 #### Validation
 
-Kind `tool_gating`. Soft expects deny without grant and allow with grant. Unit: `tests/test_access.py`. Related: `fangore_insp_risk_autonomy`.
+Harness `access_authority` op `tool_gating`. Soft expects deny without grant and allow with grant. Unit: `tests/test_access.py`. Related: `fangore_insp_risk_autonomy`.
 
 #### Footnotes
 
@@ -1588,7 +1588,7 @@ Sparse advisor counsel helps at hard boundaries while the active executor keeps 
 
 #### Validation
 
-Kind `sparse_advisor_consult`. Soft expects: first consultation returns guidance; second blocked by budget; observation recorded. Unit: `tests/test_inspiration_primitives.py`.
+Harness `pure_api` op `sparse_advisor`. Soft expects: first consultation returns guidance; second blocked by budget; observation recorded. Unit: `tests/test_inspiration_primitives.py`.
 
 #### Footnotes
 
@@ -1604,7 +1604,7 @@ Graph quality targets have owners and can be frozen so agents cannot silently mu
 
 #### Validation
 
-Kind `state_governance_write`. Soft expects frozen field denies writes.
+Harness `access_authority` op `state_governance_write`. Soft expects frozen field denies writes.
 
 #### Footnotes
 
@@ -1620,7 +1620,7 @@ A repeating repair step without an explicit stop rule must fail validation befor
 
 #### Validation
 
-Kind `graph_linkage_preflight` with stop-focused request. Soft expects `missing_stop_contract`.
+Harness `graph_execution` op `graph_linkage_preflight` with stop-focused request. Soft expects `missing_stop_contract`.
 
 #### Footnotes
 
@@ -1636,7 +1636,7 @@ When verification fails, Fangore wants structured attribution naming the repair 
 
 #### Validation
 
-Kind `targeted_rollback_select`. Soft expects selected rollback target produce.
+Harness `graph_execution` op `targeted_rollback_select`. Soft expects selected rollback target produce.
 
 #### Footnotes
 
@@ -1652,7 +1652,7 @@ Reusable Agentic Recipes expose soft points and stamp provenance onto concrete g
 
 #### Validation
 
-Kind `graph_template_soft_points`. Soft expects stamped provenance and demoted refuse.
+Harness `graph_recipes` op `graph_template_soft_points`. Soft expects stamped provenance and demoted refuse.
 
 #### Footnotes
 
@@ -1669,7 +1669,7 @@ Read-only observers must not invoke mutating tools; preparation returns typed pr
 
 #### Validation
 
-Kind `tool_phase_effect_guard`. Hard expects observe/prepare contracts with write/external/unknown effects refused at registration, read-only observe and execute-phase writes registered.
+Harness `access_authority` op `tool_phase_effect_guard`. Hard expects observe/prepare contracts with write/external/unknown effects refused at registration, read-only observe and execute-phase writes registered.
 
 #### Footnotes
 
@@ -1685,7 +1685,7 @@ Tool results that drive external decisions carry source and freshness metadata. 
 
 #### Validation
 
-Kind `tool_result_freshness_reject`. Hard expects the eight-day-old cache and the expired result rejected, and the fresh result passed through.
+Harness `access_authority` op `tool_result_freshness_reject`. Hard expects the eight-day-old cache and the expired result rejected, and the fresh result passed through.
 
 #### Footnotes
 
@@ -1701,7 +1701,7 @@ Producing an answer is not the same as finishing the task when verification is r
 
 #### Validation
 
-Kind `verification_outcome_gate`. Soft expects: answer without verification stays `answer_generated`; verification pass yields `complete`. Unit: `tests/test_inspiration_primitives.py`.
+Harness `pure_api` op `verification_outcome`. Soft expects: answer without verification stays `answer_generated`; verification pass yields `complete`. Unit: `tests/test_inspiration_primitives.py`.
 
 #### Footnotes
 
@@ -1717,7 +1717,7 @@ Client wakes call `LinkageResolver` then `GraphExecutor.run(resume=True)`. Finge
 
 #### Validation
 
-Kind `wake_reresolve_resume`. Soft expects re-resolve ok then successful resume with matching fingerprint.
+Harness `graph_execution` op `wake_reresolve_resume`. Soft expects re-resolve ok then successful resume with matching fingerprint.
 
 #### Footnotes
 
@@ -1734,7 +1734,7 @@ Fangore limits concurrent active nodes and per-write-scope work so agents cannot
 
 #### Validation
 
-Kind `wip_policy_allows`. Soft expects allow then deny when scope saturated.
+Harness `pure_api` op `wip_policy`. Soft expects allow then deny when scope saturated.
 
 #### Footnotes
 
@@ -1751,7 +1751,7 @@ Before an agent deletes, pays, or publishes, Fangore runs a semantic risk check 
 
 #### Validation
 
-Kind `action_safety_judgment`. Soft expects: delete without grant denied despite low semantic risk; granted read with high risk escalates to review; granted read with low risk allows; semantic path never elevates grants.
+Harness `decision_plane` op `action_safety_judgment`. Soft expects: delete without grant denied despite low semantic risk; granted read with high risk escalates to review; granted read with low risk allows; semantic path never elevates grants.
 
 #### Footnotes
 
@@ -1769,7 +1769,7 @@ Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a 
 
 #### Validation
 
-Kind `citation_support_judgment`. Soft expects: matching claim verified; contradicted and unavailable never verified; low confidence escalates without verifying.
+Harness `decision_plane` op `citation_support_judgment`. Soft expects: matching claim verified; contradicted and unavailable never verified; low confidence escalates without verifying.
 
 #### Footnotes
 
@@ -1786,7 +1786,7 @@ After retrieval, Fangore asks a decision model for relevance, trust, and freshne
 
 #### Validation
 
-Kind `context_budget_judgment`. Soft expects: high-trust pack within budget; stale and low-trust skipped; injection candidate excluded; missing scores fall back without exceeding budget.
+Harness `decision_plane` op `context_budget_judgment`. Soft expects: high-trust pack within budget; stale and low-trust skipped; injection candidate excluded; missing scores fall back without exceeding budget.
 
 #### Footnotes
 
@@ -1803,7 +1803,7 @@ Agentic Recipe `independent_review` provides isolated reviewer context. Agentic 
 
 #### Validation
 
-Kind `requirements_gap_judgment`. Soft expects: isolated review template present; gap and missing-crash-fact paths escalate to request_tests; approve-without-gap still not marked correct.
+Harness `decision_plane` op `requirements_gap_judgment`. Soft expects: isolated review template present; gap and missing-crash-fact paths escalate to request_tests; approve-without-gap still not marked correct.
 
 #### Footnotes
 
@@ -1819,7 +1819,7 @@ Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a 
 
 #### Validation
 
-Kind `task_route_judgment`. Soft expects: simple tasks take local_small; high complexity forces frontier; invalid and low-confidence escalate.
+Harness `decision_plane` op `task_route_judgment`. Soft expects: simple tasks take local_small; high complexity forces frontier; invalid and low-confidence escalate.
 
 #### Footnotes
 
@@ -1837,7 +1837,7 @@ Covers: INF-01, INF-03, GRF-01, GRF-02, GRF-03, GRF-04, GRF-05, GRF-06.
 
 #### Validation
 
-Kind `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.py`, `tests/test_operation_registry.py`. Fingerprint refuse covered in `tests/test_inspiration_primitives.py`.
+Harness `graph_execution` op `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.py`, `tests/test_operation_registry.py`. Fingerprint refuse covered in `tests/test_inspiration_primitives.py`.
 
 #### Footnotes
 
@@ -1854,7 +1854,7 @@ Before a run starts, Fangore’s console must place interior pieces inside each 
 
 #### Validation
 
-Kind `node_components` → `_run_node_components`. Soft expects: all components have parent_node_id; kinds ⊆ catalog; stop_contract and soft_point present for `conversational_tool_loop`. Unit: `tests/test_node_component.py`.
+Harness `graph_recipes` op `node_components` → `_run_node_components`. Soft expects: all components have parent_node_id; kinds ⊆ catalog; stop_contract and soft_point present for `conversational_tool_loop`. Unit: `tests/test_node_component.py`.
 
 #### Footnotes
 
@@ -1870,7 +1870,7 @@ Fangore’s generate-image tool should run a child oneshot recipe under that too
 
 #### Validation
 
-Kind `recipe_as_tool` → `_run_recipe_as_tool`. Soft expects: status ok; child_run_id nonempty; child_status ok; parent has child_graph component. Unit: `tests/test_conversational_tool_loop.py`.
+Harness `graph_recipes` op `recipe_as_tool` → `_run_recipe_as_tool`. Soft expects: status ok; child_run_id nonempty; child_status ok; parent has child_graph component. Unit: `tests/test_conversational_tool_loop.py`.
 
 #### Footnotes
 
@@ -1887,7 +1887,7 @@ Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance mu
 
 #### Validation
 
-Kind `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct recipe_instance_id values, and parent embed node kinds subgraph.
+Harness `graph_recipes` op `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct recipe_instance_id values, and parent embed node kinds subgraph.
 
 #### Footnotes
 
@@ -1906,7 +1906,7 @@ Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.
 
 #### Validation
 
-Kind `route_refund` → `_run_route_refund`. Soft expects: ALLOW for billing, DENY for technical. Unit: `tests/test_judgement_policy.py`, `tests/test_judge.py`.
+Harness `harness_runs` op `route_refund` → `_run_route_refund`. Soft expects: ALLOW for billing, DENY for technical. Unit: `tests/test_judgement_policy.py`, `tests/test_judge.py`.
 
 #### Footnotes
 
@@ -1922,7 +1922,7 @@ Fangore's host dispatches a long-running coding job through a durable plan. The 
 
 #### Validation
 
-Kind `transactional_durable_resume_crash_matrix`. Soft expects per crash location: final status ok, dispatch_count exactly 1 after an accepted first dispatch, effect state transitions, and reconciliation on uncertain/accepted resumes. Unit matrix in `tests/test_transactional_durable_resume.py`. Pytest `--doctest-modules` covers the pydoc examples under `src/mechaharness/{checkpoint_store,sqlite_checkpoint_store,external_effect,graph_executor,di}.py`.
+Harness `graph_execution` op `transactional_durable_resume_crash_matrix`. Soft expects per crash location: final status ok, dispatch_count exactly 1 after an accepted first dispatch, effect state transitions, and reconciliation on uncertain/accepted resumes. Unit matrix in `tests/test_transactional_durable_resume.py`. Pytest `--doctest-modules` covers the pydoc examples under `src/mechaharness/{checkpoint_store,sqlite_checkpoint_store,external_effect,graph_executor,di}.py`.
 
 #### Footnotes
 
@@ -1941,7 +1941,7 @@ As a run proceeds, Fangore’s console lights interiors that were laid out ahead
 
 #### Validation
 
-Kind `traversal_contract` → `_run_traversal_contract`. Soft expects: inference and tool_call records present; parents non-empty. Unit: `tests/test_node_component.py`.
+Harness `graph_recipes` op `traversal_contract` → `_run_traversal_contract`. Soft expects: inference and tool_call records present; parents non-empty. Unit: `tests/test_node_component.py`.
 
 #### Footnotes
 
@@ -1957,7 +1957,7 @@ Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) builds produce → verif
 
 #### Validation
 
-Kind `verify_repair_recipe`. Soft expects node ids and template_name `verify_repair`. Related: `fangore_bounded_repair_loop`.
+Harness `graph_recipes` op `verify_repair_recipe`. Soft expects node ids and template_name `verify_repair`. Related: `fangore_bounded_repair_loop`.
 
 #### Footnotes
 
@@ -1978,7 +1978,7 @@ Covers: EXP-01, EXP-02, EXP-03, EXP-04.
 
 #### Validation
 
-Kind `atk_research_reject` → `_run_atk_research_reject`. Unit: `tests/test_research.py`.
+Harness `evaluation_research` op `atk_research_reject` → `_run_atk_research_reject`. Unit: `tests/test_research.py`.
 
 #### Footnotes
 
@@ -1996,7 +1996,7 @@ Covers: CTX-09.
 
 #### Validation
 
-Kind `cache_layout_experiment` → `_run_cache_layout_experiment`. Unit: `tests/test_context_experiments.py`.
+Harness `context_management` op `cache_layout_experiment` → `_run_cache_layout_experiment`. Unit: `tests/test_context_experiments.py`.
 
 ### `taloneth_decision_plane_shadow_compare` — Compare shadowed decision-plane answers before promotion
 
@@ -2008,7 +2008,7 @@ Taloneth reviews shadow versus production answers on matched refund triage cases
 
 #### Validation
 
-Kind `decision_plane_shadow_compare`. Soft expects agreement false when answers differ, unavailable_candidate stays unavailable, telemetry has shadow_action.
+Harness `decision_plane` op `decision_plane_shadow_compare`. Soft expects agreement false when answers differ, unavailable_candidate stays unavailable, telemetry has shadow_action.
 
 #### Footnotes
 
@@ -2026,7 +2026,7 @@ Covers: JDG-01, JDG-02, JDG-03, JDG-04.
 
 #### Validation
 
-Kind `fixture_judge_batch` → `_run_fixture_judge_batch`. Unit: `tests/test_judge.py`.
+Harness `decision_plane` op `fixture_judge_batch` → `_run_fixture_judge_batch`. Unit: `tests/test_judge.py`.
 
 ### `taloneth_insp_component_ablation` — Ablate harness components against a matched corpus
 
@@ -2038,7 +2038,7 @@ Taloneth runs a component-ablation experiment that disables named harness pieces
 
 #### Validation
 
-Kind `component_ablation_delta`. Soft expects negative success_delta.
+Harness `evaluation_research` op `component_ablation_delta`. Soft expects negative success_delta.
 
 #### Footnotes
 
@@ -2055,7 +2055,7 @@ When a person corrects the agent, the correction is recorded as outstanding spec
 
 #### Validation
 
-Kind `specification_debt_capture`. Hard expects a captured record that requires review and links the promotion, a pending count that only drops after approval, and refusal of blank corrections. Unit tests: `tests/test_specification_debt.py`.
+Harness `pure_api` op `specification_debt`. Hard expects a captured record that requires review and links the promotion, a pending count that only drops after approval, and refusal of blank corrections. Unit tests: `tests/test_specification_debt.py`.
 
 #### Footnotes
 
@@ -2071,7 +2071,7 @@ Taloneth needs cross-harness evaluation to classify invalid tool names and schem
 
 #### Validation
 
-Kind `cross_harness_failure_classify`. Soft expects invalid_tool_name. Unit tests in `tests/test_cross_harness_failure.py`.
+Harness `evaluation_research` op `cross_harness_failure_classify`. Soft expects invalid_tool_name. Unit tests in `tests/test_cross_harness_failure.py`.
 
 #### Footnotes
 
@@ -2087,7 +2087,7 @@ Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by
 
 #### Validation
 
-Kind `eval_claims_compose`. Soft expects pass/fail/unknown counts.
+Harness `evaluation_research` op `eval_claims_compose`. Soft expects pass/fail/unknown counts.
 
 #### Footnotes
 
@@ -2104,7 +2104,7 @@ Taloneth evaluates the same model under multiple harness configurations and must
 
 #### Validation
 
-Kind `eval_matrix_aggregate`. Soft expects cell count and retained fingerprints. Unit tests in `tests/test_eval_matrix.py`.
+Harness `evaluation_research` op `eval_matrix_aggregate`. Soft expects cell count and retained fingerprints. Unit tests in `tests/test_eval_matrix.py`.
 
 #### Footnotes
 
@@ -2120,7 +2120,7 @@ Taloneth needs a dead sandbox or broken trace to count as unscorable execution f
 
 #### Validation
 
-Kind `evaluation_outcome_filter`. Soft expects task trial counts and pass@k ignoring execution failures. Unit tests in `tests/test_evaluation_outcome.py`.
+Harness `evaluation_research` op `evaluation_outcome_filter`. Soft expects task trial counts and pass@k ignoring execution failures. Unit tests in `tests/test_evaluation_outcome.py`.
 
 #### Footnotes
 
@@ -2136,7 +2136,7 @@ Taloneth wires a versioned evaluator that can be marked held-out so self-improve
 
 #### Validation
 
-Kind `evaluator_compose_run`. Soft expects passed and held_out true.
+Harness `evaluation_research` op `evaluator_compose_run`. Soft expects passed and held_out true.
 
 #### Footnotes
 
@@ -2154,7 +2154,7 @@ Taloneth needs every harness experiment to state which configuration axes are fi
 
 #### Validation
 
-Kind `experiment_dimensions_digest`. Soft expects digest present. Unit tests in `tests/test_experiment_dimensions.py`.
+Harness `evaluation_research` op `experiment_dimensions_digest`. Soft expects digest present. Unit tests in `tests/test_experiment_dimensions.py`.
 
 #### Footnotes
 
@@ -2170,7 +2170,7 @@ Taloneth needs mid-corpus experiment resume to remember which cases were already
 
 #### Validation
 
-Kind `experiment_lineage_resume`. Soft expects remaining cases and duplicate refusal. Unit tests in `tests/test_experiment_lineage.py`.
+Harness `evaluation_research` op `experiment_lineage_resume`. Soft expects remaining cases and duplicate refusal. Unit tests in `tests/test_experiment_lineage.py`.
 
 #### Footnotes
 
@@ -2186,7 +2186,7 @@ Taloneth needs equal rollout counts to still reveal unequal token and call expos
 
 #### Validation
 
-Kind `exposure_discriminative_report`. Soft expects unequal model_calls and all_success_tie. Unit tests in `tests/test_exposure_discriminative.py`.
+Harness `evaluation_research` op `exposure_discriminative_report`. Soft expects unequal model_calls and all_success_tie. Unit tests in `tests/test_exposure_discriminative.py`.
 
 #### Footnotes
 
@@ -2202,7 +2202,7 @@ Taloneth needs harness experiments to satisfy correctness first and only then pr
 
 #### Validation
 
-Kind `gated_objective_evaluate`. Soft expects retired when treatment fails correctness. Unit tests in `tests/test_gated_objective.py`.
+Harness `evaluation_research` op `gated_objective_evaluate`. Soft expects retired when treatment fails correctness. Unit tests in `tests/test_gated_objective.py`.
 
 #### Footnotes
 
@@ -2218,7 +2218,7 @@ Taloneth compares the same model and task under two graph configurations and nee
 
 #### Validation
 
-Kind `harness_fingerprint_digest`. Soft expects distinct digests and provenance attachment. Unit tests in `tests/test_harness_fingerprint.py`.
+Harness `evaluation_research` op `harness_fingerprint_digest`. Soft expects distinct digests and provenance attachment. Unit tests in `tests/test_harness_fingerprint.py`.
 
 #### Footnotes
 
@@ -2234,7 +2234,7 @@ Taloneth captures unused extensions, dead soft points, and unexercised routes as
 
 #### Validation
 
-Kind `harness_health_cleanup`. Soft expects needs_cleanup true.
+Harness `pure_api` op `harness_health`. Soft expects needs_cleanup true.
 
 #### Footnotes
 
@@ -2251,7 +2251,7 @@ Taloneth writes the failure mode and expected metric before shipping a harness t
 
 #### Validation
 
-Kind `harness_experiment_retire`. Soft expects retired when treatment loses (evidence-driven retain/retire).
+Harness `evaluation_research` op `harness_experiment_retire`. Soft expects retired when treatment loses (evidence-driven retain/retire).
 
 #### Footnotes
 
@@ -2267,7 +2267,7 @@ Taloneth needs exportable execution packs that carry harness fingerprint, rollou
 
 #### Validation
 
-Kind `learning_export_pack`. Soft expects schema version and fingerprint. Unit tests in `tests/test_learning_export.py`.
+Harness `evaluation_research` op `learning_export_pack`. Soft expects schema version and fingerprint. Unit tests in `tests/test_learning_export.py`.
 
 #### Footnotes
 
@@ -2283,7 +2283,7 @@ Taloneth refuses silent weighted blends of verifier scores and wants gates and f
 
 #### Validation
 
-Kind `objective_policy_aggregate`. Soft expects scored scalar with policy identity. Unit tests in `tests/test_objective_policy.py`.
+Harness `evaluation_research` op `objective_policy_aggregate`. Soft expects scored scalar with policy identity. Unit tests in `tests/test_objective_policy.py`.
 
 #### Footnotes
 
@@ -2299,7 +2299,7 @@ A host can summarize past traces into suggestions, and the library turns them in
 
 #### Validation
 
-Kind `recipe_evolution_candidates`. Hard expects bounded single-setting candidates ranked by support, the rejected reasons for fixed, unknown, and non-allowlisted settings, identical results on a repeat run, no graph in any candidate, the gated best candidate selected, and no selection when nothing beats the baseline. Unit tests: `tests/test_recipe_evolution.py`.
+Harness `graph_recipes` op `recipe_evolution_candidates`. Hard expects bounded single-setting candidates ranked by support, the rejected reasons for fixed, unknown, and non-allowlisted settings, identical results on a repeat run, no graph in any candidate, the gated best candidate selected, and no selection when nothing beats the baseline. Unit tests: `tests/test_recipe_evolution.py`.
 
 #### Footnotes
 
@@ -2315,7 +2315,7 @@ A leading candidate must pass a separate untouched final test before it can be r
 
 #### Validation
 
-Kind `recipe_final_test_gate`. Hard expects refusal for a missing, non-held-out, and failed result for both the research lab and the registry, promotion for a passing held-out result, an unmoved pointer after refusals, and that an unprotected protocol skips the gate. Unit tests: `tests/test_final_test_gate.py`.
+Harness `graph_recipes` op `recipe_final_test_gate`. Hard expects refusal for a missing, non-held-out, and failed result for both the research lab and the registry, promotion for a passing held-out result, an unmoved pointer after refusals, and that an unprotected protocol skips the gate. Unit tests: `tests/test_final_test_gate.py`.
 
 #### Footnotes
 
@@ -2331,7 +2331,7 @@ Repeated review feedback becomes an experiment, then a soft instruction, then a 
 
 #### Validation
 
-Kind `rule_promotion_hard`. Soft expects stage hard.
+Harness `pure_api` op `rule_promotion`. Soft expects stage hard.
 
 #### Footnotes
 
@@ -2350,7 +2350,7 @@ Taloneth needs comparable runs to record and flag mismatches in output caps, too
 
 #### Validation
 
-Kind `run_parity_compare`. Soft expects material max_tokens mismatch. Unit tests in `tests/test_run_parity.py`.
+Harness `harness_runs` op `run_parity_compare`. Soft expects material max_tokens mismatch. Unit tests in `tests/test_run_parity.py`.
 
 #### Footnotes
 
@@ -2366,7 +2366,7 @@ Agentic Recipe `safety_eval` (`SafetyEvalTemplate` in `graph_templates/safety_ev
 
 #### Validation
 
-Kind `safety_eval_recipe`. Hard expects the template stamp and node ids, an isolated reviewer, a deterministic score carrying the report fields and versions, the six scenario classes, an empty evolvable allowlist, node components on the right parents, and catalog registration. Unit tests: `tests/test_safety_eval_recipe.py`; fixture `tests/fixtures/graph_templates/safety_eval_defaults.json`.
+Harness `graph_recipes` op `safety_eval_recipe`. Hard expects the template stamp and node ids, an isolated reviewer, a deterministic score carrying the report fields and versions, the six scenario classes, an empty evolvable allowlist, node components on the right parents, and catalog registration. Unit tests: `tests/test_safety_eval_recipe.py`; fixture `tests/fixtures/graph_templates/safety_eval_defaults.json`.
 
 #### Footnotes
 
@@ -2382,7 +2382,7 @@ Taloneth treats an orchestration scaffold as temporary. When a with-versus-witho
 
 #### Validation
 
-Kind `harness_experiment_retire`. Soft expects: treatment worse than control yields `retired` status and a retirement candidate. Related: `taloneth_atk_research_reject`. Unit: `tests/test_inspiration_primitives.py`.
+Harness `evaluation_research` op `harness_experiment_retire`. Soft expects: treatment worse than control yields `retired` status and a retirement candidate. Related: `taloneth_atk_research_reject`. Unit: `tests/test_inspiration_primitives.py`.
 
 #### Footnotes
 
@@ -2398,7 +2398,7 @@ Taloneth records isolated trials with cost and latency, then reports pass@k for 
 
 #### Validation
 
-Kind `trial_reliability_metrics`. Soft expects positive pass_at_k and rollup trial count.
+Harness `evaluation_research` op `trial_reliability_metrics`. Soft expects positive pass_at_k and rollup trial count.
 
 #### Footnotes
 
@@ -2418,7 +2418,7 @@ Covers: OBS-02.
 
 #### Validation
 
-Kind `offline_decision_export` → `_run_offline_decision_export`. Unit: `tests/test_decision_log.py`.
+Harness `decision_plane` op `offline_decision_export` → `_run_offline_decision_export`. Unit: `tests/test_decision_log.py`.
 
 ### `taloneth_policy_replay` — Replay product policy from recorded facts and signals
 
@@ -2432,7 +2432,7 @@ Covers: OBS-03.
 
 #### Validation
 
-Kind `policy_replay` → `_run_policy_replay`. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.
+Harness `decision_plane` op `policy_replay` → `_run_policy_replay`. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.
 
 #### Footnotes
 
@@ -2450,7 +2450,7 @@ Covers: RTE-01, RTE-02.
 
 #### Validation
 
-Kind `shadow_decision_backends` → `_run_shadow_decision_backends`. Unit: `tests/test_routing.py`.
+Harness `harness_runs` op `shadow_decision_backends` → `_run_shadow_decision_backends`. Unit: `tests/test_routing.py`.
 
 ### `taloneth_systemone_cassette` — Pin System One adapter behavior to a versioned cassette
 
@@ -2464,7 +2464,7 @@ Covers: JDG wire map (System One).
 
 #### Validation
 
-Kind `systemone_cassette` → `_run_route_refund` with `systemone/laya/v1` cassette.
+Harness `harness_runs` op `systemone_cassette` → `_run_route_refund` with `systemone/laya/v1` cassette.
 
 ### `taloneth_validator_qualification` — Qualify validators before they gate completion
 
@@ -2478,4 +2478,4 @@ Covers: VER-01, VER-04.
 
 #### Validation
 
-Kind `validator_qualification` → `_run_validator_qualification`. Unit: `tests/test_graph.py`.
+Harness `graph_execution` op `validator_qualification` → `_run_validator_qualification`. Unit: `tests/test_graph.py`.

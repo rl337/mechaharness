@@ -1,3 +1,4 @@
 {
+  "op": "backend_describe_recipe",
   "backend": "mock"
 }

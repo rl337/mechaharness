@@ -2,10 +2,10 @@
   "id": "nubble_insp_recipe_audit_dimensions",
   "persona": "nubble",
   "title": "Audit recipe selection and freshness without reading full transcripts",
-  "kind": "recipe_audit_dimensions",
+  "kind": "access_authority",
   "narrative": "A quarterly audit can see which recipe and version made each decision, how the verdicts split, and how much of the evidence was fresh or stale, without reading whole transcripts. Decisions that do not name a recipe are left out of the per-recipe rollup instead of being guessed. Cost and decision telemetry already ship via `fangore_decision_plane_telemetry` and `nubble_insp_trace_envelope`. Tracks MH-PA-08[^insp-pa-08].",
   "implementation": "Optional `recipe_id`, `recipe_version`, and `freshness_summary` (plus approval, denial, and effect ids) on `DecisionRecord` and `TraceEnvelope`; `summarize_freshness()` in `tool_result_freshness.py` counts fresh versus stale tool results; `summarize_recipe_audit()` and `RecipeAuditRow` in `review_audit.py` roll decisions up per recipe selection. The new envelope fields are optional and do not change `envelope_complete`.",
-  "validation": "Kind `recipe_audit_dimensions`. Hard expects per-recipe rows with decision counts, verdict splits, and fresh/stale evidence totals computed from tool-result timestamps, that undeclared decisions are skipped, and that the envelope carries the recipe and stays complete. Unit tests: `tests/test_review_audit.py`.",
+  "validation": "Harness `access_authority` op `recipe_audit_dimensions`. Hard expects per-recipe rows with decision counts, verdict splits, and fresh/stale evidence totals computed from tool-result timestamps, that undeclared decisions are skipped, and that the envelope carries the recipe and stays complete. Unit tests: `tests/test_review_audit.py`.",
   "footnotes": [
     {
       "id": "insp-pa-08",

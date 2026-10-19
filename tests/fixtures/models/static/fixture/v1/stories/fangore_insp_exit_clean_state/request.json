@@ -1,4 +1,5 @@
 {
+  "op": "exit_clean_state",
   "require_handoff_record": true,
   "pending_nodes": [],
   "checkpoint_durable": true,

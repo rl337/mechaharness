@@ -1,4 +1,5 @@
 {
+  "op": "experiment_lineage_resume",
   "experiment_id": "exp-1",
   "assignment": "treatment",
   "consume": [

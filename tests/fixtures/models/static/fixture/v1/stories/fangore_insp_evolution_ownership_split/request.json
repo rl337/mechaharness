@@ -1,4 +1,5 @@
 {
+  "op": "evolution_ownership_split",
   "workloads": [
     "nightly",
     "regression"

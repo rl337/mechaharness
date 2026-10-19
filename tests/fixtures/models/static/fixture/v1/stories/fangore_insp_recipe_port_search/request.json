@@ -1,4 +1,5 @@
 {
+  "op": "recipe_port_search",
   "queries": [
     {
       "id": "produces_artifact",

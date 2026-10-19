@@ -2,10 +2,10 @@
   "id": "fangore_recipe_namespace_tile",
   "persona": "fangore",
   "title": "Embed two recipe instances without node-id collisions",
-  "kind": "recipe_namespace_tile",
+  "kind": "graph_recipes",
   "narrative": "Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution. Recipe tiling for self-revising MH-SR-02; registry-only production constraint: `fangore_insp_registry_only_compose`[^insp-sr-02-tile].",
   "implementation": "`GraphTemplateParams.instance_key` namespaces node ids on instantiate. `GraphTemplate.tile` embeds a recipe graph under a parent node via `SubgraphNodeRunner`. Provenance includes instance id, params fingerprint, and logical-to-concrete node map (RC-01, RC-04, RC-05, RC-08).",
-  "validation": "Kind `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct recipe_instance_id values, and parent embed node kinds subgraph.",
+  "validation": "Harness `graph_recipes` op `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct recipe_instance_id values, and parent embed node kinds subgraph.",
   "footnotes": [
     {
       "id": "rc-namespace",

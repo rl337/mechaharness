@@ -2,10 +2,10 @@
   "id": "taloneth_policy_replay",
   "persona": "taloneth",
   "title": "Replay product policy from recorded facts and signals",
-  "kind": "policy_replay",
-  "narrative": "Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: `nubble_insp_review_audit_reconstruct`[^insp-dots-09-replay].",
+  "kind": "decision_plane",
+  "narrative": "Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools \u2014 so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: `nubble_insp_review_audit_reconstruct`[^insp-dots-09-replay].",
   "implementation": "`replay_verdict` in `mechaharness.decision_log` re-runs `decide()` on recorded facts/signals/policy for deterministic audits.\n\nCovers: OBS-03.",
-  "validation": "Kind `policy_replay` → `_run_policy_replay`. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.",
+  "validation": "Harness `decision_plane` op `policy_replay` \u2192 `_run_policy_replay`. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.",
   "footnotes": [
     {
       "id": "insp-dots-09-replay",

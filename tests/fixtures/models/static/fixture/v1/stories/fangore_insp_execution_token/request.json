@@ -1,4 +1,5 @@
 {
+  "op": "execution_token_narrow",
   "parent": {
     "grants": [
       "core:graph.execute",

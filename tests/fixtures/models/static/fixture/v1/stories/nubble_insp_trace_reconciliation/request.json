@@ -1,4 +1,5 @@
 {
+  "op": "trace_reconciliation_check",
   "surfaces": [
     {
       "name": "executor",

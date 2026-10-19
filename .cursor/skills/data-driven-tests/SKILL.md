@@ -135,10 +135,16 @@ Convert task:
 | One test documents a unique invariant | Leave as a named unit test |
 | Story runner already covers acceptance | Do not duplicate story prose; unit matrix for branch coverage |
 
+### User stories share the same interpreter philosophy
+
+Persona **user stories** (`tests/fixtures/models/…/stories/`) keep narrative /
+persona fields, but **execution** is harness-driven: `story.json` `kind` is a
+harness family; `request.op` selects the surface. Do **not** add a new kind per
+story — see [`user-stories`](../user-stories/SKILL.md). Unit fixture matrices
+(`tests/fixtures/<domain>/`) remain for non-persona branch coverage.
+
 ### What not to convert
 
-- Persona **user stories** (`tests/fixtures/models/…/stories/`) — different
-  system; see `user-stories` skill.
 - Live/cassette HTTP tests whose value is the wire recording.
 - Tests whose failure message must point at a specific line of production code
   for debugging a known bug (keep until fixed, then consider matrix).
@@ -176,4 +182,5 @@ assert_expect(result=result, expect=case.expect, ...)
 
 - Example matrix: [examples.md](examples.md)
 - Naming: `.cursor/rules/unambiguous-names.mdc`
-- Stories (separate): `.cursor/skills/user-stories/SKILL.md`
+- Stories (harness + narrative): `.cursor/skills/user-stories/SKILL.md`
+- Story harness registry: `tests/stories/harness/`

@@ -1,4 +1,5 @@
 {
+  "op": "safety_eval_recipe",
   "goal": "prompt injection in tool output",
   "inputs": {
     "model_version": "m-1"

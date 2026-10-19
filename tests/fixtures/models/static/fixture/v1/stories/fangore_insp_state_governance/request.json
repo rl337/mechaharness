@@ -1,4 +1,5 @@
 {
+  "op": "state_governance_write",
   "owner": "ops",
   "writers": [
     "ops"

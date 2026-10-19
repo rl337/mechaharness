@@ -1,4 +1,5 @@
 {
+  "op": "run_parity_compare",
   "a": {
     "model": "m",
     "max_tokens": 1024,

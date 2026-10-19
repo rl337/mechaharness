@@ -2,10 +2,10 @@
   "id": "fangore_recipe_as_tool",
   "persona": "fangore",
   "title": "Nest a child recipe under a tool_call graph node",
-  "kind": "recipe_as_tool",
-  "narrative": "Fangore’s generate-image tool should run a child oneshot recipe under that tool step so operators can zoom into prompt → generate → verify without a parallel soft lane. Nested spend shares the parent budget; failure surfaces on the tool node. Complements `fangore_insp_dynamic_subgraph`, `fangore_insp_budget_subgraph_rollup`, and `fangore_conversational_tool_loop`.[^june-hf08] Nested recipe embedding for self-revising MH-SR-02[^insp-sr-02-tool].",
+  "kind": "graph_recipes",
+  "narrative": "Fangore\u2019s generate-image tool should run a child oneshot recipe under that tool step so operators can zoom into prompt \u2192 generate \u2192 verify without a parallel soft lane. Nested spend shares the parent budget; failure surfaces on the tool node. Complements `fangore_insp_dynamic_subgraph`, `fangore_insp_budget_subgraph_rollup`, and `fangore_conversational_tool_loop`.[^june-hf08] Nested recipe embedding for self-revising MH-SR-02[^insp-sr-02-tool].",
   "implementation": "`mechaharness.node_component.embed_recipe_as_tool` attaches a child `ExecutionGraph` on a `tool_call` graph node using the same nest shape as `SubgraphNodeRunner.embed`. `GraphExecutor` runs the child with `child_run_id` and shared budget (HF-08). Parent exposes a `child_graph` node component via `node_components_for`.",
-  "validation": "Kind `recipe_as_tool` → `_run_recipe_as_tool`. Soft expects: status ok; child_run_id nonempty; child_status ok; parent has child_graph component. Unit: `tests/test_conversational_tool_loop.py`.",
+  "validation": "Harness `graph_recipes` op `recipe_as_tool` \u2192 `_run_recipe_as_tool`. Soft expects: status ok; child_run_id nonempty; child_status ok; parent has child_graph component. Unit: `tests/test_conversational_tool_loop.py`.",
   "footnotes": [
     {
       "id": "june-hf08",

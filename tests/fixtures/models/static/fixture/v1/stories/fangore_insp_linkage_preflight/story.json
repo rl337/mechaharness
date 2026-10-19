@@ -2,10 +2,10 @@
   "id": "fangore_insp_linkage_preflight",
   "persona": "fangore",
   "title": "Resolve graph linkage before any node runs",
-  "kind": "graph_linkage_preflight",
+  "kind": "graph_execution",
   "narrative": "Fangore's injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2[^insp-r02]. Related: `fangore_insp_stop_contract`.",
   "implementation": "`DefaultLinkageResolver` validates runners, grants, environment, and termination separately from pyiv construction. `GraphExecutor` consults it before substantive work.",
-  "validation": "Kind `graph_linkage_preflight`. Soft expects `no_runner` on missing kinds and ok+fingerprint on a wired linear graph.",
+  "validation": "Harness `graph_execution` op `graph_linkage_preflight`. Soft expects `no_runner` on missing kinds and ok+fingerprint on a wired linear graph.",
   "footnotes": [
     {
       "id": "insp-r02",

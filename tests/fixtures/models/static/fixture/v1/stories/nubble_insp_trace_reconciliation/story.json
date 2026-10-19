@@ -2,14 +2,14 @@
   "id": "nubble_insp_trace_reconciliation",
   "persona": "nubble",
   "title": "Reject rollouts when independent traces disagree",
-  "kind": "trace_reconciliation_check",
+  "kind": "evaluation_research",
   "narrative": "Nubble needs executor events and gateway capture to reconcile before a rollout is accepted for training or self-improvement. Accepts FineEnvs independent trajectory checks[^fineenvs-reconcile]. Trace reconciliation for Dots MH-DOTS-09[^insp-dots-09-recon].",
   "implementation": "`ObservationSurface`, `reconcile_traces`, and `require_reconciled` in `mechaharness.trace_reconciliation` compare event ids and digests across surfaces.",
-  "validation": "Kind `trace_reconciliation_check`. Soft expects conflict status. Unit tests in `tests/test_trace_reconciliation.py`.",
+  "validation": "Harness `evaluation_research` op `trace_reconciliation_check`. Soft expects conflict status. Unit tests in `tests/test_trace_reconciliation.py`.",
   "footnotes": [
     {
       "id": "fineenvs-reconcile",
-      "label": "FineEnvs multi-harness RL — independent trajectories",
+      "label": "FineEnvs multi-harness RL \u2014 independent trajectories",
       "url": "https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards",
       "note": "MH-MHRL-09"
     },

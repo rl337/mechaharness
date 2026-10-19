@@ -1,4 +1,5 @@
 {
+  "op": "decision_plane_shadow_compare",
   "cases": [
     {
       "name": "disagree",

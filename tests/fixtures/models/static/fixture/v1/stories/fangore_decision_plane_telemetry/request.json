@@ -1,4 +1,5 @@
 {
+  "op": "decision_plane_telemetry",
   "state_projection": {
     "ticket_id": "T-1",
     "channel": "email"

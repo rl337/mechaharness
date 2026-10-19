@@ -1,3 +1,4 @@
 {
+  "op": "workspace_isolation_acquire",
   "label": "branch-a"
 }

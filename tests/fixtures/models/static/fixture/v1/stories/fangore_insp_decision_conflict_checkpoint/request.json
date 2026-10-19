@@ -1,4 +1,5 @@
 {
+  "op": "decision_conflict_neighbor_revisit",
   "scenarios": [
     {
       "id": "cycle_never_cleared",

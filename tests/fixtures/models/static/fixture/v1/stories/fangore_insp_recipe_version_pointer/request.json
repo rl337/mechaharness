@@ -1,4 +1,5 @@
 {
+  "op": "recipe_registry_versions",
   "recipe": "verify_repair",
   "steps": [
     {

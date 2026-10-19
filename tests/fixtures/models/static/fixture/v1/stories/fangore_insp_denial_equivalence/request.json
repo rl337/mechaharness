@@ -1,4 +1,5 @@
 {
+  "op": "denial_store_equivalence",
   "denied": {
     "effect_class": "email.send",
     "target": "bob@example.com",

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Story harness redesign:** `story.json` `kind` is now a reusable harness
+  family (`pure_api`, `access_authority`, `graph_execution`, …) under
+  `tests/stories/harness/`; `request.json` requires `op` for the surface within
+  that family. New acceptance coverage should be fixtures-only by default —
+  register a new `op` or harness only when the execution *shape* changes, never
+  a per-story kind. Catalog validation rejects unknown kinds/ops.
+
 ### Added
 
 - **Customer-facing agent skills** under `agent-skills/` (`use-mechaharness`,
