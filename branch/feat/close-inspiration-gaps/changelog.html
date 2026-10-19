@@ -124,6 +124,10 @@ family (<code class="docutils literal notranslate"><span class="pre">pure_api</s
 that family. New acceptance coverage should be fixtures-only by default —
 register a new <code class="docutils literal notranslate"><span class="pre">op</span></code> or harness only when the execution <em>shape</em> changes, never
 a per-story kind. Catalog validation rejects unknown kinds/ops.</p></li>
+<li><p><strong>Unit tests table-driven where cheap:</strong> <code class="docutils literal notranslate"><span class="pre">test_api_connection</span></code>, access-policy /
+grant-key matrices, tool-phase effect matrix (assert + registry in one loop),
+event query filters, and recipe evolvable-allowlist cases use <code class="docutils literal notranslate"><span class="pre">&#64;parametrize</span></code>
+over structs instead of near-clone functions.</p></li>
 </ul>
 </section>
 <section id="added">
