@@ -2,10 +2,10 @@
   "id": "fangore_insp_durable_resume",
   "persona": "fangore",
   "title": "Refuse resume when the harness fingerprint changed",
-  "kind": "graph_execution",
+  "kind": "cli",
   "narrative": "Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_transactional_durable_resume`[^insp-pa-05-fingerprint].",
-  "implementation": "`CheckpointStore` (default `EventLogCheckpointStore`; durable `SqliteCheckpointStore`) persists `config_fingerprint`; `GraphExecutor.run(resume=True)` compares fingerprints after re-resolve. See also `fangore_transactional_durable_resume` for external-effect crash recovery.",
-  "validation": "Harness `graph_execution` op `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume failed with incompatible fingerprint.",
+  "implementation": "`GraphExecutor` fingerprint check on resume. `CliInstrumentor` verb `checkpoint_fingerprint_refuse`.",
+  "validation": "Harness `cli` scenario `fingerprint_refuse.yaml`.",
   "footnotes": [
     {
       "id": "insp-r12",

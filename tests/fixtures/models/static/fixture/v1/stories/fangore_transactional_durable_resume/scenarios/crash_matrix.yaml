@@ -1,0 +1,75 @@
+# Crash matrix across ArmedCrashProbe locations
+kind: cli
+commands:
+- transactional_durable_resume:
+    goal: downstream-coding-job
+    run_id_prefix: story-tdr
+    crash_locations:
+    - before_intent
+    - after_intent_before_call
+    - after_accept_before_record
+    - after_accept_recorded
+    - after_reduce_before_checkpoint
+    - after_final_commit
+expect:
+  cases_exactly:
+    before_intent:
+      crashed: true
+      status: ok
+      node_status: succeeded
+      dispatch_count: 1
+      dispatch_count_after_crash: 0
+      effect_state_before: null
+      effect_state_after: completed
+      reconciliation_invoked: false
+      boundary_before: dispatch
+    after_intent_before_call:
+      crashed: true
+      status: ok
+      node_status: succeeded
+      dispatch_count: 1
+      dispatch_count_after_crash: 0
+      effect_state_before: intended
+      effect_state_after: completed
+      reconciliation_invoked: true
+      boundary_before: planning
+    after_accept_before_record:
+      crashed: true
+      status: ok
+      node_status: succeeded
+      dispatch_count: 1
+      dispatch_count_after_crash: 1
+      effect_state_before: uncertain
+      effect_state_after: completed
+      reconciliation_invoked: true
+      boundary_before: dispatch
+    after_accept_recorded:
+      crashed: true
+      status: ok
+      node_status: succeeded
+      dispatch_count: 1
+      dispatch_count_after_crash: 1
+      effect_state_before: accepted
+      effect_state_after: completed
+      reconciliation_invoked: true
+      boundary_before: post_effect_pre_record
+    after_reduce_before_checkpoint:
+      crashed: true
+      status: ok
+      node_status: succeeded
+      dispatch_count: 1
+      dispatch_count_after_crash: 1
+      effect_state_before: completed
+      effect_state_after: completed
+      reconciliation_invoked: false
+      boundary_before: post_effect_pre_record
+    after_final_commit:
+      crashed: true
+      status: ok
+      node_status: succeeded
+      dispatch_count: 1
+      dispatch_count_after_crash: 1
+      effect_state_before: completed
+      effect_state_after: completed
+      reconciliation_invoked: false
+      boundary_before: commit

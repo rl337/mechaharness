@@ -1,0 +1,20 @@
+# Soft then hard budget exhaustion on linear graph
+kind: cli
+
+commands:
+  - graph_budget_limits:
+      node_cost: 1
+      soft_policy:
+        soft_limit: 1
+        hard_limit: null
+      hard_policy:
+        soft_limit: null
+        hard_limit: 1
+
+expect:
+  soft_status: soft_exhausted
+  soft_error: soft_budget_exceeded
+  soft_budget_level: soft
+  hard_status: failed
+  hard_error: hard_budget_exceeded
+  hard_budget_level: hard

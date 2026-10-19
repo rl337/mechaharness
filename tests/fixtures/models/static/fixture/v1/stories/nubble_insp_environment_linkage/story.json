@@ -2,10 +2,10 @@
   "id": "nubble_insp_environment_linkage",
   "persona": "nubble",
   "title": "Surface environment incompatibility as linkage failure",
-  "kind": "graph_execution",
+  "kind": "cli",
   "narrative": "Missing environment capability must become a structured pre-exec failure, not a mysterious mid-run error. Accepts inspiration requirement 16[^insp-r16].",
-  "implementation": "`InferenceEnvironment.assert_compatible` is consulted by `DefaultLinkageResolver`; mismatches become `environment_incompatible` edges.",
-  "validation": "Harness `graph_execution` op `environment_linkage_fail`. Soft expects environment_incompatible code when grants are required but absent.",
+  "implementation": "`DefaultLinkageResolver` environment grant check. `CliInstrumentor` verb `environment_linkage_fail`.",
+  "validation": "Harness `cli` scenario `grant_mismatch.yaml`.",
   "footnotes": [
     {
       "id": "insp-r16",
