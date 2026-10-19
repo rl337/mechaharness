@@ -35,6 +35,7 @@ from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+from tests.support.stdlib_doubles import mock_datetime_service
 
 CASES_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "transactional_durable_resume"
 
@@ -231,7 +232,7 @@ async def run_crash_case(
     *,
     db_path: Path,
 ) -> dict[str, Any]:
-    store = SqliteCheckpointStore(db_path)
+    store = SqliteCheckpointStore(db_path, datetime_service=mock_datetime_service())
     backend = FakeCodingJobBackend()
     run_id = str(case.data.get("run_id") or f"tdr-{case.id}")
     crash_at: CrashLocation = case.crash_location

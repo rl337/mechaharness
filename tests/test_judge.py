@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import httpx
 import pytest
+from pyiv.http import MemoryAsyncHttpClient
 
+from mechaharness.api_connection import SimpleHttpConnectionConfig
 from mechaharness.inference.judge import (
     ChoiceOption,
     ChoiceQuestion,
@@ -128,7 +129,7 @@ def test_reject_duplicate_question_ids() -> None:
 
 
 @pytest.mark.asyncio
-async def test_systemone_adapter_maps_wire(httpx_mock: object | None = None) -> None:
+async def test_systemone_adapter_maps_wire() -> None:
     """Transport-level mapping with a mocked HTTP response."""
     payload = {
         "model": "laya",
@@ -141,25 +142,23 @@ async def test_systemone_adapter_maps_wire(httpx_mock: object | None = None) -> 
         },
     }
 
-    async def handler(request: httpx.Request) -> httpx.Response:
-        assert request.url.path.endswith("/v1/systemone")
-        return httpx.Response(200, json=payload)
-
-    transport = httpx.MockTransport(handler)
-    async with httpx.AsyncClient(transport=transport, base_url="http://decide.test") as client:
-        provider = SystemOneJudgeProvider(
-            base_url="http://decide.test",
-            model="laya",
-            client=client,
-        )
-        result = await judge(
-            JudgeRequest(
-                state="refund",
-                state_hash=hash_state("refund"),
-                questions=_mixed_questions()[:2],  # type: ignore[arg-type]
-                question_set_version="v1",
-            ),
-            provider=provider,
-        )
+    client = MemoryAsyncHttpClient()
+    client.add("POST", "http://decide.test/v1/systemone", json=payload)
+    connection = SimpleHttpConnectionConfig(
+        base_url="http://decide.test",
+        path="/v1/systemone",
+        model="laya",
+    )
+    provider = SystemOneJudgeProvider(connection=connection, client=client)
+    result = await judge(
+        JudgeRequest(
+            state="refund",
+            state_hash=hash_state("refund"),
+            questions=_mixed_questions()[:2],  # type: ignore[arg-type]
+            question_set_version="v1",
+        ),
+        provider=provider,
+    )
     assert result.provenance.provider == "systemone"
     assert {a.id for a in result.answers} == {"escalate", "route"}
+    assert client.requests and client.requests[0].url.endswith("/v1/systemone")

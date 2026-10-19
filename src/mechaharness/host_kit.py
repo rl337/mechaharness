@@ -92,10 +92,13 @@ from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Any, Union, cast
 
+from pyiv.injector import Injector
+from pyiv.time import DateTimeService
+
 from mechaharness.authority_gate import AuthorityGate
 from mechaharness.checkpoint_store import CheckpointStore
 from mechaharness.consequence import ConsequencePolicy
-from mechaharness.core.access import GraphEscalate, GraphExecute
+from mechaharness.core.access import AccessControl, GraphEscalate, GraphExecute
 from mechaharness.core.events import EventLog, InMemoryEventLog
 from mechaharness.denial_store import DenialStore
 from mechaharness.di import MechaHarnessConfig, get_injector
@@ -127,11 +130,11 @@ class TappingEventLog:
 
     def __init__(
         self,
-        store: EventLog | None = None,
+        store: EventLog,
         *,
         on_event: Callable[[Any], None] | None = None,
     ) -> None:
-        self._store = store if store is not None else InMemoryEventLog()
+        self._store = store
         self._on_event = on_event
 
     def emit(self, event: Any) -> None:
@@ -151,8 +154,15 @@ def tapping_event_log(
     *,
     on_event: Callable[[Any], None] | None = None,
 ) -> TappingEventLog:
-    """Build a tapping EventLog for ``host_graph_executor(event_log=...)``."""
-    return TappingEventLog(store, on_event=on_event)
+    """Build a tapping EventLog for ``host_graph_executor(event_log=...)``.
+
+    When ``store`` is omitted, uses a fresh ``InMemoryEventLog`` (explicit
+    host-kit convenience, not a Config locator default).
+    """
+    return TappingEventLog(
+        store if store is not None else InMemoryEventLog(),
+        on_event=on_event,
+    )
 
 SubmitCallable = Callable[
     [GraphNode, EffectRecord, GraphRunContext],
@@ -392,6 +402,7 @@ def host_graph_executor(
 
         >>> import tempfile
         >>> from pathlib import Path
+        >>> from pyiv.time import PythonDateTimeService
         >>> from mechaharness.host_kit import (
         ...     SubmitOnceEffectfulRunner, host_graph_executor,
         ... )
@@ -399,7 +410,10 @@ def host_graph_executor(
         >>> runner = SubmitOnceEffectfulRunner(
         ...     kinds=["coding_job"], backend_id="host.coding",
         ... )
-        >>> store = SqliteCheckpointStore(Path(tempfile.mkdtemp()) / "x.sqlite")
+        >>> store = SqliteCheckpointStore(
+        ...     Path(tempfile.mkdtemp()) / "x.sqlite",
+        ...     datetime_service=PythonDateTimeService(),
+        ... )
         >>> try:
         ...     host_graph_executor(
         ...         runners=[runner],
@@ -419,10 +433,9 @@ def host_graph_executor(
         registry = GraphNodeRunnerRegistry(list(runners))
 
     grant_list = list(grants) if grants is not None else [GraphExecute, GraphEscalate]
-    store = checkpoint_store
-    if store is None and checkpoint_path is not None:
-        store = SqliteCheckpointStore(str(checkpoint_path))
-    probe = crash_probe if crash_probe is not None else NoopCrashProbe()
+    prebuilt_store = checkpoint_store
+    sqlite_path = checkpoint_path
+    probe = crash_probe
     aid = agent_id
     elog = event_log
 
@@ -439,18 +452,26 @@ def host_graph_executor(
         def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
             return registry
 
-        def get_checkpoint_store(self) -> CheckpointStore:
-            if store is not None:
-                return store
-            return super().get_checkpoint_store()
+        def get_checkpoint_store(self) -> CheckpointStore | None:
+            return prebuilt_store
 
-        def get_crash_probe(self) -> CrashProbe:
-            return probe
+        def get_crash_probe(self) -> CrashProbe | type[CrashProbe]:
+            return probe if probe is not None else NoopCrashProbe
 
-        def get_event_log(self) -> EventLog:
-            if elog is not None:
-                return elog
-            return super().get_event_log()
+        def get_event_log(self) -> EventLog | None:
+            return elog
+
+        def configure(self) -> None:
+            super().configure()
+            if prebuilt_store is None and sqlite_path is not None:
+
+                def make_sqlite(injector: Injector) -> CheckpointStore:
+                    return SqliteCheckpointStore(
+                        str(sqlite_path),
+                        datetime_service=injector.inject(DateTimeService),
+                    )
+
+                self.register(CheckpointStore, make_sqlite, singleton=True)
 
     executor = cast(GraphExecutor, get_injector(_HostKitConfig).inject(GraphExecutor))
     executor.agent_id = aid
@@ -532,11 +553,16 @@ def host_authority_gate(
                 return bound
             return super().get_denial_store()
 
-        def get_authority_gate(self) -> AuthorityGate:
-            return AuthorityGate(
-                access=self.get_access_control(),
-                consequence=policy,
-                denials=self.get_denial_store(),
-            )
+        def configure(self) -> None:
+            super().configure()
+
+            def make_gate(injector: Injector) -> AuthorityGate:
+                return AuthorityGate(
+                    access=injector.inject(AccessControl),
+                    denials=injector.inject(DenialStore),
+                    consequence=policy,
+                )
+
+            self.register(AuthorityGate, make_gate, singleton=True)
 
     return cast(AuthorityGate, get_injector(_HostGateConfig).inject(AuthorityGate))

@@ -10,6 +10,7 @@ from mechaharness.budget import BudgetPolicy
 from mechaharness.external_effect import EffectRecord, EffectState
 from mechaharness.graph import NodeStatus
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+from tests.support.stdlib_doubles import mock_datetime_service
 from tests.support.transactional_durable_resume_cases import (
     FakeCodingJobBackend,
     assert_expect,
@@ -48,7 +49,9 @@ async def test_uncertain_effect_without_backend_job_needs_attention(
     tmp_path: Path,
 ) -> None:
     """DR-06: unknowable uncertain acceptance must not redispatch."""
-    store = SqliteCheckpointStore(tmp_path / "uncertain.sqlite")
+    store = SqliteCheckpointStore(
+        tmp_path / "uncertain.sqlite", datetime_service=mock_datetime_service()
+    )
     backend = FakeCodingJobBackend()
     backend.unknown_effect_ids = {"run-u:dispatch:1"}
     run_id = "run-u"

@@ -70,10 +70,9 @@ class ScriptedHarnessConfig(MechaHarnessConfig):
     def include_subagent_tools(self) -> bool:
         return self._include_subagent_tools or self._harness_config.subagent_tools
 
-    def get_event_log(self) -> EventLog:
-        if self._provided_event_log is not None:
-            return self._provided_event_log
-        return super().get_event_log()
+    def get_event_log(self) -> EventLog | None:
+        """Optional override; ``None`` → Config Fanout factory (injects LoggerFactory)."""
+        return self._provided_event_log
 
     def get_access_policy(self) -> GrantPolicyLike:
         if self._access_policy is not None:

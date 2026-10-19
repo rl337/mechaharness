@@ -17,6 +17,7 @@ import pytest
 from mechaharness.host_kit import SubmitOnceEffectfulRunner, host_graph_executor
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
 from tests.support.host_kit_cases import assert_expect, iter_cases, run_case
+from tests.support.stdlib_doubles import mock_datetime_service
 
 _CASES = iter_cases()
 
@@ -48,7 +49,9 @@ def test_submit_once_requires_kinds() -> None:
 
 def test_host_graph_executor_rejects_checkpoint_both(tmp_path: Path) -> None:
     runner = SubmitOnceEffectfulRunner(kinds=["coding_job"], backend_id="x")
-    store = SqliteCheckpointStore(tmp_path / "a.sqlite")
+    store = SqliteCheckpointStore(
+        tmp_path / "a.sqlite", datetime_service=mock_datetime_service()
+    )
     with pytest.raises(ValueError, match="not both"):
         host_graph_executor(
             runners=[runner],
