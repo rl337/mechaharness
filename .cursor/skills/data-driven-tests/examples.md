@@ -59,7 +59,7 @@ Use `phases` when a later run depends on a checkpoint mutation:
 
 Delta call logs per phase in the test loop so phase-2 expects stay local.
 
-## Conversion sketch
+## Conversion sketch — JSON tier
 
 **Before** (proliferation):
 
@@ -76,9 +76,37 @@ async def test_failure_policy_fail_stops_node(): ...
 3. Single `test_<domain>_case` parametrize
 4. Keep `test_registry_rejects_duplicate_kind` as a structural unit test
 
-## Inline tables (still OK)
+## Conversion sketch — struct tier
 
-Small pure functions may stay as `@pytest.mark.parametrize` without files:
+**Before**:
+
+```python
+def test_simple_http_joins_base_and_path(): ...
+def test_full_url_override(): ...
+def test_custom_path(): ...
+```
+
+**After** (no `tests/fixtures/` needed):
+
+```python
+@dataclass(frozen=True)
+class _EndpointCase:
+    id: str
+    kwargs: dict
+    endpoint: str
+
+
+@pytest.mark.parametrize("case", _CASES, ids=lambda c: c.id)
+def test_endpoint_url_from_fields(case: _EndpointCase) -> None:
+    assert SimpleHttpConnectionConfig(**case.kwargs).endpoint_url() == case.endpoint
+```
+
+Same idea for policy/allowlist/error matrices — see `tests/test_access.py`,
+`tests/test_api_connection.py`, `tests/test_tool_phase.py`.
+
+## Inline tables (struct tier)
+
+Small pure functions stay as `@pytest.mark.parametrize` without files:
 
 ```python
 @pytest.mark.parametrize(
