@@ -1,0 +1,18 @@
+# OBS-01: one infer emits exactly the baseline EventLog set (inference + cost)
+kind: cli
+
+commands:
+  - infer:
+      prompt: Say hello.
+
+expect:
+  event_types_exactly:
+    - core:access_check
+    - core:graph_start
+    - core:graph_node_start
+    - core:cost
+    - core:inference
+    - core:graph_node_end
+    - core:graph_end
+  units_positive: true
+  text_nonempty: true

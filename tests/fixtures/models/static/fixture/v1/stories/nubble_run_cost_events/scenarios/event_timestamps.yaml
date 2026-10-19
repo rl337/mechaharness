@@ -1,0 +1,12 @@
+# OBS-01: inference and cost event timestamps follow the bound clock
+kind: cli
+
+commands:
+  - set_clock:
+      at: "2026-01-15T12:00:00Z"
+  - infer:
+      prompt: Say hello.
+
+expect:
+  inference_ts: "2026-01-15T12:00:00Z"
+  cost_ts: "2026-01-15T12:00:00Z"

@@ -25,8 +25,8 @@ CLI presentation. MCP is an adapter, not core.
 | R-IOC-IDEMPOTENT / DG-09 | Sequence + idempotency | `resume(..., idempotency_key=)` | story | `fangore_insp_guidance_resume_idempotent` | — |
 | R-IOC-AUTH / DG-10 | Controller lease; advice ≠ approval | `LeaseControllerAuth`, `ApprovalInterrupt` cite | story | `fangore_insp_guidance_controller_auth` | Explicit lease transfer (M5) |
 | R-IOC-BUDGET / DG-11 | Local work vs guidance frequency | `GeneratorCostCounters` / `inspect().cost` | partial | `nubble_insp_guidance_cost_budget` | Deep cost accountant integration later |
-| R-IOC-MCP / DG-05 | Stdio MCP adapter | `mcp_graph_driver.py`, `FileGeneratorRunStore` | story | `fangore_insp_mcp_graph_driver` | — |
-| R-IOC-DRIVERS / DG-06 | Shared agent/CLI/script contract | core ops + `ScriptedDriver` + MCP | partial | `fangore_insp_shared_driver_contract` | CLI/TUI clients (M4) |
+| R-IOC-MCP / DG-05 | Stdio MCP adapter | `mcp_graph_driver.py`, `FileGeneratorRunStore` | unit/doctest | `tests/test_mcp_graph_driver.py`, module doctest | — |
+| R-IOC-DRIVERS / DG-06 | Shared agent/CLI/script contract | `durable_generator_host`, `ScriptedDriver`, MCP | partial | durable `scenario.yaml` stories + MCP doctest | CLI/TUI clients (soft-point UI; M4) |
 | R-IOC-OFFLINE / DG-07 | No live models required | ScriptedDriver + generator stories | story | covered by replay / generator stories | — |
 
 ## Related inspirations

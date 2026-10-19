@@ -1,0 +1,15 @@
+# Complete a registered recipe with no guidance yields
+kind: durable_generator
+graph: verify_repair
+controller: story
+store: memory
+
+steps:
+  - start:
+      inputs:
+        goal: trivial
+    expect:
+      kind: completed
+      sequence: 1
+      recipe_listed: true
+      guidance_yields: 0

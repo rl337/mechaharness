@@ -1,0 +1,42 @@
+# Intruder cannot answer; ordinary guidance cannot satisfy final_approval
+kind: durable_generator
+graph: verify_repair
+controller: owner
+store: memory
+
+steps:
+  - start:
+      run_id: auth-1
+      inputs:
+        guidance:
+          - question: Owned?
+            choices:
+              - id: a
+                label: A
+    expect:
+      kind: advice_requested
+
+  - answer:
+      choose: a
+      controller: intruder
+    expect_error: permission
+
+  - inspect: {}
+    expect:
+      controller_ok: true
+
+  - start:
+      run_id: auth-2
+      inputs:
+        guidance:
+          - question: Ship?
+            requested_authority: final_approval
+            choices:
+              - id: "yes"
+                label: "Yes"
+    expect:
+      kind: advice_requested
+
+  - answer:
+      choose: "yes"
+    expect_error: permission

@@ -8,6 +8,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from tests.stories.scenarios.cli_scenario import load_cli_scenario
+from tests.stories.scenarios.durable_generator_scenario import load_durable_scenario
+
 FIXTURES_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "models"
 REQUIRED_STORY_FIELDS = (
     "id",
@@ -31,7 +34,7 @@ TWIN_PARITY_FIELDS = (
 
 @dataclass(frozen=True)
 class StoryCase:
-    """One (model version, story) pair under ``tests/fixtures/models``."""
+    """One (model version, story[, scenario]) under ``tests/fixtures/models``."""
 
     family: str
     model: str
@@ -39,6 +42,7 @@ class StoryCase:
     story_id: str
     adapter: str
     root: Path
+    scenario_relpath: str | None = None
 
     @property
     def model_key(self) -> str:
@@ -46,17 +50,29 @@ class StoryCase:
 
     @property
     def label(self) -> str:
-        return f"{self.model_key}/{self.version}/{self.story_id}"
+        base = f"{self.model_key}/{self.version}/{self.story_id}"
+        if self.scenario_relpath:
+            stem = Path(self.scenario_relpath).stem
+            return f"{base}/{stem}"
+        return base
 
     def path(self, name: str) -> Path:
         return self.root / name
+
+    def scenario_path(self) -> Path | None:
+        if self.scenario_relpath is None:
+            return None
+        return self.root / self.scenario_relpath
 
     def load_json(self, name: str) -> dict[str, Any]:
         return json.loads(self.path(name).read_text(encoding="utf-8"))
 
 
 def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
-    """Walk ``family/model/version/stories/id`` trees."""
+    """Walk ``family/model/version/stories/id`` trees.
+
+    ``kind: cli`` stories expand to one case per ``scenarios/*.yaml``.
+    """
     cases: list[StoryCase] = []
     if not FIXTURES_ROOT.is_dir():
         return cases
@@ -74,18 +90,38 @@ def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
         if not stories_dir.is_dir():
             continue
         for story_dir in sorted(p for p in stories_dir.iterdir() if p.is_dir()):
-            if not (story_dir / "story.json").is_file():
+            story_json = story_dir / "story.json"
+            if not story_json.is_file():
                 continue
-            cases.append(
-                StoryCase(
-                    family=family,
-                    model=model,
-                    version=version,
-                    story_id=story_dir.name,
-                    adapter=adapter,
-                    root=story_dir,
-                )
+            meta = json.loads(story_json.read_text(encoding="utf-8"))
+            kind = meta.get("kind")
+            base = dict(
+                family=family,
+                model=model,
+                version=version,
+                story_id=story_dir.name,
+                adapter=adapter,
+                root=story_dir,
             )
+            if kind == "cli":
+                scenarios_dir = story_dir / "scenarios"
+                yaml_files = (
+                    sorted(scenarios_dir.glob("*.yaml"))
+                    if scenarios_dir.is_dir()
+                    else []
+                )
+                if not yaml_files:
+                    cases.append(StoryCase(**base))
+                    continue
+                for yaml_path in yaml_files:
+                    cases.append(
+                        StoryCase(
+                            **base,
+                            scenario_relpath=f"scenarios/{yaml_path.name}",
+                        )
+                    )
+                continue
+            cases.append(StoryCase(**base))
     return cases
 
 
@@ -183,6 +219,35 @@ def validate_story_fixtures() -> list[str]:
                 f"{path}: kind {kind!r} is not a registered story harness; "
                 f"known: {sorted(HARNESSES)}"
             )
+            continue
+        # App harnesses (YAML scenarios) — no request.op dispatch.
+        if kind == "durable_generator":
+            scenario_path = case.path("scenario.yaml")
+            if not scenario_path.is_file():
+                errors.append(
+                    f"{scenario_path}: missing scenario.yaml for harness {kind!r}"
+                )
+                continue
+            try:
+                load_durable_scenario(scenario_path)
+            except (ValueError, OSError) as exc:
+                errors.append(str(exc))
+            continue
+        if kind == "cli":
+            scenarios_dir = case.path("scenarios")
+            yaml_files = (
+                sorted(scenarios_dir.glob("*.yaml")) if scenarios_dir.is_dir() else []
+            )
+            if not yaml_files:
+                errors.append(
+                    f"{scenarios_dir}: missing scenarios/*.yaml for harness {kind!r}"
+                )
+                continue
+            for yaml_path in yaml_files:
+                try:
+                    load_cli_scenario(yaml_path)
+                except (ValueError, OSError) as exc:
+                    errors.append(str(exc))
             continue
         req_path = case.path("request.json")
         if not req_path.is_file():

@@ -111,8 +111,8 @@ Cursor-compatible NDJSON handshake (initialize + tools/list)::
     >>> "generator_start" in names and "generator_resume" in names
     True
 
-See also: ``docs/reference/durable-graph-generators.md`` and user story
-``fangore_insp_mcp_graph_driver``.
+See also: ``docs/reference/durable-graph-generators.md`` and durable
+``scenario.yaml`` stories under harness kind ``durable_generator``.
 """
 
 from __future__ import annotations

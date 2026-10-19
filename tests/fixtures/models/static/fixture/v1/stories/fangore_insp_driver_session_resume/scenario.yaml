@@ -1,0 +1,23 @@
+# Separate start and answer calls (no recursive callback)
+kind: durable_generator
+graph: verify_repair
+controller: session
+store: memory
+
+steps:
+  - start:
+      run_id: session-1
+      inputs:
+        guidance:
+          - question: Direction?
+            choices:
+              - id: a
+                label: A
+    expect:
+      kind: advice_requested
+
+  - answer:
+      choose: a
+    expect:
+      kind: completed
+      separate_calls: true

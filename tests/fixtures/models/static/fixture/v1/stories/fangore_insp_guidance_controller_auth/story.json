@@ -2,10 +2,10 @@
   "id": "fangore_insp_guidance_controller_auth",
   "persona": "fangore",
   "title": "Enforce controller ownership and keep advice distinct from approval",
-  "kind": "durable_graph_generator",
+  "kind": "durable_generator",
   "narrative": "Possession of a run id alone must not confer control. An intruder controller cannot resume; ordinary guidance cannot satisfy final-approval authority \u2014 that remains `fangore_insp_approval_interrupt`. Tracks R-IOC-AUTH[^insp-ioc-07].",
   "implementation": "`LeaseControllerAuth` / `GeneratorControllerAuth` on resume/cancel; `requested_authority=final_approval` raises PermissionError pointing hosts at ApprovalInterrupt.",
-  "validation": "Harness `durable_graph_generator` op `durable_controller_auth`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.",
+  "validation": "Harness `durable_generator` via `scenario.yaml`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.",
   "footnotes": [
     {
       "id": "insp-ioc-07",
