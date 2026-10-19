@@ -5,5 +5,23 @@
     "mechaharness/capability_envelope.py",
     "mechaharness/core/access.py",
     "mechaharness/delegation_policy.py"
+  ],
+  "probes": [
+    {
+      "kind": "model_fields",
+      "name": "envelope",
+      "target": "mechaharness.capability_envelope:CapabilityEnvelope",
+      "has": [
+        "grants",
+        "tool_names",
+        "version"
+      ],
+      "missing": [
+        "principal",
+        "expiry",
+        "trust_origin",
+        "authorization_epoch"
+      ]
+    }
   ]
 }

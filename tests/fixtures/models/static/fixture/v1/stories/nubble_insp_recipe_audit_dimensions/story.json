@@ -5,7 +5,7 @@
   "kind": "inspiration_delta_contract",
   "narrative": "Quarterly audits need recipe selection, model/tool usage, latency/cost, freshness, policy decisions, retries, and failure classes without reading entire transcripts. Cost and decision telemetry already ship via `fangore_decision_plane_telemetry` and `nubble_insp_trace_envelope`. Tracks MH-PA-08[^insp-pa-08].",
   "implementation": "DecisionLog, TraceEnvelope, Cost events, bounded_retry recipe telemetry. Desired: recipe-selection and freshness as first-class audit dimensions end-to-end.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-08, coverage partial, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-08, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-pa-08",

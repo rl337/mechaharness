@@ -6,5 +6,23 @@
     "mechaharness/harness_experiment.py",
     "mechaharness/evaluator.py",
     "mechaharness/objective_policy.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "research",
+      "module": "mechaharness.research",
+      "has": [
+        "ResearchLab"
+      ]
+    },
+    {
+      "kind": "module_symbols",
+      "name": "evolve",
+      "module": "mechaharness",
+      "missing": [
+        "evolve_recipe_candidates"
+      ]
+    }
   ]
 }

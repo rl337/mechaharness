@@ -5,7 +5,7 @@
   "kind": "inspiration_delta_contract",
   "narrative": "Leading candidates must face a separate untouched final test set at the release gate; that set must not be a continuous tuning signal. Evaluator held_out metadata exists (`taloneth_insp_evaluator_compose`). Tracks MH-SR-07[^insp-sr-07].",
   "implementation": "Evaluator.held_out and decision-export anti-leakage helpers. Desired: mandatory final-test release gate enforced at recipe promote.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-07, coverage partial, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-07, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-sr-07",

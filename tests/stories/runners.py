@@ -3806,27 +3806,138 @@ async def _run_efficiency_scorecard_build(case: StoryCase, backend: StoryBackend
     _assert_expect(actual, expect)
 
 async def _run_inspiration_delta_contract(case: StoryCase, backend: StoryBackend) -> None:
-    """Document an inspiration delta against adjacent shipped modules.
+    """Acceptance-test an inspiration delta against adjacent shipped surfaces.
 
-    Gap/partial stories assert that named adjacent source files exist and that
-    the fixture records the intended coverage level — not that the product
-    contract is fully shipped.
+    Stories record coverage (story/partial/gap), verify adjacent source files,
+    and run typed probes against live models/catalogs so expects encode the
+    honest current product state (not only documentation).
     """
     del backend
+    import importlib
     from pathlib import Path as _Path
+
+    from mechaharness.graph_templates.base import SoftPoint
+    from mechaharness.graph_templates.catalog import default_graph_template_classes
+    from mechaharness.operation_registry import EffectKind
 
     request = case.load_json("request.json")
     expect = case.load_json("expect.json")
     src_root = _Path(__file__).resolve().parents[1].parent / "src"
-    missing: list[str] = []
+    missing_files: list[str] = []
     for rel in request.get("adjacent_modules", []):
         if not (src_root / rel).is_file():
-            missing.append(rel)
+            missing_files.append(rel)
+
+    probe_failures: list[str] = []
+    probe_actual: dict[str, Any] = {}
+    for probe in request.get("probes") or []:
+        kind = probe["kind"]
+        name = str(probe.get("name") or kind)
+        if kind == "model_fields":
+            mod_name, _, attr = str(probe["target"]).partition(":")
+            model = getattr(importlib.import_module(mod_name), attr)
+            fields = set(model.model_fields)
+            for field in probe.get("has") or []:
+                if field not in fields:
+                    probe_failures.append(f"{name}: missing field {field}")
+            for field in probe.get("missing") or []:
+                if field in fields:
+                    probe_failures.append(f"{name}: unexpected field {field}")
+            probe_actual[f"{name}_field_count"] = len(fields)
+        elif kind == "catalog_names":
+            catalog = set(default_graph_template_classes())
+            for recipe in probe.get("has") or []:
+                if recipe not in catalog:
+                    probe_failures.append(f"{name}: missing recipe {recipe}")
+            for recipe in probe.get("missing") or []:
+                if recipe in catalog:
+                    probe_failures.append(f"{name}: unexpected recipe {recipe}")
+            probe_actual[f"{name}_catalog_size"] = len(catalog)
+        elif kind == "module_symbols":
+            mod = importlib.import_module(str(probe["module"]))
+            for sym in probe.get("has") or []:
+                if not hasattr(mod, sym):
+                    probe_failures.append(f"{name}: missing symbol {sym}")
+            for sym in probe.get("missing") or []:
+                if hasattr(mod, sym):
+                    probe_failures.append(f"{name}: unexpected symbol {sym}")
+        elif kind == "soft_point_fields":
+            fields = set(SoftPoint.model_fields)
+            for field in probe.get("has") or []:
+                if field not in fields:
+                    probe_failures.append(f"{name}: missing SoftPoint field {field}")
+            for field in probe.get("missing") or []:
+                if field in fields:
+                    probe_failures.append(f"{name}: unexpected SoftPoint field {field}")
+            probe_actual[f"{name}_soft_point_fields"] = sorted(fields)
+        elif kind == "effect_kind_values":
+            # EffectKind is a Literal typing alias — probe via get_args.
+            from typing import get_args
+
+            values = set(get_args(EffectKind))
+            for value in probe.get("has") or []:
+                if value not in values:
+                    probe_failures.append(f"{name}: missing effect kind {value}")
+            for value in probe.get("missing") or []:
+                if value in values:
+                    probe_failures.append(f"{name}: unexpected effect kind {value}")
+            probe_actual[f"{name}_effect_kinds"] = sorted(values)
+        elif kind == "type_attrs":
+            mod_name, _, attr = str(probe["target"]).partition(":")
+            typ = getattr(importlib.import_module(mod_name), attr)
+            for field in probe.get("has") or []:
+                if not hasattr(typ, field):
+                    probe_failures.append(f"{name}: missing attr {field}")
+            for field in probe.get("missing") or []:
+                if hasattr(typ, field) and field not in getattr(typ, "model_fields", {}):
+                    # class attrs / annotations only — model_fields handled separately
+                    if field in getattr(typ, "__annotations__", {}):
+                        probe_failures.append(f"{name}: unexpected attr {field}")
+                    elif hasattr(typ, field) and field not in {
+                        "name",
+                        "version",
+                        "status",
+                        "category",
+                        "summary",
+                        "soft_points",
+                    }:
+                        # Only flag dedicated promotion/lineage attrs if present as class vars
+                        val = getattr(typ, field, None)
+                        if val is not None and field in (probe.get("missing") or []):
+                            probe_failures.append(f"{name}: unexpected attr {field}")
+            # Honest check: promotion_pointer / lineage must not be class attributes
+            for field in probe.get("missing") or []:
+                if field in getattr(typ, "__dict__", {}):
+                    probe_failures.append(f"{name}: unexpected class attr {field}")
+        elif kind == "evaluator_held_out":
+            from mechaharness.evaluator import CallableEvaluator, Evaluator
+
+            probe_actual[f"{name}_has_held_out"] = hasattr(Evaluator, "held_out")
+            ev = CallableEvaluator(lambda _subject: [], held_out=True)
+            probe_actual[f"{name}_held_out_value"] = bool(ev.held_out)
+            has_gate = hasattr(ev, "require_final_test_gate") or hasattr(
+                Evaluator, "require_final_test_gate"
+            )
+            probe_actual[f"{name}_has_final_test_gate"] = has_gate
+            if probe.get("expect_held_out_field") and not probe_actual[f"{name}_has_held_out"]:
+                probe_failures.append(f"{name}: Evaluator.held_out missing")
+            if probe.get("expect_final_test_gate") is False and has_gate:
+                probe_failures.append(f"{name}: unexpected final-test gate API")
+            if probe.get("expect_final_test_gate") is True and not has_gate:
+                probe_failures.append(f"{name}: final-test gate API missing")
+        else:
+            probe_failures.append(f"unknown probe kind {kind!r}")
+
     actual = {
         "requirement_id": request["requirement_id"],
         "coverage": request["coverage"],
-        "adjacent_ok": not missing,
-        "missing_count": len(missing),
+        "adjacent_ok": not missing_files,
+        "missing_count": len(missing_files),
+        "probes_ok": not probe_failures,
+        "probe_failure_count": len(probe_failures),
+        **probe_actual,
     }
+    if probe_failures and expect.get("probes_ok", True):
+        raise AssertionError("; ".join(probe_failures))
     _assert_expect(actual, expect)
 

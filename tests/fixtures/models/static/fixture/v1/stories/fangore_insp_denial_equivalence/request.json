@@ -4,5 +4,16 @@
   "adjacent_modules": [
     "mechaharness/core/access.py",
     "mechaharness/judgement_policy.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "denial",
+      "module": "mechaharness",
+      "missing": [
+        "DenialStore",
+        "EquivalentActionMatcher"
+      ]
+    }
   ]
 }

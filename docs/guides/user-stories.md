@@ -188,7 +188,7 @@ DecisionLog, TraceEnvelope, Cost events, bounded_retry recipe telemetry. Desired
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-08, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-08, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -221,7 +221,7 @@ DecisionLog, TraceEnvelope, trace reconciliation, model input manifest. Desired:
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-09, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-09, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -850,7 +850,7 @@ JudgementPolicy.decide and RulesDecisionBackend provide model-proposes/code-deci
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-06, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-06, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -899,7 +899,7 @@ CheckpointStore, SqliteCheckpointStore effect rows, HostKit submit-once. Desired
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-06, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-06, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -915,7 +915,7 @@ Axes exist separately (AccessPolicy/grants, CapabilityEnvelope, ConsequencePolic
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-02, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-02, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1015,7 +1015,7 @@ IsolationContract, workspace isolation, HandoffRecord, CapabilityEnvelope. Desir
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-07, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-07, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1031,7 +1031,7 @@ concurrent_write_conflicts, fan-in merge, StopContract, CheckpointStore, decisio
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-08, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-08, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1047,7 +1047,7 @@ Denials today are ephemeral AccessControl / Verdict outcomes. Desired: durable d
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-05, coverage gap, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-05, coverage gap, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1096,7 +1096,7 @@ Linkage/fingerprint re-resolve and approval digests exist. Desired: mandatory pr
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-02, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-02, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1112,7 +1112,7 @@ Config/DI graph_template_classes and recipe registry; ownership prose in recipes
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-09, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-09, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1128,7 +1128,7 @@ CapabilityEnvelope.narrow and delegation policy choose child scope. Desired: exe
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-01, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-01, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1471,7 +1471,7 @@ Agentic Recipes `independent_review` and `verify_repair` plus isolation/budget c
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-03, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-03, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1487,7 +1487,7 @@ Stamp provenance on templates; ResearchLab promote/rollback; rule_promotion. Des
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-05, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-05, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1503,7 +1503,7 @@ TemplateIOContract / IsolationContract typed I/O surface. Desired: automated typ
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-04, coverage gap, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-04, coverage gap, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1519,7 +1519,7 @@ GraphTemplate.version/status/fingerprints and demotion. Desired: immutable versi
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-01, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-01, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1535,7 +1535,7 @@ GraphTemplateRegistry, tile/nest, embed_recipe_as_tool. Desired: hard production
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-02, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-02, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1568,7 +1568,7 @@ SoftPoint contracts and soft-vs-hard grants. Desired: explicit evolution allowli
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-03, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-03, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1682,7 +1682,7 @@ Adjacent: EffectKind / OBSERVE reconcile, ObserveBefore/After lifecycle, flat To
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-03, coverage gap, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-03, coverage gap, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -1698,7 +1698,7 @@ Adjacent: harness `ToolResult` in `mechaharness.core.types` (tool_call_id/conten
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-01, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-01, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -2134,7 +2134,7 @@ PromotionRecord / promote_soft_to_hard / rollback_promotion and failure attribut
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-07, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-07, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -2378,7 +2378,7 @@ ResearchLab, harness experiments, evaluator, ObjectivePolicy, decision-plane sha
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-06, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-06, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -2394,7 +2394,7 @@ Evaluator.held_out and decision-export anti-leakage helpers. Desired: mandatory 
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-07, coverage partial, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-07, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 
@@ -2445,7 +2445,7 @@ General evaluator / eval_matrix / independent_review recipe. Desired: dedicated 
 
 #### Validation
 
-Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-08, coverage gap, adjacent_ok true.
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-08, coverage gap, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.
 
 #### Footnotes
 

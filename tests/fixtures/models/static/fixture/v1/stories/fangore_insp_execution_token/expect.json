@@ -2,5 +2,8 @@
   "requirement_id": "MH-DOTS-01",
   "coverage": "partial",
   "adjacent_ok": true,
-  "missing_count": 0
+  "missing_count": 0,
+  "probes_ok": true,
+  "probe_failure_count": 0,
+  "envelope_field_count": 11
 }

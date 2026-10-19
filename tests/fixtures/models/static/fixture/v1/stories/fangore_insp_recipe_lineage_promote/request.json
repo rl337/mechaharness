@@ -5,5 +5,25 @@
     "mechaharness/rule_promotion.py",
     "mechaharness/research.py",
     "mechaharness/graph_templates/base.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "promo",
+      "module": "mechaharness.rule_promotion",
+      "has": [
+        "promote_soft_to_hard",
+        "rollback_promotion"
+      ]
+    },
+    {
+      "kind": "type_attrs",
+      "name": "template",
+      "target": "mechaharness.graph_templates.base:GraphTemplate",
+      "missing": [
+        "lineage",
+        "promotion_pointer"
+      ]
+    }
   ]
 }

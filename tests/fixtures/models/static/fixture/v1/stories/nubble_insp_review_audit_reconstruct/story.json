@@ -5,7 +5,7 @@
   "kind": "inspiration_delta_contract",
   "narrative": "Audits must reconstruct review decision, policy revision, source trust, delegated scope, denial reason, user approval, and actual side effects without relying on model memory. Related: `taloneth_policy_replay`, `nubble_insp_trace_reconciliation`. Tracks MH-DOTS-09[^insp-dots-09].",
   "implementation": "DecisionLog, TraceEnvelope, trace reconciliation, model input manifest. Desired: unified review-audit API tying recipe selection, policy, approvals, denials, and effects.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-09, coverage partial, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-09, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-dots-09",

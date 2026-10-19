@@ -5,5 +5,24 @@
     "mechaharness/core/types.py",
     "mechaharness/context_provider.py",
     "mechaharness/decision_plane_runtime.py"
+  ],
+  "probes": [
+    {
+      "kind": "model_fields",
+      "name": "tool_result",
+      "target": "mechaharness.core.types:ToolResult",
+      "has": [
+        "tool_call_id",
+        "content",
+        "is_error"
+      ],
+      "missing": [
+        "observed_at",
+        "fetched_at",
+        "expiry",
+        "freshness",
+        "source"
+      ]
+    }
   ]
 }

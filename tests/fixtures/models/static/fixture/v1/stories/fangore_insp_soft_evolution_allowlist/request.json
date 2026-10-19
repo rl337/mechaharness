@@ -3,5 +3,18 @@
   "coverage": "partial",
   "adjacent_modules": [
     "mechaharness/graph_templates/base.py"
+  ],
+  "probes": [
+    {
+      "kind": "soft_point_fields",
+      "name": "soft",
+      "has": [
+        "name",
+        "kind"
+      ],
+      "missing": [
+        "evolution_eligible"
+      ]
+    }
   ]
 }

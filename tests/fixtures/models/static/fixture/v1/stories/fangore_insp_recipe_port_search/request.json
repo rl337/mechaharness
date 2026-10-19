@@ -3,5 +3,23 @@
   "coverage": "gap",
   "adjacent_modules": [
     "mechaharness/isolation_contract.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "iso",
+      "module": "mechaharness.isolation_contract",
+      "has": [
+        "IsolationContract"
+      ]
+    },
+    {
+      "kind": "module_symbols",
+      "name": "search",
+      "module": "mechaharness",
+      "missing": [
+        "search_compatible_recipes"
+      ]
+    }
   ]
 }

@@ -4,5 +4,23 @@
   "adjacent_modules": [
     "mechaharness/graph_templates/base.py",
     "mechaharness/recipe_runner.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "registry",
+      "module": "mechaharness.graph_templates.base",
+      "has": [
+        "GraphTemplateRegistry"
+      ]
+    },
+    {
+      "kind": "module_symbols",
+      "name": "constraint",
+      "module": "mechaharness",
+      "missing": [
+        "require_registry_only_compose"
+      ]
+    }
   ]
 }

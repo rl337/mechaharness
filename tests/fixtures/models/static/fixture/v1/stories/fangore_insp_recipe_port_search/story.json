@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Search compatible recipe compositions by typed ports",
   "kind": "inspiration_delta_contract",
-  "narrative": "Candidate compositions must search only registered, compatible recipes using typed ports \u2014 no arbitrary executable generation on the production path. Isolation I/O contracts exist (`fangore_insp_isolation_io`). Tracks MH-SR-04[^insp-sr-04].",
+  "narrative": "Candidate compositions must search only registered, compatible recipes using typed ports — no arbitrary executable generation on the production path. Isolation I/O contracts exist (`fangore_insp_isolation_io`). Tracks MH-SR-04[^insp-sr-04].",
   "implementation": "TemplateIOContract / IsolationContract typed I/O surface. Desired: automated typed-port compatibility search over the recipe catalog.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-04, coverage gap, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-04, coverage gap, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-sr-04",

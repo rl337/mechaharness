@@ -5,7 +5,7 @@
   "kind": "inspiration_delta_contract",
   "narrative": "Safety evaluation needs reusable fixtures for prompt injection in tool output, scope bleed, changing authorization, ambiguous consent, warning disregard, and false-denial controls, reporting outcome, severity, context, and model/recipe version. Adjacent eval substrate: `taloneth_insp_eval_matrix`, `fangore_insp_independent_review`. Tracks MH-DOTS-08[^insp-dots-08].",
   "implementation": "General evaluator / eval_matrix / independent_review recipe. Desired: dedicated safety-evaluation Agentic Recipe catalog and fixture pack.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-08, coverage gap, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-08, coverage gap, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-dots-08",

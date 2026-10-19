@@ -4,5 +4,19 @@
   "adjacent_modules": [
     "mechaharness/rule_promotion.py",
     "mechaharness/failure_attribution.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "promo",
+      "module": "mechaharness.rule_promotion",
+      "has": [
+        "PromotionRecord",
+        "promote_soft_to_hard"
+      ],
+      "missing": [
+        "SpecificationDebt"
+      ]
+    }
   ]
 }

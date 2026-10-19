@@ -5,7 +5,7 @@
   "kind": "inspiration_delta_contract",
   "narrative": "Every graph run needs a capability-scoped execution token: principal, goal/run identity, allowed operations, expiry, trust origin, and authorization epoch. Child graphs receive attenuated authority only (`fangore_insp_capability_envelope`, `fangore_capability_envelope_narrow`). Tracks MH-DOTS-01[^insp-dots-01].",
   "implementation": "CapabilityEnvelope.narrow and delegation policy choose child scope. Desired: execution token fields for principal, expiry, trust origin, and auth epoch.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-01, coverage partial, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-01, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-dots-01",

@@ -5,7 +5,7 @@
   "kind": "inspiration_delta_contract",
   "narrative": "Reusable subgraphs need typed inputs/outputs, applicability predicates, budgets, and traceable outcomes. Independent review and verify-repair already ship (`fangore_insp_independent_review`, `fangore_verify_repair_recipe`). Produce-critique-refine and optional three-round council remain catalog deltas. Tracks MH-PA-03[^insp-pa-03].",
   "implementation": "Agentic Recipes `independent_review` and `verify_repair` plus isolation/budget contracts. Desired catalog recipes: produce_critique_refine; optional council with recorded dissent (not default).",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-03, coverage partial, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-03, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-pa-03",

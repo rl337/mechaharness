@@ -4,5 +4,13 @@
   "adjacent_modules": [
     "mechaharness/evaluator.py",
     "mechaharness/decision_log.py"
+  ],
+  "probes": [
+    {
+      "kind": "evaluator_held_out",
+      "name": "held",
+      "expect_held_out_field": true,
+      "expect_final_test_gate": false
+    }
   ]
 }
