@@ -3,7 +3,7 @@
 | Surface | Value |
 |---------|-------|
 | Package | `mechaharness.durable_graph_generator` |
-| Host kit | `host_kit.host_durable_graph_generator` |
+| Host kit | `host_kit.host_durable_graph_generator`, `durable_generator_host`, `durable_generator_script` |
 | Config | `MechaHarnessConfig.get_durable_graph_generator` / `get_generator_run_store` / `get_generator_controller_auth` |
 | Stability | evolving (in-process + stdio MCP; CLI/TUI still gap) |
 | Normative | [Durable graph generators](../requirements/durable-graph-generators.md) |
@@ -25,6 +25,7 @@ session.
 | Type | Purpose |
 |------|---------|
 | `DurableGraphGenerator` | `start` / `resume` / `inspect` / `cancel` / `list_recipes` |
+| `DurableInstrumentor` / `DurableScript` | Verb-led host session script (`start` / `answer` / `inspect` / `rebuild`) |
 | `GraphYield` | Ordered immutable yield (`kind`, `sequence`, `request_id`, …) |
 | `GuidanceRequest` / `GuidanceResponse` | Typed advice exchange |
 | `RunInspection` | Diagnostics without advancing |
@@ -92,10 +93,16 @@ driver.run(
 
 | Client | Mapping |
 |--------|---------|
-| In-process / stories | Call `DurableGraphGenerator` directly |
+| In-process / stories | `DurableInstrumentor` + verb-led script over `DurableGraphGenerator` |
 | OpenAPI / HTTP | Long-run façade methods mirror DG-01 ops (planned; not a second architecture) |
-| CLI / TUI | Clients of the same ops (plain-text first; curses optional) — gap |
+| CLI / TUI | Same instrumentor / soft-point seam (curses optional) — gap |
 | MCP stdio | `python -m mechaharness.mcp_graph_driver` — tools `generator_start` / `generator_resume` / `generator_inspect` / `generator_cancel` / `generator_list_recipes`. Stdio framing is newline-delimited JSON (Cursor); Content-Length is still accepted. |
+| Story scenarios | `scenario.yaml` under kind `durable_generator` — readable step script + per-step hard `expect` (tests only) |
+
+Soft points are the UI seam: story fixtures and a future CLI/TUI bind the same
+guidance answers via `answer` steps; `DurableGraphGenerator` owns suspension/resume.
+The instrumentor is host-facing (not a test harness); pytest only loads YAML and
+asserts observations.
 
 ### MCP example (doctest)
 

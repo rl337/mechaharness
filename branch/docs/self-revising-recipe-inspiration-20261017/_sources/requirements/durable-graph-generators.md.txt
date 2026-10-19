@@ -44,7 +44,7 @@ MechaHarness MUST expose a transport-neutral API with at least:
 - `list_recipes() → list[RecipeDescriptor]`
 
 Wire form: `mechaharness.durable_graph_generator.DurableGraphGenerator`.
-Host ergonomics: `host_kit.host_durable_graph_generator`.
+Host ergonomics: `host_kit.host_durable_graph_generator`, `durable_generator_host`.
 
 `recipe_id` MUST resolve through `GraphTemplateRegistry` (registered recipes
 only). Free-form executable graph synthesis is out of scope for this contract.

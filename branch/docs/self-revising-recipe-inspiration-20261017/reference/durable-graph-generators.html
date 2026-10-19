@@ -120,7 +120,7 @@
 <td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.durable_graph_generator</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Host kit</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">host_kit.host_durable_graph_generator</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">host_kit.host_durable_graph_generator</span></code>, <code class="docutils literal notranslate"><span class="pre">durable_generator_host</span></code>, <code class="docutils literal notranslate"><span class="pre">durable_generator_script</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>Config</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_durable_graph_generator</span></code> / <code class="docutils literal notranslate"><span class="pre">get_generator_run_store</span></code> / <code class="docutils literal notranslate"><span class="pre">get_generator_controller_auth</span></code></p></td>
@@ -156,22 +156,25 @@ session.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">start</span></code> / <code class="docutils literal notranslate"><span class="pre">resume</span></code> / <code class="docutils literal notranslate"><span class="pre">inspect</span></code> / <code class="docutils literal notranslate"><span class="pre">cancel</span></code> / <code class="docutils literal notranslate"><span class="pre">list_recipes</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GraphYield</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DurableInstrumentor</span></code> / <code class="docutils literal notranslate"><span class="pre">DurableScript</span></code></p></td>
+<td><p>Verb-led host session script (<code class="docutils literal notranslate"><span class="pre">start</span></code> / <code class="docutils literal notranslate"><span class="pre">answer</span></code> / <code class="docutils literal notranslate"><span class="pre">inspect</span></code> / <code class="docutils literal notranslate"><span class="pre">rebuild</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GraphYield</span></code></p></td>
 <td><p>Ordered immutable yield (<code class="docutils literal notranslate"><span class="pre">kind</span></code>, <code class="docutils literal notranslate"><span class="pre">sequence</span></code>, <code class="docutils literal notranslate"><span class="pre">request_id</span></code>, …)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GuidanceRequest</span></code> / <code class="docutils literal notranslate"><span class="pre">GuidanceResponse</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GuidanceRequest</span></code> / <code class="docutils literal notranslate"><span class="pre">GuidanceResponse</span></code></p></td>
 <td><p>Typed advice exchange</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RunInspection</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RunInspection</span></code></p></td>
 <td><p>Diagnostics without advancing</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code></p></td>
 <td><p>Strict offline replay</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code></p></td>
 <td><p>Continuation persistence (<code class="docutils literal notranslate"><span class="pre">InMemoryGeneratorRunStore</span></code>, checkpoint-backed)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GeneratorControllerAuth</span></code> / <code class="docutils literal notranslate"><span class="pre">LeaseControllerAuth</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GeneratorControllerAuth</span></code> / <code class="docutils literal notranslate"><span class="pre">LeaseControllerAuth</span></code></p></td>
 <td><p>Controller ownership</p></td>
 </tr>
 </tbody>
@@ -241,19 +244,26 @@ session.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>In-process / stories</p></td>
-<td><p>Call <code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code> directly</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DurableInstrumentor</span></code> + verb-led script over <code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>OpenAPI / HTTP</p></td>
 <td><p>Long-run façade methods mirror DG-01 ops (planned; not a second architecture)</p></td>
 </tr>
 <tr class="row-even"><td><p>CLI / TUI</p></td>
-<td><p>Clients of the same ops (plain-text first; curses optional) — gap</p></td>
+<td><p>Same instrumentor / soft-point seam (curses optional) — gap</p></td>
 </tr>
 <tr class="row-odd"><td><p>MCP stdio</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">mechaharness.mcp_graph_driver</span></code> — tools <code class="docutils literal notranslate"><span class="pre">generator_start</span></code> / <code class="docutils literal notranslate"><span class="pre">generator_resume</span></code> / <code class="docutils literal notranslate"><span class="pre">generator_inspect</span></code> / <code class="docutils literal notranslate"><span class="pre">generator_cancel</span></code> / <code class="docutils literal notranslate"><span class="pre">generator_list_recipes</span></code>. Stdio framing is newline-delimited JSON (Cursor); Content-Length is still accepted.</p></td>
 </tr>
+<tr class="row-even"><td><p>Story scenarios</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code> under kind <code class="docutils literal notranslate"><span class="pre">durable_generator</span></code> — readable step script + per-step hard <code class="docutils literal notranslate"><span class="pre">expect</span></code> (tests only)</p></td>
+</tr>
 </tbody>
 </table>
+<p>Soft points are the UI seam: story fixtures and a future CLI/TUI bind the same
+guidance answers via <code class="docutils literal notranslate"><span class="pre">answer</span></code> steps; <code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code> owns suspension/resume.
+The instrumentor is host-facing (not a test harness); pytest only loads YAML and
+asserts observations.</p>
 <section id="mcp-example-doctest">
 <h3>MCP example (doctest)<a class="headerlink" href="#mcp-example-doctest" title="Link to this heading"></a></h3>
 <p>The module docstring on <code class="docutils literal notranslate"><span class="pre">mechaharness.mcp_graph_driver</span></code> is the blessed end-to-end

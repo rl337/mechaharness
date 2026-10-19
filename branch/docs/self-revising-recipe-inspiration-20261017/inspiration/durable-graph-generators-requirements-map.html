@@ -191,16 +191,16 @@ CLI presentation. MCP is an adapter, not core.</p>
 <tr class="row-even"><td><p>R-IOC-MCP / DG-05</p></td>
 <td><p>Stdio MCP adapter</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mcp_graph_driver.py</span></code>, <code class="docutils literal notranslate"><span class="pre">FileGeneratorRunStore</span></code></p></td>
-<td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_mcp_graph_driver</span></code></p></td>
+<td><p>unit/doctest</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_mcp_graph_driver.py</span></code>, module doctest</p></td>
 <td><p>—</p></td>
 </tr>
 <tr class="row-odd"><td><p>R-IOC-DRIVERS / DG-06</p></td>
 <td><p>Shared agent/CLI/script contract</p></td>
-<td><p>core ops + <code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code> + MCP</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">durable_generator_host</span></code>, <code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code>, MCP</p></td>
 <td><p>partial</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_shared_driver_contract</span></code></p></td>
-<td><p>CLI/TUI clients (M4)</p></td>
+<td><p>durable <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code> stories + MCP doctest</p></td>
+<td><p>CLI/TUI clients (soft-point UI; M4)</p></td>
 </tr>
 <tr class="row-even"><td><p>R-IOC-OFFLINE / DG-07</p></td>
 <td><p>No live models required</p></td>
