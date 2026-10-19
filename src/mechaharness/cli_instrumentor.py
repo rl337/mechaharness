@@ -19,6 +19,16 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pyiv.time import DateTimeService, MockDateTimeService
 
 from mechaharness.budget import BudgetPolicy
+from mechaharness.cli_acceptance_verbs import (
+    CheckCompleterFlavorsCommand,
+    CheckInferenceCaptureCommand,
+    HostKitSubmitOnceCommand,
+    JudgeRouteCommand,
+    run_check_completer_flavors,
+    run_check_inference_capture,
+    run_host_kit_submit_once,
+    run_judge_route,
+)
 from mechaharness.cli_diagnostic_verbs import (
     CheckModelAffinityCommand,
     CompareRunParityCommand,
@@ -54,6 +64,7 @@ from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.host_kit import host_graph_executor, tapping_event_log
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.inference.judge import JudgeProvider
 from mechaharness.node_component import traversal_from_events
 from mechaharness.recipe_runner import (
     instantiate_recipe,
@@ -158,6 +169,10 @@ class CliCommand(BaseModel):
     check_model_affinity: CheckModelAffinityCommand | None = None
     compare_run_parity: CompareRunParityCommand | None = None
     shadow_decision_backends: ShadowDecisionBackendsCommand | None = None
+    check_completer_flavors: CheckCompleterFlavorsCommand | None = None
+    check_inference_capture: CheckInferenceCaptureCommand | None = None
+    host_kit_submit_once: HostKitSubmitOnceCommand | None = None
+    judge_route: JudgeRouteCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
 
@@ -172,6 +187,10 @@ class CliCommand(BaseModel):
             ("check_model_affinity", self.check_model_affinity),
             ("compare_run_parity", self.compare_run_parity),
             ("shadow_decision_backends", self.shadow_decision_backends),
+            ("check_completer_flavors", self.check_completer_flavors),
+            ("check_inference_capture", self.check_inference_capture),
+            ("host_kit_submit_once", self.host_kit_submit_once),
+            ("judge_route", self.judge_route),
             ("set_clock", self.set_clock),
             ("advance_clock", self.advance_clock),
         ]
@@ -193,6 +212,10 @@ class CliCommand(BaseModel):
             "check_model_affinity",
             "compare_run_parity",
             "shadow_decision_backends",
+            "check_completer_flavors",
+            "check_inference_capture",
+            "host_kit_submit_once",
+            "judge_route",
             "set_clock",
             "advance_clock",
         ):
@@ -366,11 +389,13 @@ class CliInstrumentor:
         model: str = "cli-default",
         agent_id: str = "cli",
         tools: ToolRegistry | None = None,
+        judge_provider: JudgeProvider | None = None,
     ) -> None:
         self._completer = completer
         self._model = model
         self._agent_id = agent_id
         self._tools = tools if tools is not None else ToolRegistry()
+        self._judge_provider = judge_provider
         self._tapped_types: list[str] = []
         self._datetime: DateTimeService = datetime_service or MockDateTimeService(
             datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
@@ -511,6 +536,33 @@ class CliInstrumentor:
             return CliStepResult(
                 verb="shadow_decision_backends",
                 probe=run_shadow_decision_backends(command.shadow_decision_backends),
+            )
+        if command.check_completer_flavors is not None:
+            return CliStepResult(
+                verb="check_completer_flavors",
+                probe=run_check_completer_flavors(command.check_completer_flavors),
+            )
+        if command.check_inference_capture is not None:
+            return CliStepResult(
+                verb="check_inference_capture",
+                probe=run_check_inference_capture(command.check_inference_capture),
+            )
+        if command.host_kit_submit_once is not None:
+            return CliStepResult(
+                verb="host_kit_submit_once",
+                probe=await run_host_kit_submit_once(command.host_kit_submit_once),
+            )
+        if command.judge_route is not None:
+            if self._judge_provider is None:
+                raise RuntimeError(
+                    "judge_route requires CliInstrumentor(judge_provider=...)"
+                )
+            return CliStepResult(
+                verb="judge_route",
+                probe=await run_judge_route(
+                    command.judge_route,
+                    provider=self._judge_provider,
+                ),
             )
         assert command.infer is not None
         body = command.infer

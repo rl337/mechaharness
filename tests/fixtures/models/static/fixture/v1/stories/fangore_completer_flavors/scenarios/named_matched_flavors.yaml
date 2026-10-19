@@ -1,0 +1,17 @@
+# Same-lane Completer flavors via Named/Matched DI
+kind: cli
+
+commands:
+  - check_completer_flavors:
+      flavor_tags:
+        - reason
+        - code
+        - deep
+      matched_required:
+        - reason
+        - code
+
+expect:
+  default_is_inference: true
+  flavor_selected: true
+  matched_selects_flavor: true

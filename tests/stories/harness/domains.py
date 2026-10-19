@@ -9,7 +9,6 @@ from tests.stories.runners.decision_plane import RUNNERS as DECISION_PLANE_OPS
 from tests.stories.runners.evaluation_research import RUNNERS as EVALUATION_RESEARCH_OPS
 from tests.stories.runners.graph_execution import RUNNERS as GRAPH_EXECUTION_OPS
 from tests.stories.runners.graph_recipes import RUNNERS as GRAPH_RECIPES_OPS
-from tests.stories.runners.harness_runs import RUNNERS as HARNESS_RUNS_OPS
 from tests.stories.runners.lifecycle_extensions import RUNNERS as LIFECYCLE_EXTENSIONS_OPS
 
 ACCESS_AUTHORITY = OpDispatchHarness("access_authority", ACCESS_AUTHORITY_OPS)
@@ -18,7 +17,6 @@ DECISION_PLANE = OpDispatchHarness("decision_plane", DECISION_PLANE_OPS)
 EVALUATION_RESEARCH = OpDispatchHarness("evaluation_research", EVALUATION_RESEARCH_OPS)
 GRAPH_EXECUTION = OpDispatchHarness("graph_execution", GRAPH_EXECUTION_OPS)
 GRAPH_RECIPES = OpDispatchHarness("graph_recipes", GRAPH_RECIPES_OPS)
-HARNESS_RUNS = OpDispatchHarness("harness_runs", HARNESS_RUNS_OPS)
 LIFECYCLE_EXTENSIONS = OpDispatchHarness("lifecycle_extensions", LIFECYCLE_EXTENSIONS_OPS)
 
 DOMAIN_HARNESSES = (
@@ -28,7 +26,6 @@ DOMAIN_HARNESSES = (
     EVALUATION_RESEARCH,
     GRAPH_EXECUTION,
     GRAPH_RECIPES,
-    HARNESS_RUNS,
     LIFECYCLE_EXTENSIONS,
 )
 

@@ -1,0 +1,36 @@
+# Durable submit-once dispatch + resume without redispatch
+kind: cli
+
+commands:
+  - host_kit_submit_once:
+      cases:
+        - id: dispatch_durable_ok
+          mode: dispatch
+          durable: true
+          run_id: hk-dispatch-ok
+          task_id: t1
+        - id: resume_uncertain_with_handle
+          mode: resume_seeded
+          durable: true
+          run_id: hk-uncertain-ok
+          task_id: t1
+          seed:
+            effect_state: uncertain
+            external_handle: job-seeded-1
+            node_attempt: 1
+            node_status: running
+
+expect:
+  scenario_results_exactly:
+    dispatch_durable_ok:
+      status: ok
+      dispatch_count: 1
+      external_handle: job-t1-1
+      durability: durable
+      reconciliation_invoked: false
+    resume_uncertain_with_handle:
+      status: ok
+      dispatch_count: 0
+      external_handle: job-seeded-1
+      durability: durable
+      reconciliation_invoked: true
