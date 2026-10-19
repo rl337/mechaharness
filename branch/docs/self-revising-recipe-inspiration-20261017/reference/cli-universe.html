@@ -147,7 +147,7 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">CliInferRunner</span></code> (reason-lane <code class="docutils literal notranslate"><span class="pre">Completer</span></code>, <code class="docutils literal notranslate"><span class="pre">core:inference</span></code> + <code class="docutils literal notranslate"><span class="pre">core:cost</span></code>)</p></td>
 </tr>
 <tr class="row-even"><td><p>Instrumentor</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> + <code class="docutils literal notranslate"><span class="pre">cli_diagnostic_verbs</span></code> (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>, routing/parity/manifest probes, clocks, …)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> + <code class="docutils literal notranslate"><span class="pre">cli_diagnostic_verbs</span></code> + <code class="docutils literal notranslate"><span class="pre">cli_acceptance_verbs</span></code> (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>, routing/parity, completer flavors, capture preflight, host-kit submit-once, <code class="docutils literal notranslate"><span class="pre">judge_route</span></code>, clocks, …)</p></td>
 </tr>
 <tr class="row-odd"><td><p>Event stamps</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">StampingEventLog</span></code> over injectable <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code></p></td>
@@ -190,12 +190,11 @@ legacy soft expects blindly. See <code class="docutils literal notranslate"><spa
 <code class="docutils literal notranslate"><span class="pre">durable_generator</span></code>) YAML. Each wave adds only the CLI verb or harness assert
 needed:</p>
 <ol class="arabic simple">
-<li><p>Observability / one-shot infer (OBS-*) — started (<code class="docutils literal notranslate"><span class="pre">nubble_run_cost_events</span></code>)</p></li>
-<li><p>Remaining harness_runs / pass-through / tool-loop / cassettes — in progress
-(smoke, tap, tool-loop, conversational, <code class="docutils literal notranslate"><span class="pre">harness_run</span></code>, <code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>;
-delete op runners when their stories leave; next: remaining harness_runs probes)</p></li>
-<li><p>Graph execution + recipe catalog</p></li>
-<li><p>Decision plane / judge</p></li>
+<li><p>Observability / one-shot infer (OBS-*) — done</p></li>
+<li><p>Former harness_runs / pass-through / tool-loop / cassettes / host DI /
+judge route — done (<code class="docutils literal notranslate"><span class="pre">harness_runs</span></code> runner removed)</p></li>
+<li><p>Graph execution + recipe catalog — next</p></li>
+<li><p>Decision plane / remaining judge ops</p></li>
 <li><p>pure_api + context/eval surface</p></li>
 <li><p>Fold durable IoC into CLI when ready</p></li>
 </ol>
