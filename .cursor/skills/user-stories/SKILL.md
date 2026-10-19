@@ -139,15 +139,17 @@ Migrate in waves; each wave adds the smallest CLI/harness surface required:
 
 1. Observability / one-shot infer (OBS-*) — **started** (`nubble_run_cost_events`)
 2. Remaining `harness_runs` / pass-through / tool-loop / cassettes — **in
-   progress** (`nubble_ci_static_smoke`, `fangore_host_kit_event_tap`,
-   `fangore_harness_tool_loop_graph`, `fangore_conversational_tool_loop`;
-   next recipe catalog pair + remaining probes)
+   progress** (smoke, tap, tool-loop, conversational, `harness_run`,
+   `backend_describe`; delete op runners when stories leave; next remaining
+   harness_runs probes)
 3. Graph execution + recipe catalog stories
 4. Decision plane / judge
 5. `pure_api` + context/eval library surface
 6. Fold or keep `durable_generator` IoC stories
 
 When a family has zero stories left, delete its op-dispatch runner module.
+When an individual `op` has zero remaining `request.json` stories, delete that
+op’s `_run_*` function and `RUNNERS` entry in the same change as the migration.
 
 ### `narrative` (required)
 
