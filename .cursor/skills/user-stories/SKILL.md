@@ -126,7 +126,9 @@ Verbs today: `infer`, `tool_loop`, `run_recipe`, `replay_model_input`,
 `route_capabilities`, `check_model_affinity`, `compare_run_parity`,
 `shadow_decision_backends`, `check_completer_flavors`,
 `check_inference_capture`, `host_kit_submit_once`, `judge_route`,
-`set_clock`, `advance_clock`. Add verbs only when a migrating story needs them.
+`topology_efficiency`, `validator_qualification`, `bounded_repair_loop`,
+`graph_executor_run`, `graph_event_correlators`, `set_clock`,
+`advance_clock`. Add verbs only when a migrating story needs them.
 See [`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
 
 Live: `MECHA_STORY_BACKEND=live`, `MECHA_BASE_URL`, `MECHA_MODEL` (served id).
@@ -144,7 +146,9 @@ Migrate in waves; each wave adds the smallest CLI/harness surface required:
 1. Observability / one-shot infer (OBS-*) — **done** (`nubble_run_cost_events`, …)
 2. Former `harness_runs` / pass-through / tool-loop / cassettes / host DI /
    judge route — **done** (runner module removed; verbs on `CliInstrumentor`)
-3. Graph execution + recipe catalog stories — **next**
+3. Graph execution + recipe catalog stories — **in progress**
+   (`cli_graph_verbs`: topology, validator, bounded repair, executor smoke,
+   correlators; remaining resume/budget/linkage ops still on `graph_execution`)
 4. Decision plane / remaining judge ops
 5. `pure_api` + context/eval library surface
 6. Fold or keep `durable_generator` IoC stories

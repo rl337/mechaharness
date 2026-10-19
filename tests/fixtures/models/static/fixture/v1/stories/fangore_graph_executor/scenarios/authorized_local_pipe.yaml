@@ -1,0 +1,21 @@
+# Authorized produce→flaky→consume with deny check
+kind: cli
+
+commands:
+  - graph_executor_run:
+      goal: local pipe
+      produce_value: 1
+      max_attempts: 2
+      fail_until_attempt: 99
+      check_deny: true
+      grants:
+        - core:graph.execute
+        - core:graph.escalate
+
+expect:
+  status: ok
+  consume_sum: 2
+  emitted_graph_start: true
+  emitted_graph_end: true
+  denied_without_execute_grant: true
+  flaky_attempts: 2

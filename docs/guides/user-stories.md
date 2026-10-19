@@ -86,13 +86,11 @@ Nubble loads graph events into a warehouse and cannot afford to open checkpoints
 
 #### Implementation
 
-`GraphExecutor._emit` merges `graph_trace_context` (`graph_id`, `graph_goal`, `recipe_id`/`recipe_version` from the template stamp, `authorization_epoch` from the envelope, `parent_run_id` and `nest_depth` for nested runs) under each payload; explicit payload keys win. `project_node_attempt_rows` projects one fact row per run/node/attempt from node start/end events. `DecisionRecord` and `TraceEnvelope` use the same field names. Contract: `docs/requirements/event-analytics-schema.md`.
-
-Covers: OBS-A01, OBS-A02, OBS-A03.
+Graph lifecycle emits carry warehouse correlators (`graph_id`, `recipe_id`, `authorization_epoch`, nest `parent_run_id` / `nest_depth`). `project_node_attempt_rows` projects attempt rows. `CliInstrumentor` verb `graph_event_correlators`.
 
 #### Validation
 
-Harness `graph_execution` op `graph_event_correlators`. Hard expects every parent-run event to carry the graph id, recipe stamp, and epoch; node events to carry `node_id`; nested-run events to carry `parent_run_id` and `nest_depth`; and node-attempt rows to project one per node.
+Harness `cli` scenario `warehouse_correlators.yaml`: hard correlator and node-attempt rows.
 
 #### Footnotes
 
@@ -389,13 +387,11 @@ Nubble is asked whether parallel agents sped things up. Wall time dropped, but t
 
 #### Implementation
 
-`compute_topology_metrics` / `TopologySpan` in `mechaharness.decision_log` report critical path, total work, and elapsed time distinctly and reject vanity speedups that omit baselines.
-
-Covers: OBS-04.
+`TopologySpan` and `compute_topology_metrics` in `mechaharness.decision_log`. `CliInstrumentor` verb `topology_efficiency`.
 
 #### Validation
 
-Harness `graph_execution` op `topology_efficiency` → `_run_topology_efficiency`. Unit: `tests/test_decision_log.py`.
+Harness `cli` scenario `parallel_spans.yaml`: hard work/elapsed/notes. Unit: topology helpers in `tests/test_decision_log.py` where present.
 
 ## Fangore's stories
 
@@ -417,13 +413,11 @@ After a failed verification, Fangore allows a limited repair-and-retry cycle. Wh
 
 #### Implementation
 
-Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) expresses produce → verify → bounded repair → complete as a reusable graph. The `bounded_repair` helper in `mechaharness.graph` runs verify → classify → permitted repair → retry until `max_attempts`. `VerificationPolicy` / `OutcomeContract` select verification and gate completion. Judge scores remain supplementary to verifier evidence.
-
-Covers: VER-03.
+`bounded_repair` in `mechaharness.graph` (VER-03). `CliInstrumentor` verb `bounded_repair_loop`.
 
 #### Validation
 
-Harness `graph_execution` op `bounded_repair_loop` → `_run_bounded_repair_loop`. Soft expects: succeeds within budget or fails after max attempts. Unit: `tests/test_graph.py`. Related: `fangore_insp_verification_gate`.
+Harness `cli` scenario `verify_repair_succeeds.yaml`: hard `final_status`.
 
 #### Footnotes
 
@@ -733,11 +727,11 @@ Fangore ships a host app with a produce → repair → consume plan. After linka
 
 #### Implementation
 
-`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node events, checkpoints through `GraphStore` (with config fingerprint), and enforces per-runner grants.
+`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node events. `CliInstrumentor` verb `graph_executor_run` exercises the path.
 
 #### Validation
 
-Harness `graph_execution` op `graph_executor_run` → `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py`. Related: `fangore_graph_linkage_preflight`.
+Harness `cli` scenario `authorized_local_pipe.yaml`: hard status/consume/deny/attempts/telemetry.
 
 #### Footnotes
 
@@ -2596,10 +2590,8 @@ Before a schema validator gates done, known-good, known-bad, and missing fixture
 
 #### Implementation
 
-`VerificationOracle` / `verify_node` define completion evidence; `qualify_validator` / `validator_qualified` reject always-pass mutants. Judge quality signals remain supplementary to evidence checks.
-
-Covers: VER-01, VER-04.
+`qualify_validator` / `validator_qualified` in `mechaharness.graph` (VER-04). `CliInstrumentor` verb `validator_qualification`.
 
 #### Validation
 
-Harness `graph_execution` op `validator_qualification` → `_run_validator_qualification`. Unit: `tests/test_graph.py`.
+Harness `cli` scenario `honest_vs_weak.yaml`: hard qualification booleans.

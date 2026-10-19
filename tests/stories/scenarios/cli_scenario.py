@@ -21,6 +21,13 @@ from mechaharness.cli_diagnostic_verbs import (
     RouteCapabilitiesCommand,
     ShadowDecisionBackendsCommand,
 )
+from mechaharness.cli_graph_verbs import (
+    BoundedRepairLoopCommand,
+    GraphEventCorrelatorsCommand,
+    GraphExecutorRunCommand,
+    TopologyEfficiencyCommand,
+    ValidatorQualificationCommand,
+)
 from mechaharness.cli_instrumentor import (
     AdvanceClockCommand,
     CliInstrumentor,
@@ -75,6 +82,25 @@ class CliExpect(BaseModel):
     route_selected: str | None = None
     verdict: str | None = None
     answer_count: int | None = None
+    total_node_work_ms: float | None = None
+    elapsed_ms: float | None = None
+    work_exceeds_elapsed: bool | None = None
+    notes_exactly: list[str] | None = None
+    honest_qualified: bool | None = None
+    weak_qualified: bool | None = None
+    final_status: str | None = None
+    consume_sum: int | None = None
+    emitted_graph_start: bool | None = None
+    emitted_graph_end: bool | None = None
+    denied_without_execute_grant: bool | None = None
+    flaky_attempts: int | None = None
+    graph_events_have_graph_id: bool | None = None
+    node_events_have_node_id: bool | None = None
+    recipe: list[list[str]] | None = None
+    epochs: list[int] | None = None
+    child_parent_run_ids: list[str] | None = None
+    child_nest_depths: list[int] | None = None
+    node_attempt_rows: list[list[Any]] | None = None
 
     @model_validator(mode="after")
     def _at_least_one(self) -> CliExpect:
@@ -103,6 +129,11 @@ class CliScenarioCommand(BaseModel):
     check_inference_capture: CheckInferenceCaptureCommand | None = None
     host_kit_submit_once: HostKitSubmitOnceCommand | None = None
     judge_route: JudgeRouteCommand | None = None
+    topology_efficiency: TopologyEfficiencyCommand | None = None
+    validator_qualification: ValidatorQualificationCommand | None = None
+    bounded_repair_loop: BoundedRepairLoopCommand | None = None
+    graph_executor_run: GraphExecutorRunCommand | None = None
+    graph_event_correlators: GraphEventCorrelatorsCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
     expect: CliExpect | None = None
@@ -122,6 +153,11 @@ class CliScenarioCommand(BaseModel):
             self.check_inference_capture,
             self.host_kit_submit_once,
             self.judge_route,
+            self.topology_efficiency,
+            self.validator_qualification,
+            self.bounded_repair_loop,
+            self.graph_executor_run,
+            self.graph_event_correlators,
             self.set_clock,
             self.advance_clock,
         ]
