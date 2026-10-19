@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.graph_executor &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>mechaharness.graph_executor &mdash; MechaHarness 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -125,6 +125,7 @@ side effects get durable intent/acceptance and resume reconciliation
 (DR-03..11). A host coding-job adapter + SQLite store looks like:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span><span class="o">,</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">PythonDateTimeService</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.budget</span><span class="w"> </span><span class="kn">import</span> <span class="n">BudgetPolicy</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.checkpoint_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckpointStore</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphExecute</span>
@@ -179,7 +180,9 @@ side effects get durable intent/acceptance and resume reconciliation
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_node_runner_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="gp">... </span>        <span class="k">return</span> <span class="n">GraphNodeRunnerRegistry</span><span class="p">([</span><span class="n">runner</span><span class="p">])</span>
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_checkpoint_store</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="gp">... </span>        <span class="k">return</span> <span class="n">SqliteCheckpointStore</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">SqliteCheckpointStore</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="n">path</span><span class="p">,</span> <span class="n">datetime_service</span><span class="o">=</span><span class="n">PythonDateTimeService</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">executor</span> <span class="o">=</span> <span class="n">get_injector</span><span class="p">(</span><span class="n">Cfg</span><span class="p">())</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">GraphExecutor</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">graph</span> <span class="o">=</span> <span class="n">ExecutionGraph</span><span class="p">(</span><span class="n">goal</span><span class="o">=</span><span class="s2">"ship feature"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">GraphNode</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"job"</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"coding_job"</span><span class="p">))</span>

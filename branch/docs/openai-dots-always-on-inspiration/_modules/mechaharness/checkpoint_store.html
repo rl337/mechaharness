@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.checkpoint_store &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>mechaharness.checkpoint_store &mdash; MechaHarness 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -118,11 +118,14 @@
 <span class="sd">Inspect ``durability`` so ephemeral EventLog adapters are never mistaken for</span>
 <span class="sd">process-restart safety::</span>
 
+<span class="sd">    &gt;&gt;&gt; from pyiv.time import PythonDateTimeService</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.checkpoint_store import EventLogCheckpointStore</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.core.events import InMemoryEventLog</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.graph import ExecutionGraph, GraphNode, GraphStore</span>
 <span class="sd">    &gt;&gt;&gt; log = InMemoryEventLog()</span>
-<span class="sd">    &gt;&gt;&gt; store = EventLogCheckpointStore(GraphStore(log))</span>
+<span class="sd">    &gt;&gt;&gt; store = EventLogCheckpointStore(</span>
+<span class="sd">    ...     GraphStore(log), datetime_service=PythonDateTimeService()</span>
+<span class="sd">    ... )</span>
 <span class="sd">    &gt;&gt;&gt; store.durability</span>
 <span class="sd">    'ephemeral'</span>
 <span class="sd">    &gt;&gt;&gt; g = ExecutionGraph(goal="plan")</span>
@@ -141,8 +144,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">DateTimeService</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoreEvent</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">EventLog</span><span class="p">,</span> <span class="n">event_type_key</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="n">EffectRecord</span><span class="p">,</span> <span class="n">EffectState</span>
@@ -269,11 +273,15 @@
 
 <span class="sd">    Persist an effect intent before a non-idempotent external call::</span>
 
+<span class="sd">        &gt;&gt;&gt; from pyiv.time import PythonDateTimeService</span>
 <span class="sd">        &gt;&gt;&gt; from mechaharness.checkpoint_store import EventLogCheckpointStore</span>
 <span class="sd">        &gt;&gt;&gt; from mechaharness.core.events import InMemoryEventLog</span>
 <span class="sd">        &gt;&gt;&gt; from mechaharness.external_effect import EffectRecord, EffectState</span>
 <span class="sd">        &gt;&gt;&gt; from mechaharness.graph import GraphStore</span>
-<span class="sd">        &gt;&gt;&gt; store = EventLogCheckpointStore(GraphStore(InMemoryEventLog()))</span>
+<span class="sd">        &gt;&gt;&gt; store = EventLogCheckpointStore(</span>
+<span class="sd">        ...     GraphStore(InMemoryEventLog()),</span>
+<span class="sd">        ...     datetime_service=PythonDateTimeService(),</span>
+<span class="sd">        ... )</span>
 <span class="sd">        &gt;&gt;&gt; effect = store.save_effect(EffectRecord(</span>
 <span class="sd">        ...     effect_id="r1:job:1",</span>
 <span class="sd">        ...     run_id="r1",</span>
@@ -296,12 +304,14 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">store</span><span class="p">:</span> <span class="n">GraphStore</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
+        <span class="n">datetime_service</span><span class="p">:</span> <span class="n">DateTimeService</span><span class="p">,</span>
         <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="n">store</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">event_log</span> <span class="o">=</span> <span class="n">event_log</span> <span class="k">if</span> <span class="n">event_log</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">store</span><span class="o">.</span><span class="n">event_log</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span> <span class="o">=</span> <span class="n">agent_id</span> <span class="ow">or</span> <span class="n">store</span><span class="o">.</span><span class="n">agent_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datetime</span> <span class="o">=</span> <span class="n">datetime_service</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_effects</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EffectRecord</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_revisions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_boundaries</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RecoveryBoundary</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -366,7 +376,7 @@
 <div class="viewcode-block" id="EventLogCheckpointStore.save_effect">
 <a class="viewcode-back" href="../../api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore.save_effect">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effect</span><span class="p">:</span> <span class="n">EffectRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EffectRecord</span><span class="p">:</span>
-        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datetime</span><span class="o">.</span><span class="n">now_utc_iso</span><span class="p">()</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_effects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">effect</span><span class="o">.</span><span class="n">effect_id</span><span class="p">)</span>
         <span class="n">rev</span> <span class="o">=</span> <span class="p">(</span><span class="n">existing</span><span class="o">.</span><span class="n">revision</span> <span class="k">if</span> <span class="n">existing</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">stored</span> <span class="o">=</span> <span class="n">effect</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span>
