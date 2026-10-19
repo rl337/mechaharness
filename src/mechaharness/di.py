@@ -43,6 +43,7 @@ from pyiv.scope import SingletonScope
 
 from mechaharness.advisor import Advisor, AdvisorPolicy, DefaultAdvisorPolicy, RejectAdvisor
 from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectionConfig
+from mechaharness.authority_gate import AuthorityGate
 from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.checkpoint_store import CheckpointStore, EventLogCheckpointStore
 from mechaharness.config import Settings
@@ -64,6 +65,7 @@ from mechaharness.core.environment import (
 )
 from mechaharness.core.events import EventLog, default_event_log
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
+from mechaharness.denial_store import DenialStore, InMemoryDenialStore
 from mechaharness.external_effect import CrashProbe, NoopCrashProbe
 from mechaharness.graph import GraphStore
 from mechaharness.graph_executor import (
@@ -96,6 +98,15 @@ from mechaharness.lifecycle_extension import (
 )
 from mechaharness.linkage_resolver import DefaultLinkageResolver, LinkageResolver
 from mechaharness.operation_registry import OperationRegistry, default_operations
+from mechaharness.recipe_lifecycle.evolution_campaign_hooks import (
+    EvolutionCampaignHooks,
+    NoopEvolutionCampaignHooks,
+)
+from mechaharness.recipe_lifecycle.recipe_promotion_policy import (
+    NoopRecipePromotionPolicy,
+    RecipePromotionPolicy,
+)
+from mechaharness.tool_result_freshness import ToolResultFreshnessPolicy
 from mechaharness.tools.base import ToolRegistry
 from mechaharness.verification_policy import DefaultVerificationPolicy, VerificationPolicy
 
@@ -349,6 +360,17 @@ class MechaHarnessConfig(Config):
         self.register_instance(DelegationPolicy, self.get_delegation_policy())
         self.register_instance(AdvisorPolicy, self.get_advisor_policy())
         self.register_instance(Advisor, self.get_advisor())
+        self.register_instance(
+            RecipePromotionPolicy, self.get_recipe_promotion_policy()
+        )
+        self.register_instance(
+            EvolutionCampaignHooks, self.get_evolution_campaign_hooks()
+        )
+        self.register_instance(DenialStore, self.get_denial_store())
+        self.register_instance(AuthorityGate, self.get_authority_gate())
+        self.register_instance(
+            ToolResultFreshnessPolicy, self.get_tool_result_freshness_policy()
+        )
         # Recipe / backend / family membership: pyiv map multibinds (catalog_keys).
         # Cast: pyiv accepts ABC keys; mypy rejects abstract type[T] args.
         self.contribute_map_entries(
@@ -638,6 +660,43 @@ class MechaHarnessConfig(Config):
     def get_advisor(self) -> Advisor:
         """Non-binding advisor (default: unavailable / reject)."""
         return RejectAdvisor()
+
+    def get_recipe_promotion_policy(self) -> RecipePromotionPolicy:
+        """Host policy for promoting recipe versions (default: no host opinion)."""
+        return NoopRecipePromotionPolicy()
+
+    def get_evolution_campaign_hooks(self) -> EvolutionCampaignHooks:
+        """Host-owned evolution campaign seams (default: no-op)."""
+        return NoopEvolutionCampaignHooks()
+
+    def get_denial_store(self) -> DenialStore:
+        """Denial memory shared by the authority gate (default: process-local).
+
+        Hosts bind a durable store; the in-memory default is not restart-durable.
+        """
+        existing = getattr(self, "_denial_store", None)
+        if existing is None:
+            existing = InMemoryDenialStore()
+            self._denial_store = existing
+        return existing
+
+    def get_authority_gate(self) -> AuthorityGate:
+        """Fail-closed authority gate over this Config's access control and denials.
+
+        No consequence policy by default; hosts override to add one.
+        """
+        existing = getattr(self, "_authority_gate", None)
+        if existing is None:
+            existing = AuthorityGate(
+                access=self.get_access_control(),
+                denials=self.get_denial_store(),
+            )
+            self._authority_gate = existing
+        return existing
+
+    def get_tool_result_freshness_policy(self) -> ToolResultFreshnessPolicy:
+        """Staleness rules for tool evidence (default: honor ``expires_at`` only)."""
+        return ToolResultFreshnessPolicy()
 
     def graph_template_classes(self) -> dict[str, type[GraphTemplate]]:
         """Catalog id → ``GraphTemplate`` class. Hosts merge via ``super()``."""

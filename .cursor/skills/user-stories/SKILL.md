@@ -231,5 +231,6 @@ Soft expects only. Exact wire text belongs in `response.json` for replay.
 
 - [`agentic-recipes`](../agentic-recipes/SKILL.md) — recipes as top-level concept
 - [`project-docs`](../project-docs/SKILL.md) — defer user-story guide edits to this skill
+- [`event-observability`](../event-observability/SKILL.md) — stories that assert event correlators (OBS-A*)
 - `.cursor/rules/unambiguous-names.mdc`, `.cursor/rules/agentic-recipes.mdc`
 - `tests/stories/`

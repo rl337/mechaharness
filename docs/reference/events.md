@@ -80,6 +80,34 @@ assert WidgetDone.key() == "acme:widget"
 `EventType.parse("core:run_start")` returns the registered class. Unregistered
 keys still round-trip on `Event.type`; `parse` raises `KeyError` for those.
 
+## Required correlators
+
+`GraphExecutor._emit` merges these keys into the payload of every
+`core:graph_start`, `core:graph_end`, `core:graph_node_start`, and
+`core:graph_node_end` event (explicit payload keys win; absent values are
+omitted). Contract and warehouse decomposition:
+[Event analytics schema](../requirements/event-analytics-schema.md).
+
+| Key | Source |
+|-----|--------|
+| `graph_id`, `graph_goal` | `ExecutionGraph.id` / `.goal` |
+| `recipe_id`, `recipe_version`, `recipe_instance_id` | Template stamp (`template_name`, `template_version`, `recipe_instance_id`) |
+| `authorization_epoch` | `CapabilityEnvelope.authorization_epoch` (else the graph's stamped epoch) |
+| `live_authorization_epoch` | `executor.live_authorization_epoch()` when wired |
+| `parent_run_id`, `nest_depth` | Nested subgraph runs only |
+
+`DecisionRecord` (`graphId`, `recipeId`, `recipeVersion`, `authorizationEpoch`,
+`parentRunId`) and `TraceEnvelope` use the same names. Checkpoint events
+(`core:graph_node`), `core:access_check`, and `core:extension_applied` do not
+carry graph correlators; join them on `run_id`.
+
+```python
+from mechaharness.event_correlators import project_node_attempt_rows
+
+rows = project_node_attempt_rows(log.query(run_id="run-1"))
+# one NodeAttemptRow per (run_id, node_id, attempt)
+```
+
 ## `EventLog`
 
 ```python

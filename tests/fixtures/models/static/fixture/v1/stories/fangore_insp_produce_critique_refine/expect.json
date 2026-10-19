@@ -1,9 +1,34 @@
 {
-  "requirement_id": "MH-PA-03",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0,
-  "recipes_catalog_size": 10
+  "template_name": "produce_critique_refine",
+  "nodes_include": [
+    "produce",
+    "critique",
+    "refine",
+    "complete"
+  ],
+  "critic_isolated": true,
+  "refine_max_iterations": 3,
+  "component_parents": {
+    "complete": [
+      "complete_kind"
+    ],
+    "critique": [
+      "acceptance",
+      "critique_kind",
+      "critique_prompt",
+      "omit_producer_reasoning"
+    ],
+    "produce": [
+      "produce_kind"
+    ],
+    "refine": [
+      "max_rounds",
+      "refine_kind",
+      "stop_contract"
+    ]
+  },
+  "evolvable": [
+    "critique_prompt",
+    "max_rounds"
+  ]
 }

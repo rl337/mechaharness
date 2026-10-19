@@ -1,3 +1,10 @@
 {
-  "next_action": "verify"
+  "next_action": "verify",
+  "goals": [
+    "ship report"
+  ],
+  "exclusions": [
+    "do not email the customer"
+  ],
+  "verdict_kind": "ASK_HUMAN"
 }

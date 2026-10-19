@@ -1,8 +1,35 @@
 {
-  "requirement_id": "MH-SR-09",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "default_policy_is_noop": true,
+  "default_hooks": [
+    [],
+    null
+  ],
+  "host_hooks": [
+    [
+      "verify_repair:nightly",
+      "verify_repair:regression"
+    ],
+    25.0
+  ],
+  "host_policy_blocks": [
+    false,
+    [
+      "release_freeze"
+    ]
+  ],
+  "host_block_keeps_pointer": "1",
+  "library_gate_without_final_test": [
+    false,
+    "1"
+  ],
+  "promoted_with_gates_passed": [
+    true,
+    "2"
+  ],
+  "host_hooks_saw_promotions": [
+    [
+      "verify_repair",
+      "2"
+    ]
+  ]
 }

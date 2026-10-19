@@ -2,10 +2,10 @@
   "id": "fangore_insp_denial_equivalence",
   "persona": "fangore",
   "title": "Persist denials and block equivalent actions across retries",
-  "kind": "inspiration_delta_contract",
-  "narrative": "Denied intents and side-effect classes must survive graph retries and delegated paths. A denied send cannot be retried through a second provider or tool without new explicit authorization. Native deny/allow paths: `fangore_tool_gating`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].",
-  "implementation": "Denials today are ephemeral AccessControl / Verdict outcomes. Desired: durable denial memory and equivalent-action detection across turns and tools.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-05, coverage gap, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
+  "kind": "denial_store_equivalence",
+  "narrative": "Denied intents and side-effect classes survive graph retries and delegated paths. A denied send cannot be retried through a second provider or tool without new explicit authorization. Native deny/allow paths: `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].",
+  "implementation": "`DenialStore` (ABC) with `InMemoryDenialStore` keys denials by `equivalent_action_digest(effect_class, target, ...)`, which ignores tool/provider names. `AuthorityGate` consults the store first (`prior_denial`) and records policy `DENY` verdicts. `lift()` is the explicit new-authorization path. Hosts bind a durable store; the in-memory store is not restart-durable.",
+  "validation": "Kind `denial_store_equivalence`. Hard expects a DENY verdict recorded, retries through other tools to the same target refused even when approved, a different target unaffected, and the action allowed again only after `lift`.",
   "footnotes": [
     {
       "id": "insp-dots-05",

@@ -1,27 +1,48 @@
 {
-  "requirement_id": "MH-DOTS-01",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/capability_envelope.py",
-    "mechaharness/core/access.py",
-    "mechaharness/delegation_policy.py"
-  ],
-  "probes": [
+  "parent": {
+    "grants": [
+      "core:graph.execute",
+      "core:fs.read"
+    ],
+    "tool_names": [
+      "Read"
+    ],
+    "principal": "user:fangore",
+    "expires_at": "2026-10-18T12:00:00Z",
+    "trust_origin": "host:console",
+    "authorization_epoch": 3
+  },
+  "attempts": [
     {
-      "kind": "model_fields",
-      "name": "envelope",
-      "target": "mechaharness.capability_envelope:CapabilityEnvelope",
-      "has": [
-        "grants",
-        "tool_names",
-        "version"
-      ],
-      "missing": [
-        "principal",
-        "expiry",
-        "trust_origin",
-        "authorization_epoch"
-      ]
+      "id": "attenuate",
+      "narrow": {
+        "expires_at": "2026-10-18T11:00:00Z"
+      }
+    },
+    {
+      "id": "raise_epoch",
+      "narrow": {
+        "authorization_epoch": 4
+      }
+    },
+    {
+      "id": "swap_principal",
+      "narrow": {
+        "principal": "user:other"
+      }
+    },
+    {
+      "id": "swap_origin",
+      "narrow": {
+        "trust_origin": "host:webhook"
+      }
+    },
+    {
+      "id": "outlive_parent",
+      "narrow": {
+        "expires_at": "2026-10-18T13:00:00Z"
+      }
     }
-  ]
+  ],
+  "inherit_attempt": "attenuate"
 }

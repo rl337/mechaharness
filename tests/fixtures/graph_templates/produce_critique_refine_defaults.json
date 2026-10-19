@@ -1,0 +1,31 @@
+{
+  "id": "produce_critique_refine_defaults",
+  "description": "Isolated critic feeds a bounded refine loop; defaults bind two rounds",
+  "template": "produce_critique_refine",
+  "params": {
+    "goal": "draft release notes",
+    "inputs": {"audience": "operators"},
+    "acceptance": ["no_unverified_claims"]
+  },
+  "expect": {
+    "template_name": "produce_critique_refine",
+    "template_status": "active",
+    "node_ids": ["produce", "critique", "refine", "complete"],
+    "edge_count": 3,
+    "nodes": {
+      "produce": {"kind": "produce", "payload": {"audience": "operators"}},
+      "critique": {
+        "kind": "critique",
+        "depends_on": ["produce"],
+        "payload": {
+          "isolated_context": true,
+          "omit_producer_reasoning": true,
+          "artifact_ref": "produce",
+          "acceptance": ["no_unverified_claims"]
+        }
+      },
+      "refine": {"kind": "refine", "repeating": true, "has_stop_contract": true, "depends_on": ["critique"]},
+      "complete": {"kind": "complete", "depends_on": ["refine"], "acceptance": ["no_unverified_claims"]}
+    }
+  }
+}

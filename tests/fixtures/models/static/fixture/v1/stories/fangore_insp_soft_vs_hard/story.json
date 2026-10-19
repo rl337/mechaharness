@@ -4,8 +4,8 @@
   "title": "Enforce grants mechanically instead of by prompt alone",
   "kind": "tool_gating",
   "narrative": "Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`. Soft-vs-hard split for self-revising MH-SR-03[^insp-sr-03-hard].",
-  "implementation": "`AccessControl` deny-by-default on the harness tool path; prompts never grant permission.",
-  "validation": "Kind `tool_gating`. Soft expects deny without grant and allow with grant.",
+  "implementation": "Harness tool loops consult `AccessControl` before execution — including fused or loop-proposed calls — and denied calls emit access-check events and never run side effects. Failure defaults are deny for mutations / external / privileged / uncertain scope; composed packs from `fangore_compound_grants` still apply. Prompts never grant permission.\n\nCovers: GAT-01, GAT-02, GAT-03.",
+  "validation": "Kind `tool_gating`. Soft expects deny without grant and allow with grant. Unit: `tests/test_access.py`. Related: `fangore_insp_risk_autonomy`.",
   "footnotes": [
     {
       "id": "insp-r09",

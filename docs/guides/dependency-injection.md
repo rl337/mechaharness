@@ -167,10 +167,29 @@ MechaHarness; clients instantiate them via Config and may retain the resulting
 concrete graphs. See [Architecture](../architecture.md) and
 [Graph templates](../reference/graph-templates.md).
 
+### Host APIs and promotion
+
+For inspiration-era safety and recipe surfaces, prefer
+`from mechaharness.host_apis import ...` (AuthorityGate, DenialStore, freshness,
+`promote_recipe`, port search, key templates) over mining leaf modules. See
+[Inspiration primitives](../reference/inspiration-primitives.md) and the
+[promotion surfaces](../reference/graph-templates.md#promotion-surfaces-host-orientation)
+table: product hosts should use `promote_recipe` (policy + held-out gate), not
+ungated `registry.promote`.
+
+Config hooks: `get_authority_gate()`, `get_denial_store()`,
+`get_tool_result_freshness_policy()`, `get_recipe_promotion_policy()`,
+`get_evolution_campaign_hooks()`.
+
+Coding agents in **host** repos: install the customer skills from
+[`agent-skills/`](../../agent-skills/)
+([guide](./agent-skills.md); normative [HOST-01..07](../requirements/host-integration.md)).
+
 ### Host kit (readable GraphExecutor wiring)
 
 Prefer `mechaharness.host_kit` when a host only needs to register runners and
-choose checkpoint durability. It keeps the blessed path
+choose checkpoint durability (plus `host_authority_gate` /
+`host_denial_store`). It keeps the blessed path
 (`MechaHarnessConfig` → `inject(GraphExecutor)`) without ten-line hand assembly
 of EventLog / access / linkage / checkpoint / crash probe.
 
@@ -225,6 +244,8 @@ assert effectful_external_handle(result, "coding_job") == "job-t1"
 | `tapping_event_log` | EventLog wrapper that forwards emits to a host callback (HF-05) |
 | `SubmitOnceEffectfulRunner` | Non-idempotent external effect: submit once, complete on accept, never silent-redispatch `UNCERTAIN` without a handle |
 | `effectful_external_handle` | Read `external_run_id` / `external_handle` from a `GraphResult` without scraping node maps |
+| `host_authority_gate` | `AuthorityGate` via Config inject from `grants=`, optional `consequence=` and `denial_store=` |
+| `host_denial_store` | The `DenialStore` a Config would bind (in-memory default, or the one you pass) |
 
 `SubmitOnceEffectfulRunner` completes the **graph node** when the backend
 accepts a handle. Long-running job observation (poll until finished) remains a
@@ -234,6 +255,43 @@ not both. Omit both for the default ephemeral EventLog-backed store.
 Related: [Transactional durable resume](../requirements/transactional-durable-resume.md)
 (`fangore_transactional_durable_resume`) owns the crash-window contract this kit
 sits on.
+
+### Authority, denial, and recipe-lifecycle hooks (`host_apis`)
+
+`MechaHarnessConfig` binds these as injectables in `configure()`; override the
+hook, never construct them by hand:
+
+| Hook | Type | Default |
+|------|------|---------|
+| `get_authority_gate()` | `AuthorityGate` | Config access control + `get_denial_store()`, no consequence policy |
+| `get_denial_store()` | `DenialStore` | `InMemoryDenialStore` (not restart-durable; bind a durable store) |
+| `get_tool_result_freshness_policy()` | `ToolResultFreshnessPolicy` | honors `expires_at` only |
+| `get_recipe_promotion_policy()` | `RecipePromotionPolicy` | no host opinion |
+| `get_evolution_campaign_hooks()` | `EvolutionCampaignHooks` | no-op |
+
+`mechaharness.host_apis` is the one blessed import path for these surfaces
+(re-exports only; each name lives in its owning module). Pass the bound campaign
+hooks to `promote_recipe` so the host observes each successful pointer move:
+
+```python
+from mechaharness.host_apis import (
+    EvolutionCampaignHooks,
+    RecipePromotionPolicy,
+    RecipePromotionRequest,
+    promote_recipe,
+)
+
+injector = get_injector(MyConfig())
+decision = promote_recipe(
+    registry,
+    injector.inject(RecipePromotionPolicy),
+    RecipePromotionRequest(recipe="verify_repair", to_version="2", final_test=held_out),
+    hooks=injector.inject(EvolutionCampaignHooks),  # on_promotion fires on success only
+)
+```
+
+Owning stories: `fangore_insp_authority_gate`, `fangore_insp_denial_equivalence`,
+`fangore_insp_evolution_ownership_split`.
 
 ## Verify
 

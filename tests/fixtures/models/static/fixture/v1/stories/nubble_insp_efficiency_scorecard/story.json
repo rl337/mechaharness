@@ -5,7 +5,7 @@
   "kind": "efficiency_scorecard_build",
   "narrative": "Nubble needs tool calls, tokens, latency, and coordination cost kept as separate efficiency dimensions rather than a single opaque proxy. Accepts FineEnvs tool-call efficiency observations[^fineenvs-efficiency].",
   "implementation": "`EfficiencyScorecard` and `build_efficiency_scorecard` in `mechaharness.efficiency_scorecard` compose topology/cost/coordination/resume dimensions without silent collapse.",
-  "validation": "Kind `efficiency_scorecard_build`. Soft expects tool_calls and tokens_out dimensions. Unit tests in `tests/test_efficiency_scorecard.py`.",
+  "validation": "Kind `efficiency_scorecard_build`. Soft expects tool_calls and tokens_out dimensions.",
   "footnotes": [
     {
       "id": "fineenvs-efficiency",

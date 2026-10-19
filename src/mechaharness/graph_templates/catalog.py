@@ -19,6 +19,10 @@ from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTempla
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
 from mechaharness.graph_templates.initialize_preflight import InitializePreflightTemplate
+from mechaharness.graph_templates.produce_critique_refine import (
+    ProduceCritiqueRefineTemplate,
+)
+from mechaharness.graph_templates.safety_eval import SafetyEvalTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
 
 
@@ -35,6 +39,8 @@ def default_graph_template_classes() -> dict[str, type[GraphTemplate]]:
         ConversationalToolLoopTemplate.name: ConversationalToolLoopTemplate,
         HarnessRunTemplate.name: HarnessRunTemplate,
         BackendDescribeTemplate.name: BackendDescribeTemplate,
+        ProduceCritiqueRefineTemplate.name: ProduceCritiqueRefineTemplate,
+        SafetyEvalTemplate.name: SafetyEvalTemplate,
     }
 
 

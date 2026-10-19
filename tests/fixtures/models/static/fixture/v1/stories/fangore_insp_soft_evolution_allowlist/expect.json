@@ -1,15 +1,18 @@
 {
-  "requirement_id": "MH-SR-03",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0,
-  "soft_soft_point_fields": [
-    "default",
-    "description",
-    "kind",
-    "name",
-    "required"
-  ]
+  "outcomes": {
+    "tune_prompt": "allowed",
+    "drop_isolation": "refused",
+    "more_reviewers": "allowed",
+    "swap_runner": "refused"
+  },
+  "evolvable": {
+    "produce_critique_refine": [
+      "critique_prompt",
+      "max_rounds"
+    ],
+    "independent_review": [
+      "reviewer_count"
+    ],
+    "verify_repair": []
+  }
 }

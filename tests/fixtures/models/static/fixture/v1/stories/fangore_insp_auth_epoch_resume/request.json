@@ -1,28 +1,5 @@
 {
-  "requirement_id": "MH-DOTS-06",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/checkpoint_store.py",
-    "mechaharness/sqlite_checkpoint_store.py",
-    "mechaharness/external_effect.py",
-    "mechaharness/host_kit.py"
-  ],
-  "probes": [
-    {
-      "kind": "module_symbols",
-      "name": "checkpoint",
-      "module": "mechaharness.checkpoint_store",
-      "has": [
-        "CheckpointStore"
-      ]
-    },
-    {
-      "kind": "module_symbols",
-      "name": "epoch",
-      "module": "mechaharness",
-      "missing": [
-        "AuthorizationEpoch"
-      ]
-    }
-  ]
+  "goal": "epoch",
+  "first_epoch": 2,
+  "resume_epoch": 3
 }

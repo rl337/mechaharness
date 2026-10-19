@@ -1,8 +1,10 @@
 {
-  "requirement_id": "MH-DOTS-02",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "results": {
+    "fresh": "ok",
+    "revoked": "authorization_epoch_advanced:2!=3",
+    "grant_dropped": "envelope_grant_missing:core:net.http"
+  },
+  "graph_status": "failed",
+  "node_error_contains": "revalidation_failed:authorization_epoch_advanced:2!=3",
+  "effect_calls": 0
 }

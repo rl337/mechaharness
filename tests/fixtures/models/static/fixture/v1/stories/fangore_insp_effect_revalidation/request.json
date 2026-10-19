@@ -1,29 +1,29 @@
 {
-  "requirement_id": "MH-DOTS-02",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/linkage_resolver.py",
-    "mechaharness/graph_executor.py",
-    "mechaharness/approval_interrupt.py",
-    "mechaharness/judgement_policy.py"
-  ],
-  "probes": [
+  "now": "2026-10-18T12:00:00Z",
+  "envelope": {
+    "grants": [
+      "core:graph.execute",
+      "core:fs.read"
+    ],
+    "authorization_epoch": 2,
+    "expires_at": "2026-10-18T13:00:00Z"
+  },
+  "checks": [
     {
-      "kind": "module_symbols",
-      "name": "approval",
-      "module": "mechaharness.approval_interrupt",
-      "has": [
-        "suspend_for_approval",
-        "resume_approval"
-      ]
+      "id": "fresh",
+      "live_authorization_epoch": 2
     },
     {
-      "kind": "module_symbols",
-      "name": "revalidate",
-      "module": "mechaharness",
-      "missing": [
-        "revalidate_before_effect"
-      ]
+      "id": "revoked",
+      "live_authorization_epoch": 3
+    },
+    {
+      "id": "grant_dropped",
+      "required_grants": [
+        "core:net.http"
+      ],
+      "live_authorization_epoch": 2
     }
-  ]
+  ],
+  "revoked_epoch": 3
 }

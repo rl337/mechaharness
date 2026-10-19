@@ -12,7 +12,7 @@ delivered with WL-P0-5.
 |----|-------|---------|---------|-------|
 | WL-P0-1 | Model-input replay manifest | `model_input_manifest.py` | story | `nubble_insp_model_input_replay` |
 | WL-P0-2 | Graph transitions ≠ deps | `graph_transition.py` | story | `fangore_insp_graph_transitions` |
-| WL-P0-3 | Isolation + template I/O | `isolation_contract.py` | story | `fangore_insp_isolation_io` |
+| WL-P0-3 | Isolation + template I/O | `isolation/isolation_contract.py` | story | `fangore_insp_isolation_io` |
 | WL-P0-4 | Shared vs private context | `context_layers.py` | story | `fangore_insp_context_layers` |
 | WL-P0-5 | Targeted rollback | `failure_attribution.py`, `graph_transition.py` | story | `fangore_insp_targeted_rollback` |
 | WL-P0-6 | Approval interrupt | `approval_interrupt.py` | story | `fangore_insp_approval_interrupt` |
@@ -23,7 +23,7 @@ delivered with WL-P0-5.
 | WL-P1-8 | WIP back-pressure | `work_in_progress_policy.py` | story | `fangore_insp_wip_backpressure` |
 | WL-P1-9 | Fan-in acceptance | `fan_in_policy.py` | story | `fangore_insp_fan_in_policy` |
 | WL-P1-10 | Exit / clean-state | `exit_contract.py` | story | `fangore_insp_exit_clean_state` |
-| WL-P1-11 | Workspace isolation seam | `workspace_isolation.py` | story | `nubble_insp_workspace_isolation` |
+| WL-P1-11 | Workspace isolation seam | `isolation/workspace_isolation.py` | story | `nubble_insp_workspace_isolation` |
 | WL-P1-12 | Staged context compaction | `context_compaction.py` | story | `fangore_insp_context_compaction` |
 | WL-P1-13 | State-field governance | `graph_state_governance.py` | story | `fangore_insp_state_governance` |
 | WL-P1-14 | Anchor evidence | `anchor_evidence.py` | story | `fangore_insp_anchor_evidence` |

@@ -1,8 +1,11 @@
 {
-  "requirement_id": "MH-SR-02",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "violations": {
+    "pure_tiling": [],
+    "free_form": [
+      "free_form_node:adhoc_shell"
+    ],
+    "forged_version": [
+      "unregistered_recipe:verify_repair@99"
+    ]
+  }
 }

@@ -1,8 +1,21 @@
 {
-  "requirement_id": "MH-PA-06",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "ladder": [
+    "log",
+    "surface",
+    "surface",
+    "propose",
+    "propose"
+  ],
+  "override_ladder": [
+    "surface",
+    "propose"
+  ],
+  "counter_walk": [
+    "log",
+    "surface",
+    "surface",
+    "propose",
+    "propose"
+  ],
+  "unordered_refused": true
 }

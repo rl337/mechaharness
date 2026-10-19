@@ -27,15 +27,25 @@ docs/
   logo.png              # Project logo (canonical asset)
   index.md              # Docs home / table of contents
   architecture.md       # Design: Strategy + harness + recipes
-  guides/               # How-to guides (install, local models, extend)
+  guides/               # How-to guides (install, local models, extend, agent-skills)
   reference/            # Stable contracts (types, CLI, HTTP API, recipes)
-  requirements/         # Normative library requirements (recipes, resume, …)
+  requirements/         # Normative library + host-integration requirements
   inspiration/          # Attribution / gap analysis (not specification)
   adr/                  # Architecture Decision Records (optional)
+
+agent-skills/           # Customer-facing skills for *apps using* MechaHarness
+  use-mechaharness/
+  mechaharness-observability/
+  mechaharness.mdc
 ```
 
 Keep `README.md` short: logo, one-line pitch, install/quick start, and links
 into `docs/`. Do not duplicate long reference material in the README.
+
+| Audience | Location | Notes |
+|----------|----------|-------|
+| Maintainer agents | `.cursor/skills/` | Developing *this* repo |
+| Downstream / host agents | `agent-skills/` + `docs/guides/agent-skills.md` | Copy into *their* `.cursor/skills/`; keep in sync when public host APIs change |
 
 ## Workflow
 
@@ -75,7 +85,13 @@ routes, or Agentic Recipes / graph templates change, update in this order:
 2. Related `docs/guides/` examples
 3. `docs/architecture.md` if the design shifted
 4. `docs/requirements/` when normative MUST/SHOULD text changes
-5. `README.md` only for summary/quick-start impact
+5. **Customer-facing `agent-skills/`** when `host_apis`, Config hooks, promote
+   guidance, recipe catalog ids, or event correlators change — plus
+   `docs/guides/agent-skills.md` and `docs/requirements/host-integration.md`
+6. `README.md` only for summary/quick-start impact
+
+Stale downstream skills are a docs/product bug (same bar as pyiv
+`agent-skills/`).
 
 **Agentic Recipes** are a top-level concept (substrate: `GraphTemplate`). Treat
 recipe catalog docs as first-class reference pages: catalog id, when to use,
@@ -115,7 +131,8 @@ run `--check`. Do **not** hand-edit the user-stories guide as ordinary markdown.
 | Architecture | `docs/architecture.md` | Patterns, layering, extension model |
 | Guide | `docs/guides/*.md` | Task-oriented how-tos |
 | Reference | `docs/reference/*.md` | Exact CLI/API/types/recipe contracts |
-| Requirements | `docs/requirements/*.md` | Normative library requirements |
+| Requirements | `docs/requirements/*.md` | Normative library + host-integration requirements |
+| Downstream skills | `agent-skills/` | Customer Cursor skills / `mechaharness.mdc` for host apps |
 | Inspiration | `docs/inspiration/*.md` | Attribution / gaps (not specification) |
 | ADR | `docs/adr/NNNN-title.md` (local-only / gitignored) | Decision + context + consequences |
 
@@ -129,9 +146,13 @@ Before finishing:
 - [ ] `docs/index.md` lists new/changed pages
 - [ ] Logo path is correct for the file's location
 - [ ] No secrets or live API keys in examples
+- [ ] If host-facing APIs changed: `agent-skills/` + guide + HOST requirements match
 
 ## Additional resources
 
 - Page templates: [templates.md](templates.md)
 - Agentic Recipes: [`agentic-recipes`](../agentic-recipes/SKILL.md)
 - User stories: [`user-stories`](../user-stories/SKILL.md)
+- Event observability: [`event-observability`](../event-observability/SKILL.md)
+- Downstream consumers: [`../../agent-skills/`](../../agent-skills/),
+  [`docs/guides/agent-skills.md`](../../../docs/guides/agent-skills.md)

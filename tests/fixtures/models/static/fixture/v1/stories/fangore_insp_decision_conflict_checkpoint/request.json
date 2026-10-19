@@ -1,27 +1,53 @@
 {
-  "requirement_id": "MH-SR-08",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/graph.py",
-    "mechaharness/checkpoint_store.py",
-    "mechaharness/stop_contract.py"
-  ],
-  "probes": [
+  "scenarios": [
     {
-      "kind": "module_symbols",
-      "name": "graph",
-      "module": "mechaharness.graph",
-      "has": [
-        "ExecutionGraph"
+      "id": "cycle_never_cleared",
+      "start": "a",
+      "write_scopes": {
+        "a": [
+          "repo:x"
+        ],
+        "b": [
+          "repo:x",
+          "repo:y"
+        ],
+        "c": [
+          "repo:y"
+        ]
+      },
+      "clears": []
+    },
+    {
+      "id": "cleared_at_c",
+      "start": "a",
+      "write_scopes": {
+        "a": [
+          "repo:x"
+        ],
+        "b": [
+          "repo:x",
+          "repo:y"
+        ],
+        "c": [
+          "repo:y"
+        ]
+      },
+      "clears": [
+        "c"
       ]
     },
     {
-      "kind": "module_symbols",
-      "name": "cr",
-      "module": "mechaharness",
-      "missing": [
-        "neighbor_conflict_resolver"
-      ]
+      "id": "no_conflicts",
+      "start": "a",
+      "write_scopes": {
+        "a": [
+          "repo:x"
+        ],
+        "b": [
+          "repo:y"
+        ]
+      },
+      "clears": []
     }
   ]
 }

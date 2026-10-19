@@ -1,8 +1,21 @@
 {
-  "requirement_id": "MH-SR-04",
-  "coverage": "gap",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "found": {
+    "produces_artifact": [
+      "produce_critique_refine",
+      "verify_repair"
+    ],
+    "accepts_scenario": [
+      "safety_eval"
+    ],
+    "scenario_to_report": [
+      "safety_eval"
+    ],
+    "wildcard": [
+      "safety_eval"
+    ],
+    "wrong_type": [],
+    "unknown_port": []
+  },
+  "all_catalog_ids": true,
+  "undeclared_recipes_skipped": true
 }
