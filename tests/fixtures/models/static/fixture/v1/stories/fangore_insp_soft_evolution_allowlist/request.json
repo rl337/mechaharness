@@ -1,0 +1,7 @@
+{
+  "requirement_id": "MH-SR-03",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/graph_templates/base.py"
+  ]
+}

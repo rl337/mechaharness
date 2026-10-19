@@ -178,6 +178,22 @@ Kind `capability_need_routing`. Soft expects selected_model_class matches need.
 
 [^insp-r13]: [Inspiration requirements (req 13: model routing)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 13 — model routing
 
+### `nubble_insp_recipe_audit_dimensions` — Audit recipe selection and freshness without reading full transcripts
+
+Quarterly audits need recipe selection, model/tool usage, latency/cost, freshness, policy decisions, retries, and failure classes without reading entire transcripts. Cost and decision telemetry already ship via `fangore_decision_plane_telemetry` and `nubble_insp_trace_envelope`. Tracks MH-PA-08[^insp-pa-08].
+
+#### Implementation
+
+DecisionLog, TraceEnvelope, Cost events, bounded_retry recipe telemetry. Desired: recipe-selection and freshness as first-class audit dimensions end-to-end.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-08, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-pa-08]: [Personal agent reliability (MH-PA-08)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Observability and audit
+
 ### `nubble_insp_resume_cost` — Measure wake-to-productive resume cost
 
 Nubble records how expensive resume is — rebuild tokens, tool calls, and wake-to-first-productive time — so continuity work can be optimized. Accepts WalkingLabs L05 and P03 guidance[^wl-l05-resume][^wl-p03-resume].
@@ -194,6 +210,22 @@ Kind `resume_cost_summarize`. Soft expects rebuild_tokens.
 
 [^wl-l05-resume]: [WalkingLabs L05 Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/) — Resume cost
 [^wl-p03-resume]: [WalkingLabs P03 Multi-Session Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-03-multi-session-continuity/) — Crash/resume metrics
+
+### `nubble_insp_review_audit_reconstruct` — Reconstruct why a consequential action was allowed without model recollection
+
+Audits must reconstruct review decision, policy revision, source trust, delegated scope, denial reason, user approval, and actual side effects without relying on model memory. Related: `taloneth_policy_replay`, `nubble_insp_trace_reconciliation`. Tracks MH-DOTS-09[^insp-dots-09].
+
+#### Implementation
+
+DecisionLog, TraceEnvelope, trace reconciliation, model input manifest. Desired: unified review-audit API tying recipe selection, policy, approvals, denials, and effects.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-09, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-dots-09]: [OpenAI Dots agent safety (MH-DOTS-09)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Review observability
 
 ### `nubble_insp_rollout_graph` — Reconstruct retries and delegated agents as observed rollout branches
 
@@ -213,7 +245,7 @@ Kind `rollout_graph_build`. Soft expects roots and linked retry. Unit tests in `
 
 ### `nubble_insp_trace_envelope` — Require provenance on every trace envelope
 
-Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace].
+Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace]. Trace audit substrate for personal-agent MH-PA-08[^insp-pa-08-trace].
 
 #### Implementation
 
@@ -227,10 +259,11 @@ Kind `trace_envelope_complete`. Soft expects complete true and no missing fields
 
 [^wl-l11-trace]: [WalkingLabs L11 Runtime Observability](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-11-why-observability-belongs-inside-the-harness/) — Trace reconstructs decisions
 [^wl-deepseek-trace]: [WalkingLabs DeepSeek harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/) — Observable execution-affecting state
+[^insp-pa-08-trace]: [Personal agent reliability map (MH-PA-08 trace)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Trace envelope audit substrate
 
 ### `nubble_insp_trace_reconciliation` — Reject rollouts when independent traces disagree
 
-Nubble needs executor events and gateway capture to reconcile before a rollout is accepted for training or self-improvement. Accepts FineEnvs independent trajectory checks[^fineenvs-reconcile].
+Nubble needs executor events and gateway capture to reconcile before a rollout is accepted for training or self-improvement. Accepts FineEnvs independent trajectory checks[^fineenvs-reconcile]. Trace reconciliation for Dots MH-DOTS-09[^insp-dots-09-recon].
 
 #### Implementation
 
@@ -243,6 +276,7 @@ Kind `trace_reconciliation_check`. Soft expects conflict status. Unit tests in `
 #### Footnotes
 
 [^fineenvs-reconcile]: [FineEnvs multi-harness RL — independent trajectories](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards) — MH-MHRL-09
+[^insp-dots-09-recon]: [OpenAI Dots map (MH-DOTS-09 reconciliation)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Trace reconciliation for audit reconstruction
 
 ### `nubble_insp_workspace_isolation` — Acquire workspace isolation through a host provider seam
 
@@ -381,7 +415,7 @@ Kind `bounded_retry_recipe`. Soft expects node ids, bounded stop on attempt, esc
 
 ### `fangore_capability_envelope_narrow` — Narrow child capability envelopes without silent inheritance
 
-Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent's full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes[^insp-envelope].
+Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent's full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes[^insp-envelope]. Native narrow attenuation for Dots MH-DOTS-01[^insp-dots-01-narrow].
 
 #### Implementation
 
@@ -394,6 +428,7 @@ Kind `capability_envelope_narrow` → `_run_capability_envelope_narrow`. Soft ex
 #### Footnotes
 
 [^insp-envelope]: [Inspiration requirements (delegation envelopes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 7 — CapabilityEnvelope; children must not inherit parent capabilities implicitly
+[^insp-dots-01-narrow]: [OpenAI Dots map (MH-DOTS-01 narrow)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Narrow attenuation story
 
 ### `fangore_completer_flavors` — Wire same-lane Completer flavors without forking the library
 
@@ -415,7 +450,7 @@ Kind `completer_flavors` → `_run_completer_flavors`. Unit: `tests/test_di.py`.
 
 ### `fangore_compound_grants` — Compose read-only and write permission packs
 
-Fangore’s host app must not let agents write the filesystem by default. A read-only pack refuses the write tool; composing it with a write pack allows the same tool. He needs reusable permission packs instead of copy-pasted lists.
+Fangore’s host app must not let agents write the filesystem by default. A read-only pack refuses the write tool; composing it with a write pack allows the same tool. He needs reusable permission packs instead of copy-pasted lists. Grant composition feeds personal-agent MH-PA-02 (`fangore_insp_authority_gate`)[^insp-pa-02-grants].
 
 #### Implementation
 
@@ -426,6 +461,10 @@ Covers: host compound grants.
 #### Validation
 
 Kind `grant_gate_write` → `_run_grant_gate_write`. Unit: `tests/test_access.py`.
+
+#### Footnotes
+
+[^insp-pa-02-grants]: [Personal agent reliability map (MH-PA-02 grants)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Capability packs for authority gate
 
 ### `fangore_config_access_policy` — Let the host app supply its own permission policy
 
@@ -545,7 +584,7 @@ Kind `decision_plane_model_policy`. Soft expects soft point present, bound model
 
 ### `fangore_decision_plane_policy` — Let code own the final decision-plane action with escalation
 
-A small decision model answers several triage questions in one call — which team, how risky — but only allowed teams are exposed, and product policy chooses route or escalate when confidence is low or an answer is off-list. Exact duplicate-charge math stays in facts, not in the model. Related: `fangore_decision_surface_reject`, `fangore_refund_verdict`.[^rvania-policy][^rc-dp-policy]
+A small decision model answers several triage questions in one call — which team, how risky — but only allowed teams are exposed, and product policy chooses route or escalate when confidence is low or an answer is off-list. Exact duplicate-charge math stays in facts, not in the model. Related: `fangore_decision_surface_reject`, `fangore_refund_verdict`.[^rvania-policy][^rc-dp-policy] Native model-proposes/code-decides path for personal-agent MH-PA-06; alert escalation catalog is `fangore_insp_alert_escalation_rules`[^insp-pa-06-dp]. Decision-plane resolve is not the self-revising neighbor CR loop (`fangore_insp_decision_conflict_checkpoint`)[^insp-sr-08-dp].
 
 #### Implementation
 
@@ -559,6 +598,8 @@ Kind `decision_plane_policy`. Soft expects single_batch_invocation, final_action
 
 [^rvania-policy]: [Move Routine Decisions Off Your Big Model (rvaniaaaa)](https://x.com/rvaniaaaa/status/2107453108611662172) — Rules 2,3,5,6,7 — batch ask; allowed levels; code policy; confidence; valid actions
 [^rc-dp-policy]: [Recipes requirements DP-02 / DP-04 / DP-05 / DP-06](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Batch, evidence vs policy, envelopes, escalation
+[^insp-pa-06-dp]: [Personal agent reliability map (MH-PA-06 decision plane)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Model proposes / policy decides
+[^insp-sr-08-dp]: [Self-revising recipe map (MH-SR-08 decision plane)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Decision resolve ≠ neighbor CR loop
 
 ### `fangore_decision_plane_projection` — Project decision state and facts without calling a model
 
@@ -611,7 +652,7 @@ Kind `decision_plane_shadow`. Soft expects production_action set, shadow_control
 
 ### `fangore_decision_plane_telemetry` — Export evaluation-ready decision-plane telemetry without raw context
 
-Fangore needs decision metrics — which questions, projection fingerprint, answers, confidence, final policy action, escalation reason, and cost — without dumping the full ticket body into the aggregate stream. Related: `fangore_decision_plane_policy`, `taloneth_offline_decision_export`.[^rc-dp-telemetry]
+Fangore needs decision metrics — which questions, projection fingerprint, answers, confidence, final policy action, escalation reason, and cost — without dumping the full ticket body into the aggregate stream. Related: `fangore_decision_plane_policy`, `taloneth_offline_decision_export`.[^rc-dp-telemetry] Decision telemetry for personal-agent MH-PA-08; recipe-selection/freshness audit dimensions: `nubble_insp_recipe_audit_dimensions`[^insp-pa-08-telem].
 
 #### Implementation
 
@@ -624,6 +665,7 @@ Kind `decision_plane_telemetry`. Soft expects schema ids, fingerprints, final_ac
 #### Footnotes
 
 [^rc-dp-telemetry]: [Recipes requirements DP-08](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Evaluation-ready decision telemetry
+[^insp-pa-08-telem]: [Personal agent reliability map (MH-PA-08 telemetry)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Decision/cost telemetry
 
 ### `fangore_decision_surface_reject` — Reject model choices that are not on the allowed list
 
@@ -704,7 +746,7 @@ Kind `graph_linkage_preflight` → `_run_graph_linkage_preflight`. Soft expects:
 
 ### `fangore_graph_template_soft_points` — Instantiate a reusable graph template with soft points
 
-Fangore picks the library fan-out Agentic Recipe, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which recipe produced it so later upgrades can detect drift. Independent-review and verify-repair recipes follow the same GraphTemplate pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates].
+Fangore picks the library fan-out Agentic Recipe, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which recipe produced it so later upgrades can detect drift. Independent-review and verify-repair recipes follow the same GraphTemplate pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates]. Soft-point substrate for self-revising MH-SR-03; evolution allowlist: `fangore_insp_soft_evolution_allowlist`[^insp-sr-03-soft].
 
 #### Implementation
 
@@ -717,6 +759,7 @@ Kind `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft ex
 #### Footnotes
 
 [^insp-templates]: [Inspiration requirements (subgraphs & templates)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation
+[^insp-sr-03-soft]: [Self-revising recipe map (MH-SR-03 soft points)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Soft points; evolution allowlist is fangore_insp_soft_evolution_allowlist
 
 ### `fangore_harness_run_recipe` — Run a single prompt through the harness_run Agentic Recipe
 
@@ -780,7 +823,7 @@ Kind `host_kit_submit_once` → `_run_host_kit_submit_once`. Soft expects: durab
 
 ### `fangore_human_review_pending` — Hold mutations until a matching human approval exists
 
-Fangore’s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human — not allow.
+Fangore’s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human — not allow. ASK_HUMAN path for Dots MH-DOTS-04[^insp-dots-04-pending] and approval interrupt for MH-DOTS-02[^insp-dots-02-review].
 
 #### Implementation
 
@@ -791,6 +834,27 @@ Covers: POL-04, GAT-04.
 #### Validation
 
 Kind `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
+
+#### Footnotes
+
+[^insp-dots-02-review]: [OpenAI Dots map (MH-DOTS-02 approval pending)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Approval interrupt path
+[^insp-dots-04-pending]: [OpenAI Dots map (MH-DOTS-04 ask-human)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — ASK_HUMAN path of independent review
+
+### `fangore_insp_alert_escalation_rules` — Escalate alerts by deterministic once, repeated, and persistent rules
+
+Models may propose alert actions, but code-owned rules decide whether a threshold fired and how far to escalate: once/log, repeated/surface, persistent/propose repair. Decision-plane policy already separates model propose from policy decide (`fangore_decision_plane_policy`). Tracks MH-PA-06[^insp-pa-06].
+
+#### Implementation
+
+JudgementPolicy.decide and RulesDecisionBackend provide model-proposes/code-decides. Desired: alert/error escalation catalog with deterministic once/repeated/persistent stages.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-06, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-pa-06]: [Personal agent reliability (MH-PA-06)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Deterministic alert/error rules
 
 ### `fangore_insp_anchor_evidence` — Require external anchor evidence on high-autonomy work
 
@@ -825,6 +889,38 @@ Kind `approval_interrupt_cycle`. Soft expects pending then approved with actor.
 [^wl-p08-approval]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Human approval interrupt
 [^wl-l14-approval]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Durable interrupts
 
+### `fangore_insp_auth_epoch_resume` — Refuse resumed effects when the authorization epoch advanced
+
+Checkpoints must carry authorization epoch, pending reviews, idempotency keys, and an effect ledger so crash recovery does not duplicate external operations after revocation. Effect ledger and idempotent resume already ship in `fangore_transactional_durable_resume`. Tracks MH-DOTS-06[^insp-dots-06].
+
+#### Implementation
+
+CheckpointStore, SqliteCheckpointStore effect rows, HostKit submit-once. Desired: auth-epoch / grant-revocation epoch persisted and checked on replay.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-06, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-dots-06]: [OpenAI Dots agent safety (MH-DOTS-06)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Checkpoint and replay safety with auth epoch
+
+### `fangore_insp_authority_gate` — Compose capability, impact, trust, and approval into one authority gate
+
+Hard rules for consequential actions must live outside model text. Untrusted forwarded content must not authorize an external send; high-impact reversible trades still require the configured authority. Related native paths: `fangore_insp_risk_autonomy`, `fangore_jev_action_safety`, `fangore_compound_grants`. Tracks MH-PA-02[^insp-pa-02].
+
+#### Implementation
+
+Axes exist separately (AccessPolicy/grants, CapabilityEnvelope, ConsequencePolicy, JudgementPolicy, approval interrupt). Desired: one authority gate composing capability, reversibility, impact, source trust, and explicit approval.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-02, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-pa-02]: [Personal agent reliability (MH-PA-02)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Authority policy gate
+
 ### `fangore_insp_budget_subgraph_rollup` — Roll nested subgraph spend into the parent budget
 
 When a parent step embeds a child graph, child node costs must count against the same budget the parent is running under. After the child spends enough to hit the soft limit, later parent steps wind down instead of starting. Complements `fangore_insp_graph_budget` and `fangore_insp_dynamic_subgraph`.[^insp-budget-rollup]
@@ -843,7 +939,7 @@ Kind `graph_budget_subgraph_rollup`. Soft expects aggregated spent, soft level, 
 
 ### `fangore_insp_capability_envelope` — Narrow child envelopes without silent parent inheritance
 
-Delegated work gets an explicit capability envelope. Children must not inherit the parent's full grants, and widening must fail. Accepts inspiration requirement 7[^insp-r07].
+Delegated work gets an explicit capability envelope. Children must not inherit the parent's full grants, and widening must fail. Accepts inspiration requirement 7[^insp-r07]. Child attenuation for Dots MH-DOTS-01; execution token fields: `fangore_insp_execution_token`[^insp-dots-01-env].
 
 #### Implementation
 
@@ -856,6 +952,7 @@ Kind `capability_envelope_narrow`. Soft expects narrow ok, widen raises, child d
 #### Footnotes
 
 [^insp-r07]: [Inspiration requirements (req 7: delegation envelopes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 7 — delegation envelopes
+[^insp-dots-01-env]: [OpenAI Dots map (MH-DOTS-01 envelope)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Child attenuation; token fields in fangore_insp_execution_token
 
 ### `fangore_insp_context_compaction` — Compact context in staged lossless then lossy steps
 
@@ -893,7 +990,7 @@ Kind `context_layers_project`. Soft expects projected keys and exported result.
 
 ### `fangore_insp_context_provider` — Discover context indices before loading large payloads
 
-Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06].
+Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06]. Related personal-agent freshness/provenance delta: `fangore_insp_tool_result_freshness`[^insp-pa-01-provider].
 
 #### Implementation
 
@@ -906,10 +1003,59 @@ Kind `context_provider_discovery`. Soft expects index before load and provider a
 #### Footnotes
 
 [^insp-r06]: [Inspiration requirements (req 6: scoped context)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 6 — scoped context
+[^insp-pa-01-provider]: [Personal agent reliability map (MH-PA-01 provider)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Context provider provenance adjacent to MH-PA-01
+
+### `fangore_insp_cross_task_isolation` — Prevent intervening tasks from contaminating authority and evidence
+
+Task-local evidence, policy, memory references, and approvals must not bleed across intervening tasks unless an explicit typed handoff shares them. Related contracts: `fangore_insp_isolation_io`, `fangore_insp_handoff_record`. Tracks MH-DOTS-07[^insp-dots-07].
+
+#### Implementation
+
+IsolationContract, workspace isolation, HandoffRecord, CapabilityEnvelope. Desired: hard multi-task runtime boundary with five- and ten-intervening-task bleed tests.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-07, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-dots-07]: [OpenAI Dots agent safety (MH-DOTS-07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Cross-task context isolation
+
+### `fangore_insp_decision_conflict_checkpoint` — Checkpoint after conflict-free decisions without revisiting cleared cycles
+
+Inspiration conflict resolution revisits neighbors of a recently locked node, tracks visited nodes to prevent cycles, and checkpoints when a decision has no remaining conflicts. Current product conflicts are write-scope/parallel merge (`fangore_transactional_durable_resume`, `fangore_decision_plane_policy`), not that neighbor-revisit algorithm. Tracks MH-SR-08[^insp-sr-08].
+
+#### Implementation
+
+concurrent_write_conflicts, fan-in merge, StopContract, CheckpointStore, decision-plane resolve. Desired (if adopted): neighbor-revisit CR with visited-set cycle prevention and post-clearance checkpoints — distinct from write-merge conflicts.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-08, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-08]: [Self-revising recipe evolution (MH-SR-08)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — Conflict neighbors, cycles, and checkpoints
+
+### `fangore_insp_denial_equivalence` — Persist denials and block equivalent actions across retries
+
+Denied intents and side-effect classes must survive graph retries and delegated paths. A denied send cannot be retried through a second provider or tool without new explicit authorization. Native deny/allow paths: `fangore_tool_gating`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].
+
+#### Implementation
+
+Denials today are ephemeral AccessControl / Verdict outcomes. Desired: durable denial memory and equivalent-action detection across turns and tools.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-05, coverage gap, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-dots-05]: [OpenAI Dots agent safety (MH-DOTS-05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Denial persistence and equivalent-action detection
 
 ### `fangore_insp_durable_resume` — Refuse resume when the harness fingerprint changed
 
-Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12].
+Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_transactional_durable_resume`[^insp-pa-05-fingerprint].
 
 #### Implementation
 
@@ -922,6 +1068,7 @@ Kind `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume faile
 #### Footnotes
 
 [^insp-r12]: [Inspiration requirements (req 12: durable resume)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 12 — durable resume
+[^insp-pa-05-fingerprint]: [Personal agent reliability map (MH-PA-05 fingerprint)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Fingerprint refuse on resume
 
 ### `fangore_insp_dynamic_subgraph` — Nest a child graph as an observable subgraph
 
@@ -938,6 +1085,54 @@ Kind `dynamic_subgraph_nest`. Soft expects parent ok, child_status ok, nested gr
 #### Footnotes
 
 [^insp-r03]: [Inspiration requirements (req 3: dynamic subgraphs)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 3 — dynamic subgraphs
+
+### `fangore_insp_effect_revalidation` — Revalidate authority at side-effect dispatch after pause or revocation
+
+Authority must be rechecked when a consequential action actually runs — not only at graph start, approval capture, or checkpoint creation. A paused graph resumed after revocation must not publish. Related: `fangore_insp_wake_reresolve`, `fangore_human_review_pending`. Tracks MH-DOTS-02[^insp-dots-02].
+
+#### Implementation
+
+Linkage/fingerprint re-resolve and approval digests exist. Desired: mandatory pre-effect revalidation protocol for consequential tools.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-02, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-dots-02]: [OpenAI Dots agent safety (MH-DOTS-02)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Revalidate before consequential side effects
+
+### `fangore_insp_evolution_ownership_split` — Keep recipe validation in the library and evolution campaigns in the host
+
+MechaHarness validates, executes, versions, and safety-gates recipes; June (or another host) owns workload selection, experiment budgets, evaluation campaigns, and promotion policy. Docs already split ownership; named evolution campaign hooks remain a delta. Tracks MH-SR-09[^insp-sr-09].
+
+#### Implementation
+
+Config/DI graph_template_classes and recipe registry; ownership prose in recipes-and-decision-plane and FineEnvs/June maps. Desired: explicit host hooks for evolution campaigns and promotion policy without moving validation into the host.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-09, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-09]: [Self-revising recipe evolution (MH-SR-09)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — June versus MechaHarness ownership for evolution
+
+### `fangore_insp_execution_token` — Carry principal, expiry, and trust origin on every graph invocation
+
+Every graph run needs a capability-scoped execution token: principal, goal/run identity, allowed operations, expiry, trust origin, and authorization epoch. Child graphs receive attenuated authority only (`fangore_insp_capability_envelope`, `fangore_capability_envelope_narrow`). Tracks MH-DOTS-01[^insp-dots-01].
+
+#### Implementation
+
+CapabilityEnvelope.narrow and delegation policy choose child scope. Desired: execution token fields for principal, expiry, trust origin, and auth epoch.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-01, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-dots-01]: [OpenAI Dots agent safety (MH-DOTS-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Capability-scoped execution token
 
 ### `fangore_insp_exit_clean_state` — Require clean-state exit before handoff
 
@@ -1022,11 +1217,11 @@ Kind `graph_transition_inspect`. Soft expects validation empty and rollback/end 
 
 ### `fangore_insp_handoff_record` — Capture why across session handoffs
 
-Handoffs preserve completed/pending work, decisions, rationale, rejected alternatives, risks, and next action — hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff].
+Handoffs preserve completed/pending work, decisions, rationale, rejected alternatives, risks, and next action — hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: evidence and risks are first-class; goals, exclusions, and verdict schema still travel via open detail until extended. Also the typed handoff seam for Dots MH-DOTS-07[^insp-dots-07-handoff].
 
 #### Implementation
 
-`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema; storage remains host-owned.
+`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema; storage remains host-owned. Personal-agent MH-PA-04: `evidence_refs` and `risks` are first-class; goals, exclusions, and expected verdict remain host `detail` until schema promotion.
 
 #### Validation
 
@@ -1035,10 +1230,12 @@ Kind `handoff_record_fields`. Soft expects next_action.
 #### Footnotes
 
 [^wl-l05-handoff]: [WalkingLabs L05 Continuity](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/) — HandoffRecord
+[^insp-pa-04]: [Personal agent reliability (MH-PA-04)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Delegation and handoff; goals/exclusions/verdict still via detail
+[^insp-dots-07-handoff]: [OpenAI Dots map (MH-DOTS-07 handoff)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Typed handoff for cross-task sharing
 
 ### `fangore_insp_independent_review` — Review artifacts in isolated reviewer context
 
-Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10].
+Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10]. Recipe-contract coverage for personal-agent MH-PA-03; produce-critique-refine delta: `fangore_insp_produce_critique_refine`[^insp-pa-03-review].
 
 #### Implementation
 
@@ -1051,6 +1248,7 @@ Kind `independent_review_template`. Soft expects isolated payload flags and two 
 #### Footnotes
 
 [^insp-r10]: [Inspiration requirements (req 10: independent review)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 10 — independent review
+[^insp-pa-03-review]: [Personal agent reliability map (MH-PA-03 independent review)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Adversarial/independent review recipe substrate
 
 ### `fangore_insp_inference_capture_preflight` — Fail linkage when training-grade capture is unavailable
 
@@ -1118,7 +1316,7 @@ Kind `instruction_scope_metadata`. Soft expects scope and cost.
 
 ### `fangore_insp_isolation_io` — Validate isolation and template I/O contracts
 
-Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation].
+Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation]. Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso] and Dots MH-DOTS-07 isolation substrate (`fangore_insp_cross_task_isolation`)[^insp-dots-07-iso].
 
 #### Implementation
 
@@ -1132,6 +1330,8 @@ Kind `isolation_io_contract`. Soft expects empty validation issues and budget_sh
 
 [^wl-l14-isolation]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Typed I/O and isolation
 [^wl-codex-isolation]: [WalkingLabs Codex harness design](https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/) — Child isolation
+[^insp-pa-03-iso]: [Personal agent reliability map (MH-PA-03 isolation I/O)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Typed recipe I/O
+[^insp-dots-07-iso]: [OpenAI Dots map (MH-DOTS-07 isolation)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Isolation substrate for cross-task boundary
 
 ### `fangore_insp_lifecycle_block` — Skip one tool call without inventing a new plan
 
@@ -1261,9 +1461,89 @@ Kind `operation_compensation_meta`. Soft expects idempotent true.
 
 [^wl-l12-idem]: [WalkingLabs L12 Clean Session Handoffs](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/) — Idempotency
 
+### `fangore_insp_produce_critique_refine` — Register produce-critique-refine as a reusable recipe contract
+
+Reusable subgraphs need typed inputs/outputs, applicability predicates, budgets, and traceable outcomes. Independent review and verify-repair already ship (`fangore_insp_independent_review`, `fangore_verify_repair_recipe`). Produce-critique-refine and optional three-round council remain catalog deltas. Tracks MH-PA-03[^insp-pa-03].
+
+#### Implementation
+
+Agentic Recipes `independent_review` and `verify_repair` plus isolation/budget contracts. Desired catalog recipes: produce_critique_refine; optional council with recorded dissent (not default).
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-03, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-pa-03]: [Personal agent reliability (MH-PA-03)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Recipe contracts
+
+### `fangore_insp_recipe_lineage_promote` — Attach lineage and test results when promoting a recipe version
+
+New recipe versions must be immutable artifacts with provenance, lineage, test results, and a reversible promotion pointer. Research and rule promotion patterns exist (`taloneth_insp_rule_promotion`) but the recipe catalog still overwrites by name. Tracks MH-SR-05[^insp-sr-05].
+
+#### Implementation
+
+Stamp provenance on templates; ResearchLab promote/rollback; rule_promotion. Desired: recipe lineage DAG, eval attachments, and pointer-based promote/rollback.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-05, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-05]: [Self-revising recipe evolution (MH-SR-05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — Immutable lineage and promote/rollback
+
+### `fangore_insp_recipe_port_search` — Search compatible recipe compositions by typed ports
+
+Candidate compositions must search only registered, compatible recipes using typed ports — no arbitrary executable generation on the production path. Isolation I/O contracts exist (`fangore_insp_isolation_io`). Tracks MH-SR-04[^insp-sr-04].
+
+#### Implementation
+
+TemplateIOContract / IsolationContract typed I/O surface. Desired: automated typed-port compatibility search over the recipe catalog.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-04, coverage gap, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-04]: [Self-revising recipe evolution (MH-SR-04)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — Typed-port composition search
+
+### `fangore_insp_recipe_version_pointer` — Promote and roll back recipes via an immutable version pointer
+
+Recipe execution policies must be versioned, testable, replaceable artifacts with a reversible promotion pointer — not only class version fields and demotion stamps. Incubation stamps exist in `fangore_insp_template_incubation`. Tracks MH-SR-01[^insp-sr-01].
+
+#### Implementation
+
+GraphTemplate.version/status/fingerprints and demotion. Desired: immutable version artifacts with active promotion pointer and rollback target.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-01, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-01]: [Self-revising recipe evolution (MH-SR-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — Versioned replaceable recipe artifacts
+
+### `fangore_insp_registry_only_compose` — Require production graphs to compose registered recipes only
+
+Production graphs should be composed from registered recipes (including nested recipes), not free-form node synthesis. Tiling and recipe-as-tool already help (`fangore_recipe_namespace_tile`, `fangore_recipe_as_tool`). Tracks MH-SR-02[^insp-sr-02].
+
+#### Implementation
+
+GraphTemplateRegistry, tile/nest, embed_recipe_as_tool. Desired: hard production constraint that graphs are registry-recipe compositions only.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-02, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-02]: [Self-revising recipe evolution (MH-SR-02)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — Registry-only dynamic composition
+
 ### `fangore_insp_risk_autonomy` — Scale controls by action consequence class
 
-High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15[^insp-r15].
+High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15[^insp-r15]. Contributes to personal-agent MH-PA-02; composed gate delta: `fangore_insp_authority_gate`[^insp-pa-02-risk].
 
 #### Implementation
 
@@ -1276,10 +1556,27 @@ Kind `consequence_risk_scale`. Soft expects stronger controls and approval_frequ
 #### Footnotes
 
 [^insp-r15]: [Inspiration requirements (req 15: risk-scaled autonomy)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 15 — risk-scaled autonomy
+[^insp-pa-02-risk]: [Personal agent reliability map (MH-PA-02 consequence)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Consequence axis of authority gate; compose in fangore_insp_authority_gate
+
+### `fangore_insp_soft_evolution_allowlist` — Declare which soft recipe fields may evolve under optimization
+
+Hard nodes and trusted contracts must never be silently rewritten by an optimizer; only allowlisted soft parameters (prompts, lane selection, bounded retries, thresholds) may evolve. Soft points already exist (`fangore_graph_template_soft_points`, `fangore_insp_soft_vs_hard`). Tracks MH-SR-03[^insp-sr-03].
+
+#### Implementation
+
+SoftPoint contracts and soft-vs-hard grants. Desired: explicit evolution allowlist tagging soft fields vs hard-immutable structure.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-03, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-03]: [Self-revising recipe evolution (MH-SR-03)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — Soft optimizable vs hard immutable
 
 ### `fangore_insp_soft_vs_hard` — Enforce grants mechanically instead of by prompt alone
 
-Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`.
+Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`. Soft-vs-hard split for self-revising MH-SR-03[^insp-sr-03-hard].
 
 #### Implementation
 
@@ -1292,6 +1589,7 @@ Kind `tool_gating`. Soft expects deny without grant and allow with grant.
 #### Footnotes
 
 [^insp-r09]: [Inspiration requirements (req 9: soft vs hard)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 9 — soft vs hard
+[^insp-sr-03-hard]: [Self-revising recipe map (MH-SR-03 soft vs hard)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Soft guidance vs hard enforcement
 
 ### `fangore_insp_sparse_advisor` — Consult an advisor without transferring task ownership
 
@@ -1359,7 +1657,7 @@ Kind `targeted_rollback_select`. Soft expects selected rollback target produce.
 
 ### `fangore_insp_template_incubation` — Stamp template provenance and refuse demoted skeletons
 
-Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].
+Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19]. Incubation stamps for self-revising MH-SR-01; immutable promotion pointer: `fangore_insp_recipe_version_pointer`[^insp-sr-01-incubate].
 
 #### Implementation
 
@@ -1372,6 +1670,39 @@ Kind `graph_template_soft_points`. Soft expects stamped provenance and demoted r
 #### Footnotes
 
 [^insp-r19]: [Inspiration requirements (req 19: template incubation)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 19 — template incubation
+[^insp-sr-01-incubate]: [Self-revising recipe map (MH-SR-01 incubation)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Version/status stamps; pointer is fangore_insp_recipe_version_pointer
+
+### `fangore_insp_tool_effect_classes` — Separate observe, prepare, and execute tool classes
+
+Read-only observers must not invoke mutating tools; preparation returns typed proposals; execution alone gates mutating calls. A tool alias must not bypass an observer restriction. Lifecycle observe hooks exist (`fangore_insp_lifecycle_observe`) but are not a tool-class taxonomy. Tracks MH-DOTS-03[^insp-dots-03].
+
+#### Implementation
+
+Adjacent: EffectKind / OBSERVE reconcile, ObserveBefore/After lifecycle, flat Tool + grants. Desired: Observe / Prepare / Execute tool classes with enforcement that consequential work only runs in Execute.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-03, coverage gap, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-dots-03]: [OpenAI Dots agent safety (MH-DOTS-03)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Observe/Prepare/Execute tool classes
+
+### `fangore_insp_tool_result_freshness` — Reject stale tool evidence before external decisions
+
+Tool results that drive external decisions must carry source and freshness metadata. Eight-day-old CRM cache must not be silently treated as current. Context freshness scoring already exists in `fangore_jev_context_picker` and `fangore_insp_context_provider`; typed tool-result TTL remains a delta. Tracks personal-agent inspiration MH-PA-01[^insp-pa-01].
+
+#### Implementation
+
+Adjacent: harness `ToolResult` in `mechaharness.core.types` (tool_call_id/content/is_error only); context-candidate freshness in `context_provider` / decision-plane packing. Desired: typed provenance and expiry on tool results with graph reject-before-decision.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-01, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-pa-01]: [Personal agent reliability (MH-PA-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Typed provenance and freshness
 
 ### `fangore_insp_verification_gate` — Keep answer-generated distinct from task-complete
 
@@ -1391,7 +1722,7 @@ Kind `verification_outcome_gate`. Soft expects answer_generated then complete af
 
 ### `fangore_insp_wake_reresolve` — Re-resolve linkage when resuming a woken run
 
-Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17].
+Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17]. Wake re-resolve for Dots MH-DOTS-02; effect-dispatch revalidation: `fangore_insp_effect_revalidation`[^insp-dots-02-wake].
 
 #### Implementation
 
@@ -1404,6 +1735,7 @@ Kind `wake_reresolve_resume`. Soft expects re-resolve ok then successful resume 
 #### Footnotes
 
 [^insp-r17]: [Inspiration requirements (req 17: persistent goals (library hooks))](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 17 — persistent goals (library hooks)
+[^insp-dots-02-wake]: [OpenAI Dots map (MH-DOTS-02 wake reresolve)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Wake re-resolve; effect-time revalidation is fangore_insp_effect_revalidation
 
 ### `fangore_insp_wip_backpressure` — Apply WIP back-pressure without hard-coding WIP=1
 
@@ -1424,7 +1756,7 @@ Kind `wip_policy_allows`. Soft expects allow then deny when scope saturated.
 
 ### `fangore_jev_action_safety` — Let hard grants win over semantic risk classification
 
-Before an agent deletes, pays, or publishes, Fangore runs a semantic risk check and a hard grant check. If the model says the delete looks low risk but the product has no write grant, the action stays denied. Semantic risk may only add review or deny — it never unlocks a privilege the grants do not allow. Related: `fangore_tool_gating`, `fangore_insp_risk_autonomy`, `fangore_decision_plane_policy`.[^jev-us08]
+Before an agent deletes, pays, or publishes, Fangore runs a semantic risk check and a hard grant check. If the model says the delete looks low risk but the product has no write grant, the action stays denied. Semantic risk may only add review or deny — it never unlocks a privilege the grants do not allow. Related: `fangore_tool_gating`, `fangore_insp_risk_autonomy`, `fangore_decision_plane_policy`.[^jev-us08] Satisfies Dots MH-DOTS-04 independent action review[^insp-dots-04] and contributes to personal-agent MH-PA-02[^insp-pa-02-safety].
 
 #### Implementation
 
@@ -1437,6 +1769,8 @@ Kind `action_safety_judgment`. Soft expects: delete without grant denied despite
 #### Footnotes
 
 [^jev-us08]: [Jev typed-judgment inspiration (MH-JEV-US08)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Agent action safety firewall
+[^insp-pa-02-safety]: [Personal agent reliability map (MH-PA-02 action safety)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Hard execution boundary for authority gate
+[^insp-dots-04]: [OpenAI Dots agent safety (MH-DOTS-04)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Independent action review allow/deny/request-approval
 
 ### `fangore_jev_citation_check` — Never mark unsupported claims verified from a judge alone
 
@@ -1457,7 +1791,7 @@ Kind `citation_support_judgment`. Soft expects: matching claim verified; contrad
 
 ### `fangore_jev_context_picker` — Assemble RAG context from scored candidates within a token budget
 
-After retrieval, Fangore asks a decision model for relevance, trust, and freshness scores, then packs only candidates that clear product thresholds into a fixed token budget. Stale, untrusted, or injection-tainted snippets stay out even if they look relevant. When scores are missing, deterministic ranking still fills what it can. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05]
+After retrieval, Fangore asks a decision model for relevance, trust, and freshness scores, then packs only candidates that clear product thresholds into a fixed token budget. Stale, untrusted, or injection-tainted snippets stay out even if they look relevant. When scores are missing, deterministic ranking still fills what it can. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05] Also maps to personal-agent MH-PA-01 context freshness (tool-result TTL delta: `fangore_insp_tool_result_freshness`)[^insp-pa-01-picker].
 
 #### Implementation
 
@@ -1470,6 +1804,7 @@ Kind `context_budget_judgment`. Soft expects: high-trust pack within budget; sta
 #### Footnotes
 
 [^jev-us05]: [Jev typed-judgment inspiration (MH-JEV-US05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — RAG context selection
+[^insp-pa-01-picker]: [Personal agent reliability map (MH-PA-01 context freshness)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Native context freshness scoring; tool-result TTL is fangore_insp_tool_result_freshness
 
 ### `fangore_jev_requirements_review` — Escalate requirement gaps without treating a judge approve as correctness
 
@@ -1540,7 +1875,7 @@ Kind `node_components` → `_run_node_components`. Soft expects: all components 
 
 ### `fangore_recipe_as_tool` — Nest a child recipe under a tool_call graph node
 
-Fangore’s generate-image tool should run a child oneshot recipe under that tool step so operators can zoom into prompt → generate → verify without a parallel soft lane. Nested spend shares the parent budget; failure surfaces on the tool node. Complements `fangore_insp_dynamic_subgraph`, `fangore_insp_budget_subgraph_rollup`, and `fangore_conversational_tool_loop`.[^june-hf08]
+Fangore’s generate-image tool should run a child oneshot recipe under that tool step so operators can zoom into prompt → generate → verify without a parallel soft lane. Nested spend shares the parent budget; failure surfaces on the tool node. Complements `fangore_insp_dynamic_subgraph`, `fangore_insp_budget_subgraph_rollup`, and `fangore_conversational_tool_loop`.[^june-hf08] Nested recipe embedding for self-revising MH-SR-02[^insp-sr-02-tool].
 
 #### Implementation
 
@@ -1553,10 +1888,11 @@ Kind `recipe_as_tool` → `_run_recipe_as_tool`. Soft expects: status ok; child_
 #### Footnotes
 
 [^june-hf08]: [June host-friction requirements map](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/june-host-friction-requirements-map.md) — HF-08 recipe-as-tool
+[^insp-sr-02-tool]: [Self-revising recipe map (MH-SR-02 recipe-as-tool)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Nested recipe embedding
 
 ### `fangore_recipe_namespace_tile` — Embed two recipe instances without node-id collisions
 
-Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution.
+Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution. Recipe tiling for self-revising MH-SR-02; registry-only production constraint: `fangore_insp_registry_only_compose`[^insp-sr-02-tile].
 
 #### Implementation
 
@@ -1568,7 +1904,8 @@ Kind `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct r
 
 #### Footnotes
 
-1. [Recipes requirements (RC-01/04/05/08)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Namespaced multi-instance tiling
+[^rc-namespace]: [Recipes requirements (RC-01/04/05/08)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Namespaced multi-instance tiling
+[^insp-sr-02-tile]: [Self-revising recipe map (MH-SR-02 tile)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Recipe tiling; registry-only constraint is fangore_insp_registry_only_compose
 
 ### `fangore_refund_verdict` — Keep billing authority in product rules, not the model
 
@@ -1624,7 +1961,7 @@ Kind `tool_gating` → `_run_tool_gating`. Soft expects: deny without grant, all
 
 ### `fangore_transactional_durable_resume` — Resume a coding job after process crash without duplicate dispatch
 
-Fangore's host dispatches a long-running coding job through a durable plan. The MechaHarness process can die after the remote system accepts the job but before the plan records the result. On restart, the same durable store must reconcile the existing job instead of starting a second one. Crash points before intent, after intent, after accept, after reduce, and after final commit are all covered. Complements `fangore_insp_durable_resume` fingerprint refusal. Accepts the transactional durable resume requirements[^tdr-req].
+Fangore's host dispatches a long-running coding job through a durable plan. The MechaHarness process can die after the remote system accepts the job but before the plan records the result. On restart, the same durable store must reconcile the existing job instead of starting a second one. Crash points before intent, after intent, after accept, after reduce, and after final commit are all covered. Complements `fangore_insp_durable_resume` fingerprint refusal. Accepts the transactional durable resume requirements[^tdr-req]. Satisfies personal-agent MH-PA-05 checkpoint-compatible execution[^insp-pa-05]. Dots MH-DOTS-06 effect ledger is native here; auth-epoch resume is `fangore_insp_auth_epoch_resume`[^insp-dots-06-tdr]. Self-revising MH-SR-08 uses these checkpoints; neighbor-revisit conflict resolution remains `fangore_insp_decision_conflict_checkpoint`[^insp-sr-08-tdr].
 
 #### Implementation
 
@@ -1637,6 +1974,9 @@ Kind `transactional_durable_resume_crash_matrix`. Soft expects per crash locatio
 #### Footnotes
 
 [^tdr-req]: [Transactional durable graph resume requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/transactional-durable-resume.md) — DR-01..DR-12 — checkpoint seam, SQLite, effect reconciliation, crash matrix
+[^insp-pa-05]: [Personal agent reliability (MH-PA-05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Checkpoint-compatible execution
+[^insp-dots-06-tdr]: [OpenAI Dots map (MH-DOTS-06 effect ledger)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Effect ledger native; auth epoch is fangore_insp_auth_epoch_resume
+[^insp-sr-08-tdr]: [Self-revising recipe map (MH-SR-08 checkpoints)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Durable checkpoints; neighbor CR algorithm is separate delta
 
 ### `fangore_traversal_contract` — Align live traversal with node-component ids from existing events
 
@@ -1672,7 +2012,7 @@ Kind `verification_outcome_gate` → `_run_verification_outcome_gate`. Soft expe
 
 ### `fangore_verify_repair_recipe` — Tile the verify-repair Agentic Recipe into a plan
 
-Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair are visible graph steps with an explicit stop. Complements `fangore_bounded_repair_loop` for loop helper semantics.
+Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair are visible graph steps with an explicit stop. Complements `fangore_bounded_repair_loop` for loop helper semantics. Native recipe contract for personal-agent MH-PA-03[^insp-pa-03-verify].
 
 #### Implementation
 
@@ -1684,13 +2024,14 @@ Kind `verify_repair_recipe`. Soft expects node ids and template_name `verify_rep
 
 #### Footnotes
 
-1. [Recipes requirements (verify_repair)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — verify_repair tiling story
+[^rc-verify-repair]: [Recipes requirements (verify_repair)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — verify_repair tiling story
+[^insp-pa-03-verify]: [Personal agent reliability map (MH-PA-03 verify_repair)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Named recipe contract with budgets and outcomes
 
 ## Taloneth's stories
 
 ### `taloneth_atk_research_reject` — Reject research candidates that fail verified success
 
-A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: `taloneth_validator_qualification`.
+A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: `taloneth_validator_qualification`. Generic research loop for self-revising MH-SR-06; recipe-from-traces: `taloneth_insp_recipe_evolution_loop`[^insp-sr-06-research].
 
 #### Implementation
 
@@ -1701,6 +2042,10 @@ Covers: EXP-01, EXP-02, EXP-03, EXP-04.
 #### Validation
 
 Kind `atk_research_reject` → `_run_atk_research_reject`. Unit: `tests/test_research.py`.
+
+#### Footnotes
+
+[^insp-sr-06-research]: [Self-revising recipe map (MH-SR-06 research loop)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Generic research loop; recipe evolution is taloneth_insp_recipe_evolution_loop
 
 ### `taloneth_cache_layout_experiment` — Measure cache-aware prompt layout as an explicit experiment
 
@@ -1779,6 +2124,22 @@ Kind `component_ablation_delta`. Soft expects negative success_delta.
 [^wl-l02-ablation]: [WalkingLabs L02 What a Harness Is](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/) — Ablate components
 [^wl-p01-ablation]: [WalkingLabs P01 Baseline vs Minimal](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/) — Matched corpus
 
+### `taloneth_insp_correction_spec_debt` — Capture corrections as reviewed specification debt before policy change
+
+Human corrections should become structured candidate specification debt linked to failing scenarios, with review before policy changes and regression tests afterward. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].
+
+#### Implementation
+
+PromotionRecord / promote_soft_to_hard / rollback_promotion and failure attribution helpers. Desired: correction→test feedback loop and first-class specification-debt ledger.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-07, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-pa-07]: [Personal agent reliability (MH-PA-07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Correction-to-test feedback
+
 ### `taloneth_insp_cross_harness_failure` — Separate semantic task failure from invalid tool protocol
 
 Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes[^fineenvs-xharness].
@@ -1846,7 +2207,7 @@ Kind `evaluation_outcome_filter`. Soft expects task trial counts and pass@k igno
 
 ### `taloneth_insp_evaluator_compose` — Run a versioned held-out evaluator to claims
 
-Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon].
+Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon]. Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: `taloneth_insp_recipe_final_test_gate`[^insp-sr-07-eval].
 
 #### Implementation
 
@@ -1860,6 +2221,7 @@ Kind `evaluator_compose_run`. Soft expects passed and held_out true.
 
 [^anth-evals-evaluator]: [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Deterministic then model graders
 [^arxiv-verif-horizon]: [Verification Horizon](https://arxiv.org/abs/2606.26300) — Held-out evaluator versioning
+[^insp-sr-07-eval]: [Self-revising recipe map (MH-SR-07 held_out)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — held_out metadata; final-test gate is taloneth_insp_recipe_final_test_gate
 
 ### `taloneth_insp_experiment_dimensions` — Declare fixed and varying harness experiment dimensions
 
@@ -2006,9 +2368,41 @@ Kind `objective_policy_aggregate`. Soft expects scored scalar with policy identi
 
 [^fineenvs-objective]: [FineEnvs multi-harness RL — rewards aggregation](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards) — MH-MHRL-07
 
+### `taloneth_insp_recipe_evolution_loop` — Evolve recipe candidates from traces under registry and safety gates
+
+A candidate evolution loop collects immutable traces, proposes registry-bounded recipe configurations or compositions, validates connectivity and budgets, evaluates in isolation, selects by multi-objective policy, then promotes only after gates. Generic research loops exist (`taloneth_atk_research_reject`); recipe-from-traces does not. Tracks MH-SR-06[^insp-sr-06].
+
+#### Implementation
+
+ResearchLab, harness experiments, evaluator, ObjectivePolicy, decision-plane shadow. Desired: traces→recipe-candidate proposer wired to registry validation and promotion.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-06, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-06]: [Self-revising recipe evolution (MH-SR-06)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — Candidate evolution loop
+
+### `taloneth_insp_recipe_final_test_gate` — Require an untouched final test set before recipe promotion
+
+Leading candidates must face a separate untouched final test set at the release gate; that set must not be a continuous tuning signal. Evaluator held_out metadata exists (`taloneth_insp_evaluator_compose`). Tracks MH-SR-07[^insp-sr-07].
+
+#### Implementation
+
+Evaluator.held_out and decision-export anti-leakage helpers. Desired: mandatory final-test release gate enforced at recipe promote.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-07, coverage partial, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-sr-07]: [Self-revising recipe evolution (MH-SR-07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md) — Held-out final-test release gate
+
 ### `taloneth_insp_rule_promotion` — Promote review feedback into a hard invariant with provenance
 
-Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo].
+Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo]. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (`taloneth_insp_correction_spec_debt`)[^insp-pa-07-promo] and self-revising MH-SR-05 (`fangore_insp_recipe_lineage_promote`)[^insp-sr-05-promo].
 
 #### Implementation
 
@@ -2022,6 +2416,8 @@ Kind `rule_promotion_hard`. Soft expects stage hard.
 
 [^wl-l10-promo]: [WalkingLabs L10 Full Pipeline Verification](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-10-why-end-to-end-testing-changes-results/) — Promote feedback
 [^wl-l12-promo]: [WalkingLabs L12 Clean Session Handoffs](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/) — Process changes
+[^insp-pa-07-promo]: [Personal agent reliability map (MH-PA-07 promotion)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Soft-to-hard promotion substrate
+[^insp-sr-05-promo]: [Self-revising recipe map (MH-SR-05 promotion)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Promotion pattern; recipe lineage is fangore_insp_recipe_lineage_promote
 
 ### `taloneth_insp_run_parity` — Surface material train and eval constraint mismatches
 
@@ -2038,6 +2434,22 @@ Kind `run_parity_compare`. Soft expects material max_tokens mismatch. Unit tests
 #### Footnotes
 
 [^fineenvs-parity]: [FineEnvs multi-harness RL — train/eval decline](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-the-two-harbor-runs-declined) — MH-MHRL-12
+
+### `taloneth_insp_safety_eval_recipes` — Ship reusable safety evaluation recipes for injection and scope bleed
+
+Safety evaluation needs reusable fixtures for prompt injection in tool output, scope bleed, changing authorization, ambiguous consent, warning disregard, and false-denial controls, reporting outcome, severity, context, and model/recipe version. Adjacent eval substrate: `taloneth_insp_eval_matrix`, `fangore_insp_independent_review`. Tracks MH-DOTS-08[^insp-dots-08].
+
+#### Implementation
+
+General evaluator / eval_matrix / independent_review recipe. Desired: dedicated safety-evaluation Agentic Recipe catalog and fixture pack.
+
+#### Validation
+
+Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-08, coverage gap, adjacent_ok true.
+
+#### Footnotes
+
+[^insp-dots-08]: [OpenAI Dots agent safety (MH-DOTS-08)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Safety evaluation recipes
 
 ### `taloneth_insp_scaffolding_retire` — Retire scaffolding that loses a controlled experiment
 
@@ -2089,7 +2501,7 @@ Kind `offline_decision_export` → `_run_offline_decision_export`. Unit: `tests/
 
 ### `taloneth_policy_replay` — Replay product policy from recorded facts and signals
 
-Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts.
+Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: `nubble_insp_review_audit_reconstruct`[^insp-dots-09-replay].
 
 #### Implementation
 
@@ -2100,6 +2512,10 @@ Covers: OBS-03.
 #### Validation
 
 Kind `policy_replay` → `_run_policy_replay`. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.
+
+#### Footnotes
+
+[^insp-dots-09-replay]: [OpenAI Dots map (MH-DOTS-09 policy replay)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Policy replay for review audit
 
 ### `taloneth_shadow_decision_backends` — Compare decision backends without inventing missing results
 

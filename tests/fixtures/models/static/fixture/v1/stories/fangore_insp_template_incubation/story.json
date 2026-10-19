@@ -3,7 +3,7 @@
   "persona": "fangore",
   "title": "Stamp template provenance and refuse demoted skeletons",
   "kind": "graph_template_soft_points",
-  "narrative": "Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19].",
+  "narrative": "Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19]. Incubation stamps for self-revising MH-SR-01; immutable promotion pointer: `fangore_insp_recipe_version_pointer`[^insp-sr-01-incubate].",
   "implementation": "`GraphTemplate` is the substrate for Agentic Recipes. `SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, and optional `source_workflow_ref` support incubation. This story stamps and demotes via the `fan_out_aggregate` catalog entry.",
   "validation": "Kind `graph_template_soft_points`. Soft expects stamped provenance and demoted refuse.",
   "footnotes": [
@@ -12,6 +12,12 @@
       "label": "Inspiration requirements (req 19: template incubation)",
       "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
       "note": "Req 19 — template incubation"
+    },
+    {
+      "id": "insp-sr-01-incubate",
+      "label": "Self-revising recipe map (MH-SR-01 incubation)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md",
+      "note": "Version/status stamps; pointer is fangore_insp_recipe_version_pointer"
     }
   ]
 }

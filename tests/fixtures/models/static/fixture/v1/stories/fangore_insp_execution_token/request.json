@@ -1,0 +1,9 @@
+{
+  "requirement_id": "MH-DOTS-01",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/capability_envelope.py",
+    "mechaharness/core/access.py",
+    "mechaharness/delegation_policy.py"
+  ]
+}

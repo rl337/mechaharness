@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_safety_eval_recipes",
+  "persona": "taloneth",
+  "title": "Ship reusable safety evaluation recipes for injection and scope bleed",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Safety evaluation needs reusable fixtures for prompt injection in tool output, scope bleed, changing authorization, ambiguous consent, warning disregard, and false-denial controls, reporting outcome, severity, context, and model/recipe version. Adjacent eval substrate: `taloneth_insp_eval_matrix`, `fangore_insp_independent_review`. Tracks MH-DOTS-08[^insp-dots-08].",
+  "implementation": "General evaluator / eval_matrix / independent_review recipe. Desired: dedicated safety-evaluation Agentic Recipe catalog and fixture pack.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-08, coverage gap, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-dots-08",
+      "label": "OpenAI Dots agent safety (MH-DOTS-08)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
+      "note": "Safety evaluation recipes"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "requirement_id": "MH-PA-08",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/decision_log.py",
+    "mechaharness/trace_envelope.py",
+    "mechaharness/recipe_runner.py"
+  ]
+}

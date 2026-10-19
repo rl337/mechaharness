@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_denial_equivalence",
+  "persona": "fangore",
+  "title": "Persist denials and block equivalent actions across retries",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Denied intents and side-effect classes must survive graph retries and delegated paths. A denied send cannot be retried through a second provider or tool without new explicit authorization. Native deny/allow paths: `fangore_tool_gating`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].",
+  "implementation": "Denials today are ephemeral AccessControl / Verdict outcomes. Desired: durable denial memory and equivalent-action detection across turns and tools.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-05, coverage gap, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-dots-05",
+      "label": "OpenAI Dots agent safety (MH-DOTS-05)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
+      "note": "Denial persistence and equivalent-action detection"
+    }
+  ]
+}

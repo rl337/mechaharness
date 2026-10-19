@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_recipe_version_pointer",
+  "persona": "fangore",
+  "title": "Promote and roll back recipes via an immutable version pointer",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Recipe execution policies must be versioned, testable, replaceable artifacts with a reversible promotion pointer \u2014 not only class version fields and demotion stamps. Incubation stamps exist in `fangore_insp_template_incubation`. Tracks MH-SR-01[^insp-sr-01].",
+  "implementation": "GraphTemplate.version/status/fingerprints and demotion. Desired: immutable version artifacts with active promotion pointer and rollback target.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-01, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-sr-01",
+      "label": "Self-revising recipe evolution (MH-SR-01)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "Versioned replaceable recipe artifacts"
+    }
+  ]
+}

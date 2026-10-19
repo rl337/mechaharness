@@ -1,0 +1,10 @@
+{
+  "requirement_id": "MH-DOTS-07",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/isolation_contract.py",
+    "mechaharness/workspace_isolation.py",
+    "mechaharness/handoff_record.py",
+    "mechaharness/capability_envelope.py"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_soft_evolution_allowlist",
+  "persona": "fangore",
+  "title": "Declare which soft recipe fields may evolve under optimization",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Hard nodes and trusted contracts must never be silently rewritten by an optimizer; only allowlisted soft parameters (prompts, lane selection, bounded retries, thresholds) may evolve. Soft points already exist (`fangore_graph_template_soft_points`, `fangore_insp_soft_vs_hard`). Tracks MH-SR-03[^insp-sr-03].",
+  "implementation": "SoftPoint contracts and soft-vs-hard grants. Desired: explicit evolution allowlist tagging soft fields vs hard-immutable structure.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-03, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-sr-03",
+      "label": "Self-revising recipe evolution (MH-SR-03)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "Soft optimizable vs hard immutable"
+    }
+  ]
+}

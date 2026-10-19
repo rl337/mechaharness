@@ -1,0 +1,10 @@
+{
+  "requirement_id": "MH-DOTS-02",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/linkage_resolver.py",
+    "mechaharness/graph_executor.py",
+    "mechaharness/approval_interrupt.py",
+    "mechaharness/judgement_policy.py"
+  ]
+}

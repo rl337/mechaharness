@@ -1,0 +1,10 @@
+{
+  "requirement_id": "MH-DOTS-06",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/checkpoint_store.py",
+    "mechaharness/sqlite_checkpoint_store.py",
+    "mechaharness/external_effect.py",
+    "mechaharness/host_kit.py"
+  ]
+}

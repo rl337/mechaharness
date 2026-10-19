@@ -1,0 +1,7 @@
+{
+  "requirement_id": "MH-SR-04",
+  "coverage": "gap",
+  "adjacent_modules": [
+    "mechaharness/isolation_contract.py"
+  ]
+}

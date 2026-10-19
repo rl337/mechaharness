@@ -1,0 +1,9 @@
+{
+  "requirement_id": "MH-PA-01",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/core/types.py",
+    "mechaharness/context_provider.py",
+    "mechaharness/decision_plane_runtime.py"
+  ]
+}

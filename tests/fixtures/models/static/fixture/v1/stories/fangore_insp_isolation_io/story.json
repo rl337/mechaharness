@@ -3,7 +3,7 @@
   "persona": "fangore",
   "title": "Validate isolation and template I/O contracts",
   "kind": "isolation_io_contract",
-  "narrative": "Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation].",
+  "narrative": "Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation]. Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso] and Dots MH-DOTS-07 isolation substrate (`fangore_insp_cross_task_isolation`)[^insp-dots-07-iso].",
   "implementation": "`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for Agentic Recipe / `GraphTemplate` subgraph boundaries.",
   "validation": "Kind `isolation_io_contract`. Soft expects empty validation issues and budget_share.",
   "footnotes": [
@@ -18,6 +18,18 @@
       "label": "WalkingLabs Codex harness design",
       "url": "https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/",
       "note": "Child isolation"
+    },
+    {
+      "id": "insp-pa-03-iso",
+      "label": "Personal agent reliability map (MH-PA-03 isolation I/O)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md",
+      "note": "Typed recipe I/O"
+    },
+    {
+      "id": "insp-dots-07-iso",
+      "label": "OpenAI Dots map (MH-DOTS-07 isolation)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md",
+      "note": "Isolation substrate for cross-task boundary"
     }
   ]
 }

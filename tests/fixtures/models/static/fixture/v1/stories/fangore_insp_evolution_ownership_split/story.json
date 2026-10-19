@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_evolution_ownership_split",
+  "persona": "fangore",
+  "title": "Keep recipe validation in the library and evolution campaigns in the host",
+  "kind": "inspiration_delta_contract",
+  "narrative": "MechaHarness validates, executes, versions, and safety-gates recipes; June (or another host) owns workload selection, experiment budgets, evaluation campaigns, and promotion policy. Docs already split ownership; named evolution campaign hooks remain a delta. Tracks MH-SR-09[^insp-sr-09].",
+  "implementation": "Config/DI graph_template_classes and recipe registry; ownership prose in recipes-and-decision-plane and FineEnvs/June maps. Desired: explicit host hooks for evolution campaigns and promotion policy without moving validation into the host.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-09, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-sr-09",
+      "label": "Self-revising recipe evolution (MH-SR-09)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "June versus MechaHarness ownership for evolution"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_auth_epoch_resume",
+  "persona": "fangore",
+  "title": "Refuse resumed effects when the authorization epoch advanced",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Checkpoints must carry authorization epoch, pending reviews, idempotency keys, and an effect ledger so crash recovery does not duplicate external operations after revocation. Effect ledger and idempotent resume already ship in `fangore_transactional_durable_resume`. Tracks MH-DOTS-06[^insp-dots-06].",
+  "implementation": "CheckpointStore, SqliteCheckpointStore effect rows, HostKit submit-once. Desired: auth-epoch / grant-revocation epoch persisted and checked on replay.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-06, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-dots-06",
+      "label": "OpenAI Dots agent safety (MH-DOTS-06)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
+      "note": "Checkpoint and replay safety with auth epoch"
+    }
+  ]
+}

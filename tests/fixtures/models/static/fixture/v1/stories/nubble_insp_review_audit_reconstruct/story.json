@@ -1,0 +1,17 @@
+{
+  "id": "nubble_insp_review_audit_reconstruct",
+  "persona": "nubble",
+  "title": "Reconstruct why a consequential action was allowed without model recollection",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Audits must reconstruct review decision, policy revision, source trust, delegated scope, denial reason, user approval, and actual side effects without relying on model memory. Related: `taloneth_policy_replay`, `nubble_insp_trace_reconciliation`. Tracks MH-DOTS-09[^insp-dots-09].",
+  "implementation": "DecisionLog, TraceEnvelope, trace reconciliation, model input manifest. Desired: unified review-audit API tying recipe selection, policy, approvals, denials, and effects.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-09, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-dots-09",
+      "label": "OpenAI Dots agent safety (MH-DOTS-09)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
+      "note": "Review observability"
+    }
+  ]
+}
