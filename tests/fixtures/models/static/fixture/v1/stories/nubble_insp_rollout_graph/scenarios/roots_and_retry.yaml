@@ -1,0 +1,19 @@
+# Rollout graph builds roots and links retry to execution node
+kind: cli
+
+commands:
+  - rollout_graph_build:
+      records:
+        - id: root
+          kind: model_call
+        - id: retry
+          kind: retry
+          parent_id: root
+          execution_node_id: produce
+          attempt: 2
+        - id: review
+          kind: delegated_agent
+
+expect:
+  roots_exactly: [review, root]
+  retry_linked: true

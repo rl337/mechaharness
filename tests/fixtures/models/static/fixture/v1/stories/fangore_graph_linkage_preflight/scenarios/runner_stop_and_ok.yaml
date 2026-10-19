@@ -1,0 +1,16 @@
+# Missing runner, missing stop, and ok linear preflight
+kind: cli
+
+commands:
+  - graph_linkage_preflight:
+      check_missing_runner: true
+      check_missing_stop: true
+      check_ok_linear: true
+
+expect:
+  missing_runner_ok: false
+  missing_runner_codes_exactly: [no_runner]
+  missing_stop_ok: false
+  missing_stop_codes_exactly: [missing_stop_contract]
+  ok_linear_ok: true
+  ok_linear_fingerprint_nonempty: true

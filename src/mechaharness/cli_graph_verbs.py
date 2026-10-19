@@ -8,10 +8,22 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.core.access import GraphEscalate, GraphExecute
+from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
+from mechaharness.core.access import (
+    AccessPolicy,
+    GraphEscalate,
+    GraphExecute,
+    InMemoryAccessControl,
+)
+from mechaharness.core.environment import NoOpInferenceEnvironment
+from mechaharness.core.events import InMemoryEventLog
 from mechaharness.decision_log import TopologySpan, compute_topology_metrics
 from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.event_correlators import project_node_attempt_rows
+from mechaharness.failure_attribution import (
+    attribute_with_repair_target,
+    select_rollback_target,
+)
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
@@ -30,10 +42,17 @@ from mechaharness.graph_executor import (
     GraphRunContext,
     NodeOutcome,
 )
+from mechaharness.graph_transition import (
+    GraphTransition,
+    TransitionContract,
+    inspect_transitions,
+)
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.mock import MockInferenceStrategy
+from mechaharness.linkage_resolver import DefaultLinkageResolver
+from mechaharness.rollout_graph import build_rollout_graph
 from mechaharness.tools.base import ToolRegistry
 
 
@@ -83,6 +102,45 @@ class GraphEventCorrelatorsCommand(BaseModel):
     authorization_epoch: int
     nodes: list[str] = Field(min_length=1)
     run_id: str = "corr-run"
+
+
+class GraphLinkagePreflightCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    check_missing_runner: bool = True
+    check_missing_stop: bool = True
+    check_ok_linear: bool = True
+
+
+class GraphTransitionInspectCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    nodes: list[str] = Field(min_length=1)
+    transitions: list[dict[str, Any]] = Field(min_length=1)
+    inspect_node: str = "verify"
+
+
+class TargetedRollbackSelectCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    error: str
+    node_id: str | None = None
+    repair_target: str | None = None
+    transitions: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class RolloutGraphBuildCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    records: list[dict[str, Any]] = Field(min_length=1)
+
+
+class ConvergenceCeilingCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    contract: dict[str, Any]
+    fingerprints: list[str] = Field(min_length=1)
+    elapsed_ms_per_tick: float = 1.0
 
 
 def run_topology_efficiency(body: TopologyEfficiencyCommand) -> dict[str, Any]:
@@ -378,15 +436,123 @@ async def run_graph_event_correlators(
     }
 
 
+def run_graph_linkage_preflight(
+    body: GraphLinkagePreflightCommand,
+) -> dict[str, Any]:
+    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del context
+        return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"id": node.id})
+
+    registry = GraphNodeRunnerRegistry(
+        [
+            CallableGraphNodeRunner(["compute"], ok),
+            CallableGraphNodeRunner(["loop"], ok),
+        ]
+    )
+    access = InMemoryAccessControl(
+        event_log=InMemoryEventLog(),
+        policy=AccessPolicy(grants=[GraphExecute]),
+    )
+    resolver = DefaultLinkageResolver(
+        runners=registry,
+        access=access,
+        environment=NoOpInferenceEnvironment(),
+    )
+    actual: dict[str, Any] = {}
+    if body.check_missing_runner:
+        g = ExecutionGraph(goal="missing")
+        g.add_node(GraphNode(id="x", kind="unregistered"))
+        report = resolver.resolve(g)
+        actual["missing_runner_ok"] = report.ok
+        actual["missing_runner_codes_exactly"] = sorted(e.code for e in report.edges)
+    if body.check_missing_stop:
+        g = ExecutionGraph(goal="loop")
+        g.add_node(GraphNode(id="loop", kind="loop", repeating=True))
+        report = resolver.resolve(g)
+        actual["missing_stop_ok"] = report.ok
+        actual["missing_stop_codes_exactly"] = sorted(e.code for e in report.edges)
+    if body.check_ok_linear:
+        g = ExecutionGraph(goal="ok")
+        g.add_node(GraphNode(id="a", kind="compute"))
+        g.add_node(GraphNode(id="b", kind="compute", depends_on=["a"]))
+        report = resolver.resolve(g)
+        actual["ok_linear_ok"] = report.ok
+        actual["ok_linear_fingerprint_nonempty"] = bool(report.fingerprint)
+    return actual
+
+
+def run_graph_transition_inspect(
+    body: GraphTransitionInspectCommand,
+) -> dict[str, Any]:
+    contract = TransitionContract(
+        transitions=[GraphTransition.model_validate(t) for t in body.transitions]
+    )
+    kinds = sorted(
+        t.kind for t in inspect_transitions(contract, body.inspect_node)
+    )
+    return {
+        "issues": contract.validate_against_nodes(set(body.nodes)),
+        "verify_kinds_exactly": kinds,
+    }
+
+
+def run_targeted_rollback_select(
+    body: TargetedRollbackSelectCommand,
+) -> dict[str, Any]:
+    attr = attribute_with_repair_target(
+        body.error,
+        node_id=body.node_id,
+        repair_target=body.repair_target,
+    )
+    contract = TransitionContract(
+        transitions=[GraphTransition.model_validate(t) for t in body.transitions]
+    )
+    return {
+        "rollback_target": select_rollback_target(attr, contract),
+        "repair_target": attr.repair_target,
+    }
+
+
+def run_rollout_graph_build(body: RolloutGraphBuildCommand) -> dict[str, Any]:
+    graph = build_rollout_graph(body.records)
+    retry = graph.nodes.get("retry")
+    return {
+        "roots_exactly": sorted(graph.roots()),
+        "retry_linked": retry is not None and retry.execution_node_id == "produce",
+    }
+
+
+def run_convergence_ceiling(body: ConvergenceCeilingCommand) -> dict[str, Any]:
+    contract = ConvergenceContract(**body.contract)
+    guard = ConvergenceGuard(contract)
+    for fp in body.fingerprints:
+        guard.tick(fingerprint=fp, elapsed_ms=float(body.elapsed_ms_per_tick))
+    return {
+        "terminal": guard.state.terminal,
+        "reason": guard.state.reason,
+        "success": guard.state.terminal == "success",
+    }
+
+
 __all__ = [
     "BoundedRepairLoopCommand",
+    "ConvergenceCeilingCommand",
     "GraphEventCorrelatorsCommand",
     "GraphExecutorRunCommand",
+    "GraphLinkagePreflightCommand",
+    "GraphTransitionInspectCommand",
+    "RolloutGraphBuildCommand",
+    "TargetedRollbackSelectCommand",
     "TopologyEfficiencyCommand",
     "ValidatorQualificationCommand",
     "run_bounded_repair_loop",
+    "run_convergence_ceiling",
     "run_graph_event_correlators",
     "run_graph_executor_run",
+    "run_graph_linkage_preflight",
+    "run_graph_transition_inspect",
+    "run_rollout_graph_build",
+    "run_targeted_rollback_select",
     "run_topology_efficiency",
     "run_validator_qualification",
 ]

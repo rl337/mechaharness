@@ -265,11 +265,11 @@ Nubble needs the observed run topology — retries, spawned reviewers, and termi
 
 #### Implementation
 
-`RolloutGraph`, `RolloutNode`, and `build_rollout_graph` in `mechaharness.rollout_graph` project observed records into roots/parent-child topology with optional `execution_node_id` links.
+`build_rollout_graph`; `CliInstrumentor` verb `rollout_graph_build`.
 
 #### Validation
 
-Harness `graph_execution` op `rollout_graph_build`. Soft expects roots and linked retry. Unit tests in `tests/test_rollout_graph.py`.
+Harness `cli` scenario `roots_and_retry.yaml`: hard roots and retry link.
 
 #### Footnotes
 
@@ -548,13 +548,11 @@ Fangore’s repair loop keeps asking the same question and getting the same answ
 
 #### Implementation
 
-`ConvergenceContract` / `ConvergenceGuard` fingerprint windows and nested budget slices. `StopContract` in `mechaharness.stop_contract` is the graph-facing alias for the same ceilings plus trigger/continuation/success/abort fields. Escalation may request more evidence, but ceilings never count as task success.
-
-Covers: POL-03.
+`ConvergenceGuard` / `ConvergenceContract`; `CliInstrumentor` verb `convergence_ceiling`.
 
 #### Validation
 
-Harness `graph_execution` op `convergence_ceiling` → `_run_convergence_ceiling`. Unit: `tests/test_convergence.py`. Linkage stop enforcement: `fangore_graph_linkage_preflight`.
+Harness `cli` scenario `stagnation.yaml`: hard terminal/reason.
 
 #### Footnotes
 
@@ -744,11 +742,11 @@ Fangore composes a plan that still names a step the host has not wired, and anot
 
 #### Implementation
 
-`DefaultLinkageResolver` in `mechaharness.linkage_resolver` validates runner kinds, grants, environment compatibility, termination sinks, and repeating nodes' `StopContract` before `GraphExecutor` substantive work. Missing runners and missing stop contracts become structured `UnsatisfiedEdge` codes (`no_runner`, `missing_stop_contract`). `GraphExecutor.run` records linkage failure without invoking node handlers.
+`DefaultLinkageResolver` preflight; `CliInstrumentor` verb `graph_linkage_preflight`.
 
 #### Validation
 
-Harness `graph_execution` op `graph_linkage_preflight` → `_run_graph_linkage_preflight`. Soft expects: missing-runner linkage fails with `no_runner`; repeating node without stop fails with `missing_stop_contract`; valid linear graph reports `ok` with a fingerprint. Unit: `tests/test_linkage_resolver.py`, fixtures under `tests/fixtures/linkage_resolver/`.
+Harness `cli` scenario `runner_stop_and_ok.yaml`: hard ok flags and exact edge codes.
 
 #### Footnotes
 
@@ -1245,11 +1243,11 @@ Fangore needs success, rollback, and end paths declared as transitions — not i
 
 #### Implementation
 
-`TransitionContract` / `GraphTransition` in `mechaharness.graph_transition` declare success, predicate, retry, rollback, escalate, cancel, and end edges orthogonal to `DependencyEdge`. `inspect_transitions` lists possible next steps for a node.
+`TransitionContract` / `inspect_transitions`; `CliInstrumentor` verb `graph_transition_inspect`.
 
 #### Validation
 
-Harness `graph_execution` op `graph_transition_inspect`. Soft expects validation empty and rollback/end kinds for the verify node.
+Harness `cli` scenario `verify_rollback_end.yaml`: hard issues and verify kinds.
 
 #### Footnotes
 
@@ -1508,11 +1506,11 @@ Fangore's injector can build services while a plan still names an unwired step. 
 
 #### Implementation
 
-`DefaultLinkageResolver` validates runners, grants, environment, and termination separately from pyiv construction. `GraphExecutor` consults it before substantive work.
+`DefaultLinkageResolver` runner preflight; `CliInstrumentor` verb `graph_linkage_preflight`.
 
 #### Validation
 
-Harness `graph_execution` op `graph_linkage_preflight`. Soft expects `no_runner` on missing kinds and ok+fingerprint on a wired linear graph.
+Harness `cli` scenario `missing_runner_and_ok.yaml`: hard runner codes and ok fingerprint.
 
 #### Footnotes
 
@@ -1720,11 +1718,11 @@ A repeating repair step without an explicit stop rule must fail validation befor
 
 #### Implementation
 
-`StopContract` plus `DefaultLinkageResolver` require stop contracts on repeating nodes unless declared a persistent service loop.
+`DefaultLinkageResolver` stop-contract edge; `CliInstrumentor` verb `graph_linkage_preflight`.
 
 #### Validation
 
-Harness `graph_execution` op `graph_linkage_preflight` with stop-focused request. Soft expects `missing_stop_contract`.
+Harness `cli` scenario `missing_stop.yaml`: hard stop-contract codes.
 
 #### Footnotes
 
@@ -1736,11 +1734,11 @@ When verification fails, Fangore wants structured attribution naming the repair 
 
 #### Implementation
 
-`attribute_with_repair_target` and `select_rollback_target` in `mechaharness.failure_attribution` attach `repair_target` / `responsible_node` and choose a matching rollback transition.
+`attribute_with_repair_target` / `select_rollback_target`; `CliInstrumentor` verb `targeted_rollback_select`.
 
 #### Validation
 
-Harness `graph_execution` op `targeted_rollback_select`. Soft expects selected rollback target produce.
+Harness `cli` scenario `select_produce.yaml`: hard rollback/repair targets.
 
 #### Footnotes
 

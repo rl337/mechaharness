@@ -1,0 +1,17 @@
+# Attribution + transition contract select rollback target
+kind: cli
+
+commands:
+  - targeted_rollback_select:
+      error: verification_failed
+      node_id: verify
+      repair_target: produce
+      transitions:
+        - from_node: verify
+          kind: rollback
+          to_node: produce
+          reason: verification_failed
+
+expect:
+  rollback_target: produce
+  repair_target: produce

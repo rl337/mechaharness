@@ -1,0 +1,22 @@
+# Transition contract validates produce/verify edges
+kind: cli
+
+commands:
+  - graph_transition_inspect:
+      nodes: [produce, verify]
+      inspect_node: verify
+      transitions:
+        - from_node: produce
+          kind: success
+          to_node: verify
+        - from_node: verify
+          kind: rollback
+          to_node: produce
+          reason: verification_failed
+        - from_node: verify
+          kind: end
+          reason: accepted
+
+expect:
+  issues: []
+  verify_kinds_exactly: [end, rollback]
