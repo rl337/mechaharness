@@ -18,11 +18,27 @@ from mechaharness.isolation.isolation_contract import TemplateIOContract
 
 
 class DemoGuidanceTemplate(GraphTemplate):
-    """Minimal recipe whose soft point asks a frontier driver for direction."""
+    """Minimal recipe whose soft point asks a frontier driver for direction.
+
+    Example::
+
+        >>> from mechaharness.graph_templates import (
+        ...     DemoGuidanceTemplate, GraphTemplateParams,
+        ... )
+        >>> graph = DemoGuidanceTemplate().instantiate(
+        ...     GraphTemplateParams(goal="direction")
+        ... )
+        >>> graph.template_name
+        'demo_guidance'
+    """
 
     name = "demo_guidance"
     version = "1"
     category = "agentic_recipe"
+    summary = (
+        "Demo: local prep then an external guidance soft point for artistic "
+        "direction — drive with DurableGraphGenerator / MCP."
+    )
     description = (
         "Demo: local prep node then external guidance soft point for artistic "
         "direction — drive with DurableGraphGenerator / MCP."

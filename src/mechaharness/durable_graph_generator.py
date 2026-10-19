@@ -18,6 +18,7 @@ See ``docs/requirements/durable-graph-generators.md`` and
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Literal
@@ -691,7 +692,7 @@ class ScriptedDriver:
         inputs: dict[str, Any] | None = None,
         *,
         controller_id: str = "scripted",
-        responses: list[GuidanceResponse | dict[str, Any]] | None = None,
+        responses: Sequence[GuidanceResponse | dict[str, Any]] | None = None,
         expected_kinds: list[YieldKind] | None = None,
         strict_unexpected_advice: bool = True,
         run_id: str | None = None,
