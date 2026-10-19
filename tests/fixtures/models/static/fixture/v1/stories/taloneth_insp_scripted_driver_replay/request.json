@@ -1,0 +1,19 @@
+{
+  "op": "durable_scripted_replay",
+  "recipe": "verify_repair",
+  "inputs": {
+    "guidance": [
+      {
+        "question": "Unexpected?",
+        "choices": [
+          {
+            "id": "x",
+            "label": "X"
+          }
+        ]
+      }
+    ]
+  },
+  "responses": [],
+  "strict_unexpected_advice": true
+}

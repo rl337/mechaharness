@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_scripted_driver_replay",
+  "persona": "taloneth",
+  "title": "Replay advisory decisions with a strict scripted driver",
+  "kind": "durable_graph_generator",
+  "narrative": "Evaluation and CI need a first-class scripted driver that asserts expected yield kinds and fails when unexpected advice appears. Tracks R-IOC-REPLAY and R-IOC-OFFLINE[^insp-ioc-04].",
+  "implementation": "`ScriptedDriver` in `durable_graph_generator.py` runs `start`/`resume` loops with fixture responses, optional `expected_kinds`, and `strict_unexpected_advice`.",
+  "validation": "Harness `durable_graph_generator` op `durable_scripted_replay`. Hard expects unexpected-advice failure when responses are empty under strict mode.",
+  "footnotes": [
+    {
+      "id": "insp-ioc-04",
+      "label": "Durable graph generators (R-IOC-REPLAY)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md",
+      "note": "R-IOC-REPLAY ScriptedDriver strict fixtures"
+    }
+  ]
+}

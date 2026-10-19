@@ -187,3 +187,9 @@ Include offline unit/contract tests and optional live end-to-end tests against a
 ## Design constraint
 
 **Do not build a second harness around MCP or a new dependency injection framework.** The generator is a new MechaHarness execution construct. MCP is one adapter, and curses, plain-text and test drivers are clients of the same contract. Production-specific artistic semantics remain with FOLK or NeoStudio.
+
+## Related
+
+- Normative: [Durable graph generators](../requirements/durable-graph-generators.md)
+- Story map: [durable-graph-generators-requirements-map.md](./durable-graph-generators-requirements-map.md)
+- Orthogonal: [Self-revising recipe evolution](./self-revising-recipe-evolution.md) — which recipe is active vs how a run is driven

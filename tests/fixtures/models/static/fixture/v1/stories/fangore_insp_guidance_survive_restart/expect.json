@@ -1,0 +1,6 @@
+{
+  "start_kind": "advice_requested",
+  "pending_question": "Still pending after restart?",
+  "same_request_id": true,
+  "phase": "guidance_required"
+}

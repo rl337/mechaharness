@@ -133,6 +133,9 @@ Instantiation MUST produce or compose ordinary MechaHarness graph nodes/edges so
 - cancellation;
 - failure handling;
 - model routing;
+- durable generator guidance yields (`SoftPoint` kind `guidance` /
+  node component `guidance_request`; see
+  [Durable graph generators](./durable-graph-generators.md));
 - tool/capability restrictions.
 
 The parent graph MUST be able to treat the recipe as a logical unit without hiding the internal execution trace.

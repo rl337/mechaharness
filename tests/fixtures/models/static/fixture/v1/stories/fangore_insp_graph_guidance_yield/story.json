@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_graph_guidance_yield",
+  "persona": "fangore",
+  "title": "Yield typed guidance and resume without treating advice as approval",
+  "kind": "durable_graph_generator",
+  "narrative": "When a run needs higher-level judgment, start returns an advice yield with a typed question and choices. The driver answers in a later call; the run completes. This is not a human approval interrupt (`fangore_insp_approval_interrupt`) and not an in-process sparse advisor consult (`fangore_insp_sparse_advisor`). Tracks R-IOC-GUIDANCE[^insp-ioc-02].",
+  "implementation": "`GuidanceRequest` / `GuidanceResponse` / `GraphYield` with kind `advice_requested`; `DurableGraphGenerator.resume` validates request_id, choice schema, and rejects `requested_authority=final_approval` so ordinary advice cannot unlock approval-only mutations.",
+  "validation": "Harness `durable_graph_generator` op `durable_guidance_cycle`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.",
+  "footnotes": [
+    {
+      "id": "insp-ioc-02",
+      "label": "Durable graph generators (R-IOC-GUIDANCE)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md",
+      "note": "R-IOC-GUIDANCE typed guidance suspension"
+    }
+  ]
+}

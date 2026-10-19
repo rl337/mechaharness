@@ -54,6 +54,9 @@ long as they are namespaced. Bare names (`run_start`) are rejected.
 | `GraphNodeStart` | `core:graph_node_start` |
 | `GraphNodeEnd` | `core:graph_node_end` |
 | `ExtensionApplied` | `core:extension_applied` |
+| `GraphYieldPublished` | `core:graph_yield` |
+| `GuidanceResumeApplied` | `core:guidance_resume` |
+| `GeneratorRunCancelled` | `core:generator_cancel` |
 
 `ExtensionApplied` lives in `mechaharness.lifecycle_extension` and is emitted by
 `LifecycleExtensionRegistry` (not by EventLog subscribers acting as control
@@ -64,8 +67,11 @@ flow). Payload includes `extension_id`, `extension_version`, `boundary`,
 `core:cost` may include `prompt_tokens` / `completion_tokens` / `total_tokens`.
 `core:inference` may include `reasoning_content` and `usage`.
 `GraphExecutor` emits `core:graph_start` / `core:graph_end` and per-node
-start/end events; `GraphStore` checkpoints use `core:graph_node`. Hosts add
-types by subclassing without editing this module:
+start/end events; `GraphStore` checkpoints use `core:graph_node`.
+`DurableGraphGenerator` emits `core:graph_yield`, `core:guidance_resume`, and
+`core:generator_cancel` with `run_id` / `graph_id` / `recipe_id` / sequence
+correlators (see [Durable graph generators](./durable-graph-generators.md)).
+Hosts add types by subclassing without editing this module:
 
 ```python
 from mechaharness.core.events import EventType

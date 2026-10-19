@@ -14,6 +14,7 @@ from mechaharness.graph_templates.conversational_tool_loop import (
     ConversationalToolLoopTemplate,
 )
 from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
+from mechaharness.graph_templates.demo_guidance import DemoGuidanceTemplate
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
@@ -30,6 +31,7 @@ def default_graph_template_classes() -> dict[str, type[GraphTemplate]]:
     """Catalog id → template class (single source of recipe membership)."""
     return {
         FanOutAggregateTemplate.name: FanOutAggregateTemplate,
+        DemoGuidanceTemplate.name: DemoGuidanceTemplate,
         VerifyRepairTemplate.name: VerifyRepairTemplate,
         IndependentReviewTemplate.name: IndependentReviewTemplate,
         EnvironmentRepairTemplate.name: EnvironmentRepairTemplate,

@@ -1,0 +1,21 @@
+{
+  "op": "durable_controller_auth",
+  "recipe": "verify_repair",
+  "inputs": {
+    "guidance": [
+      {
+        "question": "Owned?",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A"
+          }
+        ]
+      }
+    ]
+  },
+  "response": {
+    "choice_id": "a"
+  },
+  "final_approval": true
+}
