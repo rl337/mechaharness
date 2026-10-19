@@ -15,74 +15,28 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 from pyiv.time import DateTimeService, MockDateTimeService
 
 from mechaharness.budget import BudgetPolicy
-from mechaharness.cli_acceptance_verbs import (
-    CheckCompleterFlavorsCommand,
-    CheckInferenceCaptureCommand,
-    HostKitSubmitOnceCommand,
-    JudgeRouteCommand,
-    run_check_completer_flavors,
-    run_check_inference_capture,
-    run_host_kit_submit_once,
-    run_judge_route,
-)
-from mechaharness.cli_diagnostic_verbs import (
-    CheckModelAffinityCommand,
-    CompareRunParityCommand,
-    ReplayModelInputCommand,
-    RouteCapabilitiesCommand,
-    ShadowDecisionBackendsCommand,
-    run_check_model_affinity,
-    run_compare_run_parity,
-    run_replay_model_input,
-    run_route_capabilities,
-    run_shadow_decision_backends,
-)
-from mechaharness.cli_graph_verbs import (
-    BoundedRepairLoopCommand,
-    CheckpointFingerprintRefuseCommand,
-    ConvergenceCeilingCommand,
-    DecisionConflictNeighborRevisitCommand,
-    DynamicSubgraphNestCommand,
-    EnvironmentLinkageFailCommand,
-    GraphBudgetLimitsCommand,
-    GraphBudgetSubgraphRollupCommand,
-    GraphEventCorrelatorsCommand,
-    GraphExecutorRunCommand,
-    GraphLinkagePreflightCommand,
-    GraphTransitionInspectCommand,
-    LocalPlanResumeCommand,
-    RolloutGraphBuildCommand,
-    TargetedRollbackSelectCommand,
-    TopologyEfficiencyCommand,
-    TransactionalDurableResumeCommand,
-    ValidatorQualificationCommand,
-    WakeReresolveResumeCommand,
-    run_bounded_repair_loop,
-    run_checkpoint_fingerprint_refuse,
-    run_convergence_ceiling,
-    run_decision_conflict_neighbor_revisit,
-    run_dynamic_subgraph_nest,
-    run_environment_linkage_fail,
-    run_graph_budget_limits,
-    run_graph_budget_subgraph_rollup,
-    run_graph_event_correlators,
-    run_graph_executor_run,
-    run_graph_linkage_preflight,
-    run_graph_transition_inspect,
-    run_local_plan_resume,
-    run_rollout_graph_build,
-    run_targeted_rollback_select,
-    run_topology_efficiency,
-    run_transactional_durable_resume,
-    run_validator_qualification,
-    run_wake_reresolve_resume,
+from mechaharness.cli_commands import (
+    AdvanceClockCommand,
+    InferCommand,
+    RunRecipeCommand,
+    SetClockCommand,
+    ToolLoopCommand,
 )
 from mechaharness.cli_infer_runner import CliInferRunner
 from mechaharness.cli_universe import CLI_INFER_NODE_ID, build_cli_universe_graph
+from mechaharness.cli_verb import (
+    CliParsedCommand,
+    CliScript,
+    CliVerb,
+    resolve_cli_verbs,
+)
+from mechaharness.cli_verb import (
+    script_from_mapping as _script_from_mapping,
+)
 from mechaharness.config import Settings
 from mechaharness.conversational_tool_loop_runner import ConversationalToolLoopRunner
 from mechaharness.core.access import CostAccountant, InMemoryCostAccountant
@@ -148,185 +102,6 @@ class StampingEventLog(EventLog):
     @property
     def inner(self) -> EventLog:
         return self._inner
-
-
-class InferCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    prompt: str
-    system: str = ""
-    model: str | None = None
-
-
-class ToolLoopCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    prompt: str
-    tool_name: str = "lookup"
-    max_turns: int = 4
-    model: str | None = None
-
-
-class RunRecipeCommand(BaseModel):
-    """Execute a catalog recipe through the CLI instrumentor (Wave 2+)."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    name: str
-    prompt: str | None = None
-    backend: str = "mock"
-    family: str = "pass_through"
-    max_turns: int = 4
-    max_iterations: int = 4
-    tool_name: str = "lookup"
-    model: str | None = None
-
-
-class SetClockCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    at: str  # ISO-8601 UTC
-
-
-class AdvanceClockCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    seconds: float = 0
-    minutes: float = 0
-    hours: float = 0
-
-
-class CliCommand(BaseModel):
-    """Exactly one verb key per command."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    infer: InferCommand | None = None
-    tool_loop: ToolLoopCommand | None = None
-    run_recipe: RunRecipeCommand | None = None
-    replay_model_input: ReplayModelInputCommand | None = None
-    route_capabilities: RouteCapabilitiesCommand | None = None
-    check_model_affinity: CheckModelAffinityCommand | None = None
-    compare_run_parity: CompareRunParityCommand | None = None
-    shadow_decision_backends: ShadowDecisionBackendsCommand | None = None
-    check_completer_flavors: CheckCompleterFlavorsCommand | None = None
-    check_inference_capture: CheckInferenceCaptureCommand | None = None
-    host_kit_submit_once: HostKitSubmitOnceCommand | None = None
-    judge_route: JudgeRouteCommand | None = None
-    topology_efficiency: TopologyEfficiencyCommand | None = None
-    validator_qualification: ValidatorQualificationCommand | None = None
-    bounded_repair_loop: BoundedRepairLoopCommand | None = None
-    graph_executor_run: GraphExecutorRunCommand | None = None
-    graph_event_correlators: GraphEventCorrelatorsCommand | None = None
-    graph_linkage_preflight: GraphLinkagePreflightCommand | None = None
-    graph_transition_inspect: GraphTransitionInspectCommand | None = None
-    targeted_rollback_select: TargetedRollbackSelectCommand | None = None
-    rollout_graph_build: RolloutGraphBuildCommand | None = None
-    convergence_ceiling: ConvergenceCeilingCommand | None = None
-    local_plan_resume: LocalPlanResumeCommand | None = None
-    dynamic_subgraph_nest: DynamicSubgraphNestCommand | None = None
-    checkpoint_fingerprint_refuse: CheckpointFingerprintRefuseCommand | None = None
-    environment_linkage_fail: EnvironmentLinkageFailCommand | None = None
-    wake_reresolve_resume: WakeReresolveResumeCommand | None = None
-    graph_budget_limits: GraphBudgetLimitsCommand | None = None
-    graph_budget_subgraph_rollup: GraphBudgetSubgraphRollupCommand | None = None
-    transactional_durable_resume: TransactionalDurableResumeCommand | None = None
-    decision_conflict_neighbor_revisit: DecisionConflictNeighborRevisitCommand | None = None
-    set_clock: SetClockCommand | None = None
-    advance_clock: AdvanceClockCommand | None = None
-
-    @model_validator(mode="after")
-    def _one_verb(self) -> CliCommand:
-        verbs = [
-            ("infer", self.infer),
-            ("tool_loop", self.tool_loop),
-            ("run_recipe", self.run_recipe),
-            ("replay_model_input", self.replay_model_input),
-            ("route_capabilities", self.route_capabilities),
-            ("check_model_affinity", self.check_model_affinity),
-            ("compare_run_parity", self.compare_run_parity),
-            ("shadow_decision_backends", self.shadow_decision_backends),
-            ("check_completer_flavors", self.check_completer_flavors),
-            ("check_inference_capture", self.check_inference_capture),
-            ("host_kit_submit_once", self.host_kit_submit_once),
-            ("judge_route", self.judge_route),
-            ("topology_efficiency", self.topology_efficiency),
-            ("validator_qualification", self.validator_qualification),
-            ("bounded_repair_loop", self.bounded_repair_loop),
-            ("graph_executor_run", self.graph_executor_run),
-            ("graph_event_correlators", self.graph_event_correlators),
-            ("graph_linkage_preflight", self.graph_linkage_preflight),
-            ("graph_transition_inspect", self.graph_transition_inspect),
-            ("targeted_rollback_select", self.targeted_rollback_select),
-            ("rollout_graph_build", self.rollout_graph_build),
-            ("convergence_ceiling", self.convergence_ceiling),
-            ("local_plan_resume", self.local_plan_resume),
-            ("dynamic_subgraph_nest", self.dynamic_subgraph_nest),
-            ("checkpoint_fingerprint_refuse", self.checkpoint_fingerprint_refuse),
-            ("environment_linkage_fail", self.environment_linkage_fail),
-            ("wake_reresolve_resume", self.wake_reresolve_resume),
-            ("graph_budget_limits", self.graph_budget_limits),
-            ("graph_budget_subgraph_rollup", self.graph_budget_subgraph_rollup),
-            ("transactional_durable_resume", self.transactional_durable_resume),
-            ("decision_conflict_neighbor_revisit", self.decision_conflict_neighbor_revisit),
-            ("set_clock", self.set_clock),
-            ("advance_clock", self.advance_clock),
-        ]
-        present = [n for n, b in verbs if b is not None]
-        if len(present) != 1:
-            raise ValueError(
-                f"each command needs exactly one verb; got {present or 'none'}"
-            )
-        return self
-
-    @property
-    def verb(self) -> str:
-        for name in (
-            "infer",
-            "tool_loop",
-            "run_recipe",
-            "replay_model_input",
-            "route_capabilities",
-            "check_model_affinity",
-            "compare_run_parity",
-            "shadow_decision_backends",
-            "check_completer_flavors",
-            "check_inference_capture",
-            "host_kit_submit_once",
-            "judge_route",
-            "topology_efficiency",
-            "validator_qualification",
-            "bounded_repair_loop",
-            "graph_executor_run",
-            "graph_event_correlators",
-            "graph_linkage_preflight",
-            "graph_transition_inspect",
-            "targeted_rollback_select",
-            "rollout_graph_build",
-            "convergence_ceiling",
-            "local_plan_resume",
-            "dynamic_subgraph_nest",
-            "checkpoint_fingerprint_refuse",
-            "environment_linkage_fail",
-            "wake_reresolve_resume",
-            "graph_budget_limits",
-            "graph_budget_subgraph_rollup",
-            "transactional_durable_resume",
-            "decision_conflict_neighbor_revisit",
-            "set_clock",
-            "advance_clock",
-        ):
-            if getattr(self, name) is not None:
-                return name
-        raise RuntimeError("CliCommand missing verb")
-
-
-class CliScript(BaseModel):
-    """Product CLI script (no test expects)."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    commands: list[CliCommand] = Field(min_length=1)
 
 
 class CliStepResult(BaseModel):
@@ -487,6 +262,7 @@ class CliInstrumentor:
         agent_id: str = "cli",
         tools: ToolRegistry | None = None,
         judge_provider: JudgeProvider | None = None,
+        verbs: Mapping[str, CliVerb] | None = None,
     ) -> None:
         self._completer = completer
         self._model = model
@@ -515,6 +291,24 @@ class CliInstrumentor:
             event_log=self._log,
             agent_id=self._agent_id,
         )
+        if verbs is None:
+            from mechaharness.di import MechaHarnessConfig
+            from mechaharness.harness.pass_through import PassThroughHarness
+            from mechaharness.inference.mock import MockInferenceStrategy
+
+            class _HostCliConfig(MechaHarnessConfig):
+                def get_inference_class(self) -> type[InferenceStrategy]:
+                    return MockInferenceStrategy
+
+                def get_harness_class(self) -> type[AbstractHarness]:
+                    return PassThroughHarness
+
+            verbs = resolve_cli_verbs(_HostCliConfig())
+        self._verbs = dict(verbs)
+
+    @property
+    def judge_provider(self) -> JudgeProvider | None:
+        return self._judge_provider
 
     @property
     def event_log(self) -> EventLog:
@@ -591,183 +385,24 @@ class CliInstrumentor:
             probe=last_probe,
         )
 
-    async def _run_command(self, command: CliCommand) -> CliStepResult:
+    async def _run_command(self, command: CliParsedCommand) -> CliStepResult:
+        verb = self._verbs.get(command.verb)
+        if verb is None:
+            known = ", ".join(sorted(self._verbs))
+            raise KeyError(f"unknown CLI verb {command.verb!r}; known: {known}")
+        params = verb.params_model.model_validate(command.params)
+        outcome = await verb.run(params, self)
+        if isinstance(outcome, CliStepResult):
+            return outcome
+        if isinstance(outcome, dict):
+            return CliStepResult(verb=command.verb, probe=outcome)
+        raise TypeError(
+            f"verb {command.verb!r} returned {type(outcome).__name__}; "
+            "expected CliStepResult or dict"
+        )
+
+    async def run_infer(self, body: InferCommand) -> CliStepResult:
         before = len(self._log.query())
-        if command.set_clock is not None:
-            self._set_clock(command.set_clock.at)
-            return CliStepResult(
-                verb="set_clock",
-                clock_iso=self._datetime.now_utc_iso(),
-            )
-        if command.advance_clock is not None:
-            self._advance_clock(command.advance_clock)
-            return CliStepResult(
-                verb="advance_clock",
-                clock_iso=self._datetime.now_utc_iso(),
-            )
-        if command.tool_loop is not None:
-            return await self._run_tool_loop(command.tool_loop, before=before)
-        if command.run_recipe is not None:
-            return await self._run_recipe(command.run_recipe, before=before)
-        if command.replay_model_input is not None:
-            return CliStepResult(
-                verb="replay_model_input",
-                probe=run_replay_model_input(command.replay_model_input),
-            )
-        if command.route_capabilities is not None:
-            return CliStepResult(
-                verb="route_capabilities",
-                probe=run_route_capabilities(command.route_capabilities),
-            )
-        if command.check_model_affinity is not None:
-            return CliStepResult(
-                verb="check_model_affinity",
-                probe=run_check_model_affinity(command.check_model_affinity),
-            )
-        if command.compare_run_parity is not None:
-            return CliStepResult(
-                verb="compare_run_parity",
-                probe=run_compare_run_parity(command.compare_run_parity),
-            )
-        if command.shadow_decision_backends is not None:
-            return CliStepResult(
-                verb="shadow_decision_backends",
-                probe=run_shadow_decision_backends(command.shadow_decision_backends),
-            )
-        if command.check_completer_flavors is not None:
-            return CliStepResult(
-                verb="check_completer_flavors",
-                probe=run_check_completer_flavors(command.check_completer_flavors),
-            )
-        if command.check_inference_capture is not None:
-            return CliStepResult(
-                verb="check_inference_capture",
-                probe=run_check_inference_capture(command.check_inference_capture),
-            )
-        if command.host_kit_submit_once is not None:
-            return CliStepResult(
-                verb="host_kit_submit_once",
-                probe=await run_host_kit_submit_once(command.host_kit_submit_once),
-            )
-        if command.judge_route is not None:
-            if self._judge_provider is None:
-                raise RuntimeError(
-                    "judge_route requires CliInstrumentor(judge_provider=...)"
-                )
-            return CliStepResult(
-                verb="judge_route",
-                probe=await run_judge_route(
-                    command.judge_route,
-                    provider=self._judge_provider,
-                ),
-            )
-        if command.topology_efficiency is not None:
-            return CliStepResult(
-                verb="topology_efficiency",
-                probe=run_topology_efficiency(command.topology_efficiency),
-            )
-        if command.validator_qualification is not None:
-            return CliStepResult(
-                verb="validator_qualification",
-                probe=run_validator_qualification(command.validator_qualification),
-            )
-        if command.bounded_repair_loop is not None:
-            return CliStepResult(
-                verb="bounded_repair_loop",
-                probe=run_bounded_repair_loop(command.bounded_repair_loop),
-            )
-        if command.graph_executor_run is not None:
-            return CliStepResult(
-                verb="graph_executor_run",
-                probe=await run_graph_executor_run(command.graph_executor_run),
-            )
-        if command.graph_event_correlators is not None:
-            return CliStepResult(
-                verb="graph_event_correlators",
-                probe=await run_graph_event_correlators(
-                    command.graph_event_correlators
-                ),
-            )
-        if command.graph_linkage_preflight is not None:
-            return CliStepResult(
-                verb="graph_linkage_preflight",
-                probe=run_graph_linkage_preflight(command.graph_linkage_preflight),
-            )
-        if command.graph_transition_inspect is not None:
-            return CliStepResult(
-                verb="graph_transition_inspect",
-                probe=run_graph_transition_inspect(command.graph_transition_inspect),
-            )
-        if command.targeted_rollback_select is not None:
-            return CliStepResult(
-                verb="targeted_rollback_select",
-                probe=run_targeted_rollback_select(command.targeted_rollback_select),
-            )
-        if command.rollout_graph_build is not None:
-            return CliStepResult(
-                verb="rollout_graph_build",
-                probe=run_rollout_graph_build(command.rollout_graph_build),
-            )
-        if command.convergence_ceiling is not None:
-            return CliStepResult(
-                verb="convergence_ceiling",
-                probe=run_convergence_ceiling(command.convergence_ceiling),
-            )
-        if command.local_plan_resume is not None:
-            return CliStepResult(
-                verb="local_plan_resume",
-                probe=run_local_plan_resume(command.local_plan_resume),
-            )
-        if command.dynamic_subgraph_nest is not None:
-            return CliStepResult(
-                verb="dynamic_subgraph_nest",
-                probe=await run_dynamic_subgraph_nest(command.dynamic_subgraph_nest),
-            )
-        if command.checkpoint_fingerprint_refuse is not None:
-            return CliStepResult(
-                verb="checkpoint_fingerprint_refuse",
-                probe=await run_checkpoint_fingerprint_refuse(
-                    command.checkpoint_fingerprint_refuse
-                ),
-            )
-        if command.environment_linkage_fail is not None:
-            return CliStepResult(
-                verb="environment_linkage_fail",
-                probe=run_environment_linkage_fail(command.environment_linkage_fail),
-            )
-        if command.wake_reresolve_resume is not None:
-            return CliStepResult(
-                verb="wake_reresolve_resume",
-                probe=await run_wake_reresolve_resume(command.wake_reresolve_resume),
-            )
-        if command.graph_budget_limits is not None:
-            return CliStepResult(
-                verb="graph_budget_limits",
-                probe=await run_graph_budget_limits(command.graph_budget_limits),
-            )
-        if command.graph_budget_subgraph_rollup is not None:
-            return CliStepResult(
-                verb="graph_budget_subgraph_rollup",
-                probe=await run_graph_budget_subgraph_rollup(
-                    command.graph_budget_subgraph_rollup
-                ),
-            )
-        if command.transactional_durable_resume is not None:
-            return CliStepResult(
-                verb="transactional_durable_resume",
-                probe=await run_transactional_durable_resume(
-                    command.transactional_durable_resume
-                ),
-            )
-        if command.decision_conflict_neighbor_revisit is not None:
-            return CliStepResult(
-                verb="decision_conflict_neighbor_revisit",
-                probe=run_decision_conflict_neighbor_revisit(
-                    command.decision_conflict_neighbor_revisit
-                ),
-            )
-        assert command.infer is not None
-        body = command.infer
         graph = build_cli_universe_graph(prompt=body.prompt, system=body.system)
         if body.model:
             graph.nodes[CLI_INFER_NODE_ID].payload["model"] = body.model
@@ -795,12 +430,8 @@ class CliInstrumentor:
             clock_iso=self._datetime.now_utc_iso(),
         )
 
-    async def _run_tool_loop(
-        self,
-        body: ToolLoopCommand,
-        *,
-        before: int,
-    ) -> CliStepResult:
+    async def run_tool_loop(self, body: ToolLoopCommand) -> CliStepResult:
+        before = len(self._log.query())
         tools = ToolRegistry()
         for definition in self._tools.definitions():
             tools.register(self._tools.get(definition.name))
@@ -853,12 +484,8 @@ class CliInstrumentor:
             component_parent_ids=parents,
         )
 
-    async def _run_recipe(
-        self,
-        body: RunRecipeCommand,
-        *,
-        before: int,
-    ) -> CliStepResult:
+    async def run_recipe(self, body: RunRecipeCommand) -> CliStepResult:
+        before = len(self._log.query())
         if body.name == "conversational_tool_loop":
             return await self._run_conversational_tool_loop(body, before=before)
         if body.name == "harness_run":
@@ -1068,18 +695,24 @@ class CliInstrumentor:
         )
         dts.set_time(dts.now_utc() + delta)
 
+    async def run_set_clock(self, body: SetClockCommand) -> CliStepResult:
+        self._set_clock(body.at)
+        return CliStepResult(
+            verb="set_clock",
+            clock_iso=self._datetime.now_utc_iso(),
+        )
+
+    async def run_advance_clock(self, body: AdvanceClockCommand) -> CliStepResult:
+        self._advance_clock(body)
+        return CliStepResult(
+            verb="advance_clock",
+            clock_iso=self._datetime.now_utc_iso(),
+        )
+
 
 def script_from_mapping(data: dict[str, Any]) -> CliScript:
-    """Build a product script, stripping test-only keys."""
-    commands_raw = data.get("commands") or []
-    clean: list[dict[str, Any]] = []
-    for raw in commands_raw:
-        if not isinstance(raw, dict):
-            raise ValueError("each command must be a mapping")
-        clean.append(
-            {k: v for k, v in raw.items() if k not in {"expect", "expect_error"}}
-        )
-    return CliScript.model_validate({"commands": clean})
+    """Build a product script from a YAML-like mapping."""
+    return _script_from_mapping(data)
 
 
 def _event_dict(event: Event) -> dict[str, Any]:
@@ -1100,8 +733,8 @@ def _first_ts(events: list[dict[str, Any]], type_key: str) -> str | None:
 
 __all__ = [
     "AdvanceClockCommand",
-    "CliCommand",
     "CliInstrumentor",
+    "CliParsedCommand",
     "CliRunResult",
     "CliScript",
     "CliStepResult",

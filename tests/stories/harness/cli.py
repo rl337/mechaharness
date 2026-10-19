@@ -11,6 +11,7 @@ from pyiv.time import MockDateTimeService
 
 from mechaharness.api_connection import SimpleHttpConnectionConfig
 from mechaharness.cli_instrumentor import CliInstrumentor
+from mechaharness.cli_verb import resolve_cli_verbs
 from mechaharness.config import Settings
 from mechaharness.core.types import ChatMessage, Role, ToolCall, Usage
 from mechaharness.inference.judge import FixtureJudgeProvider, JudgeProvider
@@ -20,6 +21,7 @@ from mechaharness.inference.systemone import SystemOneJudgeProvider
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
+from tests.stories.cli_probes.config import StoryCliConfig
 from tests.stories.scenarios.cli_scenario import (
     CliScenario,
     load_cli_scenario,
@@ -62,23 +64,19 @@ class CliHarness:
         clock = MockDateTimeService(
             datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
         )
-        tool_loop = next(
-            (cmd.tool_loop for cmd in scenario.commands if cmd.tool_loop is not None),
-            None,
-        )
-        run_recipe = next(
-            (cmd.run_recipe for cmd in scenario.commands if cmd.run_recipe is not None),
-            None,
-        )
-        needs_judge = any(cmd.judge_route is not None for cmd in scenario.commands)
+        verbs = resolve_cli_verbs(StoryCliConfig())
+        needs_judge = any(cmd.verb == "judge_route" for cmd in scenario.commands)
         scripted_tool_name: str | None = None
-        if tool_loop is not None:
-            scripted_tool_name = tool_loop.tool_name
-        elif (
-            run_recipe is not None
-            and run_recipe.name == "conversational_tool_loop"
-        ):
-            scripted_tool_name = run_recipe.tool_name
+        for cmd in scenario.commands:
+            if cmd.verb == "tool_loop":
+                scripted_tool_name = str(cmd.params.get("tool_name") or "lookup")
+                break
+            if (
+                cmd.verb == "run_recipe"
+                and cmd.params.get("name") == "conversational_tool_loop"
+            ):
+                scripted_tool_name = str(cmd.params.get("tool_name") or "lookup")
+                break
 
         judge_provider: JudgeProvider | None = None
         if needs_judge:
@@ -119,6 +117,7 @@ class CliHarness:
                 datetime_service=clock,
                 model=model,
                 judge_provider=judge_provider,
+                verbs=verbs,
             )
 
         if case.adapter == "openai_compat":
@@ -146,6 +145,7 @@ class CliHarness:
                 datetime_service=clock,
                 model=model,
                 judge_provider=judge_provider,
+                verbs=verbs,
             )
 
         if case.adapter == "systemone":
@@ -156,6 +156,7 @@ class CliHarness:
                 model=model,
                 judge_provider=judge_provider
                 or self._build_judge_provider(case, backend, response),
+                verbs=verbs,
             )
 
         raise AssertionError(

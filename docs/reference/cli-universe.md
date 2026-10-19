@@ -17,7 +17,7 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 |---------|--------|
 | Graph factory | `build_cli_universe_graph` (`cli:infer` node) |
 | Infer runner | `CliInferRunner` (reason-lane `Completer`, `core:inference` + `core:cost`) |
-| Instrumentor | `CliInstrumentor` + `cli_diagnostic_verbs` + `cli_acceptance_verbs` (`infer`, `tool_loop`, `run_recipe`, routing/parity, completer flavors, capture preflight, host-kit submit-once, `judge_route`, clocks, …) |
+| Instrumentor | `CliInstrumentor` dispatches via pyiv map multibind (`cli_verb_classes` → `Dict[str, CliVerb]`). Host verbs in `cli_host_verbs`; story probes in `tests/stories/cli_probes`. |
 | Event stamps | `StampingEventLog` over injectable `DateTimeService` |
 | Event tap | `tapping_event_log` on the blessed executor path (HF-05) |
 
@@ -58,7 +58,8 @@ needed:
 1. Observability / one-shot infer (OBS-*) — done
 2. Former harness_runs / pass-through / tool-loop / cassettes / host DI /
    judge route — done (`harness_runs` runner removed)
-3. Graph execution — done (`cli_graph_verbs`; runner removed). Recipe catalog next.
+3. Graph execution — done (story probes + map multibind; runner removed).
+   Recipe catalog next.
 4. Decision plane / remaining judge ops
 5. pure_api + context/eval surface
 6. Fold durable IoC into CLI when ready
