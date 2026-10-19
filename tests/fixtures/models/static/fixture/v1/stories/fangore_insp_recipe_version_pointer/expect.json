@@ -1,8 +1,18 @@
 {
-  "requirement_id": "MH-SR-01",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "active_version": "1",
+  "versions": [
+    "1",
+    "2"
+  ],
+  "lineage": {
+    "1": null,
+    "2": "1"
+  },
+  "evaluation_counts": {
+    "1": 0,
+    "2": 0
+  },
+  "errors": [
+    "promote:KeyError"
+  ]
 }

@@ -1,27 +1,29 @@
 {
-  "requirement_id": "MH-PA-06",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/judgement_policy.py",
-    "mechaharness/decision_surfaces.py",
-    "mechaharness/decision_plane_runtime.py"
-  ],
-  "probes": [
-    {
-      "kind": "module_symbols",
-      "name": "alert",
-      "module": "mechaharness",
-      "missing": [
-        "AlertEscalationPolicy"
-      ]
-    },
-    {
-      "kind": "module_symbols",
-      "name": "judgement",
-      "module": "mechaharness.judgement_policy",
-      "has": [
-        "JudgementPolicy"
+  "policy": {
+    "repeated_at": 2,
+    "persistent_at": 4,
+    "overrides": {
+      "disk_full": [
+        1,
+        2
       ]
     }
-  ]
+  },
+  "alert": "queue_lag",
+  "counts": [
+    1,
+    2,
+    3,
+    4,
+    6
+  ],
+  "override_alert": "disk_full",
+  "override_counts": [
+    1,
+    2
+  ],
+  "unordered_policy": {
+    "repeated_at": 3,
+    "persistent_at": 3
+  }
 }

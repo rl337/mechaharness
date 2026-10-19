@@ -16,6 +16,13 @@ Hosts own storage; MechaHarness owns the schema::
     ... )
     >>> rec.next_action
     'run verify node'
+    >>> rec = HandoffRecord(
+    ...     goals=["ship the report"],
+    ...     exclusions=["do not email the customer"],
+    ...     verdict={"kind": "ASK_HUMAN", "policyVersion": "1"},
+    ... )
+    >>> rec.exclusions, rec.verdict["kind"]
+    (['do not email the customer'], 'ASK_HUMAN')
 """
 
 from __future__ import annotations
@@ -29,6 +36,8 @@ class HandoffRecord(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     version: str = "1"
+    goals: list[str] = Field(default_factory=list)
+    exclusions: list[str] = Field(default_factory=list)
     completed: list[str] = Field(default_factory=list)
     pending: list[str] = Field(default_factory=list)
     verification_state: str | None = None
@@ -38,4 +47,6 @@ class HandoffRecord(BaseModel):
     risks: list[str] = Field(default_factory=list)
     next_action: str = ""
     evidence_refs: list[str] = Field(default_factory=list)
+    # Expected or observed verdict schema (e.g. a ``Verdict`` dump); opaque to the core.
+    verdict: dict[str, Any] | None = None
     detail: dict[str, Any] = Field(default_factory=dict)

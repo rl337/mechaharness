@@ -1,24 +1,9 @@
 {
-  "requirement_id": "MH-PA-03",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/graph_templates/independent_review.py",
-    "mechaharness/graph_templates/verify_repair.py",
-    "mechaharness/isolation_contract.py",
-    "mechaharness/budget.py"
+  "goal": "draft release notes",
+  "acceptance": [
+    "no_unverified_claims"
   ],
-  "probes": [
-    {
-      "kind": "catalog_names",
-      "name": "recipes",
-      "has": [
-        "verify_repair",
-        "independent_review"
-      ],
-      "missing": [
-        "produce_critique_refine",
-        "council"
-      ]
-    }
-  ]
+  "soft_bindings": {
+    "max_rounds": 3
+  }
 }

@@ -1,9 +1,20 @@
 {
-  "requirement_id": "MH-DOTS-01",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0,
-  "envelope_field_count": 11
+  "outcomes": {
+    "attenuate": "ok",
+    "raise_epoch": "refused:widens authorization_epoch",
+    "swap_principal": "refused:changes principal",
+    "swap_origin": "refused:changes trust_origin",
+    "outlive_parent": "refused:widens expires_at"
+  },
+  "refused_ids": [
+    "outlive_parent",
+    "raise_epoch",
+    "swap_origin",
+    "swap_principal"
+  ],
+  "accepted_ids": [
+    "attenuate"
+  ],
+  "inherited_principal": "user:fangore",
+  "inherited_epoch": 3
 }

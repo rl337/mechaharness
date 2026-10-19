@@ -2,10 +2,10 @@
   "id": "nubble_insp_review_audit_reconstruct",
   "persona": "nubble",
   "title": "Reconstruct why a consequential action was allowed without model recollection",
-  "kind": "inspiration_delta_contract",
-  "narrative": "Audits must reconstruct review decision, policy revision, source trust, delegated scope, denial reason, user approval, and actual side effects without relying on model memory. Related: `taloneth_policy_replay`, `nubble_insp_trace_reconciliation`. Tracks MH-DOTS-09[^insp-dots-09].",
-  "implementation": "DecisionLog, TraceEnvelope, trace reconciliation, model input manifest. Desired: unified review-audit API tying recipe selection, policy, approvals, denials, and effects.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-09, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
+  "kind": "review_audit_reconstruct",
+  "narrative": "An auditor can rebuild a review from the saved decision log and trace alone: which recipe ran, what the policy decided and under which revision, how trusted the source was, what scope was delegated, why something was denied, who approved it, and which side effects actually happened. When any of that is missing the record says exactly which part, instead of relying on what the model remembers. Related: `taloneth_policy_replay`, `nubble_insp_trace_reconciliation`. Tracks MH-DOTS-09[^insp-dots-09].",
+  "implementation": "`ReviewAuditRecord` in `review_audit.py` composes `DecisionRecord` and `TraceEnvelope` (recipe id and version, `policy_version` / `policy_revision`, approval, denial, and effect ids, freshness summary) with caller-attested source trust, delegated scope, and denial reasons. `from_records()` prefers the decision over the envelope on overlap; `missing_dimensions()` and `reconstructable()` name gaps (denials need reasons and ids, human-approved verdicts need approval ids, executed actions need effect ids).",
+  "validation": "Kind `review_audit_reconstruct`. Hard expects records rebuilt from persisted decision-log event payloads: a fully attested allow is reconstructable, and denied, asked-human, and executed-without-effect records report exactly the missing dimensions; an envelope fills gaps. Unit tests: `tests/test_review_audit.py`.",
   "footnotes": [
     {
       "id": "insp-dots-09",

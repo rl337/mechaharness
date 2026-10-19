@@ -1,8 +1,10 @@
 {
-  "requirement_id": "MH-DOTS-05",
-  "coverage": "gap",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "first": "deny:verdict_deny",
+  "retries": {
+    "second_provider": "deny:prior_denial",
+    "graph_tool": "deny:prior_denial",
+    "other_recipient": "allow"
+  },
+  "lifted": true,
+  "after_lift": "allow"
 }

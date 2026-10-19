@@ -92,9 +92,12 @@ from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Any, Union, cast
 
+from mechaharness.authority_gate import AuthorityGate
 from mechaharness.checkpoint_store import CheckpointStore
+from mechaharness.consequence import ConsequencePolicy
 from mechaharness.core.access import GraphEscalate, GraphExecute
 from mechaharness.core.events import EventLog, InMemoryEventLog
+from mechaharness.denial_store import DenialStore
 from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.external_effect import (
     CrashProbe,
@@ -452,3 +455,88 @@ def host_graph_executor(
     executor = cast(GraphExecutor, get_injector(_HostKitConfig).inject(GraphExecutor))
     executor.agent_id = aid
     return executor
+
+
+def host_denial_store(*, denial_store: DenialStore | None = None) -> DenialStore:
+    """Resolve the :class:`DenialStore` a host Config would bind (blessed host path).
+
+    Default is the process-local ``InMemoryDenialStore`` (not restart-durable).
+    Pass ``denial_store`` to bind a durable implementation; it is returned via the
+    same Config inject so the gate from :func:`host_authority_gate` shares it.
+
+        >>> from mechaharness.denial_store import equivalent_action_digest
+        >>> store = host_denial_store()
+        >>> digest = equivalent_action_digest("email.send", "bob@example.com")
+        >>> _ = store.record(digest, reason="user_denied")
+        >>> store.lookup(digest).reason
+        'user_denied'
+    """
+    bound = denial_store
+
+    class _HostDenialConfig(MechaHarnessConfig):
+        def get_inference_class(self) -> type:
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type:
+            return PassThroughHarness
+
+        def get_denial_store(self) -> DenialStore:
+            if bound is not None:
+                return bound
+            return super().get_denial_store()
+
+    return cast(DenialStore, get_injector(_HostDenialConfig).inject(DenialStore))
+
+
+def host_authority_gate(
+    *,
+    grants: Sequence[object] | None = None,
+    consequence: ConsequencePolicy | None = None,
+    denial_store: DenialStore | None = None,
+) -> AuthorityGate:
+    """Build an :class:`AuthorityGate` via Config inject (blessed host path).
+
+    ``grants`` feed deny-by-default access control (default: none, so any action
+    that requires a grant is denied). ``consequence`` opts into approval for
+    high-consequence actions; ``denial_store`` lets the gate remember denials.
+
+        >>> from mechaharness.consequence import ActionConsequence, ConsequencePolicy
+        >>> from mechaharness.core.access import GraphExecute
+        >>> gate = host_authority_gate(
+        ...     grants=[GraphExecute],
+        ...     consequence=ConsequencePolicy(actions=[
+        ...         ActionConsequence(action="email.send", consequence="high"),
+        ...     ]),
+        ... )
+        >>> gate.evaluate(action="email.send", required_grants=[GraphExecute]).outcome
+        'ask_human'
+        >>> gate.evaluate(action="read", required_grants=[]).outcome
+        'allow'
+    """
+    grant_list = list(grants) if grants is not None else []
+    policy = consequence
+    bound = denial_store
+
+    class _HostGateConfig(MechaHarnessConfig):
+        def get_inference_class(self) -> type:
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return list(grant_list)
+
+        def get_denial_store(self) -> DenialStore:
+            if bound is not None:
+                return bound
+            return super().get_denial_store()
+
+        def get_authority_gate(self) -> AuthorityGate:
+            return AuthorityGate(
+                access=self.get_access_control(),
+                consequence=policy,
+                denials=self.get_denial_store(),
+            )
+
+    return cast(AuthorityGate, get_injector(_HostGateConfig).inject(AuthorityGate))

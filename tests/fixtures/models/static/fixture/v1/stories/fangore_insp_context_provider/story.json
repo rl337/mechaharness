@@ -3,7 +3,7 @@
   "persona": "fangore",
   "title": "Discover context indices before loading large payloads",
   "kind": "context_provider_discovery",
-  "narrative": "Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06]. Related personal-agent freshness/provenance delta: `fangore_insp_tool_result_freshness`[^insp-pa-01-provider].",
+  "narrative": "Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06]. Related personal-agent freshness/provenance story: `fangore_insp_tool_result_freshness`[^insp-pa-01-provider].",
   "implementation": "`ContextProvider` / `StaticContextProvider` expose `index` then `load` with provenance and token estimates.",
   "validation": "Kind `context_provider_discovery`. Soft expects index before load and provider attribution.",
   "footnotes": [

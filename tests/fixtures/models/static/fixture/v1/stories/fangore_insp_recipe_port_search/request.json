@@ -1,25 +1,43 @@
 {
-  "requirement_id": "MH-SR-04",
-  "coverage": "gap",
-  "adjacent_modules": [
-    "mechaharness/isolation_contract.py"
-  ],
-  "probes": [
+  "queries": [
     {
-      "kind": "module_symbols",
-      "name": "iso",
-      "module": "mechaharness.isolation_contract",
-      "has": [
-        "IsolationContract"
-      ]
+      "id": "produces_artifact",
+      "required_outputs": {
+        "artifact": "object"
+      }
     },
     {
-      "kind": "module_symbols",
-      "name": "search",
-      "module": "mechaharness",
-      "missing": [
-        "search_compatible_recipes"
-      ]
+      "id": "accepts_scenario",
+      "required_inputs": {
+        "scenario": "object"
+      }
+    },
+    {
+      "id": "scenario_to_report",
+      "required_inputs": {
+        "scenario": "object"
+      },
+      "required_outputs": {
+        "safety_report": "object"
+      }
+    },
+    {
+      "id": "wildcard",
+      "required_inputs": {
+        "scenario": "any"
+      }
+    },
+    {
+      "id": "wrong_type",
+      "required_inputs": {
+        "scenario": "string"
+      }
+    },
+    {
+      "id": "unknown_port",
+      "required_inputs": {
+        "nope": "object"
+      }
     }
   ]
 }

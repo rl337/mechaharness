@@ -1,4 +1,4 @@
-from mechaharness.isolation_contract import IsolationContract, TemplateIOContract
+from mechaharness.isolation.isolation_contract import IsolationContract, TemplateIOContract
 
 
 def test_isolation_and_template_io() -> None:

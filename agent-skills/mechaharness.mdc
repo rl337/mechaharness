@@ -1,0 +1,30 @@
+---
+description: Requirements for host apps that depend on MechaHarness.
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# MechaHarness requirements (for host / consumer application code)
+
+Copy into your project's `.cursor/rules/` (or equivalent) when the app depends
+on MechaHarness.
+
+- Prefer `from mechaharness.host_apis import …` for authority, denial,
+  isolation, recipe lifecycle, correlators, and host_kit helpers.
+- Wire with `MechaHarnessConfig` hooks + constructor injection; do not grow
+  `Settings` with lane-only knobs or hand-construct harness families.
+- Product recipe promotion: `promote_recipe` (policy + held-out gate + hooks),
+  not ungated `registry.promote`.
+- Open identity: host types are classes / namespaced strings — do not patch
+  closed library enums to add a host concept.
+- Events: keep OBS correlators (`graph_id`, `recipe_id`/`recipe_version`,
+  `authorization_epoch`, nest `parent_run_id`); no secrets in payloads;
+  warehouse/UI joins live in the host.
+- Durable denial stores, campaign UIs, and warehouse ETL are host-owned.
+
+Skills (copy or fetch latest from GitHub `main`):
+
+- `agent-skills/use-mechaharness/SKILL.md`
+- `agent-skills/mechaharness-observability/SKILL.md`
+
+Normative host contract: `docs/requirements/host-integration.md`

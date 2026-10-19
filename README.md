@@ -17,6 +17,11 @@ chat-client wrapper. Founding principles:
 Also: deny-by-default grants / `CompoundPolicy`, and host-extendable open
 identity. Docs: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness/)
 
+**Downstream / host agents:** copy Cursor skills from
+[`agent-skills/`](agent-skills/) (see
+[Agent skills for your project](docs/guides/agent-skills.md) and
+[Host integration](docs/requirements/host-integration.md)).
+
 ## Install
 
 ```bash

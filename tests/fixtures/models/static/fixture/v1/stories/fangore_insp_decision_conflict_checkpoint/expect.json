@@ -1,8 +1,35 @@
 {
-  "requirement_id": "MH-SR-08",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "scenarios": {
+    "cycle_never_cleared": {
+      "order": [
+        "a",
+        "b",
+        "c"
+      ],
+      "checkpoints": [],
+      "cycle_blocked": [
+        "c"
+      ]
+    },
+    "cleared_at_c": {
+      "order": [
+        "a",
+        "b",
+        "c"
+      ],
+      "checkpoints": [
+        "c"
+      ],
+      "cycle_blocked": []
+    },
+    "no_conflicts": {
+      "order": [
+        "a"
+      ],
+      "checkpoints": [
+        "a"
+      ],
+      "cycle_blocked": []
+    }
+  }
 }

@@ -1,8 +1,7 @@
 {
-  "requirement_id": "MH-DOTS-06",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "first_status": "ok",
+  "checkpoint_epoch": 2,
+  "resume_status": "failed",
+  "error_contains": "authorization_epoch_mismatch:2!=3",
+  "runner_calls_after_resume": 0
 }

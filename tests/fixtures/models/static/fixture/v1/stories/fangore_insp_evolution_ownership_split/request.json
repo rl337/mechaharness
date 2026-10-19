@@ -1,26 +1,7 @@
 {
-  "requirement_id": "MH-SR-09",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/di.py",
-    "mechaharness/graph_templates/base.py"
+  "workloads": [
+    "nightly",
+    "regression"
   ],
-  "probes": [
-    {
-      "kind": "module_symbols",
-      "name": "di",
-      "module": "mechaharness.di",
-      "has": [
-        "MechaHarnessConfig"
-      ]
-    },
-    {
-      "kind": "module_symbols",
-      "name": "campaign",
-      "module": "mechaharness",
-      "missing": [
-        "EvolutionCampaignHooks"
-      ]
-    }
-  ]
+  "budget": 25.0
 }

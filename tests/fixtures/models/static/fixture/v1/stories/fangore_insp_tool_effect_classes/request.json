@@ -1,27 +1,35 @@
 {
-  "requirement_id": "MH-DOTS-03",
-  "coverage": "gap",
-  "adjacent_modules": [
-    "mechaharness/external_effect.py",
-    "mechaharness/lifecycle_extension.py",
-    "mechaharness/operation_registry.py",
-    "mechaharness/tools/base.py"
-  ],
-  "probes": [
+  "contracts": [
     {
-      "kind": "effect_kind_values",
-      "name": "effects",
-      "has": [
-        "none",
-        "read",
-        "write",
-        "external"
-      ],
-      "missing": [
-        "observe",
-        "prepare",
-        "execute"
-      ]
+      "name": "peek",
+      "tool_phase": "observe",
+      "external_effects": "read"
+    },
+    {
+      "name": "peek_alias",
+      "tool_phase": "observe",
+      "external_effects": "write"
+    },
+    {
+      "name": "draft_email",
+      "tool_phase": "prepare",
+      "external_effects": "none"
+    },
+    {
+      "name": "draft_send",
+      "tool_phase": "prepare",
+      "external_effects": "external"
+    },
+    {
+      "name": "mystery_observer",
+      "tool_phase": "observe",
+      "external_effects": "unknown"
+    },
+    {
+      "name": "send_email",
+      "tool_phase": "execute",
+      "external_effects": "external"
     }
-  ]
+  ],
+  "alias_probe": "peek_alias"
 }

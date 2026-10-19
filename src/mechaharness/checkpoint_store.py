@@ -80,6 +80,15 @@ class CheckpointStore(ABC):
     def latest_boundary(self, *, run_id: str | None = None) -> RecoveryBoundary | None:
         ...
 
+    def latest_authorization_epoch(self, *, run_id: str | None = None) -> int:
+        """Authorization epoch of the latest checkpoint (0 when absent).
+
+        Epoch rides on the persisted graph, so every store carries it and
+        pre-epoch checkpoints read as 0 without a schema migration.
+        """
+        graph = self.latest(run_id=run_id)
+        return graph.authorization_epoch if graph is not None else 0
+
     @abstractmethod
     def latest_revision(self, *, run_id: str | None = None) -> int | None:
         ...

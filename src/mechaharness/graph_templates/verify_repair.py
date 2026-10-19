@@ -14,6 +14,7 @@ from mechaharness.graph_templates.base import (
     SoftPoint,
     make_node,
 )
+from mechaharness.isolation.isolation_contract import TemplateIOContract
 from mechaharness.stop_contract import StopContract
 
 
@@ -42,6 +43,10 @@ class VerifyRepairTemplate(GraphTemplate):
     summary = (
         "Produce an artifact, verify against acceptance, then repair under a "
         "stop contract until verification succeeds or budgets exhaust."
+    )
+    io_contract = TemplateIOContract(
+        inputs={"goal": "string"},
+        outputs={"artifact": "object", "verification": "object"},
     )
     soft_points = (
         SoftPoint(

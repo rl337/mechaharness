@@ -2,10 +2,10 @@
   "id": "fangore_insp_alert_escalation_rules",
   "persona": "fangore",
   "title": "Escalate alerts by deterministic once, repeated, and persistent rules",
-  "kind": "inspiration_delta_contract",
-  "narrative": "Models may propose alert actions, but code-owned rules decide whether a threshold fired and how far to escalate: once/log, repeated/surface, persistent/propose repair. Decision-plane policy already separates model propose from policy decide (`fangore_decision_plane_policy`). Tracks MH-PA-06[^insp-pa-06].",
-  "implementation": "JudgementPolicy.decide and RulesDecisionBackend provide model-proposes/code-decides. Desired: alert/error escalation catalog with deterministic once/repeated/persistent stages.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-06, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
+  "kind": "alert_escalation_stages",
+  "narrative": "Models may suggest what to do about an alert, but fixed rules decide how far it escalates. A one-off alert is only logged, an alert that keeps coming back is shown to the operator, and one that persists proposes a repair. Thresholds can be tuned per alert, the same count always gives the same answer, and nonsensical thresholds are refused. Decision-plane policy already separates model proposal from code decision (`fangore_decision_plane_policy`). Tracks MH-PA-06[^insp-pa-06].",
+  "implementation": "`AlertEscalationPolicy.evaluate(alert_id, occurrence_count)` in `alert_escalation.py` maps counts to the `AlertStage` literal (`log` → `surface` → `propose`) from default thresholds and optional per-alert overrides; thresholds must be ordered. `AlertOccurrenceCounter` is an in-memory reference counter that feeds the policy. No model participates. Complements `JudgementPolicy` / decision-plane verdicts; hosts own durable alert counts.",
+  "validation": "Kind `alert_escalation_stages`. Hard expects the stage ladder for default thresholds, a per-alert override, the counter walk, and refusal of unordered thresholds. Unit tests: `tests/test_alert_escalation.py`.",
   "footnotes": [
     {
       "id": "insp-pa-06",

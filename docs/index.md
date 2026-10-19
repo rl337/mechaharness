@@ -42,6 +42,21 @@ for events and grants ([Architecture](./architecture.md)), and **Agentic
 Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
 ([Graph templates and Agentic Recipes](./reference/graph-templates.md)).
 
+## Downstream consumers
+
+Hosts that **depend on** MechaHarness (consoles, warehouses, product agents)
+should start here — not in the maintainer `.cursor/skills/` tree.
+
+| Page | Description |
+|------|-------------|
+| [Agent skills for your project](./guides/agent-skills.md) | Install `use-mechaharness` / observability skills + `mechaharness.mdc` from GitHub `main` |
+| [Host integration requirements](./requirements/host-integration.md) | HOST-01..07: Config-first, `host_apis`, promote path, open identity, OBS export |
+| [`agent-skills/` on GitHub](https://github.com/rl337/mechaharness/tree/main/agent-skills) | Copy-paste skill sources for Cursor/Codex in *your* repo |
+
+Related: [Dependency injection](./guides/dependency-injection.md),
+[Inspiration primitives](./reference/inspiration-primitives.md),
+[Event analytics schema](./requirements/event-analytics-schema.md).
+
 ## Contents
 
 | Page | Description |
@@ -51,6 +66,10 @@ Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
 | [Recipes and decision plane](./requirements/recipes-and-decision-plane.md) | Agentic Recipes (`GraphTemplate` substrate), DP/RT reference recipes |
 | [Dynamic tool graph and node components](./requirements/dynamic-tool-graph.md) | Graph node vs node component; HF-05/07/08; kinds ⊆ existing surfaces |
 | [Transactional durable resume](./requirements/transactional-durable-resume.md) | CheckpointStore, SQLite, effect reconciliation (DR-01..12) |
+| [Event analytics schema](./requirements/event-analytics-schema.md) | Near-3NF fact/dim contract for warehouse reconstruction of graph decisions |
+| [Host integration](./requirements/host-integration.md) | Normative contract for apps that consume MechaHarness (HOST-01..07) |
+| [Agent skills (downstream)](./guides/agent-skills.md) | Customer-facing Cursor skills for host repos |
+| [Inspiration primitives](./reference/inspiration-primitives.md) | Leaf → map ID → DI? → blessed import |
 | [June host-friction inspiration](./inspiration/june-host-friction-inspiration.md) | June HF pack provenance; console consumer vs MH ownership |
 | [June host-friction requirements map](./inspiration/june-host-friction-requirements-map.md) | HF-* → modules → user stories |
 | [WalkingLabs Harness Engineering inspiration](./inspiration/walkinglabs-harness-engineering-inspiration.md) | 50-point source-attributed audit of the online book against current MechaHarness |

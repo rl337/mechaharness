@@ -1,7 +1,0 @@
-{
-  "prompt": "Write a.txt",
-  "deny_grants": [],
-  "allow_grants": [
-    "core:fs.write"
-  ]
-}

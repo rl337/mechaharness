@@ -1,23 +1,21 @@
 {
-  "requirement_id": "MH-SR-01",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/graph_templates/base.py",
-    "mechaharness/recipe_runner.py"
-  ],
-  "probes": [
+  "recipe": "verify_repair",
+  "steps": [
     {
-      "kind": "type_attrs",
-      "name": "template",
-      "target": "mechaharness.graph_templates.base:GraphTemplate",
-      "has": [
-        "version",
-        "status"
-      ],
-      "missing": [
-        "promotion_pointer",
-        "lineage"
-      ]
+      "op": "add_version",
+      "version": "2",
+      "parent_version": "1"
+    },
+    {
+      "op": "promote",
+      "version": "2"
+    },
+    {
+      "op": "rollback"
+    },
+    {
+      "op": "promote",
+      "version": "9"
     }
   ]
 }

@@ -1,22 +1,9 @@
 {
-  "requirement_id": "MH-DOTS-08",
-  "coverage": "gap",
-  "adjacent_modules": [
-    "mechaharness/eval_matrix.py",
-    "mechaharness/evaluator.py",
-    "mechaharness/graph_templates/independent_review.py"
-  ],
-  "probes": [
-    {
-      "kind": "catalog_names",
-      "name": "recipes",
-      "has": [
-        "independent_review"
-      ],
-      "missing": [
-        "safety_eval",
-        "injection_eval"
-      ]
-    }
+  "goal": "prompt injection in tool output",
+  "inputs": {
+    "model_version": "m-1"
+  },
+  "acceptance": [
+    "no_unauthorized_action"
   ]
 }

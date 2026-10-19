@@ -113,6 +113,8 @@ from mechaharness.core.events import (
     event_type_key,
 )
 from mechaharness.core.exceptions import GraphExecutorError
+from mechaharness.effect_revalidation import revalidate_before_effect
+from mechaharness.event_correlators import graph_trace_context
 from mechaharness.external_effect import (
     CrashProbe,
     EffectDispatchResult,
@@ -401,20 +403,30 @@ class GraphExecutor:
         # Not a constructor DI param: Mapping[...] | None is not pyiv-injectable
         # on Python 3.10+ (GenericAlias). Hosts assign after inject when needed.
         self.fingerprint_parts: dict[str, Any] = {}
+        # Optional live authorization epoch source (e.g. grant-revocation counter);
+        # assigned post-inject like ``fingerprint_parts`` (Callable is not injectable).
+        self.live_authorization_epoch: Callable[[], int] | None = None
         self._diagnostics: dict[str, Any] = {
             "reconciliation_invoked": False,
             "runner_reentered": False,
             "effect_dispatches": 0,
         }
+        # run_id -> correlator fields merged into every emit for that run.
+        self._trace_contexts: dict[str, dict[str, Any]] = {}
 
     def _emit(self, event_type: type[EventType], payload: dict[str, Any], run_id: str) -> None:
+        """Emit with the run's warehouse correlators merged under ``payload``.
+
+        Explicit payload keys win over correlators (OBS-A01..A06).
+        """
+        context = self._trace_contexts.get(run_id)
         self.event_log.emit(
             Event(
                 type=event_type_key(event_type),
                 agent_id=self.agent_id,
                 parent_agent_id=self.parent_agent_id,
                 run_id=run_id,
-                payload=payload,
+                payload={**context, **payload} if context else payload,
             )
         )
 
@@ -541,8 +553,14 @@ class GraphExecutor:
         resume: bool = False,
         envelope: CapabilityEnvelope | None = None,
         skip_linkage: bool = False,
+        parent_run_id: str | None = None,
     ) -> GraphResult:
         """Execute ``graph`` until completion, denial, stall, or budget failure.
+
+        Every event emitted for the run carries ``graph_id``, ``graph_goal``,
+        recipe stamp, ``authorization_epoch``, and (for nested runs)
+        ``parent_run_id`` / ``nest_depth`` — see
+        :func:`mechaharness.event_correlators.graph_trace_context`.
 
         ``budget_policy`` is required. Pass a shared ``budget`` for nested
         subgraphs so spend aggregates; otherwise a fresh :class:`Budget` is
@@ -553,6 +571,42 @@ class GraphExecutor:
         ``BudgetPolicy.hard_limit=None`` means unlimited hard ceiling.
         """
         rid = run_id or graph.id
+        parent_context = self._trace_contexts.get(parent_run_id) if parent_run_id else None
+        self._trace_contexts[rid] = graph_trace_context(
+            graph,
+            envelope=envelope,
+            live_authorization_epoch=(
+                self.live_authorization_epoch()
+                if self.live_authorization_epoch is not None
+                else None
+            ),
+            parent_run_id=parent_run_id,
+            nest_depth=int(parent_context.get("nest_depth", 0)) + 1 if parent_context else 1,
+        )
+        try:
+            return await self._run_graph(
+                graph,
+                rid=rid,
+                budget_policy=budget_policy,
+                budget=budget,
+                resume=resume,
+                envelope=envelope,
+                skip_linkage=skip_linkage,
+            )
+        finally:
+            self._trace_contexts.pop(rid, None)
+
+    async def _run_graph(
+        self,
+        graph: ExecutionGraph,
+        *,
+        rid: str,
+        budget_policy: BudgetPolicy,
+        budget: Budget | None,
+        resume: bool,
+        envelope: CapabilityEnvelope | None,
+        skip_linkage: bool,
+    ) -> GraphResult:
         ledger = budget if budget is not None else Budget(budget_policy)
         self._diagnostics = {
             "reconciliation_invoked": False,
@@ -561,6 +615,7 @@ class GraphExecutor:
             "resumed": resume,
             "checkpoint_durability": self.store.durability,
         }
+        restored: ExecutionGraph | None = None
         if resume:
             restored = self.store.latest(run_id=rid)
             if restored is not None:
@@ -589,6 +644,23 @@ class GraphExecutor:
                 budget=ledger,
                 error="missing_grant:core:graph.execute",
             )
+
+        if restored is not None and envelope is not None:
+            # Fail closed when authority was revoked/advanced since the checkpoint.
+            checkpoint_epoch = graph.authorization_epoch
+            if checkpoint_epoch != envelope.authorization_epoch:
+                err = (
+                    "authorization_epoch_mismatch:"
+                    f"{checkpoint_epoch}!={envelope.authorization_epoch}"
+                )
+                self._emit(GraphStart, {"goal": graph.goal, "status": "failed"}, rid)
+                self._emit(GraphEnd, {"status": "failed", "error": err}, rid)
+                return self._result(
+                    status="failed", graph=graph, run_id=rid, budget=ledger, error=err
+                )
+
+        if envelope is not None:
+            graph.authorization_epoch = envelope.authorization_epoch
 
         report = None
         fingerprint = graph.config_fingerprint
@@ -789,6 +861,7 @@ class GraphExecutor:
             budget=context.budget,
             run_id=child_run_id,
             envelope=context.envelope,
+            parent_run_id=context.run_id,
         )
         node.payload = {
             **node.payload,
@@ -869,6 +942,41 @@ class GraphExecutor:
                 context.run_id,
             )
             return
+
+        if node.payload.get("tool_phase", "execute") == "execute":
+            # Authority may have lapsed since planning/approval/checkpoint (MH-DOTS-02).
+            revalidation = revalidate_before_effect(
+                envelope=context.envelope,
+                required_grants=grants,
+                live_authorization_epoch=(
+                    self.live_authorization_epoch()
+                    if self.live_authorization_epoch is not None
+                    else None
+                ),
+                access_allows=lambda required: not required
+                or self._allows(
+                    required,
+                    tool_name=f"graph_node:{node.kind}",
+                    run_id=context.run_id,
+                ),
+            )
+            if not revalidation.ok:
+                node.status = NodeStatus.FAILED
+                node.error = f"revalidation_failed:{revalidation.reason}"
+                node.attempt += 1
+                node.max_attempts = node.attempt
+                self._charge_node(node, None, context.budget)
+                self._emit(
+                    GraphNodeEnd,
+                    {
+                        "node_id": node.id,
+                        "kind": node.kind,
+                        "status": node.status.value,
+                        "error": node.error,
+                    },
+                    context.run_id,
+                )
+                return
 
         if isinstance(runner, EffectfulGraphNodeRunner):
             await self._run_effectful_node(graph, node, context, runner)

@@ -1,28 +1,28 @@
 {
-  "requirement_id": "MH-PA-01",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/core/types.py",
-    "mechaharness/context_provider.py",
-    "mechaharness/decision_plane_runtime.py"
-  ],
-  "probes": [
+  "now": "2026-10-18T12:00:00Z",
+  "policy": {
+    "max_age_seconds": 86400,
+    "require_provenance": false
+  },
+  "results": [
     {
-      "kind": "model_fields",
-      "name": "tool_result",
-      "target": "mechaharness.core.types:ToolResult",
-      "has": [
-        "tool_call_id",
-        "content",
-        "is_error"
-      ],
-      "missing": [
-        "observed_at",
-        "fetched_at",
-        "expiry",
-        "freshness",
-        "source"
-      ]
+      "tool_call_id": "crm_cache_8d",
+      "content": "deal open",
+      "source": "crm.cache",
+      "observed_at": "2026-10-10T12:00:00Z"
+    },
+    {
+      "tool_call_id": "quote_expired",
+      "content": "price 10",
+      "source": "pricing",
+      "expires_at": "2026-10-18T11:00:00Z"
+    },
+    {
+      "tool_call_id": "crm_live",
+      "content": "deal open",
+      "source": "crm.api",
+      "observed_at": "2026-10-18T11:45:00Z",
+      "expires_at": "2026-10-18T13:00:00Z"
     }
   ]
 }

@@ -2,10 +2,10 @@
   "id": "taloneth_insp_correction_spec_debt",
   "persona": "taloneth",
   "title": "Capture corrections as reviewed specification debt before policy change",
-  "kind": "inspiration_delta_contract",
-  "narrative": "Human corrections should become structured candidate specification debt linked to failing scenarios, with review before policy changes and regression tests afterward. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].",
-  "implementation": "PromotionRecord / promote_soft_to_hard / rollback_promotion and failure attribution helpers. Desired: correction→test feedback loop and first-class specification-debt ledger.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-07, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
+  "kind": "specification_debt_capture",
+  "narrative": "When a person corrects the agent, the correction is recorded as outstanding specification debt: the correction text, the scenarios that failed, and a link to the rule-promotion record it may harden into. The record stays flagged for human review until someone accepts it, and the host (not the library) generates the regression test and attaches it. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].",
+  "implementation": "`SpecificationDebtRecord`, `SpecificationDebtLedger`, and `capture_correction()` in `specification_debt.py` hold the correction, `failing_scenario_refs`, `promotion_record_id` (from `PromotionRecord.record_id`), `review_required`, and a host-filled `generated_test_ref`; `link_test()` and `approve()` move status `open` → `test_linked` → `closed`. The library owns only the ledger schema; test generation stays with the host.",
+  "validation": "Kind `specification_debt_capture`. Hard expects a captured record that requires review and links the promotion, a pending count that only drops after approval, and refusal of blank corrections. Unit tests: `tests/test_specification_debt.py`.",
   "footnotes": [
     {
       "id": "insp-pa-07",

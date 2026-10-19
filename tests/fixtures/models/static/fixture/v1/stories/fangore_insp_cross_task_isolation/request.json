@@ -1,28 +1,25 @@
 {
-  "requirement_id": "MH-DOTS-07",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/isolation_contract.py",
-    "mechaharness/workspace_isolation.py",
-    "mechaharness/handoff_record.py",
-    "mechaharness/capability_envelope.py"
+  "contract": {
+    "input_context_refs": [
+      "goal"
+    ],
+    "effect_scope": "task"
+  },
+  "published_refs": [
+    "memo:customer-pref",
+    "approval:send-42"
   ],
-  "probes": [
-    {
-      "kind": "module_symbols",
-      "name": "iso",
-      "module": "mechaharness.isolation_contract",
-      "has": [
-        "IsolationContract"
-      ]
-    },
-    {
-      "kind": "module_symbols",
-      "name": "bleed",
-      "module": "mechaharness",
-      "missing": [
-        "CrossTaskIsolationGuard"
-      ]
-    }
-  ]
+  "intervening_counts": [
+    0,
+    5,
+    10
+  ],
+  "handoff": {
+    "evidence_refs": [
+      "memo:customer-pref"
+    ],
+    "goals": [
+      "follow up"
+    ]
+  }
 }

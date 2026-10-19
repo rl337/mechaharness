@@ -1,4 +1,22 @@
-"""Shared computation contracts and registry (INF-01 / INF-03)."""
+"""Shared computation contracts and registry (INF-01 / INF-03).
+
+Tool phases (MH-DOTS-03)
+------------------------
+
+OpenAI's Dots agent-safety inspiration separates tools that only look, tools
+that return typed proposals, and the one phase allowed to change the world.
+A phase is declared on :class:`~mechaharness.tools.base.Tool` and on
+:class:`~mechaharness.operation_registry.OperationContract`; consequential
+effects are only legal in ``execute``::
+
+    >>> from mechaharness.operation_registry import assert_tool_phase_allows_effects
+    >>> assert_tool_phase_allows_effects("observe", "read")
+    >>> assert_tool_phase_allows_effects("execute", "external")
+    >>> assert_tool_phase_allows_effects("prepare", "write")
+    Traceback (most recent call last):
+        ...
+    ValueError: tool_phase 'prepare' cannot declare write effects
+"""
 
 from __future__ import annotations
 
@@ -8,6 +26,22 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.core.exceptions import MechaHarnessError
+
+ToolPhase = Literal["observe", "prepare", "execute"]
+
+# Effect kinds an observe/prepare tool must not declare. ``unknown`` fails
+# closed: an undeclared effect cannot be proven read-only.
+_CONSEQUENTIAL_EFFECTS = frozenset({"write", "external", "unknown"})
+
+
+def assert_tool_phase_allows_effects(tool_phase: str, effect_kind: str) -> None:
+    """Raise ``ValueError`` if an observe/prepare phase declares consequential effects."""
+    if tool_phase not in ("observe", "prepare", "execute"):
+        raise ValueError(f"unknown tool_phase {tool_phase!r}")
+    if tool_phase != "execute" and effect_kind in _CONSEQUENTIAL_EFFECTS:
+        raise ValueError(
+            f"tool_phase {tool_phase!r} cannot declare {effect_kind} effects"
+        )
 
 
 class UnsupportedOperation(MechaHarnessError):
@@ -49,6 +83,7 @@ class OperationContract(BaseModel):
     read_scopes: list[ResourceScope] = Field(default_factory=list)
     write_scopes: list[ResourceScope] = Field(default_factory=list)
     external_effects: EffectKind = "none"
+    tool_phase: ToolPhase = "execute"
     isolation: str = "none"
     retry_policy: str = "none"
     idempotent: bool = False
@@ -82,17 +117,23 @@ class OperationRegistry:
         *,
         contract: OperationContract | None = None,
     ) -> None:
-        self._ops[name] = handler
         if contract is not None:
             if contract.name != name:
                 raise ContractMismatch(
                     f"contract name {contract.name!r} != registry key {name!r}"
                 )
+            # Observe/prepare contracts cannot declare write/external effects.
+            assert_tool_phase_allows_effects(
+                contract.tool_phase, contract.external_effects
+            )
+        self._ops[name] = handler
+        if contract is not None:
             self._contracts[name] = contract
         elif name not in self._contracts:
             self._contracts[name] = OperationContract(name=name)
 
     def register_contract(self, contract: OperationContract) -> None:
+        assert_tool_phase_allows_effects(contract.tool_phase, contract.external_effects)
         self._contracts[contract.name] = contract
 
     def supports(self, name: str) -> bool:

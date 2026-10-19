@@ -1,25 +1,38 @@
 {
-  "requirement_id": "MH-SR-02",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/graph_templates/base.py",
-    "mechaharness/recipe_runner.py"
-  ],
-  "probes": [
+  "scenarios": [
     {
-      "kind": "module_symbols",
-      "name": "registry",
-      "module": "mechaharness.graph_templates.base",
-      "has": [
-        "GraphTemplateRegistry"
+      "id": "pure_tiling",
+      "tiles": [
+        {
+          "recipe": "verify_repair",
+          "key": "a"
+        },
+        {
+          "recipe": "independent_review",
+          "key": "b"
+        }
       ]
     },
     {
-      "kind": "module_symbols",
-      "name": "constraint",
-      "module": "mechaharness",
-      "missing": [
-        "require_registry_only_compose"
+      "id": "free_form",
+      "tiles": [
+        {
+          "recipe": "verify_repair",
+          "key": "a"
+        }
+      ],
+      "free_form_nodes": [
+        "adhoc_shell"
+      ]
+    },
+    {
+      "id": "forged_version",
+      "tiles": [
+        {
+          "recipe": "verify_repair",
+          "key": "a",
+          "forge_version": "99"
+        }
       ]
     }
   ]

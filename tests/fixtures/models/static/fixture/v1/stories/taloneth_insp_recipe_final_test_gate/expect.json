@@ -1,11 +1,16 @@
 {
-  "requirement_id": "MH-SR-07",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0,
-  "held_has_held_out": true,
-  "held_held_out_value": true,
-  "held_has_final_test_gate": false
+  "lab": {
+    "missing": "refused",
+    "not_held_out": "refused",
+    "held_out_failed": "refused",
+    "held_out_passed": "promoted"
+  },
+  "registry": {
+    "missing": "refused",
+    "not_held_out": "refused",
+    "held_out_failed": "refused",
+    "held_out_passed": "promoted"
+  },
+  "registry_pointer_after_refusals": "1",
+  "unprotected_protocol_promotes": true
 }

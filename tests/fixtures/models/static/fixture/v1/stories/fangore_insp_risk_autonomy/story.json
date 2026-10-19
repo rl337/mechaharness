@@ -4,8 +4,8 @@
   "title": "Scale controls by action consequence class",
   "kind": "consequence_risk_scale",
   "narrative": "High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15[^insp-r15]. Contributes to personal-agent MH-PA-02; composed gate delta: `fangore_insp_authority_gate`[^insp-pa-02-risk].",
-  "implementation": "`ConsequencePolicy` classifies actions and tracks approval prompts versus decisions.",
-  "validation": "Kind `consequence_risk_scale`. Soft expects stronger controls and approval_frequency.",
+  "implementation": "`ConsequencePolicy` / `ActionConsequence` in `mechaharness.consequence` classify actions (`low`…`critical`), flag approval and exhaustive verification needs, and expose `approval_frequency` as a usability/safety metric. Grants in `AccessControl` remain the hard gate.",
+  "validation": "Kind `consequence_risk_scale`. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: `tests/test_inspiration_primitives.py`. Related grants: `fangore_insp_soft_vs_hard`.",
   "footnotes": [
     {
       "id": "insp-r15",

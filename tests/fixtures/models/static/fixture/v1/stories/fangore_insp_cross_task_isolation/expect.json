@@ -1,8 +1,10 @@
 {
-  "requirement_id": "MH-DOTS-07",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "bleed_by_intervening_count": {
+    "0": false,
+    "5": false,
+    "10": false
+  },
+  "receiver_reads_shared": true,
+  "receiver_reads_unshared": false,
+  "ghost_handoff_refused": true
 }

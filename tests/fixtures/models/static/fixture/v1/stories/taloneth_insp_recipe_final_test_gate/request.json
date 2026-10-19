@@ -1,16 +1,29 @@
 {
-  "requirement_id": "MH-SR-07",
-  "coverage": "partial",
-  "adjacent_modules": [
-    "mechaharness/evaluator.py",
-    "mechaharness/decision_log.py"
-  ],
-  "probes": [
+  "attempts": [
     {
-      "kind": "evaluator_held_out",
-      "name": "held",
-      "expect_held_out_field": true,
-      "expect_final_test_gate": false
+      "id": "missing",
+      "final_test": null
+    },
+    {
+      "id": "not_held_out",
+      "final_test": {
+        "held_out": false,
+        "passed": true
+      }
+    },
+    {
+      "id": "held_out_failed",
+      "final_test": {
+        "held_out": true,
+        "passed": false
+      }
+    },
+    {
+      "id": "held_out_passed",
+      "final_test": {
+        "held_out": true,
+        "passed": true
+      }
     }
   ]
 }

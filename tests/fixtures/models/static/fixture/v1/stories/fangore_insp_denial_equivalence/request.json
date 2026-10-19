@@ -1,19 +1,27 @@
 {
-  "requirement_id": "MH-DOTS-05",
-  "coverage": "gap",
-  "adjacent_modules": [
-    "mechaharness/core/access.py",
-    "mechaharness/judgement_policy.py"
-  ],
-  "probes": [
+  "denied": {
+    "effect_class": "email.send",
+    "target": "bob@example.com",
+    "tool_name": "smtp.send"
+  },
+  "retries": [
     {
-      "kind": "module_symbols",
-      "name": "denial",
-      "module": "mechaharness",
-      "missing": [
-        "DenialStore",
-        "EquivalentActionMatcher"
-      ]
+      "id": "second_provider",
+      "effect_class": "email.send",
+      "target": "bob@example.com",
+      "tool_name": "sendgrid.send"
+    },
+    {
+      "id": "graph_tool",
+      "effect_class": "email.send",
+      "target": "bob@example.com",
+      "tool_name": "graph.send"
+    },
+    {
+      "id": "other_recipient",
+      "effect_class": "email.send",
+      "target": "amy@example.com",
+      "tool_name": "smtp.send"
     }
   ]
 }

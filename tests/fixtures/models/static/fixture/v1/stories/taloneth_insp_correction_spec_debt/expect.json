@@ -1,8 +1,19 @@
 {
-  "requirement_id": "MH-PA-07",
-  "coverage": "partial",
-  "adjacent_ok": true,
-  "missing_count": 0,
-  "probes_ok": true,
-  "probe_failure_count": 0
+  "captured": {
+    "status": "open",
+    "review_required": true,
+    "promotion_record_id": "promo:42",
+    "failing_scenario_refs": [
+      "scenario:reply-thread",
+      "scenario:cc-list"
+    ],
+    "generated_test_ref": null
+  },
+  "pending_at_capture": 1,
+  "status_after_test": "test_linked",
+  "pending_after_test": 1,
+  "status_after_review": "closed",
+  "pending_after_review": 0,
+  "linked_to_promotion": true,
+  "blank_refused": true
 }

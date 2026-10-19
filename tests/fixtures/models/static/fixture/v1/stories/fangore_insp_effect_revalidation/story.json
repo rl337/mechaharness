@@ -2,10 +2,10 @@
   "id": "fangore_insp_effect_revalidation",
   "persona": "fangore",
   "title": "Revalidate authority at side-effect dispatch after pause or revocation",
-  "kind": "inspiration_delta_contract",
-  "narrative": "Authority must be rechecked when a consequential action actually runs — not only at graph start, approval capture, or checkpoint creation. A paused graph resumed after revocation must not publish. Related: `fangore_insp_wake_reresolve`, `fangore_human_review_pending`. Tracks MH-DOTS-02[^insp-dots-02].",
-  "implementation": "Linkage/fingerprint re-resolve and approval digests exist. Desired: mandatory pre-effect revalidation protocol for consequential tools.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-02, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
+  "kind": "effect_revalidation_check",
+  "narrative": "Authority is rechecked when a consequential action actually runs \u2014 not only at graph start, approval capture, or checkpoint creation. A paused graph resumed after revocation must not publish. Related: `fangore_insp_wake_reresolve`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`. Tracks MH-DOTS-02[^insp-dots-02].",
+  "implementation": "`revalidate_before_effect` rechecks envelope expiry, the live authorization epoch, envelope grants, and access control. `GraphExecutor` calls it before every node whose `tool_phase` payload is `execute` (the default); observe/prepare nodes skip it. Hosts feed the live epoch through `executor.live_authorization_epoch`. A failed recheck fails the node as `revalidation_failed:<reason>` without invoking the runner.",
+  "validation": "Kind `effect_revalidation_check`. Hard expects fresh authority to pass, expired/advanced-epoch/missing-grant checks to fail with typed reasons, and a graph with a revoked epoch to fail without running the publish effect.",
   "footnotes": [
     {
       "id": "insp-dots-02",
