@@ -41,6 +41,18 @@ from mechaharness.cli_diagnostic_verbs import (
     run_route_capabilities,
     run_shadow_decision_backends,
 )
+from mechaharness.cli_graph_verbs import (
+    BoundedRepairLoopCommand,
+    GraphEventCorrelatorsCommand,
+    GraphExecutorRunCommand,
+    TopologyEfficiencyCommand,
+    ValidatorQualificationCommand,
+    run_bounded_repair_loop,
+    run_graph_event_correlators,
+    run_graph_executor_run,
+    run_topology_efficiency,
+    run_validator_qualification,
+)
 from mechaharness.cli_infer_runner import CliInferRunner
 from mechaharness.cli_universe import CLI_INFER_NODE_ID, build_cli_universe_graph
 from mechaharness.config import Settings
@@ -173,6 +185,11 @@ class CliCommand(BaseModel):
     check_inference_capture: CheckInferenceCaptureCommand | None = None
     host_kit_submit_once: HostKitSubmitOnceCommand | None = None
     judge_route: JudgeRouteCommand | None = None
+    topology_efficiency: TopologyEfficiencyCommand | None = None
+    validator_qualification: ValidatorQualificationCommand | None = None
+    bounded_repair_loop: BoundedRepairLoopCommand | None = None
+    graph_executor_run: GraphExecutorRunCommand | None = None
+    graph_event_correlators: GraphEventCorrelatorsCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
 
@@ -191,6 +208,11 @@ class CliCommand(BaseModel):
             ("check_inference_capture", self.check_inference_capture),
             ("host_kit_submit_once", self.host_kit_submit_once),
             ("judge_route", self.judge_route),
+            ("topology_efficiency", self.topology_efficiency),
+            ("validator_qualification", self.validator_qualification),
+            ("bounded_repair_loop", self.bounded_repair_loop),
+            ("graph_executor_run", self.graph_executor_run),
+            ("graph_event_correlators", self.graph_event_correlators),
             ("set_clock", self.set_clock),
             ("advance_clock", self.advance_clock),
         ]
@@ -216,6 +238,11 @@ class CliCommand(BaseModel):
             "check_inference_capture",
             "host_kit_submit_once",
             "judge_route",
+            "topology_efficiency",
+            "validator_qualification",
+            "bounded_repair_loop",
+            "graph_executor_run",
+            "graph_event_correlators",
             "set_clock",
             "advance_clock",
         ):
@@ -562,6 +589,33 @@ class CliInstrumentor:
                 probe=await run_judge_route(
                     command.judge_route,
                     provider=self._judge_provider,
+                ),
+            )
+        if command.topology_efficiency is not None:
+            return CliStepResult(
+                verb="topology_efficiency",
+                probe=run_topology_efficiency(command.topology_efficiency),
+            )
+        if command.validator_qualification is not None:
+            return CliStepResult(
+                verb="validator_qualification",
+                probe=run_validator_qualification(command.validator_qualification),
+            )
+        if command.bounded_repair_loop is not None:
+            return CliStepResult(
+                verb="bounded_repair_loop",
+                probe=run_bounded_repair_loop(command.bounded_repair_loop),
+            )
+        if command.graph_executor_run is not None:
+            return CliStepResult(
+                verb="graph_executor_run",
+                probe=await run_graph_executor_run(command.graph_executor_run),
+            )
+        if command.graph_event_correlators is not None:
+            return CliStepResult(
+                verb="graph_event_correlators",
+                probe=await run_graph_event_correlators(
+                    command.graph_event_correlators
                 ),
             )
         assert command.infer is not None

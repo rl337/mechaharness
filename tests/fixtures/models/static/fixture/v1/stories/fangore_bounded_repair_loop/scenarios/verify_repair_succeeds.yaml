@@ -1,0 +1,10 @@
+# Bounded verify→repair→retry reaches succeeded
+kind: cli
+
+commands:
+  - bounded_repair_loop:
+      max_attempts: 3
+      repaired_path: /tmp/story.png
+
+expect:
+  final_status: succeeded

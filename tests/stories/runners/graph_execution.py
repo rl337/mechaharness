@@ -9,7 +9,6 @@ from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
 from mechaharness.core.access import (
     AccessPolicy,
-    GraphEscalate,
     GraphExecute,
     InMemoryAccessControl,
 )
@@ -18,10 +17,6 @@ from mechaharness.core.environment import (
     NoOpInferenceEnvironment,
 )
 from mechaharness.core.events import InMemoryEventLog
-from mechaharness.decision_log import (
-    TopologySpan,
-    compute_topology_metrics,
-)
 from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.failure_attribution import (
     attribute_with_repair_target,
@@ -34,15 +29,11 @@ from mechaharness.graph import (
     GraphNode,
     GraphStore,
     NodeStatus,
-    bounded_repair,
     hierarchical_fan_in,
     merge_branch_artifacts,
-    qualify_validator,
-    validator_qualified,
 )
 from mechaharness.graph_executor import (
     CallableGraphNodeRunner,
-    GraphEscalation,
     GraphExecutor,
     GraphNodeRunnerRegistry,
     GraphRunContext,
@@ -52,7 +43,7 @@ from mechaharness.graph_templates import (
     SubgraphNodeRunner,
 )
 from mechaharness.graph_transition import GraphTransition, TransitionContract, inspect_transitions
-from mechaharness.harness.base import AbstractHarness, HarnessConfig
+from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.linkage_resolver import DefaultLinkageResolver
@@ -63,7 +54,6 @@ from mechaharness.operation_registry import (
     default_operations,
 )
 from mechaharness.rollout_graph import build_rollout_graph
-from mechaharness.tools.base import ToolRegistry
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
 from tests.stories.runners._support import StoryRunner, _assert_expect, _story_graph_executor
@@ -168,203 +158,6 @@ async def _run_local_plan_resume(case: StoryCase, backend: StoryBackend) -> None
         "merge_conflicts_include": merged["conflicts"],
         "recovery_boundary_in": store.latest_boundary(run_id="story-graph"),
     }
-    _assert_expect(actual, expect)
-
-
-async def _run_graph_executor_run(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-
-    attempts: list[int] = []
-
-    async def produce(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
-        del context
-        return NodeOutcome(
-            status=NodeStatus.SUCCEEDED,
-            payload={"value": request.get("produce_value", 1)},
-            evidence={"node": node.id},
-        )
-
-    async def flaky(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
-        del context
-        attempts.append(node.attempt)
-        if len(attempts) < int(request.get("fail_until_attempt", 2)):
-            return NodeOutcome(status=NodeStatus.FAILED, error="transient")
-        return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"recovered": True})
-
-    async def consume(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
-        del node
-        parent = context.graph.nodes["produce"]
-        return NodeOutcome(
-            status=NodeStatus.SUCCEEDED,
-            payload={"sum": int(parent.payload.get("value", 0)) + 1},
-        )
-
-    class _Heal(GraphEscalation):
-        async def handle(self, node: GraphNode, *, context: GraphRunContext) -> NodeOutcome:
-            del context
-            return NodeOutcome(
-                status=NodeStatus.SUCCEEDED,
-                payload={**node.payload, "escalated": True},
-            )
-
-    registry = GraphNodeRunnerRegistry(
-        [
-            CallableGraphNodeRunner(["produce"], produce),
-            CallableGraphNodeRunner(["flaky"], flaky),
-            CallableGraphNodeRunner(["consume"], consume),
-        ]
-    )
-
-    class StoryGraphConfig(MechaHarnessConfig):
-        def get_inference_class(self) -> type[InferenceStrategy]:
-            from mechaharness.inference.mock import MockInferenceStrategy
-
-            return MockInferenceStrategy
-
-        def get_harness_class(self) -> type[AbstractHarness]:
-            return PassThroughHarness
-
-        def get_harness_config(self) -> HarnessConfig:
-            return HarnessConfig(model="story", max_turns=1)
-
-        def get_tools(self) -> ToolRegistry:
-            return ToolRegistry()
-
-        def get_grants(self) -> list[object]:
-            return list(request.get("grants", [GraphExecute, GraphEscalate]))
-
-        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
-            return registry
-
-        def get_graph_escalation(self) -> GraphEscalation:
-            return _Heal()
-
-    executor = get_injector(StoryGraphConfig()).inject(GraphExecutor)
-    graph = ExecutionGraph(goal=request.get("goal", "local pipe"))
-    graph.add_node(GraphNode(id="produce", kind="produce"))
-    graph.add_node(
-        GraphNode(
-            id="flaky",
-            kind="flaky",
-            depends_on=["produce"],
-            max_attempts=int(request.get("max_attempts", 2)),
-        )
-    )
-    graph.add_node(GraphNode(id="consume", kind="consume", depends_on=["flaky"]))
-    graph.add_dependency(
-        DependencyEdge(
-            from_node="produce",
-            to_node="flaky",
-            types=["data"],
-            reason="flaky needs produce",
-        )
-    )
-    graph.add_dependency(
-        DependencyEdge(
-            from_node="flaky",
-            to_node="consume",
-            types=["control"],
-            reason="consume after repair",
-        )
-    )
-
-    denied = None
-    if request.get("check_deny", True):
-        class DenyConfig(StoryGraphConfig):
-            def get_grants(self) -> list[object]:
-                return []
-
-        denied_exec = get_injector(DenyConfig()).inject(GraphExecutor)
-        denied = await denied_exec.run(
-            graph.model_copy(deep=True),
-            budget_policy=BudgetPolicy.unlimited(),
-            run_id="story-deny",
-        )
-
-    result = await executor.run(
-        graph, budget_policy=BudgetPolicy.unlimited(), run_id="story-graph-exec"
-    )
-    types = [e.type for e in result.events]
-    actual = {
-        "status": result.status,
-        "consume_sum": result.graph.nodes["consume"].payload.get("sum"),
-        "emitted_graph_start": "core:graph_start" in types,
-        "emitted_graph_end": "core:graph_end" in types,
-        "denied_without_execute_grant": denied is not None and denied.status == "denied",
-        "flaky_attempts": len(attempts),
-    }
-    _assert_expect(actual, expect)
-
-
-async def _run_topology_efficiency(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-    spans = [TopologySpan(**s) for s in request["spans"]]
-    metrics = compute_topology_metrics(
-        spans,
-        graph_version=request.get("graph_version", "1"),
-        worker_count=request.get("worker_count"),
-    )
-    actual = {
-        "min_total_node_work_ms": metrics.total_node_work_ms,
-        "min_elapsed_ms": metrics.elapsed_ms,
-        "work_exceeds_elapsed": metrics.total_node_work_ms > metrics.elapsed_ms,
-        "notes_include": metrics.notes,
-    }
-    _assert_expect(actual, expect)
-
-
-async def _run_validator_qualification(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-
-    def honest(item: str) -> str:
-        if item == "missing":
-            return "unknown"
-        return "pass" if item.startswith("ok") else "fail"
-
-    def always_pass(_item: str) -> str:
-        return "pass"
-
-    good = qualify_validator(
-        name="honest",
-        verifier=honest,
-        good_fixtures=request.get("good_fixtures", ["ok1"]),
-        bad_fixtures=request.get("bad_fixtures", ["bad1"]),
-        missing_fixtures=request.get("missing_fixtures", ["missing"]),
-    )
-    weak = qualify_validator(
-        name="weak",
-        verifier=always_pass,
-        good_fixtures=["ok"],
-        bad_fixtures=["bad"],
-    )
-    actual = {
-        "honest_qualified": validator_qualified(good),
-        "weak_qualified": validator_qualified(weak),
-    }
-    _assert_expect(actual, expect)
-
-
-async def _run_bounded_repair_loop(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    expect = case.load_json("expect.json")
-
-    def has_file(node: GraphNode) -> tuple[bool, dict[str, Any]]:
-        ok = bool(node.payload.get("path"))
-        return ok, {"file": node.payload.get("path")}
-
-    node = GraphNode(id="repair-story", payload={}, max_attempts=3)
-    repaired = bounded_repair(
-        node,
-        verifiers=[has_file],
-        repair=lambda n: n.model_copy(update={"payload": {"path": "/tmp/story.png"}}),
-    )
-    actual = {"final_status_in": repaired.status.value}
     _assert_expect(actual, expect)
 
 
@@ -529,7 +322,6 @@ async def _run_environment_linkage_fail(case: StoryCase, backend: StoryBackend) 
         event_log=InMemoryEventLog(),
         policy=AccessPolicy(grants=[GraphExecute]),
     )
-    from mechaharness.capability_envelope import CapabilityEnvelope
 
     resolver = DefaultLinkageResolver(
         runners=registry,
@@ -835,94 +627,11 @@ async def _run_decision_conflict_neighbor_revisit(
 
 
 
-async def _run_graph_event_correlators(case: StoryCase, backend: StoryBackend) -> None:
-    """Graph-run events carry warehouse correlators on every row (OBS-A01..A06)."""
-    del backend
-    from mechaharness.event_correlators import project_node_attempt_rows
-
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
-
-    async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
-        del node, context
-        return NodeOutcome(status=NodeStatus.SUCCEEDED)
-
-    executor = _story_graph_executor(
-        GraphNodeRunnerRegistry([CallableGraphNodeRunner(["compute"], ok)])
-    )
-    child = ExecutionGraph(id="child-graph", goal="nested work")
-    child.add_node(GraphNode(id="inner", kind="compute"))
-    graph = ExecutionGraph(id=str(request["graph_id"]), goal=str(request["goal"]))
-    graph.template_name = request["recipe_id"]
-    graph.template_version = request["recipe_version"]
-    previous: str | None = None
-    for node_id in request["nodes"]:
-        graph.add_node(GraphNode(id=node_id, kind="compute"))
-        if previous is not None:
-            graph.add_dependency(
-                DependencyEdge(
-                    from_node=previous, to_node=node_id, types=["data"], reason="story order"
-                )
-            )
-        previous = node_id
-    graph.add_node(
-        GraphNode(id="nest", kind="subgraph", subgraph=child.model_dump(mode="json"))
-    )
-    graph.add_dependency(
-        DependencyEdge(
-            from_node=previous or "", to_node="nest", types=["data"], reason="story order"
-        )
-    )
-    result = await executor.run(
-        graph,
-        budget_policy=BudgetPolicy.unlimited(),
-        run_id="corr-run",
-        envelope=CapabilityEnvelope(
-            grants=["core:graph.execute"],
-            authorization_epoch=int(request["authorization_epoch"]),
-        ),
-    )
-    lifecycle = {
-        "core:graph_start",
-        "core:graph_end",
-        "core:graph_node_start",
-        "core:graph_node_end",
-    }
-    parent_events = [e for e in executor.event_log.query(run_id="corr-run") if e.type in lifecycle]
-    child_events = [
-        e for e in executor.event_log.query(run_id="corr-run:nest") if e.type in lifecycle
-    ]
-    node_events = [e for e in parent_events if e.type.startswith("core:graph_node_")]
-    rows = project_node_attempt_rows(parent_events)
-    recipe_stamps = {
-        (e.payload.get("recipe_id"), e.payload.get("recipe_version")) for e in parent_events
-    }
-    actual = {
-        "status": result.status,
-        "graph_events_have_graph_id": all(
-            e.payload.get("graph_id") == request["graph_id"] for e in parent_events
-        ),
-        "node_events_have_node_id": bool(node_events)
-        and all(isinstance(e.payload.get("node_id"), str) for e in node_events),
-        "recipe": [list(pair) for pair in sorted(recipe_stamps)],
-        "epochs": sorted({e.payload.get("authorization_epoch") for e in parent_events}),
-        "child_parent_run_ids": sorted({e.payload.get("parent_run_id") for e in child_events}),
-        "child_nest_depths": sorted({e.payload.get("nest_depth") for e in child_events}),
-        "node_attempt_rows": [[r.node_id, r.attempt, r.status] for r in rows],
-    }
-    _assert_expect(actual, expect)
-
-
 RUNNERS: dict[str, StoryRunner] = {
     "convergence_ceiling": _run_convergence_ceiling,
     "local_plan_resume": _run_local_plan_resume,
-    "graph_executor_run": _run_graph_executor_run,
-    "topology_efficiency": _run_topology_efficiency,
-    "validator_qualification": _run_validator_qualification,
-    "bounded_repair_loop": _run_bounded_repair_loop,
     "graph_linkage_preflight": _run_graph_linkage_preflight,
     "dynamic_subgraph_nest": _run_dynamic_subgraph_nest,
-    "graph_event_correlators": _run_graph_event_correlators,
     "checkpoint_fingerprint_refuse": _run_checkpoint_fingerprint_refuse,
     "environment_linkage_fail": _run_environment_linkage_fail,
     "wake_reresolve_resume": _run_wake_reresolve_resume,

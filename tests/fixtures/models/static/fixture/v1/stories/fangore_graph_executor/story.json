@@ -2,10 +2,10 @@
   "id": "fangore_graph_executor",
   "persona": "fangore",
   "title": "Run a local plan through an authorized graph executor",
-  "kind": "graph_execution",
+  "kind": "cli",
   "narrative": "Fangore ships a host app with a produce \u2192 repair \u2192 consume plan. After linkage succeeds, the library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; preflight failures are covered by `fangore_graph_linkage_preflight`. See inspiration requirements for authorized graph execution[^insp-executor].",
-  "implementation": "`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node events, checkpoints through `GraphStore` (with config fingerprint), and enforces per-runner grants.",
-  "validation": "Harness `graph_execution` op `graph_executor_run` \u2192 `_run_graph_executor_run`. Soft expects: denied without execute grant; ok status with consume sum; graph_start/graph_end present; flaky attempts before escalation. Static matrix: `tests/fixtures/graph_executor/*.json` via `tests/test_graph_executor.py`. Related: `fangore_graph_linkage_preflight`.",
+  "implementation": "`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node events. `CliInstrumentor` verb `graph_executor_run` exercises the path.",
+  "validation": "Harness `cli` scenario `authorized_local_pipe.yaml`: hard status/consume/deny/attempts/telemetry.",
   "footnotes": [
     {
       "id": "loop-vs-graph-executor",

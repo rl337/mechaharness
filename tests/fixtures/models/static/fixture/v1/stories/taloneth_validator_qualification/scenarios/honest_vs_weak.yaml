@@ -1,0 +1,12 @@
+# Honest verifier qualifies; always-pass does not
+kind: cli
+
+commands:
+  - validator_qualification:
+      good_fixtures: [ok1]
+      bad_fixtures: [bad1]
+      missing_fixtures: [missing]
+
+expect:
+  honest_qualified: true
+  weak_qualified: false
