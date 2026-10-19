@@ -90,7 +90,7 @@ from __future__ import annotations
 import inspect
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import Any, Union, cast
+from typing import TYPE_CHECKING, Any, Union, cast
 
 from pyiv.injector import Injector
 from pyiv.time import DateTimeService
@@ -98,6 +98,9 @@ from pyiv.time import DateTimeService
 from mechaharness.authority_gate import AuthorityGate
 from mechaharness.checkpoint_store import CheckpointStore
 from mechaharness.consequence import ConsequencePolicy
+
+if TYPE_CHECKING:
+    from mechaharness.durable_graph_generator import DurableGraphGenerator
 from mechaharness.core.access import AccessControl, GraphEscalate, GraphExecute
 from mechaharness.core.events import EventLog, InMemoryEventLog
 from mechaharness.denial_store import DenialStore
@@ -485,7 +488,7 @@ def host_durable_graph_generator(
     checkpoint_path: str | Path | None = None,
     event_log: EventLog | None = None,
     controller_id_default: str = "host",
-) -> Any:
+) -> DurableGraphGenerator:
     """Build a :class:`~mechaharness.durable_graph_generator.DurableGraphGenerator`.
 
     Blessed host path for the long-run driven-execution façade (default recipe
