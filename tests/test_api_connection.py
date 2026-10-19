@@ -2,80 +2,136 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import pytest
 from pyiv.process import MemoryEnvironment
 
 from mechaharness.api_connection import SimpleHttpConnectionConfig
 
 
-def test_simple_http_joins_base_and_path() -> None:
-    conn = SimpleHttpConnectionConfig(
-        base_url="http://localhost:8009",
-        path="/v1/systemone",
+@dataclass(frozen=True)
+class _EndpointCase:
+    id: str
+    kwargs: dict
+    endpoint: str
+    model: str | None = None
+
+
+_ENDPOINT_CASES = [
+    _EndpointCase(
+        "joins_base_and_path",
+        {"base_url": "http://localhost:8009", "path": "/v1/systemone", "model": "laya"},
+        "http://localhost:8009/v1/systemone",
         model="laya",
-    )
-    assert conn.endpoint_url() == "http://localhost:8009/v1/systemone"
-    assert conn.model_id() == "laya"
+    ),
+    _EndpointCase(
+        "full_url_override",
+        {"base_url": "http://ignored:9", "url": "https://api.example.com/v2/judge"},
+        "https://api.example.com/v2/judge",
+    ),
+    _EndpointCase(
+        "custom_path_strips_slashes",
+        {"base_url": "http://localhost:8009/", "path": "v1/custom"},
+        "http://localhost:8009/v1/custom",
+    ),
+]
 
 
-def test_full_url_override() -> None:
-    conn = SimpleHttpConnectionConfig(
-        base_url="http://ignored:9",
-        url="https://api.example.com/v2/judge",
-    )
-    assert conn.endpoint_url() == "https://api.example.com/v2/judge"
+@pytest.mark.parametrize("case", _ENDPOINT_CASES, ids=lambda c: c.id)
+def test_endpoint_url_from_fields(case: _EndpointCase) -> None:
+    conn = SimpleHttpConnectionConfig(**case.kwargs)
+    assert conn.endpoint_url() == case.endpoint
+    if case.model is not None:
+        assert conn.model_id() == case.model
 
 
-def test_custom_path() -> None:
-    conn = SimpleHttpConnectionConfig(
-        base_url="http://localhost:8009/",
-        path="v1/custom",
-    )
-    assert conn.endpoint_url() == "http://localhost:8009/v1/custom"
+@dataclass(frozen=True)
+class _EnvCase:
+    id: str
+    env: dict[str, str]
+    factory: str  # "from_env" | "for_judge"
+    overrides: dict
+    endpoint: str
+    model: str
+    auth_bearer: str | None = None
 
 
-def test_from_env_judge() -> None:
-    env = MemoryEnvironment(
+_ENV_CASES = [
+    _EnvCase(
+        "from_env_judge",
         {
             "MECHA_JUDGE_BASE_URL": "http://j:8009",
             "MECHA_JUDGE_PATH": "/v1/systemone",
             "MECHA_JUDGE_MODEL": "laya",
             "MECHA_JUDGE_API_KEY": "secret",
-        }
-    )
-    conn = SimpleHttpConnectionConfig.from_env(env=env)
-    assert conn.endpoint_url() == "http://j:8009/v1/systemone"
-    assert conn.headers()["Authorization"] == "Bearer secret"
-    assert conn.model_id() == "laya"
-
-
-def test_from_env_legacy_decide_aliases() -> None:
-    env = MemoryEnvironment(
+        },
+        "from_env",
+        {},
+        "http://j:8009/v1/systemone",
+        "laya",
+        auth_bearer="secret",
+    ),
+    _EnvCase(
+        "for_judge_legacy_decide_aliases",
         {
             "MECHA_DECIDE_BASE_URL": "http://legacy:8009",
             "MECHA_DECIDE_MODEL": "kev",
-        }
-    )
-    conn = SimpleHttpConnectionConfig.for_judge(env=env)
-    assert conn.endpoint_url() == "http://legacy:8009/v1/systemone"
-    assert conn.model_id() == "kev"
+        },
+        "for_judge",
+        {},
+        "http://legacy:8009/v1/systemone",
+        "kev",
+    ),
+    _EnvCase(
+        "for_judge_overrides_env",
+        {"MECHA_JUDGE_BASE_URL": "http://env:8009"},
+        "for_judge",
+        {"base_url": "http://override:9", "model": "x"},
+        "http://override:9/v1/systemone",
+        "x",
+    ),
+]
 
 
-def test_for_judge_overrides_env() -> None:
-    env = MemoryEnvironment({"MECHA_JUDGE_BASE_URL": "http://env:8009"})
-    conn = SimpleHttpConnectionConfig.for_judge(
-        env=env, base_url="http://override:9", model="x"
-    )
-    assert conn.endpoint_url() == "http://override:9/v1/systemone"
-    assert conn.model_id() == "x"
+@pytest.mark.parametrize("case", _ENV_CASES, ids=lambda c: c.id)
+def test_env_and_for_judge_builders(case: _EnvCase) -> None:
+    env = MemoryEnvironment(case.env)
+    if case.factory == "from_env":
+        conn = SimpleHttpConnectionConfig.from_env(env=env, **case.overrides)
+    else:
+        conn = SimpleHttpConnectionConfig.for_judge(env=env, **case.overrides)
+    assert conn.endpoint_url() == case.endpoint
+    assert conn.model_id() == case.model
+    if case.auth_bearer is not None:
+        assert conn.headers()["Authorization"] == f"Bearer {case.auth_bearer}"
 
 
-def test_missing_base_raises() -> None:
-    conn = SimpleHttpConnectionConfig(base_url=None)
-    with pytest.raises(ValueError, match="MECHA_JUDGE_BASE_URL"):
-        conn.endpoint_url()
+@dataclass(frozen=True)
+class _ErrorCase:
+    id: str
+    call: object
+    exc: type[BaseException]
+    match: str
 
 
-def test_for_judge_requires_env() -> None:
-    with pytest.raises(TypeError, match="env"):
-        SimpleHttpConnectionConfig.for_judge()
+_ERROR_CASES = [
+    _ErrorCase(
+        "missing_base_raises",
+        lambda: SimpleHttpConnectionConfig(base_url=None).endpoint_url(),
+        ValueError,
+        "MECHA_JUDGE_BASE_URL",
+    ),
+    _ErrorCase(
+        "for_judge_requires_env",
+        lambda: SimpleHttpConnectionConfig.for_judge(),
+        TypeError,
+        "env",
+    ),
+]
+
+
+@pytest.mark.parametrize("case", _ERROR_CASES, ids=lambda c: c.id)
+def test_connection_errors(case: _ErrorCase) -> None:
+    with pytest.raises(case.exc, match=case.match):
+        case.call()  # type: ignore[operator]

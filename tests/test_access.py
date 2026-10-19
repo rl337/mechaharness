@@ -71,30 +71,55 @@ def add_tools() -> ToolRegistry:
     return registry
 
 
-def test_grant_key_from_class_and_string() -> None:
-    assert FsWrite.key() == "core:fs.write"
-    assert grant_key(FsWrite) == "core:fs.write"
-    assert grant_key("acme:unregistered") == "acme:unregistered"
-    with pytest.raises(KeyError, match="unknown grant"):
-        Grant.parse("acme:unregistered")
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (FsWrite, "core:fs.write"),
+        ("acme:unregistered", "acme:unregistered"),
+    ],
+    ids=["class", "namespaced_string"],
+)
+def test_grant_key_resolves(value: object, expected: str) -> None:
+    assert grant_key(value) == expected  # type: ignore[arg-type]
+    if value is FsWrite:
+        assert FsWrite.key() == expected
 
 
-def test_bare_grant_is_rejected() -> None:
-    with pytest.raises(ValueError, match="namespace:name"):
-        grant_key("fs.write")
+@pytest.mark.parametrize(
+    ("call", "exc", "match"),
+    [
+        (lambda: grant_key("fs.write"), ValueError, "namespace:name"),
+        (lambda: Grant.parse("acme:unregistered"), KeyError, "unknown grant"),
+    ],
+    ids=["bare_string", "unknown_parse"],
+)
+def test_grant_key_errors(call, exc: type[BaseException], match: str) -> None:
+    with pytest.raises(exc, match=match):
+        call()
 
 
-def test_access_policy_is_deny_by_default() -> None:
-    policy = AccessPolicy()
-    assert policy.allows([])
-    assert not policy.allows([FsWrite])
-
-
-def test_access_policy_requires_all_grants() -> None:
-    policy = AccessPolicy(grants=[FsWrite, WidgetGrant])
-    assert policy.allows([FsWrite])
-    assert policy.allows(["acme:widget"])
-    assert not policy.allows([FsWrite, "core:fs.read"])
+@pytest.mark.parametrize(
+    ("grants", "required", "allowed"),
+    [
+        ([], [], True),
+        ([], [FsWrite], False),
+        ([FsWrite, WidgetGrant], [FsWrite], True),
+        ([FsWrite, WidgetGrant], ["acme:widget"], True),
+        ([FsWrite, WidgetGrant], [FsWrite, "core:fs.read"], False),
+    ],
+    ids=[
+        "empty_policy_empty_required",
+        "deny_by_default",
+        "subset_of_grants",
+        "string_host_grant",
+        "missing_required_grant",
+    ],
+)
+def test_access_policy_allows(
+    grants: list[object], required: list[object], allowed: bool
+) -> None:
+    policy = AccessPolicy(grants=grants)
+    assert policy.allows(required) is allowed
 
 
 def test_compound_policy_unions_layers() -> None:
