@@ -4,5 +4,20 @@
   "adjacent_modules": [
     "mechaharness/graph_templates/base.py",
     "mechaharness/recipe_runner.py"
+  ],
+  "probes": [
+    {
+      "kind": "type_attrs",
+      "name": "template",
+      "target": "mechaharness.graph_templates.base:GraphTemplate",
+      "has": [
+        "version",
+        "status"
+      ],
+      "missing": [
+        "promotion_pointer",
+        "lineage"
+      ]
+    }
   ]
 }

@@ -2,5 +2,8 @@
   "requirement_id": "MH-PA-03",
   "coverage": "partial",
   "adjacent_ok": true,
-  "missing_count": 0
+  "missing_count": 0,
+  "probes_ok": true,
+  "probe_failure_count": 0,
+  "recipes_catalog_size": 10
 }

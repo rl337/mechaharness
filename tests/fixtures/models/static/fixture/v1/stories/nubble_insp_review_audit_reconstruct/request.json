@@ -6,5 +6,23 @@
     "mechaharness/trace_envelope.py",
     "mechaharness/trace_reconciliation.py",
     "mechaharness/model_input_manifest.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "trace",
+      "module": "mechaharness.trace_envelope",
+      "has": [
+        "TraceEnvelope"
+      ]
+    },
+    {
+      "kind": "module_symbols",
+      "name": "review_audit",
+      "module": "mechaharness",
+      "missing": [
+        "ReviewAuditRecord"
+      ]
+    }
   ]
 }

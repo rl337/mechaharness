@@ -6,5 +6,19 @@
     "mechaharness/graph_templates/verify_repair.py",
     "mechaharness/isolation_contract.py",
     "mechaharness/budget.py"
+  ],
+  "probes": [
+    {
+      "kind": "catalog_names",
+      "name": "recipes",
+      "has": [
+        "verify_repair",
+        "independent_review"
+      ],
+      "missing": [
+        "produce_critique_refine",
+        "council"
+      ]
+    }
   ]
 }

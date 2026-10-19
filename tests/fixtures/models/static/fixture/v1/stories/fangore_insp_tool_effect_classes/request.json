@@ -6,5 +6,22 @@
     "mechaharness/lifecycle_extension.py",
     "mechaharness/operation_registry.py",
     "mechaharness/tools/base.py"
+  ],
+  "probes": [
+    {
+      "kind": "effect_kind_values",
+      "name": "effects",
+      "has": [
+        "none",
+        "read",
+        "write",
+        "external"
+      ],
+      "missing": [
+        "observe",
+        "prepare",
+        "execute"
+      ]
+    }
   ]
 }

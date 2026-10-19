@@ -2,5 +2,14 @@
   "requirement_id": "MH-DOTS-03",
   "coverage": "gap",
   "adjacent_ok": true,
-  "missing_count": 0
+  "missing_count": 0,
+  "probes_ok": true,
+  "probe_failure_count": 0,
+  "effects_effect_kinds": [
+    "external",
+    "none",
+    "read",
+    "unknown",
+    "write"
+  ]
 }

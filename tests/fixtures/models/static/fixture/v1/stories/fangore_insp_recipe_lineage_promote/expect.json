@@ -2,5 +2,7 @@
   "requirement_id": "MH-SR-05",
   "coverage": "partial",
   "adjacent_ok": true,
-  "missing_count": 0
+  "missing_count": 0,
+  "probes_ok": true,
+  "probe_failure_count": 0
 }

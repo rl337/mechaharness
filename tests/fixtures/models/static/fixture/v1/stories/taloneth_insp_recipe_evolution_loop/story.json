@@ -4,8 +4,8 @@
   "title": "Evolve recipe candidates from traces under registry and safety gates",
   "kind": "inspiration_delta_contract",
   "narrative": "A candidate evolution loop collects immutable traces, proposes registry-bounded recipe configurations or compositions, validates connectivity and budgets, evaluates in isolation, selects by multi-objective policy, then promotes only after gates. Generic research loops exist (`taloneth_atk_research_reject`); recipe-from-traces does not. Tracks MH-SR-06[^insp-sr-06].",
-  "implementation": "ResearchLab, harness experiments, evaluator, ObjectivePolicy, decision-plane shadow. Desired: traces\u2192recipe-candidate proposer wired to registry validation and promotion.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-06, coverage partial, adjacent_ok true.",
+  "implementation": "ResearchLab, harness experiments, evaluator, ObjectivePolicy, decision-plane shadow. Desired: traces→recipe-candidate proposer wired to registry validation and promotion.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-06, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-sr-06",

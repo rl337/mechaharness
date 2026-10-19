@@ -4,8 +4,8 @@
   "title": "Checkpoint after conflict-free decisions without revisiting cleared cycles",
   "kind": "inspiration_delta_contract",
   "narrative": "Inspiration conflict resolution revisits neighbors of a recently locked node, tracks visited nodes to prevent cycles, and checkpoints when a decision has no remaining conflicts. Current product conflicts are write-scope/parallel merge (`fangore_transactional_durable_resume`, `fangore_decision_plane_policy`), not that neighbor-revisit algorithm. Tracks MH-SR-08[^insp-sr-08].",
-  "implementation": "concurrent_write_conflicts, fan-in merge, StopContract, CheckpointStore, decision-plane resolve. Desired (if adopted): neighbor-revisit CR with visited-set cycle prevention and post-clearance checkpoints \u2014 distinct from write-merge conflicts.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-08, coverage partial, adjacent_ok true.",
+  "implementation": "concurrent_write_conflicts, fan-in merge, StopContract, CheckpointStore, decision-plane resolve. Desired (if adopted): neighbor-revisit CR with visited-set cycle prevention and post-clearance checkpoints — distinct from write-merge conflicts.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-08, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-sr-08",

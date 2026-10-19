@@ -5,7 +5,7 @@
   "kind": "inspiration_delta_contract",
   "narrative": "Checkpoints must carry authorization epoch, pending reviews, idempotency keys, and an effect ledger so crash recovery does not duplicate external operations after revocation. Effect ledger and idempotent resume already ship in `fangore_transactional_durable_resume`. Tracks MH-DOTS-06[^insp-dots-06].",
   "implementation": "CheckpointStore, SqliteCheckpointStore effect rows, HostKit submit-once. Desired: auth-epoch / grant-revocation epoch persisted and checked on replay.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-06, coverage partial, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-06, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-dots-06",

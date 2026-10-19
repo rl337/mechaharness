@@ -5,5 +5,24 @@
     "mechaharness/decision_log.py",
     "mechaharness/trace_envelope.py",
     "mechaharness/recipe_runner.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "audit",
+      "module": "mechaharness.decision_log",
+      "has": [
+        "DecisionRecord"
+      ],
+      "missing": []
+    },
+    {
+      "kind": "module_symbols",
+      "name": "recipe_audit",
+      "module": "mechaharness",
+      "missing": [
+        "RecipeAuditReport"
+      ]
+    }
   ]
 }

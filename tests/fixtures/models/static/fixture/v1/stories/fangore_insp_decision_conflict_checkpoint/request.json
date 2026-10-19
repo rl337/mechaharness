@@ -5,5 +5,23 @@
     "mechaharness/graph.py",
     "mechaharness/checkpoint_store.py",
     "mechaharness/stop_contract.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "graph",
+      "module": "mechaharness.graph",
+      "has": [
+        "ExecutionGraph"
+      ]
+    },
+    {
+      "kind": "module_symbols",
+      "name": "cr",
+      "module": "mechaharness",
+      "missing": [
+        "neighbor_conflict_resolver"
+      ]
+    }
   ]
 }

@@ -5,7 +5,7 @@
   "kind": "inspiration_delta_contract",
   "narrative": "Production graphs should be composed from registered recipes (including nested recipes), not free-form node synthesis. Tiling and recipe-as-tool already help (`fangore_recipe_namespace_tile`, `fangore_recipe_as_tool`). Tracks MH-SR-02[^insp-sr-02].",
   "implementation": "GraphTemplateRegistry, tile/nest, embed_recipe_as_tool. Desired: hard production constraint that graphs are registry-recipe compositions only.",
-  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-02, coverage partial, adjacent_ok true.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-02, coverage partial, adjacent_ok, probes_ok with typed surface probes encoding the current product delta.",
   "footnotes": [
     {
       "id": "insp-sr-02",

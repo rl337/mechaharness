@@ -6,5 +6,24 @@
     "mechaharness/graph_executor.py",
     "mechaharness/approval_interrupt.py",
     "mechaharness/judgement_policy.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "approval",
+      "module": "mechaharness.approval_interrupt",
+      "has": [
+        "suspend_for_approval",
+        "resume_approval"
+      ]
+    },
+    {
+      "kind": "module_symbols",
+      "name": "revalidate",
+      "module": "mechaharness",
+      "missing": [
+        "revalidate_before_effect"
+      ]
+    }
   ]
 }

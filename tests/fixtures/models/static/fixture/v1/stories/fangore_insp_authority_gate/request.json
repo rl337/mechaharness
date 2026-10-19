@@ -7,5 +7,34 @@
     "mechaharness/consequence.py",
     "mechaharness/judgement_policy.py",
     "mechaharness/approval_interrupt.py"
+  ],
+  "probes": [
+    {
+      "kind": "module_symbols",
+      "name": "authority",
+      "module": "mechaharness",
+      "has": [],
+      "missing": [
+        "AuthorityGate"
+      ]
+    },
+    {
+      "kind": "module_symbols",
+      "name": "consequence",
+      "module": "mechaharness.consequence",
+      "has": [
+        "ConsequencePolicy"
+      ],
+      "missing": []
+    },
+    {
+      "kind": "module_symbols",
+      "name": "access",
+      "module": "mechaharness.core.access",
+      "has": [
+        "AccessPolicy"
+      ],
+      "missing": []
+    }
   ]
 }
