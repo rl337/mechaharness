@@ -1,4 +1,5 @@
 {
+  "op": "specification_debt",
   "correction": "Reply on the original thread, never a new one.",
   "failing_scenarios": [
     "scenario:reply-thread",

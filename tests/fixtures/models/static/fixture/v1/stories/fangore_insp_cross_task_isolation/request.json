@@ -1,4 +1,5 @@
 {
+  "op": "cross_task_isolation_bleed",
   "contract": {
     "input_context_refs": [
       "goal"

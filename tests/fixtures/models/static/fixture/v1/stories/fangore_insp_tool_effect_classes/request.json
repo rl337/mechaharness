@@ -1,4 +1,5 @@
 {
+  "op": "tool_phase_effect_guard",
   "contracts": [
     {
       "name": "peek",

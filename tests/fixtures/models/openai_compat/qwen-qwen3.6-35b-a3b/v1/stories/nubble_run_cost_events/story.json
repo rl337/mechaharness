@@ -2,9 +2,9 @@
   "id": "nubble_run_cost_events",
   "persona": "nubble",
   "title": "Record cost and inference events for every harness run",
-  "kind": "pass_through",
+  "kind": "harness_runs",
   "narrative": "Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units \u2014 the same signals he would forward to billing or a Grafana panel.",
   "implementation": "Harness runs emit structured `EventLog` records for inference and cost (`CostAccountant` / `core:cost`, `core:inference`). This is the baseline observability stream for every run \u2014 decisions, routing, and tools extend the same log rather than a separate ledger.\n\nCovers: OBS-01.",
-  "validation": "Kind `pass_through` \u2192 `_run_pass_through`. Soft expects: inference and cost events with non-zero units. Related: `tests/test_events.py`, `tests/test_pass_through.py`.",
+  "validation": "Harness `harness_runs` op `pass_through` \u2192 `_run_pass_through`. Soft expects: inference and cost events with non-zero units. Related: `tests/test_events.py`, `tests/test_pass_through.py`.",
   "footnotes": []
 }

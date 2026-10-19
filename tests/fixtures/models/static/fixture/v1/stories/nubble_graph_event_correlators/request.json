@@ -1,4 +1,5 @@
 {
+  "op": "graph_event_correlators",
   "graph_id": "corr-graph",
   "goal": "ship the report",
   "recipe_id": "verify_repair",

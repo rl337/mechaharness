@@ -2,10 +2,10 @@
   "id": "fangore_insp_handoff_record",
   "persona": "fangore",
   "title": "Capture why across session handoffs",
-  "kind": "handoff_record_fields",
+  "kind": "pure_api",
   "narrative": "Handoffs preserve goals, exclusions, completed/pending work, decisions, rationale, rejected alternatives, risks, evidence, an expected verdict, and next action \u2014 hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: goals, exclusions, evidence, risks, and verdict are first-class. Also the typed handoff seam for Dots MH-DOTS-07[^insp-dots-07-handoff] (`fangore_insp_cross_task_isolation`).",
   "implementation": "`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema (typed `goals`, `exclusions`, and `verdict` fields); storage remains host-owned. `CrossTaskIsolationGuard.share` consumes `evidence_refs` as the explicit sharing path.",
-  "validation": "Kind `handoff_record_fields`. Hard expects next_action, goals, exclusions, and verdict kind round-tripped as typed fields.",
+  "validation": "Harness `pure_api` op `handoff_record`. Hard expects next_action, goals, exclusions, and verdict kind round-tripped as typed fields.",
   "footnotes": [
     {
       "id": "wl-l05-handoff",

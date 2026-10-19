@@ -1,4 +1,5 @@
 {
+  "op": "decision_plane_model_policy",
   "decision_model": "flavor:local_decision",
   "questions": [
     {

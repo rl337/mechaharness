@@ -1,4 +1,5 @@
 {
+  "op": "alert_escalation_stages",
   "policy": {
     "repeated_at": 2,
     "persistent_at": 4,

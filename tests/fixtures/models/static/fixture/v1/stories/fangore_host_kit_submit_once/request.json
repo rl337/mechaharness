@@ -1,4 +1,5 @@
 {
+  "op": "host_kit_submit_once",
   "scenarios": [
     "dispatch_durable_ok",
     "resume_uncertain_with_handle"

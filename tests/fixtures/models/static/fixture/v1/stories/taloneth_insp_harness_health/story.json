@@ -2,10 +2,10 @@
   "id": "taloneth_insp_harness_health",
   "persona": "taloneth",
   "title": "Snapshot harness health for cleanup evidence",
-  "kind": "harness_health_cleanup",
+  "kind": "pure_api",
   "narrative": "Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance[^wl-l02-health][^wl-l12-health].",
   "implementation": "`HarnessHealthSnapshot` and `needs_cleanup` in `mechaharness.harness_health` provide the optional health schema.",
-  "validation": "Kind `harness_health_cleanup`. Soft expects needs_cleanup true.",
+  "validation": "Harness `pure_api` op `harness_health`. Soft expects needs_cleanup true.",
   "footnotes": [
     {
       "id": "wl-l02-health",

@@ -1,4 +1,5 @@
 {
+  "op": "registry_only_compose",
   "scenarios": [
     {
       "id": "pure_tiling",

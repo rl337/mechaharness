@@ -1,4 +1,5 @@
 {
+  "op": "graph_transition_inspect",
   "nodes": [
     "produce",
     "verify"

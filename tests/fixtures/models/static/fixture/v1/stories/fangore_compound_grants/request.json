@@ -1,4 +1,5 @@
 {
+  "op": "grant_gate_write",
   "prompt": "Write a.txt",
   "read_grants": [
     "core:fs.read"

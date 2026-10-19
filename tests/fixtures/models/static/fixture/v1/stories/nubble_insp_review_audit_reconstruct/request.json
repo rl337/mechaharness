@@ -1,4 +1,5 @@
 {
+  "op": "review_audit_reconstruct",
   "scenarios": [
     {
       "id": "fully_attested",

@@ -1,4 +1,5 @@
 {
+  "op": "environment_delta",
   "before": {
     "version": 1,
     "data": {

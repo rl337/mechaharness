@@ -2,10 +2,10 @@
   "id": "fangore_insp_graph_transitions",
   "persona": "fangore",
   "title": "Declare graph transitions separately from dependencies",
-  "kind": "graph_transition_inspect",
+  "kind": "graph_execution",
   "narrative": "Fangore needs success, rollback, and end paths declared as transitions \u2014 not inferred from dependency edges alone \u2014 so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-transitions][^wl-p08-transitions].",
   "implementation": "`TransitionContract` / `GraphTransition` in `mechaharness.graph_transition` declare success, predicate, retry, rollback, escalate, cancel, and end edges orthogonal to `DependencyEdge`. `inspect_transitions` lists possible next steps for a node.",
-  "validation": "Kind `graph_transition_inspect`. Soft expects validation empty and rollback/end kinds for the verify node.",
+  "validation": "Harness `graph_execution` op `graph_transition_inspect`. Soft expects validation empty and rollback/end kinds for the verify node.",
   "footnotes": [
     {
       "id": "wl-l14-transitions",

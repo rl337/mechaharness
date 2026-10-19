@@ -2,10 +2,10 @@
   "id": "nubble_insp_environment_delta",
   "persona": "nubble",
   "title": "Project environment context as versioned deltas",
-  "kind": "environment_delta_apply",
+  "kind": "pure_api",
   "narrative": "Nubble sends environment deltas instead of repeating full snapshots while still reconstructing deterministic state. Accepts WalkingLabs Codex guidance[^wl-codex-delta].",
   "implementation": "`EnvironmentSnapshot`, `EnvironmentDelta`, `emit_delta`, and `apply_deltas` in `mechaharness.environment_delta`.",
-  "validation": "Kind `environment_delta_apply`. Soft expects reconstructed cwd.",
+  "validation": "Harness `pure_api` op `environment_delta`. Soft expects reconstructed cwd.",
   "footnotes": [
     {
       "id": "wl-codex-delta",

@@ -1,4 +1,5 @@
 {
+  "op": "evaluation_outcome_filter",
   "trials": [
     {
       "trial_id": "1",

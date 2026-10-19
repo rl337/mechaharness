@@ -1,4 +1,5 @@
 {
+  "op": "evaluator_compose_run",
   "exists": true,
   "held_out": true
 }

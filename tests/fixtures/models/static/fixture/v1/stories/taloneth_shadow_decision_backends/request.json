@@ -1,7 +1,14 @@
 {
+  "op": "shadow_decision_backends",
   "state_hash": "story-h1",
-  "candidate_actions": ["allow", "ask_human", "deny"],
-  "evidence_refs": ["obs:12"],
+  "candidate_actions": [
+    "allow",
+    "ask_human",
+    "deny"
+  ],
+  "evidence_refs": [
+    "obs:12"
+  ],
   "backends": {
     "rules": {
       "available": true,

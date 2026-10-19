@@ -1,4 +1,5 @@
 {
+  "op": "decision_plane_shadow",
   "production_answers": {
     "team": "billing",
     "risk": 0.2

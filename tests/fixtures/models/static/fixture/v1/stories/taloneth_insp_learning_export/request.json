@@ -1,4 +1,5 @@
 {
+  "op": "learning_export_pack",
   "harness_fingerprint": "fp:1",
   "rollout_graph_ref": "rollout:1",
   "split": "train"

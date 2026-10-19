@@ -2,10 +2,10 @@
   "id": "fangore_insp_auth_epoch_resume",
   "persona": "fangore",
   "title": "Refuse resumed effects when the authorization epoch advanced",
-  "kind": "auth_epoch_resume_refuse",
+  "kind": "access_authority",
   "narrative": "Checkpoints carry the authorization epoch so crash recovery after revocation does not continue with stale authority. A resume under an envelope whose epoch differs from the checkpoint fails closed before any runner is invoked; pre-epoch checkpoints read as epoch 0. Effect ledger and idempotent resume ship in `fangore_transactional_durable_resume`. Tracks MH-DOTS-06[^insp-dots-06].",
   "implementation": "`ExecutionGraph.authorization_epoch` is stamped from the live `CapabilityEnvelope` at run time and persisted by every `CheckpointStore` (EventLog and SQLite) inside the graph checkpoint; `CheckpointStore.latest_authorization_epoch` reads it (0 when absent). `GraphExecutor.run(resume=True, envelope=...)` returns `failed` with `authorization_epoch_mismatch:<checkpoint>!=<live>` when they differ. Pending reviews and idempotency keys remain via `approval_interrupt` and the effect ledger.",
-  "validation": "Kind `auth_epoch_resume_refuse`. Hard expects first run ok with epoch persisted, resume under an advanced epoch failed with `authorization_epoch_mismatch`, and no runner re-entered.",
+  "validation": "Harness `access_authority` op `auth_epoch_resume_refuse`. Hard expects first run ok with epoch persisted, resume under an advanced epoch failed with `authorization_epoch_mismatch`, and no runner re-entered.",
   "footnotes": [
     {
       "id": "insp-dots-06",

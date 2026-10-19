@@ -2,10 +2,10 @@
   "id": "fangore_insp_recipe_lineage_promote",
   "persona": "fangore",
   "title": "Attach lineage and test results when promoting a recipe version",
-  "kind": "recipe_registry_versions",
+  "kind": "graph_recipes",
   "narrative": "New recipe versions are immutable artifacts with provenance, lineage, test results, and a reversible promotion pointer. Research and rule promotion patterns exist (`taloneth_insp_rule_promotion`); the recipe catalog now keeps versions instead of overwriting by name. Tracks MH-SR-05[^insp-sr-05].",
   "implementation": "`GraphTemplateRegistry.add_version(template, parent_version=...)` records the lineage DAG and refuses to replace a stored name+version; `attach_evaluation` / `evaluations` hang eval results on a version; `promote` and `rollback` move a reversible pointer; `merge` carries versions, lineage, evaluations, and pointer. Held-out release gates (MH-SR-07) and the evolution loop (MH-SR-06) remain separate stories.",
-  "validation": "Kind `recipe_registry_versions`. Hard expects a v1\u2192v2\u2192v3 lineage, evaluations attached to v2, promotion to v3, rollback to v2, and an unknown parent refused.",
+  "validation": "Harness `graph_recipes` op `recipe_registry_versions`. Hard expects a v1\u2192v2\u2192v3 lineage, evaluations attached to v2, promotion to v3, rollback to v2, and an unknown parent refused.",
   "footnotes": [
     {
       "id": "insp-sr-05",

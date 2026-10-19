@@ -1,4 +1,5 @@
 {
+  "op": "trial_reliability_metrics",
   "trials": [
     {
       "trial_id": "1",
