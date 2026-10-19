@@ -36,6 +36,8 @@ owning user stories):
 | initialize_preflight | `initialize_preflight` | `fangore_insp_initialize_preflight` | Linkage → capability → checkpoint → ready |
 | [decision_plane](./graph-templates/decision-plane.md) | `decision_plane` | `fangore_decision_plane_recipe` | Batched typed decisions + escalate |
 | [bounded_retry](./graph-templates/bounded-retry.md) | `bounded_retry` | `fangore_bounded_retry_recipe` | Visible classify → permit → backoff → escalate |
+| [produce_critique_refine](./graph-templates/produce-critique-refine.md) | `produce_critique_refine` | `fangore_insp_produce_critique_refine` | Produce → isolated critique → bounded refine |
+| [safety_eval](./graph-templates/safety-eval.md) | `safety_eval` | `taloneth_insp_safety_eval_recipes` | Scenario → isolated review → deterministic safety score |
 | [conversational_tool_loop](./graph-templates/conversational-tool-loop.md) | `conversational_tool_loop` | `fangore_conversational_tool_loop` | Expandable tools → inference / tool_call rounds |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
@@ -57,6 +59,58 @@ product policy or durable application state.
 Instantiated graphs are stamped with `template_name`, `template_version`, and
 `template_status` for provenance and deprecation detection. Optimize tiling
 code for human readability of how recipes compose into the final graph.
+
+## Versions, promotion, and evolution allowlist
+
+`GraphTemplateRegistry` stores every registered version of a catalog id.
+`register` activates a template (legacy replace-by-name); `add_version` stores
+an immutable candidate that stays inactive until `promote(name, version)`
+moves the active pointer. `rollback(name)` restores the previous target, and
+`get(name, version=...)` reads any stored version. Hosts own eval results and
+promotion policy; the registry owns only the reversible pointer.
+
+`SoftPoint.evolvable` (default `False`) is the declared evolution allowlist:
+an optimizer may rewrite only evolvable soft points, enforced by
+`GraphTemplate.assert_evolution_allowed`. Graph topology, grants, and stop
+contracts are hard structure.
+
+### Promotion surfaces (host orientation)
+
+| Intent | API |
+|--------|-----|
+| Catalog pointer + held-out gate + host opinion | `promote_recipe(registry, policy, request, hooks)` in `recipe_lifecycle.recipe_promotion_policy` (re-exported by `host_apis`) |
+| Catalog pointer + held-out gate only | `registry.promote_with_final_test(name, version, final_test=...)` |
+| Ungated pointer move (advanced / migration) | `registry.promote(name, version)` |
+| Offline research candidate | `ResearchLab.promote` |
+| Soft instruction → hard rule | `rule_promotion.promote_soft_to_hard` |
+
+Prefer `promote_recipe` for product hosts: it applies
+`MechaHarnessConfig.get_recipe_promotion_policy()` then the held-out gate.
+`promote` remains an ungated pointer move for hosts that run their own gate.
+Campaigns use `get_evolution_campaign_hooks()` (no-op defaults); pass them as `hooks` and `promote_recipe` calls `on_promotion` after a successful move. Typed-port search is `registry.search_compatible(...)`. The same
+held-out gate guards `ResearchLab.promote`.
+
+## Recipe comparison (do not merge)
+
+| Catalog id | Control story |
+|------------|---------------|
+| `produce_critique_refine` | Produce → critique → refine loop with evolvable soft points |
+| `independent_review` | Isolated multi-reviewer context (adversarial optional) |
+| `verify_repair` | Oracle / verify then repair until stop |
+| `safety_eval` | Produce → isolated review → deterministic score (measure-only) |
+| `decision_plane` | Bounded decision surfaces with policy / shadow / telemetry |
+
+These are distinct Agentic Recipes on the same `GraphTemplate` substrate.
+
+## Typed ports and candidate search
+
+A template may declare `io_contract` (a `TemplateIOContract` of typed input and
+output ports). `search_compatible_recipes(registry, required_inputs,
+required_outputs)` returns the catalog ids whose ports fit; it never builds a
+graph, and recipes without an `io_contract` are not candidates. Hosts
+can bound optimizer candidates with `recipe_evolution.propose_candidates`, which
+emits soft-binding dicts only and validates them against the registry and the
+evolvable allowlist.
 
 ## Usage sketch
 

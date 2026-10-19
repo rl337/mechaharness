@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Transactional durable graph resume requirements &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>Transactional durable graph resume requirements &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -302,6 +302,15 @@ complete graph                       (dispatch_count MUST still = 1)
 <h2>Compatibility and migration<a class="headerlink" href="#compatibility-and-migration" title="Link to this heading"></a></h2>
 <p>Existing in-memory/EventLog-backed execution SHOULD continue to work for ephemeral/test workloads. Durable semantics MUST be explicit: a host that has not configured durable persistence MUST NOT be led to believe it has process-restart durability.</p>
 <p>The public API SHOULD make the difference between ephemeral checkpointing and durable checkpointing inspectable/documented.</p>
+</section>
+<section id="composition-with-durable-graph-generators">
+<h2>Composition with durable graph generators<a class="headerlink" href="#composition-with-durable-graph-generators" title="Link to this heading"></a></h2>
+<p>Guidance suspension (<code class="docutils literal notranslate"><span class="pre">advice_requested</span></code> yields from
+<a class="reference internal" href="durable-graph-generators.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code></span></a>) is a first-class
+continuation that <strong>uses</strong> <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> / <code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code> and the
+effect-reconciliation rules above. It MUST NOT invent a second recovery
+protocol. Pending guidance MUST rehydrate with the same <code class="docutils literal notranslate"><span class="pre">request_id</span></code> after
+process restart when durable persistence is bound.</p>
 </section>
 <section id="definition-of-done">
 <h2>Definition of done<a class="headerlink" href="#definition-of-done" title="Link to this heading"></a></h2>

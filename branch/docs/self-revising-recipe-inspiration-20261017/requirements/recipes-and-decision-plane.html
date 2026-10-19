@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reusable graph recipes and typed decision-plane requirements &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>Reusable graph recipes and typed decision-plane requirements &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -239,6 +239,9 @@ model.</p>
 <li><p>cancellation;</p></li>
 <li><p>failure handling;</p></li>
 <li><p>model routing;</p></li>
+<li><p>durable generator guidance yields (<code class="docutils literal notranslate"><span class="pre">SoftPoint</span></code> kind <code class="docutils literal notranslate"><span class="pre">guidance</span></code> /
+node component <code class="docutils literal notranslate"><span class="pre">guidance_request</span></code>; see
+<a class="reference internal" href="durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a>);</p></li>
 <li><p>tool/capability restrictions.</p></li>
 </ul>
 <p>The parent graph MUST be able to treat the recipe as a logical unit without hiding the internal execution trace.</p>
@@ -484,7 +487,12 @@ human approval gates, sparse advisor consult, narrowed delegation envelopes.</p>
 </section>
 <section id="test-02-dependency-injection">
 <h3>TEST-02: Dependency injection<a class="headerlink" href="#test-02-dependency-injection" title="Link to this heading"></a></h3>
-<p>Reference recipe tests MUST use dependency injection for model runners, clocks, sleepers/backoff, effect adapters, and other external behavior rather than patching global state.</p>
+<p>Reference recipe tests MUST use dependency injection for model runners, clocks,
+sleepers/backoff, effect adapters, and other external behavior rather than
+patching global state. Collaborators MUST be bound on Config and injected
+(constructor or <code class="docutils literal notranslate"><span class="pre">inject(T)</span></code>); tests MUST NOT rely on Config <code class="docutils literal notranslate"><span class="pre">get_*</span></code> hooks as a
+service locator or on <code class="docutils literal notranslate"><span class="pre">getattr</span></code> lazy caches. See
+<a class="reference internal" href="dependency-injection.html"><span class="std std-doc">Dependency injection requirements</span></a>.</p>
 </section>
 <section id="test-03-decision-batching">
 <h3>TEST-03: Decision batching<a class="headerlink" href="#test-03-decision-batching" title="Link to this heading"></a></h3>

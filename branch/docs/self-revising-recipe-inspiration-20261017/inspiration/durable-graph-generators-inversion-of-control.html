@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspiration: Inversion-of-Control Execution via Durable Graph Generators &mdash; MechaHarness 0.6.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="inspiration-inversion-of-control-execution-via-durable-graph-generators">
+<h1>Inspiration: Inversion-of-Control Execution via Durable Graph Generators<a class="headerlink" href="#inspiration-inversion-of-control-execution-via-durable-graph-generators" title="Link to this heading"></a></h1>
+<p>Date: 2026-10-19
+Status: Proposed design and requirements, not an implemented API
+Project: MechaHarness
+Related use cases: Finder of Lost Keys photorealistic production; NeoStudio virtual production; local Qwen3 32B workers directed by frontier-model sessions</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
+<p>A frontier agent (Cursor, Codex, ChatGPT or another MCP-capable client) should be able to launch a MechaHarness graph and let inexpensive local inference and deterministic tools perform the token-heavy work. When the graph requires higher-level judgment, it should <strong>yield a structured guidance request as the result of the tool call</strong>. The same frontier-agent conversation then interprets the request and calls the tool again with guidance. The graph resumes from its durable checkpoint.</p>
+<p>This is inversion of control at the <em>execution</em> boundary, <strong>not</strong> pyiv dependency injection, model-to-model callbacks, or a requirement for the local worker to call a frontier model API. The initiating intelligence is simultaneously the driver and a source of direction, without requiring recursive reentry into an outstanding MCP tool call.</p>
+<p>A graph needing no guidance may complete in its initial invocation. A complex graph may yield multiple ordered statuses, each consumed in the same driving session.</p>
+</section>
+<section id="core-mental-model">
+<h2>Core mental model<a class="headerlink" href="#core-mental-model" title="Link to this heading"></a></h2>
+<p>A graph run is a <strong>durable, externally driven generator</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">start(recipe,</span> <span class="pre">inputs)</span></code> creates and advances a run to a meaningful yield.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resume(run_id,</span> <span class="pre">response?,</span> <span class="pre">expected_sequence)</span></code> consumes an optional response to the pending yield and advances to the next yield.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inspect(run_id)</span></code> exposes diagnostics, checkpoints, pending requests and artifact references without advancing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cancel(run_id)</span></code> terminates or requests safe cancellation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">list_recipes()</span></code> exposes discoverable recipe names and typed input schemas.</p></li>
+</ul>
+<p>Conceptual pseudocode (not a commitment to Python stack serialization):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">driver</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">"folk.performance"</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+<span class="k">while</span> <span class="n">status</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"completed"</span><span class="p">,</span> <span class="s2">"failed"</span><span class="p">,</span> <span class="s2">"cancelled"</span><span class="p">}:</span>
+    <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"advice_requested"</span><span class="p">:</span>
+        <span class="n">answer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">driver</span><span class="o">.</span><span class="n">obtain_guidance</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">driver</span><span class="o">.</span><span class="n">resume</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span> <span class="n">answer</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">driver</span><span class="o">.</span><span class="n">resume</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span> <span class="n">expected_sequence</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A graph’s node may conceptually <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">context.request_guidance(...)</span></code>, but the runtime implements it through an explicit persisted suspension/continuation boundary, not by attempting to serialize a live coroutine stack.</p>
+</section>
+<section id="architecture-and-ownership">
+<h2>Architecture and ownership<a class="headerlink" href="#architecture-and-ownership" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>MechaHarness core:</strong> graph state machine, yield/advice primitives, continuation semantics, durable checkpoints, execution log, dependency invalidation and authorization hooks.</p></li>
+<li><p><strong>Protocol/driver contract:</strong> transport-neutral typed operations and event envelopes. It must not depend on MCP, curses or a model SDK.</p></li>
+<li><p><strong>MCP stdio adapter:</strong> a piped MCP server exposing the same contract as tools to Cursor/Codex and other MCP clients. Stdio must keep protocol output on stdout and diagnostics on stderr; no human prompts on the MCP transport.</p></li>
+<li><p><strong>Human CLI and TUI:</strong> clients of the same MCP tools, rendering progress, choices, evidence and free-form guidance. A noninteractive plain-text mode is required; curses is optional presentation.</p></li>
+<li><p><strong>Scripted test driver:</strong> deterministic, first-class client of the same MCP protocol. MechaHarness unit tests may exercise the transport-neutral core directly; MCP integration tests exercise the real stdio adapter.</p></li>
+<li><p><strong>Local worker backends:</strong> Qwen3 32B, other specialist models, media backends and deterministic nodes perform work within graph-defined budgets.</p></li>
+</ol>
+<p>The core must not assume the driver is intelligent. Guidance can be a typed selection, structured parameters, a free-form explanation, deferral, or a refusal. Approval is separate from advisory guidance.</p>
+</section>
+<section id="yield-protocol">
+<h2>Yield protocol<a class="headerlink" href="#yield-protocol" title="Link to this heading"></a></h2>
+<p>Each externally visible yield is an ordered, immutable envelope:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"run_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"folk-scene-072"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"sequence"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"advice_requested"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"checkpoint_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cp-003"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"request_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"req-003"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How should exhaustion affect the sword maneuver?"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"choices"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"slow"</span><span class="p">,</span><span class="w"> </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Slower, imperfect technique"</span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"precise"</span><span class="p">,</span><span class="w"> </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Precise maneuver followed by collapse"</span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"recommendation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"precise"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"evidence_refs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"artifact://folk-scene-072/performance-analysis"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"requested_authority"</span><span class="p">:</span><span class="w"> </span><span class="s2">"artistic_direction"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"context_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"scene-072@v4"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Kinds: <code class="docutils literal notranslate"><span class="pre">progress</span></code> (optional), <code class="docutils literal notranslate"><span class="pre">advice_requested</span></code>, <code class="docutils literal notranslate"><span class="pre">running</span></code> (nonblocking or timeout), <code class="docutils literal notranslate"><span class="pre">completed</span></code>, <code class="docutils literal notranslate"><span class="pre">failed</span></code>, <code class="docutils literal notranslate"><span class="pre">cancelled</span></code>. <code class="docutils literal notranslate"><span class="pre">running</span></code> must not be interpreted as a demand for model reasoning; the client can wait/poll. The protocol should permit completion on the first <code class="docutils literal notranslate"><span class="pre">start</span></code> call and should not generate token-expensive progress chatter by default.</p>
+<p><code class="docutils literal notranslate"><span class="pre">resume</span></code> supplies <code class="docutils literal notranslate"><span class="pre">run_id</span></code>, expected <code class="docutils literal notranslate"><span class="pre">sequence</span></code>, pending <code class="docutils literal notranslate"><span class="pre">request_id</span></code> when applicable, guidance and an idempotency key. Guidance must be rejected if stale, unauthorized, mismatched to the pending request, or incompatible with its schema. A repeated identical call returns the previously committed result; a conflicting repeat fails safely.</p>
+<p>Use structured output for machine interpretation and compact, readable summaries for agents and humans. Large logs, media and evidence remain in referenced artifacts accessible via <code class="docutils literal notranslate"><span class="pre">inspect</span></code> rather than being copied into every yield.</p>
+</section>
+<section id="execution-state-machine">
+<h2>Execution state machine<a class="headerlink" href="#execution-state-machine" title="Link to this heading"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CREATED -&gt; RUNNING -&gt; COMPLETED
+               |  \-&gt; FAILED
+               |  \-&gt; CANCELLED
+               |  \-&gt; RUNNING (nonblocking status)
+               \-&gt; GUIDANCE_REQUIRED --(authorized resume)--&gt; RUNNING
+                          \-&gt; SUSPENDED / deferred
+</pre></div>
+</div>
+<p>Only committed yield points are externally observable. The implementation must define transaction boundaries between side effects, event logging, checkpoint persistence and yield publication. Use durable run IDs and explicit continuation records. Process restarts must not lose pending questions or silently rerun already committed side effects. For nontransactional external tools, use idempotency tokens or reconciliation records; do not promise exactly-once effects where a backend cannot provide them.</p>
+</section>
+<section id="driver-independence-and-session-continuity">
+<h2>Driver independence and session continuity<a class="headerlink" href="#driver-independence-and-session-continuity" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Frontier agent: calls MCP tools from its <strong>existing session</strong>, retaining strategic context and its previous advice. MechaHarness does not receive or store the entire conversation by default.</p></li>
+<li><p>Human operator: CLI or curses TUI receives the same typed question, inspects evidence and submits a response or defers.</p></li>
+<li><p>Scripted test: consumes the same yield sequence and supplies fixture responses, asserting exact request semantics and resulting artifacts.</p></li>
+<li><p>Local agent: may also drive the graph through the same contract.</p></li>
+<li><p>Authorized takeover: a new driver can recover a suspended run after an explicit ownership transfer. The run belongs to MechaHarness, not the original MCP subprocess or model conversation.</p></li>
+</ul>
+<p>MCP clients do not inherently allow reentering a model session during a pending tool call. The design deliberately returns guidance requests as ordinary tool results and waits for the caller’s next tool invocation.</p>
+<p>A stdio MCP process may be short-lived or disconnected; durable graph state must live outside that process when recovery across sessions is required.</p>
+</section>
+<section id="controller-ownership-authorization-and-safety">
+<h2>Controller ownership, authorization and safety<a class="headerlink" href="#controller-ownership-authorization-and-safety" title="Link to this heading"></a></h2>
+<p>Associate each run with a controller identity or lease and scope allowed operations. Separate:</p>
+<ul class="simple">
+<li><p>advisory recommendation,</p></li>
+<li><p>direction within delegated constraints,</p></li>
+<li><p>proposed requirement change,</p></li>
+<li><p>final approval reserved for an authorized actor.</p></li>
+</ul>
+<p>Changing approved production assets or requirements must not be possible through an ordinary advice response unless explicitly authorized. Inspect-only clients must not race the controlling driver. Support lease expiry and deliberate transfer; never infer that possession of a run ID alone confers control.</p>
+</section>
+<section id="cost-and-escalation-policy">
+<h2>Cost and escalation policy<a class="headerlink" href="#cost-and-escalation-policy" title="Link to this heading"></a></h2>
+<p>Graph contracts define local worker budgets, retry ceilings, evidence thresholds and which questions merit external guidance. Local inference should handle retrieval, drafting, revision, validation preparation and routine retries. Deterministic checks and independent evaluators should gate successful work, rather than a worker simply asserting confidence.</p>
+<p>Batch related guidance questions where their dependencies permit, but preserve question identity and order. Track local tokens, frontier advice frequency, latency, retry rates, cost estimates and acceptance outcomes. Optimize for verified useful work per frontier intervention, not just fewest tokens.</p>
+</section>
+<section id="testability-and-regression-replay">
+<h2>Testability and regression replay<a class="headerlink" href="#testability-and-regression-replay" title="Link to this heading"></a></h2>
+<p>Provide a first-class <code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code> supporting expected-yield assertions, typed response fixtures, strict unexpected-advice failure, and recording/replay. Fixtures should match semantic request identity and context version, not merely ordinal position.</p>
+<p>Required test scenarios:</p>
+<ol class="arabic simple">
+<li><p>Trivial graph completes in <code class="docutils literal notranslate"><span class="pre">start</span></code>, with no extra calls.</p></li>
+<li><p>Local-only graph completes with zero guidance requests.</p></li>
+<li><p>Graph yields advice, receives typed guidance, resumes, and completes.</p></li>
+<li><p>A human CLI client and a scripted driver execute the same recipe without changes.</p></li>
+<li><p>Real stdio MCP transport is exercised in an integration test, including clean stdout framing.</p></li>
+<li><p>A suspended graph survives server/executor restart and returns the identical pending question.</p></li>
+<li><p>Crash injection before/after checkpoint persistence and external side effects verifies recovery behavior.</p></li>
+<li><p>Duplicate resume with the same idempotency key is harmless; stale/conflicting responses are rejected.</p></li>
+<li><p>A driver disconnects; an authorized new driver inspects and resumes the run.</p></li>
+<li><p>Unexpected guidance requests fail strict regression fixtures.</p></li>
+<li><p>Guidance/approval authority is enforced and cannot silently overwrite locked artifacts.</p></li>
+<li><p>Multiple parallel local workers can yield related questions without nondeterministic application of advice.</p></li>
+<li><p>Test doubles use dependency injection rather than process-global monkeypatching, with explicit fake inference/tool backends.</p></li>
+</ol>
+<p>Include offline unit/contract tests and optional live end-to-end tests against a local model and MCP client.</p>
+</section>
+<section id="suggested-milestones">
+<h2>Suggested milestones<a class="headerlink" href="#suggested-milestones" title="Link to this heading"></a></h2>
+<p><strong>M0: Inventory existing MechaHarness primitives.</strong> Map current graph context, event log, resumability, checkpoints, hard/soft nodes, model routing and any existing MCP integration. Reuse instead of replacing. Record compatibility decisions.</p>
+<p><strong>M1: Core durable yield.</strong> Implement typed <code class="docutils literal notranslate"><span class="pre">GuidanceRequest</span></code> and <code class="docutils literal notranslate"><span class="pre">GraphYield</span></code>, explicit suspension/resume and scripted in-process tests. Start with one sequential graph.</p>
+<p><strong>M2: Stdio MCP transport.</strong> Expose start/resume/inspect/cancel/list recipes. Test actual piped client/server behavior and timeout handling.</p>
+<p><strong>M3: Scripted driver and replay.</strong> Strict fixtures, event recording, semantic replay and crash-location tests.</p>
+<p><strong>M4: Human drivers.</strong> Plain-text CLI first, curses/TUI second; both exercise MCP rather than private runtime internals.</p>
+<p><strong>M5: Parallel execution and ownership transfer.</strong> Related advisory batching, leases, controlled handoff and concurrency stress tests.</p>
+<p><strong>M6: Production pilot.</strong> FOLK character or performance workflow using local Qwen and deterministic QA, with a frontier agent advising only on ambiguous artistic decisions. Compare quality, costs and latency to an all-frontier baseline.</p>
+</section>
+<section id="candidate-requirements">
+<h2>Candidate requirements<a class="headerlink" href="#candidate-requirements" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>R-IOC-GENERATOR:</strong> Graph runs expose a transport-neutral durable generator contract with ordered yields.</p></li>
+<li><p><strong>R-IOC-GUIDANCE:</strong> Nodes can request typed external guidance through explicit persisted continuation points.</p></li>
+<li><p><strong>R-IOC-SESSION:</strong> Frontier guidance returns through ordinary MCP tool responses and subsequent calls in the same caller session; no recursive callback requirement.</p></li>
+<li><p><strong>R-IOC-MCP:</strong> Provide a piped stdio MCP server mapping tools to core graph operations without embedding core semantics in transport.</p></li>
+<li><p><strong>R-IOC-DRIVERS:</strong> Agent, human CLI/TUI and deterministic test drivers use the same tool protocol and graph definitions.</p></li>
+<li><p><strong>R-IOC-REPLAY:</strong> Record and replay advisory decisions against semantic request identities, with strict regression mode.</p></li>
+<li><p><strong>R-IOC-RESUME:</strong> Suspension and pending advice survive crashes and MCP process restarts.</p></li>
+<li><p><strong>R-IOC-IDEMPOTENT:</strong> Resume uses sequence checks and idempotency semantics; external side effects have documented recovery guarantees.</p></li>
+<li><p><strong>R-IOC-AUTH:</strong> Controller ownership and advisory-versus-approval authority are explicit and enforceable.</p></li>
+<li><p><strong>R-IOC-BUDGET:</strong> Graphs measure local work, guidance frequency, retries, latency and cost.</p></li>
+<li><p><strong>R-IOC-OFFLINE:</strong> Contract, recovery and driver tests can run without live models or media backends.</p></li>
+</ul>
+</section>
+<section id="open-questions">
+<h2>Open questions<a class="headerlink" href="#open-questions" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>[ ] Which existing MechaHarness resumability primitives can represent a pending guidance continuation?</p></li>
+<li><p>[ ] Should the core expose <code class="docutils literal notranslate"><span class="pre">advance</span></code> as distinct from <code class="docutils literal notranslate"><span class="pre">resume</span></code>, or unify them?</p></li>
+<li><p>[ ] How should nonblocking <code class="docutils literal notranslate"><span class="pre">running</span></code> and wait/poll behave across clients with differing tool timeouts?</p></li>
+<li><p>[ ] What is the minimum viable stable schema for typed guidance, evidence and requested authority?</p></li>
+<li><p>[ ] How are controller credentials/leases handled for a local stdio MCP server and cross-session takeover?</p></li>
+<li><p>[ ] How should multiple advisory requests from parallel branches be grouped and ordered?</p></li>
+<li><p>[ ] What event storage and side-effect reconciliation guarantees exist today?</p></li>
+<li><p>[ ] How are fixtures generated from recorded runs without leaking confidential frontier-session context?</p></li>
+<li><p>[ ] Which existing graph recipes make the best initial offline and live tests?</p></li>
+</ul>
+</section>
+<section id="design-constraint">
+<h2>Design constraint<a class="headerlink" href="#design-constraint" title="Link to this heading"></a></h2>
+<p><strong>Do not build a second harness around MCP or a new dependency injection framework.</strong> The generator is a new MechaHarness execution construct. MCP is one adapter, and curses, plain-text and test drivers are clients of the same contract. Production-specific artistic semantics remain with FOLK or NeoStudio.</p>
+</section>
+<section id="related">
+<h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Normative: <a class="reference internal" href="../requirements/durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a></p></li>
+<li><p>Story map: <a class="reference internal" href="durable-graph-generators-requirements-map.html"><span class="std std-doc">durable-graph-generators-requirements-map.md</span></a></p></li>
+<li><p>Orthogonal: <a class="reference internal" href="self-revising-recipe-evolution.html"><span class="std std-doc">Self-revising recipe evolution</span></a> — which recipe is active vs how a run is driven</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.graph_executor &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>mechaharness.graph_executor &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -122,6 +122,7 @@
 
 <span class="sd">    &gt;&gt;&gt; import asyncio, tempfile</span>
 <span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; from pyiv.time import PythonDateTimeService</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.budget import BudgetPolicy</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.checkpoint_store import CheckpointStore</span>
 <span class="sd">    &gt;&gt;&gt; from mechaharness.core.access import GraphExecute</span>
@@ -176,7 +177,9 @@
 <span class="sd">    ...     def get_node_runner_registry(self):</span>
 <span class="sd">    ...         return GraphNodeRunnerRegistry([runner])</span>
 <span class="sd">    ...     def get_checkpoint_store(self):</span>
-<span class="sd">    ...         return SqliteCheckpointStore(path)</span>
+<span class="sd">    ...         return SqliteCheckpointStore(</span>
+<span class="sd">    ...             path, datetime_service=PythonDateTimeService()</span>
+<span class="sd">    ...         )</span>
 <span class="sd">    &gt;&gt;&gt; executor = get_injector(Cfg()).inject(GraphExecutor)</span>
 <span class="sd">    &gt;&gt;&gt; graph = ExecutionGraph(goal="ship feature")</span>
 <span class="sd">    &gt;&gt;&gt; _ = graph.add_node(GraphNode(id="job", kind="coding_job"))</span>
@@ -222,6 +225,8 @@
     <span class="n">event_type_key</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphExecutorError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.effect_revalidation</span><span class="w"> </span><span class="kn">import</span> <span class="n">revalidate_before_effect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.event_correlators</span><span class="w"> </span><span class="kn">import</span> <span class="n">graph_trace_context</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CrashProbe</span><span class="p">,</span>
     <span class="n">EffectDispatchResult</span><span class="p">,</span>
@@ -613,21 +618,31 @@
         <span class="c1"># Not a constructor DI param: Mapping[...] | None is not pyiv-injectable</span>
         <span class="c1"># on Python 3.10+ (GenericAlias). Hosts assign after inject when needed.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_parts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Optional live authorization epoch source (e.g. grant-revocation counter);</span>
+        <span class="c1"># assigned post-inject like ``fingerprint_parts`` (Callable is not injectable).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">live_authorization_epoch</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_diagnostics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">"reconciliation_invoked"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">"runner_reentered"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">"effect_dispatches"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="p">}</span></div>
+        <span class="p">}</span>
+        <span class="c1"># run_id -&gt; correlator fields merged into every emit for that run.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace_contexts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">EventType</span><span class="p">],</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Emit with the run's warehouse correlators merged under ``payload``.</span>
+
+<span class="sd">        Explicit payload keys win over correlators (OBS-A01..A06).</span>
+<span class="sd">        """</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace_contexts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">event_log</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
             <span class="n">Event</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">event_type_key</span><span class="p">(</span><span class="n">event_type</span><span class="p">),</span>
                 <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
                 <span class="n">parent_agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_agent_id</span><span class="p">,</span>
                 <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
-                <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">context</span><span class="p">,</span> <span class="o">**</span><span class="n">payload</span><span class="p">}</span> <span class="k">if</span> <span class="n">context</span> <span class="k">else</span> <span class="n">payload</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
@@ -756,8 +771,14 @@
         <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">envelope</span><span class="p">:</span> <span class="n">CapabilityEnvelope</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">skip_linkage</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">parent_run_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphResult</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Execute ``graph`` until completion, denial, stall, or budget failure.</span>
+
+<span class="sd">        Every event emitted for the run carries ``graph_id``, ``graph_goal``,</span>
+<span class="sd">        recipe stamp, ``authorization_epoch``, and (for nested runs)</span>
+<span class="sd">        ``parent_run_id`` / ``nest_depth`` — see</span>
+<span class="sd">        :func:`mechaharness.event_correlators.graph_trace_context`.</span>
 
 <span class="sd">        ``budget_policy`` is required. Pass a shared ``budget`` for nested</span>
 <span class="sd">        subgraphs so spend aggregates; otherwise a fresh :class:`Budget` is</span>
@@ -768,6 +789,43 @@
 <span class="sd">        ``BudgetPolicy.hard_limit=None`` means unlimited hard ceiling.</span>
 <span class="sd">        """</span>
         <span class="n">rid</span> <span class="o">=</span> <span class="n">run_id</span> <span class="ow">or</span> <span class="n">graph</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">parent_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace_contexts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent_run_id</span><span class="p">)</span> <span class="k">if</span> <span class="n">parent_run_id</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace_contexts</span><span class="p">[</span><span class="n">rid</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_trace_context</span><span class="p">(</span>
+            <span class="n">graph</span><span class="p">,</span>
+            <span class="n">envelope</span><span class="o">=</span><span class="n">envelope</span><span class="p">,</span>
+            <span class="n">live_authorization_epoch</span><span class="o">=</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">live_authorization_epoch</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">live_authorization_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
+            <span class="n">parent_run_id</span><span class="o">=</span><span class="n">parent_run_id</span><span class="p">,</span>
+            <span class="n">nest_depth</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">parent_context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nest_depth"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">parent_context</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_graph</span><span class="p">(</span>
+                <span class="n">graph</span><span class="p">,</span>
+                <span class="n">rid</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
+                <span class="n">budget_policy</span><span class="o">=</span><span class="n">budget_policy</span><span class="p">,</span>
+                <span class="n">budget</span><span class="o">=</span><span class="n">budget</span><span class="p">,</span>
+                <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">,</span>
+                <span class="n">envelope</span><span class="o">=</span><span class="n">envelope</span><span class="p">,</span>
+                <span class="n">skip_linkage</span><span class="o">=</span><span class="n">skip_linkage</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trace_contexts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">rid</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_run_graph</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">graph</span><span class="p">:</span> <span class="n">ExecutionGraph</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">rid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">budget_policy</span><span class="p">:</span> <span class="n">BudgetPolicy</span><span class="p">,</span>
+        <span class="n">budget</span><span class="p">:</span> <span class="n">Budget</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">envelope</span><span class="p">:</span> <span class="n">CapabilityEnvelope</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">skip_linkage</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphResult</span><span class="p">:</span>
         <span class="n">ledger</span> <span class="o">=</span> <span class="n">budget</span> <span class="k">if</span> <span class="n">budget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Budget</span><span class="p">(</span><span class="n">budget_policy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_diagnostics</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">"reconciliation_invoked"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -776,6 +834,7 @@
             <span class="s2">"resumed"</span><span class="p">:</span> <span class="n">resume</span><span class="p">,</span>
             <span class="s2">"checkpoint_durability"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">durability</span><span class="p">,</span>
         <span class="p">}</span>
+        <span class="n">restored</span><span class="p">:</span> <span class="n">ExecutionGraph</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">resume</span><span class="p">:</span>
             <span class="n">restored</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">restored</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -804,6 +863,23 @@
                 <span class="n">budget</span><span class="o">=</span><span class="n">ledger</span><span class="p">,</span>
                 <span class="n">error</span><span class="o">=</span><span class="s2">"missing_grant:core:graph.execute"</span><span class="p">,</span>
             <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">restored</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">envelope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Fail closed when authority was revoked/advanced since the checkpoint.</span>
+            <span class="n">checkpoint_epoch</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">authorization_epoch</span>
+            <span class="k">if</span> <span class="n">checkpoint_epoch</span> <span class="o">!=</span> <span class="n">envelope</span><span class="o">.</span><span class="n">authorization_epoch</span><span class="p">:</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">"authorization_epoch_mismatch:"</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint_epoch</span><span class="si">}</span><span class="s2">!=</span><span class="si">{</span><span class="n">envelope</span><span class="o">.</span><span class="n">authorization_epoch</span><span class="si">}</span><span class="s2">"</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span><span class="n">GraphStart</span><span class="p">,</span> <span class="p">{</span><span class="s2">"goal"</span><span class="p">:</span> <span class="n">graph</span><span class="o">.</span><span class="n">goal</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">},</span> <span class="n">rid</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span><span class="n">GraphEnd</span><span class="p">,</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">:</span> <span class="n">err</span><span class="p">},</span> <span class="n">rid</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">(</span>
+                    <span class="n">status</span><span class="o">=</span><span class="s2">"failed"</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">budget</span><span class="o">=</span><span class="n">ledger</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">err</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">envelope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">authorization_epoch</span> <span class="o">=</span> <span class="n">envelope</span><span class="o">.</span><span class="n">authorization_epoch</span>
 
         <span class="n">report</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">config_fingerprint</span>
@@ -931,8 +1007,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span><span class="n">GraphEnd</span><span class="p">,</span> <span class="n">end_payload</span><span class="p">,</span> <span class="n">rid</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">(</span>
             <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">budget</span><span class="o">=</span><span class="n">ledger</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span>
-        <span class="p">)</span></div>
-
+        <span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_run_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="n">ExecutionGraph</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">GraphRunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Bound iterations: each node may attempt up to max_attempts (+ escalation).</span>
@@ -1005,6 +1080,7 @@
             <span class="n">budget</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">budget</span><span class="p">,</span>
             <span class="n">run_id</span><span class="o">=</span><span class="n">child_run_id</span><span class="p">,</span>
             <span class="n">envelope</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">envelope</span><span class="p">,</span>
+            <span class="n">parent_run_id</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">node</span><span class="o">.</span><span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
             <span class="o">**</span><span class="n">node</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
@@ -1085,6 +1161,41 @@
                 <span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tool_phase"</span><span class="p">,</span> <span class="s2">"execute"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"execute"</span><span class="p">:</span>
+            <span class="c1"># Authority may have lapsed since planning/approval/checkpoint (MH-DOTS-02).</span>
+            <span class="n">revalidation</span> <span class="o">=</span> <span class="n">revalidate_before_effect</span><span class="p">(</span>
+                <span class="n">envelope</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">envelope</span><span class="p">,</span>
+                <span class="n">required_grants</span><span class="o">=</span><span class="n">grants</span><span class="p">,</span>
+                <span class="n">live_authorization_epoch</span><span class="o">=</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">live_authorization_epoch</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">live_authorization_epoch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="kc">None</span>
+                <span class="p">),</span>
+                <span class="n">access_allows</span><span class="o">=</span><span class="k">lambda</span> <span class="n">required</span><span class="p">:</span> <span class="ow">not</span> <span class="n">required</span>
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allows</span><span class="p">(</span>
+                    <span class="n">required</span><span class="p">,</span>
+                    <span class="n">tool_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"graph_node:</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="n">run_id</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">revalidation</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">NodeStatus</span><span class="o">.</span><span class="n">FAILED</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"revalidation_failed:</span><span class="si">{</span><span class="n">revalidation</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">attempt</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">max_attempts</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">attempt</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_charge_node</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">budget</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span>
+                    <span class="n">GraphNodeEnd</span><span class="p">,</span>
+                    <span class="p">{</span>
+                        <span class="s2">"node_id"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                        <span class="s2">"kind"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+                        <span class="s2">"status"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="s2">"error"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+                    <span class="p">},</span>
+                    <span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">runner</span><span class="p">,</span> <span class="n">EffectfulGraphNodeRunner</span><span class="p">):</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_effectful_node</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">runner</span><span class="p">)</span>

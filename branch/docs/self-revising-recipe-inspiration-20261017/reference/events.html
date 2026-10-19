@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Event log &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>Event log &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -230,6 +230,15 @@ long as they are namespaced. Bare names (<code class="docutils literal notransla
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ExtensionApplied</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">core:extension_applied</span></code></p></td>
 </tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GraphYieldPublished</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:graph_yield</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GuidanceResumeApplied</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:guidance_resume</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GeneratorRunCancelled</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:generator_cancel</span></code></p></td>
+</tr>
 </tbody>
 </table>
 <p><code class="docutils literal notranslate"><span class="pre">ExtensionApplied</span></code> lives in <code class="docutils literal notranslate"><span class="pre">mechaharness.lifecycle_extension</span></code> and is emitted by
@@ -240,8 +249,11 @@ flow). Payload includes <code class="docutils literal notranslate"><span class="
 <code class="docutils literal notranslate"><span class="pre">core:cost</span></code> may include <code class="docutils literal notranslate"><span class="pre">prompt_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">completion_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">total_tokens</span></code>.
 <code class="docutils literal notranslate"><span class="pre">core:inference</span></code> may include <code class="docutils literal notranslate"><span class="pre">reasoning_content</span></code> and <code class="docutils literal notranslate"><span class="pre">usage</span></code>.
 <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> emits <code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code> and per-node
-start/end events; <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> checkpoints use <code class="docutils literal notranslate"><span class="pre">core:graph_node</span></code>. Hosts add
-types by subclassing without editing this module:</p>
+start/end events; <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> checkpoints use <code class="docutils literal notranslate"><span class="pre">core:graph_node</span></code>.
+<code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code> emits <code class="docutils literal notranslate"><span class="pre">core:graph_yield</span></code>, <code class="docutils literal notranslate"><span class="pre">core:guidance_resume</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">core:generator_cancel</span></code> with <code class="docutils literal notranslate"><span class="pre">run_id</span></code> / <code class="docutils literal notranslate"><span class="pre">graph_id</span></code> / <code class="docutils literal notranslate"><span class="pre">recipe_id</span></code> / sequence
+correlators (see <a class="reference internal" href="durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a>).
+Hosts add types by subclassing without editing this module:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventType</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">WidgetDone</span><span class="p">(</span><span class="n">EventType</span><span class="p">):</span>
@@ -253,6 +265,48 @@ types by subclassing without editing this module:</p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">EventType.parse(&quot;core:run_start&quot;)</span></code> returns the registered class. Unregistered
 keys still round-trip on <code class="docutils literal notranslate"><span class="pre">Event.type</span></code>; <code class="docutils literal notranslate"><span class="pre">parse</span></code> raises <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> for those.</p>
+</section>
+<section id="required-correlators">
+<h2>Required correlators<a class="headerlink" href="#required-correlators" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">GraphExecutor._emit</span></code> merges these keys into the payload of every
+<code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code>, <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code>, <code class="docutils literal notranslate"><span class="pre">core:graph_node_start</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">core:graph_node_end</span></code> event (explicit payload keys win; absent values are
+omitted). Contract and warehouse decomposition:
+<a class="reference internal" href="../requirements/event-analytics-schema.html"><span class="std std-doc">Event analytics schema</span></a>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">graph_id</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_goal</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ExecutionGraph.id</span></code> / <code class="docutils literal notranslate"><span class="pre">.goal</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">recipe_id</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_version</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_instance_id</span></code></p></td>
+<td><p>Template stamp (<code class="docutils literal notranslate"><span class="pre">template_name</span></code>, <code class="docutils literal notranslate"><span class="pre">template_version</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_instance_id</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope.authorization_epoch</span></code> (else the graph’s stamped epoch)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">live_authorization_epoch</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">executor.live_authorization_epoch()</span></code> when wired</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parent_run_id</span></code>, <code class="docutils literal notranslate"><span class="pre">nest_depth</span></code></p></td>
+<td><p>Nested subgraph runs only</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> (<code class="docutils literal notranslate"><span class="pre">graphId</span></code>, <code class="docutils literal notranslate"><span class="pre">recipeId</span></code>, <code class="docutils literal notranslate"><span class="pre">recipeVersion</span></code>, <code class="docutils literal notranslate"><span class="pre">authorizationEpoch</span></code>,
+<code class="docutils literal notranslate"><span class="pre">parentRunId</span></code>) and <code class="docutils literal notranslate"><span class="pre">TraceEnvelope</span></code> use the same names. Checkpoint events
+(<code class="docutils literal notranslate"><span class="pre">core:graph_node</span></code>), <code class="docutils literal notranslate"><span class="pre">core:access_check</span></code>, and <code class="docutils literal notranslate"><span class="pre">core:extension_applied</span></code> do not
+carry graph correlators; join them on <code class="docutils literal notranslate"><span class="pre">run_id</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.event_correlators</span><span class="w"> </span><span class="kn">import</span> <span class="n">project_node_attempt_rows</span>
+
+<span class="n">rows</span> <span class="o">=</span> <span class="n">project_node_attempt_rows</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">run_id</span><span class="o">=</span><span class="s2">"run-1"</span><span class="p">))</span>
+<span class="c1"># one NodeAttemptRow per (run_id, node_id, attempt)</span>
+</pre></div>
+</div>
 </section>
 <section id="eventlog">
 <h2><code class="docutils literal notranslate"><span class="pre">EventLog</span></code><a class="headerlink" href="#eventlog" title="Link to this heading"></a></h2>

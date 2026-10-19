@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dependency injection &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>Dependency injection &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -115,9 +115,10 @@
 <code class="docutils literal notranslate"><span class="pre">get_injector</span></code> → <code class="docutils literal notranslate"><span class="pre">inject(...)</span></code>). Manual <code class="docutils literal notranslate"><span class="pre">ToolLoopHarness(...)</span></code> construction is
 not a supported host path. Prefer the OpenAPI-shaped <code class="docutils literal notranslate"><span class="pre">run()</span></code> helper only when
 you want the facade that builds a Config under the hood.</p>
-<p>Requires <strong>pyiv ≥ 0.4.2</strong> (<code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code>, plus <code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code>
-constructor injection). Prefer <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mechaharness.di</span> <span class="pre">import</span> <span class="pre">get_injector</span></code> so
-Named Completer aliases bind correctly.</p>
+<p>Requires <strong>pyiv ≥ 1.1</strong> (<code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code>, <code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code>
+constructor injection, injectable <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>, and use-case stdlib
+doubles). Prefer <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mechaharness.di</span> <span class="pre">import</span> <span class="pre">get_injector</span></code> so Named Completer
+aliases bind correctly.</p>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <ul class="simple">
@@ -248,6 +249,86 @@ with <code class="docutils literal notranslate"><span class="pre">Annotated</spa
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">run()</span></code> still constructs a <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> and injects; it only hides pyiv from
 the caller.</p>
+</section>
+<section id="http-transport-asynchttpclient">
+<h3>HTTP transport (<code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>)<a class="headerlink" href="#http-transport-asynchttpclient" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> registers a shared pyiv <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>
+(<code class="docutils literal notranslate"><span class="pre">AsyncUrllibHttpClient</span></code> by default). Inference and judge adapters
+(<code class="docutils literal notranslate"><span class="pre">OpenAICompatStrategy</span></code>, <code class="docutils literal notranslate"><span class="pre">AnthropicStrategy</span></code>, <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code>) take it
+as a constructor dependency and send absolute URLs with per-request headers —
+endpoint ownership stays on <code class="docutils literal notranslate"><span class="pre">Settings</span></code> / <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code>.</p>
+<p>In tests, bind a double instead of hitting the network:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncHttpClient</span><span class="p">,</span> <span class="n">MemoryAsyncHttpClient</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.di</span><span class="w"> </span><span class="kn">import</span> <span class="n">MechaHarnessConfig</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestConfig</span><span class="p">(</span><span class="n">MechaHarnessConfig</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">MemoryAsyncHttpClient</span><span class="p">()</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="s2">"POST"</span><span class="p">,</span>
+            <span class="s2">"http://api.test/v1/chat/completions"</span><span class="p">,</span>
+            <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">"choices"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"message"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"assistant"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"ok"</span><span class="p">}}]},</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">AsyncHttpClient</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Hosts may register any <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code> implementation (including a custom
+httpx-backed client) without changing adapters.</p>
+</section>
+<section id="stdlib-doubles-environment-time-files-log">
+<h3>Stdlib doubles (<code class="docutils literal notranslate"><span class="pre">Environment</span></code>, time, files, log)<a class="headerlink" href="#stdlib-doubles-environment-time-files-log" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> also registers pyiv use-case injectables (pyiv ≥ 1.1):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Interface</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Typical test double</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Environment</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OsEnvironment</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MemoryEnvironment</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PythonDateTimeService</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MockDateTimeService</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Filesystem</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RealFilesystem</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MemoryFilesystem</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Clock</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RealClock</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SyntheticClock</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">StdlibLoggerFactory</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MemoryLoggerFactory</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Judge <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> / <code class="docutils literal notranslate"><span class="pre">for_judge</span></code> read through an
+injected <code class="docutils literal notranslate"><span class="pre">Environment</span></code>. Checkpoint effect stamps use an injected
+<code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>. <code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code> takes <code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code>. <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code>
+JSONL I/O takes <code class="docutils literal notranslate"><span class="pre">Filesystem</span></code>. Composed services (<code class="docutils literal notranslate"><span class="pre">EventLog</span></code>,
+<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>, <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code>, judge connection, …) MUST take these as
+constructor dependencies (or injector factories) — not by calling sibling
+Config <code class="docutils literal notranslate"><span class="pre">get_*</span></code> hooks.</p>
+<p>In tests, rebind with <code class="docutils literal notranslate"><span class="pre">register_instance</span></code> after <code class="docutils literal notranslate"><span class="pre">super().configure()</span></code>,
+subclass hooks that change what <code class="docutils literal notranslate"><span class="pre">configure()</span></code> registers, or
+<code class="docutils literal notranslate"><span class="pre">pyiv.override(base).with_(overlay)</span></code>. Do not monkeypatch <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>, freeze
+time, or touch disk when an injectable exists. Missing bindings must fail at
+<code class="docutils literal notranslate"><span class="pre">inject()</span></code> time.</p>
+<p>Test helpers live in <code class="docutils literal notranslate"><span class="pre">tests/support/stdlib_doubles.py</span></code>:
+<code class="docutils literal notranslate"><span class="pre">stdlib_doubles_config(...)</span></code> for a full Config with Memory/Mock edges, and
+<code class="docutils literal notranslate"><span class="pre">stdlib_doubles_overlay(...)</span></code> for <code class="docutils literal notranslate"><span class="pre">pyiv.override(base).with_(overlay)</span></code> (set
+<code class="docutils literal notranslate"><span class="pre">rebind_judge_connection=True</span></code> when the overlay must rebuild
+<code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> from the Memory environment).</p>
+<p>Normative rules: <a class="reference internal" href="../requirements/dependency-injection.html"><span class="std std-doc">Dependency injection requirements</span></a>.</p>
 <p>Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> (or <code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code>) to
 inject deny-by-default tool grants; use <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> to union reusable
 <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> layers. See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a>.</p>
@@ -269,10 +350,27 @@ MechaHarness; clients instantiate them via Config and may retain the resulting
 concrete graphs. See <a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a> and
 <a class="reference internal" href="../reference/graph-templates.html"><span class="std std-doc">Graph templates</span></a>.</p>
 </section>
+<section id="host-apis-and-promotion">
+<h3>Host APIs and promotion<a class="headerlink" href="#host-apis-and-promotion" title="Link to this heading"></a></h3>
+<p>For inspiration-era safety and recipe surfaces, prefer
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mechaharness.host_apis</span> <span class="pre">import</span> <span class="pre">...</span></code> (AuthorityGate, DenialStore, freshness,
+<code class="docutils literal notranslate"><span class="pre">promote_recipe</span></code>, port search, key templates) over mining leaf modules. See
+<a class="reference internal" href="../reference/inspiration-primitives.html"><span class="std std-doc">Inspiration primitives</span></a> and the
+<a class="reference internal" href="../reference/graph-templates.html#promotion-surfaces-host-orientation"><span class="std std-ref">promotion surfaces</span></a>
+table: product hosts should use <code class="docutils literal notranslate"><span class="pre">promote_recipe</span></code> (policy + held-out gate), not
+ungated <code class="docutils literal notranslate"><span class="pre">registry.promote</span></code>.</p>
+<p>Config hooks: <code class="docutils literal notranslate"><span class="pre">get_authority_gate()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_denial_store()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_tool_result_freshness_policy()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_recipe_promotion_policy()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_evolution_campaign_hooks()</span></code>.</p>
+<p>Coding agents in <strong>host</strong> repos: install the customer skills from
+<a class="reference internal" href="#../../agent-skills/"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">agent-skills/</span></code></span></a>
+(<a class="reference internal" href="agent-skills.html"><span class="std std-doc">guide</span></a>; normative <a class="reference internal" href="../requirements/host-integration.html"><span class="std std-doc">HOST-01..07</span></a>).</p>
+</section>
 <section id="host-kit-readable-graphexecutor-wiring">
 <h3>Host kit (readable GraphExecutor wiring)<a class="headerlink" href="#host-kit-readable-graphexecutor-wiring" title="Link to this heading"></a></h3>
 <p>Prefer <code class="docutils literal notranslate"><span class="pre">mechaharness.host_kit</span></code> when a host only needs to register runners and
-choose checkpoint durability. It keeps the blessed path
+choose checkpoint durability (plus <code class="docutils literal notranslate"><span class="pre">host_authority_gate</span></code> /
+<code class="docutils literal notranslate"><span class="pre">host_denial_store</span></code>). It keeps the blessed path
 (<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> → <code class="docutils literal notranslate"><span class="pre">inject(GraphExecutor)</span></code>) without ten-line hand assembly
 of EventLog / access / linkage / checkpoint / crash probe.</p>
 <p>Owning acceptance stories: <code class="docutils literal notranslate"><span class="pre">fangore_host_kit_submit_once</span></code>,
@@ -337,6 +435,12 @@ Executable examples live as pydoc doctests on <code class="docutils literal notr
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">effectful_external_handle</span></code></p></td>
 <td><p>Read <code class="docutils literal notranslate"><span class="pre">external_run_id</span></code> / <code class="docutils literal notranslate"><span class="pre">external_handle</span></code> from a <code class="docutils literal notranslate"><span class="pre">GraphResult</span></code> without scraping node maps</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">host_authority_gate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AuthorityGate</span></code> via Config inject from <code class="docutils literal notranslate"><span class="pre">grants=</span></code>, optional <code class="docutils literal notranslate"><span class="pre">consequence=</span></code> and <code class="docutils literal notranslate"><span class="pre">denial_store=</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">host_denial_store</span></code></p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">DenialStore</span></code> a Config would bind (in-memory default, or the one you pass)</p></td>
+</tr>
 </tbody>
 </table>
 <p><code class="docutils literal notranslate"><span class="pre">SubmitOnceEffectfulRunner</span></code> completes the <strong>graph node</strong> when the backend
@@ -347,6 +451,62 @@ not both. Omit both for the default ephemeral EventLog-backed store.</p>
 (<code class="docutils literal notranslate"><span class="pre">fangore_transactional_durable_resume</span></code>) owns the crash-window contract this kit
 sits on.</p>
 </section>
+</section>
+<section id="authority-denial-and-recipe-lifecycle-hooks-host-apis">
+<h3>Authority, denial, and recipe-lifecycle hooks (<code class="docutils literal notranslate"><span class="pre">host_apis</span></code>)<a class="headerlink" href="#authority-denial-and-recipe-lifecycle-hooks-host-apis" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> binds these as injectables in <code class="docutils literal notranslate"><span class="pre">configure()</span></code>; override the
+hook, never construct them by hand:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Hook</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_authority_gate()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AuthorityGate</span></code></p></td>
+<td><p>Config access control + <code class="docutils literal notranslate"><span class="pre">get_denial_store()</span></code>, no consequence policy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_denial_store()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DenialStore</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">InMemoryDenialStore</span></code> (not restart-durable; bind a durable store)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_tool_result_freshness_policy()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ToolResultFreshnessPolicy</span></code></p></td>
+<td><p>honors <code class="docutils literal notranslate"><span class="pre">expires_at</span></code> only</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_recipe_promotion_policy()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RecipePromotionPolicy</span></code></p></td>
+<td><p>no host opinion</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_evolution_campaign_hooks()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EvolutionCampaignHooks</span></code></p></td>
+<td><p>no-op</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">mechaharness.host_apis</span></code> is the one blessed import path for these surfaces
+(re-exports only; each name lives in its owning module). Pass the bound campaign
+hooks to <code class="docutils literal notranslate"><span class="pre">promote_recipe</span></code> so the host observes each successful pointer move:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.host_apis</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EvolutionCampaignHooks</span><span class="p">,</span>
+    <span class="n">RecipePromotionPolicy</span><span class="p">,</span>
+    <span class="n">RecipePromotionRequest</span><span class="p">,</span>
+    <span class="n">promote_recipe</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">injector</span> <span class="o">=</span> <span class="n">get_injector</span><span class="p">(</span><span class="n">MyConfig</span><span class="p">())</span>
+<span class="n">decision</span> <span class="o">=</span> <span class="n">promote_recipe</span><span class="p">(</span>
+    <span class="n">registry</span><span class="p">,</span>
+    <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">RecipePromotionPolicy</span><span class="p">),</span>
+    <span class="n">RecipePromotionRequest</span><span class="p">(</span><span class="n">recipe</span><span class="o">=</span><span class="s2">"verify_repair"</span><span class="p">,</span> <span class="n">to_version</span><span class="o">=</span><span class="s2">"2"</span><span class="p">,</span> <span class="n">final_test</span><span class="o">=</span><span class="n">held_out</span><span class="p">),</span>
+    <span class="n">hooks</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">EvolutionCampaignHooks</span><span class="p">),</span>  <span class="c1"># on_promotion fires on success only</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Owning stories: <code class="docutils literal notranslate"><span class="pre">fangore_insp_authority_gate</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_denial_equivalence</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_insp_evolution_ownership_split</span></code>.</p>
 </section>
 </section>
 <section id="verify">

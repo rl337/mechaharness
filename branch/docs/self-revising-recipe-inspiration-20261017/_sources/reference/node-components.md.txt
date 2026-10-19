@@ -37,6 +37,7 @@ Normative rules:
 | `stop_contract` | `repeating` + `StopContract` | Expandable / bound loop marker |
 | `budget_level` | `BudgetLevel` | OK / soft / hard on shared ledger |
 | `effect_state` | `EffectState` | Effectful node external lifecycle |
+| `guidance_request` | SoftPoint kind `guidance` / `core:graph_yield` | External driver advice suspension |
 
 **Not node components:** `agent_*`, `run_*`, `graph_start` / `graph_end`,
 `graph_node_start` / `graph_node_end` (node frame), checkpoint `GraphEvent`

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inspiration: Evaluation-driven evolution of composed recipes &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>Inspiration: Evaluation-driven evolution of composed recipes &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -183,6 +183,12 @@ Source confidence: <strong>unverified screenshot and social-media account</stron
 <section id="suggested-experiments">
 <h2>Suggested experiments<a class="headerlink" href="#suggested-experiments" title="Link to this heading"></a></h2>
 <p>Start with a fixed suite of known MechaHarness recipes. Compare a hand-selected baseline against automatically chosen <strong>compositions of existing recipes</strong>, under equal inference budgets and untouched evaluation data. Track correctness, costs, latency, tool policy violations, and checkpoint recovery. Only then consider optimizing individual recipe parameters or recursively registering winning compositions.</p>
+</section>
+<section id="related-inspirations">
+<h2>Related inspirations<a class="headerlink" href="#related-inspirations" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="durable-graph-generators-inversion-of-control.html"><span class="std std-doc">Durable graph generators (IoC)</span></a> — host-facing driven runs with ordered guidance yields; recipe evolution selects <em>which</em> registered recipe is active, while the generator drives <em>how</em> that run advances across drivers and process boundaries.</p></li>
+</ul>
 </section>
 </section>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.di &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>mechaharness.di &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=c87aa342"></script>
+      <script src="../../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -144,14 +144,20 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">eval_type_backport</span><span class="w"> </span><span class="kn">import</span> <span class="n">eval_type_backport</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">Stage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.files</span><span class="w"> </span><span class="kn">import</span> <span class="n">Filesystem</span><span class="p">,</span> <span class="n">RealFilesystem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncHttpClient</span><span class="p">,</span> <span class="n">AsyncUrllibHttpClient</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.injector</span><span class="w"> </span><span class="kn">import</span> <span class="n">Injector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.injector</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_injector</span> <span class="k">as</span> <span class="n">_pyiv_get_injector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.key</span><span class="w"> </span><span class="kn">import</span> <span class="n">Key</span><span class="p">,</span> <span class="n">Named</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggerFactory</span><span class="p">,</span> <span class="n">StdlibLoggerFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.process</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">OsEnvironment</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstanceProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.scope</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingletonScope</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyiv.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Clock</span><span class="p">,</span> <span class="n">DateTimeService</span><span class="p">,</span> <span class="n">PythonDateTimeService</span><span class="p">,</span> <span class="n">RealClock</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Advisor</span><span class="p">,</span> <span class="n">AdvisorPolicy</span><span class="p">,</span> <span class="n">DefaultAdvisorPolicy</span><span class="p">,</span> <span class="n">RejectAdvisor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.api_connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="n">SimpleHttpConnectionConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.authority_gate</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthorityGate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.capability_envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapabilityEnvelope</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.checkpoint_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckpointStore</span><span class="p">,</span> <span class="n">EventLogCheckpointStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
@@ -171,8 +177,16 @@
     <span class="n">InferenceEnvironment</span><span class="p">,</span>
     <span class="n">NoOpInferenceEnvironment</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventLog</span><span class="p">,</span> <span class="n">default_event_log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventLog</span><span class="p">,</span> <span class="n">FanoutEventLog</span><span class="p">,</span> <span class="n">InMemoryEventLog</span><span class="p">,</span> <span class="n">LoggingEventLog</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.delegation_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultDelegationPolicy</span><span class="p">,</span> <span class="n">DelegationPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.denial_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">DenialStore</span><span class="p">,</span> <span class="n">InMemoryDenialStore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.durable_graph_generator</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DurableGraphGenerator</span><span class="p">,</span>
+    <span class="n">GeneratorControllerAuth</span><span class="p">,</span>
+    <span class="n">GeneratorRunStore</span><span class="p">,</span>
+    <span class="n">InMemoryGeneratorRunStore</span><span class="p">,</span>
+    <span class="n">LeaseControllerAuth</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrashProbe</span><span class="p">,</span> <span class="n">NoopCrashProbe</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_executor</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -205,6 +219,15 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.linkage_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultLinkageResolver</span><span class="p">,</span> <span class="n">LinkageResolver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.operation_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">OperationRegistry</span><span class="p">,</span> <span class="n">default_operations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.recipe_lifecycle.evolution_campaign_hooks</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EvolutionCampaignHooks</span><span class="p">,</span>
+    <span class="n">NoopEvolutionCampaignHooks</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.recipe_lifecycle.recipe_promotion_policy</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">NoopRecipePromotionPolicy</span><span class="p">,</span>
+    <span class="n">RecipePromotionPolicy</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.tool_result_freshness</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolResultFreshnessPolicy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.tools.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.verification_policy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultVerificationPolicy</span><span class="p">,</span> <span class="n">VerificationPolicy</span>
 
@@ -446,28 +469,148 @@
             <span class="n">key_impl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_implementation_for_key</span><span class="p">(</span><span class="n">impl</span><span class="p">,</span> <span class="n">alias_to</span><span class="o">=</span><span class="n">alias_to</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">register_key</span><span class="p">(</span><span class="n">Key</span><span class="p">(</span><span class="n">abstract</span><span class="p">,</span> <span class="n">named</span><span class="p">),</span> <span class="n">key_impl</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="n">scope</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_binding</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">abstract</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">impl</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">singleton</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register a class (singleton) or a concrete instance from a hook."""</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">impl</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">abstract</span><span class="p">,</span> <span class="n">impl</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="n">singleton</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">abstract</span><span class="p">,</span> <span class="n">impl</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_register_override_or_factory</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">abstract</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">override</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Host/test override instance/class, else injector factory."""</span>
+        <span class="k">if</span> <span class="n">override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">abstract</span><span class="p">,</span> <span class="n">override</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">abstract</span><span class="p">,</span> <span class="n">factory</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
 <div class="viewcode-block" id="MechaHarnessConfig.configure">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.configure">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">event_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">()</span>
+        <span class="c1"># Leaf edges first so composed factories can inject them.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">Environment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_environment</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">DateTimeService</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_datetime_service</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">Filesystem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_filesystem</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">Clock</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">LoggerFactory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_logger_factory</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AsyncHttpClient</span><span class="p">,</span> <span class="n">AsyncUrllibHttpClient</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">Settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_settings</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">HarnessConfig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_harness_config</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">ToolRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tools</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">EventLog</span><span class="p">,</span> <span class="n">event_log</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">AccessControl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_access_control</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CostAccountant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cost_accountant</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">InferenceEnvironment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_environment</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">APIConnectionConfig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_judge_connection</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphNodeRunnerRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_runner_registry</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphFailurePolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_failure_policy</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">GraphEscalation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_escalation</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">OperationRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_operation_registry</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">InferenceCapture</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_capture</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">LinkageResolver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_linkage_resolver</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">VerificationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_verification_policy</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">DelegationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_delegation_policy</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">AdvisorPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_advisor_policy</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">Advisor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_advisor</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">InferenceEnvironment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_environment</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">GraphNodeRunnerRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_runner_registry</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">GraphFailurePolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_failure_policy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">GraphEscalation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_escalation</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">OperationRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_operation_registry</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">InferenceCapture</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_capture</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">VerificationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_verification_policy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">DelegationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_delegation_policy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">AdvisorPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_advisor_policy</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">Advisor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_advisor</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">ContextProviderRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_provider_registry</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CapabilityEnvelope</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_capability_envelope</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lifecycle_extension_registry</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">CrashProbe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_crash_probe</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">RecipePromotionPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_recipe_promotion_policy</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">EvolutionCampaignHooks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_evolution_campaign_hooks</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">DenialStore</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_denial_store</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">ToolResultFreshnessPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tool_result_freshness_policy</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_event_log</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EventLog</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">FanoutEventLog</span><span class="p">(</span>
+                <span class="n">InMemoryEventLog</span><span class="p">(),</span>
+                <span class="n">LoggingEventLog</span><span class="p">(</span><span class="n">logger_factory</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">LoggerFactory</span><span class="p">)),</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">EventLog</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">(),</span> <span class="n">make_event_log</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_access_control</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessControl</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">InMemoryAccessControl</span><span class="p">(</span>
+                <span class="n">event_log</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">EventLog</span><span class="p">),</span>
+                <span class="n">policy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_access_policy</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">AccessControl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_access_control</span><span class="p">(),</span> <span class="n">make_access_control</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_cost_accountant</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostAccountant</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">InMemoryCostAccountant</span><span class="p">(</span><span class="n">event_log</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">EventLog</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">CostAccountant</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cost_accountant</span><span class="p">(),</span> <span class="n">make_cost_accountant</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_judge_connection</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIConnectionConfig</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SimpleHttpConnectionConfig</span><span class="o">.</span><span class="n">for_judge</span><span class="p">(</span>
+                <span class="n">env</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">Environment</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">APIConnectionConfig</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_judge_connection</span><span class="p">(),</span>
+            <span class="n">make_judge_connection</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_checkpoint_store</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CheckpointStore</span><span class="p">:</span>
+            <span class="n">event_log</span> <span class="o">=</span> <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">EventLog</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">EventLogCheckpointStore</span><span class="p">(</span>
+                <span class="n">GraphStore</span><span class="p">(</span><span class="n">event_log</span><span class="p">,</span> <span class="n">agent_id</span><span class="o">=</span><span class="s2">"graph"</span><span class="p">),</span>
+                <span class="n">event_log</span><span class="o">=</span><span class="n">event_log</span><span class="p">,</span>
+                <span class="n">agent_id</span><span class="o">=</span><span class="s2">"graph"</span><span class="p">,</span>
+                <span class="n">datetime_service</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">DateTimeService</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">CheckpointStore</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_checkpoint_store</span><span class="p">(),</span> <span class="n">make_checkpoint_store</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_linkage_resolver</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LinkageResolver</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DefaultLinkageResolver</span><span class="p">(</span>
+                <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">GraphNodeRunnerRegistry</span><span class="p">),</span>
+                <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">AccessControl</span><span class="p">),</span>
+                <span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">InferenceEnvironment</span><span class="p">),</span>
+                <span class="n">operations</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">OperationRegistry</span><span class="p">),</span>
+                <span class="n">inference_capture</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">InferenceCapture</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">LinkageResolver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_linkage_resolver</span><span class="p">(),</span> <span class="n">make_linkage_resolver</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_authority_gate</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AuthorityGate</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">AuthorityGate</span><span class="p">(</span>
+                <span class="n">access</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">AccessControl</span><span class="p">),</span>
+                <span class="n">denials</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">DenialStore</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">AuthorityGate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_authority_gate</span><span class="p">(),</span> <span class="n">make_authority_gate</span>
+        <span class="p">)</span>
+
         <span class="c1"># Recipe / backend / family membership: pyiv map multibinds (catalog_keys).</span>
         <span class="c1"># Cast: pyiv accepts ABC keys; mypy rejects abstract type[T] args.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contribute_map_entries</span><span class="p">(</span>
@@ -487,13 +630,6 @@
         <span class="p">)</span>
         <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">,</span> <span class="n">GraphTemplateRegistry</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">ContextProviderRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_provider_registry</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CapabilityEnvelope</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_capability_envelope</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span>
-            <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lifecycle_extension_registry</span><span class="p">()</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CheckpointStore</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_checkpoint_store</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_instance</span><span class="p">(</span><span class="n">CrashProbe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_crash_probe</span><span class="p">())</span>
 
         <span class="n">inference_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inference_class</span><span class="p">()</span>
         <span class="n">harness_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_harness_class</span><span class="p">()</span>
@@ -503,6 +639,7 @@
         <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">AbstractHarness</span><span class="p">)</span>
         <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">graph_executor_cls</span><span class="p">)</span>
         <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">GraphExecutor</span><span class="p">)</span>
+        <span class="n">_expose_ctor_type_hints</span><span class="p">(</span><span class="n">SystemOneJudgeProvider</span><span class="p">)</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">make_inference</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InferenceStrategy</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bind_mh_providers</span><span class="p">(</span><span class="n">injector</span><span class="p">)</span>
@@ -554,7 +691,36 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">JudgeProvider</span><span class="p">,</span> <span class="n">make_judge</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">AbstractHarness</span><span class="p">,</span> <span class="n">harness_cls</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">GraphExecutor</span><span class="p">,</span> <span class="n">graph_executor_cls</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">GraphExecutor</span><span class="p">,</span> <span class="n">graph_executor_cls</span><span class="p">,</span> <span class="n">singleton</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">GeneratorControllerAuth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_generator_controller_auth</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_generator_run_store</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratorRunStore</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">InMemoryGeneratorRunStore</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">GeneratorRunStore</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_generator_run_store</span><span class="p">(),</span>
+            <span class="n">make_generator_run_store</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_durable_graph_generator</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DurableGraphGenerator</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DurableGraphGenerator</span><span class="p">(</span>
+                <span class="n">registry</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">),</span>
+                <span class="n">run_store</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">GeneratorRunStore</span><span class="p">),</span>
+                <span class="n">event_log</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">EventLog</span><span class="p">),</span>
+                <span class="n">datetime_service</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">DateTimeService</span><span class="p">),</span>
+                <span class="n">controller_auth</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">GeneratorControllerAuth</span><span class="p">),</span>
+                <span class="n">checkpoint_store</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">CheckpointStore</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">DurableGraphGenerator</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_durable_graph_generator</span><span class="p">(),</span>
+            <span class="n">make_durable_graph_generator</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_settings">
@@ -566,27 +732,16 @@
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_event_log">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_event_log">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_event_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EventLog</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Shared ``EventLog`` for harnesses and access/cost policies."""</span>
-        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_event_log"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">existing</span> <span class="o">=</span> <span class="n">default_event_log</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span> <span class="o">=</span> <span class="n">existing</span>
-        <span class="k">return</span> <span class="n">existing</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_event_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">EventLog</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional ``EventLog`` override. ``None`` → default Fanout factory."""</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_access_control">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_access_control">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_access_control</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessControl</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Deny-by-default access control bound into harnesses."""</span>
-        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_access_control"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">existing</span> <span class="o">=</span> <span class="n">InMemoryAccessControl</span><span class="p">(</span>
-                <span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">(),</span>
-                <span class="n">policy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_access_policy</span><span class="p">(),</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_access_control</span> <span class="o">=</span> <span class="n">existing</span>
-        <span class="k">return</span> <span class="n">existing</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_access_control</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessControl</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">AccessControl</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional ``AccessControl`` override. ``None`` → inject ``EventLog``."""</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_access_policy">
@@ -610,27 +765,62 @@
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_inference_environment">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_environment">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_environment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InferenceEnvironment</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_environment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InferenceEnvironment</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">InferenceEnvironment</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Host probe for the active inference profile (default: no-op)."""</span>
-        <span class="k">return</span> <span class="n">NoOpInferenceEnvironment</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">NoOpInferenceEnvironment</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_environment">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_environment">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_environment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">Environment</span><span class="p">]</span> <span class="o">|</span> <span class="n">Environment</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Process environment class/instance for ``from_env`` / host knobs."""</span>
+        <span class="k">return</span> <span class="n">OsEnvironment</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_datetime_service">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_datetime_service">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_datetime_service</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">DateTimeService</span><span class="p">]</span> <span class="o">|</span> <span class="n">DateTimeService</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""UTC timestamps for checkpoints and stamps."""</span>
+        <span class="k">return</span> <span class="n">PythonDateTimeService</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_filesystem">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_filesystem">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_filesystem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">Filesystem</span><span class="p">]</span> <span class="o">|</span> <span class="n">Filesystem</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""File I/O for decision JSONL and host paths."""</span>
+        <span class="k">return</span> <span class="n">RealFilesystem</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_clock">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_clock">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_clock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">Clock</span><span class="p">]</span> <span class="o">|</span> <span class="n">Clock</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Monotonic / sleep surface for coordination."""</span>
+        <span class="k">return</span> <span class="n">RealClock</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_logger_factory">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_logger_factory">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_logger_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">LoggerFactory</span><span class="p">]</span> <span class="o">|</span> <span class="n">LoggerFactory</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Logger factory for ``LoggingEventLog``."""</span>
+        <span class="k">return</span> <span class="n">StdlibLoggerFactory</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_judge_connection">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_connection">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIConnectionConfig</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""HTTP connection for the judge lane (override for OAuth, etc.)."""</span>
-        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_judge_connection"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">existing</span> <span class="o">=</span> <span class="n">SimpleHttpConnectionConfig</span><span class="o">.</span><span class="n">for_judge</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_judge_connection</span> <span class="o">=</span> <span class="n">existing</span>
-        <span class="k">return</span> <span class="n">existing</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIConnectionConfig</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">APIConnectionConfig</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional judge connection override. ``None`` → ``for_judge(env=inject)``."""</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_judge_provider">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_judge_provider">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JudgeProvider</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Judge backend (default: System One over ``get_judge_connection()``)."""</span>
-        <span class="k">return</span> <span class="n">SystemOneJudgeProvider</span><span class="p">(</span><span class="n">connection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_judge_connection</span><span class="p">())</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_judge_provider</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">JudgeProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">JudgeProvider</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Judge backend class or instance (default: ``SystemOneJudgeProvider``).</span>
+
+<span class="sd">        Prefer returning a class so pyiv injects ``APIConnectionConfig`` and</span>
+<span class="sd">        ``AsyncHttpClient``. Instance returns still work for host overrides.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">SystemOneJudgeProvider</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.completer_bindings">
@@ -669,9 +859,9 @@
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_cost_accountant">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_cost_accountant">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_cost_accountant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostAccountant</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Ledger used to price inference and tool invocations."""</span>
-        <span class="k">return</span> <span class="n">InMemoryCostAccountant</span><span class="p">(</span><span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">())</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cost_accountant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostAccountant</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">CostAccountant</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional cost ledger override. ``None`` → inject ``EventLog``."""</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_inference_class">
@@ -719,13 +909,15 @@
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_checkpoint_store">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_checkpoint_store">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_checkpoint_store</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CheckpointStore</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Authoritative graph/effect persistence (default: ephemeral EventLog).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_checkpoint_store</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CheckpointStore</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">CheckpointStore</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional checkpoint store override.</span>
 
-<span class="sd">        Override to bind the SQLite reference backend (or a host store)::</span>
+<span class="sd">        ``None`` → ephemeral ``EventLogCheckpointStore`` factory (injects</span>
+<span class="sd">        ``EventLog`` + ``DateTimeService``). Override to bind SQLite::</span>
 
 <span class="sd">            &gt;&gt;&gt; import tempfile</span>
 <span class="sd">            &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">            &gt;&gt;&gt; from pyiv.time import PythonDateTimeService</span>
 <span class="sd">            &gt;&gt;&gt; from mechaharness.checkpoint_store import CheckpointStore</span>
 <span class="sd">            &gt;&gt;&gt; from mechaharness.di import MechaHarnessConfig, get_injector</span>
 <span class="sd">            &gt;&gt;&gt; from mechaharness.harness.pass_through import PassThroughHarness</span>
@@ -738,112 +930,143 @@
 <span class="sd">            ...     def get_harness_class(self):</span>
 <span class="sd">            ...         return PassThroughHarness</span>
 <span class="sd">            ...     def get_checkpoint_store(self):</span>
-<span class="sd">            ...         return SqliteCheckpointStore(path)</span>
+<span class="sd">            ...         return SqliteCheckpointStore(</span>
+<span class="sd">            ...             path, datetime_service=PythonDateTimeService()</span>
+<span class="sd">            ...         )</span>
 <span class="sd">            &gt;&gt;&gt; store = get_injector(DurableConfig()).inject(CheckpointStore)</span>
 <span class="sd">            &gt;&gt;&gt; store.durability</span>
 <span class="sd">            'durable'</span>
 <span class="sd">        """</span>
-        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_checkpoint_store"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">event_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_event_log</span><span class="p">()</span>
-            <span class="n">existing</span> <span class="o">=</span> <span class="n">EventLogCheckpointStore</span><span class="p">(</span>
-                <span class="n">GraphStore</span><span class="p">(</span><span class="n">event_log</span><span class="p">,</span> <span class="n">agent_id</span><span class="o">=</span><span class="s2">"graph"</span><span class="p">),</span>
-                <span class="n">event_log</span><span class="o">=</span><span class="n">event_log</span><span class="p">,</span>
-                <span class="n">agent_id</span><span class="o">=</span><span class="s2">"graph"</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_store</span> <span class="o">=</span> <span class="n">existing</span>
-        <span class="k">return</span> <span class="n">existing</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_crash_probe">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_crash_probe">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_crash_probe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrashProbe</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_crash_probe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrashProbe</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">CrashProbe</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Optional crash-injection probe (default: never crash)."""</span>
-        <span class="k">return</span> <span class="n">NoopCrashProbe</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">NoopCrashProbe</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_node_runner_registry">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_node_runner_registry">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_node_runner_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphNodeRunnerRegistry</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_node_runner_registry</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphNodeRunnerRegistry</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">GraphNodeRunnerRegistry</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Node-kind runners for the graph executor (default: empty)."""</span>
-        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_node_runner_registry"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">existing</span> <span class="o">=</span> <span class="n">GraphNodeRunnerRegistry</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_node_runner_registry</span> <span class="o">=</span> <span class="n">existing</span>
-        <span class="k">return</span> <span class="n">existing</span></div>
+        <span class="k">return</span> <span class="n">GraphNodeRunnerRegistry</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_graph_failure_policy">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_graph_failure_policy">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_graph_failure_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphFailurePolicy</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_graph_failure_policy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphFailurePolicy</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">GraphFailurePolicy</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Retry / escalate / fail policy for graph node attempts."""</span>
-        <span class="k">return</span> <span class="n">DefaultGraphFailurePolicy</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">DefaultGraphFailurePolicy</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_graph_escalation">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_graph_escalation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_graph_escalation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphEscalation</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_graph_escalation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphEscalation</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">GraphEscalation</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Escalation hook after retries are exhausted (default: reject)."""</span>
-        <span class="k">return</span> <span class="n">RejectGraphEscalation</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">RejectGraphEscalation</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_operation_registry">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_operation_registry">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_operation_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OperationRegistry</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_operation_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OperationRegistry</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">OperationRegistry</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Shared operation contracts for linkage / compilers."""</span>
-        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_operation_registry"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">existing</span> <span class="o">=</span> <span class="n">default_operations</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_operation_registry</span> <span class="o">=</span> <span class="n">existing</span>
-        <span class="k">return</span> <span class="n">existing</span></div>
+        <span class="k">return</span> <span class="n">default_operations</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_inference_capture">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_inference_capture">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_capture</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InferenceCapture</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_inference_capture</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InferenceCapture</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">InferenceCapture</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Optional native inference capture capability (default: evaluation-only)."""</span>
         <span class="k">return</span> <span class="n">empty_inference_capture</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_linkage_resolver">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_linkage_resolver">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_linkage_resolver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LinkageResolver</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Pre-execution graph wiring validator."""</span>
-        <span class="k">return</span> <span class="n">DefaultLinkageResolver</span><span class="p">(</span>
-            <span class="n">runners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_node_runner_registry</span><span class="p">(),</span>
-            <span class="n">access</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_access_control</span><span class="p">(),</span>
-            <span class="n">environment</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_inference_environment</span><span class="p">(),</span>
-            <span class="n">operations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_operation_registry</span><span class="p">(),</span>
-            <span class="n">inference_capture</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_inference_capture</span><span class="p">(),</span>
-        <span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_linkage_resolver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LinkageResolver</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">LinkageResolver</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional linkage override. ``None`` → inject runners/access/env/…."""</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_verification_policy">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_verification_policy">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_verification_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VerificationPolicy</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_verification_policy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VerificationPolicy</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">VerificationPolicy</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Selects and runs verification for graph/outcome gates."""</span>
-        <span class="k">return</span> <span class="n">DefaultVerificationPolicy</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">DefaultVerificationPolicy</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_delegation_policy">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_delegation_policy">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_delegation_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DelegationPolicy</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_delegation_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DelegationPolicy</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">DelegationPolicy</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Chooses inline versus child/subgraph execution."""</span>
-        <span class="k">return</span> <span class="n">DefaultDelegationPolicy</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">DefaultDelegationPolicy</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_advisor_policy">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_advisor_policy">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_advisor_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AdvisorPolicy</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_advisor_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AdvisorPolicy</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">AdvisorPolicy</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Sparse advisor consultation policy."""</span>
-        <span class="k">return</span> <span class="n">DefaultAdvisorPolicy</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">DefaultAdvisorPolicy</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_advisor">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_advisor">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_advisor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Advisor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_advisor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Advisor</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">Advisor</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Non-binding advisor (default: unavailable / reject)."""</span>
-        <span class="k">return</span> <span class="n">RejectAdvisor</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">RejectAdvisor</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_recipe_promotion_policy">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_recipe_promotion_policy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_recipe_promotion_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RecipePromotionPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Host policy for promoting recipe versions (default: no host opinion)."""</span>
+        <span class="k">return</span> <span class="n">NoopRecipePromotionPolicy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_evolution_campaign_hooks">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_evolution_campaign_hooks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_evolution_campaign_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EvolutionCampaignHooks</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Host-owned evolution campaign seams (default: no-op)."""</span>
+        <span class="k">return</span> <span class="n">NoopEvolutionCampaignHooks</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_denial_store">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_denial_store">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_denial_store</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DenialStore</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Denial memory shared by the authority gate (default: process-local).</span>
+
+<span class="sd">        Hosts bind a durable store; the in-memory default is not restart-durable.</span>
+<span class="sd">        """</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_denial_store"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">InMemoryDenialStore</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_denial_store</span> <span class="o">=</span> <span class="n">existing</span>
+        <span class="k">return</span> <span class="n">existing</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_authority_gate">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_authority_gate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_authority_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AuthorityGate</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">AuthorityGate</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional ``AuthorityGate`` override. ``None`` → inject AccessControl + DenialStore.</span>
+
+<span class="sd">        No consequence policy by default; hosts override the hook or re-register</span>
+<span class="sd">        a factory that passes ``consequence=``.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_tool_result_freshness_policy">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_tool_result_freshness_policy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_tool_result_freshness_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolResultFreshnessPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Staleness rules for tool evidence (default: honor ``expires_at`` only)."""</span>
+        <span class="k">return</span> <span class="n">ToolResultFreshnessPolicy</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.graph_template_classes">
@@ -869,9 +1092,11 @@
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_context_provider_registry">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_context_provider_registry">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_context_provider_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ContextProviderRegistry</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_context_provider_registry</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ContextProviderRegistry</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">ContextProviderRegistry</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Host context providers (document/KG adapters bind here)."""</span>
-        <span class="k">return</span> <span class="n">ContextProviderRegistry</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">ContextProviderRegistry</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_capability_envelope">
@@ -879,6 +1104,29 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_capability_envelope</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CapabilityEnvelope</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Default run envelope from configured grants."""</span>
         <span class="k">return</span> <span class="n">CapabilityEnvelope</span><span class="o">.</span><span class="n">from_grants</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_grants</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_generator_controller_auth">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_generator_controller_auth">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_generator_controller_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratorControllerAuth</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Controller lease strategy for durable generator ops."""</span>
+        <span class="k">return</span> <span class="n">LeaseControllerAuth</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_generator_run_store">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_generator_run_store">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_generator_run_store</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratorRunStore</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">GeneratorRunStore</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional :class:`GeneratorRunStore` override. ``None`` → in-memory."""</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_durable_graph_generator">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_durable_graph_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_durable_graph_generator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DurableGraphGenerator</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">DurableGraphGenerator</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional :class:`DurableGraphGenerator` override. ``None`` → factory."""</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_lifecycle_extension_registry">

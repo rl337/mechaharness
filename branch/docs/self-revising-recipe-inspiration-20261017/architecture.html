@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Architecture &mdash; MechaHarness 0.4.1 documentation</title>
+  <title>Architecture &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c87aa342"></script>
+      <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -118,7 +118,24 @@ the structural map: provider I/O and agent-loop policy stay separate extension
 axes. Wiring is <strong>pyiv dependency injection first</strong>. OpenAPI (<code class="docutils literal notranslate"><span class="pre">RunRequest</span></code> /
 <code class="docutils literal notranslate"><span class="pre">run()</span></code>) is the non-DI facade, not a second architecture. See
 <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code>.</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────┐     ┌─────────────┐
+<p>For long-running, judgment-bearing graphs, the <strong>durable graph generator</strong> is
+the primary host-facing execution model: external drivers advance durable runs
+through ordered yields. One-shot harness loops remain for short work. See
+<a class="reference internal" href="requirements/durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> Frontier / human / ScriptedDriver
+              │
+              ▼
+   DurableGraphGenerator          ← primary long-run façade
+   start / resume / inspect / …
+              │
+              ▼
+        GraphExecutor + CheckpointStore   ← internal walker + durability
+              │
+              ▼
+        GraphTemplateRegistry (Agentic Recipes)
+
+ Short path (unchanged):
+┌─────────────┐     ┌─────────────┐
 │  CLI (Typer)│     │ API (FastAPI)│
 └──────┬──────┘     └──────┬──────┘
        │                   │
@@ -153,7 +170,7 @@ axes. Wiring is <strong>pyiv dependency injection first</strong>. OpenAPI (<code
 </div>
 <section id="dependency-injection">
 <h2>Dependency injection<a class="headerlink" href="#dependency-injection" title="Link to this heading"></a></h2>
-<p><strong>Pattern:</strong> Template-method pyiv <code class="docutils literal notranslate"><span class="pre">Config</span></code> + constructor injection (pyiv ≥ 0.4.2)<br />
+<p><strong>Pattern:</strong> Template-method pyiv <code class="docutils literal notranslate"><span class="pre">Config</span></code> + constructor injection (pyiv ≥ 1.1)<br />
 <strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.di</span></code></p>
 <p>Hosts <strong>must</strong> subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (or use <code class="docutils literal notranslate"><span class="pre">run()</span></code>). Hand-constructing
 harness families is unsupported. <code class="docutils literal notranslate"><span class="pre">configure()</span></code> class-binds <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>
@@ -164,26 +181,54 @@ registers <code class="docutils literal notranslate"><span class="pre">Settings<
 <code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>, <code class="docutils literal notranslate"><span class="pre">OperationRegistry</span></code>,
 <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code>, <code class="docutils literal notranslate"><span class="pre">VerificationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">DelegationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">Advisor</span></code>,
 <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">ContextProviderRegistry</span></code>,
-<code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>, <code class="docutils literal notranslate"><span class="pre">LifecycleExtensionRegistry</span></code>, and <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code>.
+<code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>, <code class="docutils literal notranslate"><span class="pre">LifecycleExtensionRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code>,
+<code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code>, <code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code>, and <code class="docutils literal notranslate"><span class="pre">GeneratorControllerAuth</span></code>.
 Subclasses override <code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called
 from the Config constructor). Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (or
 <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>) for deny-by-default tool grants; compose reusable sets with
 <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code>. Override <code class="docutils literal notranslate"><span class="pre">include_subagent_tools()</span></code> to set
 <code class="docutils literal notranslate"><span class="pre">HarnessConfig.subagent_tools</span></code> (parent EventLog query tools). Override
 <code class="docutils literal notranslate"><span class="pre">get_inference_environment()</span></code> for host profile probes.
-Override <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> for judge HTTP and
+Override <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> for judge wiring and
 wire adapters. Override <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> /
-<code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code> for plan execution and lifecycle mods.</p>
+<code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_durable_graph_generator()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_generator_run_store()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_generator_controller_auth()</span></code> for plan execution, lifecycle mods, and
+driven durable runs.</p>
 <p><strong>Config ownership:</strong> lane- and provider-specific knobs belong on the owning
 injectable (e.g. <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> for <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>), not
 as a growing pile of fields on <code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Providers are never attributes of
-<code class="docutils literal notranslate"><span class="pre">Settings</span></code>. See <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code> and the <code class="docutils literal notranslate"><span class="pre">di-config-ownership</span></code> skill.</p>
+<code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Shared edges bind in <code class="docutils literal notranslate"><span class="pre">configure()</span></code> and are consumed by constructor
+injection / <code class="docutils literal notranslate"><span class="pre">inject(T)</span></code> — not via <code class="docutils literal notranslate"><span class="pre">getattr</span></code> lazy caches on Config or sibling
+<code class="docutils literal notranslate"><span class="pre">get_*</span></code> calls that pull collaborators. See <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code>,
+<code class="docutils literal notranslate"><span class="pre">docs/requirements/dependency-injection.md</span></code>, and the <code class="docutils literal notranslate"><span class="pre">di-config-ownership</span></code>
+skill.</p>
 <p><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code> implements the hooks via overridable <code class="docutils literal notranslate"><span class="pre">inference_classes()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">harness_classes()</span></code> maps plus <code class="docutils literal notranslate"><span class="pre">Settings.inference_backend</span></code> /
 <code class="docutils literal notranslate"><span class="pre">Settings.harness_family</span></code>. That is the configuration path for CLI/HTTP callers
 who pick backends by name.</p>
+</section>
+<section id="durable-graph-generator-driven-execution">
+<span id="durable-graph-generator"></span><h2>Durable graph generator (driven execution)<a class="headerlink" href="#durable-graph-generator-driven-execution" title="Link to this heading"></a></h2>
+<p><strong>Pattern:</strong> Externally driven durable generator over registered recipes<br />
+<strong>Code:</strong> <code class="docutils literal notranslate"><span class="pre">mechaharness.durable_graph_generator</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.host_kit</span></code><br />
+<strong>Requirements:</strong> <a class="reference internal" href="requirements/durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a><br />
+<strong>Reference:</strong> <a class="reference internal" href="reference/durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a></p>
+<p>Hosts (frontier MCP clients, human CLI/TUI, <code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code>) call
+<code class="docutils literal notranslate"><span class="pre">start</span></code> / <code class="docutils literal notranslate"><span class="pre">resume</span></code> / <code class="docutils literal notranslate"><span class="pre">inspect</span></code> / <code class="docutils literal notranslate"><span class="pre">cancel</span></code> / <code class="docutils literal notranslate"><span class="pre">list_recipes</span></code>. The generator
+emits ordered <code class="docutils literal notranslate"><span class="pre">GraphYield</span></code> envelopes; <code class="docutils literal notranslate"><span class="pre">advice_requested</span></code> returns as an ordinary
+call result so the driver session can answer without recursive reentry into a
+pending MCP tool call. Continuation state lives in <code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code> and
+composes with <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code>. Advisory guidance is distinct from
+<code class="docutils literal notranslate"><span class="pre">ApprovalInterrupt</span></code> and from in-process <code class="docutils literal notranslate"><span class="pre">Advisor</span></code> consults. MCP is a planned
+stdio adapter of the same contract — not a second harness.</p>
+<p>Prefer this façade when a run may yield guidance, outlive a process, or be
+driven from an external conversation. Recipe evolution
+(<a class="reference internal" href="inspiration/self-revising-recipe-evolution.html"><span class="std std-doc">self-revising inspiration</span></a>)
+selects <em>which</em> registered recipe is active; the generator drives <em>how</em> that
+run advances.</p>
 </section>
 <section id="execution-graph">
 <span id="id1"></span><h2>Execution graph<a class="headerlink" href="#execution-graph" title="Link to this heading"></a></h2>
@@ -192,7 +237,9 @@ who pick backends by name.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ExecutionGraph</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code> model nodes, justified edges, checkpoints, and
 verification helpers. <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> depends on an injectable
 <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> (ephemeral <code class="docutils literal notranslate"><span class="pre">EventLogCheckpointStore</span></code> by default; durable
-<code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> for process-restart recovery). It walks ready nodes:
+<code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> for process-restart recovery). The durable generator
+<strong>drives</strong> this walker to the next committed yield; it does not replace it.
+<code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> walks ready nodes:
 it requires <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> and a <code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code> on every <code class="docutils literal notranslate"><span class="pre">run()</span></code>,
 dispatches open <code class="docutils literal notranslate"><span class="pre">kind</span></code> strings through a host-populated
 <code class="docutils literal notranslate"><span class="pre">GraphNodeRunnerRegistry</span></code>, charges a shared <code class="docutils literal notranslate"><span class="pre">Budget</span></code> (soft wind-down / hard
@@ -210,7 +257,7 @@ durable intent/acceptance and resume reconciliation. Bind via Config hooks
 <strong>flavors</strong> are extra pyiv <code class="docutils literal notranslate"><span class="pre">Named</span></code> bindings from
 <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.completer_bindings()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">judge_bindings()</span></code>; host constructors select them with
-<code class="docutils literal notranslate"><span class="pre">Annotated[T,</span> <span class="pre">Named(...)]</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched(...)</span></code> (pyiv ≥ 0.4.2). See
+<code class="docutils literal notranslate"><span class="pre">Annotated[T,</span> <span class="pre">Named(...)]</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched(...)</span></code> (pyiv ≥ 1.1). See
 <a class="reference internal" href="guides/dependency-injection.html"><span class="std std-doc">Dependency injection</span></a>.</p>
 <p>Before substantive work, <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> runs an injectable
 <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code> (runner kinds, grants, operation binds, stop contracts,

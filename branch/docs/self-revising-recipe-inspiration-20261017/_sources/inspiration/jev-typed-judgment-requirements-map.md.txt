@@ -17,7 +17,7 @@ infrastructure.
 | MH-JEV-02 | Batch judgments | `decision_plane_runtime.py`, `JudgeRequest` | story | `fangore_decision_plane_policy`, `taloneth_fixture_judge_batch` |
 | MH-JEV-03 | Calibration / abstention | `judgement_policy.py`, DP confidence floor | partial | `fangore_decision_plane_policy` (thresholds); deeper calibration corpus still open |
 | MH-JEV-04 | Provenance / replay | `decision_log.py`, DP telemetry | story | `taloneth_policy_replay`, `fangore_decision_plane_telemetry` |
-| MH-JEV-05 | Hard execution boundary | `core/access.py`, `consequence.py`, DP envelopes | story | `fangore_tool_gating`, `fangore_jev_action_safety` |
+| MH-JEV-05 | Hard execution boundary | `core/access.py`, `consequence.py`, DP envelopes | story | `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety` |
 | MH-JEV-06 | Escalation / bounded loops | `decision_plane`, `verify_repair`, `bounded_retry` | story | `fangore_decision_plane_policy`, `fangore_verify_repair_recipe` |
 | MH-JEV-07 | Static-data tests | `FixtureJudgeProvider`, story fixtures | story | `taloneth_fixture_judge_batch`, JEV domain stories below |
 | MH-JEV-08 | Comparative evaluation | `compare_shadow_decision`, eval matrix | story | `fangore_decision_plane_shadow`, `taloneth_decision_plane_shadow_compare` |
