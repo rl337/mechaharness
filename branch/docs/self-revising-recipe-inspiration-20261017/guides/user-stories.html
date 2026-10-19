@@ -381,11 +381,11 @@ pytest<span class="w"> </span>-q
 <p>Nubble needs the observed run topology — retries, spawned reviewers, and terminals — as a first-class graph linked back to the intended plan, not only the planned node list. Accepts FineEnvs training-sequence reconstruction<a class="footnote-reference brackets" href="#fineenvs-rollout" id="id48" role="doc-noteref"><span class="fn-bracket">[</span>15<span class="fn-bracket">]</span></a>.</p>
 <section id="id49">
 <h4>Implementation<a class="headerlink" href="#id49" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">RolloutGraph</span></code>, <code class="docutils literal notranslate"><span class="pre">RolloutNode</span></code>, and <code class="docutils literal notranslate"><span class="pre">build_rollout_graph</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.rollout_graph</span></code> project observed records into roots/parent-child topology with optional <code class="docutils literal notranslate"><span class="pre">execution_node_id</span></code> links.</p>
+<p><code class="docutils literal notranslate"><span class="pre">build_rollout_graph</span></code>; <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">rollout_graph_build</span></code>.</p>
 </section>
 <section id="id50">
 <h4>Validation<a class="headerlink" href="#id50" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code> op <code class="docutils literal notranslate"><span class="pre">rollout_graph_build</span></code>. Soft expects roots and linked retry. Unit tests in <code class="docutils literal notranslate"><span class="pre">tests/test_rollout_graph.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">roots_and_retry.yaml</span></code>: hard roots and retry link.</p>
 </section>
 <section id="id51">
 <h4>Footnotes<a class="headerlink" href="#id51" title="Link to this heading"></a></h4>
@@ -653,12 +653,11 @@ pytest<span class="w"> </span>-q
 <p>Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget. Graph repeating nodes additionally require an explicit stop contract at linkage (<code class="docutils literal notranslate"><span class="pre">fangore_graph_linkage_preflight</span></code>). See inspiration requirements for stop contracts<a class="footnote-reference brackets" href="#insp-stop" id="id107" role="doc-noteref"><span class="fn-bracket">[</span>27<span class="fn-bracket">]</span></a>.</p>
 <section id="id108">
 <h4>Implementation<a class="headerlink" href="#id108" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ConvergenceContract</span></code> / <code class="docutils literal notranslate"><span class="pre">ConvergenceGuard</span></code> fingerprint windows and nested budget slices. <code class="docutils literal notranslate"><span class="pre">StopContract</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.stop_contract</span></code> is the graph-facing alias for the same ceilings plus trigger/continuation/success/abort fields. Escalation may request more evidence, but ceilings never count as task success.</p>
-<p>Covers: POL-03.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ConvergenceGuard</span></code> / <code class="docutils literal notranslate"><span class="pre">ConvergenceContract</span></code>; <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">convergence_ceiling</span></code>.</p>
 </section>
 <section id="id109">
 <h4>Validation<a class="headerlink" href="#id109" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code> op <code class="docutils literal notranslate"><span class="pre">convergence_ceiling</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_convergence_ceiling</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_convergence.py</span></code>. Linkage stop enforcement: <code class="docutils literal notranslate"><span class="pre">fangore_graph_linkage_preflight</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">stagnation.yaml</span></code>: hard terminal/reason.</p>
 </section>
 <section id="id110">
 <h4>Footnotes<a class="headerlink" href="#id110" title="Link to this heading"></a></h4>
@@ -836,11 +835,11 @@ pytest<span class="w"> </span>-q
 <p>Fangore composes a plan that still names a step the host has not wired, and another repeating step without a stop rule. The library must refuse those plans before any runner work starts, naming the missing edge so operators can fix wiring instead of debugging a mid-run crash. Complements <code class="docutils literal notranslate"><span class="pre">fangore_graph_executor</span></code> (authorized run once linkage is sound) and <code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code> (budgets once a loop is allowed). See the inspiration requirements for linkage versus dependency injection and stop contracts<a class="footnote-reference brackets" href="#insp-linkage" id="id154" role="doc-noteref"><span class="fn-bracket">[</span>40<span class="fn-bracket">]</span></a>.</p>
 <section id="id155">
 <h4>Implementation<a class="headerlink" href="#id155" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.linkage_resolver</span></code> validates runner kinds, grants, environment compatibility, termination sinks, and repeating nodes’ <code class="docutils literal notranslate"><span class="pre">StopContract</span></code> before <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> substantive work. Missing runners and missing stop contracts become structured <code class="docutils literal notranslate"><span class="pre">UnsatisfiedEdge</span></code> codes (<code class="docutils literal notranslate"><span class="pre">no_runner</span></code>, <code class="docutils literal notranslate"><span class="pre">missing_stop_contract</span></code>). <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run</span></code> records linkage failure without invoking node handlers.</p>
+<p><code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> preflight; <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code>.</p>
 </section>
 <section id="id156">
 <h4>Validation<a class="headerlink" href="#id156" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code> op <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_graph_linkage_preflight</span></code>. Soft expects: missing-runner linkage fails with <code class="docutils literal notranslate"><span class="pre">no_runner</span></code>; repeating node without stop fails with <code class="docutils literal notranslate"><span class="pre">missing_stop_contract</span></code>; valid linear graph reports <code class="docutils literal notranslate"><span class="pre">ok</span></code> with a fingerprint. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_linkage_resolver.py</span></code>, fixtures under <code class="docutils literal notranslate"><span class="pre">tests/fixtures/linkage_resolver/</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">runner_stop_and_ok.yaml</span></code>: hard ok flags and exact edge codes.</p>
 </section>
 <section id="id157">
 <h4>Footnotes<a class="headerlink" href="#id157" title="Link to this heading"></a></h4>
@@ -1299,11 +1298,11 @@ pytest<span class="w"> </span>-q
 <p>Fangore needs success, rollback, and end paths declared as transitions — not inferred from dependency edges alone — so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance<a class="footnote-reference brackets" href="#wl-l14-transitions" id="id283" role="doc-noteref"><span class="fn-bracket">[</span>77<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-p08-transitions" id="id284" role="doc-noteref"><span class="fn-bracket">[</span>78<span class="fn-bracket">]</span></a>.</p>
 <section id="id285">
 <h4>Implementation<a class="headerlink" href="#id285" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">TransitionContract</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphTransition</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph_transition</span></code> declare success, predicate, retry, rollback, escalate, cancel, and end edges orthogonal to <code class="docutils literal notranslate"><span class="pre">DependencyEdge</span></code>. <code class="docutils literal notranslate"><span class="pre">inspect_transitions</span></code> lists possible next steps for a node.</p>
+<p><code class="docutils literal notranslate"><span class="pre">TransitionContract</span></code> / <code class="docutils literal notranslate"><span class="pre">inspect_transitions</span></code>; <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">graph_transition_inspect</span></code>.</p>
 </section>
 <section id="id286">
 <h4>Validation<a class="headerlink" href="#id286" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code> op <code class="docutils literal notranslate"><span class="pre">graph_transition_inspect</span></code>. Soft expects validation empty and rollback/end kinds for the verify node.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">verify_rollback_end.yaml</span></code>: hard issues and verify kinds.</p>
 </section>
 <section id="id287">
 <h4>Footnotes<a class="headerlink" href="#id287" title="Link to this heading"></a></h4>
@@ -1551,11 +1550,11 @@ pytest<span class="w"> </span>-q
 <p>Fangore’s injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2<a class="footnote-reference brackets" href="#insp-r02" id="id350" role="doc-noteref"><span class="fn-bracket">[</span>96<span class="fn-bracket">]</span></a>. Related: <code class="docutils literal notranslate"><span class="pre">fangore_insp_stop_contract</span></code>.</p>
 <section id="id351">
 <h4>Implementation<a class="headerlink" href="#id351" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> validates runners, grants, environment, and termination separately from pyiv construction. <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> consults it before substantive work.</p>
+<p><code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> runner preflight; <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code>.</p>
 </section>
 <section id="id352">
 <h4>Validation<a class="headerlink" href="#id352" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code> op <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code>. Soft expects <code class="docutils literal notranslate"><span class="pre">no_runner</span></code> on missing kinds and ok+fingerprint on a wired linear graph.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">missing_runner_and_ok.yaml</span></code>: hard runner codes and ok fingerprint.</p>
 </section>
 <section id="id353">
 <h4>Footnotes<a class="headerlink" href="#id353" title="Link to this heading"></a></h4>
@@ -1747,11 +1746,11 @@ pytest<span class="w"> </span>-q
 <p>A repeating repair step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration requirement 4<a class="footnote-reference brackets" href="#insp-r04" id="id404" role="doc-noteref"><span class="fn-bracket">[</span>111<span class="fn-bracket">]</span></a>. Complements <code class="docutils literal notranslate"><span class="pre">fangore_insp_linkage_preflight</span></code> and <code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code>.</p>
 <section id="id405">
 <h4>Implementation<a class="headerlink" href="#id405" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">StopContract</span></code> plus <code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> require stop contracts on repeating nodes unless declared a persistent service loop.</p>
+<p><code class="docutils literal notranslate"><span class="pre">DefaultLinkageResolver</span></code> stop-contract edge; <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code>.</p>
 </section>
 <section id="id406">
 <h4>Validation<a class="headerlink" href="#id406" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code> op <code class="docutils literal notranslate"><span class="pre">graph_linkage_preflight</span></code> with stop-focused request. Soft expects <code class="docutils literal notranslate"><span class="pre">missing_stop_contract</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">missing_stop.yaml</span></code>: hard stop-contract codes.</p>
 </section>
 <section id="id407">
 <h4>Footnotes<a class="headerlink" href="#id407" title="Link to this heading"></a></h4>
@@ -1762,11 +1761,11 @@ pytest<span class="w"> </span>-q
 <p>When verification fails, Fangore wants structured attribution naming the repair target so the graph rolls back to that layer instead of restarting from scratch. Accepts WalkingLabs P08 guidance<a class="footnote-reference brackets" href="#wl-p08-rollback" id="id408" role="doc-noteref"><span class="fn-bracket">[</span>112<span class="fn-bracket">]</span></a>.</p>
 <section id="id409">
 <h4>Implementation<a class="headerlink" href="#id409" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">attribute_with_repair_target</span></code> and <code class="docutils literal notranslate"><span class="pre">select_rollback_target</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.failure_attribution</span></code> attach <code class="docutils literal notranslate"><span class="pre">repair_target</span></code> / <code class="docutils literal notranslate"><span class="pre">responsible_node</span></code> and choose a matching rollback transition.</p>
+<p><code class="docutils literal notranslate"><span class="pre">attribute_with_repair_target</span></code> / <code class="docutils literal notranslate"><span class="pre">select_rollback_target</span></code>; <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">targeted_rollback_select</span></code>.</p>
 </section>
 <section id="id410">
 <h4>Validation<a class="headerlink" href="#id410" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code> op <code class="docutils literal notranslate"><span class="pre">targeted_rollback_select</span></code>. Soft expects selected rollback target produce.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">select_produce.yaml</span></code>: hard rollback/repair targets.</p>
 </section>
 <section id="id411">
 <h4>Footnotes<a class="headerlink" href="#id411" title="Link to this heading"></a></h4>
