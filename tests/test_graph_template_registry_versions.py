@@ -101,16 +101,28 @@ def test_soft_point_evolvable_defaults_false() -> None:
     assert SoftPoint(name="x").evolvable is False
 
 
-def test_evolvable_allowlist_gates_optimizer_edits() -> None:
-    template = ProduceCritiqueRefineTemplate()
-    assert template.evolvable_soft_point_names() == ["critique_prompt", "max_rounds"]
-    template.assert_evolution_allowed(["critique_prompt"])
-    with pytest.raises(ValueError, match="omit_producer_reasoning"):
-        template.assert_evolution_allowed(["max_rounds", "omit_producer_reasoning"])
-    assert IndependentReviewTemplate().evolvable_soft_point_names() == ["reviewer_count"]
-    assert VerifyRepairTemplate().evolvable_soft_point_names() == []
+@pytest.mark.parametrize(
+    ("template_cls", "allowed", "forbidden"),
+    [
+        (
+            ProduceCritiqueRefineTemplate,
+            ["critique_prompt", "max_rounds"],
+            ["omit_producer_reasoning"],
+        ),
+        (IndependentReviewTemplate, ["reviewer_count"], ["reviewer_count", "bogus"]),
+        (VerifyRepairTemplate, [], ["produce_kind"]),
+    ],
+    ids=["produce_critique_refine", "independent_review", "verify_repair"],
+)
+def test_evolvable_allowlist_gates_optimizer_edits(
+    template_cls: type, allowed: list[str], forbidden: list[str]
+) -> None:
+    template = template_cls()
+    assert template.evolvable_soft_point_names() == allowed
+    if allowed:
+        template.assert_evolution_allowed(allowed[:1])
     with pytest.raises(ValueError):
-        VerifyRepairTemplate().assert_evolution_allowed(["produce_kind"])
+        template.assert_evolution_allowed(forbidden)
 
 
 def test_default_catalog_includes_new_recipe_and_versions() -> None:

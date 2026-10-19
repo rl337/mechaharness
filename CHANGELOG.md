@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that family. New acceptance coverage should be fixtures-only by default —
   register a new `op` or harness only when the execution *shape* changes, never
   a per-story kind. Catalog validation rejects unknown kinds/ops.
+- **Unit tests table-driven where cheap:** `test_api_connection`, access-policy /
+  grant-key matrices, tool-phase effect matrix (assert + registry in one loop),
+  event query filters, and recipe evolvable-allowlist cases use `@parametrize`
+  over structs instead of near-clone functions.
 
 ### Added
 
