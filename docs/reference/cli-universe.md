@@ -58,7 +58,7 @@ needed:
 1. Observability / one-shot infer (OBS-*) — done
 2. Former harness_runs / pass-through / tool-loop / cassettes / host DI /
    judge route — done (`harness_runs` runner removed)
-3. Graph execution + recipe catalog — in progress (`cli_graph_verbs` started)
+3. Graph execution — done (`cli_graph_verbs`; runner removed). Recipe catalog next.
 4. Decision plane / remaining judge ops
 5. pure_api + context/eval surface
 6. Fold durable IoC into CLI when ready

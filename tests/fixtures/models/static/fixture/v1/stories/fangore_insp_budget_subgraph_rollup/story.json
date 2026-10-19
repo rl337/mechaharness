@@ -2,10 +2,10 @@
   "id": "fangore_insp_budget_subgraph_rollup",
   "persona": "fangore",
   "title": "Roll nested subgraph spend into the parent budget",
-  "kind": "graph_execution",
+  "kind": "cli",
   "narrative": "When a parent step embeds a child graph, child node costs must count against the same budget the parent is running under. After the child spends enough to hit the soft limit, later parent steps wind down instead of starting. Complements `fangore_insp_graph_budget` and `fangore_insp_dynamic_subgraph`.[^insp-budget-rollup]",
-  "implementation": "`GraphExecutor` passes the parent `Budget` into nested `run` for subgraph nodes so charges aggregate. Soft breach after the child cancels remaining parent work (`soft_exhausted`).",
-  "validation": "Harness `graph_execution` op `graph_budget_subgraph_rollup`. Soft expects aggregated spent, soft level, and cancelled downstream parent node.",
+  "implementation": "`BudgetPolicy` subgraph rollup. `CliInstrumentor` verb `graph_budget_subgraph_rollup`.",
+  "validation": "Harness `cli` scenario `child_rollup.yaml`.",
   "footnotes": [
     {
       "id": "insp-budget-rollup",

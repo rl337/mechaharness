@@ -43,25 +43,43 @@ from mechaharness.cli_diagnostic_verbs import (
 )
 from mechaharness.cli_graph_verbs import (
     BoundedRepairLoopCommand,
+    CheckpointFingerprintRefuseCommand,
     ConvergenceCeilingCommand,
+    DecisionConflictNeighborRevisitCommand,
+    DynamicSubgraphNestCommand,
+    EnvironmentLinkageFailCommand,
+    GraphBudgetLimitsCommand,
+    GraphBudgetSubgraphRollupCommand,
     GraphEventCorrelatorsCommand,
     GraphExecutorRunCommand,
     GraphLinkagePreflightCommand,
     GraphTransitionInspectCommand,
+    LocalPlanResumeCommand,
     RolloutGraphBuildCommand,
     TargetedRollbackSelectCommand,
     TopologyEfficiencyCommand,
+    TransactionalDurableResumeCommand,
     ValidatorQualificationCommand,
+    WakeReresolveResumeCommand,
     run_bounded_repair_loop,
+    run_checkpoint_fingerprint_refuse,
     run_convergence_ceiling,
+    run_decision_conflict_neighbor_revisit,
+    run_dynamic_subgraph_nest,
+    run_environment_linkage_fail,
+    run_graph_budget_limits,
+    run_graph_budget_subgraph_rollup,
     run_graph_event_correlators,
     run_graph_executor_run,
     run_graph_linkage_preflight,
     run_graph_transition_inspect,
+    run_local_plan_resume,
     run_rollout_graph_build,
     run_targeted_rollback_select,
     run_topology_efficiency,
+    run_transactional_durable_resume,
     run_validator_qualification,
+    run_wake_reresolve_resume,
 )
 from mechaharness.cli_infer_runner import CliInferRunner
 from mechaharness.cli_universe import CLI_INFER_NODE_ID, build_cli_universe_graph
@@ -205,6 +223,15 @@ class CliCommand(BaseModel):
     targeted_rollback_select: TargetedRollbackSelectCommand | None = None
     rollout_graph_build: RolloutGraphBuildCommand | None = None
     convergence_ceiling: ConvergenceCeilingCommand | None = None
+    local_plan_resume: LocalPlanResumeCommand | None = None
+    dynamic_subgraph_nest: DynamicSubgraphNestCommand | None = None
+    checkpoint_fingerprint_refuse: CheckpointFingerprintRefuseCommand | None = None
+    environment_linkage_fail: EnvironmentLinkageFailCommand | None = None
+    wake_reresolve_resume: WakeReresolveResumeCommand | None = None
+    graph_budget_limits: GraphBudgetLimitsCommand | None = None
+    graph_budget_subgraph_rollup: GraphBudgetSubgraphRollupCommand | None = None
+    transactional_durable_resume: TransactionalDurableResumeCommand | None = None
+    decision_conflict_neighbor_revisit: DecisionConflictNeighborRevisitCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
 
@@ -233,6 +260,15 @@ class CliCommand(BaseModel):
             ("targeted_rollback_select", self.targeted_rollback_select),
             ("rollout_graph_build", self.rollout_graph_build),
             ("convergence_ceiling", self.convergence_ceiling),
+            ("local_plan_resume", self.local_plan_resume),
+            ("dynamic_subgraph_nest", self.dynamic_subgraph_nest),
+            ("checkpoint_fingerprint_refuse", self.checkpoint_fingerprint_refuse),
+            ("environment_linkage_fail", self.environment_linkage_fail),
+            ("wake_reresolve_resume", self.wake_reresolve_resume),
+            ("graph_budget_limits", self.graph_budget_limits),
+            ("graph_budget_subgraph_rollup", self.graph_budget_subgraph_rollup),
+            ("transactional_durable_resume", self.transactional_durable_resume),
+            ("decision_conflict_neighbor_revisit", self.decision_conflict_neighbor_revisit),
             ("set_clock", self.set_clock),
             ("advance_clock", self.advance_clock),
         ]
@@ -268,6 +304,15 @@ class CliCommand(BaseModel):
             "targeted_rollback_select",
             "rollout_graph_build",
             "convergence_ceiling",
+            "local_plan_resume",
+            "dynamic_subgraph_nest",
+            "checkpoint_fingerprint_refuse",
+            "environment_linkage_fail",
+            "wake_reresolve_resume",
+            "graph_budget_limits",
+            "graph_budget_subgraph_rollup",
+            "transactional_durable_resume",
+            "decision_conflict_neighbor_revisit",
             "set_clock",
             "advance_clock",
         ):
@@ -667,6 +712,59 @@ class CliInstrumentor:
             return CliStepResult(
                 verb="convergence_ceiling",
                 probe=run_convergence_ceiling(command.convergence_ceiling),
+            )
+        if command.local_plan_resume is not None:
+            return CliStepResult(
+                verb="local_plan_resume",
+                probe=run_local_plan_resume(command.local_plan_resume),
+            )
+        if command.dynamic_subgraph_nest is not None:
+            return CliStepResult(
+                verb="dynamic_subgraph_nest",
+                probe=await run_dynamic_subgraph_nest(command.dynamic_subgraph_nest),
+            )
+        if command.checkpoint_fingerprint_refuse is not None:
+            return CliStepResult(
+                verb="checkpoint_fingerprint_refuse",
+                probe=await run_checkpoint_fingerprint_refuse(
+                    command.checkpoint_fingerprint_refuse
+                ),
+            )
+        if command.environment_linkage_fail is not None:
+            return CliStepResult(
+                verb="environment_linkage_fail",
+                probe=run_environment_linkage_fail(command.environment_linkage_fail),
+            )
+        if command.wake_reresolve_resume is not None:
+            return CliStepResult(
+                verb="wake_reresolve_resume",
+                probe=await run_wake_reresolve_resume(command.wake_reresolve_resume),
+            )
+        if command.graph_budget_limits is not None:
+            return CliStepResult(
+                verb="graph_budget_limits",
+                probe=await run_graph_budget_limits(command.graph_budget_limits),
+            )
+        if command.graph_budget_subgraph_rollup is not None:
+            return CliStepResult(
+                verb="graph_budget_subgraph_rollup",
+                probe=await run_graph_budget_subgraph_rollup(
+                    command.graph_budget_subgraph_rollup
+                ),
+            )
+        if command.transactional_durable_resume is not None:
+            return CliStepResult(
+                verb="transactional_durable_resume",
+                probe=await run_transactional_durable_resume(
+                    command.transactional_durable_resume
+                ),
+            )
+        if command.decision_conflict_neighbor_revisit is not None:
+            return CliStepResult(
+                verb="decision_conflict_neighbor_revisit",
+                probe=run_decision_conflict_neighbor_revisit(
+                    command.decision_conflict_neighbor_revisit
+                ),
             )
         assert command.infer is not None
         body = command.infer

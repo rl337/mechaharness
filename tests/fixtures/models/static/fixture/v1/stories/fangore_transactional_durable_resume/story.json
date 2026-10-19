@@ -2,10 +2,10 @@
   "id": "fangore_transactional_durable_resume",
   "persona": "fangore",
   "title": "Resume a coding job after process crash without duplicate dispatch",
-  "kind": "graph_execution",
+  "kind": "cli",
   "narrative": "Fangore's host dispatches a long-running coding job through a durable plan. The MechaHarness process can die after the remote system accepts the job but before the plan records the result. On restart, the same durable store must reconcile the existing job instead of starting a second one. Crash points before intent, after intent, after accept, after reduce, and after final commit are all covered. Complements `fangore_insp_durable_resume` fingerprint refusal. Accepts the transactional durable resume requirements[^tdr-req]. Satisfies personal-agent MH-PA-05 checkpoint-compatible execution[^insp-pa-05]. Dots MH-DOTS-06 effect ledger is native here; auth-epoch resume is `fangore_insp_auth_epoch_resume`[^insp-dots-06-tdr]. Self-revising MH-SR-08 uses these checkpoints; neighbor-revisit conflict resolution remains `fangore_insp_decision_conflict_checkpoint`[^insp-sr-08-tdr].",
-  "implementation": "`GraphExecutor` injects `CheckpointStore` via `MechaHarnessConfig.get_checkpoint_store()` (SQLite reference: `SqliteCheckpointStore`; default EventLog adapter is explicitly `ephemeral`). Opt-in `EffectfulGraphNodeRunner` persists effect intent before dispatch, records external handles, and reconciles uncertain/accepted effects on `run(resume=True)`. `ArmedCrashProbe` / `InjectedProcessCrash` inject process failure at recovery boundaries. EventLog stays observational; fingerprint refusal remains enforced. Module doctests on `checkpoint_store`, `sqlite_checkpoint_store`, `external_effect`, `graph_executor`, and `MechaHarnessConfig.get_checkpoint_store` show the host wiring pattern.",
-  "validation": "Harness `graph_execution` op `transactional_durable_resume_crash_matrix`. Soft expects per crash location: final status ok, dispatch_count exactly 1 after an accepted first dispatch, effect state transitions, and reconciliation on uncertain/accepted resumes. Unit matrix in `tests/test_transactional_durable_resume.py`. Pytest `--doctest-modules` covers the pydoc examples under `src/mechaharness/{checkpoint_store,sqlite_checkpoint_store,external_effect,graph_executor,di}.py`.",
+  "implementation": "`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` verb `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.",
+  "validation": "Harness `cli` scenario `crash_matrix.yaml`: hard `cases_exactly` per crash location.",
   "footnotes": [
     {
       "id": "tdr-req",

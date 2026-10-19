@@ -151,11 +151,11 @@ Missing environment capability must become a structured pre-exec failure, not a 
 
 #### Implementation
 
-`InferenceEnvironment.assert_compatible` is consulted by `DefaultLinkageResolver`; mismatches become `environment_incompatible` edges.
+`DefaultLinkageResolver` environment grant check. `CliInstrumentor` verb `environment_linkage_fail`.
 
 #### Validation
 
-Harness `graph_execution` op `environment_linkage_fail`. Soft expects environment_incompatible code when grants are required but absent.
+Harness `cli` scenario `grant_mismatch.yaml`.
 
 #### Footnotes
 
@@ -935,11 +935,11 @@ When a parent step embeds a child graph, child node costs must count against the
 
 #### Implementation
 
-`GraphExecutor` passes the parent `Budget` into nested `run` for subgraph nodes so charges aggregate. Soft breach after the child cancels remaining parent work (`soft_exhausted`).
+`BudgetPolicy` subgraph rollup. `CliInstrumentor` verb `graph_budget_subgraph_rollup`.
 
 #### Validation
 
-Harness `graph_execution` op `graph_budget_subgraph_rollup`. Soft expects aggregated spent, soft level, and cancelled downstream parent node.
+Harness `cli` scenario `child_rollup.yaml`.
 
 #### Footnotes
 
@@ -1018,11 +1018,11 @@ After a decision is settled, the nodes it still conflicts with are revisited, an
 
 #### Implementation
 
-`neighbors_from_write_conflicts()` and `neighbor_revisit()` in `decision_conflict_checkpoint.py` are pure functions over `ExecutionGraph.concurrent_write_conflicts` output and a visited set: they return the next nodes to revisit, the skipped visited neighbors, `checkpoint` (conflicts cleared) and `cycle_blocked`. Not a second conflict-resolution engine; hosts still checkpoint through `CheckpointStore` and halt via `StopContract`.
+`neighbor_revisit` / `neighbors_from_write_conflicts`. `CliInstrumentor` verb `decision_conflict_neighbor_revisit`.
 
 #### Validation
 
-Harness `graph_execution` op `decision_conflict_neighbor_revisit`. Hard expects, over a chain of write-scope conflicts, the visit order, that a cyclic conflict terminates without a checkpoint and reports the cycle block, and that a cleared decision checkpoints. Unit tests: `tests/test_decision_conflict_checkpoint.py`.
+Harness `cli` scenario `neighbor_revisit.yaml`.
 
 #### Footnotes
 
@@ -1082,11 +1082,11 @@ Long-running work checkpoints outside chat. If the harness or graph configuratio
 
 #### Implementation
 
-`CheckpointStore` (default `EventLogCheckpointStore`; durable `SqliteCheckpointStore`) persists `config_fingerprint`; `GraphExecutor.run(resume=True)` compares fingerprints after re-resolve. See also `fangore_transactional_durable_resume` for external-effect crash recovery.
+`GraphExecutor` fingerprint check on resume. `CliInstrumentor` verb `checkpoint_fingerprint_refuse`.
 
 #### Validation
 
-Harness `graph_execution` op `checkpoint_fingerprint_refuse`. Soft expects first run ok and resume failed with incompatible fingerprint.
+Harness `cli` scenario `fingerprint_refuse.yaml`.
 
 #### Footnotes
 
@@ -1099,11 +1099,11 @@ Fangore embeds a child plan under a parent step. The child must run as its own g
 
 #### Implementation
 
-`SubgraphNodeRunner.embed` stores a child `ExecutionGraph` on a parent node; `GraphExecutor` runs nested graphs with linked run ids and emits graph lifecycle events for the child. Agentic Recipes instantiate to ordinary graphs that may be embedded this way.
+`SubgraphNodeRunner.embed` + `GraphExecutor`. `CliInstrumentor` verb `dynamic_subgraph_nest`.
 
 #### Validation
 
-Harness `graph_execution` op `dynamic_subgraph_nest`. Soft expects parent ok, child_status ok, nested graph events present.
+Harness `cli` scenario `nested_child.yaml`.
 
 #### Footnotes
 
@@ -1211,11 +1211,11 @@ Every graph run must declare how much spend is allowed. Crossing the soft limit 
 
 #### Implementation
 
-`BudgetPolicy` / `Budget` in `mechaharness.budget`. `GraphExecutor.run` requires `budget_policy`; each node attempt charges the shared ledger. Soft cancel open nodes → status `soft_exhausted`; hard fail open nodes → `hard_budget_exceeded`. `hard_limit=None` means unlimited.
+`BudgetPolicy` soft/hard limits on `GraphExecutor`. `CliInstrumentor` verb `graph_budget_limits`.
 
 #### Validation
 
-Harness `graph_execution` op `graph_budget_limits`. Soft expects soft wind-down then hard fail levels. Related fixtures: `tests/fixtures/graph_executor/budget_*.json`, `tests/test_budget.py`.
+Harness `cli` scenario `soft_and_hard.yaml`.
 
 #### Footnotes
 
@@ -1815,11 +1815,11 @@ Persistent goals live in the client orchestrator. When a goal wakes, MechaHarnes
 
 #### Implementation
 
-Client wakes call `LinkageResolver` then `GraphExecutor.run(resume=True)`. Fingerprint mismatch fails closed. Goal stores remain outside the library.
+`GraphExecutor` wake resolve + resume. `CliInstrumentor` verb `wake_reresolve_resume`.
 
 #### Validation
 
-Harness `graph_execution` op `wake_reresolve_resume`. Soft expects re-resolve ok then successful resume with matching fingerprint.
+Harness `cli` scenario `wake_resume.yaml`.
 
 #### Footnotes
 
@@ -1933,13 +1933,11 @@ A local plan fans out produce-then-consume work. The process dies mid-dispatch. 
 
 #### Implementation
 
-`OperationContract` / `OperationRegistry` register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. `ExecutionGraph` / `GraphStore` persist goal, nodes, and justified dependency edges on `EventLog` with recovery boundaries and optional `config_fingerprint`; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.
-
-Covers: INF-01, INF-03, GRF-01, GRF-02, GRF-03, GRF-04, GRF-05, GRF-06.
+`GraphStore` checkpoint + `hierarchical_fan_in` / `merge_branch_artifacts` / operation preconditions. `CliInstrumentor` verb `local_plan_resume`.
 
 #### Validation
 
-Harness `graph_execution` op `local_plan_resume` → `_run_local_plan_resume`. Unit: `tests/test_graph.py`, `tests/test_operation_registry.py`. Fingerprint refuse covered in `tests/test_inspiration_primitives.py`.
+Harness `cli` scenario `checkpoint_fan_in_merge.yaml`.
 
 #### Footnotes
 
@@ -2020,11 +2018,11 @@ Fangore's host dispatches a long-running coding job through a durable plan. The 
 
 #### Implementation
 
-`GraphExecutor` injects `CheckpointStore` via `MechaHarnessConfig.get_checkpoint_store()` (SQLite reference: `SqliteCheckpointStore`; default EventLog adapter is explicitly `ephemeral`). Opt-in `EffectfulGraphNodeRunner` persists effect intent before dispatch, records external handles, and reconciles uncertain/accepted effects on `run(resume=True)`. `ArmedCrashProbe` / `InjectedProcessCrash` inject process failure at recovery boundaries. EventLog stays observational; fingerprint refusal remains enforced. Module doctests on `checkpoint_store`, `sqlite_checkpoint_store`, `external_effect`, `graph_executor`, and `MechaHarnessConfig.get_checkpoint_store` show the host wiring pattern.
+`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` verb `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
 
 #### Validation
 
-Harness `graph_execution` op `transactional_durable_resume_crash_matrix`. Soft expects per crash location: final status ok, dispatch_count exactly 1 after an accepted first dispatch, effect state transitions, and reconciliation on uncertain/accepted resumes. Unit matrix in `tests/test_transactional_durable_resume.py`. Pytest `--doctest-modules` covers the pydoc examples under `src/mechaharness/{checkpoint_store,sqlite_checkpoint_store,external_effect,graph_executor,di}.py`.
+Harness `cli` scenario `crash_matrix.yaml`: hard `cases_exactly` per crash location.
 
 #### Footnotes
 

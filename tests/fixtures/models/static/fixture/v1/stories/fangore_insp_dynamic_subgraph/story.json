@@ -2,10 +2,10 @@
   "id": "fangore_insp_dynamic_subgraph",
   "persona": "fangore",
   "title": "Nest a child graph as an observable subgraph",
-  "kind": "graph_execution",
+  "kind": "cli",
   "narrative": "Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget \u2014 see `fangore_insp_budget_subgraph_rollup`. Hosts use the same nest path when tiling Agentic Recipes into a parent graph. Accepts inspiration requirement 3[^insp-r03].",
-  "implementation": "`SubgraphNodeRunner.embed` stores a child `ExecutionGraph` on a parent node; `GraphExecutor` runs nested graphs with linked run ids and emits graph lifecycle events for the child. Agentic Recipes instantiate to ordinary graphs that may be embedded this way.",
-  "validation": "Harness `graph_execution` op `dynamic_subgraph_nest`. Soft expects parent ok, child_status ok, nested graph events present.",
+  "implementation": "`SubgraphNodeRunner.embed` + `GraphExecutor`. `CliInstrumentor` verb `dynamic_subgraph_nest`.",
+  "validation": "Harness `cli` scenario `nested_child.yaml`.",
   "footnotes": [
     {
       "id": "insp-r03",

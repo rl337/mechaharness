@@ -146,9 +146,8 @@ Migrate in waves; each wave adds the smallest CLI/harness surface required:
 1. Observability / one-shot infer (OBS-*) — **done** (`nubble_run_cost_events`, …)
 2. Former `harness_runs` / pass-through / tool-loop / cassettes / host DI /
    judge route — **done** (runner module removed; verbs on `CliInstrumentor`)
-3. Graph execution + recipe catalog stories — **in progress**
-   (`cli_graph_verbs`: topology, validator, bounded repair, executor smoke,
-   correlators; remaining resume/budget/linkage ops still on `graph_execution`)
+3. Graph execution — **done** (`cli_graph_verbs`; `graph_execution` runner gone).
+   Recipe catalog stories still partly on `graph_recipes` where not already CLI.
 4. Decision plane / remaining judge ops
 5. `pure_api` + context/eval library surface
 6. Fold or keep `durable_generator` IoC stories

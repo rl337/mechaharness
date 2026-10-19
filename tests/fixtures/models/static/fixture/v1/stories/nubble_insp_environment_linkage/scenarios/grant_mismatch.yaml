@@ -1,0 +1,10 @@
+# Envelope grant absent from environment fails linkage
+kind: cli
+
+commands:
+  - environment_linkage_fail:
+      required_grant: core:media.image
+
+expect:
+  ok: false
+  codes_exactly: [environment_incompatible]

@@ -1,5 +1,0 @@
-{
-  "op": "dynamic_subgraph_nest",
-  "parent_goal": "parent",
-  "child_goal": "child"
-}

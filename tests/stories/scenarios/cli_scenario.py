@@ -23,15 +23,24 @@ from mechaharness.cli_diagnostic_verbs import (
 )
 from mechaharness.cli_graph_verbs import (
     BoundedRepairLoopCommand,
+    CheckpointFingerprintRefuseCommand,
     ConvergenceCeilingCommand,
+    DecisionConflictNeighborRevisitCommand,
+    DynamicSubgraphNestCommand,
+    EnvironmentLinkageFailCommand,
+    GraphBudgetLimitsCommand,
+    GraphBudgetSubgraphRollupCommand,
     GraphEventCorrelatorsCommand,
     GraphExecutorRunCommand,
     GraphLinkagePreflightCommand,
     GraphTransitionInspectCommand,
+    LocalPlanResumeCommand,
     RolloutGraphBuildCommand,
     TargetedRollbackSelectCommand,
     TopologyEfficiencyCommand,
+    TransactionalDurableResumeCommand,
     ValidatorQualificationCommand,
+    WakeReresolveResumeCommand,
 )
 from mechaharness.cli_instrumentor import (
     AdvanceClockCommand,
@@ -121,6 +130,32 @@ class CliExpect(BaseModel):
     terminal: str | None = None
     reason: str | None = None
     success: bool | None = None
+    stale_preconditions_exactly: list[str] | None = None
+    ready_exactly: list[str] | None = None
+    dependency_justified: bool | None = None
+    fan_in_failures_exactly: list[str] | None = None
+    merge_conflicts_exactly: list[str] | None = None
+    recovery_boundary: str | None = None
+    child_status: str | None = None
+    child_run_id_nonempty: bool | None = None
+    first_status: str | None = None
+    resume_status: str | None = None
+    error_code: str | None = None
+    ok: bool | None = None
+    resolve_ok: bool | None = None
+    fingerprint_nonempty: bool | None = None
+    soft_status: str | None = None
+    soft_error: str | None = None
+    soft_budget_level: str | None = None
+    hard_status: str | None = None
+    hard_error: str | None = None
+    hard_budget_level: str | None = None
+    budget_spent: float | None = None
+    budget_level: str | None = None
+    error: str | None = None
+    after_status: str | None = None
+    cases_exactly: dict[str, Any] | None = None
+    scenarios_exactly: dict[str, Any] | None = None
 
     @model_validator(mode="after")
     def _at_least_one(self) -> CliExpect:
@@ -159,6 +194,15 @@ class CliScenarioCommand(BaseModel):
     targeted_rollback_select: TargetedRollbackSelectCommand | None = None
     rollout_graph_build: RolloutGraphBuildCommand | None = None
     convergence_ceiling: ConvergenceCeilingCommand | None = None
+    local_plan_resume: LocalPlanResumeCommand | None = None
+    dynamic_subgraph_nest: DynamicSubgraphNestCommand | None = None
+    checkpoint_fingerprint_refuse: CheckpointFingerprintRefuseCommand | None = None
+    environment_linkage_fail: EnvironmentLinkageFailCommand | None = None
+    wake_reresolve_resume: WakeReresolveResumeCommand | None = None
+    graph_budget_limits: GraphBudgetLimitsCommand | None = None
+    graph_budget_subgraph_rollup: GraphBudgetSubgraphRollupCommand | None = None
+    transactional_durable_resume: TransactionalDurableResumeCommand | None = None
+    decision_conflict_neighbor_revisit: DecisionConflictNeighborRevisitCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
     expect: CliExpect | None = None
@@ -188,6 +232,15 @@ class CliScenarioCommand(BaseModel):
             self.targeted_rollback_select,
             self.rollout_graph_build,
             self.convergence_ceiling,
+            self.local_plan_resume,
+            self.dynamic_subgraph_nest,
+            self.checkpoint_fingerprint_refuse,
+            self.environment_linkage_fail,
+            self.wake_reresolve_resume,
+            self.graph_budget_limits,
+            self.graph_budget_subgraph_rollup,
+            self.transactional_durable_resume,
+            self.decision_conflict_neighbor_revisit,
             self.set_clock,
             self.advance_clock,
         ]
