@@ -51,6 +51,7 @@ from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectio
 from mechaharness.authority_gate import AuthorityGate
 from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.checkpoint_store import CheckpointStore, EventLogCheckpointStore
+from mechaharness.cli_verb import CliVerb
 from mechaharness.config import Settings
 from mechaharness.context_provider import ContextProviderRegistry
 from mechaharness.core.access import (
@@ -492,8 +493,13 @@ class MechaHarnessConfig(Config):
             AuthorityGate, self.get_authority_gate(), make_authority_gate
         )
 
-        # Recipe / backend / family membership: pyiv map multibinds (catalog_keys).
+        # Recipe / backend / family / CLI verb membership: pyiv map multibinds.
         # Cast: pyiv accepts ABC keys; mypy rejects abstract type[T] args.
+        self.contribute_map_entries(
+            cast(type[Any], CliVerb),
+            cast(dict[Any, type[Any]], self.cli_verb_classes()),
+            on_conflict="replace",
+        )
         self.contribute_map_entries(
             cast(type[Any], GraphTemplate),
             cast(dict[Any, type[Any]], self.graph_template_classes()),
@@ -831,6 +837,12 @@ class MechaHarnessConfig(Config):
     def get_tool_result_freshness_policy(self) -> ToolResultFreshnessPolicy:
         """Staleness rules for tool evidence (default: honor ``expires_at`` only)."""
         return ToolResultFreshnessPolicy()
+
+    def cli_verb_classes(self) -> dict[str, type[CliVerb]]:
+        """CLI verb name → ``CliVerb`` class. Hosts merge via ``super()``."""
+        from mechaharness.cli_host_verbs import default_cli_verb_classes
+
+        return default_cli_verb_classes()
 
     def graph_template_classes(self) -> dict[str, type[GraphTemplate]]:
         """Catalog id → ``GraphTemplate`` class. Hosts merge via ``super()``."""

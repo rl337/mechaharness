@@ -1,4 +1,4 @@
-"""CLI acceptance verbs for remaining host DI / host-kit / judge stories."""
+"""Story acceptance probes for host DI / host-kit stories."""
 
 from __future__ import annotations
 
@@ -30,23 +30,7 @@ from mechaharness.host_kit import (
     host_graph_executor,
 )
 from mechaharness.inference.base import InferenceStrategy
-from mechaharness.inference.judge import (
-    ChoiceOption,
-    ChoiceQuestion,
-    ChoiceSignal,
-    JudgeProvider,
-    JudgeRequest,
-    NoulQuestion,
-    hash_state,
-    judge,
-)
 from mechaharness.inference_capture import EvaluationOnlyCapture
-from mechaharness.judgement_policy import (
-    JudgementFacts,
-    JudgementPolicy,
-    JudgementThreshold,
-    decide,
-)
 from mechaharness.linkage_resolver import DefaultLinkageResolver
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
 
@@ -82,13 +66,6 @@ class HostKitSubmitOnceCommand(BaseModel):
     cases: list[HostKitCaseSpec] = Field(min_length=1)
 
 
-class JudgeRouteCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    state: str
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    policy: dict[str, Any] = Field(default_factory=dict)
-    question_set_version: str = "story"
 
 
 def run_check_completer_flavors(body: CheckCompleterFlavorsCommand) -> dict[str, Any]:
@@ -298,77 +275,12 @@ async def run_host_kit_submit_once(
     return {"scenario_results_exactly": results}
 
 
-def _build_questions(raw: list[dict[str, Any]]) -> list[Any]:
-    out: list[Any] = []
-    for item in raw:
-        kind = item["kind"]
-        if kind == "choice":
-            out.append(
-                ChoiceQuestion(
-                    id=item["id"],
-                    instructions=item.get("instructions", ""),
-                    options=[
-                        ChoiceOption(
-                            id=o["id"], description=o.get("description", "")
-                        )
-                        for o in item["options"]
-                    ],
-                )
-            )
-        elif kind == "noul":
-            out.append(
-                NoulQuestion(id=item["id"], instructions=item.get("instructions", ""))
-            )
-        else:
-            raise ValueError(f"unsupported question kind {kind!r}")
-    return out
-
-
-def _policy_from_mapping(raw: dict[str, Any]) -> JudgementPolicy:
-    thresholds = [JudgementThreshold(**t) for t in raw.get("thresholds", [])]
-    return JudgementPolicy(
-        version=str(raw.get("version") or "story"),
-        thresholds=thresholds,
-        ignore_unknown_signals=bool(raw.get("ignore_unknown_signals", False)),
-    )
-
-
-async def run_judge_route(
-    body: JudgeRouteCommand,
-    *,
-    provider: JudgeProvider,
-) -> dict[str, Any]:
-    judgement = await judge(
-        JudgeRequest(
-            state=body.state,
-            state_hash=hash_state(body.state),
-            questions=_build_questions(body.questions),
-            question_set_version=body.question_set_version,
-        ),
-        provider=provider,
-    )
-    by_id = {a.id: a for a in judgement.answers}
-    route = by_id.get("route")
-    selected = route.selected if isinstance(route, ChoiceSignal) else None
-    verdict = decide(
-        JudgementFacts(action="route"),
-        judgement,
-        _policy_from_mapping(body.policy),
-    )
-    return {
-        "route_selected": selected,
-        "verdict": verdict.kind,
-        "answer_count": len(judgement.answers),
-    }
-
 
 __all__ = [
     "CheckCompleterFlavorsCommand",
     "CheckInferenceCaptureCommand",
     "HostKitSubmitOnceCommand",
-    "JudgeRouteCommand",
     "run_check_completer_flavors",
     "run_check_inference_capture",
     "run_host_kit_submit_once",
-    "run_judge_route",
 ]
