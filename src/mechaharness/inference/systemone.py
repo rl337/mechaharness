@@ -5,13 +5,10 @@ from __future__ import annotations
 import time
 from typing import Any
 
-import httpx
 from pydantic import BaseModel, ConfigDict, Field
+from pyiv.http import AsyncHttpClient, HttpError, HttpTimeoutError
 
-from mechaharness.api_connection import (
-    APIConnectionConfig,
-    SimpleHttpConnectionConfig,
-)
+from mechaharness.api_connection import APIConnectionConfig
 from mechaharness.core.exceptions import InferenceError
 from mechaharness.inference.judge import (
     ADAPTER_VERSION,
@@ -141,31 +138,11 @@ class SystemOneJudgeProvider(JudgeProvider):
 
     def __init__(
         self,
-        connection: APIConnectionConfig | None = None,
-        *,
-        base_url: str | None = None,
-        model: str | None = None,
-        path: str | None = None,
-        timeout: float | None = None,
-        client: httpx.AsyncClient | None = None,
+        connection: APIConnectionConfig,
+        client: AsyncHttpClient,
     ) -> None:
-        if connection is not None:
-            self._connection = connection
-        elif any(v is not None for v in (base_url, model, path, timeout)):
-            self._connection = SimpleHttpConnectionConfig.for_judge(
-                **{
-                    k: v
-                    for k, v in {
-                        "base_url": base_url,
-                        "model": model,
-                        "path": path,
-                        "timeout": timeout,
-                    }.items()
-                    if v is not None
-                }
-            )
-        else:
-            self._connection = SimpleHttpConnectionConfig.for_judge()
+        self._connection = connection
+        self._owns_client = False
         self._client = client
 
     async def judge(self, request: JudgeRequest) -> Judgement:
@@ -180,25 +157,19 @@ class SystemOneJudgeProvider(JudgeProvider):
             questions=wire_questions,
         )
         started = time.perf_counter()
-        owns_client = self._client is None
-        client = self._client or httpx.AsyncClient(
-            timeout=self._connection.timeout_seconds()
-        )
         try:
-            response = await client.post(
+            response = await self._client.post(
                 url,
                 json=body.model_dump(mode="json", exclude_none=True),
                 headers=self._connection.headers(),
+                timeout=self._connection.timeout_seconds(),
             )
             response.raise_for_status()
             payload = response.json()
-        except httpx.TimeoutException as exc:
+        except HttpTimeoutError as exc:
             raise JudgeError("timeout contacting System One") from exc
-        except httpx.HTTPError as exc:
+        except HttpError as exc:
             raise InferenceError(f"System One HTTP error: {exc}") from exc
-        finally:
-            if owns_client:
-                await client.aclose()
         elapsed = (time.perf_counter() - started) * 1000.0
         parsed = SystemOneResponseWire.model_validate(payload)
         signals: list[Signal] = []
@@ -230,3 +201,7 @@ class SystemOneJudgeProvider(JudgeProvider):
             raw=payload if isinstance(payload, dict) else {"payload": payload},
             request_id=request.trace_id,
         )
+
+    async def aclose(self) -> None:
+        if self._owns_client:
+            await self._client.aclose()

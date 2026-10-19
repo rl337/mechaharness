@@ -137,7 +137,7 @@ async def _run_local_plan_resume(case: StoryCase, backend: StoryBackend) -> None
             evidence_ref="edge:1",
         )
     )
-    store = GraphStore()
+    store = GraphStore(InMemoryEventLog())
     store.save(graph, run_id="story-graph", boundary="dispatch")
     restored = store.latest(run_id="story-graph")
     assert restored is not None

@@ -22,6 +22,7 @@ from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+from tests.support.stdlib_doubles import mock_datetime_service
 
 
 def _executor(calls: list[str]) -> GraphExecutor:
@@ -136,12 +137,13 @@ def test_old_checkpoint_without_epoch_reads_as_zero() -> None:
 
 def test_sqlite_store_round_trips_epoch(tmp_path) -> None:  # type: ignore[no-untyped-def]
     path = tmp_path / "ckpt.db"
-    store = SqliteCheckpointStore(path)
+    clock = mock_datetime_service()
+    store = SqliteCheckpointStore(path, datetime_service=clock)
     graph = _graph()
     graph.authorization_epoch = 7
     store.save(graph, run_id="r")
     store.close()
-    reopened = SqliteCheckpointStore(path)
+    reopened = SqliteCheckpointStore(path, datetime_service=clock)
     assert reopened.latest_authorization_epoch(run_id="r") == 7
     assert reopened.latest_authorization_epoch(run_id="missing") == 0
     reopened.close()

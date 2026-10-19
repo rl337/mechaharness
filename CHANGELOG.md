@@ -90,6 +90,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ResearchLab.promote` now requires `final_test=` (a passing held-out
   `EvaluatorResult`) unless the `EvalProtocol` sets `held_out_protected=False`.
 
+## [0.5.0] — 2026-10-18
+
+pyiv 1.1 HTTP + stdlib DI cut (#30). Manual minor after a squash merge
+auto-bumped the tip to `0.4.2`.
+
+### Changed
+
+- Floor **pyiv ≥ 1.1.0**. Register use-case stdlib injectables on
+  `MechaHarnessConfig` (`Environment`, `DateTimeService`, `Filesystem`,
+  `Clock`, `LoggerFactory`) and route high-residue edges through them:
+  judge `from_env`, checkpoint stamps, `LoggingEventLog`, decision JSONL.
+- Inference and judge HTTP use injectable `AsyncHttpClient`
+  (`AsyncUrllibHttpClient` by default; `MemoryAsyncHttpClient` in tests)
+  instead of raw `httpx`. Dropped runtime `httpx`; keep it as a **dev**
+  extra for FastAPI/Starlette `TestClient` (`tests/test_api.py`).
+- Shared services bind in `configure()` and are consumed by constructor
+  injection / `inject(T)`. Removed Config `getattr` service caches and
+  sibling `get_*` collaborator pulls (`EventLog`, `AccessControl`,
+  judge connection, `CheckpointStore`, `LinkageResolver`, …). Missing
+  bindings fail at inject time.
+- Domain ctors require injectables (no silent OS/stdlib/HTTP defaults):
+  `DecisionLog`, `GraphStore`, `LoggingEventLog`, checkpoint
+  `DateTimeService`, `SimpleHttpConnectionConfig.from_env` /
+  `for_judge(env=…)`, OpenAI/Anthropic/SystemOne `AsyncHttpClient`.
+- Normative docs: `docs/requirements/dependency-injection.md`;
+  `di-first` rule and `di-config-ownership` skill updated.
+
+### Migration
+
+- Subclass Config (or use `run()` / host kit); do not hand-wire services
+  via Config getters as a locator.
+- Pass `Environment` / `Filesystem` / `DateTimeService` / `AsyncHttpClient`
+  explicitly in tests, or bind Memory*/Mock* doubles through Config /
+  `pyiv.override` (`tests/support/stdlib_doubles.py`).
+
 ## [0.4.1] — 2026-10-14
 
 Node components, recipe CLI/SVG render, and pyiv catalog multibinds (#26).

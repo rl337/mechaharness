@@ -796,11 +796,13 @@ async def _run_recipe_audit_dimensions(case: StoryCase, backend: StoryBackend) -
 async def _run_review_audit_reconstruct(case: StoryCase, backend: StoryBackend) -> None:
     """A review is rebuilt from the decision log and trace envelope alone (MH-DOTS-09)."""
     del backend
+    from pyiv.files import MemoryFilesystem
+
     from mechaharness.decision_log import DecisionLog, ReviewAuditRecord
 
     request = case.load_json("request.json")
     expect = case.load_json("expect.json")
-    log = DecisionLog(InMemoryEventLog())
+    log = DecisionLog(InMemoryEventLog(), filesystem=MemoryFilesystem())
     results: dict[str, Any] = {}
     for scenario in request["scenarios"]:
         event = log.record(DecisionRecord.model_validate(scenario["decision"]))
