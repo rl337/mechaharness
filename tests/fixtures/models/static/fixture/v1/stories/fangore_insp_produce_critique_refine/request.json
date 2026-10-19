@@ -1,0 +1,10 @@
+{
+  "requirement_id": "MH-PA-03",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/graph_templates/independent_review.py",
+    "mechaharness/graph_templates/verify_repair.py",
+    "mechaharness/isolation_contract.py",
+    "mechaharness/budget.py"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_alert_escalation_rules",
+  "persona": "fangore",
+  "title": "Escalate alerts by deterministic once, repeated, and persistent rules",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Models may propose alert actions, but code-owned rules decide whether a threshold fired and how far to escalate: once/log, repeated/surface, persistent/propose repair. Decision-plane policy already separates model propose from policy decide (`fangore_decision_plane_policy`). Tracks MH-PA-06[^insp-pa-06].",
+  "implementation": "JudgementPolicy.decide and RulesDecisionBackend provide model-proposes/code-decides. Desired: alert/error escalation catalog with deterministic once/repeated/persistent stages.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-06, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-pa-06",
+      "label": "Personal agent reliability (MH-PA-06)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md",
+      "note": "Deterministic alert/error rules"
+    }
+  ]
+}

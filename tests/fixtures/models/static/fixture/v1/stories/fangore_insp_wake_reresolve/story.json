@@ -3,7 +3,7 @@
   "persona": "fangore",
   "title": "Re-resolve linkage when resuming a woken run",
   "kind": "wake_reresolve_resume",
-  "narrative": "Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17].",
+  "narrative": "Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17]. Wake re-resolve for Dots MH-DOTS-02; effect-dispatch revalidation: `fangore_insp_effect_revalidation`[^insp-dots-02-wake].",
   "implementation": "Client wakes call `LinkageResolver` then `GraphExecutor.run(resume=True)`. Fingerprint mismatch fails closed. Goal stores remain outside the library.",
   "validation": "Kind `wake_reresolve_resume`. Soft expects re-resolve ok then successful resume with matching fingerprint.",
   "footnotes": [
@@ -11,7 +11,13 @@
       "id": "insp-r17",
       "label": "Inspiration requirements (req 17: persistent goals (library hooks))",
       "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
-      "note": "Req 17 \u2014 persistent goals (library hooks)"
+      "note": "Req 17 — persistent goals (library hooks)"
+    },
+    {
+      "id": "insp-dots-02-wake",
+      "label": "OpenAI Dots map (MH-DOTS-02 wake reresolve)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md",
+      "note": "Wake re-resolve; effect-time revalidation is fangore_insp_effect_revalidation"
     }
   ]
 }

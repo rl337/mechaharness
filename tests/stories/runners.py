@@ -464,6 +464,7 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         "gated_objective_evaluate": _run_gated_objective_evaluate,
         "exposure_discriminative_report": _run_exposure_discriminative_report,
         "efficiency_scorecard_build": _run_efficiency_scorecard_build,
+        "inspiration_delta_contract": _run_inspiration_delta_contract,
     }
     try:
         runner = runners[kind]
@@ -3803,3 +3804,29 @@ async def _run_efficiency_scorecard_build(case: StoryCase, backend: StoryBackend
         "tokens_out": card.dimensions.get("tokens_out"),
     }
     _assert_expect(actual, expect)
+
+async def _run_inspiration_delta_contract(case: StoryCase, backend: StoryBackend) -> None:
+    """Document an inspiration delta against adjacent shipped modules.
+
+    Gap/partial stories assert that named adjacent source files exist and that
+    the fixture records the intended coverage level — not that the product
+    contract is fully shipped.
+    """
+    del backend
+    from pathlib import Path as _Path
+
+    request = case.load_json("request.json")
+    expect = case.load_json("expect.json")
+    src_root = _Path(__file__).resolve().parents[1].parent / "src"
+    missing: list[str] = []
+    for rel in request.get("adjacent_modules", []):
+        if not (src_root / rel).is_file():
+            missing.append(rel)
+    actual = {
+        "requirement_id": request["requirement_id"],
+        "coverage": request["coverage"],
+        "adjacent_ok": not missing,
+        "missing_count": len(missing),
+    }
+    _assert_expect(actual, expect)
+

@@ -1,0 +1,9 @@
+{
+  "requirement_id": "MH-PA-06",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/judgement_policy.py",
+    "mechaharness/decision_surfaces.py",
+    "mechaharness/decision_plane_runtime.py"
+  ]
+}

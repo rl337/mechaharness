@@ -1,0 +1,9 @@
+{
+  "requirement_id": "MH-SR-05",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/rule_promotion.py",
+    "mechaharness/research.py",
+    "mechaharness/graph_templates/base.py"
+  ]
+}

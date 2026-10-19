@@ -3,8 +3,8 @@
   "persona": "fangore",
   "title": "Capture why across session handoffs",
   "kind": "handoff_record_fields",
-  "narrative": "Handoffs preserve completed/pending work, decisions, rationale, rejected alternatives, risks, and next action \u2014 hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff].",
-  "implementation": "`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema; storage remains host-owned.",
+  "narrative": "Handoffs preserve completed/pending work, decisions, rationale, rejected alternatives, risks, and next action — hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: evidence and risks are first-class; goals, exclusions, and verdict schema still travel via open detail until extended. Also the typed handoff seam for Dots MH-DOTS-07[^insp-dots-07-handoff].",
+  "implementation": "`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema; storage remains host-owned. Personal-agent MH-PA-04: `evidence_refs` and `risks` are first-class; goals, exclusions, and expected verdict remain host `detail` until schema promotion.",
   "validation": "Kind `handoff_record_fields`. Soft expects next_action.",
   "footnotes": [
     {
@@ -12,6 +12,18 @@
       "label": "WalkingLabs L05 Continuity",
       "url": "https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/",
       "note": "HandoffRecord"
+    },
+    {
+      "id": "insp-pa-04",
+      "label": "Personal agent reliability (MH-PA-04)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md",
+      "note": "Delegation and handoff; goals/exclusions/verdict still via detail"
+    },
+    {
+      "id": "insp-dots-07-handoff",
+      "label": "OpenAI Dots map (MH-DOTS-07 handoff)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md",
+      "note": "Typed handoff for cross-task sharing"
     }
   ]
 }

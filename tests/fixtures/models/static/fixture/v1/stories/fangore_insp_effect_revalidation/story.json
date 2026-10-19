@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_effect_revalidation",
+  "persona": "fangore",
+  "title": "Revalidate authority at side-effect dispatch after pause or revocation",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Authority must be rechecked when a consequential action actually runs \u2014 not only at graph start, approval capture, or checkpoint creation. A paused graph resumed after revocation must not publish. Related: `fangore_insp_wake_reresolve`, `fangore_human_review_pending`. Tracks MH-DOTS-02[^insp-dots-02].",
+  "implementation": "Linkage/fingerprint re-resolve and approval digests exist. Desired: mandatory pre-effect revalidation protocol for consequential tools.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-02, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-dots-02",
+      "label": "OpenAI Dots agent safety (MH-DOTS-02)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
+      "note": "Revalidate before consequential side effects"
+    }
+  ]
+}

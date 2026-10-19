@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_correction_spec_debt",
+  "persona": "taloneth",
+  "title": "Capture corrections as reviewed specification debt before policy change",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Human corrections should become structured candidate specification debt linked to failing scenarios, with review before policy changes and regression tests afterward. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].",
+  "implementation": "PromotionRecord / promote_soft_to_hard / rollback_promotion and failure attribution helpers. Desired: correction\u2192test feedback loop and first-class specification-debt ledger.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-07, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-pa-07",
+      "label": "Personal agent reliability (MH-PA-07)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md",
+      "note": "Correction-to-test feedback"
+    }
+  ]
+}

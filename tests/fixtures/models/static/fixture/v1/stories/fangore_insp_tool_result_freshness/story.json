@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_tool_result_freshness",
+  "persona": "fangore",
+  "title": "Reject stale tool evidence before external decisions",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Tool results that drive external decisions must carry source and freshness metadata. Eight-day-old CRM cache must not be silently treated as current. Context freshness scoring already exists in `fangore_jev_context_picker` and `fangore_insp_context_provider`; typed tool-result TTL remains a delta. Tracks personal-agent inspiration MH-PA-01[^insp-pa-01].",
+  "implementation": "Adjacent: harness `ToolResult` in `mechaharness.core.types` (tool_call_id/content/is_error only); context-candidate freshness in `context_provider` / decision-plane packing. Desired: typed provenance and expiry on tool results with graph reject-before-decision.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-01, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-pa-01",
+      "label": "Personal agent reliability (MH-PA-01)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md",
+      "note": "Typed provenance and freshness"
+    }
+  ]
+}

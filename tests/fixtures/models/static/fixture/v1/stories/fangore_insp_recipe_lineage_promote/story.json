@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_recipe_lineage_promote",
+  "persona": "fangore",
+  "title": "Attach lineage and test results when promoting a recipe version",
+  "kind": "inspiration_delta_contract",
+  "narrative": "New recipe versions must be immutable artifacts with provenance, lineage, test results, and a reversible promotion pointer. Research and rule promotion patterns exist (`taloneth_insp_rule_promotion`) but the recipe catalog still overwrites by name. Tracks MH-SR-05[^insp-sr-05].",
+  "implementation": "Stamp provenance on templates; ResearchLab promote/rollback; rule_promotion. Desired: recipe lineage DAG, eval attachments, and pointer-based promote/rollback.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-05, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-sr-05",
+      "label": "Self-revising recipe evolution (MH-SR-05)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "Immutable lineage and promote/rollback"
+    }
+  ]
+}

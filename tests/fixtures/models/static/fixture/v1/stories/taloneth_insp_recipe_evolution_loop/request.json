@@ -1,0 +1,10 @@
+{
+  "requirement_id": "MH-SR-06",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/research.py",
+    "mechaharness/harness_experiment.py",
+    "mechaharness/evaluator.py",
+    "mechaharness/objective_policy.py"
+  ]
+}

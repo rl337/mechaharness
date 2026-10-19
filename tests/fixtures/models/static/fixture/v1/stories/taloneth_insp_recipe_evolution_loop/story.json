@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_recipe_evolution_loop",
+  "persona": "taloneth",
+  "title": "Evolve recipe candidates from traces under registry and safety gates",
+  "kind": "inspiration_delta_contract",
+  "narrative": "A candidate evolution loop collects immutable traces, proposes registry-bounded recipe configurations or compositions, validates connectivity and budgets, evaluates in isolation, selects by multi-objective policy, then promotes only after gates. Generic research loops exist (`taloneth_atk_research_reject`); recipe-from-traces does not. Tracks MH-SR-06[^insp-sr-06].",
+  "implementation": "ResearchLab, harness experiments, evaluator, ObjectivePolicy, decision-plane shadow. Desired: traces\u2192recipe-candidate proposer wired to registry validation and promotion.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-06, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-sr-06",
+      "label": "Self-revising recipe evolution (MH-SR-06)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "Candidate evolution loop"
+    }
+  ]
+}

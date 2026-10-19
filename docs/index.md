@@ -60,6 +60,12 @@ Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
 | [FineEnvs MH-MHRL requirements map](./inspiration/fineenvs-mh-mhrl-requirements-map.md) | MH-MHRL IDs → modules → user stories for evaluation/rollout/capture gaps |
 | [Jev typed-judgment inspiration](./inspiration/jev-typed-judgment-inspiration.md) | Typed decision calls, Jev attribution, MH-JEV foundation + domain packs |
 | [Jev typed-judgment requirements map](./inspiration/jev-typed-judgment-requirements-map.md) | MH-JEV IDs → judge/`decision_plane` modules → user stories |
+| [Personal agent reliability inspiration](./inspiration/personal-agent-reliability-inspiration.md) | Always-on personal agent execution patterns (MH-PA-*) |
+| [Personal agent reliability requirements map](./inspiration/personal-agent-reliability-requirements-map.md) | MH-PA IDs → modules → user stories |
+| [OpenAI Dots agent safety inspiration](./inspiration/openai-dots-agent-safety-inspiration.md) | Scoped execution and agent safety (MH-DOTS-*) |
+| [OpenAI Dots agent safety requirements map](./inspiration/openai-dots-agent-safety-requirements-map.md) | MH-DOTS IDs → modules → user stories |
+| [Self-revising recipe evolution inspiration](./inspiration/self-revising-recipe-evolution.md) | Evaluation-driven recipe evolution (proposal; unverified source) |
+| [Self-revising recipe requirements map](./inspiration/self-revising-recipe-requirements-map.md) | MH-SR IDs → modules → user stories |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |

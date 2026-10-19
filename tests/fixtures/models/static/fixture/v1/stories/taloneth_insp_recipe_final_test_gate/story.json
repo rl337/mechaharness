@@ -1,0 +1,17 @@
+{
+  "id": "taloneth_insp_recipe_final_test_gate",
+  "persona": "taloneth",
+  "title": "Require an untouched final test set before recipe promotion",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Leading candidates must face a separate untouched final test set at the release gate; that set must not be a continuous tuning signal. Evaluator held_out metadata exists (`taloneth_insp_evaluator_compose`). Tracks MH-SR-07[^insp-sr-07].",
+  "implementation": "Evaluator.held_out and decision-export anti-leakage helpers. Desired: mandatory final-test release gate enforced at recipe promote.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-07, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-sr-07",
+      "label": "Self-revising recipe evolution (MH-SR-07)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "Held-out final-test release gate"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "nubble_insp_recipe_audit_dimensions",
+  "persona": "nubble",
+  "title": "Audit recipe selection and freshness without reading full transcripts",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Quarterly audits need recipe selection, model/tool usage, latency/cost, freshness, policy decisions, retries, and failure classes without reading entire transcripts. Cost and decision telemetry already ship via `fangore_decision_plane_telemetry` and `nubble_insp_trace_envelope`. Tracks MH-PA-08[^insp-pa-08].",
+  "implementation": "DecisionLog, TraceEnvelope, Cost events, bounded_retry recipe telemetry. Desired: recipe-selection and freshness as first-class audit dimensions end-to-end.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-PA-08, coverage partial, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-pa-08",
+      "label": "Personal agent reliability (MH-PA-08)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md",
+      "note": "Observability and audit"
+    }
+  ]
+}

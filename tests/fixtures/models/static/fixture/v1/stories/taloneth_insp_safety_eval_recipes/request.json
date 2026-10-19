@@ -1,0 +1,9 @@
+{
+  "requirement_id": "MH-DOTS-08",
+  "coverage": "gap",
+  "adjacent_modules": [
+    "mechaharness/eval_matrix.py",
+    "mechaharness/evaluator.py",
+    "mechaharness/graph_templates/independent_review.py"
+  ]
+}

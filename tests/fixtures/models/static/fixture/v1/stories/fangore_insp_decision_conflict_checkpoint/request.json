@@ -1,0 +1,9 @@
+{
+  "requirement_id": "MH-SR-08",
+  "coverage": "partial",
+  "adjacent_modules": [
+    "mechaharness/graph.py",
+    "mechaharness/checkpoint_store.py",
+    "mechaharness/stop_contract.py"
+  ]
+}

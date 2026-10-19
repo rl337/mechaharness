@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_recipe_port_search",
+  "persona": "fangore",
+  "title": "Search compatible recipe compositions by typed ports",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Candidate compositions must search only registered, compatible recipes using typed ports \u2014 no arbitrary executable generation on the production path. Isolation I/O contracts exist (`fangore_insp_isolation_io`). Tracks MH-SR-04[^insp-sr-04].",
+  "implementation": "TemplateIOContract / IsolationContract typed I/O surface. Desired: automated typed-port compatibility search over the recipe catalog.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-SR-04, coverage gap, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-sr-04",
+      "label": "Self-revising recipe evolution (MH-SR-04)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md",
+      "note": "Typed-port composition search"
+    }
+  ]
+}

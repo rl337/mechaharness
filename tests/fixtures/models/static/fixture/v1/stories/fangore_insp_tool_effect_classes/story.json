@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_tool_effect_classes",
+  "persona": "fangore",
+  "title": "Separate observe, prepare, and execute tool classes",
+  "kind": "inspiration_delta_contract",
+  "narrative": "Read-only observers must not invoke mutating tools; preparation returns typed proposals; execution alone gates mutating calls. A tool alias must not bypass an observer restriction. Lifecycle observe hooks exist (`fangore_insp_lifecycle_observe`) but are not a tool-class taxonomy. Tracks MH-DOTS-03[^insp-dots-03].",
+  "implementation": "Adjacent: EffectKind / OBSERVE reconcile, ObserveBefore/After lifecycle, flat Tool + grants. Desired: Observe / Prepare / Execute tool classes with enforcement that consequential work only runs in Execute.",
+  "validation": "Kind `inspiration_delta_contract`. Soft expects requirement_id MH-DOTS-03, coverage gap, adjacent_ok true.",
+  "footnotes": [
+    {
+      "id": "insp-dots-03",
+      "label": "OpenAI Dots agent safety (MH-DOTS-03)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
+      "note": "Observe/Prepare/Execute tool classes"
+    }
+  ]
+}
