@@ -1,4 +1,0 @@
-{
-  "op": "inference_capture_preflight",
-  "required_inference_capture": "training_grade"
-}

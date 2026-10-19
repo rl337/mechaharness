@@ -6,12 +6,17 @@ import os
 from datetime import datetime, timezone
 
 from pyiv.http import AsyncUrllibHttpClient, MemoryAsyncHttpClient
+from pyiv.process import OsEnvironment
 from pyiv.time import MockDateTimeService
 
+from mechaharness.api_connection import SimpleHttpConnectionConfig
 from mechaharness.cli_instrumentor import CliInstrumentor
 from mechaharness.config import Settings
 from mechaharness.core.types import ChatMessage, Role, ToolCall, Usage
+from mechaharness.inference.judge import FixtureJudgeProvider, JudgeProvider
+from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
+from mechaharness.inference.systemone import SystemOneJudgeProvider
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
@@ -49,8 +54,6 @@ class CliHarness:
         response: dict = {}
         if response_path.is_file():
             response = case.load_json("response.json")
-        # Live servers use served ids (e.g. qwen/qwen3.6-35b-a3b); fixture
-        # folder names are not wire model ids.
         model = (
             os.environ.get("MECHA_MODEL", "").strip()
             or str(response.get("model") or "")
@@ -67,6 +70,7 @@ class CliHarness:
             (cmd.run_recipe for cmd in scenario.commands if cmd.run_recipe is not None),
             None,
         )
+        needs_judge = any(cmd.judge_route is not None for cmd in scenario.commands)
         scripted_tool_name: str | None = None
         if tool_loop is not None:
             scripted_tool_name = tool_loop.tool_name
@@ -75,6 +79,10 @@ class CliHarness:
             and run_recipe.name == "conversational_tool_loop"
         ):
             scripted_tool_name = run_recipe.tool_name
+
+        judge_provider: JudgeProvider | None = None
+        if needs_judge:
+            judge_provider = self._build_judge_provider(case, backend, response)
 
         if case.adapter == "in_process":
             if scripted_tool_name is not None:
@@ -110,6 +118,7 @@ class CliHarness:
                 completer,
                 datetime_service=clock,
                 model=model,
+                judge_provider=judge_provider,
             )
 
         if case.adapter == "openai_compat":
@@ -136,8 +145,45 @@ class CliHarness:
                 strategy,
                 datetime_service=clock,
                 model=model,
+                judge_provider=judge_provider,
+            )
+
+        if case.adapter == "systemone":
+            # Judge cassette stories: completer unused; provider is the under-test edge.
+            return CliInstrumentor(
+                MockInferenceStrategy(),
+                datetime_service=clock,
+                model=model,
+                judge_provider=judge_provider
+                or self._build_judge_provider(case, backend, response),
             )
 
         raise AssertionError(
             f"{case.label}: unsupported adapter {case.adapter!r} for kind=cli"
+        )
+
+    def _build_judge_provider(
+        self,
+        case: StoryCase,
+        backend: StoryBackend,
+        response: dict,
+    ) -> JudgeProvider:
+        if case.adapter == "in_process":
+            return FixtureJudgeProvider(response.get("answers") or {})
+        if case.adapter == "systemone":
+            if backend.mode == "static":
+                connection = SimpleHttpConnectionConfig(
+                    base_url="http://story.invalid",
+                    path="/v1/systemone",
+                    model="laya",
+                )
+                client = MemoryAsyncHttpClient()
+                client.add("POST", connection.endpoint_url(), json=response)
+                return SystemOneJudgeProvider(connection=connection, client=client)
+            return SystemOneJudgeProvider(
+                connection=SimpleHttpConnectionConfig.for_judge(env=OsEnvironment()),
+                client=AsyncUrllibHttpClient(),
+            )
+        raise AssertionError(
+            f"{case.label}: judge_route unsupported adapter {case.adapter!r}"
         )

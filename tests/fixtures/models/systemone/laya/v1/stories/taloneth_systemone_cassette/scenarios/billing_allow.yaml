@@ -1,0 +1,33 @@
+# Product policy owns ALLOW when route signal is billing
+kind: cli
+
+commands:
+  - judge_route:
+      state: Customer was charged twice and wants a refund.
+      question_set_version: story-route-v1
+      questions:
+        - kind: choice
+          id: route
+          instructions: Which team should own this?
+          options:
+            - id: billing
+              description: Payments, invoices, refunds
+            - id: technical
+              description: Bugs and outages
+            - id: other
+              description: Everything else
+        - kind: noul
+          id: escalate
+          instructions: Needs urgent human attention?
+      policy:
+        version: story-route-v1
+        thresholds:
+          - signal_id: route
+            allow_choices:
+              - billing
+        ignore_unknown_signals: true
+
+expect:
+  route_selected: billing
+  verdict: ALLOW
+  answer_count: 2

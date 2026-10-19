@@ -8,6 +8,12 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from mechaharness.cli_acceptance_verbs import (
+    CheckCompleterFlavorsCommand,
+    CheckInferenceCaptureCommand,
+    HostKitSubmitOnceCommand,
+    JudgeRouteCommand,
+)
 from mechaharness.cli_diagnostic_verbs import (
     CheckModelAffinityCommand,
     CompareRunParityCommand,
@@ -60,6 +66,15 @@ class CliExpect(BaseModel):
     unavailable_exactly: list[str] | None = None
     available_exactly: list[str] | None = None
     matched_actions_exactly: list[str] | None = None
+    default_is_inference: bool | None = None
+    flavor_selected: bool | None = None
+    matched_selects_flavor: bool | None = None
+    linkage_ok: bool | None = None
+    codes_exactly: list[str] | None = None
+    scenario_results_exactly: dict[str, Any] | None = None
+    route_selected: str | None = None
+    verdict: str | None = None
+    answer_count: int | None = None
 
     @model_validator(mode="after")
     def _at_least_one(self) -> CliExpect:
@@ -84,6 +99,10 @@ class CliScenarioCommand(BaseModel):
     check_model_affinity: CheckModelAffinityCommand | None = None
     compare_run_parity: CompareRunParityCommand | None = None
     shadow_decision_backends: ShadowDecisionBackendsCommand | None = None
+    check_completer_flavors: CheckCompleterFlavorsCommand | None = None
+    check_inference_capture: CheckInferenceCaptureCommand | None = None
+    host_kit_submit_once: HostKitSubmitOnceCommand | None = None
+    judge_route: JudgeRouteCommand | None = None
     set_clock: SetClockCommand | None = None
     advance_clock: AdvanceClockCommand | None = None
     expect: CliExpect | None = None
@@ -99,6 +118,10 @@ class CliScenarioCommand(BaseModel):
             self.check_model_affinity,
             self.compare_run_parity,
             self.shadow_decision_backends,
+            self.check_completer_flavors,
+            self.check_inference_capture,
+            self.host_kit_submit_once,
+            self.judge_route,
             self.set_clock,
             self.advance_clock,
         ]

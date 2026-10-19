@@ -56,8 +56,9 @@ tight follow-up PR in the same wave).
 | **`cli`** (default) | Host/CLI capabilities: infer, tools, lanes, recipes-as-commands, EventLog asserts, cassettes/live. Product: `CliInstrumentor` + growing `cli_universe` graph. |
 | **`durable_generator`** | Durable IoC start/answer/inspect/rebuild until those verbs land on `cli`. Product: `DurableInstrumentor`. |
 
-Legacy op-dispatch (`pure_api`, `harness_runs`, …) is **deprecated inventory** —
+Legacy op-dispatch (`pure_api`, domain runners, …) is **deprecated inventory** —
 keep runners only until their stories migrate; then delete the op.
+(`harness_runs` is fully migrated; its runner module is gone.)
 
 ### Story shape (`story.json`)
 
@@ -123,9 +124,10 @@ expect:
 
 Verbs today: `infer`, `tool_loop`, `run_recipe`, `replay_model_input`,
 `route_capabilities`, `check_model_affinity`, `compare_run_parity`,
-`shadow_decision_backends`, `set_clock`, `advance_clock`. Add verbs only when a
-migrating story needs them. See
-[`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
+`shadow_decision_backends`, `check_completer_flavors`,
+`check_inference_capture`, `host_kit_submit_once`, `judge_route`,
+`set_clock`, `advance_clock`. Add verbs only when a migrating story needs them.
+See [`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
 
 Live: `MECHA_STORY_BACKEND=live`, `MECHA_BASE_URL`, `MECHA_MODEL` (served id).
 
@@ -139,13 +141,11 @@ Verb-led steps (`start` / `answer` / `inspect` / `rebuild`) over
 
 Migrate in waves; each wave adds the smallest CLI/harness surface required:
 
-1. Observability / one-shot infer (OBS-*) — **started** (`nubble_run_cost_events`)
-2. Remaining `harness_runs` / pass-through / tool-loop / cassettes — **in
-   progress** (smoke, tap, tool-loop, conversational, `harness_run`,
-   `backend_describe`; delete op runners when stories leave; next remaining
-   harness_runs probes)
-3. Graph execution + recipe catalog stories
-4. Decision plane / judge
+1. Observability / one-shot infer (OBS-*) — **done** (`nubble_run_cost_events`, …)
+2. Former `harness_runs` / pass-through / tool-loop / cassettes / host DI /
+   judge route — **done** (runner module removed; verbs on `CliInstrumentor`)
+3. Graph execution + recipe catalog stories — **next**
+4. Decision plane / remaining judge ops
 5. `pure_api` + context/eval library surface
 6. Fold or keep `durable_generator` IoC stories
 

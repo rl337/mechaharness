@@ -468,13 +468,13 @@ Fangore’s product needs a deep code Completer beside the default reason Comple
 
 #### Implementation
 
-`MechaHarnessConfig.completer_bindings()` registers `Named` Completer tag sets (lane + host flavors). Host constructors declare `Annotated[Completer, Named(...)]` / `Matched(...)`. Bare `inject(Completer)` keeps the default aliased to `InferenceStrategy`. Lanes on `InferenceEnvironment` stay capability partitions; flavors are DI bindings.
+`MechaHarnessConfig.completer_bindings()` registers `Named` Completer tag sets (lane + host flavors). Host constructors declare `Annotated[Completer, Named(...)]` / `Matched(...)`. `CliInstrumentor` verb `check_completer_flavors` exercises the blessed DI path. Bare `inject(Completer)` keeps the default aliased to `InferenceStrategy`.
 
 Covers: same-lane Completer flavors via pyiv Named/Matched.
 
 #### Validation
 
-Harness `harness_runs` op `completer_flavors` → `_run_completer_flavors`. Unit: `tests/test_di.py`.
+Harness `cli` scenario `named_matched_flavors.yaml`: hard DI selection booleans. Unit: `tests/test_di.py`.
 
 #### Footnotes
 
@@ -827,11 +827,11 @@ Fangore builds a host that dispatches a remote coding job from a durable plan. T
 
 #### Implementation
 
-`mechaharness.host_kit.host_graph_executor` subclasses `MechaHarnessConfig` and injects a `GraphExecutor` with host runners, default graph grants, optional `SqliteCheckpointStore` via `checkpoint_path` / `checkpoint_store`, and an injectable `CrashProbe`. `SubmitOnceEffectfulRunner` implements `EffectfulGraphNodeRunner` for submit-once / complete-on-accept / never-silent-redispatch of `UNCERTAIN` without a handle. `effectful_external_handle` reads the recorded handle from a `GraphResult` without scraping node maps. Module doctests document the blessed host path.
+`mechaharness.host_kit.host_graph_executor` subclasses `MechaHarnessConfig` and injects a `GraphExecutor` with host runners, default graph grants, optional `SqliteCheckpointStore` via `checkpoint_path` / `checkpoint_store`, and an injectable `CrashProbe`. `SubmitOnceEffectfulRunner` implements submit-once / complete-on-accept. `CliInstrumentor` verb `host_kit_submit_once` runs the acceptance matrix. Module doctests document the blessed host path.
 
 #### Validation
 
-Harness `harness_runs` op `host_kit_submit_once` → `_run_host_kit_submit_once`. Soft expects: durable dispatch status ok with one submit and a handle; resume of uncertain-with-handle completes with zero further submits. Unit matrix: `tests/fixtures/host_kit/*.json` via `tests/test_host_kit.py` and `tests/support/host_kit_cases.py` (ephemeral dispatch, uncertain-without-handle needs attention, accepted resume). Pytest `--doctest-modules` covers pydoc examples on `src/mechaharness/host_kit.py`.
+Harness `cli` scenario `dispatch_and_resume.yaml`: hard `scenario_results_exactly` for durable dispatch and uncertain-with-handle resume. Unit matrix: `tests/fixtures/host_kit/*.json` via `tests/test_host_kit.py`.
 
 #### Footnotes
 
@@ -1351,11 +1351,11 @@ Fangore needs graphs that require exact token capture to fail before expensive w
 
 #### Implementation
 
-`InferenceCapture`, `EvaluationOnlyCapture`, and `TrainingGradeCapture` in `mechaharness.inference_capture`, wired through `MechaHarnessConfig.get_inference_capture` and checked by `DefaultLinkageResolver` for `required_inference_capture`.
+`InferenceCapture`, `EvaluationOnlyCapture`, and `TrainingGradeCapture` in `mechaharness.inference_capture`, wired through `MechaHarnessConfig.get_inference_capture` and checked by `DefaultLinkageResolver` for `required_inference_capture`. `CliInstrumentor` verb `check_inference_capture` runs the preflight.
 
 #### Validation
 
-Harness `harness_runs` op `inference_capture_preflight`. Soft expects inference_capture_unsupported. Unit tests in `tests/test_inference_capture.py`.
+Harness `cli` scenario `training_grade_required.yaml`: hard `linkage_ok` and exact `codes_exactly`. Unit: `tests/test_inference_capture.py`.
 
 #### Footnotes
 
@@ -2010,13 +2010,13 @@ A customer was charged twice. Only the billing team may own the ticket. The mode
 
 #### Implementation
 
-Provider-neutral judge types (`Choice`/`Score`/`Noul` questions and signals) plus `JudgementPolicy` / `decide()` apply configured thresholds. Judge scores are supplementary: policy owns ALLOW/DENY. Thresholds live in policy config per signal id. System One maps vendor wire into these types via `SystemOneJudgeProvider`.
+Provider-neutral judge types (`Choice`/`Score`/`Noul` questions and signals) plus `JudgementPolicy` / `decide()` apply configured thresholds. `CliInstrumentor` verb `judge_route` runs judge+decide. System One maps vendor wire via `SystemOneJudgeProvider`.
 
 Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.
 
 #### Validation
 
-Harness `harness_runs` op `route_refund` → `_run_route_refund`. Soft expects: ALLOW for billing, DENY for technical. Unit: `tests/test_judgement_policy.py`, `tests/test_judge.py`.
+Harness `cli` scenario `billing_allow.yaml`: hard `route_selected`/`verdict`/`answer_count`. Twins: static fixture + systemone cassette. Unit: `tests/test_judgement_policy.py`, `tests/test_judge.py`.
 
 #### Footnotes
 
@@ -2582,13 +2582,13 @@ A new Laya build changes confidence fields. A versioned cassette must fail the s
 
 #### Implementation
 
-`SystemOneJudgeProvider` maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (`get_judge_connection`, `get_judge_provider`).
+`SystemOneJudgeProvider` maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (`get_judge_connection`, `get_judge_provider`). `CliInstrumentor` verb `judge_route` runs the cassette through the real provider.
 
 Covers: JDG wire map (System One).
 
 #### Validation
 
-Harness `harness_runs` op `systemone_cassette` → `_run_route_refund` with `systemone/laya/v1` cassette.
+Harness `cli` scenario `billing_allow.yaml` on `systemone/laya` cassette: hard `route_selected`, `verdict`, `answer_count`.
 
 ### `taloneth_validator_qualification` — Qualify validators before they gate completion
 
