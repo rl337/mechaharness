@@ -1,9 +1,0 @@
-{
-  "kinds": [
-    "advice_requested",
-    "completed"
-  ],
-  "final_kind": "completed",
-  "pending_cleared": true,
-  "resumes": 1
-}

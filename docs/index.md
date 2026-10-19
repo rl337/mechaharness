@@ -104,6 +104,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
 | [Graph templates and Agentic Recipes](./reference/graph-templates.md) | Recipe catalog + `GraphTemplate` substrate + soft points |
 | [Durable graph generators](./reference/durable-graph-generators.md) | `DurableGraphGenerator` start/resume/inspect; ScriptedDriver |
+| [CLI universe](./reference/cli-universe.md) | Concrete host CLI graph + `CliInstrumentor`; story `kind: cli` |
 | [Node components](./reference/node-components.md) | Sub-node kinds (events/soft points/nest); query + traversal |
 
 ## Mental model

@@ -109,7 +109,7 @@ who pick backends by name.
 ## Durable graph generator (driven execution)
 
 **Pattern:** Externally driven durable generator over registered recipes  
-**Code:** `mechaharness.durable_graph_generator`, `mechaharness.host_kit`  
+**Code:** `mechaharness.durable_graph_generator`, `mechaharness.durable_generator_host`, `mechaharness.host_kit`  
 **Requirements:** [Durable graph generators](./requirements/durable-graph-generators.md)  
 **Reference:** [Durable graph generators](./reference/durable-graph-generators.md)
 

@@ -488,8 +488,10 @@ def host_durable_graph_generator(
 ) -> Any:
     """Build a :class:`~mechaharness.durable_graph_generator.DurableGraphGenerator`.
 
-    Blessed host path for the long-run driven-execution façade. Pass a shared
-    ``run_store`` so process-restart tests rehydrate pending guidance. Optional
+    Blessed host path for the long-run driven-execution façade (default recipe
+    catalog via Config). For soft-point guidance sessions see
+    :mod:`mechaharness.durable_generator_host`. Pass a shared ``run_store`` so
+    process-restart hosts rehydrate pending guidance. Optional
     ``checkpoint_path`` / ``checkpoint_store`` bind the same durability seam
     used by :func:`host_graph_executor`.
 

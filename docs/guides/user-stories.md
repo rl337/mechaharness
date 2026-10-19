@@ -173,7 +173,7 @@ Operators need to see how often a frontier driver was asked for advice versus ho
 
 #### Validation
 
-Harness `durable_graph_generator` op `durable_cost_budget`. Hard expects guidance_yields and resumes matching the scripted cycle.
+Harness `durable_generator` via `scenario.yaml`. Hard expects guidance_yields and resumes matching the scripted cycle.
 
 #### Footnotes
 
@@ -377,13 +377,13 @@ Finance asks Nubble whether a harness run actually burned billable units. He run
 
 #### Implementation
 
-Harness runs emit structured `EventLog` records for inference and cost (`CostAccountant` / `core:cost`, `core:inference`). This is the baseline observability stream for every run — decisions, routing, and tools extend the same log rather than a separate ledger.
+CLI universe `cli:infer` via `CliInstrumentor` / `CliInferRunner` emits structured `EventLog` records for inference and cost (`CostAccountant` / `core:cost`, `core:inference`) on the same stream as graph lifecycle events. This is the baseline observability stream for every run — decisions, routing, and tools extend the same log rather than a separate ledger.
 
 Covers: OBS-01.
 
 #### Validation
 
-Harness `harness_runs` op `pass_through` → `_run_pass_through`. Soft expects: inference and cost events with non-zero units. Related: `tests/test_events.py`, `tests/test_pass_through.py`.
+Harness `cli` scenarios `event_types.yaml` (exact baseline event types + positive cost units) and `event_timestamps.yaml` (clock-stamped inference/cost). Cassette `response.json`. Related: `tests/test_events.py`. Live: `MECHA_STORY_BACKEND=live`.
 
 ### `nubble_topology_efficiency` — Separate wall-clock speedup from total work and queue wait
 
@@ -1060,11 +1060,11 @@ Frontier and other MCP-capable clients cannot reenter a model session during a p
 
 #### Implementation
 
-`DurableGraphGenerator.start` returns a committed `GraphYield`; `resume` is a separate operation with `expected_sequence`. No recursive callback into an outstanding tool call is required. MCP mapping is documented for M2 (`fangore_insp_mcp_graph_driver`).
+`DurableGraphGenerator.start` returns a committed `GraphYield`; `resume` is a separate operation with `expected_sequence`. No recursive callback into an outstanding tool call is required. MCP adapter: `mechaharness.mcp_graph_driver` (unit/doctest).
 
 #### Validation
 
-Harness `durable_graph_generator` op `durable_session_resume`. Hard expects start advice_requested, resume completed, distinct sequences.
+Harness `durable_generator` via `scenario.yaml`. Hard expects start advice_requested, resume completed, distinct sequences.
 
 #### Footnotes
 
@@ -1076,11 +1076,11 @@ Long-running judgment-bearing work is started as a durable generator over a regi
 
 #### Implementation
 
-`DurableGraphGenerator.start` / `list_recipes` in `durable_graph_generator.py` resolve only `GraphTemplateRegistry` catalog ids, advance to an ordered `GraphYield`, and persist via `GeneratorRunStore` / `CheckpointStore`. Host entry: `host_kit.host_durable_graph_generator`. Node component kind `guidance_request` is reserved for guidance soft points; this story exercises zero-advice completion.
+`DurableGraphGenerator.start` / `list_recipes` resolve `GraphTemplateRegistry` catalog ids and persist via `GeneratorRunStore`. Host entry: `host_kit.host_durable_graph_generator` / `durable_generator_host`. Node component kind `guidance_request` is reserved for guidance soft points; this story exercises zero-advice completion.
 
 #### Validation
 
-Harness `durable_graph_generator` op `durable_complete_on_start`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.
+Harness `durable_generator` via `scenario.yaml`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.
 
 #### Footnotes
 
@@ -1241,7 +1241,7 @@ When a run needs higher-level judgment, start returns an advice yield with a typ
 
 #### Validation
 
-Harness `durable_graph_generator` op `durable_guidance_cycle`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.
+Harness `durable_generator` via `scenario.yaml`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.
 
 #### Footnotes
 
@@ -1274,7 +1274,7 @@ Possession of a run id alone must not confer control. An intruder controller can
 
 #### Validation
 
-Harness `durable_graph_generator` op `durable_controller_auth`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.
+Harness `durable_generator` via `scenario.yaml`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.
 
 #### Footnotes
 
@@ -1290,7 +1290,7 @@ Duplicate resume with the same idempotency key returns the committed result; a c
 
 #### Validation
 
-Harness `durable_graph_generator` op `durable_resume_idempotent`. Hard expects duplicate key same sequence and stale rejection.
+Harness `durable_generator` via `scenario.yaml`. Hard expects duplicate key same sequence and stale rejection.
 
 #### Footnotes
 
@@ -1306,7 +1306,7 @@ A suspended generator run must survive executor or MCP process restart and prese
 
 #### Validation
 
-Harness `durable_graph_generator` op `durable_survive_restart`. Hard expects identical pending question and request_id after rehydrate.
+Harness `durable_generator` via `scenario.yaml`. Hard expects identical pending question and request_id after rehydrate.
 
 #### Footnotes
 
@@ -1542,22 +1542,6 @@ Harness `pure_api` op `loop_health`. Soft expects wind_down true.
 
 [^wl-l13-loop]: [WalkingLabs L13 Loop Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-13-loop-engineering/) — Loop health
 
-### `fangore_insp_mcp_graph_driver` — Expose the generator contract through a stdio MCP adapter
-
-Cursor, Codex, and other MCP clients should drive the same start/resume/inspect/cancel/list_recipes contract over piped stdio without embedding core semantics in the transport. Stdout stays protocol; diagnostics go to stderr. Tracks R-IOC-MCP[^insp-ioc-09].
-
-#### Implementation
-
-`mechaharness.mcp_graph_driver.GeneratorMcpServer` is a stdio MCP adapter (newline-delimited JSON-RPC, with Content-Length fallback) mapping `generator_start` / `generator_resume` / `generator_inspect` / `generator_cancel` / `generator_list_recipes` onto `DurableGraphGenerator`. Run with `python -m mechaharness.mcp_graph_driver`. File-backed `FileGeneratorRunStore` keeps state outside the MCP process. End-to-end IoC example lives in the module doctest (pytest `--doctest-modules`).
-
-#### Validation
-
-Harness `durable_graph_generator` op `durable_mcp_gap`. Hard expects mcp_adapter_shipped true. Pytest `--doctest-modules` on `mechaharness.mcp_graph_driver` covers start → advice → store restart → resume → completed plus NDJSON initialize/tools/list. Unit framing cases: `tests/test_mcp_graph_driver.py`.
-
-#### Footnotes
-
-[^insp-ioc-09]: [Durable graph generators (R-IOC-MCP)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-MCP stdio MCP adapter
-
 ### `fangore_insp_operation_compensation` — Declare operation idempotency and compensation
 
 Cleanup and recovery operations declare idempotency and optional compensation so retries do not double side effects. Accepts WalkingLabs L12 guidance[^wl-l12-idem].
@@ -1670,22 +1654,6 @@ Harness `access_authority` op `consequence_risk_scale`. Soft expects: high-conse
 
 [^insp-r15]: [Inspiration requirements (req 15: risk-scaled autonomy)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 15 — risk-scaled autonomy
 [^insp-pa-02-risk]: [Personal agent reliability map (MH-PA-02 consequence)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Consequence axis of authority gate; compose in fangore_insp_authority_gate
-
-### `fangore_insp_shared_driver_contract` — Share one generator contract across agent, CLI, and scripted drivers
-
-Agent, human CLI/TUI, and scripted tests must use the same tool protocol and graph definitions so fixtures and production drivers cannot drift. Core ops and the stdio MCP adapter ship now; human CLI/TUI remains a milestone. Tracks R-IOC-DRIVERS[^insp-ioc-10].
-
-#### Implementation
-
-`DurableGraphGenerator` public ops, `ScriptedDriver`, and `mechaharness.mcp_graph_driver` (stdio MCP). Human CLI/TUI clients remain gap.
-
-#### Validation
-
-Harness `durable_graph_generator` op `durable_shared_driver_contract`. Hard expects core ops, ScriptedDriver, and MCP adapter present; cli_client_gap true.
-
-#### Footnotes
-
-[^insp-ioc-10]: [Durable graph generators (R-IOC-DRIVERS)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md) — R-IOC-DRIVERS shared driver contract
 
 ### `fangore_insp_soft_evolution_allowlist` — Declare which soft recipe fields may evolve under optimization
 
@@ -2538,11 +2506,11 @@ Evaluation and CI need a first-class scripted driver that asserts expected yield
 
 #### Implementation
 
-`ScriptedDriver` in `durable_graph_generator.py` runs `start`/`resume` loops with fixture responses, optional `expected_kinds`, and `strict_unexpected_advice`.
+`ScriptedDriver` / `durable_generator_host.run_soft_point_session` run start/resume with soft-point bindings and `strict_unexpected_advice`.
 
 #### Validation
 
-Harness `durable_graph_generator` op `durable_scripted_replay`. Hard expects unexpected-advice failure when responses are empty under strict mode.
+Harness `durable_generator` via `scenario.yaml`. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.
 
 #### Footnotes
 

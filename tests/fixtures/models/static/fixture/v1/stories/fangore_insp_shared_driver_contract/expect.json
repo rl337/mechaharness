@@ -1,6 +1,0 @@
-{
-  "core_ops_present": true,
-  "mcp_adapter_present": true,
-  "cli_client_gap": true,
-  "scripted_driver_present": true
-}
