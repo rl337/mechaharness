@@ -307,11 +307,11 @@ pytest<span class="w"> </span>-q
 <p>Nubble needs every model call to leave a reconstructible record of what the model saw — messages, tools, and instructions — so offline replay does not depend on hidden memory. Accepts WalkingLabs DeepSeek and P06 observability guidance<a class="footnote-reference brackets" href="#wl-deepseek-manifest" id="id26" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-p06-manifest" id="id27" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a>.</p>
 <section id="id28">
 <h4>Implementation<a class="headerlink" href="#id28" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ModelInputManifest</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.model_input_manifest</span></code> records messages, tool definitions, instructions, and content hashes; <code class="docutils literal notranslate"><span class="pre">reconstruct_messages</span></code> rebuilds the call without in-memory state. Decision records may reference the manifest via <code class="docutils literal notranslate"><span class="pre">context_manifest_ref</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ModelInputManifest</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.model_input_manifest</span></code> records messages, tool definitions, instructions, and content hashes; <code class="docutils literal notranslate"><span class="pre">reconstruct_messages</span></code> rebuilds the call without in-memory state. <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">replay_model_input</span></code> exposes this diagnostic. Decision records may reference the manifest via <code class="docutils literal notranslate"><span class="pre">context_manifest_ref</span></code>.</p>
 </section>
 <section id="id29">
 <h4>Validation<a class="headerlink" href="#id29" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">harness_runs</span></code> op <code class="docutils literal notranslate"><span class="pre">model_input_manifest_replay</span></code>. Soft expects hash verification and reconstructed message equality.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">manifest_replay.yaml</span></code>: hard <code class="docutils literal notranslate"><span class="pre">hashes_ok</span></code>, <code class="docutils literal notranslate"><span class="pre">reconstructed_equals</span></code>, <code class="docutils literal notranslate"><span class="pre">manifest_ref_nonempty</span></code>.</p>
 </section>
 <section id="id30">
 <h4>Footnotes<a class="headerlink" href="#id30" title="Link to this heading"></a></h4>
@@ -322,11 +322,11 @@ pytest<span class="w"> </span>-q
 <p>Nubble prefers declaring what a step needs instead of hard-coding a model id, then picking among available classes. Accepts inspiration requirement 13<a class="footnote-reference brackets" href="#insp-r13" id="id31" role="doc-noteref"><span class="fn-bracket">[</span>10<span class="fn-bracket">]</span></a>.</p>
 <section id="id32">
 <h4>Implementation<a class="headerlink" href="#id32" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">route_for_capability_needs</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.routing</span></code> selects a model class from <code class="docutils literal notranslate"><span class="pre">model:</span></code> needs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">route_for_capability_needs</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.routing</span></code> selects a model class from declared needs and available classes. <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">route_capabilities</span></code> exposes the host diagnostic.</p>
 </section>
 <section id="id33">
 <h4>Validation<a class="headerlink" href="#id33" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">harness_runs</span></code> op <code class="docutils literal notranslate"><span class="pre">capability_need_routing</span></code>. Soft expects selected_model_class matches need.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">capability_route.yaml</span></code>: hard <code class="docutils literal notranslate"><span class="pre">selected_model_class</span></code>.</p>
 </section>
 <section id="id34">
 <h4>Footnotes<a class="headerlink" href="#id34" title="Link to this heading"></a></h4>
@@ -455,12 +455,11 @@ pytest<span class="w"> </span>-q
 <p>Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch. Random lane thrash must not win on unit price alone.</p>
 <section id="id70">
 <h4>Implementation<a class="headerlink" href="#id70" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">route_at_boundary</span></code> selects lanes at task/phase boundaries; <code class="docutils literal notranslate"><span class="pre">activate_scoped_policy</span></code> activates judgement policy only when calibration criteria are met — affinity and activation stay behind evaluation, not cheapest unit price.</p>
-<p>Covers: RTE-03.</p>
+<p><code class="docutils literal notranslate"><span class="pre">route_at_boundary</span></code> and <code class="docutils literal notranslate"><span class="pre">activate_scoped_policy</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.routing</span></code> keep affinity inside a coherent work loop; uncalibrated policies do not activate. <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">check_model_affinity</span></code> exposes the diagnostic.</p>
 </section>
 <section id="id71">
 <h4>Validation<a class="headerlink" href="#id71" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">harness_runs</span></code> op <code class="docutils literal notranslate"><span class="pre">model_affinity</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_model_affinity</span></code>. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_routing.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">affinity_lane.yaml</span></code>: hard <code class="docutils literal notranslate"><span class="pre">selected_lane</span></code> and <code class="docutils literal notranslate"><span class="pre">uncalibrated_is_null</span></code>.</p>
 </section>
 </section>
 <section id="nubble-repo-topology-budget-repository-topology-maps-and-fall-back-when-stale">
@@ -2416,11 +2415,11 @@ pytest<span class="w"> </span>-q
 <p>Taloneth needs comparable runs to record and flag mismatches in output caps, tool budgets, timeouts, and sampling so train and eval behavior stay aligned. Accepts FineEnvs train/eval parity findings<a class="footnote-reference brackets" href="#fineenvs-parity" id="id594" role="doc-noteref"><span class="fn-bracket">[</span>171<span class="fn-bracket">]</span></a>.</p>
 <section id="id595">
 <h4>Implementation<a class="headerlink" href="#id595" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ParitySurface</span></code>, <code class="docutils literal notranslate"><span class="pre">parity_from_harness_config</span></code>, and <code class="docutils literal notranslate"><span class="pre">compare_parity</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.run_parity</span></code> snapshot constraint surfaces and list material mismatches.</p>
+<p><code class="docutils literal notranslate"><span class="pre">compare_parity</span></code> / <code class="docutils literal notranslate"><span class="pre">parity_from_harness_config</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.run_parity</span></code> compare harness constraint surfaces. <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">compare_run_parity</span></code> exposes the diagnostic.</p>
 </section>
 <section id="id596">
 <h4>Validation<a class="headerlink" href="#id596" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">harness_runs</span></code> op <code class="docutils literal notranslate"><span class="pre">run_parity_compare</span></code>. Soft expects material max_tokens mismatch. Unit tests in <code class="docutils literal notranslate"><span class="pre">tests/test_run_parity.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">parity_mismatch.yaml</span></code>: hard <code class="docutils literal notranslate"><span class="pre">comparable</span></code> and exact <code class="docutils literal notranslate"><span class="pre">material_mismatches_exactly</span></code>.</p>
 </section>
 <section id="id597">
 <h4>Footnotes<a class="headerlink" href="#id597" title="Link to this heading"></a></h4>
@@ -2520,12 +2519,11 @@ pytest<span class="w"> </span>-q
 <p>Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: <code class="docutils literal notranslate"><span class="pre">nubble_lane_load_hint</span></code>, <code class="docutils literal notranslate"><span class="pre">nubble_model_affinity</span></code>.</p>
 <section id="id622">
 <h4>Implementation<a class="headerlink" href="#id622" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> / <code class="docutils literal notranslate"><span class="pre">route_at_boundary</span></code> compare candidates at task and phase boundaries and estimate whole-task cost honesty. Unavailable backends stay unavailable.</p>
-<p>Covers: RTE-01, RTE-02.</p>
+<p><code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.routing</span></code> compares backends without inventing unavailable results. <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> exposes the diagnostic.</p>
 </section>
 <section id="id623">
 <h4>Validation<a class="headerlink" href="#id623" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">harness_runs</span></code> op <code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_shadow_decision_backends</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_routing.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">shadow_backends.yaml</span></code>: hard exact unavailable/available/matched action lists.</p>
 </section>
 </section>
 <section id="taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette">

@@ -185,11 +185,11 @@ Nubble needs every model call to leave a reconstructible record of what the mode
 
 #### Implementation
 
-`ModelInputManifest` in `mechaharness.model_input_manifest` records messages, tool definitions, instructions, and content hashes; `reconstruct_messages` rebuilds the call without in-memory state. Decision records may reference the manifest via `context_manifest_ref`.
+`ModelInputManifest` in `mechaharness.model_input_manifest` records messages, tool definitions, instructions, and content hashes; `reconstruct_messages` rebuilds the call without in-memory state. `CliInstrumentor` verb `replay_model_input` exposes this diagnostic. Decision records may reference the manifest via `context_manifest_ref`.
 
 #### Validation
 
-Harness `harness_runs` op `model_input_manifest_replay`. Soft expects hash verification and reconstructed message equality.
+Harness `cli` scenario `manifest_replay.yaml`: hard `hashes_ok`, `reconstructed_equals`, `manifest_ref_nonempty`.
 
 #### Footnotes
 
@@ -202,11 +202,11 @@ Nubble prefers declaring what a step needs instead of hard-coding a model id, th
 
 #### Implementation
 
-`route_for_capability_needs` in `mechaharness.routing` selects a model class from `model:` needs.
+`route_for_capability_needs` in `mechaharness.routing` selects a model class from declared needs and available classes. `CliInstrumentor` verb `route_capabilities` exposes the host diagnostic.
 
 #### Validation
 
-Harness `harness_runs` op `capability_need_routing`. Soft expects selected_model_class matches need.
+Harness `cli` scenario `capability_route.yaml`: hard `selected_model_class`.
 
 #### Footnotes
 
@@ -349,13 +349,11 @@ Within one coherent loop, Nubble wants routing to prefer the already-chosen lane
 
 #### Implementation
 
-`route_at_boundary` selects lanes at task/phase boundaries; `activate_scoped_policy` activates judgement policy only when calibration criteria are met — affinity and activation stay behind evaluation, not cheapest unit price.
-
-Covers: RTE-03.
+`route_at_boundary` and `activate_scoped_policy` in `mechaharness.routing` keep affinity inside a coherent work loop; uncalibrated policies do not activate. `CliInstrumentor` verb `check_model_affinity` exposes the diagnostic.
 
 #### Validation
 
-Harness `harness_runs` op `model_affinity` → `_run_model_affinity`. Soft expects: preferred lane selected for task kind; uncalibrated policy activation returns null. Unit: `tests/test_routing.py`.
+Harness `cli` scenario `affinity_lane.yaml`: hard `selected_lane` and `uncalibrated_is_null`.
 
 ### `nubble_repo_topology` — Budget repository topology maps and fall back when stale
 
@@ -2458,11 +2456,11 @@ Taloneth needs comparable runs to record and flag mismatches in output caps, too
 
 #### Implementation
 
-`ParitySurface`, `parity_from_harness_config`, and `compare_parity` in `mechaharness.run_parity` snapshot constraint surfaces and list material mismatches.
+`compare_parity` / `parity_from_harness_config` in `mechaharness.run_parity` compare harness constraint surfaces. `CliInstrumentor` verb `compare_run_parity` exposes the diagnostic.
 
 #### Validation
 
-Harness `harness_runs` op `run_parity_compare`. Soft expects material max_tokens mismatch. Unit tests in `tests/test_run_parity.py`.
+Harness `cli` scenario `parity_mismatch.yaml`: hard `comparable` and exact `material_mismatches_exactly`.
 
 #### Footnotes
 
@@ -2572,13 +2570,11 @@ Taloneth compares rules, local model, and System One on a matched ticket. When t
 
 #### Implementation
 
-`shadow_decision_backends` / `route_at_boundary` compare candidates at task and phase boundaries and estimate whole-task cost honesty. Unavailable backends stay unavailable.
-
-Covers: RTE-01, RTE-02.
+`shadow_decision_backends` in `mechaharness.routing` compares backends without inventing unavailable results. `CliInstrumentor` verb `shadow_decision_backends` exposes the diagnostic.
 
 #### Validation
 
-Harness `harness_runs` op `shadow_decision_backends` → `_run_shadow_decision_backends`. Unit: `tests/test_routing.py`.
+Harness `cli` scenario `shadow_backends.yaml`: hard exact unavailable/available/matched action lists.
 
 ### `taloneth_systemone_cassette` — Pin System One adapter behavior to a versioned cassette
 
