@@ -13,3 +13,6 @@ expect:
 - kind: equals
   key: error_code
   value: incompatible_checkpoint_fingerprint
+- kind: lte
+  key: cost_units
+  value: 1

@@ -16,3 +16,6 @@ expect:
   key: subgraph_node_ids
   value:
   - describe
+- kind: lte
+  key: cost_units
+  value: 0

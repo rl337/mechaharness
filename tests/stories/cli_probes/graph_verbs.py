@@ -88,6 +88,7 @@ from mechaharness.operation_registry import (
 from mechaharness.rollout_graph import build_rollout_graph
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
 from mechaharness.tools.base import ToolRegistry
+from tests.stories.cli_probes.graph_cost import with_graph_cost
 
 
 class TopologyEfficiencyCommand(BaseModel):
@@ -360,14 +361,20 @@ async def run_graph_executor_run(body: GraphExecutorRunCommand) -> dict[str, Any
         graph, budget_policy=BudgetPolicy.unlimited(), run_id="story-graph-exec"
     )
     types = [e.type for e in result.events]
-    return {
-        "status": result.status,
-        "consume_sum": result.graph.nodes["consume"].payload.get("sum"),
-        "emitted_graph_start": "core:graph_start" in types,
-        "emitted_graph_end": "core:graph_end" in types,
-        "denied_without_execute_grant": denied is not None and denied.status == "denied",
-        "flaky_attempts": len(attempts),
-    }
+    return with_graph_cost(
+        {
+            "status": result.status,
+            "consume_sum": result.graph.nodes["consume"].payload.get("sum"),
+            "emitted_graph_start": "core:graph_start" in types,
+            "emitted_graph_end": "core:graph_end" in types,
+            "denied_without_execute_grant": (
+                denied is not None and denied.status == "denied"
+            ),
+            "flaky_attempts": len(attempts),
+        },
+        result,
+        denied,
+    )
 
 
 async def run_graph_event_correlators(
@@ -451,23 +458,28 @@ async def run_graph_event_correlators(
         (e.payload.get("recipe_id"), e.payload.get("recipe_version"))
         for e in parent_events
     }
-    return {
-        "status": result.status,
-        "graph_events_have_graph_id": all(
-            e.payload.get("graph_id") == body.graph_id for e in parent_events
-        ),
-        "node_events_have_node_id": bool(node_events)
-        and all(isinstance(e.payload.get("node_id"), str) for e in node_events),
-        "recipe": [list(pair) for pair in sorted(recipe_stamps)],
-        "epochs": sorted({e.payload.get("authorization_epoch") for e in parent_events}),
-        "child_parent_run_ids": sorted(
-            {e.payload.get("parent_run_id") for e in child_events}
-        ),
-        "child_nest_depths": sorted(
-            {e.payload.get("nest_depth") for e in child_events}
-        ),
-        "node_attempt_rows": [[r.node_id, r.attempt, r.status] for r in rows],
-    }
+    return with_graph_cost(
+        {
+            "status": result.status,
+            "graph_events_have_graph_id": all(
+                e.payload.get("graph_id") == body.graph_id for e in parent_events
+            ),
+            "node_events_have_node_id": bool(node_events)
+            and all(isinstance(e.payload.get("node_id"), str) for e in node_events),
+            "recipe": [list(pair) for pair in sorted(recipe_stamps)],
+            "epochs": sorted(
+                {e.payload.get("authorization_epoch") for e in parent_events}
+            ),
+            "child_parent_run_ids": sorted(
+                {e.payload.get("parent_run_id") for e in child_events}
+            ),
+            "child_nest_depths": sorted(
+                {e.payload.get("nest_depth") for e in child_events}
+            ),
+            "node_attempt_rows": [[r.node_id, r.attempt, r.status] for r in rows],
+        },
+        result,
+    )
 
 
 def run_graph_linkage_preflight(
@@ -747,11 +759,14 @@ async def run_dynamic_subgraph_nest(
         run_id="story-subgraph",
     )
     wrap = result.graph.nodes["wrap"]
-    return {
-        "status": result.status,
-        "child_status": wrap.payload.get("child_status"),
-        "child_run_id_nonempty": bool(wrap.payload.get("child_run_id")),
-    }
+    return with_graph_cost(
+        {
+            "status": result.status,
+            "child_status": wrap.payload.get("child_status"),
+            "child_run_id_nonempty": bool(wrap.payload.get("child_run_id")),
+        },
+        result,
+    )
 
 
 async def run_checkpoint_fingerprint_refuse(
@@ -774,11 +789,15 @@ async def run_checkpoint_fingerprint_refuse(
         graph, budget_policy=BudgetPolicy.unlimited(), run_id="insp-fp", resume=True
     )
     err = resumed.error or ""
-    return {
-        "first_status": first.status,
-        "resume_status": resumed.status,
-        "error_code": err.split(":", 1)[0] if err else None,
-    }
+    return with_graph_cost(
+        {
+            "first_status": first.status,
+            "resume_status": resumed.status,
+            "error_code": err.split(":", 1)[0] if err else None,
+        },
+        first,
+        resumed,
+    )
 
 
 def run_environment_linkage_fail(
@@ -844,13 +863,17 @@ async def run_wake_reresolve_resume(
         run_id="insp-wake",
         resume=True,
     )
-    return {
-        "resolve_ok": resolve.ok,
-        "resume_status": resumed.status,
-        "fingerprint_nonempty": bool(
-            first.graph.config_fingerprint or resolve.fingerprint
-        ),
-    }
+    return with_graph_cost(
+        {
+            "resolve_ok": resolve.ok,
+            "resume_status": resumed.status,
+            "fingerprint_nonempty": bool(
+                first.graph.config_fingerprint or resolve.fingerprint
+            ),
+        },
+        first,
+        resumed,
+    )
 
 
 async def run_graph_budget_limits(body: GraphBudgetLimitsCommand) -> dict[str, Any]:
@@ -897,14 +920,18 @@ async def run_graph_budget_limits(body: GraphBudgetLimitsCommand) -> dict[str, A
         ),
         run_id="story-budget-hard",
     )
-    return {
-        "soft_status": soft.status,
-        "soft_error": soft.error,
-        "soft_budget_level": soft.budget_level,
-        "hard_status": hard.status,
-        "hard_error": hard.error,
-        "hard_budget_level": hard.budget_level,
-    }
+    return with_graph_cost(
+        {
+            "soft_status": soft.status,
+            "soft_error": soft.error,
+            "soft_budget_level": soft.budget_level,
+            "hard_status": hard.status,
+            "hard_error": hard.error,
+            "hard_budget_level": hard.budget_level,
+        },
+        soft,
+        hard,
+    )
 
 
 async def run_graph_budget_subgraph_rollup(
@@ -951,13 +978,16 @@ async def run_graph_budget_subgraph_rollup(
         skip_linkage=True,
         run_id="story-budget-rollup",
     )
-    return {
-        "status": result.status,
-        "budget_spent": result.budget_spent,
-        "budget_level": result.budget_level,
-        "error": result.error,
-        "after_status": parent.nodes["after"].status.value,
-    }
+    return with_graph_cost(
+        {
+            "status": result.status,
+            "budget_spent": result.budget_spent,
+            "budget_level": result.budget_level,
+            "error": result.error,
+            "after_status": parent.nodes["after"].status.value,
+        },
+        result,
+    )
 
 
 class _FakeCodingJobBackend:
@@ -1142,23 +1172,26 @@ async def run_transactional_durable_resume(
         )
         effect_after = store.get_node_effect(run_id=run_id, node_id="dispatch")
         node = result.graph.nodes["dispatch"]
-        out = {
-            "crashed": crashed,
-            "status": result.status,
-            "node_status": node.status.value,
-            "dispatch_count": backend.dispatch_count,
-            "dispatch_count_after_crash": dispatch_after_crash,
-            "effect_state_before": (
-                effect_before.state.value if effect_before else None
-            ),
-            "effect_state_after": (
-                effect_after.state.value if effect_after else None
-            ),
-            "reconciliation_invoked": bool(
-                result.diagnostics.get("reconciliation_invoked")
-            ),
-            "boundary_before": boundary_before,
-        }
+        out = with_graph_cost(
+            {
+                "crashed": crashed,
+                "status": result.status,
+                "node_status": node.status.value,
+                "dispatch_count": backend.dispatch_count,
+                "dispatch_count_after_crash": dispatch_after_crash,
+                "effect_state_before": (
+                    effect_before.state.value if effect_before else None
+                ),
+                "effect_state_after": (
+                    effect_after.state.value if effect_after else None
+                ),
+                "reconciliation_invoked": bool(
+                    result.diagnostics.get("reconciliation_invoked")
+                ),
+                "boundary_before": boundary_before,
+            },
+            result,
+        )
         store.close()
         return out
 

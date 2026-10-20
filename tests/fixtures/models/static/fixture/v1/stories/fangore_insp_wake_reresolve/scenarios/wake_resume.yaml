@@ -11,3 +11,6 @@ expect:
   value: ok
 - kind: 'true'
   key: fingerprint_nonempty
+- kind: lte
+  key: cost_units
+  value: 1

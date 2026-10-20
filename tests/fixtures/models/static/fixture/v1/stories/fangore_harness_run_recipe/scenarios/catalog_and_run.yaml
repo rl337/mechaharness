@@ -33,3 +33,6 @@ expect:
   - prepare
   - harness_loop
   - render
+- kind: lte
+  key: cost_units
+  value: 1

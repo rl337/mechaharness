@@ -506,13 +506,21 @@ async def run_auth_epoch_resume_refuse(inputs: dict[str, Any]) -> dict[str, Any]
         resume=True,
         envelope=envelope(int(request["resume_epoch"])),
     )
-    actual = {
-        "first_status": first.status,
-        "checkpoint_epoch": executor.store.latest_authorization_epoch(run_id="insp-epoch"),
-        "resume_status": resumed.status,
-        "error_contains": resumed.error or "",
-        "runner_calls_after_resume": len(calls),
-    }
+    from tests.stories.cli_probes.graph_cost import with_graph_cost
+
+    actual = with_graph_cost(
+        {
+            "first_status": first.status,
+            "checkpoint_epoch": executor.store.latest_authorization_epoch(
+                run_id="insp-epoch"
+            ),
+            "resume_status": resumed.status,
+            "error_contains": resumed.error or "",
+            "runner_calls_after_resume": len(calls),
+        },
+        first,
+        resumed,
+    )
     return actual
 
 
@@ -587,12 +595,17 @@ async def run_effect_revalidation_check(inputs: dict[str, Any]) -> dict[str, Any
             authorization_epoch=int(request["envelope"].get("authorization_epoch", 0)),
         ),
     )
-    actual = {
-        "results": results,
-        "graph_status": run.status,
-        "node_error_contains": graph.nodes["publish_post"].error or "",
-        "effect_calls": len(calls),
-    }
+    from tests.stories.cli_probes.graph_cost import with_graph_cost
+
+    actual = with_graph_cost(
+        {
+            "results": results,
+            "graph_status": run.status,
+            "node_error_contains": graph.nodes["publish_post"].error or "",
+            "effect_calls": len(calls),
+        },
+        run,
+    )
     return actual
 
 

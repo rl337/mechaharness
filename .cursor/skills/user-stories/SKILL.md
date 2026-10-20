@@ -215,6 +215,10 @@ footnote defs when the narrative contains matching `[^id]` markers).
   MUST assert event observations: `event_types` / `includes` for
   `core:inference`, and token bounds via `prompt_tokens` /
   `completion_tokens` / `total_tokens` (`equals` / `gte` / `lte`).
+- Graph-execution scenarios that expose `budget_spent` MUST declare a cost
+  ceiling (`lte` / `equals` / `gte` / `positive` on `cost_units` or
+  `budget_spent`). The harness fails the story when that expect is missing.
+
 
 ### `title`
 

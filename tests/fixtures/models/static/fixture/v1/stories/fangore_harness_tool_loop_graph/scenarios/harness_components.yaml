@@ -45,3 +45,6 @@ expect:
   - harness
   - harness
   - harness
+- kind: lte
+  key: cost_units
+  value: 3

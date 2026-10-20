@@ -251,21 +251,31 @@ class ConversationalToolLoopRecipeAdapter(CliRecipeAdapter):
         child = ExecutionGraph.resume(tools_node.subgraph or {})
         node_ids = list(child.nodes)
         after_events = runtime.event_log.query()[before:]
-        units = sum(
+        event_dicts = [_event_dict(e) for e in after_events]
+        priced = sum(
             float(e.payload.get("units") or 0)
             for e in after_events
             if e.type == "core:cost"
         )
+        # Graph node charges (rounds) plus any priced inference units.
+        units = max(float(result.budget_spent), float(priced))
+        from mechaharness.cli_instrumentor import _token_totals
+
+        prompt, completion, total = _token_totals(event_dicts)
         return CliStepResult(
             verb="run_recipe",
             text=str(tools_node.payload.get("final_text") or "") or None,
             status=result.status,
             event_types=[e.type for e in after_events],
-            events=[_event_dict(e) for e in after_events],
+            events=event_dicts,
             cost_units=units,
+            prompt_tokens=prompt,
+            completion_tokens=completion,
+            total_tokens=total,
             clock_iso=runtime.datetime_service.now_utc_iso(),
             rounds=int(tools_node.payload.get("rounds") or 0),
             subgraph_node_ids=node_ids,
+            fields={"budget_spent": float(result.budget_spent)},
         )
 
 
