@@ -24,8 +24,8 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 | Event tap | `tapping_event_log` on the blessed executor path (HF-05) |
 
 Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`,
-`instantiate_recipe`, `tile_recipe`, diagnostics, judge, durable IoC
-`start`/`answer`/`inspect`/`rebuild`/`list_recipes`).
+`instantiate_recipe`, `tile_recipe`, `recipe_plan`, diagnostics, judge,
+durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`).
 Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
 (`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
 
@@ -157,7 +157,11 @@ covers all catalog ids.
 (``binds/*_tile.yaml``) for namespaced multi-instance composition
 (`fangore_recipe_namespace_tile`).
 
+``recipe_plan`` loads a lifecycle plan under ``plans/`` (``plan: soft_evolution``
+| ``port_search`` | ``registry_compose``) for allowlist / IO search / compose
+checks — one verb, document-selected behavior.
+
 ``run_recipe`` remains for **execute** adapters (`harness_run`,
-`backend_describe`, `conversational_tool_loop`). Registry / evolution /
-``recipe_as_tool`` / traversal stories stay on test probes until they have a
-product document of their own.
+`backend_describe`, `conversational_tool_loop`). Registry pointer / final-test /
+evolution-candidate / ownership / ``recipe_as_tool`` / traversal stories stay on
+test probes until they have a product document of their own.

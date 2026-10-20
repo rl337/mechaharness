@@ -164,8 +164,8 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
 </tbody>
 </table>
 <p>Production verbs stay lean (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>,
-<code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code>, diagnostics, judge, durable IoC
-<code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">answer</span></code>/<code class="docutils literal notranslate"><span class="pre">inspect</span></code>/<code class="docutils literal notranslate"><span class="pre">rebuild</span></code>/<code class="docutils literal notranslate"><span class="pre">list_recipes</span></code>).
+<code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code>, diagnostics, judge,
+durable IoC <code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">answer</span></code>/<code class="docutils literal notranslate"><span class="pre">inspect</span></code>/<code class="docutils literal notranslate"><span class="pre">rebuild</span></code>/<code class="docutils literal notranslate"><span class="pre">list_recipes</span></code>).
 Test-only clocks and the <code class="docutils literal notranslate"><span class="pre">probe</span></code> verb join via <code class="docutils literal notranslate"><span class="pre">TestHarnessCliConfig</span></code>
 (<code class="docutils literal notranslate"><span class="pre">tests/stories/cli_probes</span></code>). Story probes register on <code class="docutils literal notranslate"><span class="pre">cli_probe_classes</span></code>.</p>
 <p><strong>Recipe parameterization</strong> uses a human-readable
@@ -309,10 +309,13 @@ covers all catalog ids.</p>
 <p><code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code> loads a :class:<code class="docutils literal notranslate"><span class="pre">~mechaharness.recipe_bind.RecipeTileBind</span></code>
 (<code class="docutils literal notranslate"><span class="pre">binds/*_tile.yaml</span></code>) for namespaced multi-instance composition
 (<code class="docutils literal notranslate"><span class="pre">fangore_recipe_namespace_tile</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code> loads a lifecycle plan under <code class="docutils literal notranslate"><span class="pre">plans/</span></code> (<code class="docutils literal notranslate"><span class="pre">plan:</span> <span class="pre">soft_evolution</span></code>
+| <code class="docutils literal notranslate"><span class="pre">port_search</span></code> | <code class="docutils literal notranslate"><span class="pre">registry_compose</span></code>) for allowlist / IO search / compose
+checks — one verb, document-selected behavior.</p>
 <p><code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> remains for <strong>execute</strong> adapters (<code class="docutils literal notranslate"><span class="pre">harness_run</span></code>,
-<code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>). Registry / evolution /
-<code class="docutils literal notranslate"><span class="pre">recipe_as_tool</span></code> / traversal stories stay on test probes until they have a
-product document of their own.</p>
+<code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>). Registry pointer / final-test /
+evolution-candidate / ownership / <code class="docutils literal notranslate"><span class="pre">recipe_as_tool</span></code> / traversal stories stay on
+test probes until they have a product document of their own.</p>
 </section>
 </section>
 
