@@ -563,13 +563,17 @@ class CliInstrumentor:
         )
 
     async def recipe_plan(self, body: RecipePlanCommand) -> CliStepResult:
-        """Run a lifecycle plan document (soft evolution / port search / compose)."""
+        """Run a lifecycle / composition plan document."""
+        import inspect
+
         fields = body.resolve_and_run(base_dir=self._bind_base_dir)
+        if inspect.isawaitable(fields):
+            fields = await fields
         return CliStepResult(
             verb="recipe_plan",
             status="ok",
             clock_iso=self._datetime.now_utc_iso(),
-            fields=fields,
+            fields=dict(fields),
         )
 
     def _set_clock(self, at: str) -> None:

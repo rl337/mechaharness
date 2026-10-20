@@ -1,0 +1,19 @@
+# Traversal contract: events with parent_node_id become traversal records.
+
+plan: traversal_contract
+summary: Inference and tool_call records keep their parent harness node.
+
+events:
+- type: core:turn_start
+  payload:
+    parent_node_id: harness
+    component_id: harness/turn_start:1
+- type: core:inference
+  payload:
+    parent_node_id: harness
+    component_id: harness/inference:1
+- type: core:tool_call
+  payload:
+    tool_name: lookup
+    parent_node_id: harness
+    component_id: harness/tool_call:lookup:1

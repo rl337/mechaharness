@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "MechaHarness validates, executes, versions, and safety-gates recipes; the host (for example June) owns which workloads to run, how much to spend, and whether a candidate should be promoted. Two named hooks carry that split: one for evolution campaigns and one for promotion policy. Both default to doing nothing, a host can replace either, a host veto stops a promotion even when every test passed, and the library's final-test gate still applies when the host has no opinion (`taloneth_insp_recipe_final_test_gate`). Tracks MH-SR-09[^insp-sr-09].",
   "implementation": "`MechaHarnessConfig.get_recipe_promotion_policy()` (`RecipePromotionPolicy`, default `NoopRecipePromotionPolicy`) and `get_evolution_campaign_hooks()` (`EvolutionCampaignHooks`, default `NoopEvolutionCampaignHooks`) are registered in `configure()` as injectables, not `Settings`. `promote_recipe()` in `recipe_promotion_policy.py` lets the host policy decide, then the registry applies `promote_with_final_test`; when given the Config-bound hooks it calls `EvolutionCampaignHooks.on_promotion` after (and only after) a successful pointer move. Registry validation, evolvable allowlists, and the final-test gate stay in the library.",
-  "validation": "Harness `cli` scenario `evolution_ownership_split.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-sr-09",
