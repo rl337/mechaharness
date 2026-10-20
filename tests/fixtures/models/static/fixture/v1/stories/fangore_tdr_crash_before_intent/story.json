@@ -1,0 +1,35 @@
+{
+  "id": "fangore_tdr_crash_before_intent",
+  "persona": "fangore",
+  "title": "Resume after crash before the job intent is recorded",
+  "kind": "cli",
+  "narrative": "Fangore's host is dispatching a remote coding job on a durable plan. The MechaHarness process dies before the job intent is written. After restart he opens the same durable store, resumes the plan from the last checkpoint, and verifies the remote job is submitted exactly once — no prior effect to reconcile, and dispatch does not double. Sibling crash windows: `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, and later accept/reduce/commit stories. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05].",
+  "implementation": "`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.",
+  "validation": "Harness `cli` `probe` loads `plans/crash_before_intent.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": [
+    {
+      "id": "tdr-req",
+      "label": "Transactional durable graph resume requirements",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/requirements/transactional-durable-resume.md",
+      "note": "DR-01..DR-12 — checkpoint seam, SQLite, effect reconciliation, crash matrix"
+    },
+    {
+      "id": "insp-pa-05",
+      "label": "Personal agent reliability (MH-PA-05)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md",
+      "note": "Checkpoint-compatible execution"
+    },
+    {
+      "id": "insp-dots-06-tdr",
+      "label": "OpenAI Dots map (MH-DOTS-06 effect ledger)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md",
+      "note": "Effect ledger native; auth epoch is fangore_insp_auth_epoch_resume"
+    },
+    {
+      "id": "insp-sr-08-tdr",
+      "label": "Self-revising recipe map (MH-SR-08 checkpoints)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md",
+      "note": "Durable checkpoints; neighbor CR algorithm is separate delta"
+    }
+  ]
+}

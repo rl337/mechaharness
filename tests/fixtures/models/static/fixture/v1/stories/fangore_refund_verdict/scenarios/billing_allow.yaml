@@ -1,36 +1,47 @@
-kind: cli
-commands:
-- judge_route:
-    state: Customer was charged twice and wants a refund.
-    question_set_version: story-route-v1
-    questions:
-    - kind: choice
-      id: route
-      instructions: Which team should own this?
-      options:
-      - id: billing
-        description: Payments, invoices, refunds
-      - id: technical
-        description: Bugs and outages
-      - id: other
-        description: Everything else
-    - kind: noul
-      id: escalate
-      instructions: Needs urgent human attention?
-    policy:
-      version: story-route-v1
-      thresholds:
-      - signal_id: route
-        allow_choices:
-        - billing
-      ignore_unknown_signals: true
-expect:
-- kind: equals
-  key: route_selected
-  value: billing
-- kind: equals
-  key: verdict
-  value: ALLOW
-- kind: equals
-  key: answer_count
-  value: 2
+# user story: fangore_refund_verdict
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# A customer was charged twice.
+# Only the billing team may own the ticket.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    judge_route:
+      state: Customer was charged twice and wants a refund.
+      question_set_version: story-route-v1
+      questions:
+      - kind: choice
+        id: route
+        instructions: Which team should own this?
+        options:
+        - id: billing
+          description: Payments, invoices, refunds
+        - id: technical
+          description: Bugs and outages
+        - id: other
+          description: Everything else
+      - kind: noul
+        id: escalate
+        instructions: Needs urgent human attention?
+      policy:
+        version: story-route-v1
+        thresholds:
+        - signal_id: route
+          allow_choices:
+          - billing
+        ignore_unknown_signals: true
+complete:
+  expect:
+  - kind: equals
+    key: route_selected
+    value: billing
+  - kind: equals
+    key: verdict
+    value: ALLOW
+  - kind: equals
+    key: answer_count
+    value: 2
+cleanup: []

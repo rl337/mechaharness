@@ -1,12 +1,24 @@
-kind: cli
-durable:
-  graph: verify_repair
-  controller: story
-  store: memory
-commands:
-- start:
-    inputs:
-      goal: trivial
+# user story: fangore_insp_durable_graph_generator
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the
+# `verify_repair` durable graph (controller `story`, store `memory`).
+# Long-running judgment-bearing work is started as a durable generator over a registered
+# recipe.
+# When no external guidance is required, the first start call returns completion — the
+# driver does not invent a second harness or free-form graph.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: verify_repair
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      inputs:
+        goal: trivial
   expect:
   - kind: equals
     key: kind
@@ -19,3 +31,17 @@ commands:
   - kind: equals
     key: guidance_yields
     value: 0
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: sequence
+    value: 1
+  - kind: 'true'
+    key: recipe_listed
+  - kind: equals
+    key: guidance_yields
+    value: 0
+cleanup: []

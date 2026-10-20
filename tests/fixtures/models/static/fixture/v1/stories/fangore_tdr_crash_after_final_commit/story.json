@@ -1,0 +1,10 @@
+{
+  "id": "fangore_tdr_crash_after_final_commit",
+  "persona": "fangore",
+  "title": "Resume after final commit with nothing left to dispatch",
+  "kind": "cli",
+  "narrative": "The durable coding job has fully committed when Fangore's process dies. On resume he loads the store and verifies the plan is already complete — no new dispatch and no reconciliation of an in-flight effect. Closes the crash matrix after `fangore_tdr_crash_after_reduce_before_checkpoint`. Self-revising checkpoint consumers build on this seam (see footnotes on `fangore_tdr_crash_before_intent`).",
+  "implementation": "`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.",
+  "validation": "Harness `cli` `probe` loads `plans/crash_after_final_commit.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

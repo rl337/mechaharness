@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_context_missing_scores_fallback",
+  "persona": "fangore",
+  "title": "Fill the budget with deterministic ranking when scores are missing",
+  "kind": "cli",
+  "narrative": "Sometimes Fangore's decision model does not return scores for every candidate. He still needs a usable pack: he runs assembly, falls back to deterministic ranking for missing scores, and verifies the budget fills with what it can. Closes the picker matrix after `fangore_jev_context_budget_pack`.",
+  "implementation": "`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.",
+  "validation": "Harness `cli` `probe` loads `plans/missing_scores_fallback.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

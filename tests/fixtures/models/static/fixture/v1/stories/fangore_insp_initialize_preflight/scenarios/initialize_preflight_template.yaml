@@ -1,18 +1,31 @@
-# Bind document: ../binds/initialize_preflight.yaml
-kind: cli
-commands:
-- instantiate_recipe:
-    path: binds/initialize_preflight.yaml
-expect:
-- kind: 'true'
-  key: recipe_in_catalog
-- kind: equals
-  key: status
-  value: ok
-- kind: includes
-  key: subgraph_node_ids
-  value:
-  - linkage
-  - capability_check
-  - checkpoint_compat
-  - ready
+# user story: fangore_insp_initialize_preflight
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `initialize_preflight` recipe.
+# Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe
+# completes linkage, capability, and checkpoint checks.
+# Accepts WalkingLabs L06 guidance.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: initialize_preflight
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/initialize_preflight.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - linkage
+    - capability_check
+    - checkpoint_compat
+    - ready
+cleanup: []

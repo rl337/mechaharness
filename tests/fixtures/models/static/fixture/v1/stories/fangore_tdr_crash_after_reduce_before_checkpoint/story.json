@@ -1,0 +1,10 @@
+{
+  "id": "fangore_tdr_crash_after_reduce_before_checkpoint",
+  "persona": "fangore",
+  "title": "Resume after reduce before the checkpoint commits",
+  "kind": "cli",
+  "narrative": "Fangore's plan has reduced the remote job result in memory but has not yet committed the checkpoint when the process dies. After restart he resumes, reconciles from the durable effect ledger, and verifies the reduce is not applied twice. Comes after accept-recorded recovery in `fangore_tdr_crash_after_accept_recorded`.",
+  "implementation": "`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.",
+  "validation": "Harness `cli` `probe` loads `plans/crash_after_reduce_before_checkpoint.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

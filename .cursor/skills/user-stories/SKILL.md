@@ -44,19 +44,29 @@ python scripts/generate_user_stories_md.py --check
 
 Bios live in `personas.json` and are rendered into the guide.
 
-## Destination: YAML app harnesses for every story
+## Destination: persona-task YAML (`user_story`)
 
-**Decision:** convert **all** user-story acceptance tests to app-harness YAML
-(CLI-shaped scripts + hard expects). Do not add new `request.json` / `op`
-stories. When you touch a legacy story, migrate it in the same change (or a
-tight follow-up PR in the same wave).
+**Decision:** new and migrated acceptance uses `kind: user_story` —
+environment → graph → steps → complete → cleanup — wrapping **product** CLI
+verbs. Production CLI scripts stay verb-led; the story harness is the wrapper
+that acts out the persona task. Do not add new `request.json` / `op` stories.
 
 | Target harness | Use when |
 |----------------|----------|
-| **`cli`** | All acceptance. Infer, tools, recipes, durable IoC, probes, EventLog asserts, cassettes/live. Config-injected `CliInstrumentor` + growing `cli_universe`. |
+| **`user_story`** | Canonical acceptance. Persona walkthrough YAML; Config from `environment` only; drives `CliInstrumentor` verbs. |
+| **`cli`** | Legacy script-shaped scenarios (still registered). Migrate to `user_story` when touching. Probes remain `cli` until a product verb exists. |
 
-Legacy op-dispatch (`pure_api`, domain runners, …) is **deprecated inventory** —
-keep runners only until their stories migrate; then delete the op.
+### Narrative litmus
+
+`narrative` must read as an operational walk, not a capability blurb:
+
+1. Who / goal
+2. Starts the CLI host (family + backend / cassette)
+3. Loads graph G (or default infer universe)
+4. Performs steps S1…Sn
+5. Verifies completion via events / artifacts X
+
+If that cannot be said honestly, split the story.
 
 ### Story shape (`story.json`)
 
@@ -65,10 +75,10 @@ keep runners only until their stories migrate; then delete the op.
   "id": "nubble_run_cost_events",
   "persona": "nubble",
   "title": "Record cost and inference events for every harness run",
-  "kind": "cli",
-  "narrative": "PM-facing prose; may cite `other_story_id` or [^footnote-id]…",
+  "kind": "user_story",
+  "narrative": "He starts the CLI host… loads … performs … verifies …",
   "implementation": "Library modules/classes that fulfill the feature…",
-  "validation": "Harness `cli` scenarios `event_types.yaml` / `event_timestamps.yaml`; hard expects…",
+  "validation": "Harness `user_story` scenarios `event_types.yaml` / …",
   "footnotes": []
 }
 ```
@@ -77,8 +87,9 @@ keep runners only until their stories migrate; then delete the op.
 
 | Harness | Files |
 |---------|--------|
-| **`cli` (canonical)** | `story.json` + `scenarios/*.yaml` (+ `response.json` cassette when needed) |
-| **Legacy (migrating)** | `request.json` + `expect.json` — **do not create new**; remove when the story moves to YAML |
+| **`user_story` (canonical)** | `story.json` + `scenarios/*.yaml` (+ `response.json` when needed) |
+| **`cli` (legacy)** | same layout; script `commands:` shape |
+| **Legacy op** | `request.json` + `expect.json` — **do not create new** |
 
 `footnotes` is **required** (use `[]` when none). Each entry needs `id`, `label`,
 and `url`; `note` is optional.
@@ -95,66 +106,73 @@ Before writing or migrating YAML:
 
 ### App harness principles
 
-1. Harness is a **real MechaHarness host** (DI Config, `cli_universe`, recipes,
-   durable generator) — not a pytest-shaped wrapper.
-2. YAML is **CLI/host instructions** a human could scan; `expect:` is test-only.
+1. Story harness wraps a **real MechaHarness host** (DI Config + product verbs).
+2. Scenario YAML declares the **persona task phases**; comments cite the story id
+   and mirror the narrative. Product CLI scripts remain verb lists without
+   `environment` / `complete`.
 3. Soft points remain the UI answer seam where advice applies.
-4. Hard expects only (strict equality on declared keys). No soft `_include`
-   suffixes for new scenarios.
-5. One story → many concise YAML files when claims diverge (events vs timestamps).
+4. Hard expects only. No soft `_include` suffixes for new scenarios.
+5. One story → many concise YAML files when claims diverge.
 6. Gap/import probes are unit/doctest, not stories.
 7. **Litmus:** about to add `_run_*` or a new `op`? Stop — add a CLI verb or
-   scenario instead.
+   `user_story` scenario instead.
+8. **No `probe`** under `user_story` steps. Clocks belong in `environment.clock`.
 
 ### Positive-path coverage (mock / cassette)
 
 From story harness **initialization**, instrument mock or cassette inference
-(and related HTTP) so every **product positive path** is hit by ≥1 `kind: cli`
-story. Refusal / deny / soft-budget stories still count — they are positive
-coverage of those control paths.
+so every **product positive path** is hit by ≥1 story. Refusal / deny stories
+still count.
 
-1. Prefer `host:` on the scenario (`family`, `backend`) so Config binds the real
+1. Set `environment.family` / `environment.backend` so Config binds the real
    harness family and Completer (ScriptedInference, cassette HTTP strategy).
-2. Drive claims through product verbs (`infer`, `tool_loop` with `family=`,
-   `run_recipe`, durable IoC) — not a probe that reimplements DI.
-3. Probes remain only for seams with no product verb yet; migrating a probe onto
-   a verb is the default when the surface exists.
-4. New library capability → owning story through Config init + mock/cassette.
-5. `scripts/story_coverage.py` / `fail_under` gate the suite; ratchet the floor
-   up as positive-path coverage grows — never lower it to hide a drop.
+2. Drive claims through product verbs in `steps[].do` — not probe-local DI.
+3. Probes remain only on legacy `kind: cli` until a product verb exists.
+4. `scripts/story_coverage.py` / `fail_under` gate the suite; ratchet up, never down.
 
-### `cli` scenario shape
+### `user_story` scenario shape
 
 ```yaml
-# One-line claim
-kind: cli
-commands:
-  - infer:
-      prompt: Say hello.
-expect:
-  - kind: exactly
-    key: event_types
-    value: [core:access_check, core:graph_start, …]
-  - kind: positive
-    key: cost_units
-  - kind: nonempty
-    key: text
+# user story: <id>
+# Comment: persona starts CLI, loads graph, walks steps, verifies completion.
+kind: user_story
+
+environment:
+  family: pass_through
+  backend: mock          # mock | anthropic | openai_compat | …
+  # clock: '2026-01-15T12:00:00Z'
+
+graph: null              # or { recipe, bind?, durable? }
+
+steps:
+  - do:
+      infer:
+        prompt: Say hello.
+    expect:
+      - kind: nonempty
+        key: text
+
+complete:
+  expect:
+    - kind: includes
+      key: event_types
+      value: [core:inference, core:cost]
+
+cleanup: []
 ```
 
-Verbs are a pyiv map multibind (`MechaHarnessConfig.cli_verb_classes()`).
-Production catalog: `cli_host_verbs` (+ durable IoC verbs). Test delta via
-`TestHarnessCliConfig` (clocks + `probe`). Story probes register on
-`cli_probe_classes` and run as `probe: {path: plans/….yaml}` (preferred) or
-inline `probe: {name: …}`. `run_recipe` uses `cli_recipe_adapter_classes` for
-execute adapters. Catalog shape stories use `instantiate_recipe` with a
-human-readable `RecipeBind` under `binds/`; lifecycle checks use `recipe_plan`
-under `plans/`. Write bind/plan files for readers — comments, `summary`, and
-the decisions the story cares about. `expect:` is an open assertion list
-(validate kinds at load). Prefer many YAML scenarios over bag-ops; discovery =
-add YAML.
-See [`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
+Models: `tests/stories/scenarios/user_story_scenario.py`. Harness:
+`tests/stories/harness/user_story.py`. Product verbs remain on
+`MechaHarnessConfig.cli_verb_classes()`. See
+[`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
 
 Live: `MECHA_STORY_BACKEND=live`, `MECHA_BASE_URL`, `MECHA_MODEL` (served id).
+
+### Migration batches
+
+Remaining `kind: cli` stories convert in waves — product verbs first (A–F), then
+probe families after a product verb exists (P1–P10). Checklist and story ids:
+[`docs/guides/user-story-migration-batches.md`](../../../docs/guides/user-story-migration-batches.md).
 
 ### Full migration program
 

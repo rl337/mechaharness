@@ -2,9 +2,9 @@
   "id": "taloneth_shadow_decision_backends",
   "persona": "taloneth",
   "title": "Compare decision backends without inventing missing results",
-  "kind": "cli",
-  "narrative": "Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable \u2014 no fake latency or verdict. Related: `nubble_lane_load_hint`, `nubble_model_affinity`.",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: `nubble_lane_load_hint`, `nubble_model_affinity`. They walk product steps (shadow_decision_backends) and verify completion from the structured observation expects on this scenario.",
   "implementation": "`shadow_decision_backends` in `mechaharness.routing` compares backends without inventing unavailable results. `CliInstrumentor` verb `shadow_decision_backends` exposes the diagnostic.",
-  "validation": "Harness `cli` scenario `shadow_backends.yaml`: hard exact unavailable/available/matched action lists.",
+  "validation": "Harness `user_story` scenario `shadow_backends.yaml`: environment + graph + steps + complete expects.",
   "footnotes": []
 }

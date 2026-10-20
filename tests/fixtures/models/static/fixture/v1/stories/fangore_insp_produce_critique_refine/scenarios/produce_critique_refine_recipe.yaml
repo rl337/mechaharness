@@ -1,47 +1,61 @@
-# Bind document: ../binds/produce_critique_refine.yaml
-kind: cli
-commands:
-- instantiate_recipe:
-    path: binds/produce_critique_refine.yaml
-expect:
-- kind: 'true'
-  key: recipe_in_catalog
-- kind: equals
-  key: status
-  value: ok
-- kind: equals
-  key: template_name
-  value: produce_critique_refine
-- kind: includes
-  key: subgraph_node_ids
-  value:
-  - produce
-  - critique
-  - refine
-  - complete
-- kind: 'true'
-  key: critic_isolated
-- kind: equals
-  key: refine_max_iterations
-  value: 3
-- kind: equals
-  key: component_parents
-  value:
-    complete:
-    - complete_kind
-    critique:
-    - acceptance
-    - critique_kind
+# user story: fangore_insp_produce_critique_refine
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `produce_critique_refine` recipe.
+# Reusable subgraphs need typed inputs/outputs, applicability predicates, budgets, and
+# traceable outcomes.
+# Independent review and verify-repair already ship (`fangore_insp_independent_review`,
+# `fangore_verify_repair_recipe`).
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: produce_critique_refine
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/produce_critique_refine.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: produce_critique_refine
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - produce
+    - critique
+    - refine
+    - complete
+  - kind: 'true'
+    key: critic_isolated
+  - kind: equals
+    key: refine_max_iterations
+    value: 3
+  - kind: equals
+    key: component_parents
+    value:
+      complete:
+      - complete_kind
+      critique:
+      - acceptance
+      - critique_kind
+      - critique_prompt
+      - omit_producer_reasoning
+      produce:
+      - produce_kind
+      refine:
+      - max_rounds
+      - refine_kind
+      - stop_contract
+  - kind: equals
+    key: evolvable
+    value:
     - critique_prompt
-    - omit_producer_reasoning
-    produce:
-    - produce_kind
-    refine:
     - max_rounds
-    - refine_kind
-    - stop_contract
-- kind: equals
-  key: evolvable
-  value:
-  - critique_prompt
-  - max_rounds
+cleanup: []

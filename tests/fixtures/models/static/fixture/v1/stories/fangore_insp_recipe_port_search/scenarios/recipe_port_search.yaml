@@ -1,24 +1,36 @@
-# Plan document: ../plans/port_search.yaml
-kind: cli
-commands:
-- recipe_plan:
-    path: plans/port_search.yaml
-expect:
-- kind: equals
-  key: found
-  value:
-    produces_artifact:
-    - produce_critique_refine
-    - verify_repair
-    accepts_scenario:
-    - safety_eval
-    scenario_to_report:
-    - safety_eval
-    wildcard:
-    - safety_eval
-    wrong_type: []
-    unknown_port: []
-- kind: 'true'
-  key: all_catalog_ids
-- kind: 'true'
-  key: undeclared_recipes_skipped
+# user story: fangore_insp_recipe_port_search
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# Candidate compositions are found by searching only the registered recipes for ones
+# whose declared inputs and outputs fit what is needed.
+# The answer is a list of recipe names; nothing is generated, so no new executable code
+# can enter the production path.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    recipe_plan:
+      path: plans/port_search.yaml
+complete:
+  expect:
+  - kind: equals
+    key: found
+    value:
+      produces_artifact:
+      - produce_critique_refine
+      - verify_repair
+      accepts_scenario:
+      - safety_eval
+      scenario_to_report:
+      - safety_eval
+      wildcard:
+      - safety_eval
+      wrong_type: []
+      unknown_port: []
+  - kind: 'true'
+    key: all_catalog_ids
+  - kind: 'true'
+    key: undeclared_recipes_skipped
+cleanup: []

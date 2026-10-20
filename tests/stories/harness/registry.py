@@ -7,11 +7,14 @@ from tests.stories.catalog import StoryCase
 from tests.stories.harness.base import StoryHarness
 from tests.stories.harness.cli import CliHarness
 from tests.stories.harness.domains import DOMAIN_HARNESSES, KIND_TO_HARNESS_OP
+from tests.stories.harness.user_story import UserStoryHarness
 
 _CLI = CliHarness()
+_USER_STORY = UserStoryHarness()
 
 HARNESSES: dict[str, StoryHarness] = {
     _CLI.name: _CLI,
+    _USER_STORY.name: _USER_STORY,
 }
 for _domain in DOMAIN_HARNESSES:
     if _domain.name in HARNESSES:

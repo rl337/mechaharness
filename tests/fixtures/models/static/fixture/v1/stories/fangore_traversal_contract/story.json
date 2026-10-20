@@ -2,10 +2,10 @@
   "id": "fangore_traversal_contract",
   "persona": "fangore",
   "title": "Align live traversal with node-component ids from existing events",
-  "kind": "cli",
-  "narrative": "As a run proceeds, Fangore\u2019s console lights interiors that were laid out ahead of time. Inference and tool events must map to the same node-component identities under a parent graph node so the path lights up without a second observability graph. Complements `fangore_node_components` and `nubble_insp_rollout_graph`.[^june-nc-trav]",
-  "implementation": "`mechaharness.node_component.traversal_from_events` projects EventLog payloads whose types are existing core events (`inference`, `tool_call`, `tool_result`, `turn_start`, \u2026) into `TraversalRecord` rows with `parent_node_id` and component ids. Harness emits enrich those payloads with `parent_node_id` / `component_id` / `execution_node_id`.",
-  "validation": "Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. As a run proceeds, Fangore’s console lights interiors that were laid out ahead of time. Inference and tool events must map to the same node-component identities under a parent graph node so the path lights up without a second observability graph. Complements `fangore_node_components` and `nubble_insp_rollout_graph`. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^june-nc-trav]",
+  "implementation": "`mechaharness.node_component.traversal_from_events` projects EventLog payloads whose types are existing core events (`inference`, `tool_call`, `tool_result`, `turn_start`, …) into `TraversalRecord` rows with `parent_node_id` and component ids. Harness emits enrich those payloads with `parent_node_id` / `component_id` / `execution_node_id`.",
+  "validation": "Harness `user_story` scenario `traversal_contract.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "june-nc-trav",

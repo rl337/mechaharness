@@ -1,0 +1,17 @@
+{
+  "id": "fangore_jev_req_review_template_shape",
+  "persona": "fangore",
+  "title": "Shape a requirements-aware review with isolated checkers",
+  "kind": "cli",
+  "narrative": "Fangore is wiring a change review against applicable user stories. He loads the requirements-review template, confirms isolated reviewers and atomic checks are present in the expanded graph, and verifies the shape is ready for real gap cases. Related: `fangore_insp_independent_review`, `fangore_decision_plane_policy`.[^jev-us06]",
+  "implementation": "Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.",
+  "validation": "Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": [
+    {
+      "id": "jev-us06",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US06)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "Requirements-aware semantic review"
+    }
+  ]
+}

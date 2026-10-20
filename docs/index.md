@@ -95,6 +95,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
+| [User-story migration batches](./guides/user-story-migration-batches.md) | Convert remaining `cli` / probe stories to `user_story` YAML |
 | [Dependency injection](./guides/dependency-injection.md) | Config hooks vs OpenAPI `run()` |
 | [CLI reference](./reference/cli.md) | `mechaharness` commands |
 | [HTTP API reference](./reference/api.md) | FastAPI routes |

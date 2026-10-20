@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_citation_uncertain_support",
+  "persona": "fangore",
+  "title": "Leave a low-confidence citation unverified",
+  "kind": "cli",
+  "narrative": "After Fangore can verify a matching citation (`fangore_jev_citation_matching_claim`), he faces a source that only weakly supports the claim. He runs the same citation check, sees low confidence or insufficient support, and verifies the product leaves the claim unverified or escalates — it must not treat a fuzzy judge answer as proof.",
+  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.",
+  "validation": "Harness `cli` `probe` loads `plans/uncertain_support.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

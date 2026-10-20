@@ -1,12 +1,24 @@
-kind: cli
-commands:
-- route_capabilities:
-    capability_needs:
-    - model:reason-large
-    available_model_classes:
-    - reason-fast
-    - reason-large
-expect:
-- kind: equals
-  key: selected_model_class
-  value: reason-large
+# user story: nubble_insp_model_routing
+# Nubble starts the CLI host with family `pass_through` and backend `mock`.
+# Nubble prefers declaring what a step needs instead of hard-coding a model id, then
+# picking among available classes.
+# Accepts inspiration requirement 13.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    route_capabilities:
+      capability_needs:
+      - model:reason-large
+      available_model_classes:
+      - reason-fast
+      - reason-large
+complete:
+  expect:
+  - kind: equals
+    key: selected_model_class
+    value: reason-large
+cleanup: []

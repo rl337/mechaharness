@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_context_exclude_injection",
+  "persona": "fangore",
+  "title": "Exclude injection-tainted snippets from the pack",
+  "kind": "cli",
+  "narrative": "Fangore's retrieval set includes an injection-tainted snippet. He runs the context picker and verifies the tainted text never enters the packed context, even if scores look attractive. Follows the stale/untrusted filter in `fangore_jev_context_filter_stale_untrusted`.",
+  "implementation": "`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.",
+  "validation": "Harness `cli` `probe` loads `plans/exclude_injection.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

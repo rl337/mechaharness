@@ -2,10 +2,10 @@
   "id": "taloneth_insp_recipe_final_test_gate",
   "persona": "taloneth",
   "title": "Require an untouched final test set before recipe promotion",
-  "kind": "cli",
-  "narrative": "A leading candidate must pass a separate untouched final test before it can be released, and that test must not be used as a tuning signal. Promotion is refused when no final-test result is supplied, when the result did not come from a held-out evaluator, or when it failed; only a passing held-out result opens the gate. The same rule guards both the research workflow and the recipe catalog's active pointer. Evaluator held-out labelling already exists (`taloneth_insp_evaluator_compose`). Tracks MH-SR-07[^insp-sr-07].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. A leading candidate must pass a separate untouched final test before it can be released, and that test must not be used as a tuning signal. Promotion is refused when no final-test result is supplied, when the result did not come from a held-out evaluator, or when it failed; only a passing held-out result opens the gate. The same rule guards both the research workflow and the recipe catalog's active pointer. They walk product steps (recipe_plan) and verify completion from the structured observation expects on this scenario. [^insp-sr-07] Related: `taloneth_insp_evaluator_compose`.",
   "implementation": "`require_held_out_final_test()` and `FinalTestGateError` in `evaluator.py`; `ResearchLab.promote(candidate, final_test=...)` enforces it whenever `EvalProtocol.held_out_protected` (the default); `GraphTemplateRegistry.promote_with_final_test()` applies it before moving the active pointer and attaches the held-out result as an evaluation. Plain `GraphTemplateRegistry.promote()` stays an ungated pointer move for hosts that run their own gate.",
-  "validation": "Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` scenario `recipe_final_test_gate.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-sr-07",

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from tests.stories.scenarios.cli_scenario import load_cli_scenario
+from tests.stories.scenarios.user_story_scenario import load_user_story_scenario
 
 FIXTURES_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "models"
 REQUIRED_STORY_FIELDS = (
@@ -70,7 +71,7 @@ class StoryCase:
 def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
     """Walk ``family/model/version/stories/id`` trees.
 
-    ``kind: cli`` stories expand to one case per ``scenarios/*.yaml``.
+    ``kind: cli`` / ``kind: user_story`` expand to one case per ``scenarios/*.yaml``.
     """
     cases: list[StoryCase] = []
     if not FIXTURES_ROOT.is_dir():
@@ -102,7 +103,7 @@ def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
                 adapter=adapter,
                 root=story_dir,
             )
-            if kind == "cli":
+            if kind in {"cli", "user_story"}:
                 scenarios_dir = story_dir / "scenarios"
                 yaml_files = (
                     sorted(scenarios_dir.glob("*.yaml"))
@@ -220,7 +221,7 @@ def validate_story_fixtures() -> list[str]:
             )
             continue
         # App harnesses (YAML scenarios) — no request.op dispatch.
-        if kind == "cli":
+        if kind in {"cli", "user_story"}:
             scenarios_dir = case.path("scenarios")
             yaml_files = (
                 sorted(scenarios_dir.glob("*.yaml")) if scenarios_dir.is_dir() else []
@@ -232,7 +233,10 @@ def validate_story_fixtures() -> list[str]:
                 continue
             for yaml_path in yaml_files:
                 try:
-                    load_cli_scenario(yaml_path)
+                    if kind == "user_story":
+                        load_user_story_scenario(yaml_path)
+                    else:
+                        load_cli_scenario(yaml_path)
                 except (ValueError, OSError) as exc:
                     errors.append(str(exc))
             continue

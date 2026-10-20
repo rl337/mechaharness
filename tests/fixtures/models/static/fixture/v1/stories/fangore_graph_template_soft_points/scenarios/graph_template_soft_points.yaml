@@ -1,8 +1,20 @@
-# Bind: ../binds/fan_out_aggregate.yaml — Plan: ../plans/demoted_refuse.yaml
-kind: cli
-commands:
-- instantiate_recipe:
-    path: binds/fan_out_aggregate.yaml
+# user story: fangore_graph_template_soft_points
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `fan_out_aggregate` recipe.
+# Fangore picks the library fan-out Agentic Recipe, fills only the soft points the host
+# owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete
+# plan in the host app.
+# The skeleton must stamp which recipe produced it so later upgrades can detect drift.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: fan_out_aggregate
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/fan_out_aggregate.yaml
   expect:
   - kind: equals
     key: template_name
@@ -22,8 +34,14 @@ commands:
     value: host:workflows/compare_v1
   - kind: 'true'
     key: catalog_soft_points_nonempty
-- recipe_plan:
-    path: plans/demoted_refuse.yaml
+- do:
+    recipe_plan:
+      path: plans/demoted_refuse.yaml
   expect:
   - kind: 'true'
     key: demoted_refused
+complete:
+  expect:
+  - kind: 'true'
+    key: demoted_refused
+cleanup: []

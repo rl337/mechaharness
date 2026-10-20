@@ -2,10 +2,10 @@
   "id": "fangore_insp_recipe_version_pointer",
   "persona": "fangore",
   "title": "Promote and roll back recipes via an immutable version pointer",
-  "kind": "cli",
-  "narrative": "Recipe execution policies are versioned, testable, replaceable artifacts with a reversible promotion pointer \u2014 not only class version fields and demotion stamps. Incubation stamps exist in `fangore_insp_template_incubation`; lineage and evaluation attachments are in `fangore_insp_recipe_lineage_promote`. Tracks MH-SR-01[^insp-sr-01].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Recipe execution policies are versioned, testable, replaceable artifacts with a reversible promotion pointer — not only class version fields and demotion stamps. Incubation stamps exist in `fangore_insp_template_incubation`; lineage and evaluation attachments are in `fangore_insp_recipe_lineage_promote`. Tracks MH-SR-01. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-01]",
   "implementation": "`GraphTemplateRegistry` stores every version of a catalog id (here `verify_repair`): `add_version` registers an immutable inactive candidate, `promote(name, version)` moves the active pointer, `rollback(name)` restores the previous target, and `get(name, version=...)` reads any stored version. `register` keeps legacy activate-by-name semantics. Eval results and promotion policy stay host/June-owned.",
-  "validation": "Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` scenario `recipe_registry_versions.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-sr-01",

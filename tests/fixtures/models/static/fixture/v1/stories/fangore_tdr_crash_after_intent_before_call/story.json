@@ -1,0 +1,10 @@
+{
+  "id": "fangore_tdr_crash_after_intent_before_call",
+  "persona": "fangore",
+  "title": "Resume after crash after intent but before the remote call",
+  "kind": "cli",
+  "narrative": "After Fangore's durable plan has recorded intent to call the remote coding job but before the HTTP call leaves the host, the process dies. On resume he loads the same store, continues the plan, and verifies the job is dispatched once without inventing a second intent. Builds on the empty-effect path in `fangore_tdr_crash_before_intent`.",
+  "implementation": "`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.",
+  "validation": "Harness `cli` `probe` loads `plans/crash_after_intent_before_call.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

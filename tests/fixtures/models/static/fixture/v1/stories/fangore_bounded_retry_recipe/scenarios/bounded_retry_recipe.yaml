@@ -1,29 +1,44 @@
-# Bind document: ../binds/bounded_retry.yaml
-kind: cli
-commands:
-- instantiate_recipe:
-    path: binds/bounded_retry.yaml
-expect:
-- kind: 'true'
-  key: recipe_in_catalog
-- kind: equals
-  key: status
-  value: ok
-- kind: equals
-  key: template_name
-  value: bounded_retry
-- kind: includes
-  key: subgraph_node_ids
-  value:
-  - attempt
-  - classify
-  - permit_retry
-  - backoff
-  - escalate
-- kind: 'true'
-  key: attempt_repeating
-- kind: equals
-  key: max_iterations
-  value: 3
-- kind: 'true'
-  key: requires_effect_reconciliation
+# user story: fangore_bounded_retry_recipe
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `bounded_retry` recipe.
+# Fangore needs retries that are visible: classify the failure, decide whether another
+# attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an
+# invisible executor loop.
+# Must compose with durable external-effect recovery from
+# `fangore_transactional_durable_resume`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: bounded_retry
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/bounded_retry.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: bounded_retry
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - attempt
+    - classify
+    - permit_retry
+    - backoff
+    - escalate
+  - kind: 'true'
+    key: attempt_repeating
+  - kind: equals
+    key: max_iterations
+    value: 3
+  - kind: 'true'
+    key: requires_effect_reconciliation
+cleanup: []

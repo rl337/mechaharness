@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_req_review_covered_with_tests",
+  "persona": "fangore",
+  "title": "Accept a change when requirements and crash tests are covered",
+  "kind": "cli",
+  "narrative": "With the review shape in place (`fangore_jev_req_review_template_shape`), Fangore reviews a change whose facts show requirements and crash-location tests are covered. He runs the review path and verifies product policy can accept without asking for more tests — still without treating a bare judge approve as correctness by itself.",
+  "implementation": "Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.",
+  "validation": "Harness `cli` `probe` loads `plans/covered_with_tests.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

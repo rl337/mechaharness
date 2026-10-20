@@ -319,7 +319,7 @@ host control-loop concern. Pass `checkpoint_store` **or** `checkpoint_path`,
 not both. Omit both for the default ephemeral EventLog-backed store.
 
 Related: [Transactional durable resume](../requirements/transactional-durable-resume.md)
-(`fangore_transactional_durable_resume`) owns the crash-window contract this kit
+(`fangore_tdr_crash_after_accept_before_record`) owns the crash-window contract this kit
 sits on.
 
 ### Authority, denial, and recipe-lifecycle hooks (`host_apis`)

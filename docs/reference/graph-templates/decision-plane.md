@@ -9,7 +9,7 @@ code, and escalate when confidence is too low.
 | Catalog id | `decision_plane` |
 | Module | `mechaharness.graph_templates.decision_plane` |
 | Substrate | `GraphTemplate` |
-| Owning stories | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_check`, `fangore_jev_context_picker`, `fangore_jev_requirements_review`, `fangore_jev_task_router`, `fangore_jev_action_safety` |
+| Owning stories | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_matching_claim`, `fangore_jev_context_budget_pack`, `fangore_jev_req_review_template_shape`, `fangore_jev_task_route_simple_local`, `fangore_jev_action_safety` |
 | Runtime | `mechaharness.decision_plane_runtime` |
 
 ## When to use

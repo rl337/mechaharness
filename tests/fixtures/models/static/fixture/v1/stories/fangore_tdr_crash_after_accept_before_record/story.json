@@ -1,0 +1,10 @@
+{
+  "id": "fangore_tdr_crash_after_accept_before_record",
+  "persona": "fangore",
+  "title": "Resume after remote accept before the plan records the result",
+  "kind": "cli",
+  "narrative": "Fangore's host has already heard the remote coding system accept the job, but the durable plan has not yet recorded that accept when MechaHarness crashes. After restart he resumes from the same store and verifies the host reconciles the existing remote job instead of starting a second one — the classic accept-before-record window. Sibling windows cover earlier and later crash points (`fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_accept_recorded`). Requirements and MH-PA-05 live with `fangore_tdr_crash_before_intent`.",
+  "implementation": "`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.",
+  "validation": "Harness `cli` `probe` loads `plans/crash_after_accept_before_record.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}
