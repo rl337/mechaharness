@@ -89,6 +89,11 @@ expose `prompt_tokens` / `completion_tokens` / `total_tokens` summed from
 `core:inference` `usage` payloads so stories can set token ceilings with
 `kind: lte`.
 
+Graph executions expose `budget_spent` (node `cost_units` charges) and fold it
+into observation `cost_units` (max of priced inference units and graph spend).
+Scenarios that surface `budget_spent` must declare an `lte` / `equals` /
+`gte` / `positive` expect on `cost_units` or `budget_spent`.
+
 Durable IoC sessions use a scenario-level `durable:` block and per-command
 `expect` / `expect_error`. Cassette vs live is harness/Config
 (`MECHA_STORY_BACKEND`, `MECHA_BASE_URL`, `MECHA_MODEL`), not YAML.
