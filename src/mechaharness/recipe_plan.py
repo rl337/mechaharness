@@ -191,7 +191,7 @@ class RegistryVersionsPlan(BaseModel):
         base = default_graph_templates().get(self.recipe)
         if base is None:
             raise KeyError(f"unknown recipe {self.recipe!r}")
-        private = GraphTemplateRegistry([base])
+        private = GraphTemplateRegistry({base.name: base})
         errors: list[str] = []
 
         def variant(version: str) -> Any:
@@ -686,7 +686,8 @@ class RecipePlanCommand(BaseModel):
         *,
         base_dir: Path | None = None,
         registry: GraphTemplateRegistry | None = None,
-    ) -> dict[str, Any]:
+    ) -> Any:
+        """Return an observation mapping, or an awaitable that yields one."""
         if self.path:
             file_path = Path(self.path)
             if not file_path.is_absolute():
