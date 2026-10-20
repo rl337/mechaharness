@@ -309,13 +309,39 @@ covers all catalog ids.</p>
 <p><code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code> loads a :class:<code class="docutils literal notranslate"><span class="pre">~mechaharness.recipe_bind.RecipeTileBind</span></code>
 (<code class="docutils literal notranslate"><span class="pre">binds/*_tile.yaml</span></code>) for namespaced multi-instance composition
 (<code class="docutils literal notranslate"><span class="pre">fangore_recipe_namespace_tile</span></code>).</p>
-<p><code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code> loads a lifecycle plan under <code class="docutils literal notranslate"><span class="pre">plans/</span></code> (<code class="docutils literal notranslate"><span class="pre">plan:</span> <span class="pre">soft_evolution</span></code>
-| <code class="docutils literal notranslate"><span class="pre">port_search</span></code> | <code class="docutils literal notranslate"><span class="pre">registry_compose</span></code>) for allowlist / IO search / compose
-checks — one verb, document-selected behavior.</p>
+<p><code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code> loads a lifecycle plan under <code class="docutils literal notranslate"><span class="pre">plans/</span></code> — one verb,
+document-selected behavior via <code class="docutils literal notranslate"><span class="pre">plan:</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">plan:</span></code></p></th>
+<th class="head"><p>Coverage</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">soft_evolution</span></code></p></td>
+<td><p>evolvable allowlist</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">port_search</span></code></p></td>
+<td><p>typed IO search</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">registry_compose</span></code></p></td>
+<td><p>registry-only compose</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">registry_versions</span></code></p></td>
+<td><p>versions / lineage / pointer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">final_test_gate</span></code></p></td>
+<td><p>held-out promotion gate</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">evolution_candidates</span></code></p></td>
+<td><p>trace → candidate → objective</p></td>
+</tr>
+</tbody>
+</table>
 <p><code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> remains for <strong>execute</strong> adapters (<code class="docutils literal notranslate"><span class="pre">harness_run</span></code>,
-<code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>). Registry pointer / final-test /
-evolution-candidate / ownership / <code class="docutils literal notranslate"><span class="pre">recipe_as_tool</span></code> / traversal stories stay on
-test probes until they have a product document of their own.</p>
+<code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>). Ownership /
+<code class="docutils literal notranslate"><span class="pre">recipe_as_tool</span></code> / traversal stories stay on test probes until they have a
+product document of their own.</p>
 </section>
 </section>
 
