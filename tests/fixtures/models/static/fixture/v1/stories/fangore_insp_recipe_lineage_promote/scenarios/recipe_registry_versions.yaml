@@ -1,29 +1,8 @@
+# Plan document: ../plans/registry_versions.yaml
 kind: cli
 commands:
-- probe:
-    name: recipe_registry_versions
-    recipe: verify_repair
-    steps:
-    - op: add_version
-      version: '2'
-      parent_version: '1'
-    - op: add_version
-      version: '3'
-      parent_version: '2'
-    - op: attach_evaluation
-      version: '2'
-      result:
-        pass_rate: 0.9
-    - op: attach_evaluation
-      version: '3'
-      result:
-        pass_rate: 0.95
-    - op: promote
-      version: '3'
-    - op: rollback
-    - op: add_version
-      version: '4'
-      parent_version: '8'
+- recipe_plan:
+    path: plans/registry_versions.yaml
 expect:
 - kind: equals
   key: active_version

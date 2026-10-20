@@ -18,7 +18,14 @@ from mechaharness.graph import ExecutionGraph, GraphNode
 from mechaharness.graph_templates.base import GraphTemplateParams, GraphTemplateRegistry
 from mechaharness.recipe_runner import resolve_registry
 
-PlanKind = Literal["soft_evolution", "port_search", "registry_compose"]
+PlanKind = Literal[
+    "soft_evolution",
+    "port_search",
+    "registry_compose",
+    "registry_versions",
+    "final_test_gate",
+    "evolution_candidates",
+]
 
 
 class SoftEvolutionAttempt(BaseModel):
@@ -153,15 +160,221 @@ class RegistryComposePlan(BaseModel):
         return {"summary": self.summary, "violations": results}
 
 
+class RegistryVersionStep(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    op: Literal["add_version", "promote", "rollback", "attach_evaluation"]
+    version: str | None = None
+    parent_version: str | None = None
+    result: dict[str, Any] | None = None
+
+
+class RegistryVersionsPlan(BaseModel):
+    """Immutable versions, lineage, evals, and pointer rollback (MH-SR-01/05)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    plan: Literal["registry_versions"] = "registry_versions"
+    summary: str = ""
+    recipe: str
+    steps: list[RegistryVersionStep] = Field(min_length=1)
+
+    def run(self, registry: GraphTemplateRegistry | None = None) -> dict[str, Any]:
+        from mechaharness.graph_templates import GraphTemplateRegistry
+        from mechaharness.graph_templates.catalog import default_graph_templates
+
+        del registry  # always isolate a private registry for the script
+        base = default_graph_templates().get(self.recipe)
+        if base is None:
+            raise KeyError(f"unknown recipe {self.recipe!r}")
+        private = GraphTemplateRegistry([base])
+        errors: list[str] = []
+
+        def variant(version: str) -> Any:
+            return type(f"V{version}", (type(base),), {"version": version})()
+
+        for step in self.steps:
+            try:
+                if step.op == "add_version":
+                    if step.version is None:
+                        raise ValueError("add_version needs version=")
+                    private.add_version(
+                        variant(step.version), parent_version=step.parent_version
+                    )
+                elif step.op == "promote":
+                    if step.version is None:
+                        raise ValueError("promote needs version=")
+                    private.promote(base.name, step.version)
+                elif step.op == "rollback":
+                    private.rollback(base.name)
+                elif step.op == "attach_evaluation":
+                    if step.version is None or step.result is None:
+                        raise ValueError("attach_evaluation needs version= and result=")
+                    private.attach_evaluation(base.name, step.version, step.result)
+            except (KeyError, ValueError) as exc:
+                errors.append(f"{step.op}:{type(exc).__name__}")
+        return {
+            "summary": self.summary,
+            "active_version": private.active_version(base.name),
+            "versions": private.versions(base.name),
+            "lineage": private.lineage(base.name),
+            "evaluation_counts": {
+                v: len(private.evaluations(base.name, v))
+                for v in private.versions(base.name)
+            },
+            "errors": errors,
+        }
+
+
+class FinalTestAttempt(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    final_test: dict[str, Any] | None = None
+
+
+class FinalTestGatePlan(BaseModel):
+    """Promotion needs a passing held-out final-test result (MH-SR-07)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    plan: Literal["final_test_gate"] = "final_test_gate"
+    summary: str = ""
+    recipe: str = "verify_repair"
+    attempts: list[FinalTestAttempt] = Field(min_length=1)
+
+    def run(self, registry: GraphTemplateRegistry | None = None) -> dict[str, Any]:
+        from mechaharness.evaluator import EvaluatorResult, FinalTestGateError
+        from mechaharness.graph_templates.catalog import default_graph_templates
+        from mechaharness.research import EvalProtocol, ResearchLab
+
+        del registry
+        lab_outcomes: dict[str, str] = {}
+        registry_outcomes: dict[str, str] = {}
+        catalog = default_graph_templates()
+        base = catalog.get(self.recipe)
+        if base is None:
+            raise KeyError(f"unknown recipe {self.recipe!r}")
+        catalog.add_version(
+            type("V2", (type(base),), {"version": "2"})(), parent_version="1"
+        )
+        for attempt in self.attempts:
+            final = (
+                EvaluatorResult(
+                    evaluator_id="story:final", version="1", **attempt.final_test
+                )
+                if attempt.final_test is not None
+                else None
+            )
+            lab = ResearchLab(EvalProtocol(task_split="story"), baseline_metric=0.5)
+            cand = lab.propose("h", {"prompt": "v2"})
+            lab.evaluate(cand, metric=0.9)
+            try:
+                lab.promote(cand, final_test=final)
+                lab_outcomes[attempt.id] = "promoted"
+            except FinalTestGateError:
+                lab_outcomes[attempt.id] = "refused"
+            try:
+                catalog.promote_with_final_test(
+                    self.recipe, "2", final_test=final
+                )
+                registry_outcomes[attempt.id] = "promoted"
+                catalog.rollback(self.recipe)
+            except FinalTestGateError:
+                registry_outcomes[attempt.id] = "refused"
+        unprotected = ResearchLab(
+            EvalProtocol(task_split="story", held_out_protected=False),
+            baseline_metric=0.5,
+        )
+        free = unprotected.propose("h", {"prompt": "v2"})
+        unprotected.evaluate(free, metric=0.9)
+        unprotected.promote(free)
+        return {
+            "summary": self.summary,
+            "lab": lab_outcomes,
+            "registry": registry_outcomes,
+            "registry_pointer_after_refusals": catalog.active_version(self.recipe),
+            "unprotected_protocol_promotes": unprotected.promoted is free,
+        }
+
+
+class EvolutionCandidatesPlan(BaseModel):
+    """Traces → bounded soft-binding candidates → objective selection (MH-SR-06)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    plan: Literal["evolution_candidates"] = "evolution_candidates"
+    summary: str = ""
+    summaries: list[dict[str, Any]] = Field(min_length=1)
+    allowlist: dict[str, list[str]] | None = None
+    objective_policy: dict[str, Any]
+    scored: list[dict[str, Any]] = Field(min_length=1)
+    baseline_scalar: float
+
+    def run(self, registry: GraphTemplateRegistry | None = None) -> dict[str, Any]:
+        from mechaharness.eval_evidence import Claim
+        from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
+        from mechaharness.recipe_lifecycle.recipe_evolution import (
+            RecipeTraceSummary,
+            ScoredCandidate,
+            propose_candidates,
+            select_candidate,
+        )
+
+        reg = resolve_registry(registry)
+        summaries = [RecipeTraceSummary.model_validate(s) for s in self.summaries]
+        proposal = propose_candidates(
+            summaries, reg, allowlist=self.allowlist, max_candidates=3
+        )
+        again = propose_candidates(
+            summaries, reg, allowlist=self.allowlist, max_candidates=3
+        )
+        policy = ObjectivePolicy.model_validate(self.objective_policy)
+        scored: list[ScoredCandidate] = []
+        for row in self.scored:
+            candidate = next(
+                c
+                for c in proposal.candidates
+                if c.soft_bindings == {row["soft_point"]: row["value"]}
+            )
+            result = aggregate_objective(
+                policy,
+                [Claim(id=k, statement=k, status=v) for k, v in row["claims"].items()],
+                metrics=row["metrics"],
+            )
+            scored.append(ScoredCandidate(candidate=candidate, result=result))
+        picked = select_candidate(scored)
+        beaten = select_candidate(scored, baseline_scalar=self.baseline_scalar)
+        return {
+            "summary": self.summary,
+            "candidate_bindings": [c.soft_bindings for c in proposal.candidates],
+            "rejected": [[r.soft_point, r.reason] for r in proposal.rejected],
+            "deterministic": proposal.model_dump() == again.model_dump(),
+            "graphs_synthesized": any(
+                "graph" in c.model_dump() for c in proposal.candidates
+            ),
+            "selected_bindings": picked.soft_bindings if picked else None,
+            "selected_over_baseline": beaten.soft_bindings if beaten else None,
+        }
+
+
 _PLAN_MODELS: dict[str, type[BaseModel]] = {
     "soft_evolution": SoftEvolutionPlan,
     "port_search": PortSearchPlan,
     "registry_compose": RegistryComposePlan,
+    "registry_versions": RegistryVersionsPlan,
+    "final_test_gate": FinalTestGatePlan,
+    "evolution_candidates": EvolutionCandidatesPlan,
 }
 
 
 RecipePlanDocument = Union[
-    SoftEvolutionPlan, PortSearchPlan, RegistryComposePlan
+    SoftEvolutionPlan,
+    PortSearchPlan,
+    RegistryComposePlan,
+    RegistryVersionsPlan,
+    FinalTestGatePlan,
+    EvolutionCandidatesPlan,
 ]
 
 
@@ -223,9 +436,12 @@ class RecipePlanCommand(BaseModel):
 
 
 __all__ = [
+    "EvolutionCandidatesPlan",
+    "FinalTestGatePlan",
     "PortSearchPlan",
     "RecipePlanCommand",
     "RegistryComposePlan",
+    "RegistryVersionsPlan",
     "SoftEvolutionPlan",
     "load_recipe_plan",
     "load_recipe_plan_path",

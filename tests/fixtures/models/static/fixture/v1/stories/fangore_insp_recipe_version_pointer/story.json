@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Recipe execution policies are versioned, testable, replaceable artifacts with a reversible promotion pointer \u2014 not only class version fields and demotion stamps. Incubation stamps exist in `fangore_insp_template_incubation`; lineage and evaluation attachments are in `fangore_insp_recipe_lineage_promote`. Tracks MH-SR-01[^insp-sr-01].",
   "implementation": "`GraphTemplateRegistry` stores every version of a catalog id (here `verify_repair`): `add_version` registers an immutable inactive candidate, `promote(name, version)` moves the active pointer, `rollback(name)` restores the previous target, and `get(name, version=...)` reads any stored version. `register` keeps legacy activate-by-name semantics. Eval results and promotion policy stay host/June-owned.",
-  "validation": "Harness `cli` scenario `recipe_registry_versions.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-sr-01",

@@ -157,11 +157,19 @@ covers all catalog ids.
 (``binds/*_tile.yaml``) for namespaced multi-instance composition
 (`fangore_recipe_namespace_tile`).
 
-``recipe_plan`` loads a lifecycle plan under ``plans/`` (``plan: soft_evolution``
-| ``port_search`` | ``registry_compose``) for allowlist / IO search / compose
-checks — one verb, document-selected behavior.
+``recipe_plan`` loads a lifecycle plan under ``plans/`` — one verb,
+document-selected behavior via ``plan:``:
+
+| ``plan:`` | Coverage |
+|-----------|----------|
+| `soft_evolution` | evolvable allowlist |
+| `port_search` | typed IO search |
+| `registry_compose` | registry-only compose |
+| `registry_versions` | versions / lineage / pointer |
+| `final_test_gate` | held-out promotion gate |
+| `evolution_candidates` | trace → candidate → objective |
 
 ``run_recipe`` remains for **execute** adapters (`harness_run`,
-`backend_describe`, `conversational_tool_loop`). Registry pointer / final-test /
-evolution-candidate / ownership / ``recipe_as_tool`` / traversal stories stay on
-test probes until they have a product document of their own.
+`backend_describe`, `conversational_tool_loop`). Ownership /
+``recipe_as_tool`` / traversal stories stay on test probes until they have a
+product document of their own.

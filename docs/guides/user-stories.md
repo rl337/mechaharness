@@ -1574,7 +1574,7 @@ New recipe versions are immutable artifacts with provenance, lineage, test resul
 
 #### Validation
 
-Harness `cli` scenario `recipe_registry_versions.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1606,7 +1606,7 @@ Recipe execution policies are versioned, testable, replaceable artifacts with a 
 
 #### Validation
 
-Harness `cli` scenario `recipe_registry_versions.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2399,7 +2399,7 @@ A host can summarize past traces into suggestions, and the library turns them in
 
 #### Validation
 
-Harness `cli` scenario `recipe_evolution_candidates.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2415,7 +2415,7 @@ A leading candidate must pass a separate untouched final test before it can be r
 
 #### Validation
 
-Harness `cli` scenario `recipe_final_test_gate.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
 
 #### Footnotes
 
