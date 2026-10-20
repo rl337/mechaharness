@@ -5,7 +5,7 @@
 # attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an
 # invisible executor loop.
 # Must compose with durable external-effect recovery from
-# `fangore_transactional_durable_resume`.
+# `fangore_tdr_crash_before_intent` and sibling TDR crash-window stories.
 kind: user_story
 environment:
   family: pass_through

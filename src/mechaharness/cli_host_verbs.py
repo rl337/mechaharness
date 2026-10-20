@@ -224,6 +224,7 @@ class ShadowDecisionBackendsVerb(CliVerb):
 def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
     """Host CLI catalog (infer / tools / recipes / diagnostics / judge / durable)."""
     from mechaharness.cli_durable_verbs import durable_cli_verb_classes
+    from mechaharness.cli_transactional_resume import TransactionalResumeVerb
 
     verbs: dict[str, type[CliVerb]] = {
         InferVerb.name: InferVerb,
@@ -238,6 +239,7 @@ def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
         CheckModelAffinityVerb.name: CheckModelAffinityVerb,
         CompareRunParityVerb.name: CompareRunParityVerb,
         ShadowDecisionBackendsVerb.name: ShadowDecisionBackendsVerb,
+        TransactionalResumeVerb.name: TransactionalResumeVerb,
     }
     verbs.update(durable_cli_verb_classes())
     return verbs

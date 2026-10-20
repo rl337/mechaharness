@@ -4,7 +4,7 @@
 # A suspended generator run must survive executor or MCP process restart and present the
 # identical pending question.
 # Uses the CheckpointStore / run-store seam from durable resume
-# (`fangore_insp_durable_resume`, `fangore_transactional_durable_resume`) rather than a
+# (`fangore_insp_durable_resume`, `fangore_tdr_crash_before_intent`) rather than a
 # second recovery protocol.
 kind: user_story
 environment:

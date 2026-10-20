@@ -17,13 +17,13 @@ exists for that claim.
 
 ## Counts
 
-- Done (`user_story`): **43** (3 pilots + Wave 1 A–F)
-- Ready (product CLI verbs, no probe): **0** (Wave 1 A–F done)
-- Blocked on probe → product verb: **130**
+- Done (`user_story`): **49** (3 pilots + Wave 1 A–F + Wave 2 P1)
+- Ready (product CLI verbs, no probe): **0**
+- Blocked on probe → product verb: **124**
 
 ## Wave order
 
-1. **Product batches A–F** (mechanical YAML + narrative tighten; no new verbs).
+1. **Product batches A–F** (mechanical YAML + narrative tighten; no new verbs) — done.
 2. **Probe batches P1–P10** (each wave may add a thin product verb, then migrate).
 3. After each batch: regenerate `docs/guides/user-stories.md`, ratchet
    `fail_under` if coverage rose, keep `./run_checks.sh` green.
@@ -123,16 +123,16 @@ _Catch-all residuals_ · **5** stories
 - [ ] `nubble_insp_review_audit_reconstruct`
 - [ ] `taloneth_insp_correction_spec_debt`
 
-### Batch P1 — TDR crash windows
+### Batch P1 — TDR crash windows — **done** (Wave 2)
 
-_Need product durable resume verbs or keep probe until verb exists_ · **6** stories
+_`transactional_resume` product verb_ · **6** stories
 
-- [ ] `fangore_tdr_crash_after_accept_before_record`
-- [ ] `fangore_tdr_crash_after_accept_recorded`
-- [ ] `fangore_tdr_crash_after_final_commit`
-- [ ] `fangore_tdr_crash_after_intent_before_call`
-- [ ] `fangore_tdr_crash_after_reduce_before_checkpoint`
-- [ ] `fangore_tdr_crash_before_intent`
+- [x] `fangore_tdr_crash_after_accept_before_record`
+- [x] `fangore_tdr_crash_after_accept_recorded`
+- [x] `fangore_tdr_crash_after_final_commit`
+- [x] `fangore_tdr_crash_after_intent_before_call`
+- [x] `fangore_tdr_crash_after_reduce_before_checkpoint`
+- [x] `fangore_tdr_crash_before_intent`
 
 ### Batch P2 — JEV decision cases
 

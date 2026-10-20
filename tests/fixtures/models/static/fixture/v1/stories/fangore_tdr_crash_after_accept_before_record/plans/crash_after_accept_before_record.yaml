@@ -1,8 +1,0 @@
-# Probe plan for scenario `crash_after_accept_before_record.yaml`.
-# Story: Resume a coding job after process crash without duplicate dispatch
-
-summary: Resume a coding job after process crash without duplicate dispatch
-name: transactional_durable_resume
-goal: downstream-coding-job
-run_id_prefix: story-tdr
-crash_location: after_accept_before_record

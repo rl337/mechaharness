@@ -437,7 +437,7 @@ Harness `cli` `probe` loads `plans/verify_repair_succeeds.yaml` (human-readable 
 
 ### `fangore_bounded_retry_recipe` — Expand a bounded-retry Agentic Recipe with explicit escalation
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `bounded_retry` recipe. Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_transactional_durable_resume`. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `bounded_retry` recipe. Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_tdr_crash_before_intent` and sibling TDR crash-window stories. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
@@ -1312,7 +1312,7 @@ Harness `user_story` scenario `session.yaml`: environment + graph.recipe verify_
 
 ### `fangore_insp_guidance_survive_restart` — Rehydrate the same pending guidance after a process restart
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `c1`, store `shared`). A suspended generator run must survive executor or MCP process restart and present the identical pending question. Uses the CheckpointStore / run-store seam from durable resume (`fangore_insp_durable_resume`, `fangore_transactional_durable_resume`) rather than a second recovery protocol. Tracks R-IOC-RESUME. He walks product steps (start, rebuild, inspect) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-05]
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `c1`, store `shared`). A suspended generator run must survive executor or MCP process restart and present the identical pending question. Uses the CheckpointStore / run-store seam from durable resume (`fangore_insp_durable_resume`, `fangore_tdr_crash_before_intent`) rather than a second recovery protocol. Tracks R-IOC-RESUME. He walks product steps (start, rebuild, inspect) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-05]
 
 #### Implementation
 
@@ -2182,75 +2182,75 @@ Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps 
 
 ### `fangore_tdr_crash_after_accept_before_record` — Resume after remote accept before the plan records the result
 
-Fangore's host has already heard the remote coding system accept the job, but the durable plan has not yet recorded that accept when MechaHarness crashes. After restart he resumes from the same store and verifies the host reconciles the existing remote job instead of starting a second one — the classic accept-before-record window. Sibling windows cover earlier and later crash points (`fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_accept_recorded`). Requirements and MH-PA-05 live with `fangore_tdr_crash_before_intent`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He dispatches a remote coding job on a durable plan; the MechaHarness process dies after the remote system accepts but before acceptance is recorded. After restart he opens the same durable store, resumes the plan, and verifies the remote job is submitted exactly once with the expected effect state for this crash window. Sibling windows: `fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_reduce_before_checkpoint`, and `fangore_tdr_crash_after_final_commit`. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05]. He walks product steps (`transactional_resume`) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
-`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+`SqliteCheckpointStore` + `host_graph_executor` with `ArmedCrashProbe` for coding_job effects. Product CLI verb `transactional_resume` (`mechaharness.cli_transactional_resume`). Unit matrix: `tests/fixtures/transactional_durable_resume/*.json`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/crash_after_accept_before_record.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `crash_after_accept_before_record.yaml` drives product verb `transactional_resume` with `crash_location: after_accept_before_record`; hard expects on declared observation keys.
 
 ### `fangore_tdr_crash_after_accept_recorded` — Resume after accept is already checkpointed
 
-The remote coding job has been accepted and that accept is already on the durable checkpoint when Fangore's process dies. On resume he opens the same store and verifies the plan continues from the recorded accept without a second dispatch. Follows the harder accept-before-record case in `fangore_tdr_crash_after_accept_before_record`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He dispatches a remote coding job on a durable plan; the MechaHarness process dies after acceptance is recorded but before the outcome is reduced. After restart he opens the same durable store, resumes the plan, and verifies the remote job is submitted exactly once with the expected effect state for this crash window. Sibling windows: `fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_reduce_before_checkpoint`, and `fangore_tdr_crash_after_final_commit`. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05]. He walks product steps (`transactional_resume`) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
-`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+`SqliteCheckpointStore` + `host_graph_executor` with `ArmedCrashProbe` for coding_job effects. Product CLI verb `transactional_resume` (`mechaharness.cli_transactional_resume`). Unit matrix: `tests/fixtures/transactional_durable_resume/*.json`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/crash_after_accept_recorded.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `crash_after_accept_recorded.yaml` drives product verb `transactional_resume` with `crash_location: after_accept_recorded`; hard expects on declared observation keys.
 
 ### `fangore_tdr_crash_after_final_commit` — Resume after final commit with nothing left to dispatch
 
-The durable coding job has fully committed when Fangore's process dies. On resume he loads the store and verifies the plan is already complete — no new dispatch and no reconciliation of an in-flight effect. Closes the crash matrix after `fangore_tdr_crash_after_reduce_before_checkpoint`. Self-revising checkpoint consumers build on this seam (see footnotes on `fangore_tdr_crash_before_intent`).
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He dispatches a remote coding job on a durable plan; the MechaHarness process dies after the final checkpoint commit. After restart he opens the same durable store, resumes the plan, and verifies the remote job is submitted exactly once with the expected effect state for this crash window. Sibling windows: `fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_reduce_before_checkpoint`, and `fangore_tdr_crash_after_final_commit`. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05]. He walks product steps (`transactional_resume`) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
-`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+`SqliteCheckpointStore` + `host_graph_executor` with `ArmedCrashProbe` for coding_job effects. Product CLI verb `transactional_resume` (`mechaharness.cli_transactional_resume`). Unit matrix: `tests/fixtures/transactional_durable_resume/*.json`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/crash_after_final_commit.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `crash_after_final_commit.yaml` drives product verb `transactional_resume` with `crash_location: after_final_commit`; hard expects on declared observation keys.
 
 ### `fangore_tdr_crash_after_intent_before_call` — Resume after crash after intent but before the remote call
 
-After Fangore's durable plan has recorded intent to call the remote coding job but before the HTTP call leaves the host, the process dies. On resume he loads the same store, continues the plan, and verifies the job is dispatched once without inventing a second intent. Builds on the empty-effect path in `fangore_tdr_crash_before_intent`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He dispatches a remote coding job on a durable plan; the MechaHarness process dies after the intent is recorded but before the external call. After restart he opens the same durable store, resumes the plan, and verifies the remote job is submitted exactly once with the expected effect state for this crash window. Sibling windows: `fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_reduce_before_checkpoint`, and `fangore_tdr_crash_after_final_commit`. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05]. He walks product steps (`transactional_resume`) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
-`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+`SqliteCheckpointStore` + `host_graph_executor` with `ArmedCrashProbe` for coding_job effects. Product CLI verb `transactional_resume` (`mechaharness.cli_transactional_resume`). Unit matrix: `tests/fixtures/transactional_durable_resume/*.json`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/crash_after_intent_before_call.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `crash_after_intent_before_call.yaml` drives product verb `transactional_resume` with `crash_location: after_intent_before_call`; hard expects on declared observation keys.
 
 ### `fangore_tdr_crash_after_reduce_before_checkpoint` — Resume after reduce before the checkpoint commits
 
-Fangore's plan has reduced the remote job result in memory but has not yet committed the checkpoint when the process dies. After restart he resumes, reconciles from the durable effect ledger, and verifies the reduce is not applied twice. Comes after accept-recorded recovery in `fangore_tdr_crash_after_accept_recorded`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He dispatches a remote coding job on a durable plan; the MechaHarness process dies after the outcome is reduced but before the checkpoint commits. After restart he opens the same durable store, resumes the plan, and verifies the remote job is submitted exactly once with the expected effect state for this crash window. Sibling windows: `fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_reduce_before_checkpoint`, and `fangore_tdr_crash_after_final_commit`. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05]. He walks product steps (`transactional_resume`) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
-`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+`SqliteCheckpointStore` + `host_graph_executor` with `ArmedCrashProbe` for coding_job effects. Product CLI verb `transactional_resume` (`mechaharness.cli_transactional_resume`). Unit matrix: `tests/fixtures/transactional_durable_resume/*.json`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/crash_after_reduce_before_checkpoint.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `crash_after_reduce_before_checkpoint.yaml` drives product verb `transactional_resume` with `crash_location: after_reduce_before_checkpoint`; hard expects on declared observation keys.
 
 ### `fangore_tdr_crash_before_intent` — Resume after crash before the job intent is recorded
 
-Fangore's host is dispatching a remote coding job on a durable plan. The MechaHarness process dies before the job intent is written. After restart he opens the same durable store, resumes the plan from the last checkpoint, and verifies the remote job is submitted exactly once — no prior effect to reconcile, and dispatch does not double. Sibling crash windows: `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, and later accept/reduce/commit stories. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He dispatches a remote coding job on a durable plan; the MechaHarness process dies before the job intent is recorded. After restart he opens the same durable store, resumes the plan, and verifies the remote job is submitted exactly once with the expected effect state for this crash window. Sibling windows: `fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_reduce_before_checkpoint`, and `fangore_tdr_crash_after_final_commit`. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05]. He walks product steps (`transactional_resume`) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
-`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+`SqliteCheckpointStore` + `host_graph_executor` with `ArmedCrashProbe` for coding_job effects. Product CLI verb `transactional_resume` (`mechaharness.cli_transactional_resume`). Unit matrix: `tests/fixtures/transactional_durable_resume/*.json`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/crash_before_intent.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `crash_before_intent.yaml` drives product verb `transactional_resume` with `crash_location: before_intent`; hard expects on declared observation keys.
 
 #### Footnotes
 

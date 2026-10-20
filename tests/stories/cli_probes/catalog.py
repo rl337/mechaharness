@@ -77,7 +77,6 @@ from tests.stories.cli_probes.graph_verbs import (
     RolloutGraphBuildCommand,
     TargetedRollbackSelectCommand,
     TopologyEfficiencyCommand,
-    TransactionalDurableResumeCommand,
     ValidatorQualificationCommand,
     WakeReresolveResumeCommand,
     run_bounded_repair_loop,
@@ -96,7 +95,6 @@ from tests.stories.cli_probes.graph_verbs import (
     run_rollout_graph_build,
     run_targeted_rollback_select,
     run_topology_efficiency,
-    run_transactional_durable_resume,
     run_validator_qualification,
     run_wake_reresolve_resume,
 )
@@ -233,11 +231,6 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
             "graph_budget_subgraph_rollup",
             GraphBudgetSubgraphRollupCommand,
             run_graph_budget_subgraph_rollup,
-        ),
-        "transactional_durable_resume": _probe(
-            "transactional_durable_resume",
-            TransactionalDurableResumeCommand,
-            run_transactional_durable_resume,
         ),
         "decision_conflict_neighbor_revisit": _probe(
             "decision_conflict_neighbor_revisit",

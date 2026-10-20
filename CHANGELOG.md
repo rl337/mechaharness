@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Product CLI verb `transactional_resume`:** crash-window durable coding-job
+  resume via `host_graph_executor` + `ArmedCrashProbe` (DR-10). Wave 2 P1
+  stories (`fangore_tdr_crash_*`) migrate onto `kind: user_story`.
+
 ### Changed
 
 - **Story harness redesign:** `story.json` `kind` is now a reusable harness
