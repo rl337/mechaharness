@@ -762,7 +762,7 @@ Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_t
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` loads `binds/fan_out_aggregate.yaml` plus demoted refusal probe; hard expects on declared keys.
+Harness `cli` `instantiate_recipe` + `recipe_plan` demoted_refuse; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1135,7 +1135,7 @@ MechaHarness validates, executes, versions, and safety-gates recipes; the host (
 
 #### Validation
 
-Harness `cli` scenario `evolution_ownership_split.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1970,7 +1970,7 @@ Fangore’s generate-image tool should run a child oneshot recipe under that too
 
 #### Validation
 
-Harness `cli` scenario `recipe_as_tool.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2041,7 +2041,7 @@ As a run proceeds, Fangore’s console lights interiors that were laid out ahead
 
 #### Validation
 
-Harness `cli` scenario `traversal_contract.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard expects on declared observation keys.
 
 #### Footnotes
 
