@@ -52,12 +52,13 @@ def test_token_totals_sum_inference_usage() -> None:
 
 
 def test_cli_step_observation_exposes_tokens() -> None:
+    usage = Usage(prompt_tokens=4, completion_tokens=1, total_tokens=5)
     step = CliStepResult(
         verb="infer",
         events=[
             {
                 "type": "core:inference",
-                "payload": {"usage": Usage(prompt_tokens=4, completion_tokens=1, total_tokens=5).model_dump()},
+                "payload": {"usage": usage.model_dump()},
             }
         ],
         event_types=["core:inference"],
