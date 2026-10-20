@@ -1,64 +1,81 @@
-# Bind document: ../binds/safety_eval.yaml
-kind: cli
-commands:
-- instantiate_recipe:
-    path: binds/safety_eval.yaml
-expect:
-- kind: 'true'
-  key: recipe_in_catalog
-- kind: equals
-  key: status
-  value: ok
-- kind: equals
-  key: template_name
-  value: safety_eval
-- kind: includes
-  key: subgraph_node_ids
-  value:
-  - produce
-  - review
-  - score
-- kind: 'true'
-  key: reviewer_isolated
-- kind: 'true'
-  key: score_deterministic
-- kind: equals
-  key: report_fields
-  value:
-  - outcome
-  - severity
-  - context
-  - model_version
-  - recipe_version
-- kind: equals
-  key: reported_versions
-  value:
-  - m-1
-  - '1'
-- kind: equals
-  key: scenario_classes
-  value:
-  - prompt_injection_in_tool_output
-  - scope_bleed
-  - authorization_change
-  - ambiguous_consent
-  - warning_disregard
-  - false_denial_control
-- kind: equals
-  key: evolvable
-  value: []
-- kind: equals
-  key: component_parents
-  value:
-    produce:
-    - produce_kind
-    - scenario_classes
-    review:
-    - omit_producer_reasoning
-    - review_kind
-    - review_prompt
-    score:
-    - score_kind
-    - severity_scale
-- kind: 'true'
-  key: in_default_catalog
+# user story: taloneth_insp_safety_eval_recipes
+# Taloneth starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `safety_eval` recipe.
+# Safety evaluation now ships as a reusable recipe: a scenario from a fixture pack is
+# run, an independent reviewer judges the outcome without seeing the agent's reasoning,
+# and a fixed scorer reports outcome, severity, context, and the model and recipe
+# versions.
+# The scenario classes cover prompt injection in tool output, scope bleed, changing
+# authorization, ambiguous consent, ignored warnings, and false-denial controls, so
+# over-refusal is measured next to unsafe compliance.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: safety_eval
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/safety_eval.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: safety_eval
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - produce
+    - review
+    - score
+  - kind: 'true'
+    key: reviewer_isolated
+  - kind: 'true'
+    key: score_deterministic
+  - kind: equals
+    key: report_fields
+    value:
+    - outcome
+    - severity
+    - context
+    - model_version
+    - recipe_version
+  - kind: equals
+    key: reported_versions
+    value:
+    - m-1
+    - '1'
+  - kind: equals
+    key: scenario_classes
+    value:
+    - prompt_injection_in_tool_output
+    - scope_bleed
+    - authorization_change
+    - ambiguous_consent
+    - warning_disregard
+    - false_denial_control
+  - kind: equals
+    key: evolvable
+    value: []
+  - kind: equals
+    key: component_parents
+    value:
+      produce:
+      - produce_kind
+      - scenario_classes
+      review:
+      - omit_producer_reasoning
+      - review_kind
+      - review_prompt
+      score:
+      - score_kind
+      - severity_scale
+  - kind: 'true'
+    key: in_default_catalog
+cleanup: []

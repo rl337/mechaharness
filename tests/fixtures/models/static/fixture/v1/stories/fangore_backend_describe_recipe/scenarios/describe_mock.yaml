@@ -1,21 +1,36 @@
-kind: cli
-commands:
-- run_recipe:
-    name: backend_describe
-    backend: mock
-expect:
-- kind: 'true'
-  key: recipe_in_catalog
-- kind: equals
-  key: status
-  value: ok
-- kind: equals
-  key: description_name
-  value: mock
-- kind: exactly
-  key: subgraph_node_ids
-  value:
-  - describe
-- kind: lte
-  key: cost_units
-  value: 0
+# user story: fangore_backend_describe_recipe
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `backend_describe` recipe.
+# Before Fangore wires a host, he wants a machine-readable description of a configured
+# backend — name, network behavior, auth — without leaving the recipe catalog.
+# He runs backend_describe with the mock backend and gets the same metadata the classic
+# describe command used to print.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: backend_describe
+steps:
+- do:
+    run_recipe:
+      name: backend_describe
+      backend: mock
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: description_name
+    value: mock
+  - kind: exactly
+    key: subgraph_node_ids
+    value:
+    - describe
+  - kind: lte
+    key: cost_units
+    value: 0
+cleanup: []

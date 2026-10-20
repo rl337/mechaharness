@@ -2,10 +2,10 @@
   "id": "fangore_insp_guidance_survive_restart",
   "persona": "fangore",
   "title": "Rehydrate the same pending guidance after a process restart",
-  "kind": "cli",
-  "narrative": "A suspended generator run must survive executor or MCP process restart and present the identical pending question. Uses the CheckpointStore / run-store seam from durable resume (`fangore_insp_durable_resume`, `fangore_transactional_durable_resume`) rather than a second recovery protocol. Tracks R-IOC-RESUME[^insp-ioc-05].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `c1`, store `shared`). A suspended generator run must survive executor or MCP process restart and present the identical pending question. Uses the CheckpointStore / run-store seam from durable resume (`fangore_insp_durable_resume`, `fangore_transactional_durable_resume`) rather than a second recovery protocol. Tracks R-IOC-RESUME. He walks product steps (start, rebuild, inspect) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-05]",
   "implementation": "`GeneratorRunStore` (in-memory shared instance or checkpoint-backed) rehydrates `GeneratorRunRecord.pending_request` for a new `DurableGraphGenerator` instance.",
-  "validation": "Harness `cli` via `scenario.yaml`. Hard expects identical pending question and request_id after rehydrate.",
+  "validation": "Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-ioc-05",

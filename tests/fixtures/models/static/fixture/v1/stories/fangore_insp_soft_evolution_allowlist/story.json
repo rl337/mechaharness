@@ -2,10 +2,10 @@
   "id": "fangore_insp_soft_evolution_allowlist",
   "persona": "fangore",
   "title": "Declare which soft recipe fields may evolve under optimization",
-  "kind": "cli",
-  "narrative": "Hard nodes and trusted contracts are never silently rewritten by an optimizer; only allowlisted soft parameters (prompts, bounded rounds, reviewer counts) may evolve. Soft points already exist (`fangore_graph_template_soft_points`, `fangore_insp_soft_vs_hard`). Tracks MH-SR-03[^insp-sr-03].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Hard nodes and trusted contracts are never silently rewritten by an optimizer; only allowlisted soft parameters (prompts, bounded rounds, reviewer counts) may evolve. Soft points already exist (`fangore_graph_template_soft_points`, `fangore_insp_soft_vs_hard`). Tracks MH-SR-03. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-03]",
   "implementation": "`SoftPoint.evolvable` (default `False`) declares the evolution allowlist. `GraphTemplate.evolvable_soft_point_names()` lists it and `assert_evolution_allowed(changed)` refuses any edit outside it. `produce_critique_refine` marks `critique_prompt` and `max_rounds`; `independent_review` marks `reviewer_count`; every other catalog soft point stays hard.",
-  "validation": "Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` scenario `soft_point_evolution_allowlist.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-sr-03",

@@ -1,9 +1,21 @@
-kind: cli
-commands:
-- check_model_affinity: {}
-expect:
-- kind: equals
-  key: selected_lane
-  value: judge
-- kind: 'true'
-  key: uncalibrated_is_null
+# user story: nubble_model_affinity
+# Nubble starts the CLI host with family `pass_through` and backend `mock`.
+# Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless
+# a phase boundary justifies a switch.
+# Random lane thrash must not win on unit price alone.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    check_model_affinity: {}
+complete:
+  expect:
+  - kind: equals
+    key: selected_lane
+    value: judge
+  - kind: 'true'
+    key: uncalibrated_is_null
+cleanup: []

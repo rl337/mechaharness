@@ -1,21 +1,32 @@
-# Bind document: ../binds/verify_repair_tile.yaml
-kind: cli
-commands:
-- tile_recipe:
-    path: binds/verify_repair_tile.yaml
-expect:
-- kind: equals
-  key: instance_count
-  value: 2
-- kind: 'false'
-  key: node_id_overlap
-- kind: 'true'
-  key: distinct_instance_ids
-- kind: equals
-  key: parent_embed_kinds
-  value:
-  - subgraph
-  - subgraph
-- kind: equals
-  key: namespaced_prefix_left
-  value: verify_repair/left/
+# user story: fangore_recipe_namespace_tile
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# Fangore tiles the same Agentic Recipe twice in one parent plan.
+# Each instance must keep distinct step identities and recipe provenance so operators can
+# tell which copy failed.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: {}
+steps:
+- do:
+    tile_recipe:
+      path: binds/verify_repair_tile.yaml
+complete:
+  expect:
+  - kind: equals
+    key: instance_count
+    value: 2
+  - kind: 'false'
+    key: node_id_overlap
+  - kind: 'true'
+    key: distinct_instance_ids
+  - kind: equals
+    key: parent_embed_kinds
+    value:
+    - subgraph
+    - subgraph
+  - kind: equals
+    key: namespaced_prefix_left
+    value: verify_repair/left/
+cleanup: []

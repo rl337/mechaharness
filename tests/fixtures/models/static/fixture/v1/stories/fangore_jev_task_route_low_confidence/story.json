@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_task_route_low_confidence",
+  "persona": "fangore",
+  "title": "Escalate when the router is not confident",
+  "kind": "cli",
+  "narrative": "Fangore's router returns a lane with low confidence. He runs the task router and verifies product policy escalates instead of locking in an uncertain lane. Builds on the forced-frontier case in `fangore_jev_task_route_complex_frontier`.",
+  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.",
+  "validation": "Harness `cli` `probe` loads `plans/low_confidence.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

@@ -1,0 +1,10 @@
+{
+  "id": "fangore_tdr_crash_after_accept_recorded",
+  "persona": "fangore",
+  "title": "Resume after accept is already checkpointed",
+  "kind": "cli",
+  "narrative": "The remote coding job has been accepted and that accept is already on the durable checkpoint when Fangore's process dies. On resume he opens the same store and verifies the plan continues from the recorded accept without a second dispatch. Follows the harder accept-before-record case in `fangore_tdr_crash_after_accept_before_record`.",
+  "implementation": "`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.",
+  "validation": "Harness `cli` `probe` loads `plans/crash_after_accept_recorded.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

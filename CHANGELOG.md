@@ -209,8 +209,8 @@ PyPI publish.
   code-owned policy with escalation, shadow compare, evaluation telemetry,
   `assemble_context_within_budget`, and `action_question_id` routing.
 - Jev typed-judgment inspiration + requirements map, with Fangore domain
-  stories: `fangore_jev_citation_check`, `fangore_jev_context_picker`,
-  `fangore_jev_requirements_review`, `fangore_jev_task_router`,
+  stories: `fangore_jev_citation_matching_claim`, `fangore_jev_context_budget_pack`,
+  `fangore_jev_req_review_template_shape`, `fangore_jev_task_route_simple_local`,
   `fangore_jev_action_safety`.
 
 ## [0.3.1] — 2026-10-06
@@ -234,7 +234,7 @@ plus transactional durable resume and WalkingLabs eval substrate.
 - Transactional durable graph resume: injectable `CheckpointStore` seam,
   `SqliteCheckpointStore` reference backend, opt-in `EffectfulGraphNodeRunner`
   with effect intent/acceptance/reconciliation, and crash-injection probes.
-  Story: `fangore_transactional_durable_resume`. Requirements:
+  Story: `fangore_tdr_crash_after_accept_before_record`. Requirements:
   `docs/requirements/transactional-durable-resume.md`. Module doctests (and
   Sphinx API pages) document Config wiring and SQLite restart usage;
   pytest runs `--doctest-modules` over `src/mechaharness`.

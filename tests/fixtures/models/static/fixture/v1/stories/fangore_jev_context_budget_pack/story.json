@@ -1,0 +1,23 @@
+{
+  "id": "fangore_jev_context_budget_pack",
+  "persona": "fangore",
+  "title": "Pack scored RAG candidates into a fixed token budget",
+  "kind": "cli",
+  "narrative": "After retrieval, Fangore needs a context pack that fits a fixed token budget. He scores candidates for relevance, trust, and freshness, then packs only those that clear product thresholds until the budget is full. He verifies the packed set stays under budget and omits low-scoring scraps. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05]",
+  "implementation": "`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.",
+  "validation": "Harness `cli` `probe` loads `plans/budget_pack.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": [
+    {
+      "id": "jev-us05",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US05)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "RAG context selection"
+    },
+    {
+      "id": "insp-pa-01-picker",
+      "label": "Personal agent reliability map (MH-PA-01 context freshness)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md",
+      "note": "Native context freshness scoring; typed tool-result TTL is fangore_insp_tool_result_freshness"
+    }
+  ]
+}

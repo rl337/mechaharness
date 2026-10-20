@@ -64,15 +64,15 @@ Live parity is a **mode** of cassette-backed stories (for example `nubble_run_co
 
 ### `nubble_anthropic_cassette_infer` — Infer through the Anthropic strategy with a cassette
 
-Nubble proves the Anthropic Messages backend is a first-class reason lane. Offline CI plays a cassette through the real `AnthropicStrategy` bound at story init — not a probe mock — so inference, usage, and cost events look the same as a live call.
+Nubble proves the Anthropic Messages backend is a first-class reason lane without a live model. He starts the CLI host with family pass-through and backend anthropic (cassette from response.json), uses the default one-shot infer universe, runs infer with a short prompt, and verifies completion by matching the cassette text plus inference/cost events and token totals from the recorded usage.
 
 #### Implementation
 
-`CliScenario.host.backend=anthropic` builds `AnthropicStrategy` + `MemoryAsyncHttpClient` against `response.json` (`/v1/messages`). `cli:infer` / `CliInferRunner` emits `core:inference` with usage and priced `core:cost`.
+`UserStoryScenario.environment.backend=anthropic` builds `AnthropicStrategy` + `MemoryAsyncHttpClient` against `response.json` (`/v1/messages`). `cli:infer` / `CliInferRunner` emits `core:inference` with usage and priced `core:cost`.
 
 #### Validation
 
-Harness `cli` scenario `cassette_infer.yaml`: host backend anthropic, hard event_types includes core:inference/core:cost, token equals from cassette, cost_units lte.
+Harness `user_story` scenario `cassette_infer.yaml`: environment backend anthropic, infer step, complete expects for event_types, text, tokens, cost_units.
 
 ### `nubble_ci_static_smoke` — Prove the HTTP adapter in CI without a live model host
 
@@ -175,7 +175,7 @@ Harness `cli` `probe` loads `plans/grant_mismatch.yaml` (human-readable probe pl
 
 ### `nubble_insp_guidance_cost_budget` — Count local steps and guidance frequency on generator runs
 
-Operators need to see how often a frontier driver was asked for advice versus how much local work ran, so they can optimize verified useful work per intervention. Tracks R-IOC-BUDGET[^insp-ioc-08].
+Nubble starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `ops`, store `memory`). Operators need to see how often a frontier driver was asked for advice versus how much local work ran, so they can optimize verified useful work per intervention. Tracks R-IOC-BUDGET. He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-08]
 
 #### Implementation
 
@@ -183,7 +183,7 @@ Operators need to see how often a frontier driver was asked for advice versus ho
 
 #### Validation
 
-Harness `cli` via `scenario.yaml`. Hard expects guidance_yields and resumes matching the scripted cycle.
+Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -191,7 +191,7 @@ Harness `cli` via `scenario.yaml`. Hard expects guidance_yields and resumes matc
 
 ### `nubble_insp_model_input_replay` — Replay model-visible inputs from a recorded manifest
 
-Nubble needs every model call to leave a reconstructible record of what the model saw — messages, tools, and instructions — so offline replay does not depend on hidden memory. Accepts WalkingLabs DeepSeek and P06 observability guidance[^wl-deepseek-manifest][^wl-p06-manifest].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble needs every model call to leave a reconstructible record of what the model saw — messages, tools, and instructions — so offline replay does not depend on hidden memory. Accepts WalkingLabs DeepSeek and P06 observability guidance. He walks product steps (replay_model_input) and verifies completion from the structured observation expects on this scenario. [^wl-deepseek-manifest][^wl-p06-manifest]
 
 #### Implementation
 
@@ -199,7 +199,7 @@ Nubble needs every model call to leave a reconstructible record of what the mode
 
 #### Validation
 
-Harness `cli` scenario `manifest_replay.yaml`: hard `hashes_ok`, `reconstructed_equals`, `manifest_ref_nonempty`.
+Harness `user_story` scenario `manifest_replay.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -208,7 +208,7 @@ Harness `cli` scenario `manifest_replay.yaml`: hard `hashes_ok`, `reconstructed_
 
 ### `nubble_insp_model_routing` — Route nodes by declared capability needs
 
-Nubble prefers declaring what a step needs instead of hard-coding a model id, then picking among available classes. Accepts inspiration requirement 13[^insp-r13].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble prefers declaring what a step needs instead of hard-coding a model id, then picking among available classes. Accepts inspiration requirement 13. He walks product steps (route_capabilities) and verifies completion from the structured observation expects on this scenario. [^insp-r13]
 
 #### Implementation
 
@@ -216,7 +216,7 @@ Nubble prefers declaring what a step needs instead of hard-coding a model id, th
 
 #### Validation
 
-Harness `cli` scenario `capability_route.yaml`: hard `selected_model_class`.
+Harness `user_story` scenario `capability_route.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -355,7 +355,7 @@ Harness `cli` `probe` loads `plans/wrong_lane_deny.yaml` (human-readable probe p
 
 ### `nubble_model_affinity` — Keep model affinity inside a coherent work loop
 
-Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch. Random lane thrash must not win on unit price alone.
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Within one coherent loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch. Random lane thrash must not win on unit price alone. He walks product steps (check_model_affinity) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
@@ -363,7 +363,7 @@ Within one coherent loop, Nubble wants routing to prefer the already-chosen lane
 
 #### Validation
 
-Harness `cli` scenario `affinity_lane.yaml`: hard `selected_lane` and `uncalibrated_is_null`.
+Harness `user_story` scenario `affinity_lane.yaml`: environment + graph + steps + complete expects.
 
 ### `nubble_repo_topology` — Budget repository topology maps and fall back when stale
 
@@ -381,7 +381,7 @@ Harness `cli` `probe` loads `plans/repo_topology.yaml` (human-readable probe pla
 
 ### `nubble_run_cost_events` — Record cost and inference events for every harness run
 
-Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units — the same signals he would forward to billing or a Grafana panel.
+Finance asks Nubble whether a harness run burned billable units. He starts the CLI host with the default pass-through family and a mock reason backend, uses the built-in one-shot infer universe (no custom recipe load), runs infer with a short prompt, and verifies completion by reading the event log: an inference event and a cost event with non-zero units — the same signals he would forward to billing. He also checks that those events carry the host clock timestamps he expects.
 
 #### Implementation
 
@@ -391,7 +391,7 @@ Covers: OBS-01.
 
 #### Validation
 
-Harness `cli` scenarios `event_types.yaml` (exact baseline event types + positive cost units) and `event_timestamps.yaml` (clock-stamped inference/cost). Cassette `response.json`. Related: `tests/test_events.py`. Live: `MECHA_STORY_BACKEND=live`.
+Harness `user_story` scenarios `event_types.yaml` (environment + infer step + complete event/cost/token expects) and `event_timestamps.yaml` (environment.clock + infer + complete timestamp expects). Cassette `response.json`. Related: `tests/test_events.py`. Live: `MECHA_STORY_BACKEND=live`.
 
 ### `nubble_topology_efficiency` — Separate wall-clock speedup from total work and queue wait
 
@@ -409,7 +409,7 @@ Harness `cli` `probe` loads `plans/parallel_spans.yaml` (human-readable probe pl
 
 ### `fangore_backend_describe_recipe` — Describe an inference backend through the backend_describe recipe
 
-Before Fangore wires a host, he wants a machine-readable description of a configured backend — name, network behavior, auth — without leaving the recipe catalog. He runs backend_describe with the mock backend and gets the same metadata the classic describe command used to print. Complements `fangore_harness_run_recipe`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `backend_describe` recipe. Before Fangore wires a host, he wants a machine-readable description of a configured backend — name, network behavior, auth — without leaving the recipe catalog. He runs backend_describe with the mock backend and gets the same metadata the classic describe command used to print. Complements `fangore_harness_run_recipe`. He walks product steps (run_recipe) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
@@ -417,7 +417,7 @@ Agentic Recipe catalog id `backend_describe` (`BackendDescribeTemplate`) with a 
 
 #### Validation
 
-Harness `cli` scenario `describe_mock.yaml`: hard `recipe_in_catalog`, `status`, `description_name`, `graph_node_ids_exactly`. Unit: `tests/test_recipe_runner.py`.
+Harness `user_story` scenario `describe_mock.yaml`: environment + graph + steps + complete expects.
 
 ### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 
@@ -437,7 +437,7 @@ Harness `cli` `probe` loads `plans/verify_repair_succeeds.yaml` (human-readable 
 
 ### `fangore_bounded_retry_recipe` — Expand a bounded-retry Agentic Recipe with explicit escalation
 
-Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_transactional_durable_resume`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `bounded_retry` recipe. Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_transactional_durable_resume`. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
@@ -445,7 +445,7 @@ Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt → class
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
+Harness `user_story` scenario `bounded_retry_recipe.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -572,7 +572,7 @@ Harness `cli` `probe` loads `plans/stagnation.yaml` (human-readable probe plan);
 
 ### `fangore_conversational_tool_loop` — Expand a conversational tool loop under a tools graph node
 
-Fangore binds the library conversational tool-loop recipe so a chat tools step grows nested rounds — model complete then per-tool calls — inside the tools node’s checkpoint without pre-creating empty max-turn slots. A stop contract bounds the loop. Complements `fangore_insp_stop_contract`, `fangore_node_components`, and `fangore_host_kit_event_tap`.[^june-hf07]
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `conversational_tool_loop` recipe. Fangore binds the library conversational tool-loop recipe so a chat tools step grows nested rounds — model complete then per-tool calls — inside the tools node’s checkpoint without pre-creating empty max-turn slots. A stop contract bounds the loop. Complements `fangore_insp_stop_contract`, `fangore_node_components`, and `fangore_host_kit_event_tap`. He walks product steps (run_recipe) and verifies completion from the structured observation expects on this scenario. [^june-hf07]
 
 #### Implementation
 
@@ -580,7 +580,7 @@ Agentic Recipe catalog id `conversational_tool_loop` (`ConversationalToolLoopTem
 
 #### Validation
 
-Harness `cli` scenario `expanded_rounds.yaml`: hard `status`, exact `rounds`, and `subgraph_node_ids_exactly`. Unit: `tests/test_conversational_tool_loop.py`.
+Harness `user_story` scenario `expanded_rounds.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -717,7 +717,7 @@ Harness `cli` `probe` loads `plans/derived_memory.yaml` (human-readable probe pl
 
 ### `fangore_environment_repair_recipe` — Instantiate the environment repair Agentic Recipe
 
-Before dependent work continues, Fangore runs the environment-repair Agentic Recipe: diagnose missing substrate, attempt a bounded repair, then recheck. The recipe must expand to a concrete plan without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `environment_repair` recipe. Before dependent work continues, Fangore runs the environment-repair Agentic Recipe: diagnose missing substrate, attempt a bounded repair, then recheck. The recipe must expand to a concrete plan without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
@@ -725,7 +725,7 @@ Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnos
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
+Harness `user_story` scenario `environment_repair_recipe.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -766,7 +766,7 @@ Harness `cli` `probe` loads `plans/runner_stop_and_ok.yaml` (human-readable prob
 
 ### `fangore_graph_template_soft_points` — Instantiate a reusable graph template with soft points
 
-Fangore picks the library fan-out Agentic Recipe, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which recipe produced it so later upgrades can detect drift. Independent-review and verify-repair recipes follow the same GraphTemplate pattern. See inspiration requirements for dynamic subgraphs and template incubation[^insp-templates]. Soft-point substrate for self-revising MH-SR-03; evolution allowlist: `fangore_insp_soft_evolution_allowlist`[^insp-sr-03-soft].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `fan_out_aggregate` recipe. Fangore picks the library fan-out Agentic Recipe, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which recipe produced it so later upgrades can detect drift. Independent-review and verify-repair recipes follow the same GraphTemplate pattern. He walks product steps (instantiate_recipe, recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-templates][^insp-sr-03-soft] Related: `fangore_insp_soft_evolution_allowlist`.
 
 #### Implementation
 
@@ -774,7 +774,7 @@ Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_t
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` + `recipe_plan` demoted_refuse; hard expects on declared observation keys.
+Harness `user_story` scenario `graph_template_soft_points.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -783,19 +783,19 @@ Harness `cli` `instantiate_recipe` + `recipe_plan` demoted_refuse; hard expects 
 
 ### `fangore_harness_family_react` — Run the react harness family through CLI tool_loop init
 
-Fangore switches the host to the classic ReAct family so models without reliable native tool calls still loop Thought/Action/Observation. He starts from the same CLI tool-loop verb, with family=react bound at harness initialization, and expects a final answer after one scripted tool round.
+Fangore starts the CLI host with family `react` and backend `mock`. Fangore switches the host to the classic ReAct family so models without reliable native tool calls still loop Thought/Action/Observation. He starts from the same CLI tool-loop verb, with family=react bound at harness initialization, and expects a final answer after one scripted tool round. He walks product steps (tool_loop) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
-`CliScenario.host.family` / `tool_loop.family=react` select `ReactHarness` via `_CliToolLoopConfig.get_harness_class` (Config DI). Story harness scripts Action/Final Answer turns on `ScriptedInference`. Emits the same EventLog inference/tool stream as other families.
+`UserStoryScenario.environment.family` / `tool_loop.family=react` select `ReactHarness` via `_CliToolLoopConfig.get_harness_class` (Config DI). Story harness scripts Action/Final Answer turns on `ScriptedInference`. Emits the same EventLog inference/tool stream as other families.
 
 #### Validation
 
-Harness `cli` scenario `react_tool_round.yaml`: host family react, tool_loop family=react, hard expects on status/text, core:inference in event_types, cost_units and total_tokens ceilings.
+Harness `user_story` scenario `react_tool_round.yaml`: environment + graph + steps + complete expects.
 
 ### `fangore_harness_run_recipe` — Run a single prompt through the harness_run Agentic Recipe
 
-Fangore wants the classic one-shot harness path to be a named control pattern he can discover beside other recipes, not a special-case CLI only. He lists the catalog, opens harness_run, binds a prompt and mock backend, and gets final text from the same graph executor used for other recipes. Complements `fangore_backend_describe_recipe` and `fangore_conversational_tool_loop`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `harness_run` recipe. Fangore wants the classic one-shot harness path to be a named control pattern he can discover beside other recipes, not a special-case CLI only. He lists the catalog, opens harness_run, binds a prompt and mock backend, and gets final text from the same graph executor used for other recipes. Complements `fangore_backend_describe_recipe` and `fangore_conversational_tool_loop`. He walks product steps (run_recipe) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
@@ -803,11 +803,11 @@ Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`): prepare → harn
 
 #### Validation
 
-Harness `cli` scenario `catalog_and_run.yaml`: hard `recipe_in_catalog`, `status`, `text_nonempty`, exact `turns`, `graph_node_ids_exactly`. Unit: `tests/test_recipe_runner.py`.
+Harness `user_story` scenario `catalog_and_run.yaml`: environment + graph + steps + complete expects.
 
 ### `fangore_harness_tool_loop_graph` — See inference and tool calls as node components inside a harness run
 
-Fangore runs a tool-loop harness with one tool then a final answer. The console must treat inference and each tool call as node components under a harness parent — not an opaque blob — using the same kinds as recipe interiors. Complements `fangore_traversal_contract` and `fangore_insp_soft_vs_hard`.[^june-nc-harness]
+Fangore starts the CLI host with family `tool_loop` and backend `mock`. Fangore runs a tool-loop harness with one tool then a final answer. The console must treat inference and each tool call as node components under a harness parent — not an opaque blob — using the same kinds as recipe interiors. Complements `fangore_traversal_contract` and `fangore_insp_soft_vs_hard`. He walks product steps (tool_loop) and verifies completion from the structured observation expects on this scenario. [^june-nc-harness]
 
 #### Implementation
 
@@ -815,7 +815,7 @@ Fangore runs a tool-loop harness with one tool then a final answer. The console 
 
 #### Validation
 
-Harness `cli` scenario `harness_components.yaml`: `host.family=tool_loop`, hard `text`/`status`, event/token/cost ceilings, exact traversal_kinds and component_parent_ids all `harness`.
+Harness `user_story` scenario `harness_components.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -823,7 +823,7 @@ Harness `cli` scenario `harness_components.yaml`: `host.family=tool_loop`, hard 
 
 ### `fangore_host_kit_event_tap` — Tap graph node events from the blessed host executor
 
-Fangore’s console needs live path lighting as a durable plan runs. They want the same short host wiring used for submit-once jobs — not a second hand-built executor — and still receive node start and end events for the active steps. Complements `fangore_host_kit_submit_once` and feeds console zoom stories such as `fangore_conversational_tool_loop`.[^june-hf05-insp]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore’s console needs live path lighting as a durable plan runs. They want the same short host wiring used for submit-once jobs — not a second hand-built executor — and still receive node start and end events for the active steps. Complements `fangore_host_kit_submit_once` and feeds console zoom stories such as `fangore_conversational_tool_loop`. He walks product steps (infer) and verifies completion from the structured observation expects on this scenario. [^june-hf05-insp]
 
 #### Implementation
 
@@ -831,7 +831,7 @@ Fangore’s console needs live path lighting as a durable plan runs. They want t
 
 #### Validation
 
-Harness `cli` scenario `tapped_node_lifecycle.yaml`: hard `tapped_event_types_exactly` includes node start/end (and full tap order). Unit: `tests/test_conversational_tool_loop.py` (tap used with tool-loop runner).
+Harness `user_story` scenario `tapped_node_lifecycle.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -839,7 +839,7 @@ Harness `cli` scenario `tapped_node_lifecycle.yaml`: hard `tapped_event_types_ex
 
 ### `fangore_host_kit_submit_once` — Wire a host graph executor and submit an external job once
 
-Fangore builds a host that dispatches a remote coding job from a durable plan. They need a short, readable way to register that job step, choose durable storage, and submit exactly once — including after a crash where the remote system may already have accepted the job. Complements `fangore_graph_executor` (authorized plan walk) and `fangore_transactional_durable_resume` (crash-window reconciliation). Host wiring lives in the dependency-injection guide[^host-kit-di].
+Fangore builds a host that dispatches a remote coding job from a durable plan. They need a short, readable way to register that job step, choose durable storage, and submit exactly once — including after a crash where the remote system may already have accepted the job. Complements `fangore_graph_executor` (authorized plan walk) and `fangore_tdr_crash_after_accept_before_record` (crash-window reconciliation). Host wiring lives in the dependency-injection guide[^host-kit-di].
 
 #### Implementation
 
@@ -923,7 +923,7 @@ Harness `cli` `probe` loads `plans/approval_interrupt_cycle.yaml` (human-readabl
 
 ### `fangore_insp_auth_epoch_resume` — Refuse resumed effects when the authorization epoch advanced
 
-Checkpoints carry the authorization epoch so crash recovery after revocation does not continue with stale authority. A resume under an envelope whose epoch differs from the checkpoint fails closed before any runner is invoked; pre-epoch checkpoints read as epoch 0. Effect ledger and idempotent resume ship in `fangore_transactional_durable_resume`. Tracks MH-DOTS-06[^insp-dots-06].
+Checkpoints carry the authorization epoch so crash recovery after revocation does not continue with stale authority. A resume under an envelope whose epoch differs from the checkpoint fails closed before any runner is invoked; pre-epoch checkpoints read as epoch 0. Effect ledger and idempotent resume ship in `fangore_tdr_crash_after_accept_before_record`. Tracks MH-DOTS-06[^insp-dots-06].
 
 #### Implementation
 
@@ -1038,7 +1038,7 @@ Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` (human-reada
 
 ### `fangore_insp_decision_conflict_checkpoint` — Checkpoint after conflict-free decisions without revisiting cleared cycles
 
-After a decision is settled, the nodes it still conflicts with are revisited, and nodes already visited are not revisited so a circular conflict cannot loop forever. A checkpoint is taken only when the decision has no remaining conflicts; a conflict blocked only by the visited set is reported instead of silently saved. The conflicts themselves are still the write-scope conflicts the product already detects (`fangore_transactional_durable_resume`, `fangore_decision_plane_policy`); this adds the revisit-and-checkpoint rule on top. Tracks MH-SR-08[^insp-sr-08].
+After a decision is settled, the nodes it still conflicts with are revisited, and nodes already visited are not revisited so a circular conflict cannot loop forever. A checkpoint is taken only when the decision has no remaining conflicts; a conflict blocked only by the visited set is reported instead of silently saved. The conflicts themselves are still the write-scope conflicts the product already detects (`fangore_tdr_crash_after_accept_before_record`, `fangore_decision_plane_policy`); this adds the revisit-and-checkpoint rule on top. Tracks MH-SR-08[^insp-sr-08].
 
 #### Implementation
 
@@ -1070,7 +1070,7 @@ Harness `cli` `probe` loads `plans/denial_store_equivalence.yaml` (human-readabl
 
 ### `fangore_insp_driver_session_resume` — Resume guidance in a later driver call without recursive callbacks
 
-Frontier and other MCP-capable clients cannot reenter a model session during a pending tool call. Guidance therefore returns as an ordinary tool result; the same driving session calls resume later with the answer. Tracks R-IOC-SESSION[^insp-ioc-03].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `session`, store `memory`). Frontier and other MCP-capable clients cannot reenter a model session during a pending tool call. Guidance therefore returns as an ordinary tool result; the same driving session calls resume later with the answer. Tracks R-IOC-SESSION. He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-03]
 
 #### Implementation
 
@@ -1078,7 +1078,7 @@ Frontier and other MCP-capable clients cannot reenter a model session during a p
 
 #### Validation
 
-Harness `cli` via `scenario.yaml`. Hard expects start advice_requested, resume completed, distinct sequences.
+Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1086,7 +1086,7 @@ Harness `cli` via `scenario.yaml`. Hard expects start advice_requested, resume c
 
 ### `fangore_insp_durable_graph_generator` — Drive a registered recipe to completion as a durable generator
 
-Long-running judgment-bearing work is started as a durable generator over a registered recipe. When no external guidance is required, the first start call returns completion — the driver does not invent a second harness or free-form graph. Complements offline recipe evolution (`taloneth_insp_recipe_evolution_loop`) which chooses which recipe is active. Tracks R-IOC-GENERATOR[^insp-ioc-01].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `story`, store `memory`). Long-running judgment-bearing work is started as a durable generator over a registered recipe. When no external guidance is required, the first start call returns completion — the driver does not invent a second harness or free-form graph. Complements offline recipe evolution (`taloneth_insp_recipe_evolution_loop`) which chooses which recipe is active. He walks product steps (start) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-01]
 
 #### Implementation
 
@@ -1094,7 +1094,7 @@ Long-running judgment-bearing work is started as a durable generator over a regi
 
 #### Validation
 
-Harness `cli` via `scenario.yaml`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.
+Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1102,7 +1102,7 @@ Harness `cli` via `scenario.yaml`. Hard expects completed kind, sequence 1, reci
 
 ### `fangore_insp_durable_resume` — Refuse resume when the harness fingerprint changed
 
-Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_transactional_durable_resume`[^insp-pa-05-fingerprint].
+Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_tdr_crash_after_accept_before_record`[^insp-pa-05-fingerprint].
 
 #### Implementation
 
@@ -1151,7 +1151,7 @@ Harness `cli` `probe` loads `plans/effect_revalidation_check.yaml` (human-readab
 
 ### `fangore_insp_evolution_ownership_split` — Keep recipe validation in the library and evolution campaigns in the host
 
-MechaHarness validates, executes, versions, and safety-gates recipes; the host (for example June) owns which workloads to run, how much to spend, and whether a candidate should be promoted. Two named hooks carry that split: one for evolution campaigns and one for promotion policy. Both default to doing nothing, a host can replace either, a host veto stops a promotion even when every test passed, and the library's final-test gate still applies when the host has no opinion (`taloneth_insp_recipe_final_test_gate`). Tracks MH-SR-09[^insp-sr-09].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. MechaHarness validates, executes, versions, and safety-gates recipes; the host (for example June) owns which workloads to run, how much to spend, and whether a candidate should be promoted. Two named hooks carry that split: one for evolution campaigns and one for promotion policy. Both default to doing nothing, a host can replace either, a host veto stops a promotion even when every test passed, and the library's final-test gate still applies when the host has no opinion (`taloneth_insp_recipe_final_test_gate`). He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-09]
 
 #### Implementation
 
@@ -1159,7 +1159,7 @@ MechaHarness validates, executes, versions, and safety-gates recipes; the host (
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard expects on declared observation keys.
+Harness `user_story` scenario `evolution_ownership_split.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1247,7 +1247,7 @@ Harness `cli` `probe` loads `plans/soft_and_hard.yaml` (human-readable probe pla
 
 ### `fangore_insp_graph_guidance_yield` — Yield typed guidance and resume without treating advice as approval
 
-When a run needs higher-level judgment, start returns an advice yield with a typed question and choices. The driver answers in a later call; the run completes. This is not a human approval interrupt (`fangore_insp_approval_interrupt`) and not an in-process sparse advisor consult (`fangore_insp_sparse_advisor`). Tracks R-IOC-GUIDANCE[^insp-ioc-02].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `story`, store `memory`). When a run needs higher-level judgment, start returns an advice yield with a typed question and choices. The driver answers in a later call; the run completes. This is not a human approval interrupt (`fangore_insp_approval_interrupt`) and not an in-process sparse advisor consult (`fangore_insp_sparse_advisor`). He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-02]
 
 #### Implementation
 
@@ -1255,7 +1255,7 @@ When a run needs higher-level judgment, start returns an advice yield with a typ
 
 #### Validation
 
-Harness `cli` via `scenario.yaml`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.
+Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1280,7 +1280,7 @@ Harness `cli` `probe` loads `plans/verify_rollback_end.yaml` (human-readable pro
 
 ### `fangore_insp_guidance_controller_auth` — Enforce controller ownership and keep advice distinct from approval
 
-Possession of a run id alone must not confer control. An intruder controller cannot resume; ordinary guidance cannot satisfy final-approval authority — that remains `fangore_insp_approval_interrupt`. Tracks R-IOC-AUTH[^insp-ioc-07].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `owner`, store `memory`). Possession of a run id alone must not confer control. An intruder controller cannot resume; ordinary guidance cannot satisfy final-approval authority — that remains `fangore_insp_approval_interrupt`. Tracks R-IOC-AUTH. He walks product steps (start, answer, inspect, start, answer) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-07]
 
 #### Implementation
 
@@ -1288,7 +1288,7 @@ Possession of a run id alone must not confer control. An intruder controller can
 
 #### Validation
 
-Harness `cli` via `scenario.yaml`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.
+Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1296,15 +1296,15 @@ Harness `cli` via `scenario.yaml`. Hard expects intruder rejected, final approva
 
 ### `fangore_insp_guidance_resume_idempotent` — Make guidance resume idempotent and reject stale sequences
 
-Duplicate resume with the same idempotency key returns the committed result; a conflicting or stale sequence fails safely so drivers can retry without double-applying advice. Tracks R-IOC-IDEMPOTENT[^insp-ioc-06].
+Fangore starts the CLI host and loads the verify_repair durable graph under a story controller with an in-memory run store. He starts a run that yields guidance, answers once with an idempotency key (run completes), replays the same key (same committed sequence), then tries a stale sequence under another key and sees a safe sequence refusal — so drivers can retry without double-applying advice. Tracks R-IOC-IDEMPOTENT[^insp-ioc-06].
 
 #### Implementation
 
-`DurableGraphGenerator.resume` stores results under `idempotency_key` and compares `expected_sequence` to the run record.
+`DurableGraphGenerator.resume` stores results under `idempotency_key` and compares `expected_sequence` to the run record. CLI durable verbs `start` / `answer` drive the same session through `CliInstrumentor`.
 
 #### Validation
 
-Harness `cli` via `scenario.yaml`. Hard expects duplicate key same sequence and stale rejection.
+Harness `user_story` scenario `session.yaml`: environment + graph.recipe verify_repair with durable session; steps start/answer with per-step expects; complete asserts terminal sequence refusal.
 
 #### Footnotes
 
@@ -1312,7 +1312,7 @@ Harness `cli` via `scenario.yaml`. Hard expects duplicate key same sequence and 
 
 ### `fangore_insp_guidance_survive_restart` — Rehydrate the same pending guidance after a process restart
 
-A suspended generator run must survive executor or MCP process restart and present the identical pending question. Uses the CheckpointStore / run-store seam from durable resume (`fangore_insp_durable_resume`, `fangore_transactional_durable_resume`) rather than a second recovery protocol. Tracks R-IOC-RESUME[^insp-ioc-05].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `c1`, store `shared`). A suspended generator run must survive executor or MCP process restart and present the identical pending question. Uses the CheckpointStore / run-store seam from durable resume (`fangore_insp_durable_resume`, `fangore_transactional_durable_resume`) rather than a second recovery protocol. Tracks R-IOC-RESUME. He walks product steps (start, rebuild, inspect) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-05]
 
 #### Implementation
 
@@ -1320,7 +1320,7 @@ A suspended generator run must survive executor or MCP process restart and prese
 
 #### Validation
 
-Harness `cli` via `scenario.yaml`. Hard expects identical pending question and request_id after rehydrate.
+Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1346,7 +1346,7 @@ Harness `cli` `probe` loads `plans/handoff_record.yaml` (human-readable probe pl
 
 ### `fangore_insp_independent_review` — Review artifacts in isolated reviewer context
 
-Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10]. Recipe-contract coverage for personal-agent MH-PA-03; produce-critique-refine delta: `fangore_insp_produce_critique_refine`[^insp-pa-03-review].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `independent_review` recipe. Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^insp-r10][^insp-pa-03-review] Related: `fangore_insp_produce_critique_refine`.
 
 #### Implementation
 
@@ -1354,7 +1354,7 @@ Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
+Harness `user_story` scenario `independent_review_template.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1379,7 +1379,7 @@ Harness `cli` `probe` loads `plans/training_grade_required.yaml` (human-readable
 
 ### `fangore_insp_initialize_preflight` — Run an initialize preflight recipe before work
 
-Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `initialize_preflight` recipe. Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^wl-l06-init]
 
 #### Implementation
 
@@ -1387,7 +1387,7 @@ Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaha
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
+Harness `user_story` scenario `initialize_preflight_template.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1574,7 +1574,7 @@ Harness `cli` `probe` loads `plans/operation_compensation.yaml` (human-readable 
 
 ### `fangore_insp_produce_critique_refine` — Register produce-critique-refine as a reusable recipe contract
 
-Reusable subgraphs need typed inputs/outputs, applicability predicates, budgets, and traceable outcomes. Independent review and verify-repair already ship (`fangore_insp_independent_review`, `fangore_verify_repair_recipe`). Produce-critique-refine now ships as its own recipe; an optional three-round council with recorded dissent remains unshipped and non-default. Tracks MH-PA-03[^insp-pa-03].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `produce_critique_refine` recipe. Reusable subgraphs need typed inputs/outputs, applicability predicates, budgets, and traceable outcomes. Independent review and verify-repair already ship (`fangore_insp_independent_review`, `fangore_verify_repair_recipe`). Produce-critique-refine now ships as its own recipe; an optional three-round council with recorded dissent remains unshipped and non-default. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^insp-pa-03]
 
 #### Implementation
 
@@ -1582,7 +1582,7 @@ Agentic Recipe `produce_critique_refine` (`ProduceCritiqueRefineTemplate`) build
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
+Harness `user_story` scenario `produce_critique_refine_recipe.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1590,7 +1590,7 @@ Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable
 
 ### `fangore_insp_recipe_lineage_promote` — Attach lineage and test results when promoting a recipe version
 
-New recipe versions are immutable artifacts with provenance, lineage, test results, and a reversible promotion pointer. Research and rule promotion patterns exist (`taloneth_insp_rule_promotion`); the recipe catalog now keeps versions instead of overwriting by name. Tracks MH-SR-05[^insp-sr-05].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. New recipe versions are immutable artifacts with provenance, lineage, test results, and a reversible promotion pointer. Research and rule promotion patterns exist (`taloneth_insp_rule_promotion`); the recipe catalog now keeps versions instead of overwriting by name. Tracks MH-SR-05. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-05]
 
 #### Implementation
 
@@ -1598,7 +1598,7 @@ New recipe versions are immutable artifacts with provenance, lineage, test resul
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
+Harness `user_story` scenario `recipe_registry_versions.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1606,7 +1606,7 @@ Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan)
 
 ### `fangore_insp_recipe_port_search` — Search compatible recipe compositions by typed ports
 
-Candidate compositions are found by searching only the registered recipes for ones whose declared inputs and outputs fit what is needed. The answer is a list of recipe names; nothing is generated, so no new executable code can enter the production path. A recipe that declares no ports is never suggested, and a type mismatch rules a recipe out. Isolation contracts already exist (`fangore_insp_isolation_io`). Tracks MH-SR-04[^insp-sr-04].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Candidate compositions are found by searching only the registered recipes for ones whose declared inputs and outputs fit what is needed. The answer is a list of recipe names; nothing is generated, so no new executable code can enter the production path. A recipe that declares no ports is never suggested, and a type mismatch rules a recipe out. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-04] Related: `fangore_insp_isolation_io`.
 
 #### Implementation
 
@@ -1614,7 +1614,7 @@ Candidate compositions are found by searching only the registered recipes for on
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
+Harness `user_story` scenario `recipe_port_search.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1622,7 +1622,7 @@ Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan)
 
 ### `fangore_insp_recipe_version_pointer` — Promote and roll back recipes via an immutable version pointer
 
-Recipe execution policies are versioned, testable, replaceable artifacts with a reversible promotion pointer — not only class version fields and demotion stamps. Incubation stamps exist in `fangore_insp_template_incubation`; lineage and evaluation attachments are in `fangore_insp_recipe_lineage_promote`. Tracks MH-SR-01[^insp-sr-01].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Recipe execution policies are versioned, testable, replaceable artifacts with a reversible promotion pointer — not only class version fields and demotion stamps. Incubation stamps exist in `fangore_insp_template_incubation`; lineage and evaluation attachments are in `fangore_insp_recipe_lineage_promote`. Tracks MH-SR-01. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-01]
 
 #### Implementation
 
@@ -1630,7 +1630,7 @@ Recipe execution policies are versioned, testable, replaceable artifacts with a 
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
+Harness `user_story` scenario `recipe_registry_versions.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1638,7 +1638,7 @@ Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan)
 
 ### `fangore_insp_registry_only_compose` — Require production graphs to compose registered recipes only
 
-Production graphs are composed from registered recipes (including nested recipes), not free-form node synthesis. Tiling and recipe-as-tool already help (`fangore_recipe_namespace_tile`, `fangore_recipe_as_tool`). Tracks MH-SR-02[^insp-sr-02].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Production graphs are composed from registered recipes (including nested recipes), not free-form node synthesis. Tiling and recipe-as-tool already help (`fangore_recipe_namespace_tile`, `fangore_recipe_as_tool`). Tracks MH-SR-02. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-02]
 
 #### Implementation
 
@@ -1646,7 +1646,7 @@ Production graphs are composed from registered recipes (including nested recipes
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
+Harness `user_story` scenario `registry_only_compose.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1671,7 +1671,7 @@ Harness `cli` `probe` loads `plans/consequence_risk_scale.yaml` (human-readable 
 
 ### `fangore_insp_soft_evolution_allowlist` — Declare which soft recipe fields may evolve under optimization
 
-Hard nodes and trusted contracts are never silently rewritten by an optimizer; only allowlisted soft parameters (prompts, bounded rounds, reviewer counts) may evolve. Soft points already exist (`fangore_graph_template_soft_points`, `fangore_insp_soft_vs_hard`). Tracks MH-SR-03[^insp-sr-03].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Hard nodes and trusted contracts are never silently rewritten by an optimizer; only allowlisted soft parameters (prompts, bounded rounds, reviewer counts) may evolve. Soft points already exist (`fangore_graph_template_soft_points`, `fangore_insp_soft_vs_hard`). Tracks MH-SR-03. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-03]
 
 #### Implementation
 
@@ -1679,7 +1679,7 @@ Hard nodes and trusted contracts are never silently rewritten by an optimizer; o
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
+Harness `user_story` scenario `soft_point_evolution_allowlist.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1770,7 +1770,7 @@ Harness `cli` `probe` loads `plans/select_produce.yaml` (human-readable probe pl
 
 ### `fangore_insp_template_incubation` — Stamp template provenance and refuse demoted skeletons
 
-Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19]. Incubation stamps for self-revising MH-SR-01; immutable promotion pointer: `fangore_insp_recipe_version_pointer`[^insp-sr-01-incubate].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `fan_out_aggregate` recipe. Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19. He walks product steps (instantiate_recipe, recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-r19][^insp-sr-01-incubate] Related: `fangore_insp_recipe_version_pointer`.
 
 #### Implementation
 
@@ -1778,7 +1778,7 @@ Reusable Agentic Recipes expose soft points and stamp provenance onto concrete g
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` + `recipe_plan` demoted_refuse; hard expects on declared observation keys.
+Harness `user_story` scenario `graph_template_soft_points.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1803,7 +1803,7 @@ Harness `cli` `probe` loads `plans/tool_phase_effect_guard.yaml` (human-readable
 
 ### `fangore_insp_tool_result_freshness` — Reject stale tool evidence before external decisions
 
-Tool results that drive external decisions carry source and freshness metadata. An eight-day-old CRM cache must not be silently treated as current: expired or too-old results are rejected as errors before the decision. Context freshness scoring in `fangore_jev_context_picker` and `fangore_insp_context_provider` covers retrieved context; this story covers typed tool-result TTL. Tracks personal-agent inspiration MH-PA-01[^insp-pa-01].
+Tool results that drive external decisions carry source and freshness metadata. An eight-day-old CRM cache must not be silently treated as current: expired or too-old results are rejected as errors before the decision. Context freshness scoring in `fangore_jev_context_budget_pack` and `fangore_insp_context_provider` covers retrieved context; this story covers typed tool-result TTL. Tracks personal-agent inspiration MH-PA-01[^insp-pa-01].
 
 #### Implementation
 
@@ -1885,47 +1885,155 @@ Harness `cli` `probe` loads `plans/read_low_risk_with_grant.yaml` (human-readabl
 [^insp-pa-02-safety]: [Personal agent reliability map (MH-PA-02 action safety)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Hard execution boundary for authority gate
 [^insp-dots-04]: [OpenAI Dots agent safety (MH-DOTS-04)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Independent action review allow/deny/request-approval
 
-### `fangore_jev_citation_check` — Never mark unsupported claims verified from a judge alone
+### `fangore_jev_citation_growth_mismatch` — Refuse to verify when the source contradicts the claim
 
-Fangore ships a citation check: a small decision model answers whether a source supports an atomic claim, but product code alone may mark a claim verified. Contradictions, missing sources, and low confidence must stay unverified or escalate. Related: `fangore_decision_plane_policy`, `fangore_refund_verdict`.[^jev-us04][^jev-insp-cite]
+Fangore's citation check sees a source that contradicts the claim (for example growth figures that do not match). He runs the decision-plane path and verifies the product does not mark the claim verified. Completes the citation matrix after `fangore_jev_citation_uncertain_support` and `fangore_jev_citation_missing_source`.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate — confidence and envelopes never upgrade unsupported or unavailable answers.
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/uncertain_support.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/growth_mismatch.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_citation_matching_claim` — Mark a claim verified only when the source supports it
+
+Fangore is checking whether a cited source supports an atomic claim before his product marks it verified. He runs the decision-plane citation path with a matching source and claim, reads the bounded support answer, and verifies product policy sets the claim verified — the model alone never stamps verification. Related policy stories: `fangore_decision_plane_policy`, `fangore_refund_verdict`.[^jev-us04][^jev-insp-cite]
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/matching_claim.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
 [^jev-us04]: [Jev typed-judgment inspiration (MH-JEV-US04)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Citation / claim support check
 [^jev-insp-cite]: [Jev decisions in a Pi harness](https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness) — Typed judgments and code-owned policy
 
-### `fangore_jev_context_picker` — Assemble RAG context from scored candidates within a token budget
+### `fangore_jev_citation_missing_source` — Refuse to verify a claim with no source
 
-After retrieval, Fangore asks a decision model for relevance, trust, and freshness scores, then packs only candidates that clear product thresholds into a fixed token budget. Stale, untrusted, or injection-tainted snippets stay out even if they look relevant. When scores are missing, deterministic ranking still fills what it can. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05] Also maps to personal-agent MH-PA-01 context freshness (typed tool-result TTL: `fangore_insp_tool_result_freshness`)[^insp-pa-01-picker].
+Fangore receives an atomic claim with no usable source attached. He runs the citation check and verifies the product keeps the claim unverified — there is nothing for the model to endorse. Builds on the happy path in `fangore_jev_citation_matching_claim`.
 
 #### Implementation
 
-`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned (DP-04). Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/missing_scores_fallback.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/missing_source.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_citation_uncertain_support` — Leave a low-confidence citation unverified
+
+After Fangore can verify a matching citation (`fangore_jev_citation_matching_claim`), he faces a source that only weakly supports the claim. He runs the same citation check, sees low confidence or insufficient support, and verifies the product leaves the claim unverified or escalates — it must not treat a fuzzy judge answer as proof.
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/uncertain_support.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_context_budget_pack` — Pack scored RAG candidates into a fixed token budget
+
+After retrieval, Fangore needs a context pack that fits a fixed token budget. He scores candidates for relevance, trust, and freshness, then packs only those that clear product thresholds until the budget is full. He verifies the packed set stays under budget and omits low-scoring scraps. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05]
+
+#### Implementation
+
+`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/budget_pack.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
 [^jev-us05]: [Jev typed-judgment inspiration (MH-JEV-US05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — RAG context selection
 [^insp-pa-01-picker]: [Personal agent reliability map (MH-PA-01 context freshness)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Native context freshness scoring; typed tool-result TTL is fangore_insp_tool_result_freshness
 
-### `fangore_jev_requirements_review` — Escalate requirement gaps without treating a judge approve as correctness
+### `fangore_jev_context_exclude_injection` — Exclude injection-tainted snippets from the pack
 
-Fangore reviews a change against applicable user stories with isolated reviewers and atomic checks. When a check finds a missing requirement or a missing crash-location test in the facts, the harness asks for focused tests or deeper review. A judge saying approve never marks the change correct by itself. Related: `fangore_insp_independent_review`, `fangore_decision_plane_policy`.[^jev-us06]
+Fangore's retrieval set includes an injection-tainted snippet. He runs the context picker and verifies the tainted text never enters the packed context, even if scores look attractive. Follows the stale/untrusted filter in `fangore_jev_context_filter_stale_untrusted`.
 
 #### Implementation
 
-Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts (for example missing crash tests) to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/exclude_injection.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_context_filter_stale_untrusted` — Keep stale or untrusted snippets out of the pack
+
+With packing working (`fangore_jev_context_budget_pack`), Fangore still sees stale or untrusted candidates that look relevant. He runs context assembly and verifies those snippets stay out of the pack even when relevance is high. Typed tool-result TTL remains `fangore_insp_tool_result_freshness`; MH-PA-01 freshness for retrieved context is documented on `fangore_jev_context_budget_pack`.
+
+#### Implementation
+
+`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/filter_stale_and_untrusted.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_context_missing_scores_fallback` — Fill the budget with deterministic ranking when scores are missing
+
+Sometimes Fangore's decision model does not return scores for every candidate. He still needs a usable pack: he runs assembly, falls back to deterministic ranking for missing scores, and verifies the budget fills with what it can. Closes the picker matrix after `fangore_jev_context_budget_pack`.
+
+#### Implementation
+
+`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/missing_scores_fallback.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_req_review_approve_missing_crash_tests` — Request crash tests even when the judge says approve
+
+A judge answers approve, but Fangore's facts show crash-location tests are missing. He runs the review and verifies product policy requests those tests (or escalates) — a model approve never alone marks the change correct. Pairs with the gap path in `fangore_jev_req_review_gap_found`.
+
+#### Implementation
+
+Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/approve_but_missing_crash_tests.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_req_review_covered_with_tests` — Accept a change when requirements and crash tests are covered
+
+With the review shape in place (`fangore_jev_req_review_template_shape`), Fangore reviews a change whose facts show requirements and crash-location tests are covered. He runs the review path and verifies product policy can accept without asking for more tests — still without treating a bare judge approve as correctness by itself.
+
+#### Implementation
+
+Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/covered_with_tests.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_req_review_gap_found` — Escalate when a requirement gap appears in the facts
+
+Fangore reviews a change where an atomic check finds a missing requirement. He runs the requirements-aware review and verifies the harness asks for focused follow-up or deeper review instead of marking the change correct. Builds on the covered path in `fangore_jev_req_review_covered_with_tests`.
+
+#### Implementation
+
+Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/gap_found.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_req_review_template_shape` — Shape a requirements-aware review with isolated checkers
+
+Fangore is wiring a change review against applicable user stories. He loads the requirements-review template, confirms isolated reviewers and atomic checks are present in the expanded graph, and verifies the shape is ready for real gap cases. Related: `fangore_insp_independent_review`, `fangore_decision_plane_policy`.[^jev-us06]
+
+#### Implementation
+
+Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
 
 #### Validation
 
@@ -1935,9 +2043,45 @@ Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe pl
 
 [^jev-us06]: [Jev typed-judgment inspiration (MH-JEV-US06)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Requirements-aware semantic review
 
-### `fangore_jev_task_router` — Route work to local, frontier, tool, or human with code-owned quality policy
+### `fangore_jev_task_route_complex_frontier` — Force frontier when quality policy rejects the cheap lane
 
-Fangore routes mixed work by asking a small decision model which lane fits — local small model, frontier model, deterministic tool, or human — then product policy accepts only allowed lanes and escalates on low confidence or invalid choices. Cheapest is not enough when quality policy requires a stronger lane. Related: `fangore_decision_plane_model_policy`, `nubble_insp_model_routing`.[^jev-us07]
+After simple local routing works (`fangore_jev_task_route_simple_local`), Fangore gets a complex request. The model may prefer cheap local, but product quality policy requires frontier. He runs the router and verifies the final route is frontier (or escalates), not the cheapest lane.
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/complex_forces_frontier.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_task_route_invalid` — Escalate when the model invents a disallowed lane
+
+The decision model proposes a route outside the allowed envelope. Fangore runs the router and verifies product policy rejects the invalid choice and escalates — the model cannot invent new lanes. Closes the matrix after `fangore_jev_task_route_low_confidence`.
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/invalid_route.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_task_route_low_confidence` — Escalate when the router is not confident
+
+Fangore's router returns a lane with low confidence. He runs the task router and verifies product policy escalates instead of locking in an uncertain lane. Builds on the forced-frontier case in `fangore_jev_task_route_complex_frontier`.
+
+#### Implementation
+
+Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/low_confidence.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_jev_task_route_simple_local` — Route simple work to the local small model
+
+Fangore has mixed work to route. For a simple request he asks a small decision model which lane fits, product policy accepts the local small-model lane, and he verifies the chosen route is local — not frontier or human. Related: `fangore_decision_plane_model_policy`, `nubble_insp_model_routing`.[^jev-us07]
 
 #### Implementation
 
@@ -1970,7 +2114,7 @@ Harness `cli` `probe` loads `plans/checkpoint_fan_in_merge.yaml` (human-readable
 
 ### `fangore_node_components` — Query node components inside each graph node for pre-layout
 
-Before a run starts, Fangore’s console must place interior pieces inside each plan step — soft bindings, stop bounds, and nested child handles — so the camera can zoom into a node without inventing a parallel structure graph. Those pieces are node components of a parent graph node, not free-floating world nodes. Complements `fangore_insp_dynamic_subgraph` and `fangore_traversal_contract`.[^june-nc-req]
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `conversational_tool_loop` recipe. Before a run starts, Fangore’s console must place interior pieces inside each plan step — soft bindings, stop bounds, and nested child handles — so the camera can zoom into a node without inventing a parallel structure graph. Those pieces are node components of a parent graph node, not free-floating world nodes. Complements `fangore_insp_dynamic_subgraph` and `fangore_traversal_contract`. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^june-nc-req]
 
 #### Implementation
 
@@ -1978,7 +2122,7 @@ Before a run starts, Fangore’s console must place interior pieces inside each 
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` loads `binds/conversational_tool_loop.yaml`; hard expects on node-component observation keys.
+Harness `user_story` scenario `node_components.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -1986,7 +2130,7 @@ Harness `cli` `instantiate_recipe` loads `binds/conversational_tool_loop.yaml`; 
 
 ### `fangore_recipe_as_tool` — Nest a child recipe under a tool_call graph node
 
-Fangore’s generate-image tool should run a child oneshot recipe under that tool step so operators can zoom into prompt → generate → verify without a parallel soft lane. Nested spend shares the parent budget; failure surfaces on the tool node. Complements `fangore_insp_dynamic_subgraph`, `fangore_insp_budget_subgraph_rollup`, and `fangore_conversational_tool_loop`.[^june-hf08] Nested recipe embedding for self-revising MH-SR-02[^insp-sr-02-tool].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore’s generate-image tool should run a child oneshot recipe under that tool step so operators can zoom into prompt → generate → verify without a parallel soft lane. Nested spend shares the parent budget; failure surfaces on the tool node. Complements `fangore_insp_dynamic_subgraph`, `fangore_insp_budget_subgraph_rollup`, and `fangore_conversational_tool_loop`. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^june-hf08][^insp-sr-02-tool]
 
 #### Implementation
 
@@ -1994,7 +2138,7 @@ Fangore’s generate-image tool should run a child oneshot recipe under that too
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard expects on declared observation keys.
+Harness `user_story` scenario `recipe_as_tool.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2003,7 +2147,7 @@ Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard exp
 
 ### `fangore_recipe_namespace_tile` — Embed two recipe instances without node-id collisions
 
-Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution. Recipe tiling for self-revising MH-SR-02; registry-only production constraint: `fangore_insp_registry_only_compose`[^insp-sr-02-tile].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for nested execution. He walks product steps (tile_recipe) and verifies completion from the structured observation expects on this scenario. [^insp-sr-02-tile] Related: `fangore_insp_registry_only_compose`.
 
 #### Implementation
 
@@ -2011,7 +2155,7 @@ Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance mu
 
 #### Validation
 
-Harness `cli` `tile_recipe` loads `binds/verify_repair_tile.yaml`; hard expects on tiling observation keys.
+Harness `user_story` scenario `recipe_namespace_tile.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2020,7 +2164,7 @@ Harness `cli` `tile_recipe` loads `binds/verify_repair_tile.yaml`; hard expects 
 
 ### `fangore_refund_verdict` — Keep billing authority in product rules, not the model
 
-A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing — and a high quality score alone must not override missing completion evidence. See also `fangore_decision_surface_reject`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing — and a high quality score alone must not override missing completion evidence. He walks product steps (judge_route) and verifies completion from the structured observation expects on this scenario. Related: `fangore_decision_surface_reject`.
 
 #### Implementation
 
@@ -2030,19 +2174,79 @@ Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.
 
 #### Validation
 
-Harness `cli` scenario `billing_allow.yaml`: hard `route_selected`/`verdict`/`answer_count`. Twins: static fixture + systemone cassette. Unit: `tests/test_judgement_policy.py`, `tests/test_judge.py`.
+Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
 1. [Jev decisions in a Pi harness](https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness) — Routing, gating, batched questions, thresholds
 
-### `fangore_transactional_durable_resume` — Resume a coding job after process crash without duplicate dispatch
+### `fangore_tdr_crash_after_accept_before_record` — Resume after remote accept before the plan records the result
 
-Fangore's host dispatches a long-running coding job through a durable plan. The MechaHarness process can die after the remote system accepts the job but before the plan records the result. On restart, the same durable store must reconcile the existing job instead of starting a second one. Crash points before intent, after intent, after accept, after reduce, and after final commit are all covered. Complements `fangore_insp_durable_resume` fingerprint refusal. Accepts the transactional durable resume requirements[^tdr-req]. Satisfies personal-agent MH-PA-05 checkpoint-compatible execution[^insp-pa-05]. Dots MH-DOTS-06 effect ledger is native here; auth-epoch resume is `fangore_insp_auth_epoch_resume`[^insp-dots-06-tdr]. Self-revising MH-SR-08 uses these checkpoints; neighbor-revisit conflict resolution remains `fangore_insp_decision_conflict_checkpoint`[^insp-sr-08-tdr].
+Fangore's host has already heard the remote coding system accept the job, but the durable plan has not yet recorded that accept when MechaHarness crashes. After restart he resumes from the same store and verifies the host reconciles the existing remote job instead of starting a second one — the classic accept-before-record window. Sibling windows cover earlier and later crash points (`fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_accept_recorded`). Requirements and MH-PA-05 live with `fangore_tdr_crash_before_intent`.
 
 #### Implementation
 
-`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` verb `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/crash_after_accept_before_record.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_tdr_crash_after_accept_recorded` — Resume after accept is already checkpointed
+
+The remote coding job has been accepted and that accept is already on the durable checkpoint when Fangore's process dies. On resume he opens the same store and verifies the plan continues from the recorded accept without a second dispatch. Follows the harder accept-before-record case in `fangore_tdr_crash_after_accept_before_record`.
+
+#### Implementation
+
+`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/crash_after_accept_recorded.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_tdr_crash_after_final_commit` — Resume after final commit with nothing left to dispatch
+
+The durable coding job has fully committed when Fangore's process dies. On resume he loads the store and verifies the plan is already complete — no new dispatch and no reconciliation of an in-flight effect. Closes the crash matrix after `fangore_tdr_crash_after_reduce_before_checkpoint`. Self-revising checkpoint consumers build on this seam (see footnotes on `fangore_tdr_crash_before_intent`).
+
+#### Implementation
+
+`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/crash_after_final_commit.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_tdr_crash_after_intent_before_call` — Resume after crash after intent but before the remote call
+
+After Fangore's durable plan has recorded intent to call the remote coding job but before the HTTP call leaves the host, the process dies. On resume he loads the same store, continues the plan, and verifies the job is dispatched once without inventing a second intent. Builds on the empty-effect path in `fangore_tdr_crash_before_intent`.
+
+#### Implementation
+
+`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/crash_after_intent_before_call.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_tdr_crash_after_reduce_before_checkpoint` — Resume after reduce before the checkpoint commits
+
+Fangore's plan has reduced the remote job result in memory but has not yet committed the checkpoint when the process dies. After restart he resumes, reconciles from the durable effect ledger, and verifies the reduce is not applied twice. Comes after accept-recorded recovery in `fangore_tdr_crash_after_accept_recorded`.
+
+#### Implementation
+
+`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
+
+#### Validation
+
+Harness `cli` `probe` loads `plans/crash_after_reduce_before_checkpoint.yaml` (human-readable probe plan); hard expects on declared observation keys.
+
+### `fangore_tdr_crash_before_intent` — Resume after crash before the job intent is recorded
+
+Fangore's host is dispatching a remote coding job on a durable plan. The MechaHarness process dies before the job intent is written. After restart he opens the same durable store, resumes the plan from the last checkpoint, and verifies the remote job is submitted exactly once — no prior effect to reconcile, and dispatch does not double. Sibling crash windows: `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, and later accept/reduce/commit stories. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05].
+
+#### Implementation
+
+`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.
 
 #### Validation
 
@@ -2057,7 +2261,7 @@ Harness `cli` `probe` loads `plans/crash_before_intent.yaml` (human-readable pro
 
 ### `fangore_traversal_contract` — Align live traversal with node-component ids from existing events
 
-As a run proceeds, Fangore’s console lights interiors that were laid out ahead of time. Inference and tool events must map to the same node-component identities under a parent graph node so the path lights up without a second observability graph. Complements `fangore_node_components` and `nubble_insp_rollout_graph`.[^june-nc-trav]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. As a run proceeds, Fangore’s console lights interiors that were laid out ahead of time. Inference and tool events must map to the same node-component identities under a parent graph node so the path lights up without a second observability graph. Complements `fangore_node_components` and `nubble_insp_rollout_graph`. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^june-nc-trav]
 
 #### Implementation
 
@@ -2065,7 +2269,7 @@ As a run proceeds, Fangore’s console lights interiors that were laid out ahead
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard expects on declared observation keys.
+Harness `user_story` scenario `traversal_contract.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2073,7 +2277,7 @@ Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable plan); hard exp
 
 ### `fangore_verify_repair_recipe` — Tile the verify-repair Agentic Recipe into a plan
 
-Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair are visible graph steps with an explicit stop. Complements `fangore_bounded_repair_loop` for loop helper semantics. Native recipe contract for personal-agent MH-PA-03[^insp-pa-03-verify].
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `verify_repair` recipe. Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair are visible graph steps with an explicit stop. Complements `fangore_bounded_repair_loop` for loop helper semantics. Native recipe contract for personal-agent MH-PA-03. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^insp-pa-03-verify]
 
 #### Implementation
 
@@ -2081,7 +2285,7 @@ Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) builds produce → verif
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
+Harness `user_story` scenario `verify_repair_recipe.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2415,7 +2619,7 @@ Harness `cli` `probe` loads `plans/objective_policy_aggregate.yaml` (human-reada
 
 ### `taloneth_insp_recipe_evolution_loop` — Evolve recipe candidates from traces under registry and safety gates
 
-A host can summarize past traces into suggestions, and the library turns them into a short list of candidate recipe settings that stay inside the catalog and inside the settings marked safe to tune. Anything that names an unknown recipe, an unknown or fixed setting, or a setting the host did not allow is reported as rejected rather than quietly dropped. Candidates are then chosen by an explicit scoring policy that respects its gates and a baseline. No model is called and no free-form graph is produced; running evaluations in isolation and promoting stay with the host and the final-test gate (`taloneth_insp_recipe_final_test_gate`). Generic research loops exist (`taloneth_atk_research_reject`). Tracks MH-SR-06[^insp-sr-06].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. A host can summarize past traces into suggestions, and the library turns them into a short list of candidate recipe settings that stay inside the catalog and inside the settings marked safe to tune. Anything that names an unknown recipe, an unknown or fixed setting, or a setting the host did not allow is reported as rejected rather than quietly dropped. Candidates are then chosen by an explicit scoring policy that respects its gates and a baseline. They walk product steps (recipe_plan) and verify completion from the structured observation expects on this scenario. [^insp-sr-06] Related: `taloneth_insp_recipe_final_test_gate`.
 
 #### Implementation
 
@@ -2423,7 +2627,7 @@ A host can summarize past traces into suggestions, and the library turns them in
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
+Harness `user_story` scenario `recipe_evolution_candidates.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2431,7 +2635,7 @@ Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan)
 
 ### `taloneth_insp_recipe_final_test_gate` — Require an untouched final test set before recipe promotion
 
-A leading candidate must pass a separate untouched final test before it can be released, and that test must not be used as a tuning signal. Promotion is refused when no final-test result is supplied, when the result did not come from a held-out evaluator, or when it failed; only a passing held-out result opens the gate. The same rule guards both the research workflow and the recipe catalog's active pointer. Evaluator held-out labelling already exists (`taloneth_insp_evaluator_compose`). Tracks MH-SR-07[^insp-sr-07].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. A leading candidate must pass a separate untouched final test before it can be released, and that test must not be used as a tuning signal. Promotion is refused when no final-test result is supplied, when the result did not come from a held-out evaluator, or when it failed; only a passing held-out result opens the gate. The same rule guards both the research workflow and the recipe catalog's active pointer. They walk product steps (recipe_plan) and verify completion from the structured observation expects on this scenario. [^insp-sr-07] Related: `taloneth_insp_evaluator_compose`.
 
 #### Implementation
 
@@ -2439,7 +2643,7 @@ A leading candidate must pass a separate untouched final test before it can be r
 
 #### Validation
 
-Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
+Harness `user_story` scenario `recipe_final_test_gate.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2466,7 +2670,7 @@ Harness `cli` `probe` loads `plans/rule_promotion.yaml` (human-readable probe pl
 
 ### `taloneth_insp_run_parity` — Surface material train and eval constraint mismatches
 
-Taloneth needs comparable runs to record and flag mismatches in output caps, tool budgets, timeouts, and sampling so train and eval behavior stay aligned. Accepts FineEnvs train/eval parity findings[^fineenvs-parity].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs comparable runs to record and flag mismatches in output caps, tool budgets, timeouts, and sampling so train and eval behavior stay aligned. Accepts FineEnvs train/eval parity findings. They walk product steps (compare_run_parity) and verify completion from the structured observation expects on this scenario. [^fineenvs-parity]
 
 #### Implementation
 
@@ -2474,7 +2678,7 @@ Taloneth needs comparable runs to record and flag mismatches in output caps, too
 
 #### Validation
 
-Harness `cli` scenario `parity_mismatch.yaml`: hard `comparable` and exact `material_mismatches_exactly`.
+Harness `user_story` scenario `parity_mismatch.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2482,7 +2686,7 @@ Harness `cli` scenario `parity_mismatch.yaml`: hard `comparable` and exact `mate
 
 ### `taloneth_insp_safety_eval_recipes` — Ship reusable safety evaluation recipes for injection and scope bleed
 
-Safety evaluation now ships as a reusable recipe: a scenario from a fixture pack is run, an independent reviewer judges the outcome without seeing the agent's reasoning, and a fixed scorer reports outcome, severity, context, and the model and recipe versions. The scenario classes cover prompt injection in tool output, scope bleed, changing authorization, ambiguous consent, ignored warnings, and false-denial controls, so over-refusal is measured next to unsafe compliance. None of its settings can be tuned by an optimizer, so the measuring instrument cannot be tuned to pass. Adjacent evaluation pieces: `taloneth_insp_eval_matrix`, `fangore_insp_independent_review`. Tracks MH-DOTS-08[^insp-dots-08].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`, and works with the `safety_eval` recipe. Safety evaluation now ships as a reusable recipe: a scenario from a fixture pack is run, an independent reviewer judges the outcome without seeing the agent's reasoning, and a fixed scorer reports outcome, severity, context, and the model and recipe versions. The scenario classes cover prompt injection in tool output, scope bleed, changing authorization, ambiguous consent, ignored warnings, and false-denial controls, so over-refusal is measured next to unsafe compliance. None of its settings can be tuned by an optimizer, so the measuring instrument cannot be tuned to pass. They walk product steps (instantiate_recipe) and verify completion from the structured observation expects on this scenario. [^insp-dots-08] Related: `taloneth_insp_eval_matrix`.
 
 #### Implementation
 
@@ -2490,7 +2694,7 @@ Agentic Recipe `safety_eval` (`SafetyEvalTemplate` in `graph_templates/safety_ev
 
 #### Validation
 
-Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
+Harness `user_story` scenario `safety_eval_recipe.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2514,7 +2718,7 @@ Harness `cli` `probe` loads `plans/harness_experiment_retire.yaml` (human-readab
 
 ### `taloneth_insp_scripted_driver_replay` — Replay advisory decisions with a strict scripted driver
 
-Evaluation and CI need a first-class scripted driver that asserts expected yield kinds and fails when unexpected advice appears. Tracks R-IOC-REPLAY and R-IOC-OFFLINE[^insp-ioc-04].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `scripted`, store `memory`). Evaluation and CI need a first-class scripted driver that asserts expected yield kinds and fails when unexpected advice appears. Tracks R-IOC-REPLAY and R-IOC-OFFLINE. They walk product steps (start, answer) and verify completion from the structured observation expects on this scenario. [^insp-ioc-04]
 
 #### Implementation
 
@@ -2522,7 +2726,7 @@ Evaluation and CI need a first-class scripted driver that asserts expected yield
 
 #### Validation
 
-Harness `cli` via `scenario.yaml`. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.
+Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.
 
 #### Footnotes
 
@@ -2580,7 +2784,7 @@ Harness `cli` `probe` loads `plans/replay_allow.yaml` (human-readable probe plan
 
 ### `taloneth_shadow_decision_backends` — Compare decision backends without inventing missing results
 
-Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: `nubble_lane_load_hint`, `nubble_model_affinity`.
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: `nubble_lane_load_hint`, `nubble_model_affinity`. They walk product steps (shadow_decision_backends) and verify completion from the structured observation expects on this scenario.
 
 #### Implementation
 
@@ -2588,7 +2792,7 @@ Taloneth compares rules, local model, and System One on a matched ticket. When t
 
 #### Validation
 
-Harness `cli` scenario `shadow_backends.yaml`: hard exact unavailable/available/matched action lists.
+Harness `user_story` scenario `shadow_backends.yaml`: environment + graph + steps + complete expects.
 
 ### `taloneth_systemone_cassette` — Pin System One adapter behavior to a versioned cassette
 

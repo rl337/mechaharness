@@ -2,10 +2,10 @@
   "id": "fangore_insp_durable_graph_generator",
   "persona": "fangore",
   "title": "Drive a registered recipe to completion as a durable generator",
-  "kind": "cli",
-  "narrative": "Long-running judgment-bearing work is started as a durable generator over a registered recipe. When no external guidance is required, the first start call returns completion \u2014 the driver does not invent a second harness or free-form graph. Complements offline recipe evolution (`taloneth_insp_recipe_evolution_loop`) which chooses which recipe is active. Tracks R-IOC-GENERATOR[^insp-ioc-01].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `story`, store `memory`). Long-running judgment-bearing work is started as a durable generator over a registered recipe. When no external guidance is required, the first start call returns completion — the driver does not invent a second harness or free-form graph. Complements offline recipe evolution (`taloneth_insp_recipe_evolution_loop`) which chooses which recipe is active. He walks product steps (start) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-01]",
   "implementation": "`DurableGraphGenerator.start` / `list_recipes` resolve `GraphTemplateRegistry` catalog ids and persist via `GeneratorRunStore`. Host entry: `host_kit.host_durable_graph_generator` / `durable_generator_host`. Node component kind `guidance_request` is reserved for guidance soft points; this story exercises zero-advice completion.",
-  "validation": "Harness `cli` via `scenario.yaml`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.",
+  "validation": "Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-ioc-01",

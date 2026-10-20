@@ -3,7 +3,7 @@
 | Surface | Value |
 |---------|-------|
 | Package | `mechaharness.cli_universe`, `cli_infer_runner`, `cli_instrumentor` |
-| Story harness | `kind: cli` with `scenarios/*.yaml` |
+| Story harness | Canonical: `kind: user_story` (persona-task YAML wrapping verbs). Legacy: `kind: cli` script YAML. |
 | Stability | evolving (Wave 1+: grow verbs as stories migrate) |
 
 ## Role
@@ -51,8 +51,13 @@ Distinct from:
 
 ## Story layout (canonical acceptance)
 
-**All user stories migrate here.** Acceptance is `kind: cli` +
-`scenarios/*.yaml`. One story may own many concise scenarios (one claim each):
+Product CLI scripts stay verb-led (`commands:` / instrumentor). **Story
+acceptance** is a separate harness wrapper: `kind: user_story` YAML with
+`environment` → `graph` → `steps` → `complete` → `cleanup` that *drives*
+those verbs (see `tests/stories/scenarios/user_story_scenario.py`). Legacy
+`kind: cli` script scenarios remain until migrated.
+
+One story may own many concise scenarios (one claim each):
 
 ```text
 stories/<id>/
@@ -64,24 +69,26 @@ stories/<id>/
 ```
 
 ```yaml
-kind: cli
-commands:
-  - infer:
-      prompt: Say hello.
-expect:
-  - kind: exactly
-    key: event_types
-    value: [core:access_check, core:graph_start, …]
-  - kind: positive
-    key: cost_units
-  - kind: equals
-    key: total_tokens
-    value: 5
-  - kind: lte
-    key: total_tokens
-    value: 5
-  - kind: nonempty
-    key: text
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+  - do:
+      infer:
+        prompt: Say hello.
+complete:
+  expect:
+    - kind: exactly
+      key: event_types
+      value: [core:access_check, core:graph_start, …]
+    - kind: positive
+      key: cost_units
+    - kind: equals
+      key: total_tokens
+      value: 5
+cleanup: []
 ```
 
 Inference-running verbs (`infer`, `tool_loop`, `run_recipe` that completes)

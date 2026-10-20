@@ -21,10 +21,10 @@ infrastructure.
 | MH-JEV-06 | Escalation / bounded loops | `decision_plane`, `verify_repair`, `bounded_retry` | story | `fangore_decision_plane_policy`, `fangore_verify_repair_recipe` |
 | MH-JEV-07 | Static-data tests | `FixtureJudgeProvider`, story fixtures | story | `taloneth_fixture_judge_batch`, JEV domain stories below |
 | MH-JEV-08 | Comparative evaluation | `compare_shadow_decision`, eval matrix | story | `fangore_decision_plane_shadow`, `taloneth_decision_plane_shadow_compare` |
-| MH-JEV-US04 | Citation support check | `decision_plane_runtime.py` | story | `fangore_jev_citation_check` |
-| MH-JEV-US05 | RAG context picker | `assemble_context_within_budget`, DP batch | story | `fangore_jev_context_picker` |
-| MH-JEV-US06 | Requirements-aware review | `decision_plane`, `independent_review` | story | `fangore_jev_requirements_review` |
-| MH-JEV-US07 | Task-specific router | `decision_plane`, `routing.py` | story | `fangore_jev_task_router` |
+| MH-JEV-US04 | Citation support check | `decision_plane_runtime.py` | story | `fangore_jev_citation_matching_claim` (+ uncertain / missing / growth siblings) |
+| MH-JEV-US05 | RAG context picker | `assemble_context_within_budget`, DP batch | story | `fangore_jev_context_budget_pack` (+ filter / injection / missing-scores siblings) |
+| MH-JEV-US06 | Requirements-aware review | `decision_plane`, `independent_review` | story | `fangore_jev_req_review_template_shape` (+ covered / gap / approve-missing-crash siblings) |
+| MH-JEV-US07 | Task-specific router | `decision_plane`, `routing.py` | story | `fangore_jev_task_route_simple_local` (+ frontier / low-confidence / invalid siblings) |
 | MH-JEV-US08 | Action safety firewall | `AccessControl` + DP semantic risk | story | `fangore_jev_action_safety` |
 | MH-JEV-US01–03 | Triage / lead / moderation packs | host bindings on `decision_plane` | surface | US01 pattern covered by decision-plane policy stories |
 | MH-JEV-US09–10 | Browser / game reflex | — | gap | Experimental; not library-owned yet |

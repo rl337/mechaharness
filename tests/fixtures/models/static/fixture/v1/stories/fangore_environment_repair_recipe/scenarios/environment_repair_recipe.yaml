@@ -1,23 +1,36 @@
-# Bind document: ../binds/environment_repair.yaml
-kind: cli
-commands:
-- instantiate_recipe:
-    path: binds/environment_repair.yaml
-expect:
-- kind: 'true'
-  key: recipe_in_catalog
-- kind: equals
-  key: status
-  value: ok
-- kind: equals
-  key: template_name
-  value: environment_repair
-- kind: includes
-  key: subgraph_node_ids
-  value:
-  - diagnose
-  - repair_env
-  - recheck
-- kind: equals
-  key: recipe_category
-  value: agentic_recipe
+# user story: fangore_environment_repair_recipe
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `environment_repair` recipe.
+# Before dependent work continues, Fangore runs the environment-repair Agentic Recipe:
+# diagnose missing substrate, attempt a bounded repair, then recheck.
+# The recipe must expand to a concrete plan without calling a model.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: environment_repair
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/environment_repair.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: environment_repair
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - diagnose
+    - repair_env
+    - recheck
+  - kind: equals
+    key: recipe_category
+    value: agentic_recipe
+cleanup: []

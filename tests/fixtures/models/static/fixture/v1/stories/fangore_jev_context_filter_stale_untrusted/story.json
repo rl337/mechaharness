@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_context_filter_stale_untrusted",
+  "persona": "fangore",
+  "title": "Keep stale or untrusted snippets out of the pack",
+  "kind": "cli",
+  "narrative": "With packing working (`fangore_jev_context_budget_pack`), Fangore still sees stale or untrusted candidates that look relevant. He runs context assembly and verifies those snippets stay out of the pack even when relevance is high. Typed tool-result TTL remains `fangore_insp_tool_result_freshness`; MH-PA-01 freshness for retrieved context is documented on `fangore_jev_context_budget_pack`.",
+  "implementation": "`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.",
+  "validation": "Harness `cli` `probe` loads `plans/filter_stale_and_untrusted.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

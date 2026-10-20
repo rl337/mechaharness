@@ -1,18 +1,29 @@
-kind: cli
-durable:
-  graph: verify_repair
-  controller: ops
-  store: memory
-commands:
-- start:
-    run_id: cost-1
-    inputs:
-      guidance:
-      - request_id: req-cost
-        question: Budget?
-        choices:
-        - id: a
-          label: A
+# user story: nubble_insp_guidance_cost_budget
+# Nubble starts the CLI host with family `pass_through` and backend `mock`, loads the
+# `verify_repair` durable graph (controller `ops`, store `memory`).
+# Operators need to see how often a frontier driver was asked for advice versus how much
+# local work ran, so they can optimize verified useful work per intervention.
+# Tracks R-IOC-BUDGET.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: verify_repair
+  durable:
+    controller: ops
+    store: memory
+steps:
+- do:
+    start:
+      run_id: cost-1
+      inputs:
+        guidance:
+        - request_id: req-cost
+          question: Budget?
+          choices:
+          - id: a
+            label: A
   expect:
   - kind: equals
     key: kind
@@ -20,9 +31,10 @@ commands:
   - kind: equals
     key: question
     value: Budget?
-- answer:
-    choose: a
-    request_id: req-cost
+- do:
+    answer:
+      choose: a
+      request_id: req-cost
   expect:
   - kind: equals
     key: kind
@@ -36,3 +48,18 @@ commands:
   - kind: equals
     key: local_steps
     value: 2
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: guidance_yields
+    value: 1
+  - kind: equals
+    key: resumes
+    value: 1
+  - kind: equals
+    key: local_steps
+    value: 2
+cleanup: []

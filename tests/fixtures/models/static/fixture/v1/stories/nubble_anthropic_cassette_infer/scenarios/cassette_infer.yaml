@@ -1,34 +1,51 @@
-# Product-path AnthropicStrategy via host.backend cassette (not probe mock).
-kind: cli
-host:
+# user story: nubble_anthropic_cassette_infer
+# Nubble starts the CLI with Anthropic cassette wiring (not a probe mock),
+# runs one-shot infer on the default universe, and verifies the cassette
+# text plus inference/cost/token observations match the recorded reply.
+kind: user_story
+
+environment:
   family: pass_through
   backend: anthropic
-commands:
-- infer:
-    prompt: Say hello.
-expect:
-- kind: includes
-  key: event_types
-  value:
-  - core:inference
-  - core:cost
-- kind: equals
-  key: text
-  value: hello
-- kind: equals
-  key: prompt_tokens
-  value: 6
-- kind: equals
-  key: completion_tokens
-  value: 1
-- kind: equals
-  key: total_tokens
-  value: 7
-- kind: lte
-  key: total_tokens
-  value: 7
-- kind: positive
-  key: cost_units
-- kind: lte
-  key: cost_units
-  value: 1
+
+graph: null
+
+steps:
+  - # S1 — one-shot infer through AnthropicStrategy + cassette
+    do:
+      infer:
+        prompt: Say hello.
+    expect:
+      - kind: equals
+        key: text
+        value: hello
+
+complete:
+  expect:
+    - kind: includes
+      key: event_types
+      value:
+        - core:inference
+        - core:cost
+    - kind: equals
+      key: text
+      value: hello
+    - kind: equals
+      key: prompt_tokens
+      value: 6
+    - kind: equals
+      key: completion_tokens
+      value: 1
+    - kind: equals
+      key: total_tokens
+      value: 7
+    - kind: lte
+      key: total_tokens
+      value: 7
+    - kind: positive
+      key: cost_units
+    - kind: lte
+      key: cost_units
+      value: 1
+
+cleanup: []

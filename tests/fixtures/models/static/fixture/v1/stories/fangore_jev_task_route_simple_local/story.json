@@ -1,0 +1,17 @@
+{
+  "id": "fangore_jev_task_route_simple_local",
+  "persona": "fangore",
+  "title": "Route simple work to the local small model",
+  "kind": "cli",
+  "narrative": "Fangore has mixed work to route. For a simple request he asks a small decision model which lane fits, product policy accepts the local small-model lane, and he verifies the chosen route is local — not frontier or human. Related: `fangore_decision_plane_model_policy`, `nubble_insp_model_routing`.[^jev-us07]",
+  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.",
+  "validation": "Harness `cli` `probe` loads `plans/simple_local.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": [
+    {
+      "id": "jev-us07",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US07)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "Task-specific model/workflow router"
+    }
+  ]
+}

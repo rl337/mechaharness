@@ -2,16 +2,16 @@
   "id": "fangore_insp_independent_review",
   "persona": "fangore",
   "title": "Review artifacts in isolated reviewer context",
-  "kind": "cli",
-  "narrative": "Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10]. Recipe-contract coverage for personal-agent MH-PA-03; produce-critique-refine delta: `fangore_insp_produce_critique_refine`[^insp-pa-03-review].",
-  "implementation": "Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce \u2192 isolated review_* \u2192 aggregate_reviews with omit_producer_reasoning and retain_disagreement.",
-  "validation": "Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `independent_review` recipe. Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^insp-r10][^insp-pa-03-review] Related: `fangore_insp_produce_critique_refine`.",
+  "implementation": "Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce → isolated review_* → aggregate_reviews with omit_producer_reasoning and retain_disagreement.",
+  "validation": "Harness `user_story` scenario `independent_review_template.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-r10",
       "label": "Inspiration requirements (req 10: independent review)",
       "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
-      "note": "Req 10 \u2014 independent review"
+      "note": "Req 10 — independent review"
     },
     {
       "id": "insp-pa-03-review",

@@ -1,16 +1,27 @@
-# Plan document: ../plans/recipe_as_tool.yaml
-kind: cli
-commands:
-- recipe_plan:
-    path: plans/recipe_as_tool.yaml
-expect:
-- kind: equals
-  key: status
-  value: ok
-- kind: 'true'
-  key: child_run_id_nonempty
-- kind: equals
-  key: child_status
-  value: ok
-- kind: 'true'
-  key: has_child_graph_component
+# user story: fangore_recipe_as_tool
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# Fangore’s generate-image tool should run a child oneshot recipe under that tool step so
+# operators can zoom into prompt → generate → verify without a parallel soft lane.
+# Nested spend shares the parent budget; failure surfaces on the tool node.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    recipe_plan:
+      path: plans/recipe_as_tool.yaml
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: 'true'
+    key: child_run_id_nonempty
+  - kind: equals
+    key: child_status
+    value: ok
+  - kind: 'true'
+    key: has_child_graph_component
+cleanup: []

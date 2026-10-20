@@ -2,10 +2,10 @@
   "id": "fangore_insp_guidance_controller_auth",
   "persona": "fangore",
   "title": "Enforce controller ownership and keep advice distinct from approval",
-  "kind": "cli",
-  "narrative": "Possession of a run id alone must not confer control. An intruder controller cannot resume; ordinary guidance cannot satisfy final-approval authority \u2014 that remains `fangore_insp_approval_interrupt`. Tracks R-IOC-AUTH[^insp-ioc-07].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `owner`, store `memory`). Possession of a run id alone must not confer control. An intruder controller cannot resume; ordinary guidance cannot satisfy final-approval authority — that remains `fangore_insp_approval_interrupt`. Tracks R-IOC-AUTH. He walks product steps (start, answer, inspect, start, answer) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-07]",
   "implementation": "`LeaseControllerAuth` / `GeneratorControllerAuth` on resume/cancel; `requested_authority=final_approval` raises PermissionError pointing hosts at ApprovalInterrupt.",
-  "validation": "Harness `cli` via `scenario.yaml`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.",
+  "validation": "Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-ioc-07",

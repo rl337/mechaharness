@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_req_review_gap_found",
+  "persona": "fangore",
+  "title": "Escalate when a requirement gap appears in the facts",
+  "kind": "cli",
+  "narrative": "Fangore reviews a change where an atomic check finds a missing requirement. He runs the requirements-aware review and verifies the harness asks for focused follow-up or deeper review instead of marking the change correct. Builds on the covered path in `fangore_jev_req_review_covered_with_tests`.",
+  "implementation": "Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.",
+  "validation": "Harness `cli` `probe` loads `plans/gap_found.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "footnotes": []
+}

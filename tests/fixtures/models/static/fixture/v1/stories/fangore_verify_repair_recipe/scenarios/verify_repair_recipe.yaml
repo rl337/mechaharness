@@ -1,21 +1,34 @@
-# Bind document: ../binds/verify_repair.yaml
-kind: cli
-commands:
-- instantiate_recipe:
-    path: binds/verify_repair.yaml
-expect:
-- kind: 'true'
-  key: recipe_in_catalog
-- kind: equals
-  key: status
-  value: ok
-- kind: equals
-  key: template_name
-  value: verify_repair
-- kind: includes
-  key: subgraph_node_ids
-  value:
-  - produce
-  - verify
-  - repair
-  - complete
+# user story: fangore_verify_repair_recipe
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `verify_repair` recipe.
+# Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair
+# are visible graph steps with an explicit stop.
+# Complements `fangore_bounded_repair_loop` for loop helper semantics.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: verify_repair
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/verify_repair.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: verify_repair
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - produce
+    - verify
+    - repair
+    - complete
+cleanup: []
