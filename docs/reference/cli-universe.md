@@ -168,8 +168,10 @@ document-selected behavior via ``plan:``:
 | `registry_versions` | versions / lineage / pointer |
 | `final_test_gate` | held-out promotion gate |
 | `evolution_candidates` | trace → candidate → objective |
+| `evolution_ownership` | host policy vs library gates |
+| `recipe_as_tool` | embed child graph as tool |
+| `traversal_contract` | events → traversal records |
+| `demoted_refuse` | demoted template refuses expand |
 
 ``run_recipe`` remains for **execute** adapters (`harness_run`,
-`backend_describe`, `conversational_tool_loop`). Ownership /
-``recipe_as_tool`` / traversal stories stay on test probes until they have a
-product document of their own.
+`backend_describe`, `conversational_tool_loop`).

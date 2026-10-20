@@ -25,6 +25,10 @@ PlanKind = Literal[
     "registry_versions",
     "final_test_gate",
     "evolution_candidates",
+    "evolution_ownership",
+    "recipe_as_tool",
+    "traversal_contract",
+    "demoted_refuse",
 ]
 
 
@@ -358,6 +362,256 @@ class EvolutionCandidatesPlan(BaseModel):
         }
 
 
+class EvolutionOwnershipPlan(BaseModel):
+    """Host owns campaign/promotion policy; library keeps gates (MH-SR-09)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    plan: Literal["evolution_ownership"] = "evolution_ownership"
+    summary: str = ""
+    recipe: str = "verify_repair"
+    workloads: list[str] = Field(min_length=1)
+    budget: float
+
+    def run(self, registry: GraphTemplateRegistry | None = None) -> dict[str, Any]:
+        from mechaharness.core.access import GraphExecute
+        from mechaharness.di import MechaHarnessConfig, get_injector
+        from mechaharness.evaluator import EvaluatorResult
+        from mechaharness.graph_templates.catalog import default_graph_templates
+        from mechaharness.harness.base import AbstractHarness
+        from mechaharness.harness.pass_through import PassThroughHarness
+        from mechaharness.inference.base import InferenceStrategy
+        from mechaharness.recipe_lifecycle.evolution_campaign_hooks import (
+            EvolutionCampaignHooks,
+            NoopEvolutionCampaignHooks,
+        )
+        from mechaharness.recipe_lifecycle.recipe_promotion_policy import (
+            NoopRecipePromotionPolicy,
+            RecipePromotionDecision,
+            RecipePromotionPolicy,
+            RecipePromotionRequest,
+            promote_recipe,
+        )
+
+        del registry
+        workloads = list(self.workloads)
+        budget = float(self.budget)
+        recipe = self.recipe
+
+        class _Freeze(RecipePromotionPolicy):
+            def decide(self, request: RecipePromotionRequest) -> RecipePromotionDecision:
+                return RecipePromotionDecision(
+                    allowed=False, reasons=["release_freeze"]
+                )
+
+        class _Campaign(NoopEvolutionCampaignHooks):
+            def __init__(self) -> None:
+                self.promotions: list[list[str]] = []
+
+            def on_promotion(self, recipe_id: str, version: str) -> None:
+                self.promotions.append([recipe_id, version])
+
+            def select_workloads(self, recipe_id: str) -> list[str]:
+                return [f"{recipe_id}:{w}" for w in workloads]
+
+            def experiment_budget(self, recipe_id: str) -> float | None:
+                del recipe_id
+                return budget
+
+        class _Base(MechaHarnessConfig):
+            def get_inference_class(self) -> type[InferenceStrategy]:
+                from mechaharness.inference.mock import MockInferenceStrategy
+
+                return MockInferenceStrategy
+
+            def get_harness_class(self) -> type[AbstractHarness]:
+                return PassThroughHarness
+
+            def get_grants(self) -> list[object]:
+                return [GraphExecute]
+
+        class _Host(_Base):
+            def get_recipe_promotion_policy(self) -> RecipePromotionPolicy:
+                return _Freeze()
+
+            def get_evolution_campaign_hooks(self) -> EvolutionCampaignHooks:
+                return _Campaign()
+
+        default = get_injector(_Base())
+        host = get_injector(_Host())
+        default_hooks = default.inject(EvolutionCampaignHooks)
+        host_hooks = host.inject(EvolutionCampaignHooks)
+
+        def registry_with_v2() -> Any:
+            reg = default_graph_templates()
+            base = reg.get(recipe)
+            if base is None:
+                raise KeyError(f"unknown recipe {recipe!r}")
+            reg.add_version(
+                type("V2", (type(base),), {"version": "2"})(), parent_version="1"
+            )
+            return reg
+
+        passed = EvaluatorResult(
+            evaluator_id="story:final", version="1", held_out=True, passed=True
+        )
+        ask = RecipePromotionRequest(recipe=recipe, to_version="2")
+        blocked_registry = registry_with_v2()
+        blocked = promote_recipe(
+            blocked_registry,
+            host.inject(RecipePromotionPolicy),
+            ask.model_copy(update={"final_test": passed}),
+            host_hooks,
+        )
+        ungated_registry = registry_with_v2()
+        ungated = promote_recipe(
+            ungated_registry, NoopRecipePromotionPolicy(), ask, host_hooks
+        )
+        allowed_registry = registry_with_v2()
+        allowed = promote_recipe(
+            allowed_registry,
+            NoopRecipePromotionPolicy(),
+            ask.model_copy(update={"final_test": passed}),
+            host_hooks,
+        )
+        return {
+            "summary": self.summary,
+            "default_policy_is_noop": isinstance(
+                default.inject(RecipePromotionPolicy), NoopRecipePromotionPolicy
+            ),
+            "default_hooks": [
+                default_hooks.select_workloads(recipe),
+                default_hooks.experiment_budget(recipe),
+            ],
+            "host_hooks": [
+                host_hooks.select_workloads(recipe),
+                host_hooks.experiment_budget(recipe),
+            ],
+            "host_policy_blocks": [blocked.allowed, blocked.reasons],
+            "host_block_keeps_pointer": blocked_registry.active_version(recipe),
+            "library_gate_without_final_test": [
+                ungated.allowed,
+                ungated_registry.active_version(recipe),
+            ],
+            "promoted_with_gates_passed": [
+                allowed.allowed,
+                allowed_registry.active_version(recipe),
+            ],
+            "host_hooks_saw_promotions": getattr(host_hooks, "promotions", None),
+        }
+
+
+class RecipeAsToolPlan(BaseModel):
+    """Embed a child recipe graph as a tool node and execute it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    plan: Literal["recipe_as_tool"] = "recipe_as_tool"
+    summary: str = ""
+    parent_node_id: str = "generate_image"
+    tool_name: str = "generate_image"
+    child_goal: str = "oneshot"
+
+    async def run(
+        self, registry: GraphTemplateRegistry | None = None
+    ) -> dict[str, Any]:
+        from mechaharness.budget import BudgetPolicy
+        from mechaharness.graph import NodeStatus
+        from mechaharness.graph_executor import (
+            CallableGraphNodeRunner,
+            GraphRunContext,
+            NodeOutcome,
+        )
+        from mechaharness.host_kit import host_graph_executor
+        from mechaharness.node_component import embed_recipe_as_tool, node_components_for
+
+        del registry
+
+        async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+            del context
+            return NodeOutcome(status=NodeStatus.SUCCEEDED, payload={"id": node.id})
+
+        child = ExecutionGraph(goal=self.child_goal)
+        child.add_node(GraphNode(id="prompt", kind="compute"))
+        child.template_name = "oneshot"
+        parent = ExecutionGraph(goal="parent")
+        parent.add_node(
+            embed_recipe_as_tool(
+                child,
+                parent_node_id=self.parent_node_id,
+                tool_name=self.tool_name,
+            )
+        )
+        executor = host_graph_executor(
+            runners=[CallableGraphNodeRunner(["compute"], ok)],
+        )
+        result = await executor.run(
+            parent,
+            budget_policy=BudgetPolicy.unlimited(),
+            run_id="story-rat",
+            skip_linkage=True,
+        )
+        wrap = result.graph.nodes[self.parent_node_id]
+        comps = node_components_for(result.graph)
+        return {
+            "summary": self.summary,
+            "status": result.status,
+            "child_run_id_nonempty": bool(wrap.payload.get("child_run_id")),
+            "child_status": wrap.payload.get("child_status"),
+            "has_child_graph_component": any(c.kind == "child_graph" for c in comps),
+        }
+
+
+class TraversalContractPlan(BaseModel):
+    """Derive traversal records from stamped events (parent_node_id required)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    plan: Literal["traversal_contract"] = "traversal_contract"
+    summary: str = ""
+    events: list[dict[str, Any]] = Field(min_length=1)
+
+    def run(self, registry: GraphTemplateRegistry | None = None) -> dict[str, Any]:
+        from mechaharness.node_component import traversal_from_events
+
+        del registry
+        records = traversal_from_events(list(self.events))
+        kinds = {r.kind for r in records}
+        return {
+            "summary": self.summary,
+            "record_count_min": len(records),
+            "has_inference": "inference" in kinds,
+            "has_tool_call": "tool_call" in kinds,
+            "all_have_parent": all(bool(r.parent_node_id) for r in records),
+        }
+
+
+class DemotedRefusePlan(BaseModel):
+    """Demoted templates refuse instantiate."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    plan: Literal["demoted_refuse"] = "demoted_refuse"
+    summary: str = ""
+    template: str = "fan_out_aggregate"
+
+    def run(self, registry: GraphTemplateRegistry | None = None) -> dict[str, Any]:
+        from mechaharness.graph_templates.catalog import default_graph_templates
+
+        del registry
+        base = default_graph_templates().get(self.template)
+        if base is None:
+            raise KeyError(f"unknown template {self.template!r}")
+        demoted = type(base)()
+        demoted.status = "demoted"
+        refused = False
+        try:
+            demoted.instantiate(GraphTemplateParams(goal="nope"))
+        except RuntimeError:
+            refused = True
+        return {"summary": self.summary, "demoted_refused": refused}
+
+
 _PLAN_MODELS: dict[str, type[BaseModel]] = {
     "soft_evolution": SoftEvolutionPlan,
     "port_search": PortSearchPlan,
@@ -365,6 +619,10 @@ _PLAN_MODELS: dict[str, type[BaseModel]] = {
     "registry_versions": RegistryVersionsPlan,
     "final_test_gate": FinalTestGatePlan,
     "evolution_candidates": EvolutionCandidatesPlan,
+    "evolution_ownership": EvolutionOwnershipPlan,
+    "recipe_as_tool": RecipeAsToolPlan,
+    "traversal_contract": TraversalContractPlan,
+    "demoted_refuse": DemotedRefusePlan,
 }
 
 
@@ -375,6 +633,10 @@ RecipePlanDocument = Union[
     RegistryVersionsPlan,
     FinalTestGatePlan,
     EvolutionCandidatesPlan,
+    EvolutionOwnershipPlan,
+    RecipeAsToolPlan,
+    TraversalContractPlan,
+    DemotedRefusePlan,
 ]
 
 
@@ -398,7 +660,8 @@ def load_recipe_plan_path(path: str | Path) -> RecipePlanDocument:
 def run_recipe_plan_document(
     plan: RecipePlanDocument,
     registry: GraphTemplateRegistry | None = None,
-) -> dict[str, Any]:
+) -> Any:
+    """Return observation dict, or an awaitable for async plans."""
     return plan.run(registry=registry)
 
 
@@ -436,13 +699,17 @@ class RecipePlanCommand(BaseModel):
 
 
 __all__ = [
+    "DemotedRefusePlan",
     "EvolutionCandidatesPlan",
+    "EvolutionOwnershipPlan",
     "FinalTestGatePlan",
     "PortSearchPlan",
+    "RecipeAsToolPlan",
     "RecipePlanCommand",
     "RegistryComposePlan",
     "RegistryVersionsPlan",
     "SoftEvolutionPlan",
+    "TraversalContractPlan",
     "load_recipe_plan",
     "load_recipe_plan_path",
     "run_recipe_plan_document",

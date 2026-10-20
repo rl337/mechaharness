@@ -1,21 +1,8 @@
+# Plan document: ../plans/traversal_contract.yaml
 kind: cli
 commands:
-- probe:
-    name: traversal_contract
-    events:
-    - type: core:turn_start
-      payload:
-        parent_node_id: harness
-        component_id: harness/turn_start:1
-    - type: core:inference
-      payload:
-        parent_node_id: harness
-        component_id: harness/inference:1
-    - type: core:tool_call
-      payload:
-        tool_name: lookup
-        parent_node_id: harness
-        component_id: harness/tool_call:lookup:1
+- recipe_plan:
+    path: plans/traversal_contract.yaml
 expect:
 - kind: gte
   key: record_count_min

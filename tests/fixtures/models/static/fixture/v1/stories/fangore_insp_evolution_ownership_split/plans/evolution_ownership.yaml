@@ -1,0 +1,10 @@
+# Evolution ownership split (MH-SR-09).
+# Host supplies campaign hooks and promotion policy; library keeps final-test gates.
+
+plan: evolution_ownership
+summary: Host freeze blocks promote; with noop policy + final test, pointer advances.
+recipe: verify_repair
+workloads:
+- nightly
+- regression
+budget: 25.0

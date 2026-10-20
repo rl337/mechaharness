@@ -1,5 +1,4 @@
-# Bind document: ../binds/fan_out_aggregate.yaml
-# Demoted templates still refuse instantiate (library probe).
+# Bind: ../binds/fan_out_aggregate.yaml — Plan: ../plans/demoted_refuse.yaml
 kind: cli
 commands:
 - instantiate_recipe:
@@ -23,8 +22,8 @@ commands:
     value: host:workflows/compare_v1
   - kind: 'true'
     key: catalog_soft_points_nonempty
-- probe:
-    name: demoted_template_refused
+- recipe_plan:
+    path: plans/demoted_refuse.yaml
   expect:
   - kind: 'true'
     key: demoted_refused

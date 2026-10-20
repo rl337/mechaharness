@@ -1,10 +1,8 @@
+# Plan document: ../plans/recipe_as_tool.yaml
 kind: cli
 commands:
-- probe:
-    name: recipe_as_tool
-    parent_node_id: generate_image
-    tool_name: generate_image
-    child_goal: oneshot
+- recipe_plan:
+    path: plans/recipe_as_tool.yaml
 expect:
 - kind: equals
   key: status

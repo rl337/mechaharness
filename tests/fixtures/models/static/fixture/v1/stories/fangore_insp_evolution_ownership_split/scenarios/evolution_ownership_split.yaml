@@ -1,11 +1,8 @@
+# Plan document: ../plans/evolution_ownership.yaml
 kind: cli
 commands:
-- probe:
-    name: evolution_ownership_split
-    workloads:
-    - nightly
-    - regression
-    budget: 25.0
+- recipe_plan:
+    path: plans/evolution_ownership.yaml
 expect:
 - kind: 'true'
   key: default_policy_is_noop
