@@ -215,6 +215,23 @@ class GteAssertion(CliAssertion):
             raise AssertionError(f"{body.key}: {got!r} < {body.value!r}")
 
 
+class LteAssertion(CliAssertion):
+    """Observation at ``key`` must be <= ``value`` (token / cost ceilings)."""
+
+    kind = "lte"
+    params_model = _GteParams
+
+    def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
+        body = cast(_GteParams, params)
+        if body.key not in observation:
+            raise AssertionError(
+                f"missing observation key {body.key!r}; got {sorted(observation)}"
+            )
+        got = observation[body.key]
+        if not isinstance(got, (int, float)) or got > body.value:
+            raise AssertionError(f"{body.key}: {got!r} > {body.value!r}")
+
+
 class _ContainsParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -250,6 +267,7 @@ def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
         ErrorAssertion.kind: ErrorAssertion,
         IncludesAssertion.kind: IncludesAssertion,
         GteAssertion.kind: GteAssertion,
+        LteAssertion.kind: LteAssertion,
         ContainsAssertion.kind: ContainsAssertion,
     }
 

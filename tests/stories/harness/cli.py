@@ -107,11 +107,16 @@ class CliHarness:
             else:
                 content = str(response.get("content") or "ok")
                 usage_raw = response.get("usage") or {}
-                usage = Usage(
-                    prompt_tokens=usage_raw.get("prompt_tokens"),
-                    completion_tokens=usage_raw.get("completion_tokens"),
-                    total_tokens=usage_raw.get("total_tokens"),
-                )
+                if usage_raw:
+                    usage = Usage(
+                        prompt_tokens=usage_raw.get("prompt_tokens"),
+                        completion_tokens=usage_raw.get("completion_tokens"),
+                        total_tokens=usage_raw.get("total_tokens"),
+                    )
+                else:
+                    usage = Usage(
+                        prompt_tokens=1, completion_tokens=1, total_tokens=2
+                    )
                 completer = ScriptedInference(
                     [ChatMessage(role=Role.ASSISTANT, content=content)],
                     usages=[usage],

@@ -211,6 +211,10 @@ footnote defs when the narrative contains matching `[^id]` markers).
 - Cassette / live dual-mode notes when relevant.
 - Related unit test modules under `tests/`.
 - Do **not** cite new legacy `op` names for newly migrated stories.
+- Inference-running scenarios (`infer`, `tool_loop`, completing `run_recipe`)
+  MUST assert event observations: `event_types` / `includes` for
+  `core:inference`, and token bounds via `prompt_tokens` /
+  `completion_tokens` / `total_tokens` (`equals` / `gte` / `lte`).
 
 ### `title`
 
