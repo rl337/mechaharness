@@ -1,0 +1,43 @@
+kind: cli
+commands:
+- probe:
+    name: decision_plane_telemetry
+    questions:
+    - id: team
+      kind: choice
+      options:
+      - id: billing
+        label: Billing
+      allowed_actions:
+      - billing
+    - id: risk
+      kind: score
+      min: 0
+      max: 1
+    state_projection:
+      ticket_id: T-1
+      channel: email
+    answers:
+      team: billing
+      risk: 0.2
+    confidence: 0.91
+    final_action: billing
+    model_ref: flavor:local_decision
+    latency_ms: 42
+    raw_body: customer wrote a long complaint with PII
+expect:
+- kind: 'true'
+  key: has_question_schema_ids
+- kind: 'true'
+  key: has_projection_fingerprint
+- kind: equals
+  key: final_action
+  value: billing
+- kind: equals
+  key: model_ref
+  value: flavor:local_decision
+- kind: equals
+  key: latency_ms
+  value: 42
+- kind: 'false'
+  key: includes_raw_body

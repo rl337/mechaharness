@@ -1,0 +1,29 @@
+kind: cli
+commands:
+- probe:
+    name: decision_surface_reject
+    question:
+      kind: choice
+      id: route
+      instructions: Which team owns this?
+      options:
+      - id: billing
+        description: Billing
+      - id: technical
+        description: Technical
+    allowed_actions:
+    - billing
+    - technical
+    answers:
+      route: billing
+    invalid_choice: pirate-crew
+    state:
+      ticket: double charge
+expect:
+- kind: 'false'
+  key: rules_rejected
+- kind: 'true'
+  key: invalid_choice_rejected
+- kind: equals
+  key: rules_source
+  value: rules

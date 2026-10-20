@@ -1,0 +1,29 @@
+kind: cli
+commands:
+- probe:
+    name: citation_support_case
+    questions:
+    - id: support
+      kind: choice
+      options:
+      - id: supported
+        label: Supported
+      - id: contradicted
+        label: Contradicted
+      - id: insufficient
+        label: Insufficient
+      - id: unavailable
+        label: Unavailable
+      allowed_actions:
+      - supported
+      - contradicted
+      - insufficient
+      - unavailable
+    action_question_id: support
+    answers:
+      support: contradicted
+    confidence: 0.95
+    confidence_floor: 0.7
+expect:
+- kind: 'false'
+  key: claim_verified

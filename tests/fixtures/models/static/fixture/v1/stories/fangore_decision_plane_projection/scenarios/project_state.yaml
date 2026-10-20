@@ -1,0 +1,32 @@
+kind: cli
+commands:
+- probe:
+    name: decision_plane_projection
+    raw_context:
+      ticket_id: T-9
+      channel: email
+      body: charged twice
+      secret: do-not-emit
+    project_keys:
+    - ticket_id
+    - channel
+    facts:
+      duplicate_charge: true
+      amount_cents: 1200
+expect:
+- kind: equals
+  key: projection
+  value:
+    ticket_id: T-9
+    channel: email
+- kind: exactly
+  key: facts
+  value:
+  - duplicate_charge
+  - amount_cents
+- kind: 'false'
+  key: projection_has_secret
+- kind: 'true'
+  key: no_model_invocation
+- kind: 'true'
+  key: facts_fingerprint_nonempty

@@ -2,9 +2,9 @@
   "id": "taloneth_fixture_judge_batch",
   "persona": "taloneth",
   "title": "Validate judge question batches without a live model",
-  "kind": "decision_plane",
+  "kind": "cli",
   "narrative": "Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors \u2014 including partial failure reporting \u2014 without a GPU host.",
   "implementation": "Provider-neutral judge schema in `mechaharness.inference.judge` (`Choice`/`Noul`/`Score` questions and signals, `Judgement`, `JudgeErrorItem`, provenance). `FixtureJudgeProvider` + `judge()` validate batches and report per-question errors. Semantics cover closed-world answers, partial failure, and calibration/provenance fields adapters must map.\n\nCovers: JDG-01, JDG-02, JDG-03, JDG-04.",
-  "validation": "Harness `decision_plane` op `fixture_judge_batch` \u2192 `_run_fixture_judge_batch`. Unit: `tests/test_judge.py`.",
+  "validation": "Harness `cli` scenario `batch_answers.yaml`. Hard expects answer count, errors, and answer ids.",
   "footnotes": []
 }

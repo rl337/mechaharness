@@ -2,10 +2,10 @@
   "id": "fangore_decision_plane_policy",
   "persona": "fangore",
   "title": "Let code own the final decision-plane action with escalation",
-  "kind": "decision_plane",
+  "kind": "cli",
   "narrative": "A small decision model answers several triage questions in one call \u2014 which team, how risky \u2014 but only allowed teams are exposed, and product policy chooses route or escalate when confidence is low or an answer is off-list. Exact duplicate-charge math stays in facts, not in the model. Related: `fangore_decision_surface_reject`, `fangore_refund_verdict`.[^rvania-policy][^rc-dp-policy] Native model-proposes/code-decides path for personal-agent MH-PA-06; alert escalation catalog is `fangore_insp_alert_escalation_rules`[^insp-pa-06-dp]. Decision-plane resolve is not the self-revising neighbor CR loop (`fangore_insp_decision_conflict_checkpoint`)[^insp-sr-08-dp].",
   "implementation": "Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed questions in one invocation (DP-02); `reject_invalid_choice` / envelopes enforce valid actions (DP-05); `apply_decision_plane_policy` owns the final action or routable escalation from confidence/validity (DP-04, DP-06). Model signals are evidence only.",
-  "validation": "Harness `decision_plane` op `decision_plane_policy`. Soft expects single_batch_invocation, final_action billing on high confidence, escalate on low confidence and on invalid team, escalation_route host_policy.",
+  "validation": "Harness `cli` scenarios `accept_billing.yaml` / `low_confidence.yaml` / `invalid_team.yaml`.",
   "footnotes": [
     {
       "id": "rvania-policy",

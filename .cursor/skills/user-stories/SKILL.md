@@ -143,7 +143,7 @@ Migrate in waves; each wave adds the smallest CLI/harness surface required:
    judge route — **done**
 3. Graph execution — **done** (`probe` + `cli_probe_classes`)
 4. Durable IoC — **done** (CLI verbs; parallel harness removed)
-5. Decision plane / remaining judge ops
+5. Decision plane / remaining judge ops — **done** (`decision_plane` runner removed)
 6. `pure_api` + context/eval library surface
 
 When a family has zero stories left, delete its op-dispatch runner module.

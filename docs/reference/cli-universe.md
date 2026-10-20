@@ -90,7 +90,7 @@ wave adds only the CLI verb, probe, or universe node needed:
    judge route — done
 3. Graph execution — done (test probes + `probe` verb)
 4. Durable IoC — done (CLI verbs; parallel harness removed)
-5. Decision plane / remaining judge ops
+5. Decision plane / remaining judge ops — done (`decision_plane` runner removed)
 6. pure_api + context/eval surface
 
 When a legacy family has zero stories left, delete its op-dispatch runner.

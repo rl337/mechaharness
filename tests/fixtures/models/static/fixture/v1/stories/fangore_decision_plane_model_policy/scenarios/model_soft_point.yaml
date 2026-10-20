@@ -1,0 +1,23 @@
+kind: cli
+commands:
+- probe:
+    name: decision_plane_model_policy
+    state_projection:
+      ticket_id: T-1
+    questions:
+    - id: team
+      kind: choice
+      options:
+      - id: billing
+        label: Billing
+      allowed_actions:
+      - billing
+    decision_model: flavor:local_decision
+expect:
+- kind: 'true'
+  key: soft_point_decision_model
+- kind: equals
+  key: ask_model_ref
+  value: flavor:local_decision
+- kind: 'false'
+  key: describe_has_param_count

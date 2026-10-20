@@ -1,0 +1,46 @@
+kind: cli
+commands:
+- probe:
+    name: decision_plane_recipe
+    goal: route refund triage
+    state_projection:
+      ticket_id: T-1
+      channel: email
+    facts:
+      duplicate_charge: true
+      amount_cents: 1200
+    questions:
+    - id: team
+      kind: choice
+      options:
+      - billing
+      - technical
+      allowed_actions:
+      - billing
+      - technical
+    - id: risk
+      kind: score
+      min: 0
+      max: 1
+    confidence_floor: 0.7
+    shadow_mode: true
+expect:
+- kind: equals
+  key: template_name
+  value: decision_plane
+- kind: exactly
+  key: nodes
+  value:
+  - apply_policy
+  - ask_batch
+  - escalate
+  - project_state
+  - shadow_ask
+- kind: equals
+  key: ask_batch_question_count
+  value: 2
+- kind: 'true'
+  key: facts_on_project_not_ask
+- kind: equals
+  key: confidence_floor
+  value: 0.7
