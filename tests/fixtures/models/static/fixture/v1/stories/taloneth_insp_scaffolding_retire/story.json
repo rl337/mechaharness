@@ -2,10 +2,10 @@
   "id": "taloneth_insp_scaffolding_retire",
   "persona": "taloneth",
   "title": "Retire scaffolding that loses a controlled experiment",
-  "kind": "evaluation_research",
+  "kind": "cli",
   "narrative": "Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1[^insp-r01].",
   "implementation": "`HarnessExperiment` / `HarnessExperimentRunner` in `mechaharness.harness_experiment` express interventions as hypotheses with expected metrics, compare with/without arms, and list retirement candidates. Integrates with `ResearchLab` for offline evaluation. Trace fields expose experiment id, harness version, and assignment.",
-  "validation": "Harness `evaluation_research` op `harness_experiment_retire`. Soft expects: treatment worse than control yields `retired` status and a retirement candidate. Related: `taloneth_atk_research_reject`. Unit: `tests/test_inspiration_primitives.py`.",
+  "validation": "Harness `cli` scenario `harness_experiment_retire.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r01",

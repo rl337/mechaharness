@@ -1,0 +1,24 @@
+kind: cli
+commands:
+- probe:
+    name: eval_claims_compose
+    claims:
+    - id: a
+      statement: a
+      status: pass
+    - id: b
+      statement: b
+      status: fail
+    - id: c
+      statement: c
+      status: unknown
+expect:
+- kind: equals
+  key: pass
+  value: 1
+- kind: equals
+  key: fail
+  value: 1
+- kind: equals
+  key: unknown
+  value: 1

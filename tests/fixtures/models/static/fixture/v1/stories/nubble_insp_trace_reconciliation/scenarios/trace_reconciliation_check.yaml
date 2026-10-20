@@ -1,0 +1,21 @@
+kind: cli
+commands:
+- probe:
+    name: trace_reconciliation_check
+    surfaces:
+    - name: executor
+      event_ids:
+      - a
+      digests:
+        a: '1'
+    - name: gateway
+      event_ids:
+      - a
+      digests:
+        a: '2'
+expect:
+- kind: equals
+  key: status
+  value: conflict
+- kind: 'false'
+  key: ok

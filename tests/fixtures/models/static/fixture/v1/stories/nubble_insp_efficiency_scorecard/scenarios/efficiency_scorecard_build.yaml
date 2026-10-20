@@ -1,0 +1,15 @@
+kind: cli
+commands:
+- probe:
+    name: efficiency_scorecard_build
+    tool_calls: 3
+    tokens_out: 1200
+    latency_ms: 4000
+    coordination_cost: 1.5
+expect:
+- kind: equals
+  key: tool_calls
+  value: 3.0
+- kind: equals
+  key: tokens_out
+  value: 1200.0
