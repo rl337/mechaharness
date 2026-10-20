@@ -147,7 +147,13 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">CliInferRunner</span></code> (reason-lane <code class="docutils literal notranslate"><span class="pre">Completer</span></code>, <code class="docutils literal notranslate"><span class="pre">core:inference</span></code> + <code class="docutils literal notranslate"><span class="pre">core:cost</span></code>)</p></td>
 </tr>
 <tr class="row-even"><td><p>Instrumentor</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> dispatches via pyiv map multibind (<code class="docutils literal notranslate"><span class="pre">cli_verb_classes</span></code> → <code class="docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">CliVerb]</span></code>). Host verbs in <code class="docutils literal notranslate"><span class="pre">cli_host_verbs</span></code>; story probes in <code class="docutils literal notranslate"><span class="pre">tests/stories/cli_probes</span></code>.</p></td>
+<td><p>Config-injected <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code>; verbs via <code class="docutils literal notranslate"><span class="pre">cli_verb_classes</span></code> map multibind</p></td>
+</tr>
+<tr class="row-odd"><td><p>Recipe adapters</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cli_recipe_adapter_classes</span></code> → <code class="docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">CliRecipeAdapter]</span></code> for <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Assertions</p></td>
+<td><p>Open <code class="docutils literal notranslate"><span class="pre">cli_assertion_classes</span></code> list (<code class="docutils literal notranslate"><span class="pre">kind</span></code> / <code class="docutils literal notranslate"><span class="pre">key</span></code> / <code class="docutils literal notranslate"><span class="pre">op</span></code>-like fields)</p></td>
 </tr>
 <tr class="row-odd"><td><p>Event stamps</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">StampingEventLog</span></code> over injectable <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code></p></td>
@@ -157,15 +163,23 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
 </tr>
 </tbody>
 </table>
+<p>Production verbs stay lean (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>, diagnostics,
+judge, durable IoC <code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">answer</span></code>/<code class="docutils literal notranslate"><span class="pre">inspect</span></code>/<code class="docutils literal notranslate"><span class="pre">rebuild</span></code>/<code class="docutils literal notranslate"><span class="pre">list_recipes</span></code>).
+Test-only clocks and the <code class="docutils literal notranslate"><span class="pre">probe</span></code> verb join via <code class="docutils literal notranslate"><span class="pre">TestHarnessCliConfig</span></code>
+(<code class="docutils literal notranslate"><span class="pre">tests/stories/cli_probes</span></code>). Story probes register on <code class="docutils literal notranslate"><span class="pre">cli_probe_classes</span></code>.</p>
+<p>Grow <code class="docutils literal notranslate"><span class="pre">cli_universe</span></code> nodes when stories need product surface that isn’t there
+yet — not one node per verb. If the graph never grows, stories aren’t covering
+real host interaction.</p>
 <p>Distinct from:</p>
 <ul class="simple">
-<li><p><strong>Durable generator scripts</strong> (<code class="docutils literal notranslate"><span class="pre">durable_generator_script</span></code>) — IoC start/answer/inspect (fold into CLI later)</p></li>
 <li><p><strong>Agentic Recipes</strong> — <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> soft-point catalogs (<code class="docutils literal notranslate"><span class="pre">verify_repair</span></code>, …)</p></li>
+<li><p><strong>Durable generator product API</strong> — <code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code> / host kit; CLI
+verbs drive the same session through the instrumentor</p></li>
 </ul>
 </section>
 <section id="story-layout-canonical-acceptance">
 <h2>Story layout (canonical acceptance)<a class="headerlink" href="#story-layout-canonical-acceptance" title="Link to this heading"></a></h2>
-<p><strong>All user stories are migrating here.</strong> New acceptance is <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> +
+<p><strong>All user stories migrate here.</strong> Acceptance is <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> +
 <code class="docutils literal notranslate"><span class="pre">scenarios/*.yaml</span></code>. One story may own many concise scenarios (one claim each):</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>stories/&lt;id&gt;/
   story.json
@@ -175,8 +189,25 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
   response.json          # cassette when needed
 </pre></div>
 </div>
-<p>YAML is CLI-shaped; <code class="docutils literal notranslate"><span class="pre">expect:</span></code> is test-only (hard equality). Cassette vs live is
-harness/Config (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND</span></code>, <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>, <code class="docutils literal notranslate"><span class="pre">MECHA_MODEL</span></code>), not YAML.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
+<span class="nt">commands</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">infer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Say hello.</span>
+<span class="nt">expect</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exactly</span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">event_types</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">access_check</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">graph_start</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">…</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">positive</span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cost_units</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nonempty</span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">text</span>
+</pre></div>
+</div>
+<p>Durable IoC sessions use a scenario-level <code class="docutils literal notranslate"><span class="pre">durable:</span></code> block and per-command
+<code class="docutils literal notranslate"><span class="pre">expect</span></code> / <code class="docutils literal notranslate"><span class="pre">expect_error</span></code>. Cassette vs live is harness/Config
+(<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND</span></code>, <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>, <code class="docutils literal notranslate"><span class="pre">MECHA_MODEL</span></code>), not YAML.</p>
+<p>Discovery = add a YAML under <code class="docutils literal notranslate"><span class="pre">scenarios/</span></code>. Prefer few reusable verbs + many
+scenario files over bag-ops and per-test Python.</p>
 </section>
 <section id="intent-check">
 <h2>Intent check<a class="headerlink" href="#intent-check" title="Link to this heading"></a></h2>
@@ -186,18 +217,16 @@ legacy soft expects blindly. See <code class="docutils literal notranslate"><spa
 </section>
 <section id="migration-program">
 <h2>Migration program<a class="headerlink" href="#migration-program" title="Link to this heading"></a></h2>
-<p>Convert every legacy <code class="docutils literal notranslate"><span class="pre">request.json</span></code> / <code class="docutils literal notranslate"><span class="pre">op</span></code> story onto CLI (or temporary
-<code class="docutils literal notranslate"><span class="pre">durable_generator</span></code>) YAML. Each wave adds only the CLI verb or harness assert
-needed:</p>
+<p>Convert every legacy <code class="docutils literal notranslate"><span class="pre">request.json</span></code> / <code class="docutils literal notranslate"><span class="pre">op</span></code> story onto <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> YAML. Each
+wave adds only the CLI verb, probe, or universe node needed:</p>
 <ol class="arabic simple">
 <li><p>Observability / one-shot infer (OBS-*) — done</p></li>
 <li><p>Former harness_runs / pass-through / tool-loop / cassettes / host DI /
-judge route — done (<code class="docutils literal notranslate"><span class="pre">harness_runs</span></code> runner removed)</p></li>
-<li><p>Graph execution — done (story probes + map multibind; runner removed).
-Recipe catalog next.</p></li>
+judge route — done</p></li>
+<li><p>Graph execution — done (test probes + <code class="docutils literal notranslate"><span class="pre">probe</span></code> verb)</p></li>
+<li><p>Durable IoC — done (CLI verbs; parallel harness removed)</p></li>
 <li><p>Decision plane / remaining judge ops</p></li>
 <li><p>pure_api + context/eval surface</p></li>
-<li><p>Fold durable IoC into CLI when ready</p></li>
 </ol>
 <p>When a legacy family has zero stories left, delete its op-dispatch runner.</p>
 </section>

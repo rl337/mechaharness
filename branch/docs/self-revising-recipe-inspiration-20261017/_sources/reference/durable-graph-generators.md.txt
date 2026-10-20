@@ -97,7 +97,7 @@ driver.run(
 | OpenAPI / HTTP | Long-run façade methods mirror DG-01 ops (planned; not a second architecture) |
 | CLI / TUI | Same instrumentor / soft-point seam (curses optional) — gap |
 | MCP stdio | `python -m mechaharness.mcp_graph_driver` — tools `generator_start` / `generator_resume` / `generator_inspect` / `generator_cancel` / `generator_list_recipes`. Stdio framing is newline-delimited JSON (Cursor); Content-Length is still accepted. |
-| Story scenarios | `scenario.yaml` under kind `durable_generator` — readable step script + per-step hard `expect` (tests only) |
+| Story scenarios | `kind: cli` + `durable:` session block; verbs `start`/`answer`/`inspect`/`rebuild` with per-step `expect` |
 
 Soft points are the UI seam: story fixtures and a future CLI/TUI bind the same
 guidance answers via `answer` steps; `DurableGraphGenerator` owns suspension/resume.
