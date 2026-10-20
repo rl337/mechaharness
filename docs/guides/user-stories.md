@@ -762,7 +762,7 @@ Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_t
 
 #### Validation
 
-Harness `cli` scenario `graph_template_soft_points.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` loads `binds/fan_out_aggregate.yaml` plus demoted refusal probe; hard expects on declared keys.
 
 #### Footnotes
 
@@ -1954,7 +1954,7 @@ Before a run starts, Fangore’s console must place interior pieces inside each 
 
 #### Validation
 
-Harness `cli` scenario `node_components.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` loads `binds/conversational_tool_loop.yaml`; hard expects on node-component observation keys.
 
 #### Footnotes
 
@@ -1987,7 +1987,7 @@ Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance mu
 
 #### Validation
 
-Harness `cli` scenario `recipe_namespace_tile.yaml`. Hard expects on declared observation keys.
+Harness `cli` `tile_recipe` loads `binds/verify_repair_tile.yaml`; hard expects on tiling observation keys.
 
 #### Footnotes
 

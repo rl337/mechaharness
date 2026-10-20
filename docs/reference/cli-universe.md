@@ -24,7 +24,7 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 | Event tap | `tapping_event_log` on the blessed executor path (HF-05) |
 
 Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`,
-`instantiate_recipe`, diagnostics, judge, durable IoC
+`instantiate_recipe`, `tile_recipe`, diagnostics, judge, durable IoC
 `start`/`answer`/`inspect`/`rebuild`/`list_recipes`).
 Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
 (`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
@@ -150,8 +150,14 @@ covers all catalog ids.
 | `initialize_preflight` | `fangore_insp_initialize_preflight` |
 | `produce_critique_refine` | `fangore_insp_produce_critique_refine` |
 | `safety_eval` | `taloneth_insp_safety_eval_recipes` |
+| `conversational_tool_loop` (shape) | `fangore_node_components` |
+| `fan_out_aggregate` | `fangore_graph_template_soft_points` |
+
+``tile_recipe`` loads a :class:`~mechaharness.recipe_bind.RecipeTileBind`
+(``binds/*_tile.yaml``) for namespaced multi-instance composition
+(`fangore_recipe_namespace_tile`).
 
 ``run_recipe`` remains for **execute** adapters (`harness_run`,
-`backend_describe`, `conversational_tool_loop`). Registry / evolution / tile /
+`backend_describe`, `conversational_tool_loop`). Registry / evolution /
 ``recipe_as_tool`` / traversal stories stay on test probes until they have a
 product document of their own.

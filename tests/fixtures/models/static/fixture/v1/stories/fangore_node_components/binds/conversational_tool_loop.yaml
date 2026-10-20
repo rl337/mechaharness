@@ -1,0 +1,14 @@
+# Conversational tool-loop recipe: soft points and stop contracts show as
+# node components under their parent graph nodes (not free-floating viz).
+
+name: conversational_tool_loop
+summary: Expand tool-loop so every node component has a parent node.
+goal: components
+
+soft_bindings:
+  tools_kind: conversational_tool_loop
+  inference_kind: inference
+  tool_call_kind: tool_call
+  # Story claim: three tool-loop rounds
+  max_iterations: 3
+  message_state_key: messages

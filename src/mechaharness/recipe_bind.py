@@ -199,22 +199,34 @@ def observe_instantiated_recipe(
     template: GraphTemplate,
 ) -> dict[str, Any]:
     """Structural observation for instantiate_recipe (stories + CLI)."""
-    from mechaharness.node_component import node_components_for
+    from mechaharness.node_component import NODE_COMPONENT_KINDS, node_components_for
     from mechaharness.recipe_runner import list_recipes
 
-    catalog = {row["name"] for row in list_recipes()}
+    catalog_rows = list_recipes()
+    catalog = {row["name"] for row in catalog_rows}
     in_catalog = bind.name in catalog
+    comps = node_components_for(graph, template=template)
     parents: dict[str, list[str]] = {}
-    for comp in node_components_for(graph, template=template):
+    for comp in comps:
         parents.setdefault(comp.parent_node_id, []).append(
             comp.soft_point_name or comp.kind
         )
+    kinds = {c.kind for c in comps}
     fields: dict[str, Any] = {
         "template_name": graph.template_name,
+        "template_status": graph.template_status,
+        "source_workflow_ref": graph.source_workflow_ref,
         "recipe_category": getattr(template, "category", None),
         "evolvable": list(template.evolvable_soft_point_names()),
         "component_parents": {k: sorted(v) for k, v in sorted(parents.items())},
         "in_default_catalog": in_catalog,
+        "catalog_soft_points_nonempty": all(
+            bool(row.get("soft_points")) for row in catalog_rows
+        ),
+        "all_have_parent": all(bool(c.parent_node_id) for c in comps),
+        "kinds_subset_catalog": kinds <= NODE_COMPONENT_KINDS,
+        "has_stop_contract": "stop_contract" in kinds,
+        "has_soft_point": "soft_point" in kinds,
         "summary": bind.summary,
         "soft_bindings": dict(bind.soft_bindings),
     }
@@ -266,8 +278,120 @@ def observe_instantiated_recipe(
     }
 
 
+class RecipeTileBind(BaseModel):
+    """Tile one catalog recipe under multiple instance keys (readable composition)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    summary: str = ""
+    instance_keys: list[str] = Field(min_length=1)
+    soft_bindings: dict[str, Any] = Field(default_factory=dict)
+    acceptance: list[str] = Field(default_factory=list)
+    inputs: dict[str, Any] = Field(default_factory=dict)
+
+    @classmethod
+    def from_mapping(cls, data: Mapping[str, Any]) -> RecipeTileBind:
+        return cls.model_validate(dict(data))
+
+    @classmethod
+    def from_path(cls, path: str | Path) -> RecipeTileBind:
+        file_path = Path(path)
+        data = yaml.safe_load(file_path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError(f"{path}: recipe tile bind root must be a mapping")
+        return cls.from_mapping(data)
+
+    def tile(self, registry: GraphTemplateRegistry | None = None) -> dict[str, Any]:
+        """Expand each instance key and return structural observation fields."""
+        from mechaharness.graph import ExecutionGraph
+        from mechaharness.recipe_runner import get_recipe
+
+        template = get_recipe(self.name, registry=registry)
+        # Reuse RecipeBind materialize rules for shared soft bindings.
+        seed = RecipeBind(
+            name=self.name,
+            soft_bindings=dict(self.soft_bindings),
+            acceptance=list(self.acceptance),
+            inputs=dict(self.inputs),
+        ).materialize(template)
+        parent = ExecutionGraph(goal="parent")
+        children = []
+        embeds = []
+        for key in self.instance_keys:
+            child, embed = template.tile(
+                GraphTemplateParams(
+                    goal=f"{self.name}:{key}",
+                    instance_key=str(key),
+                    soft_bindings=dict(seed.soft_bindings),
+                    acceptance=list(seed.acceptance),
+                    inputs=dict(seed.inputs),
+                ),
+                parent_node_id=f"embed_{key}",
+            )
+            children.append(child)
+            embeds.append(embed)
+            parent.add_node(embed)
+        id_sets = [set(c.nodes) for c in children]
+        overlap = (
+            bool(id_sets[0].intersection(*id_sets[1:])) if len(id_sets) > 1 else False
+        )
+        prefix_left = f"{self.name}/{self.instance_keys[0]}/"
+        return {
+            "summary": self.summary,
+            "template_name": self.name,
+            "instance_count": len(children),
+            "node_id_overlap": overlap,
+            "distinct_instance_ids": len({c.recipe_instance_id for c in children})
+            == len(children),
+            "parent_embed_kinds": [e.kind for e in embeds],
+            "namespaced_prefix_left": prefix_left,
+        }
+
+
+class TileRecipeCommand(BaseModel):
+    """CLI verb body: inline :class:`RecipeTileBind` or ``path`` to a tile file."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    path: str | None = None
+    name: str | None = None
+    summary: str = ""
+    instance_keys: list[str] = Field(default_factory=list)
+    soft_bindings: dict[str, Any] = Field(default_factory=dict)
+    acceptance: list[str] = Field(default_factory=list)
+    inputs: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _path_or_inline(self) -> TileRecipeCommand:
+        if self.path:
+            return self
+        if not self.name or not self.instance_keys:
+            raise ValueError("tile_recipe requires path= or name= with instance_keys=")
+        return self
+
+    def resolve_bind(self, *, base_dir: Path | None = None) -> RecipeTileBind:
+        if self.path:
+            file_path = Path(self.path)
+            if not file_path.is_absolute():
+                root = base_dir if base_dir is not None else Path.cwd()
+                file_path = (root / file_path).resolve()
+            return RecipeTileBind.from_path(file_path)
+        assert self.name is not None
+        return RecipeTileBind(
+            name=self.name,
+            summary=self.summary,
+            instance_keys=list(self.instance_keys),
+            soft_bindings=dict(self.soft_bindings),
+            acceptance=list(self.acceptance),
+            inputs=dict(self.inputs),
+        )
+
+
 __all__ = [
     "InstantiateRecipeCommand",
     "RecipeBind",
+    "RecipeTileBind",
+    "TileRecipeCommand",
     "observe_instantiated_recipe",
 ]

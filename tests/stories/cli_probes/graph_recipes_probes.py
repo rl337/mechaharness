@@ -26,7 +26,6 @@ from mechaharness.graph_executor import (
     NodeOutcome,
 )
 from mechaharness.graph_templates import (
-    ConversationalToolLoopTemplate,
     FanOutAggregateTemplate,
     GraphTemplateParams,
     default_graph_templates,
@@ -36,7 +35,6 @@ from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.host_kit import host_graph_executor
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.node_component import (
-    NODE_COMPONENT_KINDS,
     embed_recipe_as_tool,
     node_components_for,
     traversal_from_events,
@@ -45,20 +43,9 @@ from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
 from mechaharness.research import EvalProtocol, ResearchLab
 
 
-async def run_graph_template_soft_points(inputs: dict[str, Any]) -> dict[str, Any]:
-    request = inputs
-    registry = default_graph_templates()
-    template = registry.get(str(request["template"]))
-    assert template is not None
-    n = int(request.get("branch_count", 2))
-    graph = template.instantiate(
-        GraphTemplateParams(
-            goal=str(request.get("goal") or ""),
-            branch_payloads=[{"index": i} for i in range(n)],
-            acceptance=list(request.get("acceptance") or []),
-            source_workflow_ref=request.get("source_workflow_ref"),
-        )
-    )
+async def run_demoted_template_refused(inputs: dict[str, Any]) -> dict[str, Any]:
+    """Demoted templates refuse instantiate (companion to RecipeBind expand)."""
+    del inputs
     demoted = FanOutAggregateTemplate()
     demoted.status = "demoted"
     refused = False
@@ -66,37 +53,7 @@ async def run_graph_template_soft_points(inputs: dict[str, Any]) -> dict[str, An
         demoted.instantiate(GraphTemplateParams(goal="nope"))
     except RuntimeError:
         refused = True
-    catalog = registry.catalog()
-    soft_nonempty = all(bool(row.get("soft_points")) for row in catalog)
-    actual = {
-        "template_name": graph.template_name,
-        "template_status": graph.template_status,
-        "node_ids_include": list(graph.nodes),
-        "source_workflow_ref": graph.source_workflow_ref,
-        "catalog_soft_points_nonempty": soft_nonempty,
-        "demoted_refused": refused,
-    }
-    return actual
-
-
-async def run_node_components(inputs: dict[str, Any]) -> dict[str, Any]:
-    request = inputs
-    template = ConversationalToolLoopTemplate()
-    graph = template.instantiate(
-        GraphTemplateParams(
-            goal="components",
-            inputs={"max_iterations": int(request.get("max_iterations") or 3)},
-        )
-    )
-    comps = node_components_for(graph, template=template)
-    kinds = {c.kind for c in comps}
-    actual = {
-        "all_have_parent": all(bool(c.parent_node_id) for c in comps),
-        "kinds_subset_catalog": kinds <= NODE_COMPONENT_KINDS,
-        "has_stop_contract": "stop_contract" in kinds,
-        "has_soft_point": "soft_point" in kinds,
-    }
-    return actual
+    return {"demoted_refused": refused}
 
 
 async def run_traversal_contract(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -146,43 +103,6 @@ async def run_recipe_as_tool(inputs: dict[str, Any]) -> dict[str, Any]:
         "child_run_id_nonempty": bool(wrap.payload.get("child_run_id")),
         "child_status": wrap.payload.get("child_status"),
         "has_child_graph_component": any(c.kind == "child_graph" for c in comps),
-    }
-    return actual
-
-
-async def run_recipe_namespace_tile(inputs: dict[str, Any]) -> dict[str, Any]:
-    request = inputs
-    registry = default_graph_templates()
-    recipe_name = str(request.get("recipe") or "verify_repair")
-    template = registry.get(recipe_name)
-    assert template is not None
-    keys = list(request.get("instance_keys") or ["left", "right"])
-    parent = ExecutionGraph(goal="parent")
-    children = []
-    embeds = []
-    for key in keys:
-        child, embed = template.tile(
-            GraphTemplateParams(
-                goal=f"{recipe_name}:{key}",
-                instance_key=str(key),
-            ),
-            parent_node_id=f"embed_{key}",
-        )
-        children.append(child)
-        embeds.append(embed)
-        parent.add_node(embed)
-    id_sets = [set(c.nodes) for c in children]
-    overlap = bool(id_sets[0].intersection(*id_sets[1:])) if len(id_sets) > 1 else False
-    left = children[0]
-    prefix_left = f"{recipe_name}/{keys[0]}/"
-    assert any(nid.startswith(prefix_left) for nid in left.nodes)
-    actual = {
-        "instance_count": len(children),
-        "node_id_overlap": overlap,
-        "distinct_instance_ids": len({c.recipe_instance_id for c in children})
-        == len(children),
-        "parent_embed_kinds": [e.kind for e in embeds],
-        "namespaced_prefix_left": prefix_left,
     }
     return actual
 
@@ -496,11 +416,9 @@ async def run_evolution_ownership_split(inputs: dict[str, Any]) -> dict[str, Any
 
 
 GRAPH_RECIPES_HANDLERS: dict[str, Any] = {
-    "graph_template_soft_points": run_graph_template_soft_points,
-    "node_components": run_node_components,
+    "demoted_template_refused": run_demoted_template_refused,
     "traversal_contract": run_traversal_contract,
     "recipe_as_tool": run_recipe_as_tool,
-    "recipe_namespace_tile": run_recipe_namespace_tile,
     "recipe_registry_versions": run_recipe_registry_versions,
     "soft_point_evolution_allowlist": run_soft_point_evolution_allowlist,
     "registry_only_compose": run_registry_only_compose,

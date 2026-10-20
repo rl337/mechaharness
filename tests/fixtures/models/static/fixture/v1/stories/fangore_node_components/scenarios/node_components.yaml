@@ -1,9 +1,8 @@
+# Bind document: ../binds/conversational_tool_loop.yaml
 kind: cli
 commands:
-- probe:
-    name: node_components
-    template: conversational_tool_loop
-    max_iterations: 3
+- instantiate_recipe:
+    path: binds/conversational_tool_loop.yaml
 expect:
 - kind: 'true'
   key: all_have_parent

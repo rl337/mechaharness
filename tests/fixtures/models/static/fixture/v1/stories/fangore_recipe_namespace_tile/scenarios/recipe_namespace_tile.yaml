@@ -1,11 +1,8 @@
+# Bind document: ../binds/verify_repair_tile.yaml
 kind: cli
 commands:
-- probe:
-    name: recipe_namespace_tile
-    recipe: verify_repair
-    instance_keys:
-    - left
-    - right
+- tile_recipe:
+    path: binds/verify_repair_tile.yaml
 expect:
 - kind: equals
   key: instance_count
