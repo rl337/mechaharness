@@ -1,0 +1,24 @@
+kind: cli
+commands:
+- probe:
+    name: recipe_namespace_tile
+    recipe: verify_repair
+    instance_keys:
+    - left
+    - right
+expect:
+- kind: equals
+  key: instance_count
+  value: 2
+- kind: 'false'
+  key: node_id_overlap
+- kind: 'true'
+  key: distinct_instance_ids
+- kind: equals
+  key: parent_embed_kinds
+  value:
+  - subgraph
+  - subgraph
+- kind: equals
+  key: namespaced_prefix_left
+  value: verify_repair/left/

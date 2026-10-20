@@ -1,0 +1,37 @@
+kind: cli
+commands:
+- probe:
+    name: recipe_registry_versions
+    recipe: verify_repair
+    steps:
+    - op: add_version
+      version: '2'
+      parent_version: '1'
+    - op: promote
+      version: '2'
+    - op: rollback
+    - op: promote
+      version: '9'
+expect:
+- kind: equals
+  key: active_version
+  value: '1'
+- kind: equals
+  key: versions
+  value:
+  - '1'
+  - '2'
+- kind: equals
+  key: lineage
+  value:
+    '1': null
+    '2': '1'
+- kind: equals
+  key: evaluation_counts
+  value:
+    '1': 0
+    '2': 0
+- kind: equals
+  key: errors
+  value:
+  - promote:KeyError

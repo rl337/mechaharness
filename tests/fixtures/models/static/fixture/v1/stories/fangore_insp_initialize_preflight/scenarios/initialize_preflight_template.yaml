@@ -1,0 +1,13 @@
+kind: cli
+commands:
+- probe:
+    name: initialize_preflight_template
+    goal: preflight
+expect:
+- kind: includes
+  key: nodes_include
+  value:
+  - linkage
+  - capability_check
+  - checkpoint_compat
+  - ready

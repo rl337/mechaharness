@@ -100,6 +100,9 @@ from tests.stories.cli_probes.context_management_probes import (
 from tests.stories.cli_probes.evaluation_research_probes import (
     evaluation_research_cli_probe_classes,
 )
+from tests.stories.cli_probes.graph_recipes_probes import (
+    graph_recipes_cli_probe_classes,
+)
 from tests.stories.cli_probes.lifecycle_extensions_probes import (
     lifecycle_extensions_cli_probe_classes,
 )
@@ -326,6 +329,7 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
     probes.update(evaluation_research_cli_probe_classes())
     probes.update(lifecycle_extensions_cli_probe_classes())
     probes.update(access_authority_cli_probe_classes())
+    probes.update(graph_recipes_cli_probe_classes())
     return probes
 
 

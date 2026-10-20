@@ -1,0 +1,15 @@
+kind: cli
+commands:
+- probe:
+    name: node_components
+    template: conversational_tool_loop
+    max_iterations: 3
+expect:
+- kind: 'true'
+  key: all_have_parent
+- kind: 'true'
+  key: kinds_subset_catalog
+- kind: 'true'
+  key: has_stop_contract
+- kind: 'true'
+  key: has_soft_point

@@ -2,10 +2,10 @@
   "id": "fangore_insp_independent_review",
   "persona": "fangore",
   "title": "Review artifacts in isolated reviewer context",
-  "kind": "graph_recipes",
+  "kind": "cli",
   "narrative": "Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10[^insp-r10]. Recipe-contract coverage for personal-agent MH-PA-03; produce-critique-refine delta: `fangore_insp_produce_critique_refine`[^insp-pa-03-review].",
   "implementation": "Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce \u2192 isolated review_* \u2192 aggregate_reviews with omit_producer_reasoning and retain_disagreement.",
-  "validation": "Harness `graph_recipes` op `independent_review_template`. Soft expects isolated payload flags and two reviewers.",
+  "validation": "Harness `cli` scenario `independent_review_template.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r10",

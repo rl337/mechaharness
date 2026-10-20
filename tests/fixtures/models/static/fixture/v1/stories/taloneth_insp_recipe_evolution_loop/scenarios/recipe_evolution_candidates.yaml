@@ -1,0 +1,84 @@
+kind: cli
+commands:
+- probe:
+    name: recipe_evolution_candidates
+    summaries:
+    - recipe: produce_critique_refine
+      runs: 40
+      suggestions:
+      - soft_point: max_rounds
+        value: 3
+        support: 12
+      - soft_point: critique_prompt
+        value: be strict about unsupported claims
+        support: 9
+      - soft_point: refine_kind
+        value: custom_refine
+        support: 30
+    - recipe: independent_review
+      runs: 20
+      suggestions:
+      - soft_point: reviewer_count
+        value: 2
+        support: 7
+    - recipe: ghost_recipe
+      runs: 3
+      suggestions:
+      - soft_point: x
+        value: 1
+        support: 1
+    allowlist:
+      produce_critique_refine:
+      - max_rounds
+      - critique_prompt
+      independent_review:
+      - omit_producer_reasoning
+    objective_policy:
+      policy_id: story:gated
+      formula: gated_primary
+      component_signals:
+      - accuracy
+      gates:
+      - safe
+    scored:
+    - soft_point: max_rounds
+      value: 3
+      claims:
+        safe: fail
+        accuracy: pass
+      metrics:
+        accuracy: 0.95
+    - soft_point: critique_prompt
+      value: be strict about unsupported claims
+      claims:
+        safe: pass
+        accuracy: pass
+      metrics:
+        accuracy: 0.8
+    baseline_scalar: 0.8
+expect:
+- kind: equals
+  key: candidate_bindings
+  value:
+  - max_rounds: 3
+  - critique_prompt: be strict about unsupported claims
+- kind: equals
+  key: rejected
+  value:
+  - - refine_kind
+    - soft_point_not_evolvable:refine_kind
+  - - reviewer_count
+    - soft_point_not_allowlisted:reviewer_count
+  - - x
+    - unknown_recipe:ghost_recipe
+- kind: 'true'
+  key: deterministic
+- kind: 'false'
+  key: graphs_synthesized
+- kind: equals
+  key: selected_bindings
+  value:
+    critique_prompt: be strict about unsupported claims
+- kind: equals
+  key: selected_over_baseline
+  value: null

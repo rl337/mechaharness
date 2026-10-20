@@ -1,0 +1,43 @@
+kind: cli
+commands:
+- probe:
+    name: soft_point_evolution_allowlist
+    recipes:
+    - produce_critique_refine
+    - independent_review
+    - verify_repair
+    attempts:
+    - id: tune_prompt
+      recipe: produce_critique_refine
+      changed:
+      - critique_prompt
+      - max_rounds
+    - id: drop_isolation
+      recipe: produce_critique_refine
+      changed:
+      - omit_producer_reasoning
+    - id: more_reviewers
+      recipe: independent_review
+      changed:
+      - reviewer_count
+    - id: swap_runner
+      recipe: verify_repair
+      changed:
+      - repair_kind
+expect:
+- kind: equals
+  key: outcomes
+  value:
+    tune_prompt: allowed
+    drop_isolation: refused
+    more_reviewers: allowed
+    swap_runner: refused
+- kind: equals
+  key: evolvable
+  value:
+    produce_critique_refine:
+    - critique_prompt
+    - max_rounds
+    independent_review:
+    - reviewer_count
+    verify_repair: []

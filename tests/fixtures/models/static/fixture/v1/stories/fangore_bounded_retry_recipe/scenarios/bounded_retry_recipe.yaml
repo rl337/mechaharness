@@ -1,0 +1,25 @@
+kind: cli
+commands:
+- probe:
+    name: bounded_retry_recipe
+    goal: dispatch remote job with safe retry
+    max_attempts: 3
+expect:
+- kind: equals
+  key: template_name
+  value: bounded_retry
+- kind: includes
+  key: nodes_include
+  value:
+  - attempt
+  - classify
+  - permit_retry
+  - backoff
+  - escalate
+- kind: 'true'
+  key: attempt_repeating
+- kind: equals
+  key: max_iterations
+  value: 3
+- kind: 'true'
+  key: requires_effect_reconciliation
