@@ -1,0 +1,26 @@
+kind: cli
+durable:
+  graph: verify_repair
+  controller: session
+  store: memory
+commands:
+- start:
+    run_id: session-1
+    inputs:
+      guidance:
+      - question: Direction?
+        choices:
+        - id: a
+          label: A
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- answer:
+    choose: a
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: separate_calls

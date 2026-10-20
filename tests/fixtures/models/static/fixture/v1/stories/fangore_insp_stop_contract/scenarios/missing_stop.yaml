@@ -1,12 +1,14 @@
-# Repeating node without stop contract fails linkage
 kind: cli
-
 commands:
-  - graph_linkage_preflight:
-      check_missing_runner: false
-      check_missing_stop: true
-      check_ok_linear: false
-
+- probe:
+    name: graph_linkage_preflight
+    check_missing_runner: false
+    check_missing_stop: true
+    check_ok_linear: false
 expect:
-  missing_stop_ok: false
-  missing_stop_codes_exactly: [missing_stop_contract]
+- kind: 'false'
+  key: missing_stop_ok
+- kind: equals
+  key: missing_stop_codes_exactly
+  value:
+  - missing_stop_contract

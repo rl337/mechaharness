@@ -1,9 +1,9 @@
-# Model affinity stays inside a coherent work-loop lane
 kind: cli
-
 commands:
-  - check_model_affinity: {}
-
+- check_model_affinity: {}
 expect:
-  selected_lane: judge
-  uncalibrated_is_null: true
+- kind: equals
+  key: selected_lane
+  value: judge
+- kind: 'true'
+  key: uncalibrated_is_null

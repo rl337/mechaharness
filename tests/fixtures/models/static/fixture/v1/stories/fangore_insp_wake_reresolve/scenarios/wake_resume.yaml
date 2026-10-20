@@ -1,11 +1,13 @@
-# Wake re-resolves then resumes with matching fingerprint
 kind: cli
-
 commands:
-  - wake_reresolve_resume:
-      goal: wake
-
+- probe:
+    name: wake_reresolve_resume
+    goal: wake
 expect:
-  resolve_ok: true
-  resume_status: ok
-  fingerprint_nonempty: true
+- kind: 'true'
+  key: resolve_ok
+- kind: equals
+  key: resume_status
+  value: ok
+- kind: 'true'
+  key: fingerprint_nonempty

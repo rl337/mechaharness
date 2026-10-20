@@ -1,0 +1,21 @@
+kind: cli
+durable:
+  graph: verify_repair
+  controller: story
+  store: memory
+commands:
+- start:
+    inputs:
+      goal: trivial
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: sequence
+    value: 1
+  - kind: 'true'
+    key: recipe_listed
+  - kind: equals
+    key: guidance_yields
+    value: 0

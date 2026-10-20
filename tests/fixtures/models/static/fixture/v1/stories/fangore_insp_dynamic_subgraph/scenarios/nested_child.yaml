@@ -1,12 +1,15 @@
-# Parent embeds child subgraph via SubgraphNodeRunner
 kind: cli
-
 commands:
-  - dynamic_subgraph_nest:
-      parent_goal: parent
-      child_goal: child
-
+- probe:
+    name: dynamic_subgraph_nest
+    parent_goal: parent
+    child_goal: child
 expect:
-  status: ok
-  child_status: ok
-  child_run_id_nonempty: true
+- kind: equals
+  key: status
+  value: ok
+- kind: equals
+  key: child_status
+  value: ok
+- kind: 'true'
+  key: child_run_id_nonempty

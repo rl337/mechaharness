@@ -2,10 +2,10 @@
   "id": "taloneth_insp_scripted_driver_replay",
   "persona": "taloneth",
   "title": "Replay advisory decisions with a strict scripted driver",
-  "kind": "durable_generator",
+  "kind": "cli",
   "narrative": "Evaluation and CI need a first-class scripted driver that asserts expected yield kinds and fails when unexpected advice appears. Tracks R-IOC-REPLAY and R-IOC-OFFLINE[^insp-ioc-04].",
   "implementation": "`ScriptedDriver` / `durable_generator_host.run_soft_point_session` run start/resume with soft-point bindings and `strict_unexpected_advice`.",
-  "validation": "Harness `durable_generator` via `scenario.yaml`. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.",
+  "validation": "Harness `cli` via `scenario.yaml`. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.",
   "footnotes": [
     {
       "id": "insp-ioc-04",

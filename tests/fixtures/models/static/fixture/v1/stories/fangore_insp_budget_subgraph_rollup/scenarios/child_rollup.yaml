@@ -1,15 +1,23 @@
-# Child subgraph spend rolls into parent soft budget
 kind: cli
-
 commands:
-  - graph_budget_subgraph_rollup:
-      soft_limit: 2
-      hard_limit: null
-      node_cost: 1
-
+- probe:
+    name: graph_budget_subgraph_rollup
+    soft_limit: 2
+    hard_limit: null
+    node_cost: 1
 expect:
-  status: soft_exhausted
-  budget_spent: 2.0
-  budget_level: soft
-  error: soft_budget_exceeded
-  after_status: cancelled
+- kind: equals
+  key: status
+  value: soft_exhausted
+- kind: equals
+  key: budget_spent
+  value: 2.0
+- kind: equals
+  key: budget_level
+  value: soft
+- kind: equals
+  key: error
+  value: soft_budget_exceeded
+- kind: equals
+  key: after_status
+  value: cancelled

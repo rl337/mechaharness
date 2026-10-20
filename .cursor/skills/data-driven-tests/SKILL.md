@@ -242,7 +242,7 @@ Convert task:
 
 Persona **user stories** (`tests/fixtures/models/…/stories/`) keep narrative /
 persona fields; **execution** is app-harness YAML (`kind: cli` +
-`scenarios/*.yaml`, or `durable_generator`). Do **not** add a new kind or
+`scenarios/*.yaml`). Do **not** add a new kind or
 legacy `op` per story — see [`user-stories`](../user-stories/SKILL.md). Unit
 fixture matrices (`tests/fixtures/<domain>/`) and inline struct tables remain
 for non-persona branch coverage.

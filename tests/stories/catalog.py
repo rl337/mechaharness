@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 
 from tests.stories.scenarios.cli_scenario import load_cli_scenario
-from tests.stories.scenarios.durable_generator_scenario import load_durable_scenario
 
 FIXTURES_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "models"
 REQUIRED_STORY_FIELDS = (
@@ -221,18 +220,6 @@ def validate_story_fixtures() -> list[str]:
             )
             continue
         # App harnesses (YAML scenarios) — no request.op dispatch.
-        if kind == "durable_generator":
-            scenario_path = case.path("scenario.yaml")
-            if not scenario_path.is_file():
-                errors.append(
-                    f"{scenario_path}: missing scenario.yaml for harness {kind!r}"
-                )
-                continue
-            try:
-                load_durable_scenario(scenario_path)
-            except (ValueError, OSError) as exc:
-                errors.append(str(exc))
-            continue
         if kind == "cli":
             scenarios_dir = case.path("scenarios")
             yaml_files = (

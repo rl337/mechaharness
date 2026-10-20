@@ -1,0 +1,29 @@
+kind: cli
+commands:
+- probe:
+    name: host_kit_submit_once
+    id: resume_uncertain_with_handle
+    mode: resume_seeded
+    durable: true
+    run_id: hk-uncertain-ok
+    task_id: t1
+    seed:
+      effect_state: uncertain
+      external_handle: job-seeded-1
+      node_attempt: 1
+      node_status: running
+expect:
+- kind: equals
+  key: status
+  value: ok
+- kind: equals
+  key: dispatch_count
+  value: 0
+- kind: equals
+  key: external_handle
+  value: job-seeded-1
+- kind: equals
+  key: durability
+  value: durable
+- kind: 'true'
+  key: reconciliation_invoked

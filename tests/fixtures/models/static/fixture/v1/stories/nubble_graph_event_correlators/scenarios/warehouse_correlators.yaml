@@ -1,25 +1,49 @@
-# Graph lifecycle events carry warehouse correlators
 kind: cli
-
 commands:
-  - graph_event_correlators:
-      graph_id: corr-graph
-      goal: ship the report
-      recipe_id: verify_repair
-      recipe_version: "1"
-      authorization_epoch: 3
-      nodes: [a, b]
-
+- probe:
+    name: graph_event_correlators
+    graph_id: corr-graph
+    goal: ship the report
+    recipe_id: verify_repair
+    recipe_version: '1'
+    authorization_epoch: 3
+    nodes:
+    - a
+    - b
 expect:
-  status: ok
-  graph_events_have_graph_id: true
-  node_events_have_node_id: true
-  recipe:
-    - [verify_repair, "1"]
-  epochs: [3]
-  child_parent_run_ids: [corr-run]
-  child_nest_depths: [1]
-  node_attempt_rows:
-    - [a, 1, succeeded]
-    - [b, 1, succeeded]
-    - [nest, 1, succeeded]
+- kind: equals
+  key: status
+  value: ok
+- kind: 'true'
+  key: graph_events_have_graph_id
+- kind: 'true'
+  key: node_events_have_node_id
+- kind: equals
+  key: recipe
+  value:
+  - - verify_repair
+    - '1'
+- kind: equals
+  key: epochs
+  value:
+  - 3
+- kind: equals
+  key: child_parent_run_ids
+  value:
+  - corr-run
+- kind: equals
+  key: child_nest_depths
+  value:
+  - 1
+- kind: equals
+  key: node_attempt_rows
+  value:
+  - - a
+    - 1
+    - succeeded
+  - - b
+    - 1
+    - succeeded
+  - - nest
+    - 1
+    - succeeded

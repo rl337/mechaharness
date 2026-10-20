@@ -1,13 +1,12 @@
-# Route a node by declared capability needs
 kind: cli
-
 commands:
-  - route_capabilities:
-      capability_needs:
-        - model:reason-large
-      available_model_classes:
-        - reason-fast
-        - reason-large
-
+- route_capabilities:
+    capability_needs:
+    - model:reason-large
+    available_model_classes:
+    - reason-fast
+    - reason-large
 expect:
-  selected_model_class: reason-large
+- kind: equals
+  key: selected_model_class
+  value: reason-large

@@ -124,7 +124,11 @@ class DurableScriptStep(BaseModel):
 
 
 class DurableScript(BaseModel):
-    """Host-executable session script (no test expects)."""
+    """Host-executable session script (no test expects).
+
+    ``steps`` may be empty when the script only carries session knobs for a
+    CLI instrumentor that drives verbs one at a time.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -132,12 +136,6 @@ class DurableScript(BaseModel):
     controller: str = "host"
     store: StoreMode = "memory"
     steps: list[DurableScriptStep] = Field(default_factory=list)
-
-    @model_validator(mode="after")
-    def _nonempty_steps(self) -> DurableScript:
-        if not self.steps:
-            raise ValueError("script must declare at least one step")
-        return self
 
 
 class StepObservation(BaseModel):
@@ -192,7 +190,24 @@ class DurableInstrumentor:
         self._graph = script.graph
 
     def run(self) -> list[StepObservation]:
+        if not self.script.steps:
+            raise ValueError("script must declare at least one step to run()")
         return [self._run_step(step) for step in self.script.steps]
+
+    def start(self, body: StartBody) -> StepObservation:
+        return self._do_start(body)
+
+    def answer(self, body: AnswerBody) -> StepObservation:
+        return self._do_answer(body)
+
+    def inspect(self, body: InspectBody) -> StepObservation:
+        return self._do_inspect(body)
+
+    def rebuild(self) -> StepObservation:
+        return self._do_rebuild()
+
+    def list_recipes(self) -> StepObservation:
+        return self._do_list_recipes()
 
     def _run_step(self, step: DurableScriptStep) -> StepObservation:
         if step.start is not None:

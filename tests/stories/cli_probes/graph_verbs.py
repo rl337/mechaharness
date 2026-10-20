@@ -625,13 +625,16 @@ class TransactionalDurableResumeCommand(BaseModel):
 
     goal: str = "downstream-coding-job"
     run_id_prefix: str = "story-tdr"
-    crash_locations: list[str] = Field(min_length=1)
+    crash_location: str
 
 
 class DecisionConflictNeighborRevisitCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    scenarios: list[dict[str, Any]] = Field(min_length=1)
+    id: str
+    start: str
+    write_scopes: dict[str, list[str]]
+    clears: list[str] = Field(default_factory=list)
 
 
 def _compute_executor(registry: GraphNodeRunnerRegistry) -> GraphExecutor:
@@ -1099,106 +1102,100 @@ def _tdr_executor(
 async def run_transactional_durable_resume(
     body: TransactionalDurableResumeCommand,
 ) -> dict[str, Any]:
-    cases: dict[str, Any] = {}
     clock = MockDateTimeService(datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc))
+    location = body.crash_location
     with tempfile.TemporaryDirectory(prefix="mh-cli-tdr-") as tmp:
-        for location in body.crash_locations:
-            db = Path(tmp) / f"{location}.sqlite"
-            store = SqliteCheckpointStore(db, datetime_service=clock)
-            backend = _FakeCodingJobBackend()
-            run_id = f"{body.run_id_prefix}-{location}"
-            crash_at: CrashLocation = location  # type: ignore[assignment]
-            first = _tdr_executor(
-                store=store, backend=backend, crash=ArmedCrashProbe(crash_at)
-            )
-            graph = ExecutionGraph(goal=body.goal)
-            graph.add_node(GraphNode(id="dispatch", kind="coding_job", max_attempts=3))
-            crashed = False
-            try:
-                await first.run(
-                    graph,
-                    budget_policy=BudgetPolicy.unlimited(),
-                    run_id=run_id,
-                )
-            except InjectedProcessCrash:
-                crashed = True
-            effect_before = store.get_node_effect(run_id=run_id, node_id="dispatch")
-            boundary_before = store.latest_boundary(run_id=run_id)
-            dispatch_after_crash = backend.dispatch_count
-            resumed_exec = _tdr_executor(
-                store=store, backend=backend, crash=NoopCrashProbe()
-            )
-            resume_graph = ExecutionGraph(goal=body.goal)
-            resume_graph.add_node(
-                GraphNode(id="dispatch", kind="coding_job", max_attempts=3)
-            )
-            result = await resumed_exec.run(
-                resume_graph,
+        db = Path(tmp) / f"{location}.sqlite"
+        store = SqliteCheckpointStore(db, datetime_service=clock)
+        backend = _FakeCodingJobBackend()
+        run_id = f"{body.run_id_prefix}-{location}"
+        crash_at: CrashLocation = location  # type: ignore[assignment]
+        first = _tdr_executor(
+            store=store, backend=backend, crash=ArmedCrashProbe(crash_at)
+        )
+        graph = ExecutionGraph(goal=body.goal)
+        graph.add_node(GraphNode(id="dispatch", kind="coding_job", max_attempts=3))
+        crashed = False
+        try:
+            await first.run(
+                graph,
                 budget_policy=BudgetPolicy.unlimited(),
                 run_id=run_id,
-                resume=True,
             )
-            effect_after = store.get_node_effect(run_id=run_id, node_id="dispatch")
-            node = result.graph.nodes["dispatch"]
-            cases[location] = {
-                "crashed": crashed,
-                "status": result.status,
-                "node_status": node.status.value,
-                "dispatch_count": backend.dispatch_count,
-                "dispatch_count_after_crash": dispatch_after_crash,
-                "effect_state_before": (
-                    effect_before.state.value if effect_before else None
-                ),
-                "effect_state_after": (
-                    effect_after.state.value if effect_after else None
-                ),
-                "reconciliation_invoked": bool(
-                    result.diagnostics.get("reconciliation_invoked")
-                ),
-                "boundary_before": boundary_before,
-            }
-            store.close()
-    return {"cases_exactly": cases}
+        except InjectedProcessCrash:
+            crashed = True
+        effect_before = store.get_node_effect(run_id=run_id, node_id="dispatch")
+        boundary_before = store.latest_boundary(run_id=run_id)
+        dispatch_after_crash = backend.dispatch_count
+        resumed_exec = _tdr_executor(
+            store=store, backend=backend, crash=NoopCrashProbe()
+        )
+        resume_graph = ExecutionGraph(goal=body.goal)
+        resume_graph.add_node(
+            GraphNode(id="dispatch", kind="coding_job", max_attempts=3)
+        )
+        result = await resumed_exec.run(
+            resume_graph,
+            budget_policy=BudgetPolicy.unlimited(),
+            run_id=run_id,
+            resume=True,
+        )
+        effect_after = store.get_node_effect(run_id=run_id, node_id="dispatch")
+        node = result.graph.nodes["dispatch"]
+        out = {
+            "crashed": crashed,
+            "status": result.status,
+            "node_status": node.status.value,
+            "dispatch_count": backend.dispatch_count,
+            "dispatch_count_after_crash": dispatch_after_crash,
+            "effect_state_before": (
+                effect_before.state.value if effect_before else None
+            ),
+            "effect_state_after": (
+                effect_after.state.value if effect_after else None
+            ),
+            "reconciliation_invoked": bool(
+                result.diagnostics.get("reconciliation_invoked")
+            ),
+            "boundary_before": boundary_before,
+        }
+        store.close()
+        return out
 
 
 def run_decision_conflict_neighbor_revisit(
     body: DecisionConflictNeighborRevisitCommand,
 ) -> dict[str, Any]:
-    results: dict[str, Any] = {}
-    for scenario in body.scenarios:
-        graph = ExecutionGraph(goal=scenario["id"])
-        for node_id, scopes in scenario["write_scopes"].items():
-            graph.add_node(GraphNode(id=node_id, kind="decide", write_scopes=scopes))
-        conflicts = graph.concurrent_write_conflicts(list(scenario["write_scopes"]))
-        cleared = set(scenario.get("clears", []))
-        visited: set[str] = set()
-        queue = [scenario["start"]]
-        order: list[str] = []
-        checkpoints: list[str] = []
-        cycle_blocked: list[str] = []
-        while queue:
-            node = queue.pop(0)
-            if node in visited:
-                continue
-            order.append(node)
-            neighbors = (
-                []
-                if node in cleared
-                else neighbors_from_write_conflicts(node, conflicts)
-            )
-            step = neighbor_revisit(node, neighbors, visited=visited)
-            visited = set(step.visited)
-            queue.extend(step.revisit)
-            if step.checkpoint:
-                checkpoints.append(node)
-            if step.cycle_blocked:
-                cycle_blocked.append(node)
-        results[scenario["id"]] = {
-            "order": order,
-            "checkpoints": checkpoints,
-            "cycle_blocked": cycle_blocked,
-        }
-    return {"scenarios_exactly": results}
+    graph = ExecutionGraph(goal=body.id)
+    for node_id, scopes in body.write_scopes.items():
+        graph.add_node(GraphNode(id=node_id, kind="decide", write_scopes=scopes))
+    conflicts = graph.concurrent_write_conflicts(list(body.write_scopes))
+    cleared = set(body.clears)
+    visited: set[str] = set()
+    queue = [body.start]
+    order: list[str] = []
+    checkpoints: list[str] = []
+    cycle_blocked: list[str] = []
+    while queue:
+        node = queue.pop(0)
+        if node in visited:
+            continue
+        order.append(node)
+        neighbors = (
+            [] if node in cleared else neighbors_from_write_conflicts(node, conflicts)
+        )
+        step = neighbor_revisit(node, neighbors, visited=visited)
+        visited = set(step.visited)
+        queue.extend(step.revisit)
+        if step.checkpoint:
+            checkpoints.append(node)
+        if step.cycle_blocked:
+            cycle_blocked.append(node)
+    return {
+        "order": order,
+        "checkpoints": checkpoints,
+        "cycle_blocked": cycle_blocked,
+    }
 
 
 __all__ = [

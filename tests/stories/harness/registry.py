@@ -7,16 +7,13 @@ from tests.stories.catalog import StoryCase
 from tests.stories.harness.base import StoryHarness
 from tests.stories.harness.cli import CliHarness
 from tests.stories.harness.domains import DOMAIN_HARNESSES, KIND_TO_HARNESS_OP
-from tests.stories.harness.durable_generator import DurableGeneratorHarness
 from tests.stories.harness.pure_api import PURE_API_KIND_TO_OP, PureApiHarness
 
 _PURE = PureApiHarness()
-_DURABLE = DurableGeneratorHarness()
 _CLI = CliHarness()
 
 HARNESSES: dict[str, StoryHarness] = {
     _PURE.name: _PURE,
-    _DURABLE.name: _DURABLE,
     _CLI.name: _CLI,
 }
 for _domain in DOMAIN_HARNESSES:

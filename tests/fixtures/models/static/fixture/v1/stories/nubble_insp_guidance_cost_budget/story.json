@@ -2,10 +2,10 @@
   "id": "nubble_insp_guidance_cost_budget",
   "persona": "nubble",
   "title": "Count local steps and guidance frequency on generator runs",
-  "kind": "durable_generator",
+  "kind": "cli",
   "narrative": "Operators need to see how often a frontier driver was asked for advice versus how much local work ran, so they can optimize verified useful work per intervention. Tracks R-IOC-BUDGET[^insp-ioc-08].",
   "implementation": "`GeneratorCostCounters` on `GeneratorRunRecord` exposed via `inspect().cost` (local_steps, guidance_yields, resumes, rejected_resumes).",
-  "validation": "Harness `durable_generator` via `scenario.yaml`. Hard expects guidance_yields and resumes matching the scripted cycle.",
+  "validation": "Harness `cli` via `scenario.yaml`. Hard expects guidance_yields and resumes matching the scripted cycle.",
   "footnotes": [
     {
       "id": "insp-ioc-08",

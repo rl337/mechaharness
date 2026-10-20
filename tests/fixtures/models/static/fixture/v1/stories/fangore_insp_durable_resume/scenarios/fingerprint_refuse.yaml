@@ -1,11 +1,15 @@
-# Resume refuses when config fingerprint changes
 kind: cli
-
 commands:
-  - checkpoint_fingerprint_refuse:
-      goal: fp
-
+- probe:
+    name: checkpoint_fingerprint_refuse
+    goal: fp
 expect:
-  first_status: ok
-  resume_status: failed
-  error_code: incompatible_checkpoint_fingerprint
+- kind: equals
+  key: first_status
+  value: ok
+- kind: equals
+  key: resume_status
+  value: failed
+- kind: equals
+  key: error_code
+  value: incompatible_checkpoint_fingerprint

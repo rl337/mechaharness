@@ -1,12 +1,15 @@
-# Honest verifier qualifies; always-pass does not
 kind: cli
-
 commands:
-  - validator_qualification:
-      good_fixtures: [ok1]
-      bad_fixtures: [bad1]
-      missing_fixtures: [missing]
-
+- probe:
+    name: validator_qualification
+    good_fixtures:
+    - ok1
+    bad_fixtures:
+    - bad1
+    missing_fixtures:
+    - missing
 expect:
-  honest_qualified: true
-  weak_qualified: false
+- kind: 'true'
+  key: honest_qualified
+- kind: 'false'
+  key: weak_qualified

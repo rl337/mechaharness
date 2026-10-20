@@ -1,0 +1,32 @@
+kind: cli
+durable:
+  graph: verify_repair
+  controller: c1
+  store: shared
+commands:
+- start:
+    run_id: restart-1
+    inputs:
+      guidance:
+      - question: Still pending after restart?
+        choices:
+        - id: ok
+          label: OK
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: equals
+    key: question
+    value: Still pending after restart?
+- rebuild: {}
+- inspect: {}
+  expect:
+  - kind: equals
+    key: phase
+    value: guidance_required
+  - kind: equals
+    key: pending_question
+    value: Still pending after restart?
+  - kind: 'true'
+    key: same_request_id
