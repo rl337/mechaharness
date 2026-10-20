@@ -94,6 +94,7 @@ wave adds only the CLI verb, probe, or universe node needed:
 6. pure_api — done (library probes; runner removed)
 7. context_management — done (library probes; ``includes``/``gte`` asserts)
 8. evaluation_research — done (library probes; runner removed)
-9. access_authority / graph_recipes / lifecycle_extensions
+9. lifecycle_extensions — done (tool/graph lifecycle probes; runner removed)
+10. access_authority / graph_recipes
 
 When a legacy family has zero stories left, delete its op-dispatch runner.

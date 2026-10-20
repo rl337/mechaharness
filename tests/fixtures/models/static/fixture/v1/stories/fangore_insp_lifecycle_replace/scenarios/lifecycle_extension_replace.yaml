@@ -1,0 +1,20 @@
+kind: cli
+commands:
+- probe:
+    name: lifecycle_extension_replace
+    prompt: Write a.txt
+    grants:
+    - core:fs.write
+    tool_calls:
+    - id: '1'
+      name: write_file
+      arguments:
+        path: a.txt
+expect:
+- kind: equals
+  key: tool_result
+  value: 'hand-off: skipped write'
+- kind: 'true'
+  key: applied_replace
+- kind: 'false'
+  key: default_ran

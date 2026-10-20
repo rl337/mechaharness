@@ -1,25 +1,19 @@
-"""Lifecycle extension story runners."""
+"""CLI probes for former ``lifecycle_extensions`` stories."""
 
 from __future__ import annotations
 
 from typing import Any
 
+from pydantic import BaseModel, ConfigDict
+
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.core.access import (
-    Ability,
-    AccessPolicy,
-    FsWrite,
-    GraphExecute,
-)
+from mechaharness.cli_verb import CliProbe
+from mechaharness.core.access import Ability, AccessPolicy, FsWrite, GraphExecute
 from mechaharness.core.events import InMemoryEventLog
 from mechaharness.core.types import ChatMessage, Role, ToolCall
 from mechaharness.di import MechaHarnessConfig, get_injector
-from mechaharness.graph import (
-    ExecutionGraph,
-    GraphNode,
-    NodeStatus,
-)
+from mechaharness.graph import ExecutionGraph, GraphNode, NodeStatus
 from mechaharness.graph_executor import (
     CallableGraphNodeRunner,
     GraphExecutor,
@@ -45,10 +39,11 @@ from mechaharness.lifecycle_extension import (
 )
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
-from tests.stories.backend import StoryBackend
-from tests.stories.catalog import StoryCase
-from tests.stories.runners._support import StoryRunner, _assert_expect
 from tests.support.di import make_harness
+
+
+class LifecycleParams(BaseModel):
+    model_config = ConfigDict(extra="allow")
 
 
 class _WatchA(LifecycleExtension):
@@ -146,20 +141,18 @@ def _lifecycle_write_registry() -> ToolRegistry:
     return registry
 
 
-async def _run_lifecycle_tool_story(
-    case: StoryCase,
+async def _run_lifecycle_tool(
+    inputs: dict[str, Any],
     *,
     extensions: list[LifecycleExtension],
 ) -> dict[str, Any]:
-    request = case.load_json("request.json")
-    response = case.load_json("response.json")
     tool_calls = [
         ToolCall(
             id=tc["id"],
             name=tc["name"],
             arguments=tc.get("arguments") or {},
         )
-        for tc in response.get("tool_calls", [])
+        for tc in inputs.get("tool_calls") or []
     ]
     inference = ScriptedInference(
         [
@@ -168,7 +161,7 @@ async def _run_lifecycle_tool_story(
         ]
     )
     log = InMemoryEventLog()
-    grants = list(request.get("grants", [FsWrite]))
+    grants = list(inputs.get("grants", [FsWrite]))
     result = await make_harness(
         inference,
         tools=_lifecycle_write_registry(),
@@ -178,14 +171,13 @@ async def _run_lifecycle_tool_story(
         access_policy=AccessPolicy(grants=grants),
         lifecycle_extensions=LifecycleExtensionRegistry(extensions),
         capability_envelope=CapabilityEnvelope.from_grants(grants),
-    ).run(request.get("prompt", "write"))
+    ).run(str(inputs.get("prompt") or "write"))
     rid = result.events[0].run_id if result.events else None
     ext_events = [
         e for e in log.query(run_id=rid) if e.type == "core:extension_applied"
     ]
     tool_msgs = [m.content or "" for m in result.messages if m.role == Role.TOOL]
     tool_result = tool_msgs[0] if tool_msgs else ""
-    # Mutative flags / default_ran are taken from before_tool events only.
     before_events = [
         e for e in ext_events if e.payload.get("boundary") == "core:before_tool"
     ]
@@ -199,74 +191,48 @@ async def _run_lifecycle_tool_story(
         "applied_rewrite": any(bool(e.payload.get("applied_rewrite")) for e in focus),
         "applied_block": any(bool(e.payload.get("applied_block")) for e in focus),
         "applied_replace": any(bool(e.payload.get("applied_replace")) for e in focus),
-        "tool_result_contains": tool_result,
+        "tool_result": tool_result,
     }
 
 
-async def _run_lifecycle_extension_observe(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    expect = case.load_json("expect.json")
-    actual = await _run_lifecycle_tool_story(case, extensions=[_WatchA(), _WatchB()])
-    # Also ensure AfterTool observers are optional; before-tool order is the claim.
-    _assert_expect(
-        {
-            "extension_ids": actual["extension_ids"],
-            "orders": actual["orders"],
-            "default_ran": actual["default_ran"],
-            "tool_result_contains": actual["tool_result_contains"],
-        },
-        expect,
-    )
+async def run_lifecycle_extension_observe(inputs: dict[str, Any]) -> dict[str, Any]:
+    actual = await _run_lifecycle_tool(inputs, extensions=[_WatchA(), _WatchB()])
+    return {
+        "extension_ids": actual["extension_ids"],
+        "orders": actual["orders"],
+        "default_ran": actual["default_ran"],
+        "tool_result": actual["tool_result"],
+    }
 
 
-async def _run_lifecycle_extension_rewrite(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    expect = case.load_json("expect.json")
-    actual = await _run_lifecycle_tool_story(case, extensions=[_SandboxRewrite()])
-    _assert_expect(
-        {
-            "tool_result_contains": actual["tool_result_contains"],
-            "applied_rewrite": actual["applied_rewrite"],
-            "default_ran": actual["default_ran"],
-        },
-        expect,
-    )
+async def run_lifecycle_extension_rewrite(inputs: dict[str, Any]) -> dict[str, Any]:
+    actual = await _run_lifecycle_tool(inputs, extensions=[_SandboxRewrite()])
+    return {
+        "tool_result": actual["tool_result"],
+        "applied_rewrite": actual["applied_rewrite"],
+        "default_ran": actual["default_ran"],
+    }
 
 
-async def _run_lifecycle_extension_block(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    expect = case.load_json("expect.json")
-    actual = await _run_lifecycle_tool_story(case, extensions=[_BlockWrite()])
-    _assert_expect(
-        {
-            "tool_result_contains": actual["tool_result_contains"],
-            "applied_block": actual["applied_block"],
-            "default_ran": actual["default_ran"],
-        },
-        expect,
-    )
+async def run_lifecycle_extension_block(inputs: dict[str, Any]) -> dict[str, Any]:
+    actual = await _run_lifecycle_tool(inputs, extensions=[_BlockWrite()])
+    return {
+        "tool_result": actual["tool_result"],
+        "applied_block": actual["applied_block"],
+        "default_ran": actual["default_ran"],
+    }
 
 
-async def _run_lifecycle_extension_replace(case: StoryCase, backend: StoryBackend) -> None:
-    del backend
-    expect = case.load_json("expect.json")
-    actual = await _run_lifecycle_tool_story(case, extensions=[_ReplaceWrite()])
-    _assert_expect(
-        {
-            "tool_result_contains": actual["tool_result_contains"],
-            "applied_replace": actual["applied_replace"],
-            "default_ran": actual["default_ran"],
-        },
-        expect,
-    )
+async def run_lifecycle_extension_replace(inputs: dict[str, Any]) -> dict[str, Any]:
+    actual = await _run_lifecycle_tool(inputs, extensions=[_ReplaceWrite()])
+    return {
+        "tool_result": actual["tool_result"],
+        "applied_replace": actual["applied_replace"],
+        "default_ran": actual["default_ran"],
+    }
 
 
-async def _run_lifecycle_extension_graph_observe(
-    case: StoryCase, backend: StoryBackend
-) -> None:
-    del backend
-    request = case.load_json("request.json")
-    expect = case.load_json("expect.json")
+async def run_lifecycle_extension_graph_observe(inputs: dict[str, Any]) -> dict[str, Any]:
     log = InMemoryEventLog()
 
     async def ok(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
@@ -297,32 +263,61 @@ async def _run_lifecycle_extension_graph_observe(
             return LifecycleExtensionRegistry([_GraphWatch()])
 
     executor = get_injector(Cfg()).inject(GraphExecutor)
-    graph = ExecutionGraph(goal=str(request.get("goal") or "lifecycle"))
+    graph = ExecutionGraph(goal=str(inputs.get("goal") or "lifecycle"))
     graph.add_node(GraphNode(id="a", kind="compute"))
     result = await executor.run(
         graph, budget_policy=BudgetPolicy.unlimited(), run_id="lifecycle-graph"
     )
     ext_events = [
-        e for e in log.query(run_id="lifecycle-graph") if e.type == "core:extension_applied"
+        e
+        for e in log.query(run_id="lifecycle-graph")
+        if e.type == "core:extension_applied"
     ]
     before = next(
-        (e for e in ext_events if e.payload.get("boundary") == "core:before_graph_node"),
+        (
+            e
+            for e in ext_events
+            if e.payload.get("boundary") == "core:before_graph_node"
+        ),
         None,
     )
-    actual = {
+    return {
         "graph_status": result.status,
         "boundary": before.payload.get("boundary") if before else None,
         "extension_id": before.payload.get("extension_id") if before else None,
         "default_ran": bool(before.payload.get("default_ran")) if before else False,
     }
-    _assert_expect(actual, expect)
 
 
-
-RUNNERS: dict[str, StoryRunner] = {
-    "lifecycle_extension_observe": _run_lifecycle_extension_observe,
-    "lifecycle_extension_rewrite": _run_lifecycle_extension_rewrite,
-    "lifecycle_extension_block": _run_lifecycle_extension_block,
-    "lifecycle_extension_replace": _run_lifecycle_extension_replace,
-    "lifecycle_extension_graph_observe": _run_lifecycle_extension_graph_observe,
+LIFECYCLE_HANDLERS: dict[str, Any] = {
+    "lifecycle_extension_observe": run_lifecycle_extension_observe,
+    "lifecycle_extension_rewrite": run_lifecycle_extension_rewrite,
+    "lifecycle_extension_block": run_lifecycle_extension_block,
+    "lifecycle_extension_replace": run_lifecycle_extension_replace,
+    "lifecycle_extension_graph_observe": run_lifecycle_extension_graph_observe,
 }
+
+
+def _lifecycle_probe(name: str, fn: Any) -> type[CliProbe]:
+    class _P(CliProbe):
+        async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+            del runtime
+            assert isinstance(params, LifecycleParams)
+            return await fn(params.model_dump())
+
+    _P.name = name
+    _P.params_model = LifecycleParams
+    _P.__name__ = f"{name}_probe"
+    _P.__qualname__ = _P.__name__
+    return _P
+
+
+def lifecycle_extensions_cli_probe_classes() -> dict[str, type[CliProbe]]:
+    return {name: _lifecycle_probe(name, fn) for name, fn in LIFECYCLE_HANDLERS.items()}
+
+
+__all__ = [
+    "LIFECYCLE_HANDLERS",
+    "LifecycleParams",
+    "lifecycle_extensions_cli_probe_classes",
+]
