@@ -235,7 +235,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id8">
 <h4>Validation<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">coordination_cost</span></code>. Soft expects branch_count.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">coordination_cost.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id9">
 <h4>Footnotes<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
@@ -265,7 +265,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id16">
 <h4>Validation<a class="headerlink" href="#id16" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">environment_delta</span></code>. Soft expects reconstructed cwd.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">environment_delta.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id17">
 <h4>Footnotes<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
@@ -295,7 +295,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id24">
 <h4>Validation<a class="headerlink" href="#id24" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenarios/session.yaml</span></code>. Hard expects guidance_yields and resumes matching the scripted cycle.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code>. Hard expects guidance_yields and resumes matching the scripted cycle.</p>
 </section>
 <section id="id25">
 <h4>Footnotes<a class="headerlink" href="#id25" title="Link to this heading"></a></h4>
@@ -355,7 +355,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id42">
 <h4>Validation<a class="headerlink" href="#id42" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">resume_cost</span></code>. Soft expects rebuild_tokens.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">resume_cost.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id43">
 <h4>Footnotes<a class="headerlink" href="#id43" title="Link to this heading"></a></h4>
@@ -687,7 +687,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id117">
 <h4>Validation<a class="headerlink" href="#id117" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">decision_plane_model_policy</span></code>. Soft expects soft point present, bound model_ref on ask payload, no param_count field on recipe describe.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">model_soft_point.yaml</span></code>. Hard expects decision_model soft point.</p>
 </section>
 <section id="id118">
 <h4>Footnotes<a class="headerlink" href="#id118" title="Link to this heading"></a></h4>
@@ -702,7 +702,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id124">
 <h4>Validation<a class="headerlink" href="#id124" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">decision_plane_policy</span></code>. Soft expects single_batch_invocation, final_action billing on high confidence, escalate on low confidence and on invalid team, escalation_route host_policy.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenarios <code class="docutils literal notranslate"><span class="pre">accept_billing.yaml</span></code> / <code class="docutils literal notranslate"><span class="pre">low_confidence.yaml</span></code> / <code class="docutils literal notranslate"><span class="pre">invalid_team.yaml</span></code>.</p>
 </section>
 <section id="id125">
 <h4>Footnotes<a class="headerlink" href="#id125" title="Link to this heading"></a></h4>
@@ -717,7 +717,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id129">
 <h4>Validation<a class="headerlink" href="#id129" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">decision_plane_projection</span></code>. Soft expects projection keys, facts fingerprint present, and no_model_invocation true. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_plane_runtime.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">project_state.yaml</span></code>. Hard expects projection without secrets.</p>
 </section>
 <section id="id130">
 <h4>Footnotes<a class="headerlink" href="#id130" title="Link to this heading"></a></h4>
@@ -732,7 +732,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id132">
 <h4>Validation<a class="headerlink" href="#id132" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">decision_plane_recipe</span></code>. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>. Runtime DP paths: see sibling decision_plane_* stories.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">template_shape.yaml</span></code>. Hard expects decision_plane template shape.</p>
 </section>
 <section id="id133">
 <h4>Footnotes<a class="headerlink" href="#id133" title="Link to this heading"></a></h4>
@@ -750,7 +750,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id136">
 <h4>Validation<a class="headerlink" href="#id136" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">decision_plane_shadow</span></code>. Soft expects production_action set, shadow_controls_execution false, both_outcomes_recorded true, agreement bool.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">shadow_compare.yaml</span></code>. Hard expects shadow does not control execution.</p>
 </section>
 <section id="id137">
 <h4>Footnotes<a class="headerlink" href="#id137" title="Link to this heading"></a></h4>
@@ -765,7 +765,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id141">
 <h4>Validation<a class="headerlink" href="#id141" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">decision_plane_telemetry</span></code>. Soft expects schema ids, fingerprints, final_action, no raw_body field, optional latency_ms.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">telemetry_fields.yaml</span></code>. Hard expects telemetry fields without raw body.</p>
 </section>
 <section id="id142">
 <h4>Footnotes<a class="headerlink" href="#id142" title="Link to this heading"></a></h4>
@@ -781,7 +781,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id144">
 <h4>Validation<a class="headerlink" href="#id144" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">decision_surface_reject</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_decision_surface_reject</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">reject_invalid.yaml</span></code>. Hard expects rules/invalid rejection.</p>
 </section>
 </section>
 <section id="fangore-derived-memory-rebuild-derived-memory-without-letting-rank-invent-authority">
@@ -1122,7 +1122,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id236">
 <h4>Validation<a class="headerlink" href="#id236" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenarios/session.yaml</span></code>. Hard expects start advice_requested, resume completed, distinct sequences.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code>. Hard expects start advice_requested, resume completed, distinct sequences.</p>
 </section>
 <section id="id237">
 <h4>Footnotes<a class="headerlink" href="#id237" title="Link to this heading"></a></h4>
@@ -1137,7 +1137,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id240">
 <h4>Validation<a class="headerlink" href="#id240" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenarios/session.yaml</span></code>. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_durable_graph_generator.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code>. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_durable_graph_generator.py</span></code>.</p>
 </section>
 <section id="id241">
 <h4>Footnotes<a class="headerlink" href="#id241" title="Link to this heading"></a></h4>
@@ -1227,7 +1227,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id265">
 <h4>Validation<a class="headerlink" href="#id265" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">exit_clean_state</span></code>. Soft expects ok true.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">exit_clean_state.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id266">
 <h4>Footnotes<a class="headerlink" href="#id266" title="Link to this heading"></a></h4>
@@ -1257,7 +1257,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id273">
 <h4>Validation<a class="headerlink" href="#id273" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">fan_in_policy</span></code>. Soft expects quorum acceptance true.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">fan_in_policy.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id274">
 <h4>Footnotes<a class="headerlink" href="#id274" title="Link to this heading"></a></h4>
@@ -1287,7 +1287,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id281">
 <h4>Validation<a class="headerlink" href="#id281" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenarios/session.yaml</span></code>. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code>. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.</p>
 </section>
 <section id="id282">
 <h4>Footnotes<a class="headerlink" href="#id282" title="Link to this heading"></a></h4>
@@ -1317,7 +1317,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id290">
 <h4>Validation<a class="headerlink" href="#id290" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenarios/session.yaml</span></code>. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code>. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.</p>
 </section>
 <section id="id291">
 <h4>Footnotes<a class="headerlink" href="#id291" title="Link to this heading"></a></h4>
@@ -1332,7 +1332,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id294">
 <h4>Validation<a class="headerlink" href="#id294" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenarios/session.yaml</span></code>. Hard expects duplicate key same sequence and stale rejection.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code>. Hard expects duplicate key same sequence and stale rejection.</p>
 </section>
 <section id="id295">
 <h4>Footnotes<a class="headerlink" href="#id295" title="Link to this heading"></a></h4>
@@ -1347,7 +1347,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id298">
 <h4>Validation<a class="headerlink" href="#id298" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenarios/session.yaml</span></code>. Hard expects identical pending question and request_id after rehydrate.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code>. Hard expects identical pending question and request_id after rehydrate.</p>
 </section>
 <section id="id299">
 <h4>Footnotes<a class="headerlink" href="#id299" title="Link to this heading"></a></h4>
@@ -1362,7 +1362,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id304">
 <h4>Validation<a class="headerlink" href="#id304" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">handoff_record</span></code>. Hard expects next_action, goals, exclusions, and verdict kind round-tripped as typed fields.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">handoff_record.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id305">
 <h4>Footnotes<a class="headerlink" href="#id305" title="Link to this heading"></a></h4>
@@ -1569,7 +1569,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id356">
 <h4>Validation<a class="headerlink" href="#id356" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">loop_health</span></code>. Soft expects wind_down true.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">loop_health.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id357">
 <h4>Footnotes<a class="headerlink" href="#id357" title="Link to this heading"></a></h4>
@@ -1584,7 +1584,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id360">
 <h4>Validation<a class="headerlink" href="#id360" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">operation_compensation</span></code>. Soft expects idempotent true.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">operation_compensation.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id361">
 <h4>Footnotes<a class="headerlink" href="#id361" title="Link to this heading"></a></h4>
@@ -1720,7 +1720,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id398">
 <h4>Validation<a class="headerlink" href="#id398" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">sparse_advisor</span></code>. Soft expects: first consultation returns guidance; second blocked by budget; observation recorded. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">sparse_advisor.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id399">
 <h4>Footnotes<a class="headerlink" href="#id399" title="Link to this heading"></a></h4>
@@ -1825,7 +1825,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id427">
 <h4>Validation<a class="headerlink" href="#id427" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">verification_outcome</span></code>. Soft expects: answer without verification stays <code class="docutils literal notranslate"><span class="pre">answer_generated</span></code>; verification pass yields <code class="docutils literal notranslate"><span class="pre">complete</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_inspiration_primitives.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">verification_outcome.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id428">
 <h4>Footnotes<a class="headerlink" href="#id428" title="Link to this heading"></a></h4>
@@ -1855,7 +1855,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id437">
 <h4>Validation<a class="headerlink" href="#id437" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">wip_policy</span></code>. Soft expects allow then deny when scope saturated.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">wip_policy.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id438">
 <h4>Footnotes<a class="headerlink" href="#id438" title="Link to this heading"></a></h4>
@@ -1870,7 +1870,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id443">
 <h4>Validation<a class="headerlink" href="#id443" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">action_safety_judgment</span></code>. Soft expects: delete without grant denied despite low semantic risk; granted read with high risk escalates to review; granted read with low risk allows; semantic path never elevates grants.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenarios per action safety case.</p>
 </section>
 <section id="id444">
 <h4>Footnotes<a class="headerlink" href="#id444" title="Link to this heading"></a></h4>
@@ -1885,7 +1885,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id448">
 <h4>Validation<a class="headerlink" href="#id448" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">citation_support_judgment</span></code>. Soft expects: matching claim verified; contradicted and unavailable never verified; low confidence escalates without verifying.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenarios per citation case. Hard expects claim_verified / escalate.</p>
 </section>
 <section id="id449">
 <h4>Footnotes<a class="headerlink" href="#id449" title="Link to this heading"></a></h4>
@@ -1900,7 +1900,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id453">
 <h4>Validation<a class="headerlink" href="#id453" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">context_budget_judgment</span></code>. Soft expects: high-trust pack within budget; stale and low-trust skipped; injection candidate excluded; missing scores fall back without exceeding budget.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenarios per context budget case.</p>
 </section>
 <section id="id454">
 <h4>Footnotes<a class="headerlink" href="#id454" title="Link to this heading"></a></h4>
@@ -1915,7 +1915,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id457">
 <h4>Validation<a class="headerlink" href="#id457" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">requirements_gap_judgment</span></code>. Soft expects: isolated review template present; gap and missing-crash-fact paths escalate to request_tests; approve-without-gap still not marked correct.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenarios for requirements gap outcomes + template shape.</p>
 </section>
 <section id="id458">
 <h4>Footnotes<a class="headerlink" href="#id458" title="Link to this heading"></a></h4>
@@ -1930,7 +1930,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id461">
 <h4>Validation<a class="headerlink" href="#id461" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">task_route_judgment</span></code>. Soft expects: simple tasks take local_small; high complexity forces frontier; invalid and low-confidence escalate.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenarios per task route case.</p>
 </section>
 <section id="id462">
 <h4>Footnotes<a class="headerlink" href="#id462" title="Link to this heading"></a></h4>
@@ -2101,7 +2101,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id506">
 <h4>Validation<a class="headerlink" href="#id506" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">decision_plane_shadow_compare</span></code>. Soft expects agreement false when answers differ, unavailable_candidate stays unavailable, telemetry has shadow_action.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenarios <code class="docutils literal notranslate"><span class="pre">disagree.yaml</span></code> / <code class="docutils literal notranslate"><span class="pre">candidate_unavailable.yaml</span></code>.</p>
 </section>
 <section id="id507">
 <h4>Footnotes<a class="headerlink" href="#id507" title="Link to this heading"></a></h4>
@@ -2117,7 +2117,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id509">
 <h4>Validation<a class="headerlink" href="#id509" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">fixture_judge_batch</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_fixture_judge_batch</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_judge.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">batch_answers.yaml</span></code>. Hard expects answer count, errors, and answer ids.</p>
 </section>
 </section>
 <section id="taloneth-insp-component-ablation-ablate-harness-components-against-a-matched-corpus">
@@ -2144,7 +2144,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id517">
 <h4>Validation<a class="headerlink" href="#id517" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">specification_debt</span></code>. Hard expects a captured record that requires review and links the promotion, a pending count that only drops after approval, and refusal of blank corrections. Unit tests: <code class="docutils literal notranslate"><span class="pre">tests/test_specification_debt.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">specification_debt.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id518">
 <h4>Footnotes<a class="headerlink" href="#id518" title="Link to this heading"></a></h4>
@@ -2309,7 +2309,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id565">
 <h4>Validation<a class="headerlink" href="#id565" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">harness_health</span></code>. Soft expects needs_cleanup true.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">harness_health.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id566">
 <h4>Footnotes<a class="headerlink" href="#id566" title="Link to this heading"></a></h4>
@@ -2399,7 +2399,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id592">
 <h4>Validation<a class="headerlink" href="#id592" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">pure_api</span></code> op <code class="docutils literal notranslate"><span class="pre">rule_promotion</span></code>. Soft expects stage hard.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">rule_promotion.yaml</span></code>. Hard expects on declared observation keys.</p>
 </section>
 <section id="id593">
 <h4>Footnotes<a class="headerlink" href="#id593" title="Link to this heading"></a></h4>
@@ -2459,7 +2459,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id608">
 <h4>Validation<a class="headerlink" href="#id608" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenarios/session.yaml</span></code>. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> via <code class="docutils literal notranslate"><span class="pre">scenario.yaml</span></code>. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.</p>
 </section>
 <section id="id609">
 <h4>Footnotes<a class="headerlink" href="#id609" title="Link to this heading"></a></h4>
@@ -2490,7 +2490,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id617">
 <h4>Validation<a class="headerlink" href="#id617" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">offline_decision_export</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_offline_decision_export</span></code>. Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_decision_log.py</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">export_train.yaml</span></code>. Hard expects export lineage and no outcome leak.</p>
 </section>
 </section>
 <section id="taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals">
@@ -2503,7 +2503,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id620">
 <h4>Validation<a class="headerlink" href="#id620" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> op <code class="docutils literal notranslate"><span class="pre">policy_replay</span></code> → <code class="docutils literal notranslate"><span class="pre">_run_policy_replay</span></code>. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">replay_allow.yaml</span></code>. Hard expects verdict kind.</p>
 </section>
 <section id="id621">
 <h4>Footnotes<a class="headerlink" href="#id621" title="Link to this heading"></a></h4>
