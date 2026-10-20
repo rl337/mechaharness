@@ -1,0 +1,21 @@
+# Final-test gate (MH-SR-07): promotion needs a passing held-out result.
+
+plan: final_test_gate
+summary: Lab and registry promote only when held_out+passed; pointer stays at v1 after refusals.
+recipe: verify_repair
+
+attempts:
+- id: missing
+  final_test: null
+- id: not_held_out
+  final_test:
+    held_out: false
+    passed: true
+- id: held_out_failed
+  final_test:
+    held_out: true
+    passed: false
+- id: held_out_passed
+  final_test:
+    held_out: true
+    passed: true
