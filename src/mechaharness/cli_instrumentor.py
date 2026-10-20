@@ -63,7 +63,7 @@ from mechaharness.host_kit import host_graph_executor, tapping_event_log
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
 from mechaharness.node_component import traversal_from_events
-from mechaharness.recipe_bind import InstantiateRecipeCommand
+from mechaharness.recipe_bind import InstantiateRecipeCommand, TileRecipeCommand
 from mechaharness.tools.base import Tool, ToolRegistry
 
 
@@ -548,6 +548,17 @@ class CliInstrumentor:
             recipe_in_catalog=bool(observed["recipe_in_catalog"]),
             subgraph_node_ids=list(observed["subgraph_node_ids"]),
             fields=dict(observed["fields"]),
+        )
+
+    async def tile_recipe(self, body: TileRecipeCommand) -> CliStepResult:
+        """:class:`~mechaharness.recipe_bind.RecipeTileBind` → tiled observation."""
+        tile = body.resolve_bind(base_dir=self._bind_base_dir)
+        fields = tile.tile()
+        return CliStepResult(
+            verb="tile_recipe",
+            status="ok",
+            clock_iso=self._datetime.now_utc_iso(),
+            fields=fields,
         )
 
     def _set_clock(self, at: str) -> None:

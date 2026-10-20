@@ -38,7 +38,7 @@ from mechaharness.judgement_policy import (
     JudgementThreshold,
     decide,
 )
-from mechaharness.recipe_bind import InstantiateRecipeCommand
+from mechaharness.recipe_bind import InstantiateRecipeCommand, TileRecipeCommand
 
 
 class InferVerb(CliVerb):
@@ -66,13 +66,23 @@ class RunRecipeVerb(CliVerb):
 
 
 class InstantiateRecipeVerb(CliVerb):
-    """Expand a strict RecipeBind (inline or path) into a concrete graph."""
+    """Expand a RecipeBind (inline or path) into a concrete graph."""
 
     name = "instantiate_recipe"
     params_model = InstantiateRecipeCommand
 
     async def run(self, params: BaseModel, runtime: Any) -> Any:
         return await runtime.instantiate_recipe(params)
+
+
+class TileRecipeVerb(CliVerb):
+    """Tile a catalog recipe under multiple instance keys."""
+
+    name = "tile_recipe"
+    params_model = TileRecipeCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> Any:
+        return await runtime.tile_recipe(params)
 
 
 class JudgeRouteCommand(BaseModel):
@@ -209,6 +219,7 @@ def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
         ToolLoopVerb.name: ToolLoopVerb,
         RunRecipeVerb.name: RunRecipeVerb,
         InstantiateRecipeVerb.name: InstantiateRecipeVerb,
+        TileRecipeVerb.name: TileRecipeVerb,
         JudgeRouteVerb.name: JudgeRouteVerb,
         ReplayModelInputVerb.name: ReplayModelInputVerb,
         RouteCapabilitiesVerb.name: RouteCapabilitiesVerb,
@@ -231,6 +242,7 @@ __all__ = [
     "RouteCapabilitiesVerb",
     "RunRecipeVerb",
     "ShadowDecisionBackendsVerb",
+    "TileRecipeVerb",
     "ToolLoopVerb",
     "default_cli_verb_classes",
 ]

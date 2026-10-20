@@ -1,0 +1,8 @@
+# Tile verify_repair twice under distinct instance keys so node ids do not collide.
+# Readable composition: left/ and right/ namespaces under the parent embeds.
+
+name: verify_repair
+summary: Two namespaced verify_repair tiles under one parent plan.
+instance_keys:
+- left
+- right

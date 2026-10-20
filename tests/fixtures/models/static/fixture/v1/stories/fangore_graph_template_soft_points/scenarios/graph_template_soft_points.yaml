@@ -1,31 +1,30 @@
+# Bind document: ../binds/fan_out_aggregate.yaml
+# Demoted templates still refuse instantiate (library probe).
 kind: cli
 commands:
+- instantiate_recipe:
+    path: binds/fan_out_aggregate.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: fan_out_aggregate
+  - kind: equals
+    key: template_status
+    value: active
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - plan
+    - branch_0
+    - branch_1
+    - reduce
+  - kind: equals
+    key: source_workflow_ref
+    value: host:workflows/compare_v1
+  - kind: 'true'
+    key: catalog_soft_points_nonempty
 - probe:
-    name: graph_template_soft_points
-    template: fan_out_aggregate
-    goal: compare drafts
-    branch_count: 2
-    acceptance:
-    - merged
-    source_workflow_ref: host:workflows/compare_v1
-expect:
-- kind: equals
-  key: template_name
-  value: fan_out_aggregate
-- kind: equals
-  key: template_status
-  value: active
-- kind: includes
-  key: node_ids_include
-  value:
-  - plan
-  - branch_0
-  - branch_1
-  - reduce
-- kind: equals
-  key: source_workflow_ref
-  value: host:workflows/compare_v1
-- kind: 'true'
-  key: catalog_soft_points_nonempty
-- kind: 'true'
-  key: demoted_refused
+    name: demoted_template_refused
+  expect:
+  - kind: 'true'
+    key: demoted_refused
