@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import BaseModel, ConfigDict
+
 from mechaharness.budget import BudgetPolicy
+from mechaharness.cli_verb import CliProbe
 from mechaharness.core.access import (
     GraphExecute,
 )
@@ -45,9 +48,6 @@ from mechaharness.node_component import (
 )
 from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
 from mechaharness.research import EvalProtocol, ResearchLab
-from pydantic import BaseModel, ConfigDict
-
-from mechaharness.cli_verb import CliProbe
 
 
 async def run_graph_template_soft_points(inputs: dict[str, Any]) -> dict[str, Any]:

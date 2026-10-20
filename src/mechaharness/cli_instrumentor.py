@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel, ConfigDict, Field
 from pyiv.time import DateTimeService, MockDateTimeService
@@ -322,7 +322,7 @@ class CliInstrumentor:
         self._durable_script = DurableScript(
             graph=graph,
             controller=controller,
-            store=store,  # type: ignore[arg-type]
+            store=store,
             steps=[],
         )
         self._durable = DurableInstrumentor(self._durable_script)
@@ -519,7 +519,7 @@ class CliInstrumentor:
             raise KeyError(
                 f"run_recipe has no adapter for {body.name!r}; known: {known}"
             )
-        return await adapter.run(body, self)
+        return cast(CliStepResult, await adapter.run(body, self))
 
     def _set_clock(self, at: str) -> None:
         dts = self._datetime
