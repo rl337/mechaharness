@@ -1,0 +1,37 @@
+kind: cli
+commands:
+- probe:
+    name: effect_revalidation_check
+    now: '2026-10-18T12:00:00Z'
+    envelope:
+      grants:
+      - core:graph.execute
+      - core:fs.read
+      authorization_epoch: 2
+      expires_at: '2026-10-18T13:00:00Z'
+    checks:
+    - id: fresh
+      live_authorization_epoch: 2
+    - id: revoked
+      live_authorization_epoch: 3
+    - id: grant_dropped
+      required_grants:
+      - core:net.http
+      live_authorization_epoch: 2
+    revoked_epoch: 3
+expect:
+- kind: equals
+  key: results
+  value:
+    fresh: ok
+    revoked: authorization_epoch_advanced:2!=3
+    grant_dropped: envelope_grant_missing:core:net.http
+- kind: equals
+  key: graph_status
+  value: failed
+- kind: contains
+  key: node_error_contains
+  value: revalidation_failed:authorization_epoch_advanced:2!=3
+- kind: equals
+  key: effect_calls
+  value: 0

@@ -1,0 +1,13 @@
+kind: cli
+commands:
+- probe:
+    name: wrong_lane_deny
+    active_lane: reason
+    require_lane: judge
+expect:
+- kind: equals
+  key: error_type
+  value: InferenceEnvironmentError
+- kind: contains
+  key: error_match
+  value: judge

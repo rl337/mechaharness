@@ -1,0 +1,17 @@
+kind: cli
+commands:
+- probe:
+    name: config_access_policy
+    layers:
+    - - core:fs.read
+    - - core:fs.write
+    must_allow:
+    - core:fs.read
+    - core:fs.write
+    must_deny:
+    - core:media.image
+expect:
+- kind: 'true'
+  key: allows_compound
+- kind: 'true'
+  key: denies_missing

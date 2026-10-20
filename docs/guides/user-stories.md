@@ -220,7 +220,7 @@ Optional `recipe_id`, `recipe_version`, and `freshness_summary` (plus approval, 
 
 #### Validation
 
-Harness `access_authority` op `recipe_audit_dimensions`. Hard expects per-recipe rows with decision counts, verdict splits, and fresh/stale evidence totals computed from tool-result timestamps, that undeclared decisions are skipped, and that the envelope carries the recipe and stays complete. Unit tests: `tests/test_review_audit.py`.
+Harness `cli` scenario `recipe_audit_dimensions.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -253,7 +253,7 @@ An auditor can rebuild a review from the saved decision log and trace alone: whi
 
 #### Validation
 
-Harness `access_authority` op `review_audit_reconstruct`. Hard expects records rebuilt from persisted decision-log event payloads: a fully attested allow is reconstructable, and denied, asked-human, and executed-without-effect records report exactly the missing dimensions; an envelope fills gaps. Unit tests: `tests/test_review_audit.py`.
+Harness `cli` scenario `review_audit_reconstruct.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -320,7 +320,7 @@ Nubble asks branches for isolation without hard-coding worktrees or containers �
 
 #### Validation
 
-Harness `access_authority` op `workspace_isolation_acquire`. Soft expects memory provider_kind.
+Harness `cli` scenario `workspace_isolation_acquire.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -339,7 +339,7 @@ Covers: INF-02.
 
 #### Validation
 
-Harness `access_authority` op `wrong_lane_deny` → `_run_wrong_lane_deny`. Soft expects: non-empty error naming the required lane / load hint. Unit: `tests/test_environment.py`.
+Harness `cli` scenario `wrong_lane_deny.yaml`. Hard expects on declared observation keys.
 
 ### `nubble_model_affinity` — Keep model affinity inside a coherent work loop
 
@@ -449,7 +449,7 @@ Fangore delegates a child plan with fewer tools and grants than the parent. The 
 
 #### Validation
 
-Harness `access_authority` op `capability_envelope_narrow` → `_run_capability_envelope_narrow`. Soft expects: narrowed grants subset; widen raises; delegation chooses child when independence is required. Unit: `tests/test_inspiration_primitives.py`.
+Harness `cli` scenario `capability_envelope_narrow.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -486,7 +486,7 @@ Covers: host compound grants.
 
 #### Validation
 
-Harness `access_authority` op `grant_gate_write` → `_run_grant_gate_write`. Unit: `tests/test_access.py`.
+Harness `cli` scenario `grant_gate_write.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -504,7 +504,7 @@ Covers: host DI access policy.
 
 #### Validation
 
-Harness `access_authority` op `config_access_policy` → `_run_config_access_policy`. Unit: `tests/test_di.py`.
+Harness `cli` scenario `config_access_policy.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -841,7 +841,7 @@ Covers: POL-04, GAT-04.
 
 #### Validation
 
-Harness `access_authority` op `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
+Harness `cli` scenario `human_review_pending.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -858,7 +858,7 @@ Models may suggest what to do about an alert, but fixed rules decide how far it 
 
 #### Validation
 
-Harness `access_authority` op `alert_escalation_stages`. Hard expects the stage ladder for default thresholds, a per-alert override, the counter walk, and refusal of unordered thresholds. Unit tests: `tests/test_alert_escalation.py`.
+Harness `cli` scenario `alert_escalation_stages.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -890,7 +890,7 @@ High-consequence steps must pause on a durable approval interrupt with evidence,
 
 #### Validation
 
-Harness `access_authority` op `approval_interrupt_cycle`. Soft expects pending then approved with actor.
+Harness `cli` scenario `approval_interrupt_cycle.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -907,7 +907,7 @@ Checkpoints carry the authorization epoch so crash recovery after revocation doe
 
 #### Validation
 
-Harness `access_authority` op `auth_epoch_resume_refuse`. Hard expects first run ok with epoch persisted, resume under an advanced epoch failed with `authorization_epoch_mismatch`, and no runner re-entered.
+Harness `cli` scenario `auth_epoch_resume_refuse.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -923,7 +923,7 @@ Hard rules for consequential actions live outside model text. Untrusted forwarde
 
 #### Validation
 
-Harness `access_authority` op `authority_gate_evaluate`. Hard expects low-consequence actions allowed, high-consequence actions asking until approved, untrusted-source sends denied even when approved, and envelope/access/verdict denials with reason codes.
+Harness `cli` scenario `authority_gate_evaluate.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1006,7 +1006,7 @@ Task-local evidence, policy, memory references, and approvals must not bleed acr
 
 #### Validation
 
-Harness `access_authority` op `cross_task_isolation_bleed`. Hard expects no bleed after 0/5/10 intervening tasks, the receiver reading only handed-off refs, and a handoff naming an unreadable ref refused.
+Harness `cli` scenario `cross_task_isolation_bleed.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1038,7 +1038,7 @@ Denied intents and side-effect classes survive graph retries and delegated paths
 
 #### Validation
 
-Harness `access_authority` op `denial_store_equivalence`. Hard expects a DENY verdict recorded, retries through other tools to the same target refused even when approved, a different target unaffected, and the action allowed again only after `lift`.
+Harness `cli` scenario `denial_store_equivalence.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1119,7 +1119,7 @@ Authority is rechecked when a consequential action actually runs — not only at
 
 #### Validation
 
-Harness `access_authority` op `effect_revalidation_check`. Hard expects fresh authority to pass, expired/advanced-epoch/missing-grant checks to fail with typed reasons, and a graph with a revoked epoch to fail without running the publish effect.
+Harness `cli` scenario `effect_revalidation_check.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1151,7 +1151,7 @@ Every graph run needs a capability-scoped execution token: principal, expiry, tr
 
 #### Validation
 
-Harness `access_authority` op `execution_token_narrow`. Hard expects widening attempts refused by reason and attenuation attempts accepted with principal and epoch inherited.
+Harness `cli` scenario `execution_token_narrow.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1411,7 +1411,7 @@ Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (ef
 
 #### Validation
 
-Harness `access_authority` op `isolation_io_contract`. Soft expects empty validation issues and budget_share.
+Harness `cli` scenario `isolation_io_contract.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1638,7 +1638,7 @@ High-consequence writes demand stronger controls and visible approval frequency;
 
 #### Validation
 
-Harness `access_authority` op `consequence_risk_scale`. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: `tests/test_inspiration_primitives.py`. Related grants: `fangore_insp_soft_vs_hard`.
+Harness `cli` scenario `consequence_risk_scale.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1673,7 +1673,7 @@ Covers: GAT-01, GAT-02, GAT-03.
 
 #### Validation
 
-Harness `access_authority` op `tool_gating`. Soft expects deny without grant and allow with grant. Unit: `tests/test_access.py`. Related: `fangore_insp_risk_autonomy`.
+Harness `cli` scenario `tool_gating.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1706,7 +1706,7 @@ Graph quality targets have owners and can be frozen so agents cannot silently mu
 
 #### Validation
 
-Harness `access_authority` op `state_governance_write`. Soft expects frozen field denies writes.
+Harness `cli` scenario `state_governance_write.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1771,7 +1771,7 @@ Read-only observers must not invoke mutating tools; preparation returns typed pr
 
 #### Validation
 
-Harness `access_authority` op `tool_phase_effect_guard`. Hard expects observe/prepare contracts with write/external/unknown effects refused at registration, read-only observe and execute-phase writes registered.
+Harness `cli` scenario `tool_phase_effect_guard.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1787,7 +1787,7 @@ Tool results that drive external decisions carry source and freshness metadata. 
 
 #### Validation
 
-Harness `access_authority` op `tool_result_freshness_reject`. Hard expects the eight-day-old cache and the expired result rejected, and the fresh result passed through.
+Harness `cli` scenario `tool_result_freshness_reject.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 

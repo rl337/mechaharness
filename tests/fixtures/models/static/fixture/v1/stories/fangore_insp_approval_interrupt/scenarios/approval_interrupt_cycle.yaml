@@ -1,0 +1,18 @@
+kind: cli
+commands:
+- probe:
+    name: approval_interrupt_cycle
+    reason: Deploy to production
+    decision: approve
+    actor: ops@acme
+    checkpoint: ckpt:1
+expect:
+- kind: equals
+  key: initial_status
+  value: pending
+- kind: equals
+  key: final_status
+  value: approved
+- kind: contains
+  key: actor_contains
+  value: ops@acme

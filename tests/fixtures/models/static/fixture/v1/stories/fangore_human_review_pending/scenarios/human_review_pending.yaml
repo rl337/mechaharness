@@ -1,0 +1,10 @@
+kind: cli
+commands:
+- probe:
+    name: human_review_pending
+expect:
+- kind: equals
+  key: verdict_kinds
+  value:
+  - ASK_HUMAN
+  - ALLOW

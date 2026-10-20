@@ -1,0 +1,11 @@
+kind: cli
+commands:
+- probe:
+    name: workspace_isolation_acquire
+    label: branch-a
+expect:
+- kind: equals
+  key: provider_kind
+  value: memory
+- kind: 'true'
+  key: released

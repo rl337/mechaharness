@@ -1,0 +1,23 @@
+kind: cli
+commands:
+- probe:
+    name: auth_epoch_resume_refuse
+    goal: epoch
+    first_epoch: 2
+    resume_epoch: 3
+expect:
+- kind: equals
+  key: first_status
+  value: ok
+- kind: equals
+  key: checkpoint_epoch
+  value: 2
+- kind: equals
+  key: resume_status
+  value: failed
+- kind: contains
+  key: error_contains
+  value: authorization_epoch_mismatch:2!=3
+- kind: equals
+  key: runner_calls_after_resume
+  value: 0
