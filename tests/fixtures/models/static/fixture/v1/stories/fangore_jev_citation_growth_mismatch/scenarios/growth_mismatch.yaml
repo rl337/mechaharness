@@ -1,8 +1,17 @@
-# Plan document: ../plans/growth_mismatch.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/growth_mismatch.yaml
-expect:
-- kind: 'false'
-  key: claim_verified
+# user story: fangore_jev_citation_growth_mismatch
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/growth_mismatch.yaml` (citation_support), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/growth_mismatch.yaml
+complete:
+  expect:
+  - kind: 'false'
+    key: claim_verified
+cleanup: []

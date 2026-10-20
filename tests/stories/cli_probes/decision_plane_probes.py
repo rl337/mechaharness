@@ -6,14 +6,12 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from mechaharness.core.access import AccessPolicy
 from mechaharness.decision_log import (
     DecisionRecord,
     export_offline_dataset,
     replay_verdict,
 )
 from mechaharness.decision_plane_runtime import (
-    assemble_context_within_budget,
     build_decision_plane_telemetry,
     compare_shadow_decision,
     project_decision_state,
@@ -27,7 +25,6 @@ from mechaharness.decision_surfaces import (
 from mechaharness.graph_templates import (
     DecisionPlaneTemplate,
     GraphTemplateParams,
-    IndependentReviewTemplate,
 )
 from mechaharness.inference.judge import (
     ChoiceOption,
@@ -436,190 +433,7 @@ async def run_decision_plane_shadow_compare(
     return out
 
 
-class CitationSupportCaseCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    action_question_id: str = "support"
-    answers: dict[str, Any] = Field(default_factory=dict)
-    confidence: float | None = None
-    confidence_floor: float = 0.7
-
-
-async def run_citation_support_case(body: CitationSupportCaseCommand) -> dict[str, Any]:
-    result = await run_decision_plane_policy(
-        questions=list(body.questions),
-        answers=dict(body.answers),
-        confidence=body.confidence,
-        confidence_floor=body.confidence_floor,
-        action_question_id=body.action_question_id,
-    )
-    claim_verified = not result.escalate and result.final_action == "supported"
-    return {
-        "claim_verified": claim_verified,
-        "escalate": result.escalate,
-        "final_action": result.final_action,
-    }
-
-
-class ContextBudgetCaseCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    token_budget: int
-    min_relevance: float = 0.0
-    min_trust: float = 0.0
-    min_freshness: float = 0.0
-    candidates: list[dict[str, Any]] = Field(default_factory=list)
-
-
-def run_context_budget_case(body: ContextBudgetCaseCommand) -> dict[str, Any]:
-    selected = assemble_context_within_budget(
-        list(body.candidates),
-        token_budget=body.token_budget,
-        min_relevance=body.min_relevance,
-        min_trust=body.min_trust,
-        min_freshness=body.min_freshness,
-    )
-    by_id = {str(c["id"]): c for c in body.candidates}
-    total = sum(int(by_id[cid]["tokens"]) for cid in selected)
-    return {
-        "selected_ids": selected,
-        "token_total": total,
-        "within_budget": total <= body.token_budget,
-    }
-
-
-class RequirementsGapCaseCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    reviewer_count: int = 1
-    acceptance: list[Any] = Field(default_factory=list)
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    action_question_id: str = "coverage"
-    answers: dict[str, Any] = Field(default_factory=dict)
-    confidence: float | None = None
-    confidence_floor: float = 0.7
-    facts: dict[str, Any] = Field(default_factory=dict)
-
-
-async def run_requirements_gap_case(
-    body: RequirementsGapCaseCommand,
-) -> dict[str, Any]:
-    review_graph = IndependentReviewTemplate().instantiate(
-        GraphTemplateParams(
-            goal="requirements review",
-            inputs={"reviewer_count": body.reviewer_count},
-            acceptance=list(body.acceptance),
-        )
-    )
-    reviews = [n for n in review_graph.nodes if n.startswith("review_")]
-    result = await run_decision_plane_policy(
-        questions=list(body.questions),
-        answers=dict(body.answers),
-        confidence=body.confidence,
-        confidence_floor=body.confidence_floor,
-        action_question_id=body.action_question_id,
-    )
-    facts = dict(body.facts)
-    if result.escalate or result.final_action in {"gap", "unclear"}:
-        outcome = "request_tests"
-    elif not facts.get("crash_tests_present", True):
-        outcome = "request_tests"
-    elif result.final_action == "covered":
-        outcome = "continue_review"
-    else:
-        outcome = "request_tests"
-    return {
-        "template_name": review_graph.template_name,
-        "omit_producer_reasoning": review_graph.nodes[reviews[0]].payload.get(
-            "omit_producer_reasoning"
-        ),
-        "outcome": outcome,
-        "final_action": result.final_action,
-        "escalate": result.escalate,
-    }
-
-
-class TaskRouteCaseCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    action_question_id: str = "route"
-    answers: dict[str, Any] = Field(default_factory=dict)
-    confidence: float | None = None
-    confidence_floor: float = 0.7
-    min_complexity_for_frontier: float = 0.7
-
-
-async def run_task_route_case(body: TaskRouteCaseCommand) -> dict[str, Any]:
-    result = await run_decision_plane_policy(
-        questions=list(body.questions),
-        answers=dict(body.answers),
-        confidence=body.confidence,
-        confidence_floor=body.confidence_floor,
-        action_question_id=body.action_question_id,
-    )
-    complexity = float(body.answers.get("complexity") or 0.0)
-    final_action = result.final_action
-    escalate = result.escalate
-    if (
-        not escalate
-        and final_action == "local_small"
-        and complexity >= body.min_complexity_for_frontier
-    ):
-        final_action = "frontier"
-    return {
-        "final_action": final_action,
-        "escalate": escalate,
-    }
-
-
-class ActionSafetyCaseCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    action_question_id: str = "semantic_risk"
-    answers: dict[str, Any] = Field(default_factory=dict)
-    confidence: float | None = None
-    confidence_floor: float = 0.7
-    grants: list[Any] = Field(default_factory=list)
-    required_grants: list[Any] = Field(default_factory=list)
-
-
-async def run_action_safety_case(body: ActionSafetyCaseCommand) -> dict[str, Any]:
-    policy = AccessPolicy(grants=list(body.grants))
-    required = list(body.required_grants)
-    grants_ok = policy.allows(required) if required else True
-    result = await run_decision_plane_policy(
-        questions=list(body.questions),
-        answers=dict(body.answers),
-        confidence=body.confidence,
-        confidence_floor=body.confidence_floor,
-        action_question_id=body.action_question_id,
-    )
-    risk = result.final_action
-    if not grants_ok:
-        decision = "deny"
-        hard_won = True
-    elif result.escalate or risk == "high":
-        decision = "escalate_review"
-        hard_won = False
-    else:
-        decision = "allow"
-        hard_won = False
-    return {
-        "decision": decision,
-        "hard_won": hard_won,
-        "grants_unchanged": list(policy.grants) == list(body.grants),
-        "escalate": result.escalate,
-        "final_action": result.final_action,
-    }
-
-
 __all__ = [
-    "ActionSafetyCaseCommand",
-    "CitationSupportCaseCommand",
-    "ContextBudgetCaseCommand",
     "DecisionPlaneModelPolicyCommand",
     "DecisionPlanePolicyCaseCommand",
     "DecisionPlaneProjectionCommand",
@@ -631,11 +445,6 @@ __all__ = [
     "FixtureJudgeBatchCommand",
     "OfflineDecisionExportCommand",
     "PolicyReplayCommand",
-    "RequirementsGapCaseCommand",
-    "TaskRouteCaseCommand",
-    "run_action_safety_case",
-    "run_citation_support_case",
-    "run_context_budget_case",
     "run_decision_plane_model_policy",
     "run_decision_plane_policy_case",
     "run_decision_plane_projection",
@@ -647,6 +456,4 @@ __all__ = [
     "run_fixture_judge_batch",
     "run_offline_decision_export",
     "run_policy_replay",
-    "run_requirements_gap_case",
-    "run_task_route_case",
 ]

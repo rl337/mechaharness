@@ -2,10 +2,10 @@
   "id": "fangore_jev_context_budget_pack",
   "persona": "fangore",
   "title": "Pack scored RAG candidates into a fixed token budget",
-  "kind": "cli",
-  "narrative": "After retrieval, Fangore needs a context pack that fits a fixed token budget. He scores candidates for relevance, trust, and freshness, then packs only those that clear product thresholds until the budget is full. He verifies the packed set stays under budget and omits low-scoring scraps. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05]",
-  "implementation": "`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.",
-  "validation": "Harness `cli` `probe` loads `plans/budget_pack.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (context_budget) for: Pack scored RAG candidates into a fixed token budget. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^jev-us05]",
+  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: context_budget` plans.",
+  "validation": "Harness `user_story` scenario(s) `budget_pack.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "jev-us05",

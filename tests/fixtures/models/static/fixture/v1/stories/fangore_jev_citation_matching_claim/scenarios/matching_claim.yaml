@@ -1,8 +1,17 @@
-# Plan document: ../plans/matching_claim.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/matching_claim.yaml
-expect:
-- kind: 'true'
-  key: claim_verified
+# user story: fangore_jev_citation_matching_claim
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/matching_claim.yaml` (citation_support), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/matching_claim.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: claim_verified
+cleanup: []

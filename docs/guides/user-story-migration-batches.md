@@ -17,9 +17,9 @@ exists for that claim.
 
 ## Counts
 
-- Done (`user_story`): **49** (3 pilots + Wave 1 A–F + Wave 2 P1)
+- Done (`user_story`): **66** (3 pilots + Wave 1 A–F + Wave 2 P1–P2)
 - Ready (product CLI verbs, no probe): **0**
-- Blocked on probe → product verb: **124**
+- Blocked on probe → product verb: **107**
 
 ## Wave order
 
@@ -134,27 +134,27 @@ _`transactional_resume` product verb_ · **6** stories
 - [x] `fangore_tdr_crash_after_reduce_before_checkpoint`
 - [x] `fangore_tdr_crash_before_intent`
 
-### Batch P2 — JEV decision cases
+### Batch P2 — JEV decision cases — **done** (Wave 2)
 
-_Promote citation/context/req/router probes onto decision_plane run_recipe or new verbs_ · **17** stories
+_`decision_case` product verb (`case:` plans)_ · **17** stories
 
-- [ ] `fangore_jev_action_safety`
-- [ ] `fangore_jev_citation_growth_mismatch`
-- [ ] `fangore_jev_citation_matching_claim`
-- [ ] `fangore_jev_citation_missing_source`
-- [ ] `fangore_jev_citation_uncertain_support`
-- [ ] `fangore_jev_context_budget_pack`
-- [ ] `fangore_jev_context_exclude_injection`
-- [ ] `fangore_jev_context_filter_stale_untrusted`
-- [ ] `fangore_jev_context_missing_scores_fallback`
-- [ ] `fangore_jev_req_review_approve_missing_crash_tests`
-- [ ] `fangore_jev_req_review_covered_with_tests`
-- [ ] `fangore_jev_req_review_gap_found`
-- [ ] `fangore_jev_req_review_template_shape`
-- [ ] `fangore_jev_task_route_complex_frontier`
-- [ ] `fangore_jev_task_route_invalid`
-- [ ] `fangore_jev_task_route_low_confidence`
-- [ ] `fangore_jev_task_route_simple_local`
+- [x] `fangore_jev_action_safety`
+- [x] `fangore_jev_citation_growth_mismatch`
+- [x] `fangore_jev_citation_matching_claim`
+- [x] `fangore_jev_citation_missing_source`
+- [x] `fangore_jev_citation_uncertain_support`
+- [x] `fangore_jev_context_budget_pack`
+- [x] `fangore_jev_context_exclude_injection`
+- [x] `fangore_jev_context_filter_stale_untrusted`
+- [x] `fangore_jev_context_missing_scores_fallback`
+- [x] `fangore_jev_req_review_approve_missing_crash_tests`
+- [x] `fangore_jev_req_review_covered_with_tests`
+- [x] `fangore_jev_req_review_gap_found`
+- [x] `fangore_jev_req_review_template_shape`
+- [x] `fangore_jev_task_route_complex_frontier`
+- [x] `fangore_jev_task_route_invalid`
+- [x] `fangore_jev_task_route_low_confidence`
+- [x] `fangore_jev_task_route_simple_local`
 
 ### Batch P3 — Decision plane core
 

@@ -1,10 +1,19 @@
-# Plan document: ../plans/uncertain_support.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/uncertain_support.yaml
-expect:
-- kind: 'false'
-  key: claim_verified
-- kind: 'true'
-  key: escalate
+# user story: fangore_jev_citation_uncertain_support
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/uncertain_support.yaml` (citation_support), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/uncertain_support.yaml
+complete:
+  expect:
+  - kind: 'false'
+    key: claim_verified
+  - kind: 'true'
+    key: escalate
+cleanup: []

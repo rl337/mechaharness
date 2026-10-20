@@ -1,8 +1,7 @@
-# Probe plan for scenario `delete_low_risk_no_grant.yaml`.
+# Decision case plan for scenario `delete_low_risk_no_grant.yaml`.
 # Story: Let hard grants win over semantic risk classification
-
 summary: Let hard grants win over semantic risk classification
-name: action_safety_case
+case: action_safety
 questions:
 - id: semantic_risk
   kind: choice

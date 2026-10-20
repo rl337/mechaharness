@@ -1,9 +1,18 @@
-# Plan document: ../plans/approve_but_missing_crash_tests.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/approve_but_missing_crash_tests.yaml
-expect:
-- kind: equals
-  key: outcome
-  value: request_tests
+# user story: fangore_jev_req_review_approve_missing_crash_tests
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/approve_but_missing_crash_tests.yaml` (requirements_gap), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/approve_but_missing_crash_tests.yaml
+complete:
+  expect:
+  - kind: equals
+    key: outcome
+    value: request_tests
+cleanup: []

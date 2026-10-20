@@ -1,8 +1,7 @@
-# Probe plan for scenario `template_shape.yaml`.
+# Decision case plan for scenario `template_shape.yaml`.
 # Story: Escalate requirement gaps without treating a judge approve as correctness
-
 summary: Escalate requirement gaps without treating a judge approve as correctness
-name: requirements_gap_case
+case: requirements_gap
 reviewer_count: 2
 acceptance:
 - stories_covered

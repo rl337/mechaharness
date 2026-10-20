@@ -1,8 +1,7 @@
-# Probe plan for scenario `exclude_injection.yaml`.
+# Decision case plan for scenario `exclude_injection.yaml`.
 # Story: Assemble RAG context from scored candidates within a token budget
-
 summary: Assemble RAG context from scored candidates within a token budget
-name: context_budget_case
+case: context_budget
 token_budget: 120
 min_relevance: 0.5
 min_trust: 0.5

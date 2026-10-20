@@ -2,9 +2,9 @@
   "id": "fangore_jev_citation_growth_mismatch",
   "persona": "fangore",
   "title": "Refuse to verify when the source contradicts the claim",
-  "kind": "cli",
-  "narrative": "Fangore's citation check sees a source that contradicts the claim (for example growth figures that do not match). He runs the decision-plane path and verifies the product does not mark the claim verified. Completes the citation matrix after `fangore_jev_citation_uncertain_support` and `fangore_jev_citation_missing_source`.",
-  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.",
-  "validation": "Harness `cli` `probe` loads `plans/growth_mismatch.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (citation_support) for: Refuse to verify when the source contradicts the claim. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
+  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: citation_support` plans.",
+  "validation": "Harness `user_story` scenario(s) `growth_mismatch.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": []
 }

@@ -1,8 +1,17 @@
-# Plan document: ../plans/low_confidence.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/low_confidence.yaml
-expect:
-- kind: 'true'
-  key: escalate
+# user story: fangore_jev_task_route_low_confidence
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/low_confidence.yaml` (task_route), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/low_confidence.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: escalate
+cleanup: []

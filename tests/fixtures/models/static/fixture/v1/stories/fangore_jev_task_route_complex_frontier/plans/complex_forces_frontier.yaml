@@ -1,8 +1,7 @@
-# Probe plan for scenario `complex_forces_frontier.yaml`.
+# Decision case plan for scenario `complex_forces_frontier.yaml`.
 # Story: Route work to local, frontier, tool, or human with code-owned quality policy
-
 summary: Route work to local, frontier, tool, or human with code-owned quality policy
-name: task_route_case
+case: task_route
 questions:
 - id: route
   kind: choice

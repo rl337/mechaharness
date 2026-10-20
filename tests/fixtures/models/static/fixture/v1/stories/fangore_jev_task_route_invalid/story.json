@@ -2,9 +2,9 @@
   "id": "fangore_jev_task_route_invalid",
   "persona": "fangore",
   "title": "Escalate when the model invents a disallowed lane",
-  "kind": "cli",
-  "narrative": "The decision model proposes a route outside the allowed envelope. Fangore runs the router and verifies product policy rejects the invalid choice and escalates — the model cannot invent new lanes. Closes the matrix after `fangore_jev_task_route_low_confidence`.",
-  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.",
-  "validation": "Harness `cli` `probe` loads `plans/invalid_route.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (task_route) for: Escalate when the model invents a disallowed lane. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
+  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: task_route` plans.",
+  "validation": "Harness `user_story` scenario(s) `invalid_route.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": []
 }

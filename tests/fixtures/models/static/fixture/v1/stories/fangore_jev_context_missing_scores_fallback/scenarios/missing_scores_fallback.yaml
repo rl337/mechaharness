@@ -1,13 +1,22 @@
-# Plan document: ../plans/missing_scores_fallback.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/missing_scores_fallback.yaml
-expect:
-- kind: exactly
-  key: selected_ids
-  value:
-  - ok
-  - ok2
-- kind: 'true'
-  key: within_budget
+# user story: fangore_jev_context_missing_scores_fallback
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/missing_scores_fallback.yaml` (context_budget), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/missing_scores_fallback.yaml
+complete:
+  expect:
+  - kind: exactly
+    key: selected_ids
+    value:
+    - ok
+    - ok2
+  - kind: 'true'
+    key: within_budget
+cleanup: []

@@ -1869,15 +1869,15 @@ Harness `cli` `probe` loads `plans/wip_policy.yaml` (human-readable probe plan);
 
 ### `fangore_jev_action_safety` — Let hard grants win over semantic risk classification
 
-Before an agent deletes, pays, or publishes, Fangore runs a semantic risk check and a hard grant check. If the model says the delete looks low risk but the product has no write grant, the action stays denied. Semantic risk may only add review or deny — it never unlocks a privilege the grants do not allow. Related: `fangore_insp_soft_vs_hard`, `fangore_insp_risk_autonomy`, `fangore_decision_plane_policy`.[^jev-us08] Satisfies Dots MH-DOTS-04 independent action review[^insp-dots-04] and contributes to personal-agent MH-PA-02[^insp-pa-02-safety].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (action_safety) for: Let hard grants win over semantic risk classification. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^jev-us08] [^insp-dots-04] [^insp-pa-02-safety]
 
 #### Implementation
 
-`AccessPolicy` / grant checks are the hard execution boundary (MH-JEV-05). Agentic Recipe `decision_plane` runtime classifies semantic risk as evidence only. Host composition: deny when grants fail regardless of risk label; high semantic risk on an allowed read may escalate to review without elevating grants.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: action_safety` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/read_low_risk_with_grant.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `delete_low_risk_no_grant.yaml`, `read_high_risk_with_grant.yaml`, `read_low_risk_with_grant.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1887,27 +1887,27 @@ Harness `cli` `probe` loads `plans/read_low_risk_with_grant.yaml` (human-readabl
 
 ### `fangore_jev_citation_growth_mismatch` — Refuse to verify when the source contradicts the claim
 
-Fangore's citation check sees a source that contradicts the claim (for example growth figures that do not match). He runs the decision-plane path and verifies the product does not mark the claim verified. Completes the citation matrix after `fangore_jev_citation_uncertain_support` and `fangore_jev_citation_missing_source`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (citation_support) for: Refuse to verify when the source contradicts the claim. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: citation_support` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/growth_mismatch.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `growth_mismatch.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_citation_matching_claim` — Mark a claim verified only when the source supports it
 
-Fangore is checking whether a cited source supports an atomic claim before his product marks it verified. He runs the decision-plane citation path with a matching source and claim, reads the bounded support answer, and verifies product policy sets the claim verified — the model alone never stamps verification. Related policy stories: `fangore_decision_plane_policy`, `fangore_refund_verdict`.[^jev-us04][^jev-insp-cite]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (citation_support) for: Mark a claim verified only when the source supports it. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^jev-us04] [^jev-insp-cite]
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: citation_support` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/matching_claim.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `matching_claim.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1916,39 +1916,39 @@ Harness `cli` `probe` loads `plans/matching_claim.yaml` (human-readable probe pl
 
 ### `fangore_jev_citation_missing_source` — Refuse to verify a claim with no source
 
-Fangore receives an atomic claim with no usable source attached. He runs the citation check and verifies the product keeps the claim unverified — there is nothing for the model to endorse. Builds on the happy path in `fangore_jev_citation_matching_claim`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (citation_support) for: Refuse to verify a claim with no source. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: citation_support` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/missing_source.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `missing_source.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_citation_uncertain_support` — Leave a low-confidence citation unverified
 
-After Fangore can verify a matching citation (`fangore_jev_citation_matching_claim`), he faces a source that only weakly supports the claim. He runs the same citation check, sees low confidence or insufficient support, and verifies the product leaves the claim unverified or escalates — it must not treat a fuzzy judge answer as proof.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (citation_support) for: Leave a low-confidence citation unverified. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: citation_support` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/uncertain_support.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `uncertain_support.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_context_budget_pack` — Pack scored RAG candidates into a fixed token budget
 
-After retrieval, Fangore needs a context pack that fits a fixed token budget. He scores candidates for relevance, trust, and freshness, then packs only those that clear product thresholds until the budget is full. He verifies the packed set stays under budget and omits low-scoring scraps. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (context_budget) for: Pack scored RAG candidates into a fixed token budget. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^jev-us05]
 
 #### Implementation
 
-`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: context_budget` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/budget_pack.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `budget_pack.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1957,87 +1957,87 @@ Harness `cli` `probe` loads `plans/budget_pack.yaml` (human-readable probe plan)
 
 ### `fangore_jev_context_exclude_injection` — Exclude injection-tainted snippets from the pack
 
-Fangore's retrieval set includes an injection-tainted snippet. He runs the context picker and verifies the tainted text never enters the packed context, even if scores look attractive. Follows the stale/untrusted filter in `fangore_jev_context_filter_stale_untrusted`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (context_budget) for: Exclude injection-tainted snippets from the pack. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: context_budget` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/exclude_injection.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `exclude_injection.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_context_filter_stale_untrusted` — Keep stale or untrusted snippets out of the pack
 
-With packing working (`fangore_jev_context_budget_pack`), Fangore still sees stale or untrusted candidates that look relevant. He runs context assembly and verifies those snippets stay out of the pack even when relevance is high. Typed tool-result TTL remains `fangore_insp_tool_result_freshness`; MH-PA-01 freshness for retrieved context is documented on `fangore_jev_context_budget_pack`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (context_budget) for: Keep stale or untrusted snippets out of the pack. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: context_budget` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/filter_stale_and_untrusted.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `filter_stale_and_untrusted.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_context_missing_scores_fallback` — Fill the budget with deterministic ranking when scores are missing
 
-Sometimes Fangore's decision model does not return scores for every candidate. He still needs a usable pack: he runs assembly, falls back to deterministic ranking for missing scores, and verifies the budget fills with what it can. Closes the picker matrix after `fangore_jev_context_budget_pack`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (context_budget) for: Fill the budget with deterministic ranking when scores are missing. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned. Agentic Recipe `decision_plane` supplies the typed score batch pattern.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: context_budget` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/missing_scores_fallback.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `missing_scores_fallback.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_req_review_approve_missing_crash_tests` — Request crash tests even when the judge says approve
 
-A judge answers approve, but Fangore's facts show crash-location tests are missing. He runs the review and verifies product policy requests those tests (or escalates) — a model approve never alone marks the change correct. Pairs with the gap path in `fangore_jev_req_review_gap_found`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (requirements_gap) for: Request crash tests even when the judge says approve. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: requirements_gap` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/approve_but_missing_crash_tests.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `approve_but_missing_crash_tests.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_req_review_covered_with_tests` — Accept a change when requirements and crash tests are covered
 
-With the review shape in place (`fangore_jev_req_review_template_shape`), Fangore reviews a change whose facts show requirements and crash-location tests are covered. He runs the review path and verifies product policy can accept without asking for more tests — still without treating a bare judge approve as correctness by itself.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (requirements_gap) for: Accept a change when requirements and crash tests are covered. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: requirements_gap` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/covered_with_tests.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `covered_with_tests.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_req_review_gap_found` — Escalate when a requirement gap appears in the facts
 
-Fangore reviews a change where an atomic check finds a missing requirement. He runs the requirements-aware review and verifies the harness asks for focused follow-up or deeper review instead of marking the change correct. Builds on the covered path in `fangore_jev_req_review_covered_with_tests`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (requirements_gap) for: Escalate when a requirement gap appears in the facts. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: requirements_gap` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/gap_found.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `gap_found.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_req_review_template_shape` — Shape a requirements-aware review with isolated checkers
 
-Fangore is wiring a change review against applicable user stories. He loads the requirements-review template, confirms isolated reviewers and atomic checks are present in the expanded graph, and verifies the shape is ready for real gap cases. Related: `fangore_insp_independent_review`, `fangore_decision_plane_policy`.[^jev-us06]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (requirements_gap) for: Shape a requirements-aware review with isolated checkers. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^jev-us06]
 
 #### Implementation
 
-Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: requirements_gap` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `template_shape.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2045,51 +2045,51 @@ Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe pl
 
 ### `fangore_jev_task_route_complex_frontier` — Force frontier when quality policy rejects the cheap lane
 
-After simple local routing works (`fangore_jev_task_route_simple_local`), Fangore gets a complex request. The model may prefer cheap local, but product quality policy requires frontier. He runs the router and verifies the final route is frontier (or escalates), not the cheapest lane.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (task_route) for: Force frontier when quality policy rejects the cheap lane. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: task_route` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/complex_forces_frontier.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `complex_forces_frontier.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_task_route_invalid` — Escalate when the model invents a disallowed lane
 
-The decision model proposes a route outside the allowed envelope. Fangore runs the router and verifies product policy rejects the invalid choice and escalates — the model cannot invent new lanes. Closes the matrix after `fangore_jev_task_route_low_confidence`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (task_route) for: Escalate when the model invents a disallowed lane. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: task_route` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/invalid_route.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `invalid_route.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_task_route_low_confidence` — Escalate when the router is not confident
 
-Fangore's router returns a lane with low confidence. He runs the task router and verifies product policy escalates instead of locking in an uncertain lane. Builds on the forced-frontier case in `fangore_jev_task_route_complex_frontier`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (task_route) for: Escalate when the router is not confident. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: task_route` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/low_confidence.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `low_confidence.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 ### `fangore_jev_task_route_simple_local` — Route simple work to the local small model
 
-Fangore has mixed work to route. For a simple request he asks a small decision model which lane fits, product policy accepts the local small-model lane, and he verifies the chosen route is local — not frontier or human. Related: `fangore_decision_plane_model_policy`, `nubble_insp_model_routing`.[^jev-us07]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (task_route) for: Route simple work to the local small model. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^jev-us07]
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.
+Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: task_route` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/simple_local.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `simple_local.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
