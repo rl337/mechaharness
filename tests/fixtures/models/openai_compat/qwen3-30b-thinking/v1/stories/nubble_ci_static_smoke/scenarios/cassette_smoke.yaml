@@ -1,18 +1,19 @@
-# Cassette: OpenAI-compat HTTP path returns text without a live host
 kind: cli
-
 commands:
-  - infer:
-      prompt: Say hello.
-
+- infer:
+    prompt: Say hello.
 expect:
-  text_nonempty: true
-  units_positive: true
-  event_types_exactly:
-    - core:access_check
-    - core:graph_start
-    - core:graph_node_start
-    - core:cost
-    - core:inference
-    - core:graph_node_end
-    - core:graph_end
+- kind: nonempty
+  key: text
+- kind: positive
+  key: cost_units
+- kind: exactly
+  key: event_types
+  value:
+  - core:access_check
+  - core:graph_start
+  - core:graph_node_start
+  - core:cost
+  - core:inference
+  - core:graph_node_end
+  - core:graph_end

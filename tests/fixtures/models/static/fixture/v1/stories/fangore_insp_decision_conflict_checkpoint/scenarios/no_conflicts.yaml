@@ -1,0 +1,24 @@
+kind: cli
+commands:
+- probe:
+    name: decision_conflict_neighbor_revisit
+    id: no_conflicts
+    start: a
+    write_scopes:
+      a:
+      - repo:x
+      b:
+      - repo:y
+    clears: []
+expect:
+- kind: equals
+  key: order
+  value:
+  - a
+- kind: equals
+  key: checkpoints
+  value:
+  - a
+- kind: equals
+  key: cycle_blocked
+  value: []

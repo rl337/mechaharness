@@ -1,4 +1,7 @@
-"""Product-facing CLI verbs registered on ``MechaHarnessConfig.cli_verb_classes``."""
+"""Product-facing CLI verbs registered on ``MechaHarnessConfig.cli_verb_classes``.
+
+Clocks and story probes are test-Config only (see ``TestHarnessCliConfig``).
+"""
 
 from __future__ import annotations
 
@@ -6,13 +9,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from mechaharness.cli_commands import (
-    AdvanceClockCommand,
-    InferCommand,
-    RunRecipeCommand,
-    SetClockCommand,
-    ToolLoopCommand,
-)
+from mechaharness.cli_commands import InferCommand, RunRecipeCommand, ToolLoopCommand
 from mechaharness.cli_diagnostic_verbs import (
     CheckModelAffinityCommand,
     CompareRunParityCommand,
@@ -25,7 +22,7 @@ from mechaharness.cli_diagnostic_verbs import (
     run_route_capabilities,
     run_shadow_decision_backends,
 )
-from mechaharness.cli_verb import CliVerb, make_probe_verb, make_runtime_verb
+from mechaharness.cli_verb import CliVerb
 from mechaharness.inference.judge import (
     ChoiceOption,
     ChoiceQuestion,
@@ -41,6 +38,30 @@ from mechaharness.judgement_policy import (
     JudgementThreshold,
     decide,
 )
+
+
+class InferVerb(CliVerb):
+    name = "infer"
+    params_model = InferCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> Any:
+        return await runtime.run_infer(params)
+
+
+class ToolLoopVerb(CliVerb):
+    name = "tool_loop"
+    params_model = ToolLoopCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> Any:
+        return await runtime.run_tool_loop(params)
+
+
+class RunRecipeVerb(CliVerb):
+    name = "run_recipe"
+    params_model = RunRecipeCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> Any:
+        return await runtime.run_recipe(params)
 
 
 class JudgeRouteCommand(BaseModel):
@@ -87,81 +108,116 @@ def _policy_from_mapping(raw: dict[str, Any]) -> JudgementPolicy:
     )
 
 
-async def _run_judge_route(body: JudgeRouteCommand, runtime: Any) -> dict[str, Any]:
-    provider = runtime.judge_provider
-    if provider is None:
-        raise RuntimeError("judge_route requires CliInstrumentor(judge_provider=...)")
-    judgement = await judge(
-        JudgeRequest(
-            state=body.state,
-            state_hash=hash_state(body.state),
-            questions=_build_questions(body.questions),
-            question_set_version=body.question_set_version,
-        ),
-        provider=provider,
-    )
-    by_id = {a.id: a for a in judgement.answers}
-    route = by_id.get("route")
-    selected = route.selected if isinstance(route, ChoiceSignal) else None
-    verdict = decide(
-        JudgementFacts(action="route"),
-        judgement,
-        _policy_from_mapping(body.policy),
-    )
-    return {
-        "route_selected": selected,
-        "verdict": verdict.kind,
-        "answer_count": len(judgement.answers),
-    }
+class JudgeRouteVerb(CliVerb):
+    name = "judge_route"
+    params_model = JudgeRouteCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        body = params
+        assert isinstance(body, JudgeRouteCommand)
+        provider = runtime.judge_provider
+        if provider is None:
+            raise RuntimeError(
+                "judge_route requires CliInstrumentor(judge_provider=...)"
+            )
+        judgement = await judge(
+            JudgeRequest(
+                state=body.state,
+                state_hash=hash_state(body.state),
+                questions=_build_questions(body.questions),
+                question_set_version=body.question_set_version,
+            ),
+            provider=provider,
+        )
+        by_id = {a.id: a for a in judgement.answers}
+        route = by_id.get("route")
+        selected = route.selected if isinstance(route, ChoiceSignal) else None
+        verdict = decide(
+            JudgementFacts(action="route"),
+            judgement,
+            _policy_from_mapping(body.policy),
+        )
+        return {
+            "route_selected": selected,
+            "verdict": verdict.kind,
+            "answer_count": len(judgement.answers),
+        }
+
+
+class ReplayModelInputVerb(CliVerb):
+    name = "replay_model_input"
+    params_model = ReplayModelInputCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        return run_replay_model_input(params)  # type: ignore[arg-type]
+
+
+class RouteCapabilitiesVerb(CliVerb):
+    name = "route_capabilities"
+    params_model = RouteCapabilitiesCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        return run_route_capabilities(params)  # type: ignore[arg-type]
+
+
+class CheckModelAffinityVerb(CliVerb):
+    name = "check_model_affinity"
+    params_model = CheckModelAffinityCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        return run_check_model_affinity(params)  # type: ignore[arg-type]
+
+
+class CompareRunParityVerb(CliVerb):
+    name = "compare_run_parity"
+    params_model = CompareRunParityCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        return run_compare_run_parity(params)  # type: ignore[arg-type]
+
+
+class ShadowDecisionBackendsVerb(CliVerb):
+    name = "shadow_decision_backends"
+    params_model = ShadowDecisionBackendsCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        return run_shadow_decision_backends(params)  # type: ignore[arg-type]
 
 
 def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
-    """Host CLI catalog (infer / tools / recipes / diagnostics / clocks / judge)."""
-    return {
-        "infer": make_runtime_verb("infer", InferCommand, lambda p, r: r.run_infer(p)),
-        "tool_loop": make_runtime_verb(
-            "tool_loop", ToolLoopCommand, lambda p, r: r.run_tool_loop(p)
-        ),
-        "run_recipe": make_runtime_verb(
-            "run_recipe", RunRecipeCommand, lambda p, r: r.run_recipe(p)
-        ),
-        "set_clock": make_runtime_verb(
-            "set_clock", SetClockCommand, lambda p, r: r.run_set_clock(p)
-        ),
-        "advance_clock": make_runtime_verb(
-            "advance_clock",
-            AdvanceClockCommand,
-            lambda p, r: r.run_advance_clock(p),
-        ),
-        "replay_model_input": make_probe_verb(
-            "replay_model_input",
-            ReplayModelInputCommand,
-            run_replay_model_input,
-        ),
-        "route_capabilities": make_probe_verb(
-            "route_capabilities",
-            RouteCapabilitiesCommand,
-            run_route_capabilities,
-        ),
-        "check_model_affinity": make_probe_verb(
-            "check_model_affinity",
-            CheckModelAffinityCommand,
-            run_check_model_affinity,
-        ),
-        "compare_run_parity": make_probe_verb(
-            "compare_run_parity",
-            CompareRunParityCommand,
-            run_compare_run_parity,
-        ),
-        "shadow_decision_backends": make_probe_verb(
-            "shadow_decision_backends",
-            ShadowDecisionBackendsCommand,
-            run_shadow_decision_backends,
-        ),
-        "judge_route": make_runtime_verb(
-            "judge_route", JudgeRouteCommand, _run_judge_route
-        ),
+    """Host CLI catalog (infer / tools / recipes / diagnostics / judge / durable)."""
+    from mechaharness.cli_durable_verbs import durable_cli_verb_classes
+
+    verbs: dict[str, type[CliVerb]] = {
+        InferVerb.name: InferVerb,
+        ToolLoopVerb.name: ToolLoopVerb,
+        RunRecipeVerb.name: RunRecipeVerb,
+        JudgeRouteVerb.name: JudgeRouteVerb,
+        ReplayModelInputVerb.name: ReplayModelInputVerb,
+        RouteCapabilitiesVerb.name: RouteCapabilitiesVerb,
+        CheckModelAffinityVerb.name: CheckModelAffinityVerb,
+        CompareRunParityVerb.name: CompareRunParityVerb,
+        ShadowDecisionBackendsVerb.name: ShadowDecisionBackendsVerb,
     }
+    verbs.update(durable_cli_verb_classes())
+    return verbs
 
 
-__all__ = ["JudgeRouteCommand", "default_cli_verb_classes"]
+__all__ = [
+    "CheckModelAffinityVerb",
+    "CompareRunParityVerb",
+    "InferVerb",
+    "JudgeRouteCommand",
+    "JudgeRouteVerb",
+    "ReplayModelInputVerb",
+    "RouteCapabilitiesVerb",
+    "RunRecipeVerb",
+    "ShadowDecisionBackendsVerb",
+    "ToolLoopVerb",
+    "default_cli_verb_classes",
+]

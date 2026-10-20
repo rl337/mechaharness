@@ -1,0 +1,38 @@
+kind: cli
+durable:
+  graph: verify_repair
+  controller: ops
+  store: memory
+commands:
+- start:
+    run_id: cost-1
+    inputs:
+      guidance:
+      - request_id: req-cost
+        question: Budget?
+        choices:
+        - id: a
+          label: A
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: equals
+    key: question
+    value: Budget?
+- answer:
+    choose: a
+    request_id: req-cost
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: guidance_yields
+    value: 1
+  - kind: equals
+    key: resumes
+    value: 1
+  - kind: equals
+    key: local_steps
+    value: 2

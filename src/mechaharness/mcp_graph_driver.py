@@ -112,7 +112,7 @@ Cursor-compatible NDJSON handshake (initialize + tools/list)::
     True
 
 See also: ``docs/reference/durable-graph-generators.md`` and durable
-``scenario.yaml`` stories under harness kind ``durable_generator``.
+``kind: cli`` stories with a ``durable:`` session block.
 """
 
 from __future__ import annotations

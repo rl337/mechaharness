@@ -60,12 +60,10 @@ class HostKitCaseSpec(BaseModel):
     seed: dict[str, Any] = Field(default_factory=dict)
 
 
-class HostKitSubmitOnceCommand(BaseModel):
+class HostKitSubmitOnceCommand(HostKitCaseSpec):
+    """One submit-once claim (split matrices across scenario YAML files)."""
+
     model_config = ConfigDict(extra="forbid")
-
-    cases: list[HostKitCaseSpec] = Field(min_length=1)
-
-
 
 
 def run_check_completer_flavors(body: CheckCompleterFlavorsCommand) -> dict[str, Any]:
@@ -195,84 +193,86 @@ def _make_job_graph(*, node_id: str, task_id: str) -> ExecutionGraph:
 async def run_host_kit_submit_once(
     body: HostKitSubmitOnceCommand,
 ) -> dict[str, Any]:
-    results: dict[str, Any] = {}
     with tempfile.TemporaryDirectory(prefix="mh-cli-host-kit-") as tmp:
-        for case in body.cases:
-            log = _SubmitLog()
-            runner = SubmitOnceEffectfulRunner(
-                kinds=["coding_job"],
-                backend_id="cli.coding",
-                submit=log.submit,
+        log = _SubmitLog()
+        runner = SubmitOnceEffectfulRunner(
+            kinds=["coding_job"],
+            backend_id="cli.coding",
+            submit=log.submit,
+        )
+        run_id = body.run_id or f"cli-{body.id}"
+        db = Path(tmp) / f"{body.id}.sqlite"
+        if body.durable:
+            executor = host_graph_executor(
+                runners=[runner],
+                checkpoint_path=db,
+                agent_id="cli-host-kit",
             )
-            run_id = case.run_id or f"cli-{case.id}"
-            db = Path(tmp) / f"{case.id}.sqlite"
-            if case.durable:
-                executor = host_graph_executor(
-                    runners=[runner],
-                    checkpoint_path=db,
-                    agent_id="cli-host-kit",
+        else:
+            executor = host_graph_executor(
+                runners=[runner],
+                agent_id="cli-host-kit",
+            )
+        store = executor.store
+        node_id = body.node_id
+        if body.mode == "dispatch":
+            result = await executor.run(
+                _make_job_graph(node_id=node_id, task_id=body.task_id),
+                budget_policy=BudgetPolicy.unlimited(),
+                run_id=run_id,
+                skip_linkage=True,
+            )
+        elif body.mode == "resume_seeded":
+            if not isinstance(store, SqliteCheckpointStore):
+                raise ValueError(
+                    "resume_seeded requires durable SqliteCheckpointStore"
                 )
-            else:
-                executor = host_graph_executor(
-                    runners=[runner],
-                    agent_id="cli-host-kit",
-                )
-            store = executor.store
-            node_id = case.node_id
-            if case.mode == "dispatch":
-                result = await executor.run(
-                    _make_job_graph(node_id=node_id, task_id=case.task_id),
-                    budget_policy=BudgetPolicy.unlimited(),
+            effect_states = {s.value: s for s in EffectState}
+            node_statuses = {s.value: s for s in NodeStatus}
+            seed = body.seed
+            effect_state = effect_states[
+                str(seed.get("effect_state") or "uncertain")
+            ]
+            handle = seed.get("external_handle")
+            attempt = int(seed.get("node_attempt") or 1)
+            node_status = node_statuses[str(seed.get("node_status") or "running")]
+            graph = _make_job_graph(node_id=node_id, task_id=body.task_id)
+            graph.nodes[node_id].attempt = attempt
+            graph.nodes[node_id].status = node_status
+            store.save_effect(
+                EffectRecord(
+                    effect_id=f"{run_id}:{node_id}:{attempt}",
                     run_id=run_id,
-                    skip_linkage=True,
+                    node_id=node_id,
+                    node_attempt=attempt,
+                    backend_id="cli.coding",
+                    state=effect_state,
+                    external_handle=str(handle) if handle else None,
+                    recovery_boundary="dispatch",
                 )
-            elif case.mode == "resume_seeded":
-                if not isinstance(store, SqliteCheckpointStore):
-                    raise ValueError("resume_seeded requires durable SqliteCheckpointStore")
-                effect_states = {s.value: s for s in EffectState}
-                node_statuses = {s.value: s for s in NodeStatus}
-                seed = case.seed
-                effect_state = effect_states[str(seed.get("effect_state") or "uncertain")]
-                handle = seed.get("external_handle")
-                attempt = int(seed.get("node_attempt") or 1)
-                node_status = node_statuses[str(seed.get("node_status") or "running")]
-                graph = _make_job_graph(node_id=node_id, task_id=case.task_id)
-                graph.nodes[node_id].attempt = attempt
-                graph.nodes[node_id].status = node_status
-                store.save_effect(
-                    EffectRecord(
-                        effect_id=f"{run_id}:{node_id}:{attempt}",
-                        run_id=run_id,
-                        node_id=node_id,
-                        node_attempt=attempt,
-                        backend_id="cli.coding",
-                        state=effect_state,
-                        external_handle=str(handle) if handle else None,
-                        recovery_boundary="dispatch",
-                    )
-                )
-                store.save(graph, run_id=run_id, boundary="dispatch", fingerprint="fp")
-                result = await executor.run(
-                    _make_job_graph(node_id=node_id, task_id=case.task_id),
-                    budget_policy=BudgetPolicy.unlimited(),
-                    run_id=run_id,
-                    resume=True,
-                    skip_linkage=True,
-                )
-            else:
-                raise ValueError(f"unknown host_kit mode {case.mode!r}")
-            results[case.id] = {
-                "status": result.status,
-                "dispatch_count": log.count,
-                "external_handle": effectful_external_handle(result, node_id),
-                "durability": store.durability,
-                "reconciliation_invoked": bool(
-                    result.diagnostics.get("reconciliation_invoked")
-                ),
-            }
-            if hasattr(store, "close"):
-                store.close()
-    return {"scenario_results_exactly": results}
+            )
+            store.save(graph, run_id=run_id, boundary="dispatch", fingerprint="fp")
+            result = await executor.run(
+                _make_job_graph(node_id=node_id, task_id=body.task_id),
+                budget_policy=BudgetPolicy.unlimited(),
+                run_id=run_id,
+                resume=True,
+                skip_linkage=True,
+            )
+        else:
+            raise ValueError(f"unknown host_kit mode {body.mode!r}")
+        out = {
+            "status": result.status,
+            "dispatch_count": log.count,
+            "external_handle": effectful_external_handle(result, node_id),
+            "durability": store.durability,
+            "reconciliation_invoked": bool(
+                result.diagnostics.get("reconciliation_invoked")
+            ),
+        }
+        if hasattr(store, "close"):
+            store.close()
+        return out
 
 
 

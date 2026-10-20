@@ -1,0 +1,36 @@
+kind: cli
+durable:
+  graph: verify_repair
+  controller: story
+  store: memory
+commands:
+- start:
+    run_id: folk-guidance
+    inputs:
+      guidance:
+      - question: How should exhaustion affect the sword maneuver?
+        choices:
+        - id: slow
+          label: Slower
+        - id: precise
+          label: Precise
+        recommendation: precise
+        requested_authority: artistic_direction
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: equals
+    key: question
+    value: How should exhaustion affect the sword maneuver?
+- answer:
+    choose: precise
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+  - kind: equals
+    key: resumes
+    value: 1

@@ -8,50 +8,102 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from mechaharness.cli_assertion import (
+    CliAssertion,
+    CliAssertionSpec,
+    check_assertions,
+    parse_expect_list,
+)
 from mechaharness.cli_instrumentor import CliInstrumentor, CliRunResult
-from mechaharness.cli_verb import CliParsedCommand, parse_cli_commands, script_from_mapping
+from mechaharness.cli_verb import CliParsedCommand, CliScript, parse_cli_commands
+
+
+class DurableSessionBlock(BaseModel):
+    """Scenario-level durable IoC session (graph / controller / store)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    graph: str
+    controller: str = "story"
+    store: Literal["memory", "shared"] = "memory"
 
 
 class CliScenario(BaseModel):
-    """CLI story script: verb commands + open hard expect mapping."""
+    """CLI story script: verb commands + open structured expect list."""
 
     model_config = ConfigDict(extra="forbid")
 
     kind: Literal["cli"]
     commands: list[CliParsedCommand] = Field(min_length=1)
-    expect: dict[str, Any]
+    expect: list[CliAssertionSpec] | None = None
+    durable: DurableSessionBlock | None = None
 
     @model_validator(mode="before")
     @classmethod
-    def _parse_commands(cls, data: Any) -> Any:
+    def _parse_commands_and_expect(cls, data: Any) -> Any:
         if not isinstance(data, dict):
             return data
-        raw = data.get("commands")
+        out = dict(data)
+        raw = out.get("commands")
         if isinstance(raw, list) and raw and isinstance(raw[0], dict):
-            # YAML shape ``- infer: {…}`` → CliParsedCommand list
             if "verb" not in raw[0]:
-                data = {**data, "commands": parse_cli_commands(raw)}
-        return data
+                out["commands"] = parse_cli_commands(raw)
+        expect = out.get("expect")
+        if isinstance(expect, list):
+            out["expect"] = parse_expect_list(expect)
+        commands = out.get("commands") or []
+        for cmd in commands:
+            if isinstance(cmd, CliParsedCommand) and cmd.expect is not None:
+                # already parsed as list[dict] by parse_cli_commands
+                continue
+        return out
 
     @model_validator(mode="after")
-    def _expect_nonempty(self) -> CliScenario:
-        if not self.expect:
-            raise ValueError("expect must declare at least one key")
+    def _expect_present(self) -> CliScenario:
+        has_script_expect = bool(self.expect)
+        has_step_expect = any(
+            c.expect is not None or c.expect_error is not None for c in self.commands
+        )
+        if not has_script_expect and not has_step_expect:
+            raise ValueError(
+                "scenario needs script-level expect or per-command expect/expect_error"
+            )
         return self
 
-    def to_script(self):
-        return script_from_mapping(
-            {"commands": [{c.verb: c.params} for c in self.commands]}
-        )
+    def to_script(self) -> CliScript:
+        return CliScript(commands=self.commands)
 
-    def assert_expect(self, result: CliRunResult, *, label: str) -> None:
-        got = result.as_expect_dict()
-        for key, wanted in self.expect.items():
-            if key not in got:
-                raise AssertionError(
-                    f"{label}: missing actual key {key!r}; got {sorted(got)}"
-                )
-            assert got[key] == wanted, f"{label}: {key}: {got[key]!r} != {wanted!r}"
+    def assert_expect(
+        self,
+        result: CliRunResult,
+        assertions: dict[str, CliAssertion],
+        *,
+        label: str,
+    ) -> None:
+        if len(result.steps) != len(self.commands):
+            raise AssertionError(
+                f"{label}: got {len(result.steps)} steps for "
+                f"{len(self.commands)} commands"
+            )
+        for index, (cmd, step) in enumerate(zip(self.commands, result.steps)):
+            step_label = f"{label}:commands[{index}].{cmd.verb}"
+            obs = step.observation()
+            if cmd.expect_error is not None:
+                if obs.get("error") != cmd.expect_error:
+                    raise AssertionError(
+                        f"{step_label}: expect_error {cmd.expect_error!r} "
+                        f"!= {obs.get('error')!r}"
+                    )
+            elif cmd.expect is not None:
+                specs = parse_expect_list(cmd.expect)
+                check_assertions(obs, specs, assertions, label=step_label)
+        if self.expect:
+            check_assertions(
+                result.observation(),
+                self.expect,
+                assertions,
+                label=label,
+            )
 
 
 def load_cli_scenario(path: Path) -> CliScenario:
@@ -68,4 +120,10 @@ async def run_cli_scenario(
     scenario: CliScenario,
     instrumentor: CliInstrumentor,
 ) -> CliRunResult:
+    if scenario.durable is not None:
+        instrumentor.configure_durable_session(
+            graph=scenario.durable.graph,
+            controller=scenario.durable.controller,
+            store=scenario.durable.store,
+        )
     return await instrumentor.run(scenario.to_script())

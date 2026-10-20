@@ -1,25 +1,39 @@
-# Local plan checkpoint, fan-in, and merge conflicts
 kind: cli
-
 commands:
-  - local_plan_resume:
-      goal: ship patch
-      state_revision: r1
-      evidence_refs: [obs:1]
-      satisfied: []
-      fan_in_budget: 4
-      branches:
-        - path: app.py
-          content: a
-          status: ok
-        - path: app.py
-          content: b
-          status: ok
-
+- probe:
+    name: local_plan_resume
+    goal: ship patch
+    state_revision: r1
+    evidence_refs:
+    - obs:1
+    satisfied: []
+    fan_in_budget: 4
+    branches:
+    - path: app.py
+      content: a
+      status: ok
+    - path: app.py
+      content: b
+      status: ok
 expect:
-  stale_preconditions_exactly: [approved]
-  ready_exactly: [consume]
-  dependency_justified: true
-  fan_in_failures_exactly: [bad]
-  merge_conflicts_exactly: [app.py]
-  recovery_boundary: dispatch
+- kind: equals
+  key: stale_preconditions_exactly
+  value:
+  - approved
+- kind: equals
+  key: ready_exactly
+  value:
+  - consume
+- kind: 'true'
+  key: dependency_justified
+- kind: equals
+  key: fan_in_failures_exactly
+  value:
+  - bad
+- kind: equals
+  key: merge_conflicts_exactly
+  value:
+  - app.py
+- kind: equals
+  key: recovery_boundary
+  value: dispatch

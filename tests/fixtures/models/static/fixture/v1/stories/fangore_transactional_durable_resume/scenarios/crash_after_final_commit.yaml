@@ -1,0 +1,33 @@
+kind: cli
+commands:
+- probe:
+    name: transactional_durable_resume
+    goal: downstream-coding-job
+    run_id_prefix: story-tdr
+    crash_location: after_final_commit
+expect:
+- kind: 'true'
+  key: crashed
+- kind: equals
+  key: status
+  value: ok
+- kind: equals
+  key: node_status
+  value: succeeded
+- kind: equals
+  key: dispatch_count
+  value: 1
+- kind: equals
+  key: dispatch_count_after_crash
+  value: 1
+- kind: equals
+  key: effect_state_before
+  value: completed
+- kind: equals
+  key: effect_state_after
+  value: completed
+- kind: 'false'
+  key: reconciliation_invoked
+- kind: equals
+  key: boundary_before
+  value: commit

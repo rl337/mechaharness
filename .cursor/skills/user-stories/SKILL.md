@@ -53,12 +53,10 @@ tight follow-up PR in the same wave).
 
 | Target harness | Use when |
 |----------------|----------|
-| **`cli`** (default) | Host/CLI capabilities: infer, tools, lanes, recipes-as-commands, EventLog asserts, cassettes/live. Product: `CliInstrumentor` + growing `cli_universe` graph. |
-| **`durable_generator`** | Durable IoC start/answer/inspect/rebuild until those verbs land on `cli`. Product: `DurableInstrumentor`. |
+| **`cli`** | All acceptance. Infer, tools, recipes, durable IoC, probes, EventLog asserts, cassettes/live. Config-injected `CliInstrumentor` + growing `cli_universe`. |
 
 Legacy op-dispatch (`pure_api`, domain runners, …) is **deprecated inventory** —
 keep runners only until their stories migrate; then delete the op.
-(`harness_runs` is fully migrated; its runner module is gone.)
 
 ### Story shape (`story.json`)
 
@@ -80,7 +78,6 @@ keep runners only until their stories migrate; then delete the op.
 | Harness | Files |
 |---------|--------|
 | **`cli` (canonical)** | `story.json` + `scenarios/*.yaml` (+ `response.json` cassette when needed) |
-| **`durable_generator`** | `story.json` + `scenario.yaml` (or migrate to `scenarios/` when convenient) |
 | **Legacy (migrating)** | `request.json` + `expect.json` — **do not create new**; remove when the story moves to YAML |
 
 `footnotes` is **required** (use `[]` when none). Each entry needs `id`, `label`,
@@ -118,37 +115,36 @@ commands:
   - infer:
       prompt: Say hello.
 expect:
-  event_types_exactly: [core:access_check, core:graph_start, …]
-  units_positive: true
+  - kind: exactly
+    key: event_types
+    value: [core:access_check, core:graph_start, …]
+  - kind: positive
+    key: cost_units
+  - kind: nonempty
+    key: text
 ```
 
 Verbs are a pyiv map multibind (`MechaHarnessConfig.cli_verb_classes()`).
-Host catalog: `cli_host_verbs.default_cli_verb_classes()`. Story-only probes
-merge via `tests/stories/cli_probes` (`StoryCliConfig`). `expect:` is an open
-mapping (hard equality on declared keys). Add a probe verb + map entry — do
-not grow an if-ladder or closed expect bag.
+Production catalog: `cli_host_verbs` (+ durable IoC verbs). Test delta via
+`TestHarnessCliConfig` (clocks + `probe`). Story probes register on
+`cli_probe_classes` and run as `probe: {name: …}`. `run_recipe` uses
+`cli_recipe_adapter_classes`. `expect:` is an open assertion list (validate
+kinds at load). Prefer many YAML scenarios over bag-ops; discovery = add YAML.
 See [`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
 
 Live: `MECHA_STORY_BACKEND=live`, `MECHA_BASE_URL`, `MECHA_MODEL` (served id).
-
-### `durable_generator` scenario shape
-
-Verb-led steps (`start` / `answer` / `inspect` / `rebuild`) over
-`DurableInstrumentor`. Per-step `expect` / `expect_error`. Prefer folding into
-`cli` once durable verbs exist there.
 
 ### Full migration program
 
 Migrate in waves; each wave adds the smallest CLI/harness surface required:
 
-1. Observability / one-shot infer (OBS-*) — **done** (`nubble_run_cost_events`, …)
+1. Observability / one-shot infer (OBS-*) — **done**
 2. Former `harness_runs` / pass-through / tool-loop / cassettes / host DI /
-   judge route — **done** (runner module removed; verbs on `CliInstrumentor`)
-3. Graph execution — **done** (probes under `tests/stories/cli_probes`;
-   `graph_execution` runner gone). Recipe catalog next.
-4. Decision plane / remaining judge ops
-5. `pure_api` + context/eval library surface
-6. Fold or keep `durable_generator` IoC stories
+   judge route — **done**
+3. Graph execution — **done** (`probe` + `cli_probe_classes`)
+4. Durable IoC — **done** (CLI verbs; parallel harness removed)
+5. Decision plane / remaining judge ops
+6. `pure_api` + context/eval library surface
 
 When a family has zero stories left, delete its op-dispatch runner module.
 When an individual `op` has zero remaining `request.json` stories, delete that
@@ -205,7 +201,7 @@ footnote defs when the narrative contains matching `[^id]` markers).
 
 **How the story is proven** — technical, like `implementation`, but about tests.
 
-- Cite `Harness \`cli\` scenarios \`…yaml\`` (or `durable_generator`) and the hard
+- Cite `Harness \`cli\` scenarios \`…yaml\`` and the hard
   expect keys / scenario stems.
 - Cassette / live dual-mode notes when relevant.
 - Related unit test modules under `tests/`.
@@ -240,7 +236,7 @@ Literal feature outcome (not metaphor). Must match what `narrative` claims.
 When you **touch** functionality in this repo:
 
 1. Name which story id(s) exercise the change.
-2. If none fit — add a **`kind: cli`** (or `durable_generator`) story under
+2. If none fit — add a **`kind: cli`** story under
    Nubble / Fangore / Taloneth — never a new legacy `op`.
 3. If the owning story is still legacy op-dispatch, **migrate it to YAML** in
    the same change when practical (intent check → scenarios → delete
@@ -260,11 +256,10 @@ tests/fixtures/models/
   <family>/<model>/<version>/
     manifest.json
     stories/<story_id>/
-      story.json           # kind = cli | durable_generator | (legacy during migration)
+      story.json           # kind = cli | (legacy during migration)
       scenarios/*.yaml     # cli: CLI commands + hard expect (preferred)
-      scenario.yaml        # durable_generator (interim)
       response.json        # cassette when needed
-tests/stories/harness/     # cli, durable_generator, … (+ legacy until empty)
+tests/stories/harness/     # cli (+ legacy until empty)
 tests/stories/runners/     # deprecated op-dispatch; delete per migrated family
 scripts/generate_user_stories_md.py
 docs/guides/user-stories.md   # GENERATED

@@ -1,16 +1,19 @@
-# HF-07: conversational_tool_loop expands nested inference/tool_call rounds
 kind: cli
-
 commands:
-  - run_recipe:
-      name: conversational_tool_loop
-      max_iterations: 4
-      tool_name: lookup
-
+- run_recipe:
+    name: conversational_tool_loop
+    max_iterations: 4
+    tool_name: lookup
 expect:
-  status: ok
-  rounds: 2
-  subgraph_node_ids_exactly:
-    - round_0/inference
-    - round_0/tool_call:lookup:0
-    - round_1/inference
+- kind: equals
+  key: status
+  value: ok
+- kind: equals
+  key: rounds
+  value: 2
+- kind: exactly
+  key: subgraph_node_ids
+  value:
+  - round_0/inference
+  - round_0/tool_call:lookup:0
+  - round_1/inference

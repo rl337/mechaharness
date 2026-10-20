@@ -1,30 +1,35 @@
-# Tool-loop harness emits inference/tool components under parent harness
 kind: cli
-
 commands:
-  - tool_loop:
-      prompt: find it
-      tool_name: lookup
-      max_turns: 4
-
+- tool_loop:
+    prompt: find it
+    tool_name: lookup
+    max_turns: 4
 expect:
-  text: done
-  status: ok
-  traversal_kinds_exactly:
-    - turn_start
-    - cost
-    - inference
-    - tool_call
-    - access_check
-    - cost
-    - tool_result
-    - turn_start
-    - cost
-    - inference
-  component_parents_exactly:
-    - harness
-    - harness
-    - harness
-    - harness
-    - harness
-    - harness
+- kind: equals
+  key: text
+  value: done
+- kind: equals
+  key: status
+  value: ok
+- kind: exactly
+  key: traversal_kinds
+  value:
+  - turn_start
+  - cost
+  - inference
+  - tool_call
+  - access_check
+  - cost
+  - tool_result
+  - turn_start
+  - cost
+  - inference
+- kind: exactly
+  key: component_parent_ids
+  value:
+  - harness
+  - harness
+  - harness
+  - harness
+  - harness
+  - harness

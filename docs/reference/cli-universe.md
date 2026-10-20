@@ -17,18 +17,30 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 |---------|--------|
 | Graph factory | `build_cli_universe_graph` (`cli:infer` node) |
 | Infer runner | `CliInferRunner` (reason-lane `Completer`, `core:inference` + `core:cost`) |
-| Instrumentor | `CliInstrumentor` dispatches via pyiv map multibind (`cli_verb_classes` → `Dict[str, CliVerb]`). Host verbs in `cli_host_verbs`; story probes in `tests/stories/cli_probes`. |
+| Instrumentor | Config-injected `CliInstrumentor`; verbs via `cli_verb_classes` map multibind |
+| Recipe adapters | `cli_recipe_adapter_classes` → `Dict[str, CliRecipeAdapter]` for `run_recipe` |
+| Assertions | Open `cli_assertion_classes` list (`kind` / `key` / `op`-like fields) |
 | Event stamps | `StampingEventLog` over injectable `DateTimeService` |
 | Event tap | `tapping_event_log` on the blessed executor path (HF-05) |
 
+Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`, diagnostics,
+judge, durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`).
+Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
+(`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
+
+Grow `cli_universe` nodes when stories need product surface that isn’t there
+yet — not one node per verb. If the graph never grows, stories aren’t covering
+real host interaction.
+
 Distinct from:
 
-- **Durable generator scripts** (`durable_generator_script`) — IoC start/answer/inspect (fold into CLI later)
 - **Agentic Recipes** — `GraphTemplate` soft-point catalogs (`verify_repair`, …)
+- **Durable generator product API** — `DurableGraphGenerator` / host kit; CLI
+  verbs drive the same session through the instrumentor
 
 ## Story layout (canonical acceptance)
 
-**All user stories are migrating here.** New acceptance is `kind: cli` +
+**All user stories migrate here.** Acceptance is `kind: cli` +
 `scenarios/*.yaml`. One story may own many concise scenarios (one claim each):
 
 ```text
@@ -40,8 +52,27 @@ stories/<id>/
   response.json          # cassette when needed
 ```
 
-YAML is CLI-shaped; `expect:` is test-only (hard equality). Cassette vs live is
-harness/Config (`MECHA_STORY_BACKEND`, `MECHA_BASE_URL`, `MECHA_MODEL`), not YAML.
+```yaml
+kind: cli
+commands:
+  - infer:
+      prompt: Say hello.
+expect:
+  - kind: exactly
+    key: event_types
+    value: [core:access_check, core:graph_start, …]
+  - kind: positive
+    key: cost_units
+  - kind: nonempty
+    key: text
+```
+
+Durable IoC sessions use a scenario-level `durable:` block and per-command
+`expect` / `expect_error`. Cassette vs live is harness/Config
+(`MECHA_STORY_BACKEND`, `MECHA_BASE_URL`, `MECHA_MODEL`), not YAML.
+
+Discovery = add a YAML under `scenarios/`. Prefer few reusable verbs + many
+scenario files over bag-ops and per-test Python.
 
 ## Intent check
 
@@ -51,17 +82,15 @@ legacy soft expects blindly. See `.cursor/skills/user-stories/SKILL.md`.
 
 ## Migration program
 
-Convert every legacy `request.json` / `op` story onto CLI (or temporary
-`durable_generator`) YAML. Each wave adds only the CLI verb or harness assert
-needed:
+Convert every legacy `request.json` / `op` story onto `kind: cli` YAML. Each
+wave adds only the CLI verb, probe, or universe node needed:
 
 1. Observability / one-shot infer (OBS-*) — done
 2. Former harness_runs / pass-through / tool-loop / cassettes / host DI /
-   judge route — done (`harness_runs` runner removed)
-3. Graph execution — done (story probes + map multibind; runner removed).
-   Recipe catalog next.
-4. Decision plane / remaining judge ops
-5. pure_api + context/eval surface
-6. Fold durable IoC into CLI when ready
+   judge route — done
+3. Graph execution — done (test probes + `probe` verb)
+4. Durable IoC — done (CLI verbs; parallel harness removed)
+5. Decision plane / remaining judge ops
+6. pure_api + context/eval surface
 
 When a legacy family has zero stories left, delete its op-dispatch runner.

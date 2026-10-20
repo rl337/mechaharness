@@ -1,11 +1,12 @@
-# Fail linkage when training-grade capture is unavailable
 kind: cli
-
 commands:
-  - check_inference_capture:
-      required_inference_capture: training_grade
-
+- probe:
+    name: check_inference_capture
+    required_inference_capture: training_grade
 expect:
-  linkage_ok: false
-  codes_exactly:
-    - inference_capture_unsupported
+- kind: 'false'
+  key: linkage_ok
+- kind: equals
+  key: codes_exactly
+  value:
+  - inference_capture_unsupported

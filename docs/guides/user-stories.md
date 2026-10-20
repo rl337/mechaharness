@@ -171,7 +171,7 @@ Operators need to see how often a frontier driver was asked for advice versus ho
 
 #### Validation
 
-Harness `durable_generator` via `scenario.yaml`. Hard expects guidance_yields and resumes matching the scripted cycle.
+Harness `cli` via `scenarios/session.yaml`. Hard expects guidance_yields and resumes matching the scripted cycle.
 
 #### Footnotes
 
@@ -1054,7 +1054,7 @@ Frontier and other MCP-capable clients cannot reenter a model session during a p
 
 #### Validation
 
-Harness `durable_generator` via `scenario.yaml`. Hard expects start advice_requested, resume completed, distinct sequences.
+Harness `cli` via `scenarios/session.yaml`. Hard expects start advice_requested, resume completed, distinct sequences.
 
 #### Footnotes
 
@@ -1070,7 +1070,7 @@ Long-running judgment-bearing work is started as a durable generator over a regi
 
 #### Validation
 
-Harness `durable_generator` via `scenario.yaml`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.
+Harness `cli` via `scenarios/session.yaml`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.
 
 #### Footnotes
 
@@ -1231,7 +1231,7 @@ When a run needs higher-level judgment, start returns an advice yield with a typ
 
 #### Validation
 
-Harness `durable_generator` via `scenario.yaml`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.
+Harness `cli` via `scenarios/session.yaml`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.
 
 #### Footnotes
 
@@ -1264,7 +1264,7 @@ Possession of a run id alone must not confer control. An intruder controller can
 
 #### Validation
 
-Harness `durable_generator` via `scenario.yaml`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.
+Harness `cli` via `scenarios/session.yaml`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.
 
 #### Footnotes
 
@@ -1280,7 +1280,7 @@ Duplicate resume with the same idempotency key returns the committed result; a c
 
 #### Validation
 
-Harness `durable_generator` via `scenario.yaml`. Hard expects duplicate key same sequence and stale rejection.
+Harness `cli` via `scenarios/session.yaml`. Hard expects duplicate key same sequence and stale rejection.
 
 #### Footnotes
 
@@ -1296,7 +1296,7 @@ A suspended generator run must survive executor or MCP process restart and prese
 
 #### Validation
 
-Harness `durable_generator` via `scenario.yaml`. Hard expects identical pending question and request_id after rehydrate.
+Harness `cli` via `scenarios/session.yaml`. Hard expects identical pending question and request_id after rehydrate.
 
 #### Footnotes
 
@@ -2498,7 +2498,7 @@ Evaluation and CI need a first-class scripted driver that asserts expected yield
 
 #### Validation
 
-Harness `durable_generator` via `scenario.yaml`. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.
+Harness `cli` via `scenarios/session.yaml`. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.
 
 #### Footnotes
 

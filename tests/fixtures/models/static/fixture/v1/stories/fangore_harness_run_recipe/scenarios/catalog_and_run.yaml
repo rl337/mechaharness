@@ -1,19 +1,24 @@
-# Catalog lists harness_run; run yields text through prepare→loop→render
 kind: cli
-
 commands:
-  - run_recipe:
-      name: harness_run
-      prompt: say hello
-      backend: mock
-      family: pass_through
-
+- run_recipe:
+    name: harness_run
+    prompt: say hello
+    backend: mock
+    family: pass_through
 expect:
-  recipe_in_catalog: true
-  status: ok
-  text_nonempty: true
-  turns: 1
-  graph_node_ids_exactly:
-    - prepare
-    - harness_loop
-    - render
+- kind: 'true'
+  key: recipe_in_catalog
+- kind: equals
+  key: status
+  value: ok
+- kind: nonempty
+  key: text
+- kind: equals
+  key: turns
+  value: 1
+- kind: exactly
+  key: subgraph_node_ids
+  value:
+  - prepare
+  - harness_loop
+  - render

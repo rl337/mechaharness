@@ -51,7 +51,9 @@ from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectio
 from mechaharness.authority_gate import AuthorityGate
 from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.checkpoint_store import CheckpointStore, EventLogCheckpointStore
-from mechaharness.cli_verb import CliVerb
+from mechaharness.cli_assertion import CliAssertion
+from mechaharness.cli_recipe_adapter import CliRecipeAdapter
+from mechaharness.cli_verb import CliProbe, CliVerb
 from mechaharness.config import Settings
 from mechaharness.context_provider import ContextProviderRegistry
 from mechaharness.core.access import (
@@ -501,6 +503,21 @@ class MechaHarnessConfig(Config):
             on_conflict="replace",
         )
         self.contribute_map_entries(
+            cast(type[Any], CliRecipeAdapter),
+            cast(dict[Any, type[Any]], self.cli_recipe_adapter_classes()),
+            on_conflict="replace",
+        )
+        self.contribute_map_entries(
+            cast(type[Any], CliAssertion),
+            cast(dict[Any, type[Any]], self.cli_assertion_classes()),
+            on_conflict="replace",
+        )
+        self.contribute_map_entries(
+            cast(type[Any], CliProbe),
+            cast(dict[Any, type[Any]], self.cli_probe_classes()),
+            on_conflict="replace",
+        )
+        self.contribute_map_entries(
             cast(type[Any], GraphTemplate),
             cast(dict[Any, type[Any]], self.graph_template_classes()),
             on_conflict="error",
@@ -843,6 +860,22 @@ class MechaHarnessConfig(Config):
         from mechaharness.cli_host_verbs import default_cli_verb_classes
 
         return default_cli_verb_classes()
+
+    def cli_recipe_adapter_classes(self) -> dict[str, type[CliRecipeAdapter]]:
+        """Recipe id → CLI adapter. Hosts merge via ``super()``."""
+        from mechaharness.cli_recipe_adapter import default_cli_recipe_adapter_classes
+
+        return default_cli_recipe_adapter_classes()
+
+    def cli_assertion_classes(self) -> dict[str, type[CliAssertion]]:
+        """Assertion kind → checker. Hosts merge via ``super()``."""
+        from mechaharness.cli_assertion import default_cli_assertion_classes
+
+        return default_cli_assertion_classes()
+
+    def cli_probe_classes(self) -> dict[str, type[CliProbe]]:
+        """Story/test probe name → ``CliProbe``. Production default is empty."""
+        return {}
 
     def graph_template_classes(self) -> dict[str, type[GraphTemplate]]:
         """Catalog id → ``GraphTemplate`` class. Hosts merge via ``super()``."""

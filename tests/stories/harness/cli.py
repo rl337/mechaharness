@@ -10,10 +10,11 @@ from pyiv.process import OsEnvironment
 from pyiv.time import MockDateTimeService
 
 from mechaharness.api_connection import SimpleHttpConnectionConfig
+from mechaharness.cli_assertion import resolve_cli_assertions
 from mechaharness.cli_instrumentor import CliInstrumentor
-from mechaharness.cli_verb import resolve_cli_verbs
 from mechaharness.config import Settings
 from mechaharness.core.types import ChatMessage, Role, ToolCall, Usage
+from mechaharness.di import get_injector
 from mechaharness.inference.judge import FixtureJudgeProvider, JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
@@ -21,7 +22,7 @@ from mechaharness.inference.systemone import SystemOneJudgeProvider
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
-from tests.stories.cli_probes.config import StoryCliConfig
+from tests.stories.cli_probes.config import TestHarnessCliConfig
 from tests.stories.scenarios.cli_scenario import (
     CliScenario,
     load_cli_scenario,
@@ -42,16 +43,18 @@ class CliHarness:
         if path is None or not path.is_file():
             raise AssertionError(f"{case.label}: missing CLI scenario YAML")
         scenario = load_cli_scenario(path)
-        instrumentor = self._build_instrumentor(case, backend, scenario)
+        config = self._build_config(case, backend, scenario)
+        instrumentor = get_injector(config).inject(CliInstrumentor)
+        assertions = resolve_cli_assertions(config)
         result = await run_cli_scenario(scenario, instrumentor)
-        scenario.assert_expect(result, label=case.label)
+        scenario.assert_expect(result, assertions, label=case.label)
 
-    def _build_instrumentor(
+    def _build_config(
         self,
         case: StoryCase,
         backend: StoryBackend,
         scenario: CliScenario,
-    ) -> CliInstrumentor:
+    ) -> TestHarnessCliConfig:
         response_path = case.path("response.json")
         response: dict = {}
         if response_path.is_file():
@@ -64,7 +67,6 @@ class CliHarness:
         clock = MockDateTimeService(
             datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
         )
-        verbs = resolve_cli_verbs(StoryCliConfig())
         needs_judge = any(cmd.verb == "judge_route" for cmd in scenario.commands)
         scripted_tool_name: str | None = None
         for cmd in scenario.commands:
@@ -112,12 +114,11 @@ class CliHarness:
                     [ChatMessage(role=Role.ASSISTANT, content=content)],
                     usages=[usage],
                 )
-            return CliInstrumentor(
+            return TestHarnessCliConfig(
                 completer,
-                datetime_service=clock,
+                clock,
                 model=model,
                 judge_provider=judge_provider,
-                verbs=verbs,
             )
 
         if case.adapter == "openai_compat":
@@ -140,23 +141,20 @@ class CliHarness:
                     )
                 client = AsyncUrllibHttpClient(timeout=180.0)
             strategy = OpenAICompatStrategy(settings, client=client, timeout=180.0)
-            return CliInstrumentor(
+            return TestHarnessCliConfig(
                 strategy,
-                datetime_service=clock,
+                clock,
                 model=model,
                 judge_provider=judge_provider,
-                verbs=verbs,
             )
 
         if case.adapter == "systemone":
-            # Judge cassette stories: completer unused; provider is the under-test edge.
-            return CliInstrumentor(
+            return TestHarnessCliConfig(
                 MockInferenceStrategy(),
-                datetime_service=clock,
+                clock,
                 model=model,
                 judge_provider=judge_provider
                 or self._build_judge_provider(case, backend, response),
-                verbs=verbs,
             )
 
         raise AssertionError(

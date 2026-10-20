@@ -1,25 +1,25 @@
-# Surface material train/eval constraint mismatches
 kind: cli
-
 commands:
-  - compare_run_parity:
-      a:
-        model: m
-        max_tokens: 1024
-        temperature: 0.0
-        max_turns: 4
-        tools:
-          - Read
-      b:
-        model: m
-        max_tokens: 512
-        temperature: 0.0
-        max_turns: 4
-        tools:
-          - Read
-
+- compare_run_parity:
+    a:
+      model: m
+      max_tokens: 1024
+      temperature: 0.0
+      max_turns: 4
+      tools:
+      - Read
+    b:
+      model: m
+      max_tokens: 512
+      temperature: 0.0
+      max_turns: 4
+      tools:
+      - Read
 expect:
-  comparable: false
-  material_mismatches_exactly:
-    - max_tokens
-    - sampling
+- kind: 'false'
+  key: comparable
+- kind: equals
+  key: material_mismatches_exactly
+  value:
+  - max_tokens
+  - sampling

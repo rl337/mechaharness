@@ -1,14 +1,18 @@
-# Catalog lists backend_describe; mock backend description name is mock
 kind: cli
-
 commands:
-  - run_recipe:
-      name: backend_describe
-      backend: mock
-
+- run_recipe:
+    name: backend_describe
+    backend: mock
 expect:
-  recipe_in_catalog: true
-  status: ok
-  description_name: mock
-  graph_node_ids_exactly:
-    - describe
+- kind: 'true'
+  key: recipe_in_catalog
+- kind: equals
+  key: status
+  value: ok
+- kind: equals
+  key: description_name
+  value: mock
+- kind: exactly
+  key: subgraph_node_ids
+  value:
+  - describe

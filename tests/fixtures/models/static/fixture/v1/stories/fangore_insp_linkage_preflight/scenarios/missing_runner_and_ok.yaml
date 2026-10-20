@@ -1,14 +1,18 @@
-# Unregistered kind fails; linear compute plan links
 kind: cli
-
 commands:
-  - graph_linkage_preflight:
-      check_missing_runner: true
-      check_missing_stop: false
-      check_ok_linear: true
-
+- probe:
+    name: graph_linkage_preflight
+    check_missing_runner: true
+    check_missing_stop: false
+    check_ok_linear: true
 expect:
-  missing_runner_ok: false
-  missing_runner_codes_exactly: [no_runner]
-  ok_linear_ok: true
-  ok_linear_fingerprint_nonempty: true
+- kind: 'false'
+  key: missing_runner_ok
+- kind: equals
+  key: missing_runner_codes_exactly
+  value:
+  - no_runner
+- kind: 'true'
+  key: ok_linear_ok
+- kind: 'true'
+  key: ok_linear_fingerprint_nonempty

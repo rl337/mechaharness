@@ -1,0 +1,19 @@
+kind: cli
+durable:
+  graph: verify_repair
+  controller: scripted
+  store: memory
+commands:
+- start:
+    inputs:
+      guidance:
+      - question: Unexpected?
+        choices:
+        - id: x
+          label: X
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- answer: {}
+  expect_error: unexpected_advice

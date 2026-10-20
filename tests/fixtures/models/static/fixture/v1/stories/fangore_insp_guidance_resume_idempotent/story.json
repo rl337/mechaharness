@@ -2,10 +2,10 @@
   "id": "fangore_insp_guidance_resume_idempotent",
   "persona": "fangore",
   "title": "Make guidance resume idempotent and reject stale sequences",
-  "kind": "durable_generator",
+  "kind": "cli",
   "narrative": "Duplicate resume with the same idempotency key returns the committed result; a conflicting or stale sequence fails safely so drivers can retry without double-applying advice. Tracks R-IOC-IDEMPOTENT[^insp-ioc-06].",
   "implementation": "`DurableGraphGenerator.resume` stores results under `idempotency_key` and compares `expected_sequence` to the run record.",
-  "validation": "Harness `durable_generator` via `scenario.yaml`. Hard expects duplicate key same sequence and stale rejection.",
+  "validation": "Harness `cli` via `scenario.yaml`. Hard expects duplicate key same sequence and stale rejection.",
   "footnotes": [
     {
       "id": "insp-ioc-06",
