@@ -167,7 +167,8 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
 <p>Production verbs stay lean (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>,
 <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code>, diagnostics, judge,
 durable IoC <code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">answer</span></code>/<code class="docutils literal notranslate"><span class="pre">inspect</span></code>/<code class="docutils literal notranslate"><span class="pre">rebuild</span></code>/<code class="docutils literal notranslate"><span class="pre">list_recipes</span></code>,
-<code class="docutils literal notranslate"><span class="pre">transactional_resume</span></code> for DR-10 crash-window durable coding-job resume).
+<code class="docutils literal notranslate"><span class="pre">transactional_resume</span></code> for DR-10 crash-window durable coding-job resume,
+<code class="docutils literal notranslate"><span class="pre">decision_case</span></code> for JEV / decision-plane case plans).
 Test-only clocks and the <code class="docutils literal notranslate"><span class="pre">probe</span></code> verb join via <code class="docutils literal notranslate"><span class="pre">TestHarnessCliConfig</span></code>
 (<code class="docutils literal notranslate"><span class="pre">tests/stories/cli_probes</span></code>). Story probes register on <code class="docutils literal notranslate"><span class="pre">cli_probe_classes</span></code>.
 Probe stories load a human-readable plan under <code class="docutils literal notranslate"><span class="pre">plans/</span></code>
@@ -377,6 +378,32 @@ document-selected behavior via <code class="docutils literal notranslate"><span 
 </table>
 <p><code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> remains for <strong>execute</strong> adapters (<code class="docutils literal notranslate"><span class="pre">harness_run</span></code>,
 <code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">decision_case</span></code> loads a judgement / decision-plane case under <code class="docutils literal notranslate"><span class="pre">plans/</span></code> —
+one verb, document-selected behavior via <code class="docutils literal notranslate"><span class="pre">case:</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">case:</span></code></p></th>
+<th class="head"><p>Coverage</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">citation_support</span></code></p></td>
+<td><p>claim verified / escalate</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">context_budget</span></code></p></td>
+<td><p>RAG pack within token budget</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">requirements_gap</span></code></p></td>
+<td><p>independent_review + coverage outcome</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">task_route</span></code></p></td>
+<td><p>lane route + quality override</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">action_safety</span></code></p></td>
+<td><p>hard grants vs semantic risk</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
 
