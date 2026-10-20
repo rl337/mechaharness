@@ -1,9 +1,18 @@
-# Plan document: ../plans/complex_forces_frontier.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/complex_forces_frontier.yaml
-expect:
-- kind: equals
-  key: final_action
-  value: frontier
+# user story: fangore_jev_task_route_complex_frontier
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/complex_forces_frontier.yaml` (task_route), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/complex_forces_frontier.yaml
+complete:
+  expect:
+  - kind: equals
+    key: final_action
+    value: frontier
+cleanup: []

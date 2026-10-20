@@ -1,8 +1,7 @@
-# Probe plan for scenario `read_high_risk_with_grant.yaml`.
+# Decision case plan for scenario `read_high_risk_with_grant.yaml`.
 # Story: Let hard grants win over semantic risk classification
-
 summary: Let hard grants win over semantic risk classification
-name: action_safety_case
+case: action_safety
 questions:
 - id: semantic_risk
   kind: choice

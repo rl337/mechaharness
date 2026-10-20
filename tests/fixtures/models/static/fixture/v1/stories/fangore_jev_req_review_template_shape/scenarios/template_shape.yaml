@@ -1,11 +1,20 @@
-# Plan document: ../plans/template_shape.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/template_shape.yaml
-expect:
-- kind: equals
-  key: template_name
-  value: independent_review
-- kind: 'true'
-  key: omit_producer_reasoning
+# user story: fangore_jev_req_review_template_shape
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/template_shape.yaml` (requirements_gap), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/template_shape.yaml
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: independent_review
+  - kind: 'true'
+    key: omit_producer_reasoning
+cleanup: []

@@ -1,13 +1,22 @@
-# Plan document: ../plans/delete_low_risk_no_grant.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/delete_low_risk_no_grant.yaml
-expect:
-- kind: equals
-  key: decision
-  value: deny
-- kind: 'true'
-  key: hard_won
-- kind: 'true'
-  key: grants_unchanged
+# user story: fangore_jev_action_safety
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/delete_low_risk_no_grant.yaml` (action_safety), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/delete_low_risk_no_grant.yaml
+complete:
+  expect:
+  - kind: equals
+    key: decision
+    value: deny
+  - kind: 'true'
+    key: hard_won
+  - kind: 'true'
+    key: grants_unchanged
+cleanup: []

@@ -26,7 +26,8 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`,
 `instantiate_recipe`, `tile_recipe`, `recipe_plan`, diagnostics, judge,
 durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`,
-`transactional_resume` for DR-10 crash-window durable coding-job resume).
+`transactional_resume` for DR-10 crash-window durable coding-job resume,
+`decision_case` for JEV / decision-plane case plans).
 Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
 (`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
 Probe stories load a human-readable plan under ``plans/``
@@ -202,3 +203,14 @@ document-selected behavior via ``plan:``:
 
 ``run_recipe`` remains for **execute** adapters (`harness_run`,
 `backend_describe`, `conversational_tool_loop`).
+
+``decision_case`` loads a judgement / decision-plane case under ``plans/`` —
+one verb, document-selected behavior via ``case:``:
+
+| ``case:`` | Coverage |
+|-----------|----------|
+| `citation_support` | claim verified / escalate |
+| `context_budget` | RAG pack within token budget |
+| `requirements_gap` | independent_review + coverage outcome |
+| `task_route` | lane route + quality override |
+| `action_safety` | hard grants vs semantic risk |

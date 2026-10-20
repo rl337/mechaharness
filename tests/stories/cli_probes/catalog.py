@@ -24,9 +24,6 @@ from tests.stories.cli_probes.context_management_probes import (
     context_management_cli_probe_classes,
 )
 from tests.stories.cli_probes.decision_plane_probes import (
-    ActionSafetyCaseCommand,
-    CitationSupportCaseCommand,
-    ContextBudgetCaseCommand,
     DecisionPlaneModelPolicyCommand,
     DecisionPlanePolicyCaseCommand,
     DecisionPlaneProjectionCommand,
@@ -38,11 +35,6 @@ from tests.stories.cli_probes.decision_plane_probes import (
     FixtureJudgeBatchCommand,
     OfflineDecisionExportCommand,
     PolicyReplayCommand,
-    RequirementsGapCaseCommand,
-    TaskRouteCaseCommand,
-    run_action_safety_case,
-    run_citation_support_case,
-    run_context_budget_case,
     run_decision_plane_model_policy,
     run_decision_plane_policy_case,
     run_decision_plane_projection,
@@ -54,8 +46,6 @@ from tests.stories.cli_probes.decision_plane_probes import (
     run_fixture_judge_batch,
     run_offline_decision_export,
     run_policy_replay,
-    run_requirements_gap_case,
-    run_task_route_case,
 )
 from tests.stories.cli_probes.evaluation_research_probes import (
     evaluation_research_cli_probe_classes,
@@ -289,29 +279,6 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
             "decision_plane_shadow_compare",
             DecisionPlaneShadowCompareCommand,
             run_decision_plane_shadow_compare,
-        ),
-        "citation_support_case": _probe(
-            "citation_support_case",
-            CitationSupportCaseCommand,
-            run_citation_support_case,
-        ),
-        "context_budget_case": _probe(
-            "context_budget_case",
-            ContextBudgetCaseCommand,
-            run_context_budget_case,
-        ),
-        "requirements_gap_case": _probe(
-            "requirements_gap_case",
-            RequirementsGapCaseCommand,
-            run_requirements_gap_case,
-        ),
-        "task_route_case": _probe(
-            "task_route_case", TaskRouteCaseCommand, run_task_route_case
-        ),
-        "action_safety_case": _probe(
-            "action_safety_case",
-            ActionSafetyCaseCommand,
-            run_action_safety_case,
         ),
     }
     probes.update(pure_api_cli_probe_classes())

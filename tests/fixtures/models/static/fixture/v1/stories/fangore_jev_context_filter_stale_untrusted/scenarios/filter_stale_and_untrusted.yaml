@@ -1,12 +1,21 @@
-# Plan document: ../plans/filter_stale_and_untrusted.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/filter_stale_and_untrusted.yaml
-expect:
-- kind: exactly
-  key: selected_ids
-  value:
-  - fresh
-- kind: 'true'
-  key: within_budget
+# user story: fangore_jev_context_filter_stale_untrusted
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/filter_stale_and_untrusted.yaml` (context_budget), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/filter_stale_and_untrusted.yaml
+complete:
+  expect:
+  - kind: exactly
+    key: selected_ids
+    value:
+    - fresh
+  - kind: 'true'
+    key: within_budget
+cleanup: []

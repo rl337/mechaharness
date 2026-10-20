@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Product CLI verb `transactional_resume`:** crash-window durable coding-job
   resume via `host_graph_executor` + `ArmedCrashProbe` (DR-10). Wave 2 P1
   stories (`fangore_tdr_crash_*`) migrate onto `kind: user_story`.
+- **Product CLI verb `decision_case`:** JEV / decision-plane case plans
+  (`citation_support`, `context_budget`, `requirements_gap`, `task_route`,
+  `action_safety`). Wave 2 P2 `fangore_jev_*` stories migrate onto
+  `kind: user_story`.
 
 ### Changed
 

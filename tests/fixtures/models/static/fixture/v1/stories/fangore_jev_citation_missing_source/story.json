@@ -2,9 +2,9 @@
   "id": "fangore_jev_citation_missing_source",
   "persona": "fangore",
   "title": "Refuse to verify a claim with no source",
-  "kind": "cli",
-  "narrative": "Fangore receives an atomic claim with no usable source attached. He runs the citation check and verifies the product keeps the claim unverified — there is nothing for the model to endorse. Builds on the happy path in `fangore_jev_citation_matching_claim`.",
-  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate.",
-  "validation": "Harness `cli` `probe` loads `plans/missing_source.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (citation_support) for: Refuse to verify a claim with no source. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
+  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: citation_support` plans.",
+  "validation": "Harness `user_story` scenario(s) `missing_source.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": []
 }

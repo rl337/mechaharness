@@ -1,8 +1,7 @@
-# Probe plan for scenario `uncertain_support.yaml`.
+# Decision case plan for scenario `uncertain_support.yaml`.
 # Story: Never mark unsupported claims verified from a judge alone
-
 summary: Never mark unsupported claims verified from a judge alone
-name: citation_support_case
+case: citation_support
 questions:
 - id: support
   kind: choice

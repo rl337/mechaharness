@@ -1,12 +1,21 @@
-# Plan document: ../plans/exclude_injection.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/exclude_injection.yaml
-expect:
-- kind: exactly
-  key: selected_ids
-  value:
-  - safe
-- kind: 'true'
-  key: within_budget
+# user story: fangore_jev_context_exclude_injection
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/exclude_injection.yaml` (context_budget), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/exclude_injection.yaml
+complete:
+  expect:
+  - kind: exactly
+    key: selected_ids
+    value:
+    - safe
+  - kind: 'true'
+    key: within_budget
+cleanup: []

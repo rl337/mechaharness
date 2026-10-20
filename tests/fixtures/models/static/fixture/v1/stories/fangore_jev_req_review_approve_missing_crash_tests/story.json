@@ -2,9 +2,9 @@
   "id": "fangore_jev_req_review_approve_missing_crash_tests",
   "persona": "fangore",
   "title": "Request crash tests even when the judge says approve",
-  "kind": "cli",
-  "narrative": "A judge answers approve, but Fangore's facts show crash-location tests are missing. He runs the review and verifies product policy requests those tests (or escalates) — a model approve never alone marks the change correct. Pairs with the gap path in `fangore_jev_req_review_gap_found`.",
-  "implementation": "Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.",
-  "validation": "Harness `cli` `probe` loads `plans/approve_but_missing_crash_tests.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (requirements_gap) for: Request crash tests even when the judge says approve. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
+  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: requirements_gap` plans.",
+  "validation": "Harness `user_story` scenario(s) `approve_but_missing_crash_tests.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": []
 }

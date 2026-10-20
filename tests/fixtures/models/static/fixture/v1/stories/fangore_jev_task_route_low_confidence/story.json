@@ -2,9 +2,9 @@
   "id": "fangore_jev_task_route_low_confidence",
   "persona": "fangore",
   "title": "Escalate when the router is not confident",
-  "kind": "cli",
-  "narrative": "Fangore's router returns a lane with low confidence. He runs the task router and verifies product policy escalates instead of locking in an uncertain lane. Builds on the forced-frontier case in `fangore_jev_task_route_complex_frontier`.",
-  "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded route choice with envelopes. Host quality policy may override a cheap route when complexity facts demand frontier or human. Invalid routes and low confidence escalate; model signals never invent new lanes.",
-  "validation": "Harness `cli` `probe` loads `plans/low_confidence.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (task_route) for: Escalate when the router is not confident. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
+  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: task_route` plans.",
+  "validation": "Harness `user_story` scenario(s) `low_confidence.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": []
 }

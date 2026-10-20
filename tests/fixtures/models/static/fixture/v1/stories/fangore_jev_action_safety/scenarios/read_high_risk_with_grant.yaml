@@ -1,11 +1,20 @@
-# Plan document: ../plans/read_high_risk_with_grant.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/read_high_risk_with_grant.yaml
-expect:
-- kind: equals
-  key: decision
-  value: escalate_review
-- kind: 'true'
-  key: grants_unchanged
+# user story: fangore_jev_action_safety
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/read_high_risk_with_grant.yaml` (action_safety), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/read_high_risk_with_grant.yaml
+complete:
+  expect:
+  - kind: equals
+    key: decision
+    value: escalate_review
+  - kind: 'true'
+    key: grants_unchanged
+cleanup: []

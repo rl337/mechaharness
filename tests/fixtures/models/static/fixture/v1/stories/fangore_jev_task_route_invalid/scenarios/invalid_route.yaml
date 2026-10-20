@@ -1,8 +1,17 @@
-# Plan document: ../plans/invalid_route.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/invalid_route.yaml
-expect:
-- kind: 'true'
-  key: escalate
+# user story: fangore_jev_task_route_invalid
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/invalid_route.yaml` (task_route), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/invalid_route.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: escalate
+cleanup: []
