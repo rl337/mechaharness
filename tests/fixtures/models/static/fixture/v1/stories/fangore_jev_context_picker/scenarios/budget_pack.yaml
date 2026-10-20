@@ -1,0 +1,32 @@
+kind: cli
+commands:
+- probe:
+    name: context_budget_case
+    token_budget: 120
+    min_relevance: 0.5
+    min_trust: 0.5
+    min_freshness: 0.3
+    candidates:
+    - id: a
+      tokens: 50
+      relevance: 0.9
+      trust: 0.9
+      freshness: 0.8
+    - id: b
+      tokens: 50
+      relevance: 0.8
+      trust: 0.85
+      freshness: 0.7
+    - id: c
+      tokens: 50
+      relevance: 0.95
+      trust: 0.9
+      freshness: 0.9
+expect:
+- kind: exactly
+  key: selected_ids
+  value:
+  - c
+  - a
+- kind: 'true'
+  key: within_budget

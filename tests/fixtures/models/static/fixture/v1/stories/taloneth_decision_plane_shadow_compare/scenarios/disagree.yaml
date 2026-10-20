@@ -1,0 +1,28 @@
+kind: cli
+commands:
+- probe:
+    name: decision_plane_shadow_compare
+    questions:
+    - id: team
+      kind: choice
+      options:
+      - id: billing
+        label: Billing
+      - id: technical
+        label: Technical
+      allowed_actions:
+      - billing
+      - technical
+    production_answers:
+      team: billing
+    shadow_answers:
+      team: technical
+    confidence: 0.9
+    confidence_floor: 0.7
+    with_telemetry: true
+expect:
+- kind: equals
+  key: agreement
+  value: false
+- kind: 'true'
+  key: telemetry_has_shadow_action

@@ -1,0 +1,8 @@
+kind: cli
+commands:
+- probe:
+    name: policy_replay
+expect:
+- kind: equals
+  key: verdict_kind
+  value: ALLOW

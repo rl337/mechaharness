@@ -1,7 +1,0 @@
-{
-  "single_batch_invocation": true,
-  "accept_billing_action": "billing",
-  "low_confidence_escalates": true,
-  "invalid_team_escalates": true,
-  "escalation_route": "host_policy"
-}

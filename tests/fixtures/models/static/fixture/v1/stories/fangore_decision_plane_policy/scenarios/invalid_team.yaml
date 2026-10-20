@@ -1,0 +1,31 @@
+kind: cli
+commands:
+- probe:
+    name: decision_plane_policy_case
+    questions:
+    - id: team
+      kind: choice
+      options:
+      - id: billing
+        label: Billing
+      - id: technical
+        label: Technical
+      allowed_actions:
+      - billing
+      - technical
+    - id: risk
+      kind: score
+      min: 0
+      max: 1
+    escalation_route: host_policy
+    answers:
+      team: legal
+      risk: 0.1
+    confidence: 0.99
+    confidence_floor: 0.7
+expect:
+- kind: 'true'
+  key: escalate
+- kind: equals
+  key: escalation_reason
+  value: choice_not_allowed

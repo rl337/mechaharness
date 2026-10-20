@@ -2,10 +2,10 @@
   "id": "fangore_jev_citation_check",
   "persona": "fangore",
   "title": "Never mark unsupported claims verified from a judge alone",
-  "kind": "decision_plane",
+  "kind": "cli",
   "narrative": "Fangore ships a citation check: a small decision model answers whether a source supports an atomic claim, but product code alone may mark a claim verified. Contradictions, missing sources, and low confidence must stay unverified or escalate. Related: `fangore_decision_plane_policy`, `fangore_refund_verdict`.[^jev-us04][^jev-insp-cite]",
   "implementation": "Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a bounded support choice (`supported` / `contradicted` / `insufficient` / `unavailable`). Host policy sets `claim_verified` only when the final action is `supported` and the path does not escalate \u2014 confidence and envelopes never upgrade unsupported or unavailable answers.",
-  "validation": "Harness `decision_plane` op `citation_support_judgment`. Soft expects: matching claim verified; contradicted and unavailable never verified; low confidence escalates without verifying.",
+  "validation": "Harness `cli` scenarios per citation case. Hard expects claim_verified / escalate.",
   "footnotes": [
     {
       "id": "jev-us04",

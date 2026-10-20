@@ -17,6 +17,40 @@ from tests.stories.cli_probes.acceptance_verbs import (
     run_check_inference_capture,
     run_host_kit_submit_once,
 )
+from tests.stories.cli_probes.decision_plane_probes import (
+    ActionSafetyCaseCommand,
+    CitationSupportCaseCommand,
+    ContextBudgetCaseCommand,
+    DecisionPlaneModelPolicyCommand,
+    DecisionPlanePolicyCaseCommand,
+    DecisionPlaneProjectionCommand,
+    DecisionPlaneRecipeCommand,
+    DecisionPlaneShadowCommand,
+    DecisionPlaneShadowCompareCommand,
+    DecisionPlaneTelemetryCommand,
+    DecisionSurfaceRejectCommand,
+    FixtureJudgeBatchCommand,
+    OfflineDecisionExportCommand,
+    PolicyReplayCommand,
+    RequirementsGapCaseCommand,
+    TaskRouteCaseCommand,
+    run_action_safety_case,
+    run_citation_support_case,
+    run_context_budget_case,
+    run_decision_plane_model_policy,
+    run_decision_plane_policy_case,
+    run_decision_plane_projection,
+    run_decision_plane_recipe,
+    run_decision_plane_shadow,
+    run_decision_plane_shadow_compare,
+    run_decision_plane_telemetry,
+    run_decision_surface_reject,
+    run_fixture_judge_batch,
+    run_offline_decision_export,
+    run_policy_replay,
+    run_requirements_gap_case,
+    run_task_route_case,
+)
 from tests.stories.cli_probes.graph_verbs import (
     BoundedRepairLoopCommand,
     CheckpointFingerprintRefuseCommand,
@@ -196,6 +230,82 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
             "decision_conflict_neighbor_revisit",
             DecisionConflictNeighborRevisitCommand,
             run_decision_conflict_neighbor_revisit,
+        ),
+        "fixture_judge_batch": _probe(
+            "fixture_judge_batch",
+            FixtureJudgeBatchCommand,
+            run_fixture_judge_batch,
+        ),
+        "decision_surface_reject": _probe(
+            "decision_surface_reject",
+            DecisionSurfaceRejectCommand,
+            run_decision_surface_reject,
+        ),
+        "offline_decision_export": _probe(
+            "offline_decision_export",
+            OfflineDecisionExportCommand,
+            run_offline_decision_export,
+        ),
+        "policy_replay": _probe(
+            "policy_replay", PolicyReplayCommand, run_policy_replay
+        ),
+        "decision_plane_recipe": _probe(
+            "decision_plane_recipe",
+            DecisionPlaneRecipeCommand,
+            run_decision_plane_recipe,
+        ),
+        "decision_plane_projection": _probe(
+            "decision_plane_projection",
+            DecisionPlaneProjectionCommand,
+            run_decision_plane_projection,
+        ),
+        "decision_plane_policy_case": _probe(
+            "decision_plane_policy_case",
+            DecisionPlanePolicyCaseCommand,
+            run_decision_plane_policy_case,
+        ),
+        "decision_plane_shadow": _probe(
+            "decision_plane_shadow",
+            DecisionPlaneShadowCommand,
+            run_decision_plane_shadow,
+        ),
+        "decision_plane_telemetry": _probe(
+            "decision_plane_telemetry",
+            DecisionPlaneTelemetryCommand,
+            run_decision_plane_telemetry,
+        ),
+        "decision_plane_model_policy": _probe(
+            "decision_plane_model_policy",
+            DecisionPlaneModelPolicyCommand,
+            run_decision_plane_model_policy,
+        ),
+        "decision_plane_shadow_compare": _probe(
+            "decision_plane_shadow_compare",
+            DecisionPlaneShadowCompareCommand,
+            run_decision_plane_shadow_compare,
+        ),
+        "citation_support_case": _probe(
+            "citation_support_case",
+            CitationSupportCaseCommand,
+            run_citation_support_case,
+        ),
+        "context_budget_case": _probe(
+            "context_budget_case",
+            ContextBudgetCaseCommand,
+            run_context_budget_case,
+        ),
+        "requirements_gap_case": _probe(
+            "requirements_gap_case",
+            RequirementsGapCaseCommand,
+            run_requirements_gap_case,
+        ),
+        "task_route_case": _probe(
+            "task_route_case", TaskRouteCaseCommand, run_task_route_case
+        ),
+        "action_safety_case": _probe(
+            "action_safety_case",
+            ActionSafetyCaseCommand,
+            run_action_safety_case,
         ),
     }
 

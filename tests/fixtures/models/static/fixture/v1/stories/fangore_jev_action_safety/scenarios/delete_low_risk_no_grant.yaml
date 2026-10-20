@@ -1,0 +1,34 @@
+kind: cli
+commands:
+- probe:
+    name: action_safety_case
+    questions:
+    - id: semantic_risk
+      kind: choice
+      options:
+      - id: low
+        label: Low
+      - id: medium
+        label: Medium
+      - id: high
+        label: High
+      allowed_actions:
+      - low
+      - medium
+      - high
+    action_question_id: semantic_risk
+    answers:
+      semantic_risk: low
+    confidence: 0.95
+    confidence_floor: 0.7
+    grants: []
+    required_grants:
+    - core:fs.write
+expect:
+- kind: equals
+  key: decision
+  value: deny
+- kind: 'true'
+  key: hard_won
+- kind: 'true'
+  key: grants_unchanged
