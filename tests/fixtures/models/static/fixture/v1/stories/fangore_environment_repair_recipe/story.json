@@ -2,10 +2,10 @@
   "id": "fangore_environment_repair_recipe",
   "persona": "fangore",
   "title": "Instantiate the environment repair Agentic Recipe",
-  "kind": "graph_recipes",
+  "kind": "cli",
   "narrative": "Before dependent work continues, Fangore runs the environment-repair Agentic Recipe: diagnose missing substrate, attempt a bounded repair, then recheck. The recipe must expand to a concrete plan without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`.",
   "implementation": "Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnose \u2192 bounded env repair \u2192 recheck as an ordinary `ExecutionGraph` with provenance stamps via `GraphTemplate.instantiate`.",
-  "validation": "Harness `graph_recipes` op `environment_repair_recipe`. Soft expects catalog id, diagnose/repair/recheck node ids, and stamped template_name. Unit: `tests/test_graph_templates.py`.",
+  "validation": "Harness `cli` scenario `environment_repair_recipe.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-env-repair",

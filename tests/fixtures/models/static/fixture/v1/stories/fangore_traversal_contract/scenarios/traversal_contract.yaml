@@ -1,0 +1,28 @@
+kind: cli
+commands:
+- probe:
+    name: traversal_contract
+    events:
+    - type: core:turn_start
+      payload:
+        parent_node_id: harness
+        component_id: harness/turn_start:1
+    - type: core:inference
+      payload:
+        parent_node_id: harness
+        component_id: harness/inference:1
+    - type: core:tool_call
+      payload:
+        tool_name: lookup
+        parent_node_id: harness
+        component_id: harness/tool_call:lookup:1
+expect:
+- kind: gte
+  key: record_count_min
+  value: 3
+- kind: 'true'
+  key: has_inference
+- kind: 'true'
+  key: has_tool_call
+- kind: 'true'
+  key: all_have_parent

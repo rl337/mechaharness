@@ -1,0 +1,44 @@
+kind: cli
+commands:
+- probe:
+    name: recipe_port_search
+    queries:
+    - id: produces_artifact
+      required_outputs:
+        artifact: object
+    - id: accepts_scenario
+      required_inputs:
+        scenario: object
+    - id: scenario_to_report
+      required_inputs:
+        scenario: object
+      required_outputs:
+        safety_report: object
+    - id: wildcard
+      required_inputs:
+        scenario: any
+    - id: wrong_type
+      required_inputs:
+        scenario: string
+    - id: unknown_port
+      required_inputs:
+        nope: object
+expect:
+- kind: equals
+  key: found
+  value:
+    produces_artifact:
+    - produce_critique_refine
+    - verify_repair
+    accepts_scenario:
+    - safety_eval
+    scenario_to_report:
+    - safety_eval
+    wildcard:
+    - safety_eval
+    wrong_type: []
+    unknown_port: []
+- kind: 'true'
+  key: all_catalog_ids
+- kind: 'true'
+  key: undeclared_recipes_skipped

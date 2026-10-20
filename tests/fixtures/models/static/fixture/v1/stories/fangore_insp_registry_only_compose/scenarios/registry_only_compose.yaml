@@ -1,0 +1,31 @@
+kind: cli
+commands:
+- probe:
+    name: registry_only_compose
+    scenarios:
+    - id: pure_tiling
+      tiles:
+      - recipe: verify_repair
+        key: a
+      - recipe: independent_review
+        key: b
+    - id: free_form
+      tiles:
+      - recipe: verify_repair
+        key: a
+      free_form_nodes:
+      - adhoc_shell
+    - id: forged_version
+      tiles:
+      - recipe: verify_repair
+        key: a
+        forge_version: '99'
+expect:
+- kind: equals
+  key: violations
+  value:
+    pure_tiling: []
+    free_form:
+    - free_form_node:adhoc_shell
+    forged_version:
+    - unregistered_recipe:verify_repair@99

@@ -1,0 +1,18 @@
+kind: cli
+commands:
+- probe:
+    name: recipe_as_tool
+    parent_node_id: generate_image
+    tool_name: generate_image
+    child_goal: oneshot
+expect:
+- kind: equals
+  key: status
+  value: ok
+- kind: 'true'
+  key: child_run_id_nonempty
+- kind: equals
+  key: child_status
+  value: ok
+- kind: 'true'
+  key: has_child_graph_component

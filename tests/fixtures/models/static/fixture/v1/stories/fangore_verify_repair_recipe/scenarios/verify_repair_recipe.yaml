@@ -1,0 +1,16 @@
+kind: cli
+commands:
+- probe:
+    name: verify_repair_recipe
+    goal: ship artifact with verify gate
+expect:
+- kind: equals
+  key: template_name
+  value: verify_repair
+- kind: includes
+  key: nodes_include
+  value:
+  - produce
+  - verify
+  - repair
+  - complete

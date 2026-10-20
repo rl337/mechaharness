@@ -75,8 +75,25 @@ from tests.fakes import ScriptedInference
 from pydantic import BaseModel, ConfigDict
 
 from mechaharness.cli_verb import CliProbe
-from tests.stories.runners._support import _LaneEnvironment
 from tests.support.di import make_harness
+
+
+class _LaneEnvironment(InferenceEnvironment):
+    """Story double: real lane checks (unlike NoOpInferenceEnvironment)."""
+
+    def __init__(self, lane: str) -> None:
+        self._lane = lane
+
+    def active_profile(self) -> str | None:
+        return f"story-{self._lane}"
+
+    def active_capabilities(self):
+        from mechaharness.core.access import CapabilityProfile
+
+        return CapabilityProfile()
+
+    def active_lane(self) -> str | None:
+        return self._lane
 
 
 async def run_wrong_lane_deny(inputs: dict[str, Any]) -> dict[str, Any]:

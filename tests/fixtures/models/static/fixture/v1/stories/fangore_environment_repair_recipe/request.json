@@ -1,4 +1,0 @@
-{
-  "op": "environment_repair_recipe",
-  "goal": "repair missing secrets route"
-}

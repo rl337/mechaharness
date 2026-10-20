@@ -2,10 +2,10 @@
   "id": "taloneth_insp_recipe_evolution_loop",
   "persona": "taloneth",
   "title": "Evolve recipe candidates from traces under registry and safety gates",
-  "kind": "graph_recipes",
+  "kind": "cli",
   "narrative": "A host can summarize past traces into suggestions, and the library turns them into a short list of candidate recipe settings that stay inside the catalog and inside the settings marked safe to tune. Anything that names an unknown recipe, an unknown or fixed setting, or a setting the host did not allow is reported as rejected rather than quietly dropped. Candidates are then chosen by an explicit scoring policy that respects its gates and a baseline. No model is called and no free-form graph is produced; running evaluations in isolation and promoting stay with the host and the final-test gate (`taloneth_insp_recipe_final_test_gate`). Generic research loops exist (`taloneth_atk_research_reject`). Tracks MH-SR-06[^insp-sr-06].",
   "implementation": "`recipe_evolution.py`: `RecipeTraceSummary` / `SoftBindingSuggestion` in, `propose_candidates()` out as `RecipeCandidate` soft-binding dicts validated by `validate_candidate()` against `GraphTemplateRegistry` names, `GraphTemplate.evolvable_soft_point_names()`, and an optional host allowlist; `select_candidate()` picks over `ScoredCandidate` results built from `ObjectivePolicy` / `aggregate_objective` with a deterministic tie-break. Pure structure for hosts such as June; evaluation reuses `ResearchLab` and the registry final-test gate.",
-  "validation": "Harness `graph_recipes` op `recipe_evolution_candidates`. Hard expects bounded single-setting candidates ranked by support, the rejected reasons for fixed, unknown, and non-allowlisted settings, identical results on a repeat run, no graph in any candidate, the gated best candidate selected, and no selection when nothing beats the baseline. Unit tests: `tests/test_recipe_evolution.py`.",
+  "validation": "Harness `cli` scenario `recipe_evolution_candidates.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-sr-06",
