@@ -1,9 +1,11 @@
-"""``pure_api`` harness: build / call / assert dict — no graph or HTTP substrate."""
+"""CLI probes for former ``pure_api`` library-surface stories."""
 
 from __future__ import annotations
 
 import inspect
 from typing import Any
+
+from pydantic import BaseModel, ConfigDict
 
 from mechaharness.advisor import (
     AdvisorContextContract,
@@ -12,6 +14,7 @@ from mechaharness.advisor import (
     RejectAdvisor,
     consult_advisor,
 )
+from mechaharness.cli_verb import CliProbe
 from mechaharness.coordination_cost import CoordinationCostMetrics, summarize_coordination_cost
 from mechaharness.environment_delta import EnvironmentSnapshot, apply_deltas, emit_delta
 from mechaharness.exit_contract import CleanStateContract, evaluate_exit
@@ -31,12 +34,15 @@ from mechaharness.rule_promotion import (
 )
 from mechaharness.verification_policy import DefaultVerificationPolicy
 from mechaharness.work_in_progress_policy import WorkInProgressPolicy
-from tests.stories.backend import StoryBackend
-from tests.stories.catalog import StoryCase
-from tests.stories.harness.base import PureApiOp, assert_expect, split_request
 
 
-async def _sparse_advisor(inputs: dict[str, Any]) -> dict[str, Any]:
+class PureApiParams(BaseModel):
+    """Open params bag — each pure_api probe validates only what it needs."""
+
+    model_config = ConfigDict(extra="allow")
+
+
+async def run_sparse_advisor(inputs: dict[str, Any]) -> dict[str, Any]:
     policy = DefaultAdvisorPolicy(max_consultations=int(inputs.get("max_consultations", 1)))
     observations: list[Any] = []
     trigger = inputs.get("trigger", "consequential_planning")
@@ -62,7 +68,7 @@ async def _sparse_advisor(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _verification_outcome(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_verification_outcome(inputs: dict[str, Any]) -> dict[str, Any]:
     outcome = OutcomeContract(
         require_verification=bool(inputs.get("require_verification", True))
     )
@@ -87,7 +93,7 @@ def _verification_outcome(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _wip_policy(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_wip_policy(inputs: dict[str, Any]) -> dict[str, Any]:
     policy = WorkInProgressPolicy(
         max_active_nodes=inputs.get("max_active_nodes"),
         max_per_write_scope=inputs.get("max_per_write_scope"),
@@ -105,7 +111,7 @@ def _wip_policy(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _fan_in_policy(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_fan_in_policy(inputs: dict[str, Any]) -> dict[str, Any]:
     policy = FanInPolicy(
         strategy=str(inputs.get("strategy") or "all"),
         quorum=inputs.get("quorum"),
@@ -113,7 +119,7 @@ def _fan_in_policy(inputs: dict[str, Any]) -> dict[str, Any]:
     return {"accepted": accept_fan_in(policy, results=list(inputs.get("results") or []))}
 
 
-def _exit_clean_state(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_exit_clean_state(inputs: dict[str, Any]) -> dict[str, Any]:
     report = evaluate_exit(
         CleanStateContract(require_handoff_record=bool(inputs.get("require_handoff_record"))),
         pending_nodes=list(inputs.get("pending_nodes") or []),
@@ -124,23 +130,23 @@ def _exit_clean_state(inputs: dict[str, Any]) -> dict[str, Any]:
     return {"ok": report.ok, "issues": report.issues}
 
 
-def _resume_cost(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_resume_cost(inputs: dict[str, Any]) -> dict[str, Any]:
     return summarize_resume_cost(ResumeCostMetrics.model_validate(inputs))
 
 
-def _coordination_cost(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_coordination_cost(inputs: dict[str, Any]) -> dict[str, Any]:
     return summarize_coordination_cost(CoordinationCostMetrics.model_validate(inputs))
 
 
-def _loop_health(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_loop_health(inputs: dict[str, Any]) -> dict[str, Any]:
     return {"wind_down": should_wind_down(LoopHealthSignals.model_validate(inputs))}
 
 
-def _harness_health(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_harness_health(inputs: dict[str, Any]) -> dict[str, Any]:
     return {"needs_cleanup": needs_cleanup(HarnessHealthSnapshot.model_validate(inputs))}
 
 
-def _rule_promotion(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_rule_promotion(inputs: dict[str, Any]) -> dict[str, Any]:
     rec = PromotionRecord(
         observed_pattern=str(inputs.get("observed_pattern") or ""),
         hypothesis=str(inputs.get("hypothesis") or ""),
@@ -152,7 +158,7 @@ def _rule_promotion(inputs: dict[str, Any]) -> dict[str, Any]:
     return {"stage": hard.stage}
 
 
-def _handoff_record(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_handoff_record(inputs: dict[str, Any]) -> dict[str, Any]:
     rec = HandoffRecord.model_validate(inputs)
     return {
         "next_action": rec.next_action,
@@ -162,7 +168,7 @@ def _handoff_record(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _operation_compensation(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_operation_compensation(inputs: dict[str, Any]) -> dict[str, Any]:
     contract = OperationContract.model_validate(inputs)
     return {
         "idempotent": contract.idempotent,
@@ -170,14 +176,14 @@ def _operation_compensation(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _environment_delta(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_environment_delta(inputs: dict[str, Any]) -> dict[str, Any]:
     before = EnvironmentSnapshot.model_validate(inputs["before"])
     after = EnvironmentSnapshot.model_validate(inputs["after"])
     rebuilt = apply_deltas(before, [emit_delta(before, after)])
     return {"cwd": rebuilt.data.get("cwd")}
 
 
-def _specification_debt(inputs: dict[str, Any]) -> dict[str, Any]:
+def run_specification_debt(inputs: dict[str, Any]) -> dict[str, Any]:
     promotion = PromotionRecord.model_validate(inputs["promotion"])
     ledger = SpecificationDebtLedger()
     item = ledger.add(
@@ -216,68 +222,43 @@ def _specification_debt(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-# Stable op ids (fixtures use these; not the old kind strings).
-PURE_API_OPS: dict[str, PureApiOp] = {
-    "sparse_advisor": _sparse_advisor,
-    "verification_outcome": _verification_outcome,
-    "wip_policy": _wip_policy,
-    "fan_in_policy": _fan_in_policy,
-    "exit_clean_state": _exit_clean_state,
-    "resume_cost": _resume_cost,
-    "coordination_cost": _coordination_cost,
-    "loop_health": _loop_health,
-    "harness_health": _harness_health,
-    "rule_promotion": _rule_promotion,
-    "handoff_record": _handoff_record,
-    "operation_compensation": _operation_compensation,
-    "environment_delta": _environment_delta,
-    "specification_debt": _specification_debt,
-}
-
-# Old kind → op (fixture migration / docs).
-PURE_API_KIND_TO_OP: dict[str, str] = {
-    "sparse_advisor_consult": "sparse_advisor",
-    "verification_outcome_gate": "verification_outcome",
-    "wip_policy_allows": "wip_policy",
-    "fan_in_policy_accept": "fan_in_policy",
-    "exit_clean_state_eval": "exit_clean_state",
-    "resume_cost_summarize": "resume_cost",
-    "coordination_cost_summarize": "coordination_cost",
-    "loop_health_wind_down": "loop_health",
-    "harness_health_cleanup": "harness_health",
-    "rule_promotion_hard": "rule_promotion",
-    "handoff_record_fields": "handoff_record",
-    "operation_compensation_meta": "operation_compensation",
-    "environment_delta_apply": "environment_delta",
-    "specification_debt_capture": "specification_debt",
+PURE_API_HANDLERS: dict[str, Any] = {
+    "sparse_advisor": run_sparse_advisor,
+    "verification_outcome": run_verification_outcome,
+    "wip_policy": run_wip_policy,
+    "fan_in_policy": run_fan_in_policy,
+    "exit_clean_state": run_exit_clean_state,
+    "resume_cost": run_resume_cost,
+    "coordination_cost": run_coordination_cost,
+    "loop_health": run_loop_health,
+    "harness_health": run_harness_health,
+    "rule_promotion": run_rule_promotion,
+    "handoff_record": run_handoff_record,
+    "operation_compensation": run_operation_compensation,
+    "environment_delta": run_environment_delta,
+    "specification_debt": run_specification_debt,
 }
 
 
-class PureApiHarness:
-    """Harness family ``pure_api``."""
+def _pure_api_probe(name: str, fn: Any) -> type[CliProbe]:
+    class _P(CliProbe):
+        async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+            del runtime
+            assert isinstance(params, PureApiParams)
+            out = fn(params.model_dump())
+            if inspect.isawaitable(out):
+                out = await out
+            return out
 
-    name = "pure_api"
+    _P.name = name
+    _P.params_model = PureApiParams
+    _P.__name__ = f"{name}_probe"
+    _P.__qualname__ = _P.__name__
+    return _P
 
-    def known_ops(self) -> frozenset[str]:
-        return frozenset(PURE_API_OPS)
 
-    async def run(self, case: StoryCase, backend: StoryBackend) -> None:
-        del backend
-        request = case.load_json("request.json")
-        expect = case.load_json("expect.json")
-        op, inputs = split_request(request)
-        try:
-            handler = PURE_API_OPS[op]
-        except KeyError as exc:
-            known = ", ".join(sorted(PURE_API_OPS))
-            raise ValueError(
-                f"{case.label}: unknown op {op!r} for harness pure_api; known: {known}"
-            ) from exc
-        result = handler(inputs)
-        if inspect.isawaitable(result):
-            actual = await result
-        else:
-            actual = result
-        if op == "handoff_record":
-            actual = {k: v for k, v in actual.items() if k in expect}
-        assert_expect(actual, expect)
+def pure_api_cli_probe_classes() -> dict[str, type[CliProbe]]:
+    return {name: _pure_api_probe(name, fn) for name, fn in PURE_API_HANDLERS.items()}
+
+
+__all__ = ["PURE_API_HANDLERS", "PureApiParams", "pure_api_cli_probe_classes"]

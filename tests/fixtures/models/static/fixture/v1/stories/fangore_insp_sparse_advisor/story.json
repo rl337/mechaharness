@@ -2,10 +2,10 @@
   "id": "fangore_insp_sparse_advisor",
   "persona": "fangore",
   "title": "Consult an advisor without transferring task ownership",
-  "kind": "pure_api",
+  "kind": "cli",
   "narrative": "Sparse advisor counsel helps at hard boundaries while the active executor keeps ownership. Budgets stop routine consultation. Accepts inspiration requirement 18[^insp-r18].",
   "implementation": "`Advisor` / `AdvisorPolicy` in `mechaharness.advisor` are distinct from `GraphEscalation` (ownership transfer). `DefaultAdvisorPolicy` rate-limits consultations; `consult_advisor` records `AdvisorObservation` and never transfers task ownership. Default DI binds `RejectAdvisor` with an explicit continue fallback.",
-  "validation": "Harness `pure_api` op `sparse_advisor`. Soft expects: first consultation returns guidance; second blocked by budget; observation recorded. Unit: `tests/test_inspiration_primitives.py`.",
+  "validation": "Harness `cli` scenario `sparse_advisor.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r18",

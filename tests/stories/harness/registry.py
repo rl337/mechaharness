@@ -7,13 +7,10 @@ from tests.stories.catalog import StoryCase
 from tests.stories.harness.base import StoryHarness
 from tests.stories.harness.cli import CliHarness
 from tests.stories.harness.domains import DOMAIN_HARNESSES, KIND_TO_HARNESS_OP
-from tests.stories.harness.pure_api import PURE_API_KIND_TO_OP, PureApiHarness
 
-_PURE = PureApiHarness()
 _CLI = CliHarness()
 
 HARNESSES: dict[str, StoryHarness] = {
-    _PURE.name: _PURE,
     _CLI.name: _CLI,
 }
 for _domain in DOMAIN_HARNESSES:
@@ -21,10 +18,8 @@ for _domain in DOMAIN_HARNESSES:
         raise RuntimeError(f"duplicate story harness {_domain.name!r}")
     HARNESSES[_domain.name] = _domain
 
-# Complete legacy kind → (harness, op) map (pure_api uses renamed ops).
+# Former kind/op inventory for migration docs (pure_api fully on CLI).
 LEGACY_KIND_TO_HARNESS_OP: dict[str, tuple[str, str]] = dict(KIND_TO_HARNESS_OP)
-for _legacy, _op in PURE_API_KIND_TO_OP.items():
-    LEGACY_KIND_TO_HARNESS_OP[_legacy] = ("pure_api", _op)
 
 
 def known_ops_for(kind: str) -> frozenset[str] | None:

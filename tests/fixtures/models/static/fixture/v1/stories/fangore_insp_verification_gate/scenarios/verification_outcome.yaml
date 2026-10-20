@@ -1,0 +1,14 @@
+kind: cli
+commands:
+- probe:
+    name: verification_outcome
+    require_verification: true
+expect:
+- kind: equals
+  key: before_verify_completion
+  value: answer_generated
+- kind: equals
+  key: after_verify_completion
+  value: complete
+- kind: 'true'
+  key: verification_passed

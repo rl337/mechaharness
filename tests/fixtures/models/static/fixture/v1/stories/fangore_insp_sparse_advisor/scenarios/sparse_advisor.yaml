@@ -1,0 +1,14 @@
+kind: cli
+commands:
+- probe:
+    name: sparse_advisor
+    max_consultations: 1
+    trigger: consequential_planning
+expect:
+- kind: 'true'
+  key: first_consult_ok
+- kind: 'true'
+  key: second_consult_blocked
+- kind: equals
+  key: observation_count
+  value: 1

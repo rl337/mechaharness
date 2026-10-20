@@ -2,10 +2,10 @@
   "id": "fangore_insp_operation_compensation",
   "persona": "fangore",
   "title": "Declare operation idempotency and compensation",
-  "kind": "pure_api",
+  "kind": "cli",
   "narrative": "Cleanup and recovery operations declare idempotency and optional compensation so retries do not double side effects. Accepts WalkingLabs L12 guidance[^wl-l12-idem].",
   "implementation": "`OperationContract.idempotent` and `compensation_strategy` in `mechaharness.operation_registry`.",
-  "validation": "Harness `pure_api` op `operation_compensation`. Soft expects idempotent true.",
+  "validation": "Harness `cli` scenario `operation_compensation.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l12-idem",

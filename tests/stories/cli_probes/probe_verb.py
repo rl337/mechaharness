@@ -11,7 +11,11 @@ from mechaharness.cli_verb import CliProbe, CliVerb
 
 
 class ProbeParams(BaseModel):
-    """``probe: {name: …, …probe fields}``."""
+    """``probe: {name: <catalog key>, …probe fields}``.
+
+    Catalog key is always ``name``. Payload fields that also need a ``name``
+    (e.g. ``OperationContract``) go under ``params:``.
+    """
 
     model_config = ConfigDict(extra="allow")
 
@@ -28,11 +32,14 @@ class ProbeVerb(CliVerb):
     async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
         assert isinstance(params, ProbeParams)
         raw = params.model_dump()
-        name = str(raw.pop("name"))
-        probe = self._probes.get(name)
+        probe_id = str(raw.pop("name"))
+        nested = raw.pop("params", None)
+        if isinstance(nested, dict):
+            raw = {**raw, **nested}
+        probe = self._probes.get(probe_id)
         if probe is None:
             known = ", ".join(sorted(self._probes))
-            raise KeyError(f"unknown CLI probe {name!r}; known: {known}")
+            raise KeyError(f"unknown CLI probe {probe_id!r}; known: {known}")
         probe_params = probe.params_model.model_validate(raw)
         out = probe.run(probe_params, runtime)
         if inspect.isawaitable(out):

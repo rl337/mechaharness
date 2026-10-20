@@ -1,0 +1,13 @@
+kind: cli
+commands:
+- probe:
+    name: fan_in_policy
+    strategy: quorum
+    quorum: 2
+    results:
+    - true
+    - true
+    - false
+expect:
+- kind: 'true'
+  key: accepted

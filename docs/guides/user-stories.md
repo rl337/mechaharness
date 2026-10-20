@@ -106,7 +106,7 @@ Nubble compares wall-clock critical path, duplicated context, and fan-in review 
 
 #### Validation
 
-Harness `pure_api` op `coordination_cost`. Soft expects branch_count.
+Harness `cli` scenario `coordination_cost.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -139,7 +139,7 @@ Nubble sends environment deltas instead of repeating full snapshots while still 
 
 #### Validation
 
-Harness `pure_api` op `environment_delta`. Soft expects reconstructed cwd.
+Harness `cli` scenario `environment_delta.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -171,7 +171,7 @@ Operators need to see how often a frontier driver was asked for advice versus ho
 
 #### Validation
 
-Harness `cli` via `scenarios/session.yaml`. Hard expects guidance_yields and resumes matching the scripted cycle.
+Harness `cli` via `scenario.yaml`. Hard expects guidance_yields and resumes matching the scripted cycle.
 
 #### Footnotes
 
@@ -236,7 +236,7 @@ Nubble records how expensive resume is — rebuild tokens, tool calls, and wake-
 
 #### Validation
 
-Harness `pure_api` op `resume_cost`. Soft expects rebuild_tokens.
+Harness `cli` scenario `resume_cost.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -584,7 +584,7 @@ Agentic Recipe `decision_plane` exposes a `decision_model` soft point (router/fl
 
 #### Validation
 
-Harness `decision_plane` op `decision_plane_model_policy`. Soft expects soft point present, bound model_ref on ask payload, no param_count field on recipe describe.
+Harness `cli` scenario `model_soft_point.yaml`. Hard expects decision_model soft point.
 
 #### Footnotes
 
@@ -600,7 +600,7 @@ Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed
 
 #### Validation
 
-Harness `decision_plane` op `decision_plane_policy`. Soft expects single_batch_invocation, final_action billing on high confidence, escalate on low confidence and on invalid team, escalation_route host_policy.
+Harness `cli` scenarios `accept_billing.yaml` / `low_confidence.yaml` / `invalid_team.yaml`.
 
 #### Footnotes
 
@@ -619,7 +619,7 @@ Agentic Recipe `decision_plane` uses `project_decision_state` in `mechaharness.d
 
 #### Validation
 
-Harness `decision_plane` op `decision_plane_projection`. Soft expects projection keys, facts fingerprint present, and no_model_invocation true. Unit: `tests/test_decision_plane_runtime.py`.
+Harness `cli` scenario `project_state.yaml`. Hard expects projection without secrets.
 
 #### Footnotes
 
@@ -636,7 +636,7 @@ Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state �
 
 #### Validation
 
-Harness `decision_plane` op `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Runtime DP paths: see sibling decision_plane_* stories.
+Harness `cli` scenario `template_shape.yaml`. Hard expects decision_plane template shape.
 
 #### Footnotes
 
@@ -652,7 +652,7 @@ Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mecha
 
 #### Validation
 
-Harness `decision_plane` op `decision_plane_shadow`. Soft expects production_action set, shadow_controls_execution false, both_outcomes_recorded true, agreement bool.
+Harness `cli` scenario `shadow_compare.yaml`. Hard expects shadow does not control execution.
 
 #### Footnotes
 
@@ -668,7 +668,7 @@ Fangore needs decision metrics — which questions, projection fingerprint, answ
 
 #### Validation
 
-Harness `decision_plane` op `decision_plane_telemetry`. Soft expects schema ids, fingerprints, final_action, no raw_body field, optional latency_ms.
+Harness `cli` scenario `telemetry_fields.yaml`. Hard expects telemetry fields without raw body.
 
 #### Footnotes
 
@@ -687,7 +687,7 @@ Covers: POL-01.
 
 #### Validation
 
-Harness `decision_plane` op `decision_surface_reject` → `_run_decision_surface_reject`.
+Harness `cli` scenario `reject_invalid.yaml`. Hard expects rules/invalid rejection.
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 
@@ -1054,7 +1054,7 @@ Frontier and other MCP-capable clients cannot reenter a model session during a p
 
 #### Validation
 
-Harness `cli` via `scenarios/session.yaml`. Hard expects start advice_requested, resume completed, distinct sequences.
+Harness `cli` via `scenario.yaml`. Hard expects start advice_requested, resume completed, distinct sequences.
 
 #### Footnotes
 
@@ -1070,7 +1070,7 @@ Long-running judgment-bearing work is started as a durable generator over a regi
 
 #### Validation
 
-Harness `cli` via `scenarios/session.yaml`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.
+Harness `cli` via `scenario.yaml`. Hard expects completed kind, sequence 1, recipe listed, zero guidance yields. Unit tests: `tests/test_durable_graph_generator.py`.
 
 #### Footnotes
 
@@ -1167,7 +1167,7 @@ A run is not done until checkpoint durability, pending-node policy, and optional
 
 #### Validation
 
-Harness `pure_api` op `exit_clean_state`. Soft expects ok true.
+Harness `cli` scenario `exit_clean_state.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1199,7 +1199,7 @@ Parallel branches rejoin through an explicit fan-in acceptance policy such as qu
 
 #### Validation
 
-Harness `pure_api` op `fan_in_policy`. Soft expects quorum acceptance true.
+Harness `cli` scenario `fan_in_policy.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1231,7 +1231,7 @@ When a run needs higher-level judgment, start returns an advice yield with a typ
 
 #### Validation
 
-Harness `cli` via `scenarios/session.yaml`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.
+Harness `cli` via `scenario.yaml`. Hard expects kinds advice_requested then completed, pending cleared, resume count 1.
 
 #### Footnotes
 
@@ -1264,7 +1264,7 @@ Possession of a run id alone must not confer control. An intruder controller can
 
 #### Validation
 
-Harness `cli` via `scenarios/session.yaml`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.
+Harness `cli` via `scenario.yaml`. Hard expects intruder rejected, final approval rejected, inspect still ok for owner.
 
 #### Footnotes
 
@@ -1280,7 +1280,7 @@ Duplicate resume with the same idempotency key returns the committed result; a c
 
 #### Validation
 
-Harness `cli` via `scenarios/session.yaml`. Hard expects duplicate key same sequence and stale rejection.
+Harness `cli` via `scenario.yaml`. Hard expects duplicate key same sequence and stale rejection.
 
 #### Footnotes
 
@@ -1296,7 +1296,7 @@ A suspended generator run must survive executor or MCP process restart and prese
 
 #### Validation
 
-Harness `cli` via `scenarios/session.yaml`. Hard expects identical pending question and request_id after rehydrate.
+Harness `cli` via `scenario.yaml`. Hard expects identical pending question and request_id after rehydrate.
 
 #### Footnotes
 
@@ -1312,7 +1312,7 @@ Handoffs preserve goals, exclusions, completed/pending work, decisions, rational
 
 #### Validation
 
-Harness `pure_api` op `handoff_record`. Hard expects next_action, goals, exclusions, and verdict kind round-tripped as typed fields.
+Harness `cli` scenario `handoff_record.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1526,7 +1526,7 @@ Long loops accumulate verification debt; Fangore winds them down when independen
 
 #### Validation
 
-Harness `pure_api` op `loop_health`. Soft expects wind_down true.
+Harness `cli` scenario `loop_health.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1542,7 +1542,7 @@ Cleanup and recovery operations declare idempotency and optional compensation so
 
 #### Validation
 
-Harness `pure_api` op `operation_compensation`. Soft expects idempotent true.
+Harness `cli` scenario `operation_compensation.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1690,7 +1690,7 @@ Sparse advisor counsel helps at hard boundaries while the active executor keeps 
 
 #### Validation
 
-Harness `pure_api` op `sparse_advisor`. Soft expects: first consultation returns guidance; second blocked by budget; observation recorded. Unit: `tests/test_inspiration_primitives.py`.
+Harness `cli` scenario `sparse_advisor.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1803,7 +1803,7 @@ Producing an answer is not the same as finishing the task when verification is r
 
 #### Validation
 
-Harness `pure_api` op `verification_outcome`. Soft expects: answer without verification stays `answer_generated`; verification pass yields `complete`. Unit: `tests/test_inspiration_primitives.py`.
+Harness `cli` scenario `verification_outcome.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1836,7 +1836,7 @@ Fangore limits concurrent active nodes and per-write-scope work so agents cannot
 
 #### Validation
 
-Harness `pure_api` op `wip_policy`. Soft expects allow then deny when scope saturated.
+Harness `cli` scenario `wip_policy.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1853,7 +1853,7 @@ Before an agent deletes, pays, or publishes, Fangore runs a semantic risk check 
 
 #### Validation
 
-Harness `decision_plane` op `action_safety_judgment`. Soft expects: delete without grant denied despite low semantic risk; granted read with high risk escalates to review; granted read with low risk allows; semantic path never elevates grants.
+Harness `cli` scenarios per action safety case.
 
 #### Footnotes
 
@@ -1871,7 +1871,7 @@ Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a 
 
 #### Validation
 
-Harness `decision_plane` op `citation_support_judgment`. Soft expects: matching claim verified; contradicted and unavailable never verified; low confidence escalates without verifying.
+Harness `cli` scenarios per citation case. Hard expects claim_verified / escalate.
 
 #### Footnotes
 
@@ -1888,7 +1888,7 @@ After retrieval, Fangore asks a decision model for relevance, trust, and freshne
 
 #### Validation
 
-Harness `decision_plane` op `context_budget_judgment`. Soft expects: high-trust pack within budget; stale and low-trust skipped; injection candidate excluded; missing scores fall back without exceeding budget.
+Harness `cli` scenarios per context budget case.
 
 #### Footnotes
 
@@ -1905,7 +1905,7 @@ Agentic Recipe `independent_review` provides isolated reviewer context. Agentic 
 
 #### Validation
 
-Harness `decision_plane` op `requirements_gap_judgment`. Soft expects: isolated review template present; gap and missing-crash-fact paths escalate to request_tests; approve-without-gap still not marked correct.
+Harness `cli` scenarios for requirements gap outcomes + template shape.
 
 #### Footnotes
 
@@ -1921,7 +1921,7 @@ Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a 
 
 #### Validation
 
-Harness `decision_plane` op `task_route_judgment`. Soft expects: simple tasks take local_small; high complexity forces frontier; invalid and low-confidence escalate.
+Harness `cli` scenarios per task route case.
 
 #### Footnotes
 
@@ -2108,7 +2108,7 @@ Taloneth reviews shadow versus production answers on matched refund triage cases
 
 #### Validation
 
-Harness `decision_plane` op `decision_plane_shadow_compare`. Soft expects agreement false when answers differ, unavailable_candidate stays unavailable, telemetry has shadow_action.
+Harness `cli` scenarios `disagree.yaml` / `candidate_unavailable.yaml`.
 
 #### Footnotes
 
@@ -2126,7 +2126,7 @@ Covers: JDG-01, JDG-02, JDG-03, JDG-04.
 
 #### Validation
 
-Harness `decision_plane` op `fixture_judge_batch` → `_run_fixture_judge_batch`. Unit: `tests/test_judge.py`.
+Harness `cli` scenario `batch_answers.yaml`. Hard expects answer count, errors, and answer ids.
 
 ### `taloneth_insp_component_ablation` — Ablate harness components against a matched corpus
 
@@ -2155,7 +2155,7 @@ When a person corrects the agent, the correction is recorded as outstanding spec
 
 #### Validation
 
-Harness `pure_api` op `specification_debt`. Hard expects a captured record that requires review and links the promotion, a pending count that only drops after approval, and refusal of blank corrections. Unit tests: `tests/test_specification_debt.py`.
+Harness `cli` scenario `specification_debt.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2334,7 +2334,7 @@ Taloneth captures unused extensions, dead soft points, and unexercised routes as
 
 #### Validation
 
-Harness `pure_api` op `harness_health`. Soft expects needs_cleanup true.
+Harness `cli` scenario `harness_health.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2431,7 +2431,7 @@ Repeated review feedback becomes an experiment, then a soft instruction, then a 
 
 #### Validation
 
-Harness `pure_api` op `rule_promotion`. Soft expects stage hard.
+Harness `cli` scenario `rule_promotion.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2498,7 +2498,7 @@ Evaluation and CI need a first-class scripted driver that asserts expected yield
 
 #### Validation
 
-Harness `cli` via `scenarios/session.yaml`. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.
+Harness `cli` via `scenario.yaml`. Hard expects unexpected-advice failure when when_guidance is empty under strict mode.
 
 #### Footnotes
 
@@ -2534,7 +2534,7 @@ Covers: OBS-02.
 
 #### Validation
 
-Harness `decision_plane` op `offline_decision_export` → `_run_offline_decision_export`. Unit: `tests/test_decision_log.py`.
+Harness `cli` scenario `export_train.yaml`. Hard expects export lineage and no outcome leak.
 
 ### `taloneth_policy_replay` — Replay product policy from recorded facts and signals
 
@@ -2548,7 +2548,7 @@ Covers: OBS-03.
 
 #### Validation
 
-Harness `decision_plane` op `policy_replay` → `_run_policy_replay`. Soft expects: identical verdict kind on replay. Unit: decision_log / judgement_policy tests.
+Harness `cli` scenario `replay_allow.yaml`. Hard expects verdict kind.
 
 #### Footnotes
 
