@@ -2,9 +2,9 @@
   "id": "fangore_derived_memory",
   "persona": "fangore",
   "title": "Rebuild derived memory without letting rank invent authority",
-  "kind": "context_management",
+  "kind": "cli",
   "narrative": "When derived memory is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval rank must not confer authority over approval rules.",
   "implementation": "`DerivedMemoryStore` / `DerivedMemoryRecord` separate provenance, validity, and retrieval priority. Consolidation is optional and idempotent; `retrieval_candidates` must not elevate non-authoritative rumors.\n\nCovers: CTX-06, CTX-07.",
-  "validation": "Harness `context_management` op `derived_memory` \u2192 `_run_derived_memory`. Unit: `tests/test_context_experiments.py`.",
+  "validation": "Harness `cli` scenario `derived_memory.yaml`. Hard expects on declared observation keys.",
   "footnotes": []
 }

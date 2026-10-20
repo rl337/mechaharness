@@ -1,0 +1,16 @@
+kind: cli
+commands:
+- probe:
+    name: instruction_scope_metadata
+    title: Router
+    body: See details on demand
+    scope: entry
+    authority: ops
+    estimated_context_cost: 120
+expect:
+- kind: equals
+  key: scope
+  value: entry
+- kind: equals
+  key: estimated_context_cost
+  value: 120

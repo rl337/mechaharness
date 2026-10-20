@@ -1,0 +1,21 @@
+kind: cli
+commands:
+- probe:
+    name: context_provider_discovery
+    provider_id: host.docs
+    ref: doc:1
+    content: 'alpha beta gamma alpha beta gamma alpha beta gamma alpha beta gamma
+      alpha beta gamma alpha beta gamma alpha beta gamma alpha beta gamma alpha beta
+      gamma alpha beta gamma alpha beta gamma alpha beta gamma alpha beta gamma alpha
+      beta gamma alpha beta gamma alpha beta gamma alpha beta gamma alpha beta gamma
+      alpha beta gamma alpha beta gamma '
+expect:
+- kind: equals
+  key: index_count
+  value: 1
+- kind: equals
+  key: loaded_provider_id
+  value: host.docs
+- kind: gte
+  key: token_estimate
+  value: 1

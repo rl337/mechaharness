@@ -2,10 +2,10 @@
   "id": "fangore_insp_anchor_evidence",
   "persona": "fangore",
   "title": "Require external anchor evidence on high-autonomy work",
-  "kind": "context_management",
+  "kind": "cli",
   "narrative": "High-autonomy graphs must periodically attach labeled external anchors so branches cannot drift on mutually reinforcing model judgments alone. Accepts WalkingLabs L14 guidance[^wl-l14-anchor].",
   "implementation": "`AnchorRequirement`, `AnchorEvidence`, and `anchors_satisfied` in `mechaharness.anchor_evidence` label and require anchor kinds.",
-  "validation": "Harness `context_management` op `anchor_evidence_require`. Soft expects satisfied true.",
+  "validation": "Harness `cli` scenario `anchor_evidence_require.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l14-anchor",

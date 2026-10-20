@@ -1,0 +1,7 @@
+kind: cli
+commands:
+- probe:
+    name: repo_topology
+expect:
+- kind: 'true'
+  key: has_omissions_or_entries

@@ -1,0 +1,13 @@
+kind: cli
+commands:
+- probe:
+    name: anchor_evidence_require
+    kinds:
+    - external_observation
+    min_count: 1
+    anchors:
+    - kind: external_observation
+      ref: obs:1
+expect:
+- kind: 'true'
+  key: satisfied

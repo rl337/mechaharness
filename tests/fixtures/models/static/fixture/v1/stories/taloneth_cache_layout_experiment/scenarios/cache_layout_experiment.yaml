@@ -1,0 +1,7 @@
+kind: cli
+commands:
+- probe:
+    name: cache_layout_experiment
+expect:
+- kind: 'true'
+  key: enabled_has_stable_prefix

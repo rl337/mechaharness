@@ -1,0 +1,11 @@
+kind: cli
+commands:
+- probe:
+    name: context_observation_chain
+expect:
+- kind: 'true'
+  key: fabricated_receipt
+- kind: 'true'
+  key: fused
+- kind: 'true'
+  key: compacted
