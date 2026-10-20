@@ -1,0 +1,33 @@
+kind: cli
+commands:
+- probe:
+    name: cross_task_isolation_bleed
+    contract:
+      input_context_refs:
+      - goal
+      effect_scope: task
+    published_refs:
+    - memo:customer-pref
+    - approval:send-42
+    intervening_counts:
+    - 0
+    - 5
+    - 10
+    handoff:
+      evidence_refs:
+      - memo:customer-pref
+      goals:
+      - follow up
+expect:
+- kind: equals
+  key: bleed_by_intervening_count
+  value:
+    '0': false
+    '5': false
+    '10': false
+- kind: 'true'
+  key: receiver_reads_shared
+- kind: 'false'
+  key: receiver_reads_unshared
+- kind: 'true'
+  key: ghost_handoff_refused

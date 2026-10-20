@@ -1,0 +1,17 @@
+kind: cli
+commands:
+- probe:
+    name: isolation_io_contract
+    effect_scope: workspace:branch
+    budget_share: 0.25
+    inputs:
+      goal: string
+    outputs:
+      summary: string
+expect:
+- kind: equals
+  key: issues
+  value: []
+- kind: equals
+  key: budget_share
+  value: 0.25

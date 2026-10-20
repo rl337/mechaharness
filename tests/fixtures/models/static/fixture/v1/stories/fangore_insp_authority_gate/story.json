@@ -2,10 +2,10 @@
   "id": "fangore_insp_authority_gate",
   "persona": "fangore",
   "title": "Compose capability, impact, trust, and approval into one authority gate",
-  "kind": "access_authority",
+  "kind": "cli",
   "narrative": "Hard rules for consequential actions live outside model text. Untrusted forwarded content must not authorize an external send; high-impact actions still require the configured authority. Related native paths: `fangore_insp_risk_autonomy`, `fangore_jev_action_safety`, `fangore_compound_grants`. Tracks MH-PA-02[^insp-pa-02].",
   "implementation": "`AuthorityGate.evaluate` composes `AccessControl` grants, `CapabilityEnvelope` (expiry, tools, grants), `ConsequencePolicy` (reversibility/impact class), source trust, a judgement `Verdict`, explicit approval, and an optional `DenialStore`, failing closed in that order. It returns `allow`, `deny`, or `ask_human` with reason codes. Every collaborator is optional so hosts adopt it incrementally.",
-  "validation": "Harness `access_authority` op `authority_gate_evaluate`. Hard expects low-consequence actions allowed, high-consequence actions asking until approved, untrusted-source sends denied even when approved, and envelope/access/verdict denials with reason codes.",
+  "validation": "Harness `cli` scenario `authority_gate_evaluate.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-pa-02",

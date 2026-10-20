@@ -91,6 +91,9 @@ from tests.stories.cli_probes.graph_verbs import (
     run_validator_qualification,
     run_wake_reresolve_resume,
 )
+from tests.stories.cli_probes.access_authority_probes import (
+    access_authority_cli_probe_classes,
+)
 from tests.stories.cli_probes.context_management_probes import (
     context_management_cli_probe_classes,
 )
@@ -322,6 +325,7 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
     probes.update(context_management_cli_probe_classes())
     probes.update(evaluation_research_cli_probe_classes())
     probes.update(lifecycle_extensions_cli_probe_classes())
+    probes.update(access_authority_cli_probe_classes())
     return probes
 
 

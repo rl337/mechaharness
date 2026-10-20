@@ -1,0 +1,57 @@
+kind: cli
+commands:
+- probe:
+    name: execution_token_narrow
+    parent:
+      grants:
+      - core:graph.execute
+      - core:fs.read
+      tool_names:
+      - Read
+      principal: user:fangore
+      expires_at: '2026-10-18T12:00:00Z'
+      trust_origin: host:console
+      authorization_epoch: 3
+    attempts:
+    - id: attenuate
+      narrow:
+        expires_at: '2026-10-18T11:00:00Z'
+    - id: raise_epoch
+      narrow:
+        authorization_epoch: 4
+    - id: swap_principal
+      narrow:
+        principal: user:other
+    - id: swap_origin
+      narrow:
+        trust_origin: host:webhook
+    - id: outlive_parent
+      narrow:
+        expires_at: '2026-10-18T13:00:00Z'
+    inherit_attempt: attenuate
+expect:
+- kind: equals
+  key: outcomes
+  value:
+    attenuate: ok
+    raise_epoch: refused:widens authorization_epoch
+    swap_principal: refused:changes principal
+    swap_origin: refused:changes trust_origin
+    outlive_parent: refused:widens expires_at
+- kind: equals
+  key: refused_ids
+  value:
+  - outlive_parent
+  - raise_epoch
+  - swap_origin
+  - swap_principal
+- kind: equals
+  key: accepted_ids
+  value:
+  - attenuate
+- kind: equals
+  key: inherited_principal
+  value: user:fangore
+- kind: equals
+  key: inherited_epoch
+  value: 3

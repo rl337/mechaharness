@@ -2,10 +2,10 @@
   "id": "fangore_insp_risk_autonomy",
   "persona": "fangore",
   "title": "Scale controls by action consequence class",
-  "kind": "access_authority",
+  "kind": "cli",
   "narrative": "High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15[^insp-r15]. Contributes to personal-agent MH-PA-02; composed gate delta: `fangore_insp_authority_gate`[^insp-pa-02-risk].",
   "implementation": "`ConsequencePolicy` / `ActionConsequence` in `mechaharness.consequence` classify actions (`low`\u2026`critical`), flag approval and exhaustive verification needs, and expose `approval_frequency` as a usability/safety metric. Grants in `AccessControl` remain the hard gate.",
-  "validation": "Harness `access_authority` op `consequence_risk_scale`. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: `tests/test_inspiration_primitives.py`. Related grants: `fangore_insp_soft_vs_hard`.",
+  "validation": "Harness `cli` scenario `consequence_risk_scale.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r15",

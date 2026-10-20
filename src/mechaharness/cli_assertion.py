@@ -215,6 +215,30 @@ class GteAssertion(CliAssertion):
             raise AssertionError(f"{body.key}: {got!r} < {body.value!r}")
 
 
+class _ContainsParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str
+    value: str
+
+
+class ContainsAssertion(CliAssertion):
+    """``value`` must be a substring of ``str(observation[key])``."""
+
+    kind = "contains"
+    params_model = _ContainsParams
+
+    def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
+        body = cast(_ContainsParams, params)
+        if body.key not in observation:
+            raise AssertionError(
+                f"missing observation key {body.key!r}; got {sorted(observation)}"
+            )
+        got = observation[body.key]
+        if body.value not in str(got):
+            raise AssertionError(f"{body.key}: {body.value!r} not in {got!r}")
+
+
 def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
     return {
         EqualsAssertion.kind: EqualsAssertion,
@@ -226,6 +250,7 @@ def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
         ErrorAssertion.kind: ErrorAssertion,
         IncludesAssertion.kind: IncludesAssertion,
         GteAssertion.kind: GteAssertion,
+        ContainsAssertion.kind: ContainsAssertion,
     }
 
 

@@ -1,0 +1,12 @@
+kind: cli
+commands:
+- probe:
+    name: state_governance_write
+    owner: ops
+    writers:
+    - ops
+    mutable: false
+    actor: agent
+expect:
+- kind: 'false'
+  key: allowed

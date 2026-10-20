@@ -2,10 +2,10 @@
   "id": "fangore_insp_state_governance",
   "persona": "fangore",
   "title": "Freeze graph metric ownership against agent writes",
-  "kind": "access_authority",
+  "kind": "cli",
   "narrative": "Graph quality targets have owners and can be frozen so agents cannot silently mutate success criteria. Accepts WalkingLabs L14 guidance[^wl-l14-gov].",
   "implementation": "`GraphStateGovernance`, `FieldGovernance`, and `authorize_write` in `mechaharness.graph_state_governance` enforce owner/writer/mutability rules.",
-  "validation": "Harness `access_authority` op `state_governance_write`. Soft expects frozen field denies writes.",
+  "validation": "Harness `cli` scenario `state_governance_write.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l14-gov",
