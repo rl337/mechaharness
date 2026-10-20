@@ -15,6 +15,7 @@ from mechaharness.cli_instrumentor import CliInstrumentor
 from mechaharness.config import Settings
 from mechaharness.core.types import ChatMessage, Role, ToolCall, Usage
 from mechaharness.di import get_injector
+from mechaharness.inference.anthropic import AnthropicStrategy
 from mechaharness.inference.judge import FixtureJudgeProvider, JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
@@ -25,6 +26,7 @@ from tests.stories.catalog import StoryCase
 from tests.stories.cli_probes.config import TestHarnessCliConfig
 from tests.stories.scenarios.cli_scenario import (
     CliScenario,
+    HostInitBlock,
     load_cli_scenario,
     run_cli_scenario,
 )
@@ -69,89 +71,39 @@ class CliHarness:
         clock = MockDateTimeService(
             datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
         )
+        host = scenario.host or HostInitBlock()
         needs_judge = any(cmd.verb == "judge_route" for cmd in scenario.commands)
-        scripted_tool_name: str | None = None
-        for cmd in scenario.commands:
-            if cmd.verb == "tool_loop":
-                scripted_tool_name = str(cmd.params.get("tool_name") or "lookup")
-                break
-            if (
-                cmd.verb == "run_recipe"
-                and cmd.params.get("name") == "conversational_tool_loop"
-            ):
-                scripted_tool_name = str(cmd.params.get("tool_name") or "lookup")
-                break
+        loop_family, scripted_tool_name = self._tool_loop_needs(scenario, host)
 
         judge_provider: JudgeProvider | None = None
         if needs_judge:
             judge_provider = self._build_judge_provider(case, backend, response)
 
-        if case.adapter == "in_process":
-            if scripted_tool_name is not None:
-                completer = ScriptedInference(
-                    [
-                        ChatMessage(
-                            role=Role.ASSISTANT,
-                            content=None,
-                            tool_calls=[
-                                ToolCall(
-                                    id="c1",
-                                    name=scripted_tool_name,
-                                    arguments={},
-                                )
-                            ],
-                        ),
-                        ChatMessage(role=Role.ASSISTANT, content="done"),
-                    ]
-                )
-            else:
-                content = str(response.get("content") or "ok")
-                usage_raw = response.get("usage") or {}
-                if usage_raw:
-                    usage = Usage(
-                        prompt_tokens=usage_raw.get("prompt_tokens"),
-                        completion_tokens=usage_raw.get("completion_tokens"),
-                        total_tokens=usage_raw.get("total_tokens"),
-                    )
-                else:
-                    usage = Usage(
-                        prompt_tokens=1, completion_tokens=1, total_tokens=2
-                    )
-                completer = ScriptedInference(
-                    [ChatMessage(role=Role.ASSISTANT, content=content)],
-                    usages=[usage],
-                )
-            return TestHarnessCliConfig(
-                completer,
+        completer_backend = host.backend
+        if case.adapter == "openai_compat":
+            completer_backend = "openai_compat"
+        elif case.adapter == "systemone":
+            completer_backend = "systemone"
+
+        if completer_backend == "anthropic":
+            return self._anthropic_config(
+                case,
+                backend,
+                response,
                 clock,
                 model=model,
+                harness_family=host.family,
                 judge_provider=judge_provider,
             )
 
-        if case.adapter == "openai_compat":
-            settings = Settings(
-                inference_backend="openai_compat",
-                harness_family="pass_through",
-                model=model,
-                base_url=os.environ.get("MECHA_BASE_URL", "http://story.invalid/v1"),
-                api_key=os.environ.get("MECHA_API_KEY", "story"),
-                max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "256")),
-            )
-            base = (settings.base_url or "http://story.invalid/v1").rstrip("/")
-            if backend.mode == "static":
-                client = MemoryAsyncHttpClient()
-                client.add("POST", f"{base}/chat/completions", json=response)
-            else:
-                if not os.environ.get("MECHA_BASE_URL"):
-                    raise AssertionError(
-                        "MECHA_BASE_URL is required for live openai_compat stories"
-                    )
-                client = AsyncUrllibHttpClient(timeout=180.0)
-            strategy = OpenAICompatStrategy(settings, client=client, timeout=180.0)
-            return TestHarnessCliConfig(
-                strategy,
+        if completer_backend == "openai_compat" or case.adapter == "openai_compat":
+            return self._openai_compat_config(
+                case,
+                backend,
+                response,
                 clock,
                 model=model,
+                harness_family=host.family,
                 judge_provider=judge_provider,
             )
 
@@ -162,10 +114,175 @@ class CliHarness:
                 model=model,
                 judge_provider=judge_provider
                 or self._build_judge_provider(case, backend, response),
+                harness_family=host.family,
             )
 
-        raise AssertionError(
-            f"{case.label}: unsupported adapter {case.adapter!r} for kind=cli"
+        if case.adapter != "in_process" and completer_backend == "mock":
+            raise AssertionError(
+                f"{case.label}: unsupported adapter {case.adapter!r} for kind=cli"
+            )
+
+        completer = self._scripted_completer(
+            response,
+            tool_name=scripted_tool_name,
+            family=loop_family or host.family,
+        )
+        return TestHarnessCliConfig(
+            completer,
+            clock,
+            model=model,
+            judge_provider=judge_provider,
+            harness_family=host.family,
+        )
+
+    def _tool_loop_needs(
+        self, scenario: CliScenario, host: HostInitBlock
+    ) -> tuple[str | None, str | None]:
+        for cmd in scenario.commands:
+            if cmd.verb != "tool_loop":
+                continue
+            family = str(cmd.params.get("family") or host.family or "tool_loop")
+            tool_name = str(cmd.params.get("tool_name") or "lookup")
+            return family, tool_name
+        for cmd in scenario.commands:
+            if (
+                cmd.verb == "run_recipe"
+                and cmd.params.get("name") == "conversational_tool_loop"
+            ):
+                return "tool_loop", str(cmd.params.get("tool_name") or "lookup")
+        return None, None
+
+    def _scripted_completer(
+        self,
+        response: dict,
+        *,
+        tool_name: str | None,
+        family: str,
+    ) -> ScriptedInference:
+        if family == "react" and tool_name is not None:
+            return ScriptedInference(
+                [
+                    ChatMessage(
+                        role=Role.ASSISTANT,
+                        content=(
+                            f"Thought: use the tool\n"
+                            f"Action: {tool_name}\n"
+                            f"Action Input: {{}}\n"
+                        ),
+                    ),
+                    ChatMessage(
+                        role=Role.ASSISTANT,
+                        content="Thought: done\nFinal Answer: done\n",
+                    ),
+                ]
+            )
+        if tool_name is not None:
+            return ScriptedInference(
+                [
+                    ChatMessage(
+                        role=Role.ASSISTANT,
+                        content=None,
+                        tool_calls=[
+                            ToolCall(
+                                id="c1",
+                                name=tool_name,
+                                arguments={},
+                            )
+                        ],
+                    ),
+                    ChatMessage(role=Role.ASSISTANT, content="done"),
+                ]
+            )
+        content = str(response.get("content") or "ok")
+        usage_raw = response.get("usage") or {}
+        if usage_raw:
+            usage = Usage(
+                prompt_tokens=usage_raw.get("prompt_tokens"),
+                completion_tokens=usage_raw.get("completion_tokens"),
+                total_tokens=usage_raw.get("total_tokens"),
+            )
+        else:
+            usage = Usage(prompt_tokens=1, completion_tokens=1, total_tokens=2)
+        return ScriptedInference(
+            [ChatMessage(role=Role.ASSISTANT, content=content)],
+            usages=[usage],
+        )
+
+    def _openai_compat_config(
+        self,
+        case: StoryCase,
+        backend: StoryBackend,
+        response: dict,
+        clock: MockDateTimeService,
+        *,
+        model: str,
+        harness_family: str,
+        judge_provider: JudgeProvider | None,
+    ) -> TestHarnessCliConfig:
+        settings = Settings(
+            inference_backend="openai_compat",
+            harness_family=harness_family,
+            model=model,
+            base_url=os.environ.get("MECHA_BASE_URL", "http://story.invalid/v1"),
+            api_key=os.environ.get("MECHA_API_KEY", "story"),
+            max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "256")),
+        )
+        base = (settings.base_url or "http://story.invalid/v1").rstrip("/")
+        if backend.mode == "static":
+            client = MemoryAsyncHttpClient()
+            client.add("POST", f"{base}/chat/completions", json=response)
+        else:
+            if not os.environ.get("MECHA_BASE_URL"):
+                raise AssertionError(
+                    "MECHA_BASE_URL is required for live openai_compat stories"
+                )
+            client = AsyncUrllibHttpClient(timeout=180.0)
+        strategy = OpenAICompatStrategy(settings, client=client, timeout=180.0)
+        return TestHarnessCliConfig(
+            strategy,
+            clock,
+            model=model,
+            judge_provider=judge_provider,
+            harness_family=harness_family,
+        )
+
+    def _anthropic_config(
+        self,
+        case: StoryCase,
+        backend: StoryBackend,
+        response: dict,
+        clock: MockDateTimeService,
+        *,
+        model: str,
+        harness_family: str,
+        judge_provider: JudgeProvider | None,
+    ) -> TestHarnessCliConfig:
+        del case
+        settings = Settings(
+            inference_backend="anthropic",
+            harness_family=harness_family,
+            model=model or "claude-story",
+            base_url=os.environ.get("MECHA_BASE_URL", "http://story.invalid"),
+            api_key=os.environ.get("MECHA_API_KEY", "story"),
+            max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "256")),
+        )
+        base = (settings.base_url or "http://story.invalid").rstrip("/")
+        if backend.mode == "static":
+            client = MemoryAsyncHttpClient()
+            client.add("POST", f"{base}/v1/messages", json=response)
+        else:
+            if not os.environ.get("MECHA_BASE_URL"):
+                raise AssertionError(
+                    "MECHA_BASE_URL is required for live anthropic stories"
+                )
+            client = AsyncUrllibHttpClient(timeout=180.0)
+        strategy = AnthropicStrategy(settings, client=client, timeout=180.0)
+        return TestHarnessCliConfig(
+            strategy,
+            clock,
+            model=settings.model,
+            judge_provider=judge_provider,
+            harness_family=harness_family,
         )
 
     def _build_judge_provider(

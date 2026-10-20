@@ -62,6 +62,18 @@ Live parity is a **mode** of cassette-backed stories (for example `nubble_run_co
 
 ## Nubble's stories
 
+### `nubble_anthropic_cassette_infer` — Infer through the Anthropic strategy with a cassette
+
+Nubble proves the Anthropic Messages backend is a first-class reason lane. Offline CI plays a cassette through the real `AnthropicStrategy` bound at story init — not a probe mock — so inference, usage, and cost events look the same as a live call.
+
+#### Implementation
+
+`CliScenario.host.backend=anthropic` builds `AnthropicStrategy` + `MemoryAsyncHttpClient` against `response.json` (`/v1/messages`). `cli:infer` / `CliInferRunner` emits `core:inference` with usage and priced `core:cost`.
+
+#### Validation
+
+Harness `cli` scenario `cassette_infer.yaml`: host backend anthropic, hard event_types includes core:inference/core:cost, token equals from cassette, cost_units lte.
+
 ### `nubble_ci_static_smoke` — Prove the HTTP adapter in CI without a live model host
 
 The local inference host is offline, but a pull request still needs green CI. Nubble wants the OpenAI-compatible path proven from a cassette — a recorded reply replayed through the real HTTP client — so merges do not depend on LAN reachability.
@@ -769,6 +781,18 @@ Harness `cli` `instantiate_recipe` + `recipe_plan` demoted_refuse; hard expects 
 [^insp-templates]: [Inspiration requirements (subgraphs & templates)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation
 [^insp-sr-03-soft]: [Self-revising recipe map (MH-SR-03 soft points)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Soft points; evolution allowlist is fangore_insp_soft_evolution_allowlist
 
+### `fangore_harness_family_react` — Run the react harness family through CLI tool_loop init
+
+Fangore switches the host to the classic ReAct family so models without reliable native tool calls still loop Thought/Action/Observation. He starts from the same CLI tool-loop verb, with family=react bound at harness initialization, and expects a final answer after one scripted tool round.
+
+#### Implementation
+
+`CliScenario.host.family` / `tool_loop.family=react` select `ReactHarness` via `_CliToolLoopConfig.get_harness_class` (Config DI). Story harness scripts Action/Final Answer turns on `ScriptedInference`. Emits the same EventLog inference/tool stream as other families.
+
+#### Validation
+
+Harness `cli` scenario `react_tool_round.yaml`: host family react, tool_loop family=react, hard expects on status/text, core:inference in event_types, cost_units and total_tokens ceilings.
+
 ### `fangore_harness_run_recipe` — Run a single prompt through the harness_run Agentic Recipe
 
 Fangore wants the classic one-shot harness path to be a named control pattern he can discover beside other recipes, not a special-case CLI only. He lists the catalog, opens harness_run, binds a prompt and mock backend, and gets final text from the same graph executor used for other recipes. Complements `fangore_backend_describe_recipe` and `fangore_conversational_tool_loop`.
@@ -791,7 +815,7 @@ Fangore runs a tool-loop harness with one tool then a final answer. The console 
 
 #### Validation
 
-Harness `cli` scenario `harness_components.yaml`: hard `text`/`status`, exact `traversal_kinds_exactly`, and `component_parents_exactly` all `harness`.
+Harness `cli` scenario `harness_components.yaml`: `host.family=tool_loop`, hard `text`/`status`, event/token/cost ceilings, exact traversal_kinds and component_parent_ids all `harness`.
 
 #### Footnotes
 

@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore runs a tool-loop harness with one tool then a final answer. The console must treat inference and each tool call as node components under a harness parent \u2014 not an opaque blob \u2014 using the same kinds as recipe interiors. Complements `fangore_traversal_contract` and `fangore_insp_soft_vs_hard`.[^june-nc-harness]",
   "implementation": "`CliInstrumentor` verb `tool_loop` runs `ToolLoopHarness` on the stamped/tapped EventLog. The harness emits `turn_start`, `inference`, `tool_call`, and `tool_result` with `parent_node_id` / `component_id`. `node_components_for_harness` lists planned components; `traversal_from_events` recovers them after the run.",
-  "validation": "Harness `cli` scenario `harness_components.yaml`: hard `text`/`status`, exact `traversal_kinds_exactly`, and `component_parents_exactly` all `harness`.",
+  "validation": "Harness `cli` scenario `harness_components.yaml`: `host.family=tool_loop`, hard `text`/`status`, event/token/cost ceilings, exact traversal_kinds and component_parent_ids all `harness`.",
   "footnotes": [
     {
       "id": "june-nc-harness",

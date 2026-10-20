@@ -11,7 +11,6 @@ from mechaharness.cli_verb import CliProbe, CliVerb
 from mechaharness.core.completer import Completer
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints
 from mechaharness.harness.base import AbstractHarness
-from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
@@ -41,12 +40,14 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         model: str = "cli-default",
         agent_id: str = "cli",
         judge_provider: JudgeProvider | None = None,
+        harness_family: str = "pass_through",
     ) -> None:
         self._completer = completer
         self._datetime_service = datetime_service
         self._model = model
         self._agent_id = agent_id
         self._judge_provider = judge_provider
+        self._harness_family = harness_family
         super().__init__()
 
     def get_inference_class(self) -> type[InferenceStrategy]:
@@ -55,7 +56,15 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         return MockInferenceStrategy
 
     def get_harness_class(self) -> type[AbstractHarness]:
-        return PassThroughHarness
+        name = self._harness_family.lower()
+        classes = self.harness_classes()
+        try:
+            return classes[name]
+        except KeyError as exc:
+            known = ", ".join(sorted(classes)) or "(none)"
+            raise KeyError(
+                f"Unknown harness family {name!r}. Known: {known}"
+            ) from exc
 
     def cli_verb_classes(self) -> dict[str, type[CliVerb]]:
         verbs = dict(super().cli_verb_classes())

@@ -28,6 +28,17 @@ class DurableSessionBlock(BaseModel):
     store: Literal["memory", "shared"] = "memory"
 
 
+class HostInitBlock(BaseModel):
+    """How the story harness initializes product Config (mock / cassette)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    # Harness family bound on TestHarnessCliConfig (pass_through, tool_loop, react, …).
+    family: str = "pass_through"
+    # Completer wiring: mock (ScriptedInference), anthropic / openai_compat cassettes.
+    backend: str = "mock"
+
+
 class CliScenario(BaseModel):
     """CLI story script: verb commands + open structured expect list."""
 
@@ -37,6 +48,7 @@ class CliScenario(BaseModel):
     commands: list[CliParsedCommand] = Field(min_length=1)
     expect: list[CliAssertionSpec] | None = None
     durable: DurableSessionBlock | None = None
+    host: HostInitBlock | None = None
 
     @model_validator(mode="before")
     @classmethod

@@ -1,0 +1,34 @@
+# Product-path AnthropicStrategy via host.backend cassette (not probe mock).
+kind: cli
+host:
+  family: pass_through
+  backend: anthropic
+commands:
+- infer:
+    prompt: Say hello.
+expect:
+- kind: includes
+  key: event_types
+  value:
+  - core:inference
+  - core:cost
+- kind: equals
+  key: text
+  value: hello
+- kind: equals
+  key: prompt_tokens
+  value: 6
+- kind: equals
+  key: completion_tokens
+  value: 1
+- kind: equals
+  key: total_tokens
+  value: 7
+- kind: lte
+  key: total_tokens
+  value: 7
+- kind: positive
+  key: cost_units
+- kind: lte
+  key: cost_units
+  value: 1

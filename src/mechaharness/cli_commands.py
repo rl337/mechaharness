@@ -20,6 +20,8 @@ class ToolLoopCommand(BaseModel):
     tool_name: str = "lookup"
     max_turns: int = 4
     model: str | None = None
+    # Product harness family (tool_loop, react, openai_tools, …).
+    family: str = "tool_loop"
 
 
 class RunRecipeCommand(BaseModel):
