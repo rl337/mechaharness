@@ -2,10 +2,10 @@
   "id": "fangore_insp_context_compaction",
   "persona": "fangore",
   "title": "Compact context in staged lossless then lossy steps",
-  "kind": "context_management",
+  "kind": "cli",
   "narrative": "Long runs compact context through staged strategies that record which information classes were discarded. Accepts WalkingLabs L05 and Claude Code design guidance[^wl-l05-compact][^wl-claude-compact].",
   "implementation": "`ContextCompactionStrategy` and `DefaultStagedCompaction` in `mechaharness.context_compaction` apply lossless dedupe, distill truncation, and optional lossy drops with provenance.",
-  "validation": "Harness `context_management` op `context_compaction_staged`. Soft expects deduplicated discarded class.",
+  "validation": "Harness `cli` scenario `context_compaction_staged.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l05-compact",

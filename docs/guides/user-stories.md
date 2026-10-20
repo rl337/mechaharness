@@ -365,7 +365,7 @@ Covers: CTX-08.
 
 #### Validation
 
-Harness `context_management` op `repo_topology` → `_run_repo_topology`. Unit: `tests/test_context_experiments.py`.
+Harness `cli` scenario `repo_topology.yaml`. Hard expects on declared observation keys.
 
 ### `nubble_run_cost_events` — Record cost and inference events for every harness run
 
@@ -522,7 +522,7 @@ Covers: CTX-05.
 
 #### Validation
 
-Harness `context_management` op `context_compiler_deficit` → `_run_context_compiler_deficit`. Unit: `tests/test_context_experiments.py`.
+Harness `cli` scenario `context_compiler_deficit.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -540,7 +540,7 @@ Covers: CTX-01, CTX-02, CTX-03, CTX-04.
 
 #### Validation
 
-Harness `context_management` op `context_observation_chain` → `_run_context_observation_chain`. Unit: `tests/test_context_experiments.py`.
+Harness `cli` scenario `context_observation_chain.yaml`. Hard expects on declared observation keys.
 
 ### `fangore_convergence_ceiling` — Stop agent loops that make no progress
 
@@ -701,7 +701,7 @@ Covers: CTX-06, CTX-07.
 
 #### Validation
 
-Harness `context_management` op `derived_memory` → `_run_derived_memory`. Unit: `tests/test_context_experiments.py`.
+Harness `cli` scenario `derived_memory.yaml`. Hard expects on declared observation keys.
 
 ### `fangore_environment_repair_recipe` — Instantiate the environment repair Agentic Recipe
 
@@ -874,7 +874,7 @@ High-autonomy graphs must periodically attach labeled external anchors so branch
 
 #### Validation
 
-Harness `context_management` op `anchor_evidence_require`. Soft expects satisfied true.
+Harness `cli` scenario `anchor_evidence_require.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -955,7 +955,7 @@ Long runs compact context through staged strategies that record which informatio
 
 #### Validation
 
-Harness `context_management` op `context_compaction_staged`. Soft expects deduplicated discarded class.
+Harness `cli` scenario `context_compaction_staged.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -972,7 +972,7 @@ Fangore keeps durable graph state large and shared while each node receives only
 
 #### Validation
 
-Harness `context_management` op `context_layers_project`. Soft expects projected keys and exported result.
+Harness `cli` scenario `context_layers_project.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -989,7 +989,7 @@ Fangore's host memory source must advertise what it can supply before dumping la
 
 #### Validation
 
-Harness `context_management` op `context_provider_discovery`. Soft expects index before load and provider attribution.
+Harness `cli` scenario `context_provider_discovery.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1379,7 +1379,7 @@ Scarce instruction components distinguish invariants from learned gotchas. Over-
 
 #### Validation
 
-Harness `context_management` op `instruction_gotcha_metrics`. Soft expects over_trigger recorded and active after promote.
+Harness `cli` scenario `instruction_gotcha_metrics.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1395,7 +1395,7 @@ Instruction components declare scope, authority, and estimated context cost so e
 
 #### Validation
 
-Harness `context_management` op `instruction_scope_metadata`. Soft expects scope and cost.
+Harness `cli` scenario `instruction_scope_metadata.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2096,7 +2096,7 @@ Covers: CTX-09.
 
 #### Validation
 
-Harness `context_management` op `cache_layout_experiment` → `_run_cache_layout_experiment`. Unit: `tests/test_context_experiments.py`.
+Harness `cli` scenario `cache_layout_experiment.yaml`. Hard expects on declared observation keys.
 
 ### `taloneth_decision_plane_shadow_compare` — Compare shadowed decision-plane answers before promotion
 

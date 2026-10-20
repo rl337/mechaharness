@@ -2,9 +2,9 @@
   "id": "nubble_repo_topology",
   "persona": "nubble",
   "title": "Budget repository topology maps and fall back when stale",
-  "kind": "context_management",
+  "kind": "cli",
   "narrative": "Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback \u2014 not pretend the map is complete.",
   "implementation": "`RepositoryTopologyProvider` builds budgeted `TopologyView` entries with omissions and invalidation; stale maps fall back to source inspection.\n\nCovers: CTX-08.",
-  "validation": "Harness `context_management` op `repo_topology` \u2192 `_run_repo_topology`. Unit: `tests/test_context_experiments.py`.",
+  "validation": "Harness `cli` scenario `repo_topology.yaml`. Hard expects on declared observation keys.",
   "footnotes": []
 }

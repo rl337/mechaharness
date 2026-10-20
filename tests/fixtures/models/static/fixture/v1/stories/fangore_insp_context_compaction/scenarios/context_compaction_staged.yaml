@@ -1,0 +1,17 @@
+kind: cli
+commands:
+- probe:
+    name: context_compaction_staged
+    messages:
+    - role: user
+      content: a
+    - role: user
+      content: a
+    - role: assistant
+      content: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+expect:
+- kind: includes
+  key: discarded_classes
+  value:
+  - deduplicated
+  - truncated_content

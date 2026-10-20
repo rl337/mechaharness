@@ -166,6 +166,55 @@ class ErrorAssertion(CliAssertion):
             raise AssertionError(f"error: {got!r} != {body.value!r}")
 
 
+class _IncludesParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str
+    value: list[Any]
+
+
+class IncludesAssertion(CliAssertion):
+    """Every item in ``value`` must appear in the observation sequence at ``key``."""
+
+    kind = "includes"
+    params_model = _IncludesParams
+
+    def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
+        body = cast(_IncludesParams, params)
+        if body.key not in observation:
+            raise AssertionError(
+                f"missing observation key {body.key!r}; got {sorted(observation)}"
+            )
+        got = observation[body.key]
+        missing = [item for item in body.value if item not in got]
+        if missing:
+            raise AssertionError(f"{body.key}: missing {missing} in {got}")
+
+
+class _GteParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str
+    value: int | float
+
+
+class GteAssertion(CliAssertion):
+    """Observation at ``key`` must be >= ``value``."""
+
+    kind = "gte"
+    params_model = _GteParams
+
+    def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
+        body = cast(_GteParams, params)
+        if body.key not in observation:
+            raise AssertionError(
+                f"missing observation key {body.key!r}; got {sorted(observation)}"
+            )
+        got = observation[body.key]
+        if not isinstance(got, (int, float)) or got < body.value:
+            raise AssertionError(f"{body.key}: {got!r} < {body.value!r}")
+
+
 def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
     return {
         EqualsAssertion.kind: EqualsAssertion,
@@ -175,6 +224,8 @@ def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
         TrueAssertion.kind: TrueAssertion,
         FalseAssertion.kind: FalseAssertion,
         ErrorAssertion.kind: ErrorAssertion,
+        IncludesAssertion.kind: IncludesAssertion,
+        GteAssertion.kind: GteAssertion,
     }
 
 

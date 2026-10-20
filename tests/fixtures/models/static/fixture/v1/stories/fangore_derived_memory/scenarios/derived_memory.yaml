@@ -1,0 +1,9 @@
+kind: cli
+commands:
+- probe:
+    name: derived_memory
+expect:
+- kind: 'true'
+  key: authority_outranks_popularity
+- kind: 'true'
+  key: idempotent

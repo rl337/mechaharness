@@ -1,0 +1,30 @@
+kind: cli
+commands:
+- probe:
+    name: context_compiler_deficit
+    token_budget: 5
+    state_revision: r-story
+    operation: chat
+    sources:
+      noise: word word word word word word word word word word word word
+      oath: MUST retain approval boundary and verification obligations forever and
+        ever with lots of text
+    mandatory:
+    - oath
+    blockers:
+    - awaiting-human
+    verification_obligations:
+    - tests-green
+expect:
+- kind: 'true'
+  key: deficit
+- kind: includes
+  key: unresolved_gaps
+  value:
+  - oath
+- kind: includes
+  key: blockers
+  value:
+  - awaiting-human
+- kind: 'false'
+  key: silent_truncate
