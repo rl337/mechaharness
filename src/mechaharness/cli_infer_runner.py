@@ -9,7 +9,7 @@ from mechaharness.cli_universe import CLI_INFER_KIND
 from mechaharness.core.access import CostAccountant
 from mechaharness.core.completer import Completer
 from mechaharness.core.events import Event, EventLog, Inference, event_type_key
-from mechaharness.core.types import ChatMessage, CompletionRequest, Role
+from mechaharness.core.types import ChatMessage, CompletionRequest, Role, Usage
 from mechaharness.graph import GraphNode, NodeStatus
 from mechaharness.graph_executor import GraphNodeRunner, GraphRunContext, NodeOutcome
 
@@ -79,8 +79,7 @@ class CliInferRunner(GraphNodeRunner):
         }
         if assistant.reasoning_content:
             inference_payload["reasoning_content"] = assistant.reasoning_content
-        if response.usage is not None:
-            inference_payload["usage"] = response.usage.model_dump()
+        inference_payload["usage"] = Usage.for_event(response.usage)
         self._event_log.emit(
             Event(
                 type=event_type_key(Inference),

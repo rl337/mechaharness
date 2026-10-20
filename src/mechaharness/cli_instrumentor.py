@@ -114,6 +114,9 @@ class CliStepResult(BaseModel):
     event_types: list[str] = Field(default_factory=list)
     events: list[dict[str, Any]] = Field(default_factory=list)
     cost_units: float = 0.0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
     clock_iso: str | None = None
     traversal_kinds: list[str] = Field(default_factory=list)
     component_parent_ids: list[str] = Field(default_factory=list)
@@ -126,12 +129,16 @@ class CliStepResult(BaseModel):
 
     def observation(self) -> dict[str, Any]:
         """Flat observation for structured assertions (no alias minting)."""
+        prompt, completion, total = _token_totals(self.events)
         data: dict[str, Any] = {
             "verb": self.verb,
             "text": self.text,
             "status": self.status,
             "event_types": list(self.event_types),
             "cost_units": self.cost_units,
+            "prompt_tokens": prompt,
+            "completion_tokens": completion,
+            "total_tokens": total,
             "clock_iso": self.clock_iso,
             "inference_ts": _first_ts(self.events, "core:inference"),
             "cost_ts": _first_ts(self.events, "core:cost"),
@@ -157,6 +164,9 @@ class CliRunResult(BaseModel):
     tapped_event_types: list[str] = Field(default_factory=list)
     events: list[dict[str, Any]] = Field(default_factory=list)
     cost_units: float = 0.0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
     text: str | None = None
     status: str | None = None
     traversal_kinds: list[str] = Field(default_factory=list)
@@ -169,10 +179,14 @@ class CliRunResult(BaseModel):
     fields: dict[str, Any] = Field(default_factory=dict)
 
     def observation(self) -> dict[str, Any]:
+        prompt, completion, total = _token_totals(self.events)
         data: dict[str, Any] = {
             "event_types": list(self.event_types),
             "tapped_event_types": list(self.tapped_event_types),
             "cost_units": self.cost_units,
+            "prompt_tokens": prompt,
+            "completion_tokens": completion,
+            "total_tokens": total,
             "text": self.text,
             "status": self.status,
             "inference_ts": _first_ts(self.events, "core:inference"),
@@ -402,17 +416,22 @@ class CliInstrumentor:
         if not all_events:
             all_events = self._log.query()
         types = [e.type for e in all_events]
+        event_dicts = [_event_dict(e) for e in all_events]
         units = sum(
             float(e.payload.get("units") or 0)
             for e in all_events
             if e.type == "core:cost"
         )
+        prompt, completion, total = _token_totals(event_dicts)
         return CliRunResult(
             steps=steps,
             event_types=types,
             tapped_event_types=list(self._tapped_types),
-            events=[_event_dict(e) for e in all_events],
+            events=event_dicts,
             cost_units=units,
+            prompt_tokens=prompt,
+            completion_tokens=completion,
+            total_tokens=total,
             text=last_text,
             status=last_status,
             traversal_kinds=last_traversal,
@@ -455,18 +474,23 @@ class CliInstrumentor:
         text = None
         if node is not None:
             text = str((node.payload or {}).get("text") or "") or None
+        event_dicts = [_event_dict(e) for e in after_events]
         units = sum(
             float(e.payload.get("units") or 0)
             for e in after_events
             if e.type == "core:cost"
         )
+        prompt, completion, total = _token_totals(event_dicts)
         return CliStepResult(
             verb="infer",
             text=text,
             status=result.status,
             event_types=[e.type for e in after_events],
-            events=[_event_dict(e) for e in after_events],
+            events=event_dicts,
             cost_units=units,
+            prompt_tokens=prompt,
+            completion_tokens=completion,
+            total_tokens=total,
             clock_iso=self._datetime.now_utc_iso(),
         )
 
@@ -507,18 +531,23 @@ class CliInstrumentor:
             if r.kind in {"inference", "tool_call", "tool_result", "turn_start"}
             and r.parent_node_id is not None
         ]
+        event_dicts = [_event_dict(e) for e in after_events]
         units = sum(
             float(e.payload.get("units") or 0)
             for e in after_events
             if e.type == "core:cost"
         )
+        prompt, completion, total = _token_totals(event_dicts)
         return CliStepResult(
             verb="tool_loop",
             text=result.final_text,
             status="ok" if (result.final_text or "").strip() else "failed",
             event_types=[e.type for e in after_events],
-            events=[_event_dict(e) for e in after_events],
+            events=event_dicts,
             cost_units=units,
+            prompt_tokens=prompt,
+            completion_tokens=completion,
+            total_tokens=total,
             clock_iso=self._datetime.now_utc_iso(),
             traversal_kinds=kinds,
             component_parent_ids=parents,
@@ -637,6 +666,34 @@ def _first_ts(events: list[dict[str, Any]], type_key: str) -> str | None:
             ts = event.get("ts")
             return str(ts) if ts is not None else None
     return None
+
+
+def _token_totals(events: Sequence[Mapping[str, Any]]) -> tuple[int, int, int]:
+    """Sum ``usage`` from ``core:inference`` event payloads."""
+    prompt = 0
+    completion = 0
+    total = 0
+    for event in events:
+        if event.get("type") != "core:inference":
+            continue
+        payload = event.get("payload") or {}
+        if not isinstance(payload, Mapping):
+            continue
+        usage = payload.get("usage") or {}
+        if not isinstance(usage, Mapping):
+            continue
+        p = usage.get("prompt_tokens")
+        c = usage.get("completion_tokens")
+        t = usage.get("total_tokens")
+        prompt += int(p) if p is not None else 0
+        completion += int(c) if c is not None else 0
+        if t is not None:
+            total += int(t)
+        else:
+            total += (int(p) if p is not None else 0) + (
+                int(c) if c is not None else 0
+            )
+    return prompt, completion, total
 
 
 __all__ = [

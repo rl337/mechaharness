@@ -15,5 +15,17 @@ expect:
   - core:graph_end
 - kind: positive
   key: cost_units
+- kind: equals
+  key: prompt_tokens
+  value: 4
+- kind: equals
+  key: completion_tokens
+  value: 1
+- kind: equals
+  key: total_tokens
+  value: 5
+- kind: lte
+  key: total_tokens
+  value: 5
 - kind: nonempty
   key: text

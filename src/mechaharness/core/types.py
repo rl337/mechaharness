@@ -80,6 +80,21 @@ class Usage(BaseModel):
     completion_tokens: int | None = None
     total_tokens: int | None = None
 
+    def event_payload(self) -> dict[str, int]:
+        """Integer usage for ``core:inference`` payloads (missing → 0)."""
+        return {
+            "prompt_tokens": int(self.prompt_tokens or 0),
+            "completion_tokens": int(self.completion_tokens or 0),
+            "total_tokens": int(self.total_tokens or 0),
+        }
+
+    @classmethod
+    def for_event(cls, usage: Usage | None) -> dict[str, int]:
+        """Normalize optional usage into an inference-event payload."""
+        if usage is None:
+            return cls().event_payload()
+        return usage.event_payload()
+
 
 class CompletionResponse(BaseModel):
     """Normalized response returned by an InferenceStrategy."""

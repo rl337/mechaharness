@@ -16,6 +16,17 @@ expect:
 - kind: equals
   key: turns
   value: 1
+- kind: includes
+  key: event_types
+  value:
+  - core:inference
+  - core:cost
+- kind: equals
+  key: total_tokens
+  value: 2
+- kind: lte
+  key: total_tokens
+  value: 2
 - kind: exactly
   key: subgraph_node_ids
   value:

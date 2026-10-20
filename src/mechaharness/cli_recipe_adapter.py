@@ -70,19 +70,34 @@ class HarnessRunRecipeAdapter(CliRecipeAdapter):
                 },
             ),
         )
+        from mechaharness.cli_instrumentor import _token_totals
+        from mechaharness.core.events import Event
+
+        # Harness DI owns a separate EventLog; mirror records onto the CLI log
+        # so script-level observation sees inference / cost / tokens.
+        for raw in response.events or []:
+            if isinstance(raw, dict):
+                runtime.event_log.emit(Event.model_validate(raw))
+            else:
+                runtime.event_log.emit(raw)
         after_events = runtime.event_log.query()[before:]
+        event_dicts = [_event_dict(e) for e in after_events]
         units = sum(
             float(e.payload.get("units") or 0)
             for e in after_events
             if e.type == "core:cost"
         )
+        prompt, completion, total = _token_totals(event_dicts)
         return CliStepResult(
             verb="run_recipe",
             text=response.final_text,
             status="ok",
             event_types=[e.type for e in after_events],
-            events=[_event_dict(e) for e in after_events],
+            events=event_dicts,
             cost_units=units,
+            prompt_tokens=prompt,
+            completion_tokens=completion,
+            total_tokens=total,
             clock_iso=runtime.datetime_service.now_utc_iso(),
             turns=int(response.turns or 0),
             recipe_in_catalog="harness_run" in catalog,
@@ -161,7 +176,10 @@ class ConversationalToolLoopRecipeAdapter(CliRecipeAdapter):
             messages: list[dict[str, Any]],
             meta: Mapping[str, Any],
         ) -> dict[str, Any]:
-            del messages, meta
+            del messages
+            from mechaharness.core.events import Event, Inference, event_type_key
+            from mechaharness.core.types import Usage
+
             response = await runtime.completer.complete(
                 CompletionRequest(
                     model=runtime.model,
@@ -169,6 +187,24 @@ class ConversationalToolLoopRecipeAdapter(CliRecipeAdapter):
                 )
             )
             message = response.message
+            round_i = int(meta.get("round") or 0)
+            runtime.event_log.emit(
+                Event(
+                    type=event_type_key(Inference),
+                    agent_id=runtime.agent_id,
+                    run_id="cli:conversational_tool_loop",
+                    payload={
+                        "completer": type(runtime.completer).__name__,
+                        "model": runtime.model,
+                        "finish_reason": response.finish_reason,
+                        "content": message.content,
+                        "parent_node_id": "tools",
+                        "component_id": f"tools/inference:{round_i + 1}",
+                        "execution_node_id": "tools",
+                        "usage": Usage.for_event(response.usage),
+                    },
+                )
+            )
             out: dict[str, Any] = {
                 "role": "assistant",
                 "content": message.content or "",

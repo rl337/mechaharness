@@ -11,6 +11,18 @@ expect:
 - kind: equals
   key: status
   value: ok
+- kind: includes
+  key: event_types
+  value:
+  - core:inference
+  - core:cost
+  - core:tool_call
+- kind: equals
+  key: total_tokens
+  value: 4
+- kind: lte
+  key: total_tokens
+  value: 4
 - kind: exactly
   key: traversal_kinds
   value:

@@ -11,6 +11,16 @@ expect:
 - kind: equals
   key: rounds
   value: 2
+- kind: includes
+  key: event_types
+  value:
+  - core:inference
+- kind: equals
+  key: total_tokens
+  value: 4
+- kind: lte
+  key: total_tokens
+  value: 4
 - kind: exactly
   key: subgraph_node_ids
   value:
