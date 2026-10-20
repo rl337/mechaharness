@@ -1,0 +1,15 @@
+kind: cli
+commands:
+- probe:
+    name: exit_clean_state
+    require_handoff_record: true
+    pending_nodes: []
+    checkpoint_durable: true
+    unresolved_effects: []
+    handoff_record_ref: handoff:1
+expect:
+- kind: 'true'
+  key: ok
+- kind: equals
+  key: issues
+  value: []

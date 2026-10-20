@@ -1,0 +1,32 @@
+kind: cli
+commands:
+- probe:
+    name: handoff_record
+    goals:
+    - ship report
+    exclusions:
+    - do not email the customer
+    completed:
+    - a
+    pending:
+    - b
+    rationale: because
+    next_action: verify
+    verdict:
+      kind: ASK_HUMAN
+      policyVersion: '1'
+expect:
+- kind: equals
+  key: next_action
+  value: verify
+- kind: equals
+  key: goals
+  value:
+  - ship report
+- kind: equals
+  key: exclusions
+  value:
+  - do not email the customer
+- kind: equals
+  key: verdict_kind
+  value: ASK_HUMAN

@@ -1,0 +1,16 @@
+kind: cli
+commands:
+- probe:
+    name: environment_delta
+    before:
+      version: 1
+      data:
+        cwd: /app
+    after:
+      version: 2
+      data:
+        cwd: /tmp
+expect:
+- kind: equals
+  key: cwd
+  value: /tmp

@@ -1,0 +1,14 @@
+kind: cli
+commands:
+- probe:
+    name: operation_compensation
+    params:
+      name: cleanup
+      idempotent: true
+      compensation_strategy: noop_if_clean
+expect:
+- kind: 'true'
+  key: idempotent
+- kind: equals
+  key: compensation_strategy
+  value: noop_if_clean

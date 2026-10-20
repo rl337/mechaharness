@@ -2,10 +2,10 @@
   "id": "taloneth_insp_correction_spec_debt",
   "persona": "taloneth",
   "title": "Capture corrections as reviewed specification debt before policy change",
-  "kind": "pure_api",
+  "kind": "cli",
   "narrative": "When a person corrects the agent, the correction is recorded as outstanding specification debt: the correction text, the scenarios that failed, and a link to the rule-promotion record it may harden into. The record stays flagged for human review until someone accepts it, and the host (not the library) generates the regression test and attaches it. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].",
   "implementation": "`SpecificationDebtRecord`, `SpecificationDebtLedger`, and `capture_correction()` in `specification_debt.py` hold the correction, `failing_scenario_refs`, `promotion_record_id` (from `PromotionRecord.record_id`), `review_required`, and a host-filled `generated_test_ref`; `link_test()` and `approve()` move status `open` \u2192 `test_linked` \u2192 `closed`. The library owns only the ledger schema; test generation stays with the host.",
-  "validation": "Harness `pure_api` op `specification_debt`. Hard expects a captured record that requires review and links the promotion, a pending count that only drops after approval, and refusal of blank corrections. Unit tests: `tests/test_specification_debt.py`.",
+  "validation": "Harness `cli` scenario `specification_debt.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-pa-07",

@@ -2,10 +2,10 @@
   "id": "fangore_insp_exit_clean_state",
   "persona": "fangore",
   "title": "Require clean-state exit before handoff",
-  "kind": "pure_api",
+  "kind": "cli",
   "narrative": "A run is not done until checkpoint durability, pending-node policy, and optional handoff records satisfy a clean-state exit contract. Accepts WalkingLabs L12 guidance[^wl-l12-exit].",
   "implementation": "`CleanStateContract` / `ExitContract` and `evaluate_exit` in `mechaharness.exit_contract` check post-run clean-state invariants.",
-  "validation": "Harness `pure_api` op `exit_clean_state`. Soft expects ok true.",
+  "validation": "Harness `cli` scenario `exit_clean_state.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l12-exit",

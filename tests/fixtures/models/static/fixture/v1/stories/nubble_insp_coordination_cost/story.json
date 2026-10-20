@@ -2,10 +2,10 @@
   "id": "nubble_insp_coordination_cost",
   "persona": "nubble",
   "title": "Report parallel coordination cost on fan-out",
-  "kind": "pure_api",
+  "kind": "cli",
   "narrative": "Nubble compares wall-clock critical path, duplicated context, and fan-in review cost so parallelism is measured rather than assumed beneficial. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-coord][^wl-p08-coord].",
   "implementation": "`CoordinationCostMetrics` and `summarize_coordination_cost` in `mechaharness.coordination_cost` report fan-out orchestration cost, including graphs tiled from the `fan_out_aggregate` Agentic Recipe.",
-  "validation": "Harness `pure_api` op `coordination_cost`. Soft expects branch_count.",
+  "validation": "Harness `cli` scenario `coordination_cost.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l14-coord",

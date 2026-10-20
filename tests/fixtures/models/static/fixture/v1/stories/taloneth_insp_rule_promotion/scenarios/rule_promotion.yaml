@@ -1,0 +1,13 @@
+kind: cli
+commands:
+- probe:
+    name: rule_promotion
+    observed_pattern: missing changelog
+    hypothesis: require check
+    experiment_ref: e1
+    soft_instruction_ref: s1
+    hard_invariant_ref: h1
+expect:
+- kind: equals
+  key: stage
+  value: hard

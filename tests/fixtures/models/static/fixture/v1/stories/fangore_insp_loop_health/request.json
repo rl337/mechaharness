@@ -1,6 +1,0 @@
-{
-  "op": "loop_health",
-  "iterations_since_independent_verification": 6,
-  "repeated_failure_class_count": 1,
-  "unresolved_assumptions": 0
-}

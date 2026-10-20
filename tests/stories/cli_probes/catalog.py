@@ -91,6 +91,7 @@ from tests.stories.cli_probes.graph_verbs import (
     run_validator_qualification,
     run_wake_reresolve_resume,
 )
+from tests.stories.cli_probes.pure_api_probes import pure_api_cli_probe_classes
 
 ParamsT = TypeVar("ParamsT", bound=BaseModel)
 ProbeFn = Callable[[Any], Union[dict[str, Any], Awaitable[dict[str, Any]]]]
@@ -120,7 +121,7 @@ def _probe(
 
 def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
     """Acceptance probes merged into test Config via ``cli_probe_classes()``."""
-    return {
+    probes: dict[str, type[CliProbe]] = {
         "check_completer_flavors": _probe(
             "check_completer_flavors",
             CheckCompleterFlavorsCommand,
@@ -308,6 +309,8 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
             run_action_safety_case,
         ),
     }
+    probes.update(pure_api_cli_probe_classes())
+    return probes
 
 
 __all__ = ["story_cli_probe_classes"]

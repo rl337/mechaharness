@@ -1,0 +1,11 @@
+kind: cli
+commands:
+- probe:
+    name: harness_health
+    unused_extensions:
+    - acme:old
+    dead_soft_points: []
+    unexercised_routes: []
+expect:
+- kind: 'true'
+  key: needs_cleanup
