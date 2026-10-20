@@ -23,10 +23,18 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 | Event stamps | `StampingEventLog` over injectable `DateTimeService` |
 | Event tap | `tapping_event_log` on the blessed executor path (HF-05) |
 
-Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`, diagnostics,
-judge, durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`).
+Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`,
+`instantiate_recipe`, diagnostics, judge, durable IoC
+`start`/`answer`/`inspect`/`rebuild`/`list_recipes`).
 Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
 (`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
+
+**Recipe parameterization** uses a human-readable
+:class:`~mechaharness.recipe_bind.RecipeBind` document (story ``binds/`` or
+CLI ``path:``) via ``instantiate_recipe`` — not a new verb per catalog id.
+Authors list the soft decisions that matter; omitted soft points take catalog
+defaults; unknown keys fail. `cli_universe` remains the host shell for infer /
+durable IoC; recipe shape stories bind and expand a catalog recipe instead.
 
 Grow `cli_universe` nodes when stories need product surface that isn’t there
 yet — not one node per verb. If the graph never grows, stories aren’t covering
@@ -101,3 +109,49 @@ wave adds only the CLI verb, probe, or universe node needed:
 Migration complete: story acceptance is ``kind: cli`` only.
 
 When a legacy family has zero stories left, delete its op-dispatch runner.
+
+## ``RecipeBind`` / ``instantiate_recipe`` (documentation surface)
+
+Shape stories keep a human-readable bind file under ``binds/`` and a thin
+scenario that loads it. The bind is part of the user-story documentation: a
+reader should see the recipe id, goal, acceptance, and the soft decisions that
+matter. Omitted soft points take catalog defaults; unknown soft point keys fail.
+
+```text
+stories/<id>/
+  story.json
+  binds/
+    verify_repair.yaml      # prose comments + RecipeBind fields
+  scenarios/
+    verify_repair_recipe.yaml   # path: binds/… + expect
+```
+
+```yaml
+# binds/verify_repair.yaml
+name: verify_repair
+summary: Tile verify-repair into a concrete plan with default runner kinds.
+goal: ship artifact with verify gate
+soft_bindings:
+  produce_kind: produce
+  verify_kind: verify
+  repair_kind: repair
+  complete_kind: complete
+```
+
+CLI hosts use the same file: ``instantiate_recipe`` with ``path:``. One verb
+covers all catalog ids.
+
+| Catalog id | Story coverage |
+|------------|----------------|
+| `verify_repair` | `fangore_verify_repair_recipe` |
+| `environment_repair` | `fangore_environment_repair_recipe` |
+| `bounded_retry` | `fangore_bounded_retry_recipe` |
+| `independent_review` | `fangore_insp_independent_review` |
+| `initialize_preflight` | `fangore_insp_initialize_preflight` |
+| `produce_critique_refine` | `fangore_insp_produce_critique_refine` |
+| `safety_eval` | `taloneth_insp_safety_eval_recipes` |
+
+``run_recipe`` remains for **execute** adapters (`harness_run`,
+`backend_describe`, `conversational_tool_loop`). Registry / evolution / tile /
+``recipe_as_tool`` / traversal stories stay on test probes until they have a
+product document of their own.

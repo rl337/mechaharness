@@ -1,14 +1,19 @@
+# Bind document: ../binds/environment_repair.yaml
 kind: cli
 commands:
-- probe:
-    name: environment_repair_recipe
-    goal: repair missing secrets route
+- instantiate_recipe:
+    path: binds/environment_repair.yaml
 expect:
+- kind: 'true'
+  key: recipe_in_catalog
+- kind: equals
+  key: status
+  value: ok
 - kind: equals
   key: template_name
   value: environment_repair
 - kind: includes
-  key: nodes_include
+  key: subgraph_node_ids
   value:
   - diagnose
   - repair_env

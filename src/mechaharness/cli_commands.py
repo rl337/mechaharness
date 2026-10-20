@@ -23,7 +23,7 @@ class ToolLoopCommand(BaseModel):
 
 
 class RunRecipeCommand(BaseModel):
-    """Execute a catalog recipe through the CLI instrumentor."""
+    """Execute a catalog recipe through a registered recipe adapter."""
 
     model_config = ConfigDict(extra="forbid")
 

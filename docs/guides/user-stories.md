@@ -433,7 +433,7 @@ Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt → class
 
 #### Validation
 
-Harness `cli` scenario `bounded_retry_recipe.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -713,7 +713,7 @@ Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnos
 
 #### Validation
 
-Harness `cli` scenario `environment_repair_recipe.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1330,7 +1330,7 @@ Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce
 
 #### Validation
 
-Harness `cli` scenario `independent_review_template.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1363,7 +1363,7 @@ Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaha
 
 #### Validation
 
-Harness `cli` scenario `initialize_preflight_template.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1558,7 +1558,7 @@ Agentic Recipe `produce_critique_refine` (`ProduceCritiqueRefineTemplate`) build
 
 #### Validation
 
-Harness `cli` scenario `produce_critique_refine_recipe.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2057,7 +2057,7 @@ Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) builds produce → verif
 
 #### Validation
 
-Harness `cli` scenario `verify_repair_recipe.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2466,7 +2466,7 @@ Agentic Recipe `safety_eval` (`SafetyEvalTemplate` in `graph_templates/safety_ev
 
 #### Validation
 
-Harness `cli` scenario `safety_eval_recipe.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.
 
 #### Footnotes
 

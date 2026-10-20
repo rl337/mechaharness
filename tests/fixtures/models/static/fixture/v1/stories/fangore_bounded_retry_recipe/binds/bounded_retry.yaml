@@ -1,0 +1,16 @@
+# Bounded-retry Agentic Recipe: attempt → classify → permit → backoff → escalate.
+# Retries are visible graph steps, not a hidden executor loop.
+
+name: bounded_retry
+summary: Expand bounded_retry with three attempts and effect reconciliation.
+goal: dispatch remote job with safe retry
+
+soft_bindings:
+  # Visible control path
+  attempt_kind: attempt
+  classify_kind: classify
+  permit_kind: permit_retry
+  backoff_kind: backoff
+  escalate_kind: escalate
+  # Attempt budget when no explicit stop_contract is bound
+  max_attempts: 3

@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted \u2014 not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_transactional_durable_resume`.",
   "implementation": "Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt \u2192 classify \u2192 permit_retry \u2192 backoff with a terminal escalate node and a StopContract on the repeating attempt. Attempt payloads carry deliberate attempt context and an effect-reconciliation flag (RT-01..05).",
-  "validation": "Harness `cli` scenario `bounded_retry_recipe.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-bounded-retry",

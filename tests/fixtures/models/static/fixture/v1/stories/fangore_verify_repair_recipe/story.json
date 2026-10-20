@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair are visible graph steps with an explicit stop. Complements `fangore_bounded_repair_loop` for loop helper semantics. Native recipe contract for personal-agent MH-PA-03[^insp-pa-03-verify].",
   "implementation": "Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) builds produce \u2192 verify \u2192 bounded repair \u2192 complete. Soft points bind runner kinds and stop contracts; instantiate stamps catalog provenance.",
-  "validation": "Harness `cli` scenario `verify_repair_recipe.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-verify-repair",

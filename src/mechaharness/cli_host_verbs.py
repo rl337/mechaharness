@@ -38,6 +38,7 @@ from mechaharness.judgement_policy import (
     JudgementThreshold,
     decide,
 )
+from mechaharness.recipe_bind import InstantiateRecipeCommand
 
 
 class InferVerb(CliVerb):
@@ -62,6 +63,16 @@ class RunRecipeVerb(CliVerb):
 
     async def run(self, params: BaseModel, runtime: Any) -> Any:
         return await runtime.run_recipe(params)
+
+
+class InstantiateRecipeVerb(CliVerb):
+    """Expand a strict RecipeBind (inline or path) into a concrete graph."""
+
+    name = "instantiate_recipe"
+    params_model = InstantiateRecipeCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> Any:
+        return await runtime.instantiate_recipe(params)
 
 
 class JudgeRouteCommand(BaseModel):
@@ -197,6 +208,7 @@ def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
         InferVerb.name: InferVerb,
         ToolLoopVerb.name: ToolLoopVerb,
         RunRecipeVerb.name: RunRecipeVerb,
+        InstantiateRecipeVerb.name: InstantiateRecipeVerb,
         JudgeRouteVerb.name: JudgeRouteVerb,
         ReplayModelInputVerb.name: ReplayModelInputVerb,
         RouteCapabilitiesVerb.name: RouteCapabilitiesVerb,
@@ -212,6 +224,7 @@ __all__ = [
     "CheckModelAffinityVerb",
     "CompareRunParityVerb",
     "InferVerb",
+    "InstantiateRecipeVerb",
     "JudgeRouteCommand",
     "JudgeRouteVerb",
     "ReplayModelInputVerb",
