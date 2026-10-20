@@ -220,7 +220,7 @@ Optional `recipe_id`, `recipe_version`, and `freshness_summary` (plus approval, 
 
 #### Validation
 
-Harness `access_authority` op `recipe_audit_dimensions`. Hard expects per-recipe rows with decision counts, verdict splits, and fresh/stale evidence totals computed from tool-result timestamps, that undeclared decisions are skipped, and that the envelope carries the recipe and stays complete. Unit tests: `tests/test_review_audit.py`.
+Harness `cli` scenario `recipe_audit_dimensions.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -253,7 +253,7 @@ An auditor can rebuild a review from the saved decision log and trace alone: whi
 
 #### Validation
 
-Harness `access_authority` op `review_audit_reconstruct`. Hard expects records rebuilt from persisted decision-log event payloads: a fully attested allow is reconstructable, and denied, asked-human, and executed-without-effect records report exactly the missing dimensions; an envelope fills gaps. Unit tests: `tests/test_review_audit.py`.
+Harness `cli` scenario `review_audit_reconstruct.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -320,7 +320,7 @@ Nubble asks branches for isolation without hard-coding worktrees or containers �
 
 #### Validation
 
-Harness `access_authority` op `workspace_isolation_acquire`. Soft expects memory provider_kind.
+Harness `cli` scenario `workspace_isolation_acquire.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -339,7 +339,7 @@ Covers: INF-02.
 
 #### Validation
 
-Harness `access_authority` op `wrong_lane_deny` → `_run_wrong_lane_deny`. Soft expects: non-empty error naming the required lane / load hint. Unit: `tests/test_environment.py`.
+Harness `cli` scenario `wrong_lane_deny.yaml`. Hard expects on declared observation keys.
 
 ### `nubble_model_affinity` — Keep model affinity inside a coherent work loop
 
@@ -433,7 +433,7 @@ Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt → class
 
 #### Validation
 
-Harness `graph_recipes` op `bounded_retry_recipe`. Soft expects node ids, bounded stop on attempt, escalate terminal present, and requires_effect_reconciliation on attempt payload.
+Harness `cli` scenario `bounded_retry_recipe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -449,7 +449,7 @@ Fangore delegates a child plan with fewer tools and grants than the parent. The 
 
 #### Validation
 
-Harness `access_authority` op `capability_envelope_narrow` → `_run_capability_envelope_narrow`. Soft expects: narrowed grants subset; widen raises; delegation chooses child when independence is required. Unit: `tests/test_inspiration_primitives.py`.
+Harness `cli` scenario `capability_envelope_narrow.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -486,7 +486,7 @@ Covers: host compound grants.
 
 #### Validation
 
-Harness `access_authority` op `grant_gate_write` → `_run_grant_gate_write`. Unit: `tests/test_access.py`.
+Harness `cli` scenario `grant_gate_write.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -504,7 +504,7 @@ Covers: host DI access policy.
 
 #### Validation
 
-Harness `access_authority` op `config_access_policy` → `_run_config_access_policy`. Unit: `tests/test_di.py`.
+Harness `cli` scenario `config_access_policy.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -713,7 +713,7 @@ Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnos
 
 #### Validation
 
-Harness `graph_recipes` op `environment_repair_recipe`. Soft expects catalog id, diagnose/repair/recheck node ids, and stamped template_name. Unit: `tests/test_graph_templates.py`.
+Harness `cli` scenario `environment_repair_recipe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -762,7 +762,7 @@ Agentic Recipes are concrete `GraphTemplate` subclasses in `mechaharness.graph_t
 
 #### Validation
 
-Harness `graph_recipes` op `graph_template_soft_points` → `_run_graph_template_soft_points`. Soft expects: fan-out node ids, stamped provenance, soft-point catalog nonempty, demoted template raises. Unit: `tests/test_graph_templates.py`, fixtures under `tests/fixtures/graph_templates/`.
+Harness `cli` scenario `graph_template_soft_points.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -841,7 +841,7 @@ Covers: POL-04, GAT-04.
 
 #### Validation
 
-Harness `access_authority` op `human_review_pending` → `_run_human_review_pending`. Soft expects: ASK_HUMAN without token; ALLOW when digest approval present. Unit coverage in `tests/test_judgement_policy.py`.
+Harness `cli` scenario `human_review_pending.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -858,7 +858,7 @@ Models may suggest what to do about an alert, but fixed rules decide how far it 
 
 #### Validation
 
-Harness `access_authority` op `alert_escalation_stages`. Hard expects the stage ladder for default thresholds, a per-alert override, the counter walk, and refusal of unordered thresholds. Unit tests: `tests/test_alert_escalation.py`.
+Harness `cli` scenario `alert_escalation_stages.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -890,7 +890,7 @@ High-consequence steps must pause on a durable approval interrupt with evidence,
 
 #### Validation
 
-Harness `access_authority` op `approval_interrupt_cycle`. Soft expects pending then approved with actor.
+Harness `cli` scenario `approval_interrupt_cycle.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -907,7 +907,7 @@ Checkpoints carry the authorization epoch so crash recovery after revocation doe
 
 #### Validation
 
-Harness `access_authority` op `auth_epoch_resume_refuse`. Hard expects first run ok with epoch persisted, resume under an advanced epoch failed with `authorization_epoch_mismatch`, and no runner re-entered.
+Harness `cli` scenario `auth_epoch_resume_refuse.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -923,7 +923,7 @@ Hard rules for consequential actions live outside model text. Untrusted forwarde
 
 #### Validation
 
-Harness `access_authority` op `authority_gate_evaluate`. Hard expects low-consequence actions allowed, high-consequence actions asking until approved, untrusted-source sends denied even when approved, and envelope/access/verdict denials with reason codes.
+Harness `cli` scenario `authority_gate_evaluate.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1006,7 +1006,7 @@ Task-local evidence, policy, memory references, and approvals must not bleed acr
 
 #### Validation
 
-Harness `access_authority` op `cross_task_isolation_bleed`. Hard expects no bleed after 0/5/10 intervening tasks, the receiver reading only handed-off refs, and a handoff naming an unreadable ref refused.
+Harness `cli` scenario `cross_task_isolation_bleed.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1038,7 +1038,7 @@ Denied intents and side-effect classes survive graph retries and delegated paths
 
 #### Validation
 
-Harness `access_authority` op `denial_store_equivalence`. Hard expects a DENY verdict recorded, retries through other tools to the same target refused even when approved, a different target unaffected, and the action allowed again only after `lift`.
+Harness `cli` scenario `denial_store_equivalence.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1119,7 +1119,7 @@ Authority is rechecked when a consequential action actually runs — not only at
 
 #### Validation
 
-Harness `access_authority` op `effect_revalidation_check`. Hard expects fresh authority to pass, expired/advanced-epoch/missing-grant checks to fail with typed reasons, and a graph with a revoked epoch to fail without running the publish effect.
+Harness `cli` scenario `effect_revalidation_check.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1135,7 +1135,7 @@ MechaHarness validates, executes, versions, and safety-gates recipes; the host (
 
 #### Validation
 
-Harness `graph_recipes` op `evolution_ownership_split`. Hard expects default no-op hooks via the injector, host overrides through a subclassed Config, a host veto that leaves the active recipe version unchanged, the final-test gate refusing a no-opinion promotion without a result, promotion once the gate passes, and the `on_promotion` hook observing only that successful move. Unit tests: `tests/test_evolution_ownership_hooks.py`.
+Harness `cli` scenario `evolution_ownership_split.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1151,7 +1151,7 @@ Every graph run needs a capability-scoped execution token: principal, expiry, tr
 
 #### Validation
 
-Harness `access_authority` op `execution_token_narrow`. Hard expects widening attempts refused by reason and attenuation attempts accepted with principal and epoch inherited.
+Harness `cli` scenario `execution_token_narrow.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1330,7 +1330,7 @@ Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce
 
 #### Validation
 
-Harness `graph_recipes` op `independent_review_template`. Soft expects isolated payload flags and two reviewers.
+Harness `cli` scenario `independent_review_template.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1363,7 +1363,7 @@ Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaha
 
 #### Validation
 
-Harness `graph_recipes` op `initialize_preflight_template`. Soft expects node ids include ready.
+Harness `cli` scenario `initialize_preflight_template.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1411,7 +1411,7 @@ Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (ef
 
 #### Validation
 
-Harness `access_authority` op `isolation_io_contract`. Soft expects empty validation issues and budget_share.
+Harness `cli` scenario `isolation_io_contract.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1558,7 +1558,7 @@ Agentic Recipe `produce_critique_refine` (`ProduceCritiqueRefineTemplate`) build
 
 #### Validation
 
-Harness `graph_recipes` op `produce_critique_refine_recipe`. Hard expects template stamp, node ids, an isolated critic, refine bounded by `max_rounds`, node components attached to the right parents, and the evolvable allowlist.
+Harness `cli` scenario `produce_critique_refine_recipe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1574,7 +1574,7 @@ New recipe versions are immutable artifacts with provenance, lineage, test resul
 
 #### Validation
 
-Harness `graph_recipes` op `recipe_registry_versions`. Hard expects a v1→v2→v3 lineage, evaluations attached to v2, promotion to v3, rollback to v2, and an unknown parent refused.
+Harness `cli` scenario `recipe_registry_versions.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1590,7 +1590,7 @@ Candidate compositions are found by searching only the registered recipes for on
 
 #### Validation
 
-Harness `graph_recipes` op `recipe_port_search`. Hard expects the catalog ids returned for output-only, input-only, combined, wildcard, wrong-type, and unknown-port queries, that every result is a registered catalog id, and that recipes without ports are never returned. Unit tests: `tests/test_recipe_port_search.py`.
+Harness `cli` scenario `recipe_port_search.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1606,7 +1606,7 @@ Recipe execution policies are versioned, testable, replaceable artifacts with a 
 
 #### Validation
 
-Harness `graph_recipes` op `recipe_registry_versions`. Hard expects a candidate to stay inactive until promoted, rollback to restore the earlier version, and promoting an unknown version to fail without moving the pointer.
+Harness `cli` scenario `recipe_registry_versions.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1622,7 +1622,7 @@ Production graphs are composed from registered recipes (including nested recipes
 
 #### Validation
 
-Harness `graph_recipes` op `registry_only_compose`. Hard expects pure tiling of registered recipes to pass, a free-form shell node and a forged recipe version to be reported.
+Harness `cli` scenario `registry_only_compose.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1638,7 +1638,7 @@ High-consequence writes demand stronger controls and visible approval frequency;
 
 #### Validation
 
-Harness `access_authority` op `consequence_risk_scale`. Soft expects: high-consequence write requires stronger controls; approval frequency recorded. Unit: `tests/test_inspiration_primitives.py`. Related grants: `fangore_insp_soft_vs_hard`.
+Harness `cli` scenario `consequence_risk_scale.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1655,7 +1655,7 @@ Hard nodes and trusted contracts are never silently rewritten by an optimizer; o
 
 #### Validation
 
-Harness `graph_recipes` op `soft_point_evolution_allowlist`. Hard expects allowlisted edits allowed, runner-kind and policy edits refused, and `verify_repair` having no evolvable points.
+Harness `cli` scenario `soft_point_evolution_allowlist.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1673,7 +1673,7 @@ Covers: GAT-01, GAT-02, GAT-03.
 
 #### Validation
 
-Harness `access_authority` op `tool_gating`. Soft expects deny without grant and allow with grant. Unit: `tests/test_access.py`. Related: `fangore_insp_risk_autonomy`.
+Harness `cli` scenario `tool_gating.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1706,7 +1706,7 @@ Graph quality targets have owners and can be frozen so agents cannot silently mu
 
 #### Validation
 
-Harness `access_authority` op `state_governance_write`. Soft expects frozen field denies writes.
+Harness `cli` scenario `state_governance_write.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1754,7 +1754,7 @@ Reusable Agentic Recipes expose soft points and stamp provenance onto concrete g
 
 #### Validation
 
-Harness `graph_recipes` op `graph_template_soft_points`. Soft expects stamped provenance and demoted refuse.
+Harness `cli` scenario `graph_template_soft_points.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1771,7 +1771,7 @@ Read-only observers must not invoke mutating tools; preparation returns typed pr
 
 #### Validation
 
-Harness `access_authority` op `tool_phase_effect_guard`. Hard expects observe/prepare contracts with write/external/unknown effects refused at registration, read-only observe and execute-phase writes registered.
+Harness `cli` scenario `tool_phase_effect_guard.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1787,7 +1787,7 @@ Tool results that drive external decisions carry source and freshness metadata. 
 
 #### Validation
 
-Harness `access_authority` op `tool_result_freshness_reject`. Hard expects the eight-day-old cache and the expired result rejected, and the fresh result passed through.
+Harness `cli` scenario `tool_result_freshness_reject.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1954,7 +1954,7 @@ Before a run starts, Fangore’s console must place interior pieces inside each 
 
 #### Validation
 
-Harness `graph_recipes` op `node_components` → `_run_node_components`. Soft expects: all components have parent_node_id; kinds ⊆ catalog; stop_contract and soft_point present for `conversational_tool_loop`. Unit: `tests/test_node_component.py`.
+Harness `cli` scenario `node_components.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1970,7 +1970,7 @@ Fangore’s generate-image tool should run a child oneshot recipe under that too
 
 #### Validation
 
-Harness `graph_recipes` op `recipe_as_tool` → `_run_recipe_as_tool`. Soft expects: status ok; child_run_id nonempty; child_status ok; parent has child_graph component. Unit: `tests/test_conversational_tool_loop.py`.
+Harness `cli` scenario `recipe_as_tool.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1987,7 +1987,7 @@ Fangore tiles the same Agentic Recipe twice in one parent plan. Each instance mu
 
 #### Validation
 
-Harness `graph_recipes` op `recipe_namespace_tile`. Soft expects two disjoint node-id sets, distinct recipe_instance_id values, and parent embed node kinds subgraph.
+Harness `cli` scenario `recipe_namespace_tile.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2041,7 +2041,7 @@ As a run proceeds, Fangore’s console lights interiors that were laid out ahead
 
 #### Validation
 
-Harness `graph_recipes` op `traversal_contract` → `_run_traversal_contract`. Soft expects: inference and tool_call records present; parents non-empty. Unit: `tests/test_node_component.py`.
+Harness `cli` scenario `traversal_contract.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2057,7 +2057,7 @@ Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) builds produce → verif
 
 #### Validation
 
-Harness `graph_recipes` op `verify_repair_recipe`. Soft expects node ids and template_name `verify_repair`. Related: `fangore_bounded_repair_loop`.
+Harness `cli` scenario `verify_repair_recipe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2399,7 +2399,7 @@ A host can summarize past traces into suggestions, and the library turns them in
 
 #### Validation
 
-Harness `graph_recipes` op `recipe_evolution_candidates`. Hard expects bounded single-setting candidates ranked by support, the rejected reasons for fixed, unknown, and non-allowlisted settings, identical results on a repeat run, no graph in any candidate, the gated best candidate selected, and no selection when nothing beats the baseline. Unit tests: `tests/test_recipe_evolution.py`.
+Harness `cli` scenario `recipe_evolution_candidates.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2415,7 +2415,7 @@ A leading candidate must pass a separate untouched final test before it can be r
 
 #### Validation
 
-Harness `graph_recipes` op `recipe_final_test_gate`. Hard expects refusal for a missing, non-held-out, and failed result for both the research lab and the registry, promotion for a passing held-out result, an unmoved pointer after refusals, and that an unprotected protocol skips the gate. Unit tests: `tests/test_final_test_gate.py`.
+Harness `cli` scenario `recipe_final_test_gate.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2466,7 +2466,7 @@ Agentic Recipe `safety_eval` (`SafetyEvalTemplate` in `graph_templates/safety_ev
 
 #### Validation
 
-Harness `graph_recipes` op `safety_eval_recipe`. Hard expects the template stamp and node ids, an isolated reviewer, a deterministic score carrying the report fields and versions, the six scenario classes, an empty evolvable allowlist, node components on the right parents, and catalog registration. Unit tests: `tests/test_safety_eval_recipe.py`; fixture `tests/fixtures/graph_templates/safety_eval_defaults.json`.
+Harness `cli` scenario `safety_eval_recipe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
