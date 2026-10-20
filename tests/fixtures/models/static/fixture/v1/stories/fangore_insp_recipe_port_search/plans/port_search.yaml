@@ -1,0 +1,27 @@
+# Typed-port catalog search (MH-SR-04).
+# Queries return catalog recipe ids whose IO contracts match.
+
+plan: port_search
+summary: Find recipes by required inputs/outputs; skip undeclared contracts.
+
+queries:
+- id: produces_artifact
+  required_outputs:
+    artifact: object
+- id: accepts_scenario
+  required_inputs:
+    scenario: object
+- id: scenario_to_report
+  required_inputs:
+    scenario: object
+  required_outputs:
+    safety_report: object
+- id: wildcard
+  required_inputs:
+    scenario: any
+- id: wrong_type
+  required_inputs:
+    scenario: string
+- id: unknown_port
+  required_inputs:
+    nope: object

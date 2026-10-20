@@ -64,6 +64,7 @@ from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
 from mechaharness.node_component import traversal_from_events
 from mechaharness.recipe_bind import InstantiateRecipeCommand, TileRecipeCommand
+from mechaharness.recipe_plan import RecipePlanCommand
 from mechaharness.tools.base import Tool, ToolRegistry
 
 
@@ -556,6 +557,16 @@ class CliInstrumentor:
         fields = tile.tile()
         return CliStepResult(
             verb="tile_recipe",
+            status="ok",
+            clock_iso=self._datetime.now_utc_iso(),
+            fields=fields,
+        )
+
+    async def recipe_plan(self, body: RecipePlanCommand) -> CliStepResult:
+        """Run a lifecycle plan document (soft evolution / port search / compose)."""
+        fields = body.resolve_and_run(base_dir=self._bind_base_dir)
+        return CliStepResult(
+            verb="recipe_plan",
             status="ok",
             clock_iso=self._datetime.now_utc_iso(),
             fields=fields,

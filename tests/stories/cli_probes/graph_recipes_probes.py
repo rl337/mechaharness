@@ -148,50 +148,6 @@ async def run_recipe_registry_versions(inputs: dict[str, Any]) -> dict[str, Any]
     return actual
 
 
-async def run_soft_point_evolution_allowlist(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Only declared evolvable soft points may be rewritten (MH-SR-03)."""
-    request = inputs
-    registry = default_graph_templates()
-    outcomes: dict[str, str] = {}
-    for attempt in request["attempts"]:
-        template = registry.get(attempt["recipe"])
-        assert template is not None
-        try:
-            template.assert_evolution_allowed(attempt["changed"])
-            outcomes[attempt["id"]] = "allowed"
-        except ValueError:
-            outcomes[attempt["id"]] = "refused"
-    evolvable = {
-        name: (registry.get(name).evolvable_soft_point_names())  # type: ignore[union-attr]
-        for name in request["recipes"]
-    }
-    return {"outcomes": outcomes, "evolvable": evolvable}
-
-
-async def run_registry_only_compose(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Production graphs compose only registered recipes (MH-SR-02)."""
-    request = inputs
-    registry = default_graph_templates()
-    results: dict[str, list[str]] = {}
-    for scenario in request["scenarios"]:
-        parent = ExecutionGraph(goal=scenario["id"])
-        for tile in scenario.get("tiles", []):
-            template = registry.get(tile["recipe"])
-            assert template is not None
-            child, embed = template.tile(
-                GraphTemplateParams(goal=tile["recipe"], instance_key=tile["key"]),
-                parent_node_id=f"embed_{tile['key']}",
-            )
-            if tile.get("forge_version"):
-                child.template_version = tile["forge_version"]
-                embed = embed.model_copy(update={"subgraph": child.checkpoint()})
-            parent.add_node(embed)
-        for node_id in scenario.get("free_form_nodes", []):
-            parent.add_node(GraphNode(id=node_id, kind="shell"))
-        results[scenario["id"]] = registry.composition_violations(parent)
-    return {"violations": results}
-
-
 async def run_recipe_final_test_gate(inputs: dict[str, Any]) -> dict[str, Any]:
     """Promotion needs a passing held-out final-test result (MH-SR-07)."""
     from mechaharness.evaluator import FinalTestGateError
@@ -276,31 +232,6 @@ async def run_recipe_evolution_candidates(inputs: dict[str, Any]) -> dict[str, A
         "graphs_synthesized": any("graph" in c.model_dump() for c in proposal.candidates),
         "selected_bindings": picked.soft_bindings if picked else None,
         "selected_over_baseline": beaten.soft_bindings if beaten else None,
-    }
-    return actual
-
-
-async def run_recipe_port_search(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Typed-port search returns catalog ids only (MH-SR-04)."""
-    from mechaharness.recipe_lifecycle.recipe_port_search import search_compatible_recipes
-    request = inputs
-    registry = default_graph_templates()
-    found = {
-        q["id"]: search_compatible_recipes(
-            registry, q.get("required_inputs"), q.get("required_outputs")
-        )
-        for q in request["queries"]
-    }
-    actual = {
-        "found": found,
-        "all_catalog_ids": all(
-            name in registry.names() for names in found.values() for name in names
-        ),
-        "undeclared_recipes_skipped": not any(
-            registry.get(name).io_contract is None  # type: ignore[union-attr]
-            for names in found.values()
-            for name in names
-        ),
     }
     return actual
 
@@ -420,11 +351,8 @@ GRAPH_RECIPES_HANDLERS: dict[str, Any] = {
     "traversal_contract": run_traversal_contract,
     "recipe_as_tool": run_recipe_as_tool,
     "recipe_registry_versions": run_recipe_registry_versions,
-    "soft_point_evolution_allowlist": run_soft_point_evolution_allowlist,
-    "registry_only_compose": run_registry_only_compose,
     "recipe_final_test_gate": run_recipe_final_test_gate,
     "recipe_evolution_candidates": run_recipe_evolution_candidates,
-    "recipe_port_search": run_recipe_port_search,
     "evolution_ownership_split": run_evolution_ownership_split,
 }
 

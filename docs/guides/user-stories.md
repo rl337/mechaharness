@@ -1590,7 +1590,7 @@ Candidate compositions are found by searching only the registered recipes for on
 
 #### Validation
 
-Harness `cli` scenario `recipe_port_search.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1622,7 +1622,7 @@ Production graphs are composed from registered recipes (including nested recipes
 
 #### Validation
 
-Harness `cli` scenario `registry_only_compose.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1655,7 +1655,7 @@ Hard nodes and trusted contracts are never silently rewritten by an optimizer; o
 
 #### Validation
 
-Harness `cli` scenario `soft_point_evolution_allowlist.yaml`. Hard expects on declared observation keys.
+Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.
 
 #### Footnotes
 
