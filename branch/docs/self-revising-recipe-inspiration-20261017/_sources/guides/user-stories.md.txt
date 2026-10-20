@@ -123,7 +123,7 @@ Nubble needs tool calls, tokens, latency, and coordination cost kept as separate
 
 #### Validation
 
-Harness `evaluation_research` op `efficiency_scorecard_build`. Soft expects tool_calls and tokens_out dimensions.
+Harness `cli` scenario `efficiency_scorecard_build.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -285,7 +285,7 @@ Nubble rejects incomplete traces that omit config fingerprint, routing, context 
 
 #### Validation
 
-Harness `evaluation_research` op `trace_envelope_complete`. Soft expects complete true and no missing fields.
+Harness `cli` scenario `trace_envelope_complete.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -303,7 +303,7 @@ Nubble needs executor events and gateway capture to reconcile before a rollout i
 
 #### Validation
 
-Harness `evaluation_research` op `trace_reconciliation_check`. Soft expects conflict status. Unit tests in `tests/test_trace_reconciliation.py`.
+Harness `cli` scenario `trace_reconciliation_check.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1183,7 +1183,7 @@ When the same failure class repeats, Fangore needs structured attribution so the
 
 #### Validation
 
-Harness `evaluation_research` op `failure_attribution_trace`. Soft expects linkage category and repeated class detection.
+Harness `cli` scenario `failure_attribution_trace.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1430,7 +1430,7 @@ Before a dangerous tool runs, Fangore's extension blocks that single call. The d
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_block`. Soft expects blocked tool content, applied_block true, and default_ran false.
+Harness `cli` scenario `lifecycle_extension_block.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1446,7 +1446,7 @@ Fangore binds an observe-only extension around each graph node attempt. The node
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_graph_observe`. Soft expects a before_graph_node extension event and a successful graph run.
+Harness `cli` scenario `lifecycle_extension_graph_observe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1462,7 +1462,7 @@ Fangore binds two host extensions that watch each tool call before it runs. The 
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_observe`. Soft expects two extension ids in order, default_ran true, and the original tool path in the tool result.
+Harness `cli` scenario `lifecycle_extension_observe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1478,7 +1478,7 @@ For one tool boundary, Fangore may substitute a different single-step outcome in
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_replace`. Soft expects replaced content, applied_replace true, and default_ran false.
+Harness `cli` scenario `lifecycle_extension_replace.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1494,7 +1494,7 @@ Before a write tool runs, Fangore's extension rewrites the path argument into a 
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_rewrite`. Soft expects sandbox path in the tool result, applied_rewrite true, and default_ran true.
+Harness `cli` scenario `lifecycle_extension_rewrite.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2078,7 +2078,7 @@ Covers: EXP-01, EXP-02, EXP-03, EXP-04.
 
 #### Validation
 
-Harness `evaluation_research` op `atk_research_reject` → `_run_atk_research_reject`. Unit: `tests/test_research.py`.
+Harness `cli` scenario `atk_research_reject.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2138,7 +2138,7 @@ Taloneth runs a component-ablation experiment that disables named harness pieces
 
 #### Validation
 
-Harness `evaluation_research` op `component_ablation_delta`. Soft expects negative success_delta.
+Harness `cli` scenario `component_ablation_delta.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2171,7 +2171,7 @@ Taloneth needs cross-harness evaluation to classify invalid tool names and schem
 
 #### Validation
 
-Harness `evaluation_research` op `cross_harness_failure_classify`. Soft expects invalid_tool_name. Unit tests in `tests/test_cross_harness_failure.py`.
+Harness `cli` scenario `cross_harness_failure_classify.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2187,7 +2187,7 @@ Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by
 
 #### Validation
 
-Harness `evaluation_research` op `eval_claims_compose`. Soft expects pass/fail/unknown counts.
+Harness `cli` scenario `eval_claims_compose.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2204,7 +2204,7 @@ Taloneth evaluates the same model under multiple harness configurations and must
 
 #### Validation
 
-Harness `evaluation_research` op `eval_matrix_aggregate`. Soft expects cell count and retained fingerprints. Unit tests in `tests/test_eval_matrix.py`.
+Harness `cli` scenario `eval_matrix_aggregate.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2220,7 +2220,7 @@ Taloneth needs a dead sandbox or broken trace to count as unscorable execution f
 
 #### Validation
 
-Harness `evaluation_research` op `evaluation_outcome_filter`. Soft expects task trial counts and pass@k ignoring execution failures. Unit tests in `tests/test_evaluation_outcome.py`.
+Harness `cli` scenario `evaluation_outcome_filter.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2236,7 +2236,7 @@ Taloneth wires a versioned evaluator that can be marked held-out so self-improve
 
 #### Validation
 
-Harness `evaluation_research` op `evaluator_compose_run`. Soft expects passed and held_out true.
+Harness `cli` scenario `evaluator_compose_run.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2254,7 +2254,7 @@ Taloneth needs every harness experiment to state which configuration axes are fi
 
 #### Validation
 
-Harness `evaluation_research` op `experiment_dimensions_digest`. Soft expects digest present. Unit tests in `tests/test_experiment_dimensions.py`.
+Harness `cli` scenario `experiment_dimensions_digest.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2270,7 +2270,7 @@ Taloneth needs mid-corpus experiment resume to remember which cases were already
 
 #### Validation
 
-Harness `evaluation_research` op `experiment_lineage_resume`. Soft expects remaining cases and duplicate refusal. Unit tests in `tests/test_experiment_lineage.py`.
+Harness `cli` scenario `experiment_lineage_resume.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2286,7 +2286,7 @@ Taloneth needs equal rollout counts to still reveal unequal token and call expos
 
 #### Validation
 
-Harness `evaluation_research` op `exposure_discriminative_report`. Soft expects unequal model_calls and all_success_tie. Unit tests in `tests/test_exposure_discriminative.py`.
+Harness `cli` scenario `exposure_discriminative_report.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2302,7 +2302,7 @@ Taloneth needs harness experiments to satisfy correctness first and only then pr
 
 #### Validation
 
-Harness `evaluation_research` op `gated_objective_evaluate`. Soft expects retired when treatment fails correctness. Unit tests in `tests/test_gated_objective.py`.
+Harness `cli` scenario `gated_objective_evaluate.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2318,7 +2318,7 @@ Taloneth compares the same model and task under two graph configurations and nee
 
 #### Validation
 
-Harness `evaluation_research` op `harness_fingerprint_digest`. Soft expects distinct digests and provenance attachment. Unit tests in `tests/test_harness_fingerprint.py`.
+Harness `cli` scenario `harness_fingerprint_digest.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2351,7 +2351,7 @@ Taloneth writes the failure mode and expected metric before shipping a harness t
 
 #### Validation
 
-Harness `evaluation_research` op `harness_experiment_retire`. Soft expects retired when treatment loses (evidence-driven retain/retire).
+Harness `cli` scenario `harness_experiment_retire.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2367,7 +2367,7 @@ Taloneth needs exportable execution packs that carry harness fingerprint, rollou
 
 #### Validation
 
-Harness `evaluation_research` op `learning_export_pack`. Soft expects schema version and fingerprint. Unit tests in `tests/test_learning_export.py`.
+Harness `cli` scenario `learning_export_pack.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2383,7 +2383,7 @@ Taloneth refuses silent weighted blends of verifier scores and wants gates and f
 
 #### Validation
 
-Harness `evaluation_research` op `objective_policy_aggregate`. Soft expects scored scalar with policy identity. Unit tests in `tests/test_objective_policy.py`.
+Harness `cli` scenario `objective_policy_aggregate.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2482,7 +2482,7 @@ Taloneth treats an orchestration scaffold as temporary. When a with-versus-witho
 
 #### Validation
 
-Harness `evaluation_research` op `harness_experiment_retire`. Soft expects: treatment worse than control yields `retired` status and a retirement candidate. Related: `taloneth_atk_research_reject`. Unit: `tests/test_inspiration_primitives.py`.
+Harness `cli` scenario `harness_experiment_retire.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2514,7 +2514,7 @@ Taloneth records isolated trials with cost and latency, then reports pass@k for 
 
 #### Validation
 
-Harness `evaluation_research` op `trial_reliability_metrics`. Soft expects positive pass_at_k and rollup trial count.
+Harness `cli` scenario `trial_reliability_metrics.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
