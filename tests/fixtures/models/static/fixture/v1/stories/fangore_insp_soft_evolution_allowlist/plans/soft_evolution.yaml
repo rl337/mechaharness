@@ -1,0 +1,33 @@
+# Soft-point evolution allowlist (MH-SR-03).
+# Only declared evolvable soft points may be rewritten by an optimizer.
+
+plan: soft_evolution
+summary: Allow critique_prompt/max_rounds and reviewer_count; refuse hard slots.
+
+recipes:
+- produce_critique_refine
+- independent_review
+- verify_repair
+
+attempts:
+# Evolvable prompt + rounds on produce-critique-refine
+- id: tune_prompt
+  recipe: produce_critique_refine
+  changed:
+  - critique_prompt
+  - max_rounds
+# Isolation is hard structure — must refuse
+- id: drop_isolation
+  recipe: produce_critique_refine
+  changed:
+  - omit_producer_reasoning
+# Reviewer count is evolvable on independent_review
+- id: more_reviewers
+  recipe: independent_review
+  changed:
+  - reviewer_count
+# Runner kinds on verify_repair are not evolvable
+- id: swap_runner
+  recipe: verify_repair
+  changed:
+  - repair_kind

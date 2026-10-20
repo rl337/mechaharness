@@ -39,6 +39,7 @@ from mechaharness.judgement_policy import (
     decide,
 )
 from mechaharness.recipe_bind import InstantiateRecipeCommand, TileRecipeCommand
+from mechaharness.recipe_plan import RecipePlanCommand
 
 
 class InferVerb(CliVerb):
@@ -83,6 +84,16 @@ class TileRecipeVerb(CliVerb):
 
     async def run(self, params: BaseModel, runtime: Any) -> Any:
         return await runtime.tile_recipe(params)
+
+
+class RecipePlanVerb(CliVerb):
+    """Run a lifecycle plan document (soft evolution / ports / compose)."""
+
+    name = "recipe_plan"
+    params_model = RecipePlanCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> Any:
+        return await runtime.recipe_plan(params)
 
 
 class JudgeRouteCommand(BaseModel):
@@ -220,6 +231,7 @@ def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
         RunRecipeVerb.name: RunRecipeVerb,
         InstantiateRecipeVerb.name: InstantiateRecipeVerb,
         TileRecipeVerb.name: TileRecipeVerb,
+        RecipePlanVerb.name: RecipePlanVerb,
         JudgeRouteVerb.name: JudgeRouteVerb,
         ReplayModelInputVerb.name: ReplayModelInputVerb,
         RouteCapabilitiesVerb.name: RouteCapabilitiesVerb,
@@ -238,6 +250,7 @@ __all__ = [
     "InstantiateRecipeVerb",
     "JudgeRouteCommand",
     "JudgeRouteVerb",
+    "RecipePlanVerb",
     "ReplayModelInputVerb",
     "RouteCapabilitiesVerb",
     "RunRecipeVerb",

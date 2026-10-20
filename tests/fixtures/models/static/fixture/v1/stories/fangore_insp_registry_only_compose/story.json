@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Production graphs are composed from registered recipes (including nested recipes), not free-form node synthesis. Tiling and recipe-as-tool already help (`fangore_recipe_namespace_tile`, `fangore_recipe_as_tool`). Tracks MH-SR-02[^insp-sr-02].",
   "implementation": "`GraphTemplateRegistry.composition_violations(graph)` / `assert_registry_composed(graph)` check that a recipe-stamped graph names a stored `name@version` and that an unstamped container graph holds only embedded recipe subgraphs, recursively. Free-form nodes and forged versions are reported. Hosts call it as a production gate; the executor does not force it.",
-  "validation": "Harness `cli` scenario `registry_only_compose.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `recipe_plan` loads `plans/*.yaml` (human-readable lifecycle plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-sr-02",

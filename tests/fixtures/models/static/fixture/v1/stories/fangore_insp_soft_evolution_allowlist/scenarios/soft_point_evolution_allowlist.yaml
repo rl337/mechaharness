@@ -1,29 +1,8 @@
+# Plan document: ../plans/soft_evolution.yaml
 kind: cli
 commands:
-- probe:
-    name: soft_point_evolution_allowlist
-    recipes:
-    - produce_critique_refine
-    - independent_review
-    - verify_repair
-    attempts:
-    - id: tune_prompt
-      recipe: produce_critique_refine
-      changed:
-      - critique_prompt
-      - max_rounds
-    - id: drop_isolation
-      recipe: produce_critique_refine
-      changed:
-      - omit_producer_reasoning
-    - id: more_reviewers
-      recipe: independent_review
-      changed:
-      - reviewer_count
-    - id: swap_runner
-      recipe: verify_repair
-      changed:
-      - repair_kind
+- recipe_plan:
+    path: plans/soft_evolution.yaml
 expect:
 - kind: equals
   key: outcomes

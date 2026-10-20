@@ -1,28 +1,8 @@
+# Plan document: ../plans/port_search.yaml
 kind: cli
 commands:
-- probe:
-    name: recipe_port_search
-    queries:
-    - id: produces_artifact
-      required_outputs:
-        artifact: object
-    - id: accepts_scenario
-      required_inputs:
-        scenario: object
-    - id: scenario_to_report
-      required_inputs:
-        scenario: object
-      required_outputs:
-        safety_report: object
-    - id: wildcard
-      required_inputs:
-        scenario: any
-    - id: wrong_type
-      required_inputs:
-        scenario: string
-    - id: unknown_port
-      required_inputs:
-        nope: object
+- recipe_plan:
+    path: plans/port_search.yaml
 expect:
 - kind: equals
   key: found
