@@ -2,10 +2,10 @@
   "id": "taloneth_insp_component_ablation",
   "persona": "taloneth",
   "title": "Ablate harness components against a matched corpus",
-  "kind": "evaluation_research",
+  "kind": "cli",
   "narrative": "Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance[^wl-l02-ablation][^wl-p01-ablation].",
   "implementation": "`ComponentAblationExperiment` and `ablation_delta` in `mechaharness.component_ablation` standardize baseline fingerprint, disabled component IDs, and quality/cost deltas.",
-  "validation": "Harness `evaluation_research` op `component_ablation_delta`. Soft expects negative success_delta.",
+  "validation": "Harness `cli` scenario `component_ablation_delta.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l02-ablation",

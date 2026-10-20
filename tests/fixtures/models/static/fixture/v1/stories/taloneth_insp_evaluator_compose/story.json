@@ -2,10 +2,10 @@
   "id": "taloneth_insp_evaluator_compose",
   "persona": "taloneth",
   "title": "Run a versioned held-out evaluator to claims",
-  "kind": "evaluation_research",
+  "kind": "cli",
   "narrative": "Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon]. Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: `taloneth_insp_recipe_final_test_gate`[^insp-sr-07-eval].",
   "implementation": "`Evaluator`, `CallableEvaluator`, and `evaluate_claims` in `mechaharness.evaluator` compose deterministic claim producers with version and held_out metadata beside VerificationPolicy.",
-  "validation": "Harness `evaluation_research` op `evaluator_compose_run`. Soft expects passed and held_out true.",
+  "validation": "Harness `cli` scenario `evaluator_compose_run.yaml`. Hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "anth-evals-evaluator",

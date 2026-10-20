@@ -1,0 +1,18 @@
+kind: cli
+commands:
+- probe:
+    name: experiment_dimensions_digest
+    fixed:
+      model_revision: m@1
+    varying:
+      tool_surface:
+      - Read
+      - Edit
+expect:
+- kind: 'true'
+  key: has_digest
+- kind: includes
+  key: varying_tools
+  value:
+  - Edit
+  - Read

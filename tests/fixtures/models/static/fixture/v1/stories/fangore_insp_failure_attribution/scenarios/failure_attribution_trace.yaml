@@ -1,0 +1,18 @@
+kind: cli
+commands:
+- probe:
+    name: failure_attribution_trace
+    errors:
+    - no_runner:x
+    - no_runner:y
+    - permission_denied
+expect:
+- kind: includes
+  key: categories
+  value:
+  - linkage
+  - tools
+- kind: includes
+  key: repeated_classes
+  value:
+  - no_runner

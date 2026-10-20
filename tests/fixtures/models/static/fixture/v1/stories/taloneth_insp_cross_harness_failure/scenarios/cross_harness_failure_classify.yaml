@@ -1,0 +1,9 @@
+kind: cli
+commands:
+- probe:
+    name: cross_harness_failure_classify
+    message: unknown tool foobar
+expect:
+- kind: equals
+  key: kind
+  value: invalid_tool_name
