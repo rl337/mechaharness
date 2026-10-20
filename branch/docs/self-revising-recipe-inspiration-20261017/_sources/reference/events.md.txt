@@ -65,7 +65,9 @@ flow). Payload includes `extension_id`, `extension_version`, `boundary`,
 
 `core:access_check` payload: `tool`, `required`, `granted`, `allowed`.
 `core:cost` may include `prompt_tokens` / `completion_tokens` / `total_tokens`.
-`core:inference` may include `reasoning_content` and `usage`.
+`core:inference` always includes `usage` with integer `prompt_tokens` /
+`completion_tokens` / `total_tokens` (missing provider fields become `0`) and
+may include `reasoning_content`.
 `GraphExecutor` emits `core:graph_start` / `core:graph_end` and per-node
 start/end events; `GraphStore` checkpoints use `core:graph_node`.
 `DurableGraphGenerator` emits `core:graph_yield`, `core:guidance_resume`, and

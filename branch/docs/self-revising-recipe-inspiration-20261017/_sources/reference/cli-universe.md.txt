@@ -74,9 +74,20 @@ expect:
     value: [core:access_check, core:graph_start, …]
   - kind: positive
     key: cost_units
+  - kind: equals
+    key: total_tokens
+    value: 5
+  - kind: lte
+    key: total_tokens
+    value: 5
   - kind: nonempty
     key: text
 ```
+
+Inference-running verbs (`infer`, `tool_loop`, `run_recipe` that completes)
+expose `prompt_tokens` / `completion_tokens` / `total_tokens` summed from
+`core:inference` `usage` payloads so stories can set token ceilings with
+`kind: lte`.
 
 Durable IoC sessions use a scenario-level `durable:` block and per-command
 `expect` / `expect_error`. Cassette vs live is harness/Config

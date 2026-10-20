@@ -209,10 +209,20 @@ verbs drive the same session through the instrumentor</p></li>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">access_check</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">graph_start</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">…</span><span class="p p-Indicator">]</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">positive</span>
 <span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cost_units</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">equals</span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">total_tokens</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lte</span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">total_tokens</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nonempty</span>
 <span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">text</span>
 </pre></div>
 </div>
+<p>Inference-running verbs (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> that completes)
+expose <code class="docutils literal notranslate"><span class="pre">prompt_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">completion_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">total_tokens</span></code> summed from
+<code class="docutils literal notranslate"><span class="pre">core:inference</span></code> <code class="docutils literal notranslate"><span class="pre">usage</span></code> payloads so stories can set token ceilings with
+<code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">lte</span></code>.</p>
 <p>Durable IoC sessions use a scenario-level <code class="docutils literal notranslate"><span class="pre">durable:</span></code> block and per-command
 <code class="docutils literal notranslate"><span class="pre">expect</span></code> / <code class="docutils literal notranslate"><span class="pre">expect_error</span></code>. Cassette vs live is harness/Config
 (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND</span></code>, <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>, <code class="docutils literal notranslate"><span class="pre">MECHA_MODEL</span></code>), not YAML.</p>
