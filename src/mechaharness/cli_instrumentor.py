@@ -58,7 +58,6 @@ from mechaharness.durable_generator_script import (
 )
 from mechaharness.graph_executor import GraphNodeRunnerRegistry
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
-from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.host_kit import host_graph_executor, tapping_event_log
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
@@ -214,12 +213,14 @@ class _CliToolLoopConfig(MechaHarnessConfig):
         harness_config: HarnessConfig,
         event_log: EventLog,
         agent_id: str,
+        harness_family: str = "tool_loop",
     ) -> None:
         self._completer = completer
         self._tools = tools
         self._harness_config = harness_config
         self._provided_event_log = event_log
         self._agent_id = agent_id
+        self._harness_family = harness_family
         super().__init__()
 
     def get_inference_class(self) -> type[InferenceStrategy]:
@@ -230,7 +231,15 @@ class _CliToolLoopConfig(MechaHarnessConfig):
         return MockInferenceStrategy
 
     def get_harness_class(self) -> type[AbstractHarness]:
-        return ToolLoopHarness
+        name = self._harness_family.lower()
+        classes = self.harness_classes()
+        try:
+            return classes[name]
+        except KeyError as exc:
+            known = ", ".join(sorted(classes)) or "(none)"
+            raise KeyError(
+                f"Unknown harness family {name!r}. Known: {known}"
+            ) from exc
 
     def get_tools(self) -> ToolRegistry:
         return self._tools
@@ -519,6 +528,7 @@ class CliInstrumentor:
             ),
             event_log=self._log,
             agent_id=self._agent_id,
+            harness_family=body.family,
         )
         harness = get_injector(config).inject(
             AbstractHarness,

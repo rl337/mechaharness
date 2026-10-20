@@ -1,8 +1,13 @@
+# Product-path tool_loop family via host init + tool_loop.family.
 kind: cli
+host:
+  family: tool_loop
+  backend: mock
 commands:
 - tool_loop:
     prompt: find it
     tool_name: lookup
+    family: tool_loop
     max_turns: 4
 expect:
 - kind: equals

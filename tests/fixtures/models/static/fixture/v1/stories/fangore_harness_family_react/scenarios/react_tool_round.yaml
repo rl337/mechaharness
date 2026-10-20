@@ -1,0 +1,32 @@
+# Product-path react family via tool_loop + host init (mock ScriptedInference).
+kind: cli
+host:
+  family: react
+  backend: mock
+commands:
+- tool_loop:
+    prompt: find it
+    tool_name: lookup
+    family: react
+    max_turns: 4
+expect:
+- kind: equals
+  key: text
+  value: done
+- kind: equals
+  key: status
+  value: ok
+- kind: includes
+  key: event_types
+  value:
+  - core:inference
+  - core:tool_call
+  - core:cost
+- kind: positive
+  key: total_tokens
+- kind: lte
+  key: total_tokens
+  value: 8
+- kind: lte
+  key: cost_units
+  value: 4

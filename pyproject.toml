@@ -148,7 +148,7 @@ skip_covered = true
 show_missing = true
 # Story-suite floor (branch coverage). Raise when stories cover more; never lower
 # without an explicit decision — CI fails if coverage drops below this.
-fail_under = 77
+fail_under = 78
 
 [tool.coverage.json]
 output = "coverage-stories.json"

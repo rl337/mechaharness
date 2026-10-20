@@ -60,7 +60,14 @@ def _print_gaps(data: dict) -> None:
     mid = [row for row in rows if 50.0 <= row[0] < 80.0]
 
     print()
-    print("=== Gaps: 0% under user stories ===")
+    print(
+        "Positive-path rule: product modules should be hit via Config + mock/"
+        "cassette story init (host.family / host.backend), not probe-local DI. "
+        "Refusal stories still count as coverage."
+    )
+
+    print()
+    print("=== Gaps: 0% under user stories (product positive-path debt) ===")
     if not zeros:
         print("  (none)")
     for _pct, _miss, stmts, path in zeros:

@@ -1,0 +1,10 @@
+{
+  "id": "nubble_anthropic_cassette_infer",
+  "persona": "nubble",
+  "title": "Infer through the Anthropic strategy with a cassette",
+  "kind": "cli",
+  "narrative": "Nubble proves the Anthropic Messages backend is a first-class reason lane. Offline CI plays a cassette through the real `AnthropicStrategy` bound at story init — not a probe mock — so inference, usage, and cost events look the same as a live call.",
+  "implementation": "`CliScenario.host.backend=anthropic` builds `AnthropicStrategy` + `MemoryAsyncHttpClient` against `response.json` (`/v1/messages`). `cli:infer` / `CliInferRunner` emits `core:inference` with usage and priced `core:cost`.",
+  "validation": "Harness `cli` scenario `cassette_infer.yaml`: host backend anthropic, hard event_types includes core:inference/core:cost, token equals from cassette, cost_units lte.",
+  "footnotes": []
+}

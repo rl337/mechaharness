@@ -106,6 +106,23 @@ Before writing or migrating YAML:
 7. **Litmus:** about to add `_run_*` or a new `op`? Stop — add a CLI verb or
    scenario instead.
 
+### Positive-path coverage (mock / cassette)
+
+From story harness **initialization**, instrument mock or cassette inference
+(and related HTTP) so every **product positive path** is hit by ≥1 `kind: cli`
+story. Refusal / deny / soft-budget stories still count — they are positive
+coverage of those control paths.
+
+1. Prefer `host:` on the scenario (`family`, `backend`) so Config binds the real
+   harness family and Completer (ScriptedInference, cassette HTTP strategy).
+2. Drive claims through product verbs (`infer`, `tool_loop` with `family=`,
+   `run_recipe`, durable IoC) — not a probe that reimplements DI.
+3. Probes remain only for seams with no product verb yet; migrating a probe onto
+   a verb is the default when the surface exists.
+4. New library capability → owning story through Config init + mock/cassette.
+5. `scripts/story_coverage.py` / `fail_under` gate the suite; ratchet the floor
+   up as positive-path coverage grows — never lower it to hide a drop.
+
 ### `cli` scenario shape
 
 ```yaml

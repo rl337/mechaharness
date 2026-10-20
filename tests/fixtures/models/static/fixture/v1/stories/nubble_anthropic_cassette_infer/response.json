@@ -1,0 +1,17 @@
+{
+  "id": "msg_story_static",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-story",
+  "content": [
+    {
+      "type": "text",
+      "text": "hello"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 6,
+    "output_tokens": 1
+  }
+}
