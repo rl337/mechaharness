@@ -1,0 +1,27 @@
+# Probe plan for scenario `matching_claim.yaml`.
+# Story: Never mark unsupported claims verified from a judge alone
+
+summary: Never mark unsupported claims verified from a judge alone
+name: citation_support_case
+questions:
+- id: support
+  kind: choice
+  options:
+  - id: supported
+    label: Supported
+  - id: contradicted
+    label: Contradicted
+  - id: insufficient
+    label: Insufficient
+  - id: unavailable
+    label: Unavailable
+  allowed_actions:
+  - supported
+  - contradicted
+  - insufficient
+  - unavailable
+action_question_id: support
+answers:
+  support: supported
+confidence: 0.92
+confidence_floor: 0.7

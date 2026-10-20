@@ -1,0 +1,21 @@
+# Probe plan for scenario `cross_task_isolation_bleed.yaml`.
+# Story: Prevent intervening tasks from contaminating authority and evidence
+
+summary: Prevent intervening tasks from contaminating authority and evidence
+name: cross_task_isolation_bleed
+contract:
+  input_context_refs:
+  - goal
+  effect_scope: task
+published_refs:
+- memo:customer-pref
+- approval:send-42
+intervening_counts:
+- 0
+- 5
+- 10
+handoff:
+  evidence_refs:
+  - memo:customer-pref
+  goals:
+  - follow up

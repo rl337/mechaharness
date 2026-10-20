@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "When a parent step embeds a child graph, child node costs must count against the same budget the parent is running under. After the child spends enough to hit the soft limit, later parent steps wind down instead of starting. Complements `fangore_insp_graph_budget` and `fangore_insp_dynamic_subgraph`.[^insp-budget-rollup]",
   "implementation": "`BudgetPolicy` subgraph rollup. `CliInstrumentor` verb `graph_budget_subgraph_rollup`.",
-  "validation": "Harness `cli` scenario `child_rollup.yaml`.",
+  "validation": "Harness `cli` `probe` loads `plans/child_rollup.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-budget-rollup",

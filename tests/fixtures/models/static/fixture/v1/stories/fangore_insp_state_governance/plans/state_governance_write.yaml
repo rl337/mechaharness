@@ -1,0 +1,10 @@
+# Probe plan for scenario `state_governance_write.yaml`.
+# Story: Freeze graph metric ownership against agent writes
+
+summary: Freeze graph metric ownership against agent writes
+name: state_governance_write
+owner: ops
+writers:
+- ops
+mutable: false
+actor: agent

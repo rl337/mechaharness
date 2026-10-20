@@ -1,9 +1,8 @@
+# Plan document: ../plans/sparse_advisor.yaml
 kind: cli
 commands:
 - probe:
-    name: sparse_advisor
-    max_consultations: 1
-    trigger: consequential_planning
+    path: plans/sparse_advisor.yaml
 expect:
 - kind: 'true'
   key: first_consult_ok

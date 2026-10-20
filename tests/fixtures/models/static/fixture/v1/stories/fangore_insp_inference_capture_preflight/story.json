@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore needs graphs that require exact token capture to fail before expensive work when the active backend is evaluation-only. Accepts FineEnvs capture probing guidance[^fineenvs-capture].",
   "implementation": "`InferenceCapture`, `EvaluationOnlyCapture`, and `TrainingGradeCapture` in `mechaharness.inference_capture`, wired through `MechaHarnessConfig.get_inference_capture` and checked by `DefaultLinkageResolver` for `required_inference_capture`. `CliInstrumentor` verb `check_inference_capture` runs the preflight.",
-  "validation": "Harness `cli` scenario `training_grade_required.yaml`: hard `linkage_ok` and exact `codes_exactly`. Unit: `tests/test_inference_capture.py`.",
+  "validation": "Harness `cli` `probe` loads `plans/training_grade_required.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-capture",

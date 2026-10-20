@@ -1,0 +1,5 @@
+# Probe plan for scenario `human_review_pending.yaml`.
+# Story: Hold mutations until a matching human approval exists
+
+summary: Hold mutations until a matching human approval exists
+name: human_review_pending

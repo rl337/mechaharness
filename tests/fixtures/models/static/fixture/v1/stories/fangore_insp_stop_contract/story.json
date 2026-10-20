@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "A repeating repair step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration requirement 4[^insp-r04]. Complements `fangore_insp_linkage_preflight` and `fangore_convergence_ceiling`.",
   "implementation": "`DefaultLinkageResolver` stop-contract edge; `CliInstrumentor` verb `graph_linkage_preflight`.",
-  "validation": "Harness `cli` scenario `missing_stop.yaml`: hard stop-contract codes.",
+  "validation": "Harness `cli` `probe` loads `plans/missing_stop.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r04",

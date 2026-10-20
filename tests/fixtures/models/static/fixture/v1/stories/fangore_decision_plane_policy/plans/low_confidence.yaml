@@ -1,0 +1,26 @@
+# Probe plan for scenario `low_confidence.yaml`.
+# Story: Let code own the final decision-plane action with escalation
+
+summary: Let code own the final decision-plane action with escalation
+name: decision_plane_policy_case
+questions:
+- id: team
+  kind: choice
+  options:
+  - id: billing
+    label: Billing
+  - id: technical
+    label: Technical
+  allowed_actions:
+  - billing
+  - technical
+- id: risk
+  kind: score
+  min: 0
+  max: 1
+escalation_route: host_policy
+answers:
+  team: billing
+  risk: 0.2
+confidence: 0.4
+confidence_floor: 0.7

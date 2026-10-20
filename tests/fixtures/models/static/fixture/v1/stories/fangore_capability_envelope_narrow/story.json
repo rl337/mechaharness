@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent's full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes[^insp-envelope]. Child attenuation for Dots MH-DOTS-01[^insp-dots-01-narrow]; execution token fields: `fangore_insp_execution_token`.",
   "implementation": "`CapabilityEnvelope` in `mechaharness.capability_envelope` carries grants, tools, context provider ids, model class, budgets, and escalation policy. `narrow()` produces a child envelope that cannot widen parent grants or tools. Attached on `GraphRunContext.envelope` during graph runs. `DefaultDelegationPolicy` chooses inline versus child/subgraph using independence and pollution signals.",
-  "validation": "Harness `cli` scenario `capability_envelope_narrow.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/capability_envelope_narrow.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-envelope",

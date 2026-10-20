@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: `fangore_decision_plane_shadow`, `taloneth_shadow_decision_backends`.[^rc-dp-shadow-t]",
   "implementation": "`compare_shadow_decision` plus `build_decision_plane_telemetry` support promotion evidence for Agentic Recipe `decision_plane` without inventing unavailable candidate results (DP-07, DP-08).",
-  "validation": "Harness `cli` scenarios `disagree.yaml` / `candidate_unavailable.yaml`.",
+  "validation": "Harness `cli` `probe` loads `plans/disagree.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-dp-shadow-t",

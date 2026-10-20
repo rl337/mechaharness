@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore\u2019s product needs permission rules defined by the application. He configures the harness once so composed packs from `fangore_compound_grants` are what the harness enforces.",
   "implementation": "`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection \u2014 not Settings bags or hand-wired harness constructors. Fangore subclasses Config once; the injector builds `AccessControl` and the harness with those grants.\n\nCovers: host DI access policy.",
-  "validation": "Harness `cli` scenario `config_access_policy.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/config_access_policy.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "pyiv",

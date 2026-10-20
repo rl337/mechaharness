@@ -1,0 +1,7 @@
+# Probe plan for scenario `evaluator_compose_run.yaml`.
+# Story: Run a versioned held-out evaluator to claims
+
+summary: Run a versioned held-out evaluator to claims
+name: evaluator_compose_run
+exists: true
+held_out: true

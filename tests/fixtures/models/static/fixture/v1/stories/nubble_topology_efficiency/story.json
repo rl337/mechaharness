@@ -5,6 +5,6 @@
   "kind": "cli",
   "narrative": "Nubble is asked whether parallel agents sped things up. Wall time dropped, but total work grew and queue waits hid under a vanity speedup. He needs metrics that separate critical path, total work, and elapsed time \u2014 and that refuse misleading efficiency claims without a serial baseline and worker-count note.",
   "implementation": "`TopologySpan` and `compute_topology_metrics` in `mechaharness.decision_log`. `CliInstrumentor` verb `topology_efficiency`.",
-  "validation": "Harness `cli` scenario `parallel_spans.yaml`: hard work/elapsed/notes. Unit: topology helpers in `tests/test_decision_log.py` where present.",
+  "validation": "Harness `cli` `probe` loads `plans/parallel_spans.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": []
 }

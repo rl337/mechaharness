@@ -1,17 +1,8 @@
+# Plan document: ../plans/roots_and_retry.yaml
 kind: cli
 commands:
 - probe:
-    name: rollout_graph_build
-    records:
-    - id: root
-      kind: model_call
-    - id: retry
-      kind: retry
-      parent_id: root
-      execution_node_id: produce
-      attempt: 2
-    - id: review
-      kind: delegated_agent
+    path: plans/roots_and_retry.yaml
 expect:
 - kind: equals
   key: roots_exactly

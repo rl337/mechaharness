@@ -1,0 +1,20 @@
+# Probe plan for scenario `verify_rollback_end.yaml`.
+# Story: Declare graph transitions separately from dependencies
+
+summary: Declare graph transitions separately from dependencies
+name: graph_transition_inspect
+nodes:
+- produce
+- verify
+inspect_node: verify
+transitions:
+- from_node: produce
+  kind: success
+  to_node: verify
+- from_node: verify
+  kind: rollback
+  to_node: produce
+  reason: verification_failed
+- from_node: verify
+  kind: end
+  reason: accepted

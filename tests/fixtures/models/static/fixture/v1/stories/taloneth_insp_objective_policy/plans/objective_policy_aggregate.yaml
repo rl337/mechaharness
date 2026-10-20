@@ -1,0 +1,24 @@
+# Probe plan for scenario `objective_policy_aggregate.yaml`.
+# Story: Require an explicit policy before collapsing evaluator signals
+
+summary: Require an explicit policy before collapsing evaluator signals
+name: objective_policy_aggregate
+policy:
+  policy_id: demo:lexi
+  version: '1'
+  component_signals:
+  - correct
+  - tokens
+  formula: lexicographic
+  gates:
+  - correct
+  lexicographic:
+  - correct
+  - tokens
+claims:
+- id: correct
+  statement: ok
+  status: pass
+- id: tokens
+  statement: budget
+  status: pass

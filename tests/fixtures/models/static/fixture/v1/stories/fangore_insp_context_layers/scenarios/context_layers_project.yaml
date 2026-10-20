@@ -1,15 +1,8 @@
+# Plan document: ../plans/context_layers_project.yaml
 kind: cli
 commands:
 - probe:
-    name: context_layers_project
-    shared:
-      goal: ship
-      notes:
-      - a
-    needs:
-    - goal
-    exports:
-      result: ok
+    path: plans/context_layers_project.yaml
 expect:
 - kind: includes
   key: projected_keys

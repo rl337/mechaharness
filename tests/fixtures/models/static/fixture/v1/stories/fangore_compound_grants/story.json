@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore\u2019s host app must not let agents write the filesystem by default. A read-only pack refuses the write tool; composing it with a write pack allows the same tool. He needs reusable permission packs instead of copy-pasted lists. Grant composition feeds personal-agent MH-PA-02 (`fangore_insp_authority_gate`)[^insp-pa-02-grants].",
   "implementation": "`AccessPolicy` deny-by-default grants; `CompoundPolicy` unions packs; `AccessControl` enforces tool grants and emits access-check events. This is the permission half of tool gating \u2014 every tool call must pass access before side effects.\n\nCovers: host compound grants.",
-  "validation": "Harness `cli` scenario `grant_gate_write.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/grant_gate_write.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-pa-02-grants",

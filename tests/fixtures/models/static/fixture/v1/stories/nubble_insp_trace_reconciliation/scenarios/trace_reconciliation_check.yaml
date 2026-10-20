@@ -1,18 +1,8 @@
+# Plan document: ../plans/trace_reconciliation_check.yaml
 kind: cli
 commands:
 - probe:
-    name: trace_reconciliation_check
-    surfaces:
-    - name: executor
-      event_ids:
-      - a
-      digests:
-        a: '1'
-    - name: gateway
-      event_ids:
-      - a
-      digests:
-        a: '2'
+    path: plans/trace_reconciliation_check.yaml
 expect:
 - kind: equals
   key: status

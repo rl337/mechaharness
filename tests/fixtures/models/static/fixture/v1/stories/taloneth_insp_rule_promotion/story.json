@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant \u2014 always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo]. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (`taloneth_insp_correction_spec_debt`)[^insp-pa-07-promo] and self-revising MH-SR-05 (`fangore_insp_recipe_lineage_promote`)[^insp-sr-05-promo].",
   "implementation": "`PromotionRecord`, `promote_soft_to_hard`, and `rollback_promotion` in `mechaharness.rule_promotion` model the promotion chain.",
-  "validation": "Harness `cli` scenario `rule_promotion.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/rule_promotion.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l10-promo",

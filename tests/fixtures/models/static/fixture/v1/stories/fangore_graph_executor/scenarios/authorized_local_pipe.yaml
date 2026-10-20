@@ -1,15 +1,8 @@
+# Plan document: ../plans/authorized_local_pipe.yaml
 kind: cli
 commands:
 - probe:
-    name: graph_executor_run
-    goal: local pipe
-    produce_value: 1
-    max_attempts: 2
-    fail_until_attempt: 99
-    check_deny: true
-    grants:
-    - core:graph.execute
-    - core:graph.escalate
+    path: plans/authorized_local_pipe.yaml
 expect:
 - kind: equals
   key: status

@@ -1,23 +1,8 @@
+# Plan document: ../plans/cross_task_isolation_bleed.yaml
 kind: cli
 commands:
 - probe:
-    name: cross_task_isolation_bleed
-    contract:
-      input_context_refs:
-      - goal
-      effect_scope: task
-    published_refs:
-    - memo:customer-pref
-    - approval:send-42
-    intervening_counts:
-    - 0
-    - 5
-    - 10
-    handoff:
-      evidence_refs:
-      - memo:customer-pref
-      goals:
-      - follow up
+    path: plans/cross_task_isolation_bleed.yaml
 expect:
 - kind: equals
   key: bleed_by_intervening_count

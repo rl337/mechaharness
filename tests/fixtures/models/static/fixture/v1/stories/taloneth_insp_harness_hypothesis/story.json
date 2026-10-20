@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].",
   "implementation": "`HarnessExperiment` carries hypothesis, intervention, failure_mode, evidence, and `to_trace_fields` for version/assignment on traces.",
-  "validation": "Harness `cli` scenario `harness_experiment_retire.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/harness_experiment_retire.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r14",

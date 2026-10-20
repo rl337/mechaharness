@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Before moving refund triage off the production decision path, Fangore runs a candidate small model in shadow: it still answers the same batched questions, but production policy keeps control and both outcomes are kept for comparison. Related: `taloneth_shadow_decision_backends`, `fangore_decision_plane_policy`.[^rc-dp-shadow]",
   "implementation": "Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mechaharness.decision_plane_runtime` records candidate and production typed results while `controls_execution` stays on the production path (DP-07).",
-  "validation": "Harness `cli` scenario `shadow_compare.yaml`. Hard expects shadow does not control execution.",
+  "validation": "Harness `cli` `probe` loads `plans/shadow_compare.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-dp-shadow",

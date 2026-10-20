@@ -1,11 +1,8 @@
+# Plan document: ../plans/harness_health.yaml
 kind: cli
 commands:
 - probe:
-    name: harness_health
-    unused_extensions:
-    - acme:old
-    dead_soft_points: []
-    unexercised_routes: []
+    path: plans/harness_health.yaml
 expect:
 - kind: 'true'
   key: needs_cleanup

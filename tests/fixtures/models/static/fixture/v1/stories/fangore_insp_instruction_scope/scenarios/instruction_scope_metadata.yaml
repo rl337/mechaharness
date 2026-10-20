@@ -1,12 +1,8 @@
+# Plan document: ../plans/instruction_scope_metadata.yaml
 kind: cli
 commands:
 - probe:
-    name: instruction_scope_metadata
-    title: Router
-    body: See details on demand
-    scope: entry
-    authority: ops
-    estimated_context_cost: 120
+    path: plans/instruction_scope_metadata.yaml
 expect:
 - kind: equals
   key: scope

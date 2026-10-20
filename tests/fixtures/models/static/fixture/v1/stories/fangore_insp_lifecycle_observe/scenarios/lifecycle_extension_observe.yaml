@@ -1,15 +1,8 @@
+# Plan document: ../plans/lifecycle_extension_observe.yaml
 kind: cli
 commands:
 - probe:
-    name: lifecycle_extension_observe
-    prompt: Write a.txt
-    grants:
-    - core:fs.write
-    tool_calls:
-    - id: '1'
-      name: write_file
-      arguments:
-        path: a.txt
+    path: plans/lifecycle_extension_observe.yaml
 expect:
 - kind: equals
   key: extension_ids

@@ -1,0 +1,16 @@
+# Probe plan for scenario `cycle_never_cleared.yaml`.
+# Story: Checkpoint after conflict-free decisions without revisiting cleared cycles
+
+summary: Checkpoint after conflict-free decisions without revisiting cleared cycles
+name: decision_conflict_neighbor_revisit
+id: cycle_never_cleared
+start: a
+write_scopes:
+  a:
+  - repo:x
+  b:
+  - repo:x
+  - repo:y
+  c:
+  - repo:y
+clears: []

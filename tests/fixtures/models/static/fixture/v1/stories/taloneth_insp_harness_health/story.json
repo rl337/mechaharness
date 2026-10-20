@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance[^wl-l02-health][^wl-l12-health].",
   "implementation": "`HarnessHealthSnapshot` and `needs_cleanup` in `mechaharness.harness_health` provide the optional health schema.",
-  "validation": "Harness `cli` scenario `harness_health.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/harness_health.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l02-health",

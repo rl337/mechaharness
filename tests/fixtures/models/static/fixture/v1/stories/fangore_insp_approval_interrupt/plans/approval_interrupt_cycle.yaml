@@ -1,0 +1,9 @@
+# Probe plan for scenario `approval_interrupt_cycle.yaml`.
+# Story: Suspend a graph for durable human approval
+
+summary: Suspend a graph for durable human approval
+name: approval_interrupt_cycle
+reason: Deploy to production
+decision: approve
+actor: ops@acme
+checkpoint: ckpt:1

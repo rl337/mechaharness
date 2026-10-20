@@ -1,17 +1,8 @@
+# Plan document: ../plans/grant_gate_write.yaml
 kind: cli
 commands:
 - probe:
-    name: grant_gate_write
-    prompt: Write a.txt
-    read_grants:
-    - core:fs.read
-    write_grants:
-    - core:fs.write
-    tool_calls:
-    - id: '1'
-      name: write_file
-      arguments:
-        path: a.txt
+    path: plans/grant_gate_write.yaml
 expect:
 - kind: 'true'
   key: denied_without_write_grant

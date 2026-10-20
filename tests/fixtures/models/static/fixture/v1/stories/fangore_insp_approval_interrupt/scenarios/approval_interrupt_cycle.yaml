@@ -1,11 +1,8 @@
+# Plan document: ../plans/approval_interrupt_cycle.yaml
 kind: cli
 commands:
 - probe:
-    name: approval_interrupt_cycle
-    reason: Deploy to production
-    decision: approve
-    actor: ops@acme
-    checkpoint: ckpt:1
+    path: plans/approval_interrupt_cycle.yaml
 expect:
 - kind: equals
   key: initial_status

@@ -1,24 +1,8 @@
+# Plan document: ../plans/reject_invalid.yaml
 kind: cli
 commands:
 - probe:
-    name: decision_surface_reject
-    question:
-      kind: choice
-      id: route
-      instructions: Which team owns this?
-      options:
-      - id: billing
-        description: Billing
-      - id: technical
-        description: Technical
-    allowed_actions:
-    - billing
-    - technical
-    answers:
-      route: billing
-    invalid_choice: pirate-crew
-    state:
-      ticket: double charge
+    path: plans/reject_invalid.yaml
 expect:
 - kind: 'false'
   key: rules_rejected

@@ -1,0 +1,6 @@
+# Probe plan for scenario `grant_mismatch.yaml`.
+# Story: Surface environment incompatibility as linkage failure
+
+summary: Surface environment incompatibility as linkage failure
+name: environment_linkage_fail
+required_grant: core:media.image

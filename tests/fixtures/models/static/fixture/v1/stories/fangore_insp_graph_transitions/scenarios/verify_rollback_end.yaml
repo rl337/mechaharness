@@ -1,22 +1,8 @@
+# Plan document: ../plans/verify_rollback_end.yaml
 kind: cli
 commands:
 - probe:
-    name: graph_transition_inspect
-    nodes:
-    - produce
-    - verify
-    inspect_node: verify
-    transitions:
-    - from_node: produce
-      kind: success
-      to_node: verify
-    - from_node: verify
-      kind: rollback
-      to_node: produce
-      reason: verification_failed
-    - from_node: verify
-      kind: end
-      reason: accepted
+    path: plans/verify_rollback_end.yaml
 expect:
 - kind: equals
   key: issues

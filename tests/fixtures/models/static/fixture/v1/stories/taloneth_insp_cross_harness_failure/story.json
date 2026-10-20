@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes[^fineenvs-xharness].",
   "implementation": "`CrossHarnessFailure` and `classify_cross_harness_failure` in `mechaharness.cross_harness_failure` emit taxonomy kinds usable as claims inside matrix cells.",
-  "validation": "Harness `cli` scenario `cross_harness_failure_classify.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/cross_harness_failure_classify.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-xharness",

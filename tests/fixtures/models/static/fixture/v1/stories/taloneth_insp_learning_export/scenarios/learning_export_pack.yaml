@@ -1,10 +1,8 @@
+# Plan document: ../plans/learning_export_pack.yaml
 kind: cli
 commands:
 - probe:
-    name: learning_export_pack
-    harness_fingerprint: fp:1
-    rollout_graph_ref: rollout:1
-    split: train
+    path: plans/learning_export_pack.yaml
 expect:
 - kind: equals
   key: schema_version

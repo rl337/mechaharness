@@ -1,0 +1,9 @@
+# Probe plan for scenario `wip_policy.yaml`.
+# Story: Apply WIP back-pressure without hard-coding WIP=1
+
+summary: Apply WIP back-pressure without hard-coding WIP=1
+name: wip_policy
+max_active_nodes: 2
+max_per_write_scope: 1
+active_nodes: 1
+active_in_scope: 1

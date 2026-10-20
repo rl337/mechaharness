@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed \u2014 it does not loop forever. Complements `fangore_convergence_ceiling` for judge loops and `fangore_insp_verification_gate` for completion versus answer-generated. See inspiration requirements for verification loops[^insp-repair].",
   "implementation": "`bounded_repair` in `mechaharness.graph` (VER-03). `CliInstrumentor` verb `bounded_repair_loop`.",
-  "validation": "Harness `cli` scenario `verify_repair_succeeds.yaml`: hard `final_status`.",
+  "validation": "Harness `cli` `probe` loads `plans/verify_repair_succeeds.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-repair",

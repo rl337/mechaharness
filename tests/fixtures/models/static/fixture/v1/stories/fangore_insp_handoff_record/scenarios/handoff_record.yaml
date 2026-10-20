@@ -1,20 +1,8 @@
+# Plan document: ../plans/handoff_record.yaml
 kind: cli
 commands:
 - probe:
-    name: handoff_record
-    goals:
-    - ship report
-    exclusions:
-    - do not email the customer
-    completed:
-    - a
-    pending:
-    - b
-    rationale: because
-    next_action: verify
-    verdict:
-      kind: ASK_HUMAN
-      policyVersion: '1'
+    path: plans/handoff_record.yaml
 expect:
 - kind: equals
   key: next_action

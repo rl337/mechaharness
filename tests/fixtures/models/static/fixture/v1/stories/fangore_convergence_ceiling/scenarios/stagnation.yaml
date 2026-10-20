@@ -1,17 +1,8 @@
+# Plan document: ../plans/stagnation.yaml
 kind: cli
 commands:
 - probe:
-    name: convergence_ceiling
-    contract:
-      version: story-conv-v1
-      max_iterations: 10
-      stagnation_window: 2
-      max_elapsed_ms: 60000
-    fingerprints:
-    - same
-    - same
-    - same
-    elapsed_ms_per_tick: 5
+    path: plans/stagnation.yaml
 expect:
 - kind: equals
   key: terminal

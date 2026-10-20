@@ -1,8 +1,8 @@
+# Plan document: ../plans/workspace_isolation_acquire.yaml
 kind: cli
 commands:
 - probe:
-    name: workspace_isolation_acquire
-    label: branch-a
+    path: plans/workspace_isolation_acquire.yaml
 expect:
 - kind: equals
   key: provider_kind

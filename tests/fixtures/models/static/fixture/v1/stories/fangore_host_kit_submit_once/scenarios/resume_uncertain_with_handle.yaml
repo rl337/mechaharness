@@ -1,17 +1,8 @@
+# Plan document: ../plans/resume_uncertain_with_handle.yaml
 kind: cli
 commands:
 - probe:
-    name: host_kit_submit_once
-    id: resume_uncertain_with_handle
-    mode: resume_seeded
-    durable: true
-    run_id: hk-uncertain-ok
-    task_id: t1
-    seed:
-      effect_state: uncertain
-      external_handle: job-seeded-1
-      node_attempt: 1
-      node_status: running
+    path: plans/resume_uncertain_with_handle.yaml
 expect:
 - kind: equals
   key: status

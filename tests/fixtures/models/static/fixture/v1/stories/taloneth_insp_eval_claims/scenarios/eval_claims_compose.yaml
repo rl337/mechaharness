@@ -1,17 +1,8 @@
+# Plan document: ../plans/eval_claims_compose.yaml
 kind: cli
 commands:
 - probe:
-    name: eval_claims_compose
-    claims:
-    - id: a
-      statement: a
-      status: pass
-    - id: b
-      statement: b
-      status: fail
-    - id: c
-      statement: c
-      status: unknown
+    path: plans/eval_claims_compose.yaml
 expect:
 - kind: equals
   key: pass

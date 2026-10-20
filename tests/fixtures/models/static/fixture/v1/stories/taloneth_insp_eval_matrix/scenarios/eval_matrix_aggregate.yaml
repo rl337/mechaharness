@@ -1,18 +1,8 @@
+# Plan document: ../plans/eval_matrix_aggregate.yaml
 kind: cli
 commands:
 - probe:
-    name: eval_matrix_aggregate
-    trials:
-    - trial_id: '1'
-      success: true
-      model: m1
-      harness_fingerprint: fp:a
-      task_family: math
-    - trial_id: '2'
-      success: false
-      model: m1
-      harness_fingerprint: fp:b
-      task_family: math
+    path: plans/eval_matrix_aggregate.yaml
 expect:
 - kind: equals
   key: cell_count

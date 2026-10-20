@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Nubble needs tool calls, tokens, latency, and coordination cost kept as separate efficiency dimensions rather than a single opaque proxy. Accepts FineEnvs tool-call efficiency observations[^fineenvs-efficiency].",
   "implementation": "`EfficiencyScorecard` and `build_efficiency_scorecard` in `mechaharness.efficiency_scorecard` compose topology/cost/coordination/resume dimensions without silent collapse.",
-  "validation": "Harness `cli` scenario `efficiency_scorecard_build.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/efficiency_scorecard_build.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-efficiency",

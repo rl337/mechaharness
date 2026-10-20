@@ -1,0 +1,7 @@
+# Probe plan for scenario `verify_repair_succeeds.yaml`.
+# Story: Bound verification repair loops to a fixed number of attempts
+
+summary: Bound verification repair loops to a fixed number of attempts
+name: bounded_repair_loop
+max_attempts: 3
+repaired_path: /tmp/story.png

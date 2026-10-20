@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints \u2014 not chat \u2014 must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes. Incompatible harness or graph fingerprints must refuse silent continue. See inspiration requirements for durable long-running work[^insp-resume].",
   "implementation": "`GraphStore` checkpoint + `hierarchical_fan_in` / `merge_branch_artifacts` / operation preconditions. `CliInstrumentor` verb `local_plan_resume`.",
-  "validation": "Harness `cli` scenario `checkpoint_fan_in_merge.yaml`.",
+  "validation": "Harness `cli` `probe` loads `plans/checkpoint_fan_in_merge.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "loop-vs-graph",

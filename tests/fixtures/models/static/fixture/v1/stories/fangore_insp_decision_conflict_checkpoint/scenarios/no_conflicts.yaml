@@ -1,15 +1,8 @@
+# Plan document: ../plans/no_conflicts.yaml
 kind: cli
 commands:
 - probe:
-    name: decision_conflict_neighbor_revisit
-    id: no_conflicts
-    start: a
-    write_scopes:
-      a:
-      - repo:x
-      b:
-      - repo:y
-    clears: []
+    path: plans/no_conflicts.yaml
 expect:
 - kind: equals
   key: order

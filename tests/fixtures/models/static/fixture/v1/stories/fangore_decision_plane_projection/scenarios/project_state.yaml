@@ -1,18 +1,8 @@
+# Plan document: ../plans/project_state.yaml
 kind: cli
 commands:
 - probe:
-    name: decision_plane_projection
-    raw_context:
-      ticket_id: T-9
-      channel: email
-      body: charged twice
-      secret: do-not-emit
-    project_keys:
-    - ticket_id
-    - channel
-    facts:
-      duplicate_charge: true
-      amount_cents: 1200
+    path: plans/project_state.yaml
 expect:
 - kind: equals
   key: projection

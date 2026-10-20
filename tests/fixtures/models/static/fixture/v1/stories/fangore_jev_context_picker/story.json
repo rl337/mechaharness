@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "After retrieval, Fangore asks a decision model for relevance, trust, and freshness scores, then packs only candidates that clear product thresholds into a fixed token budget. Stale, untrusted, or injection-tainted snippets stay out even if they look relevant. When scores are missing, deterministic ranking still fills what it can. Related: `fangore_decision_plane_projection`, `fangore_insp_context_provider`.[^jev-us05] Also maps to personal-agent MH-PA-01 context freshness (typed tool-result TTL: `fangore_insp_tool_result_freshness`)[^insp-pa-01-picker].",
   "implementation": "`assemble_context_within_budget` in `mechaharness.decision_plane_runtime` packs scored candidates under host thresholds. Judge scores are evidence only; budget and min trust/freshness/relevance are code-owned (DP-04). Agentic Recipe `decision_plane` supplies the typed score batch pattern.",
-  "validation": "Harness `cli` scenarios per context budget case.",
+  "validation": "Harness `cli` `probe` loads `plans/missing_scores_fallback.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "jev-us05",

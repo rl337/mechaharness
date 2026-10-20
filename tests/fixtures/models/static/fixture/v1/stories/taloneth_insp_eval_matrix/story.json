@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth evaluates the same model under multiple harness configurations and must keep every matrix cell so averages cannot hide a catastrophic compatibility failure. Accepts FineEnvs cross-harness matrix practice[^fineenvs-matrix].",
   "implementation": "`EvalMatrix` and `EvalMatrixCell` in `mechaharness.eval_matrix` index trials by model, harness fingerprint, and task family, and `aggregate` retains cell drill-down.",
-  "validation": "Harness `cli` scenario `eval_matrix_aggregate.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/eval_matrix_aggregate.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-matrix",

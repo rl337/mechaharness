@@ -1,10 +1,8 @@
+# Plan document: ../plans/crash_after_reduce_before_checkpoint.yaml
 kind: cli
 commands:
 - probe:
-    name: transactional_durable_resume
-    goal: downstream-coding-job
-    run_id_prefix: story-tdr
-    crash_location: after_reduce_before_checkpoint
+    path: plans/crash_after_reduce_before_checkpoint.yaml
 expect:
 - kind: 'true'
   key: crashed

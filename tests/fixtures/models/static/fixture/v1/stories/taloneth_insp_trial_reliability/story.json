@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth records isolated trials with cost and latency, then reports pass@k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, \u03c4-bench, and HumanEval[^anth-evals-trial][^arxiv-taubench][^arxiv-humaneval].",
   "implementation": "`Trial`, `pass_at_k`, `pass_caret_k`, and `trial_cost_rollup` in `mechaharness.eval_trial` aggregate isolated attempts.",
-  "validation": "Harness `cli` scenario `trial_reliability_metrics.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/trial_reliability_metrics.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "anth-evals-trial",

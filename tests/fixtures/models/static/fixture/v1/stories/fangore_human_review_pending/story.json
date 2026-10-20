@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore\u2019s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human \u2014 not allow. ASK_HUMAN path for Dots MH-DOTS-04[^insp-dots-04-pending] and approval interrupt for MH-DOTS-02[^insp-dots-02-review].",
   "implementation": "`JudgementPolicy.require_approval_for` plus `JudgementFacts.approvals` / `action_digest` in `decide()`: missing approval yields `ASK_HUMAN` with `MISSING_APPROVAL`. Approvals bind to executed args via digest keys.\n\nCovers: POL-04, GAT-04.",
-  "validation": "Harness `cli` scenario `human_review_pending.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/human_review_pending.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-dots-02-review",

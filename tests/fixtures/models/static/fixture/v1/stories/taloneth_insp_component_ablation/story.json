@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance[^wl-l02-ablation][^wl-p01-ablation].",
   "implementation": "`ComponentAblationExperiment` and `ablation_delta` in `mechaharness.component_ablation` standardize baseline fingerprint, disabled component IDs, and quality/cost deltas.",
-  "validation": "Harness `cli` scenario `component_ablation_delta.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/component_ablation_delta.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l02-ablation",

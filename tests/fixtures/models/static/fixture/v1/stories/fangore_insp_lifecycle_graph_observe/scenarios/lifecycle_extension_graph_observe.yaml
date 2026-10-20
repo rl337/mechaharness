@@ -1,8 +1,8 @@
+# Plan document: ../plans/lifecycle_extension_graph_observe.yaml
 kind: cli
 commands:
 - probe:
-    name: lifecycle_extension_graph_observe
-    goal: lifecycle graph observe
+    path: plans/lifecycle_extension_graph_observe.yaml
 expect:
 - kind: equals
   key: graph_status

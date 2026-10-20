@@ -1,0 +1,6 @@
+# Probe plan for scenario `lifecycle_extension_graph_observe.yaml`.
+# Story: Watch graph node attempts without replacing failure policy
+
+summary: Watch graph node attempts without replacing failure policy
+name: lifecycle_extension_graph_observe
+goal: lifecycle graph observe

@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore swaps which decision model answers the batch \u2014 local small, hosted, or a future class \u2014 by host policy and soft binding, not by a parameter-count field inside the recipe. Related: `fangore_completer_flavors`, `fangore_decision_plane_recipe`.[^rc-dp-size]",
   "implementation": "Agentic Recipe `decision_plane` exposes a `decision_model` soft point (router/flavor ref). Instantiation and runtime treat model identity as routing policy (DP-09); no fixed parameter-count architecture field.",
-  "validation": "Harness `cli` scenario `model_soft_point.yaml`. Hard expects decision_model soft point.",
+  "validation": "Harness `cli` `probe` loads `plans/model_soft_point.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-dp-size",

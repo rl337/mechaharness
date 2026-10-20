@@ -1,7 +1,8 @@
+# Plan document: ../plans/context_observation_chain.yaml
 kind: cli
 commands:
 - probe:
-    name: context_observation_chain
+    path: plans/context_observation_chain.yaml
 expect:
 - kind: 'true'
   key: fabricated_receipt

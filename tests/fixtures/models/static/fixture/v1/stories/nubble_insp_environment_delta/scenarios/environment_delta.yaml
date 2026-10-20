@@ -1,15 +1,8 @@
+# Plan document: ../plans/environment_delta.yaml
 kind: cli
 commands:
 - probe:
-    name: environment_delta
-    before:
-      version: 1
-      data:
-        cwd: /app
-    after:
-      version: 2
-      data:
-        cwd: /tmp
+    path: plans/environment_delta.yaml
 expect:
 - kind: equals
   key: cwd

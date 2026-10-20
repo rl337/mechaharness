@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore binds an observe-only extension around each graph node attempt. The node still runs through the normal runner and failure policy. The log records the extension at the graph-node boundary. This does not invent a second plan graph. Complements `fangore_insp_lifecycle_observe`. Accepts inspiration requirement 20.",
   "implementation": "`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole executor-level retry brain (distinct from the planned `bounded_retry` Agentic Recipe, which makes retry a visible subgraph).",
-  "validation": "Harness `cli` scenario `lifecycle_extension_graph_observe.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/lifecycle_extension_graph_observe.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r20-graph",

@@ -1,0 +1,12 @@
+# Probe plan for scenario `soft_and_hard.yaml`.
+# Story: Enforce soft and hard spend limits on graph runs
+
+summary: Enforce soft and hard spend limits on graph runs
+name: graph_budget_limits
+node_cost: 1
+soft_policy:
+  soft_limit: 1
+  hard_limit: null
+hard_policy:
+  soft_limit: null
+  hard_limit: 1

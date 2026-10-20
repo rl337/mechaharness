@@ -1,10 +1,8 @@
+# Plan document: ../plans/loop_health.yaml
 kind: cli
 commands:
 - probe:
-    name: loop_health
-    iterations_since_independent_verification: 6
-    repeated_failure_class_count: 1
-    unresolved_assumptions: 0
+    path: plans/loop_health.yaml
 expect:
 - kind: 'true'
   key: wind_down

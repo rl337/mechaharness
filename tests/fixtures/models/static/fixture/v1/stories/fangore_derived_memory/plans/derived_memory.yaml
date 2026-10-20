@@ -1,0 +1,5 @@
+# Probe plan for scenario `derived_memory.yaml`.
+# Story: Rebuild derived memory without letting rank invent authority
+
+summary: Rebuild derived memory without letting rank invent authority
+name: derived_memory

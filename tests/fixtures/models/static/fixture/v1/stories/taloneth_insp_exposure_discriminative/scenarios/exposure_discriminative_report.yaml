@@ -1,21 +1,8 @@
+# Plan document: ../plans/exposure_discriminative_report.yaml
 kind: cli
 commands:
 - probe:
-    name: exposure_discriminative_report
-    exposure:
-    - arm: treatment
-      rollouts: 1
-      model_calls: 4
-      tokens_out: 800
-    - arm: control
-      rollouts: 1
-      model_calls: 1
-      tokens_out: 100
-    trials:
-    - trial_id: '1'
-      success: true
-    - trial_id: '2'
-      success: true
+    path: plans/exposure_discriminative_report.yaml
 expect:
 - kind: equals
   key: treatment_model_calls

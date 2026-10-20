@@ -1,8 +1,8 @@
+# Plan document: ../plans/fingerprint_refuse.yaml
 kind: cli
 commands:
 - probe:
-    name: checkpoint_fingerprint_refuse
-    goal: fp
+    path: plans/fingerprint_refuse.yaml
 expect:
 - kind: equals
   key: first_status

@@ -5,6 +5,6 @@
   "kind": "cli",
   "narrative": "Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback \u2014 not pretend the map is complete.",
   "implementation": "`RepositoryTopologyProvider` builds budgeted `TopologyView` entries with omissions and invalidation; stale maps fall back to source inspection.\n\nCovers: CTX-08.",
-  "validation": "Harness `cli` scenario `repo_topology.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/repo_topology.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": []
 }

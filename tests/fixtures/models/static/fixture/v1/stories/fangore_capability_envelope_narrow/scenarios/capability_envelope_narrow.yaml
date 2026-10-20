@@ -1,15 +1,8 @@
+# Plan document: ../plans/capability_envelope_narrow.yaml
 kind: cli
 commands:
 - probe:
-    name: capability_envelope_narrow
-    parent_grants:
-    - core:graph.execute
-    - core:fs.read
-    child_grants:
-    - core:graph.execute
-    widen_grants:
-    - core:graph.execute
-    - core:fs.write
+    path: plans/capability_envelope_narrow.yaml
 expect:
 - kind: 'true'
   key: narrow_ok

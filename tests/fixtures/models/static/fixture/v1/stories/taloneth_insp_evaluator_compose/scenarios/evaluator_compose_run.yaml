@@ -1,9 +1,8 @@
+# Plan document: ../plans/evaluator_compose_run.yaml
 kind: cli
 commands:
 - probe:
-    name: evaluator_compose_run
-    exists: true
-    held_out: true
+    path: plans/evaluator_compose_run.yaml
 expect:
 - kind: 'true'
   key: passed

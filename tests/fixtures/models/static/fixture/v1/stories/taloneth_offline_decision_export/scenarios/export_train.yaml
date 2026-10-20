@@ -1,26 +1,8 @@
+# Plan document: ../plans/export_train.yaml
 kind: cli
 commands:
 - probe:
-    name: offline_decision_export
-    records:
-    - eventId: d1
-      stateHash: h1
-      policyVersion: p1
-      verdict: ALLOW
-      outcomeId: late-success
-      allowedCandidates:
-      - a
-      - b
-      excludedCandidates:
-        c: unauthorized
-    - eventId: d2
-      stateHash: h2
-      policyVersion: p1
-      verdict: ASK_HUMAN
-      terminationReason: interrupted
-      outcomeId: null
-    split: train
-    include_outcomes: false
+    path: plans/export_train.yaml
 expect:
 - kind: equals
   key: record_count

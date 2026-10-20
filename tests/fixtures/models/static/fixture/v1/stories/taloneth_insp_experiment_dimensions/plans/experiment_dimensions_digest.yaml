@@ -1,0 +1,11 @@
+# Probe plan for scenario `experiment_dimensions_digest.yaml`.
+# Story: Declare fixed and varying harness experiment dimensions
+
+summary: Declare fixed and varying harness experiment dimensions
+name: experiment_dimensions_digest
+fixed:
+  model_revision: m@1
+varying:
+  tool_surface:
+  - Read
+  - Edit

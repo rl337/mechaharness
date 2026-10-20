@@ -1,15 +1,8 @@
+# Plan document: ../plans/select_produce.yaml
 kind: cli
 commands:
 - probe:
-    name: targeted_rollback_select
-    error: verification_failed
-    node_id: verify
-    repair_target: produce
-    transitions:
-    - from_node: verify
-      kind: rollback
-      to_node: produce
-      reason: verification_failed
+    path: plans/select_produce.yaml
 expect:
 - kind: equals
   key: rollback_target

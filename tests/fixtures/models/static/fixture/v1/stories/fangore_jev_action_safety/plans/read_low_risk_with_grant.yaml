@@ -1,0 +1,27 @@
+# Probe plan for scenario `read_low_risk_with_grant.yaml`.
+# Story: Let hard grants win over semantic risk classification
+
+summary: Let hard grants win over semantic risk classification
+name: action_safety_case
+questions:
+- id: semantic_risk
+  kind: choice
+  options:
+  - id: low
+    label: Low
+  - id: medium
+    label: Medium
+  - id: high
+    label: High
+  allowed_actions:
+  - low
+  - medium
+  - high
+action_question_id: semantic_risk
+answers:
+  semantic_risk: low
+confidence: 0.9
+confidence_floor: 0.7
+grants:
+- core:fs.read
+required_grants: []

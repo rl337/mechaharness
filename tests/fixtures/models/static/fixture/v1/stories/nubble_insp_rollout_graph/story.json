@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Nubble needs the observed run topology \u2014 retries, spawned reviewers, and terminals \u2014 as a first-class graph linked back to the intended plan, not only the planned node list. Accepts FineEnvs training-sequence reconstruction[^fineenvs-rollout].",
   "implementation": "`build_rollout_graph`; `CliInstrumentor` verb `rollout_graph_build`.",
-  "validation": "Harness `cli` scenario `roots_and_retry.yaml`: hard roots and retry link.",
+  "validation": "Harness `cli` `probe` loads `plans/roots_and_retry.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-rollout",

@@ -1,15 +1,8 @@
+# Plan document: ../plans/experiment_lineage_resume.yaml
 kind: cli
 commands:
 - probe:
-    name: experiment_lineage_resume
-    experiment_id: exp-1
-    assignment: treatment
-    consume:
-    - case-a
-    corpus:
-    - case-a
-    - case-b
-    - case-c
+    path: plans/experiment_lineage_resume.yaml
 expect:
 - kind: equals
   key: remaining

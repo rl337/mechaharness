@@ -1,25 +1,8 @@
+# Plan document: ../plans/tool_result_freshness_reject.yaml
 kind: cli
 commands:
 - probe:
-    name: tool_result_freshness_reject
-    now: '2026-10-18T12:00:00Z'
-    policy:
-      max_age_seconds: 86400
-      require_provenance: false
-    results:
-    - tool_call_id: crm_cache_8d
-      content: deal open
-      source: crm.cache
-      observed_at: '2026-10-10T12:00:00Z'
-    - tool_call_id: quote_expired
-      content: price 10
-      source: pricing
-      expires_at: '2026-10-18T11:00:00Z'
-    - tool_call_id: crm_live
-      content: deal open
-      source: crm.api
-      observed_at: '2026-10-18T11:45:00Z'
-      expires_at: '2026-10-18T13:00:00Z'
+    path: plans/tool_result_freshness_reject.yaml
 expect:
 - kind: equals
   key: rejected_ids

@@ -1,8 +1,8 @@
+# Plan document: ../plans/cross_harness_failure_classify.yaml
 kind: cli
 commands:
 - probe:
-    name: cross_harness_failure_classify
-    message: unknown tool foobar
+    path: plans/cross_harness_failure_classify.yaml
 expect:
 - kind: equals
   key: kind

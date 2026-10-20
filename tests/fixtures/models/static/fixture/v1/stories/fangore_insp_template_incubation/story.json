@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Reusable Agentic Recipes expose soft points and stamp provenance onto concrete graphs. Demoted templates that proved application-specific refuse instantiate. Accepts inspiration requirement 19[^insp-r19]. Incubation stamps for self-revising MH-SR-01; immutable promotion pointer: `fangore_insp_recipe_version_pointer`[^insp-sr-01-incubate].",
   "implementation": "`GraphTemplate` is the substrate for Agentic Recipes. `SoftPoint`, `GraphTemplate.stamp`, `status` active/deprecated/demoted, and optional `source_workflow_ref` support incubation. This story stamps and demotes via the `fan_out_aggregate` catalog entry.",
-  "validation": "Harness `cli` scenario `graph_template_soft_points.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `instantiate_recipe` + `recipe_plan` demoted_refuse; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r19",

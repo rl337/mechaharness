@@ -1,0 +1,6 @@
+# Probe plan for scenario `training_grade_required.yaml`.
+# Story: Fail linkage when training-grade capture is unavailable
+
+summary: Fail linkage when training-grade capture is unavailable
+name: check_inference_capture
+required_inference_capture: training_grade

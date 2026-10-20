@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Instruction components declare scope, authority, and estimated context cost so entry files stay routers rather than encyclopedias. Accepts WalkingLabs L04 guidance[^wl-l04-instr].",
   "implementation": "`InstructionComponent` fields `scope`, `priority`, `authority`, and `estimated_context_cost` in `mechaharness.instruction_component`.",
-  "validation": "Harness `cli` scenario `instruction_scope_metadata.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/instruction_scope_metadata.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l04-instr",

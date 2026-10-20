@@ -1,14 +1,8 @@
+# Plan document: ../plans/named_matched_flavors.yaml
 kind: cli
 commands:
 - probe:
-    name: check_completer_flavors
-    flavor_tags:
-    - reason
-    - code
-    - deep
-    matched_required:
-    - reason
-    - code
+    path: plans/named_matched_flavors.yaml
 expect:
 - kind: 'true'
   key: default_is_inference

@@ -1,0 +1,5 @@
+# Demoted templates refuse instantiate.
+
+plan: demoted_refuse
+summary: A demoted fan_out_aggregate cannot expand.
+template: fan_out_aggregate

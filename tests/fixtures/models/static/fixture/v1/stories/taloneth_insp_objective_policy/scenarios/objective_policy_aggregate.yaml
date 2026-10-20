@@ -1,26 +1,8 @@
+# Plan document: ../plans/objective_policy_aggregate.yaml
 kind: cli
 commands:
 - probe:
-    name: objective_policy_aggregate
-    policy:
-      policy_id: demo:lexi
-      version: '1'
-      component_signals:
-      - correct
-      - tokens
-      formula: lexicographic
-      gates:
-      - correct
-      lexicographic:
-      - correct
-      - tokens
-    claims:
-    - id: correct
-      statement: ok
-      status: pass
-    - id: tokens
-      statement: budget
-      status: pass
+    path: plans/objective_policy_aggregate.yaml
 expect:
 - kind: 'true'
   key: scored

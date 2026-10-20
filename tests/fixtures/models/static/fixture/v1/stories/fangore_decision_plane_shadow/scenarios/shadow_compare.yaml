@@ -1,30 +1,8 @@
+# Plan document: ../plans/shadow_compare.yaml
 kind: cli
 commands:
 - probe:
-    name: decision_plane_shadow
-    questions:
-    - id: team
-      kind: choice
-      options:
-      - id: billing
-        label: Billing
-      - id: technical
-        label: Technical
-      allowed_actions:
-      - billing
-      - technical
-    - id: risk
-      kind: score
-      min: 0
-      max: 1
-    production_answers:
-      team: billing
-      risk: 0.2
-    shadow_answers:
-      team: technical
-      risk: 0.8
-    confidence: 0.9
-    confidence_floor: 0.7
+    path: plans/shadow_compare.yaml
 expect:
 - kind: equals
   key: production_action

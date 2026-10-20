@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Nubble asks branches for isolation without hard-coding worktrees or containers \u2014 the host provider supplies the mechanism. Accepts WalkingLabs L13 and Codex guidance[^wl-l13-workspace][^wl-codex-workspace].",
   "implementation": "`WorkspaceIsolationProvider` and `InMemoryWorkspaceIsolationProvider` in `mechaharness.isolation.workspace_isolation` define the acquire/release capability seam.",
-  "validation": "Harness `cli` scenario `workspace_isolation_acquire.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/workspace_isolation_acquire.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l13-workspace",

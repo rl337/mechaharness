@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore ships a host app with a produce \u2192 repair \u2192 consume plan. After linkage succeeds, the library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; preflight failures are covered by `fangore_graph_linkage_preflight`. See inspiration requirements for authorized graph execution[^insp-executor].",
   "implementation": "`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node events. `CliInstrumentor` verb `graph_executor_run` exercises the path.",
-  "validation": "Harness `cli` scenario `authorized_local_pipe.yaml`: hard status/consume/deny/attempts/telemetry.",
+  "validation": "Harness `cli` `probe` loads `plans/authorized_local_pipe.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "loop-vs-graph-executor",

@@ -1,0 +1,8 @@
+# Probe plan for scenario `learning_export_pack.yaml`.
+# Story: Export provenance-rich trajectories without owning training recipes
+
+summary: Export provenance-rich trajectories without owning training recipes
+name: learning_export_pack
+harness_fingerprint: fp:1
+rollout_graph_ref: rollout:1
+split: train

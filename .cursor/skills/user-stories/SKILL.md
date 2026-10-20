@@ -127,13 +127,14 @@ expect:
 Verbs are a pyiv map multibind (`MechaHarnessConfig.cli_verb_classes()`).
 Production catalog: `cli_host_verbs` (+ durable IoC verbs). Test delta via
 `TestHarnessCliConfig` (clocks + `probe`). Story probes register on
-`cli_probe_classes` and run as `probe: {name: …}`. `run_recipe` uses
-`cli_recipe_adapter_classes` for execute adapters. Catalog shape stories use
-`instantiate_recipe` with a human-readable `RecipeBind` under `binds/` (loaded
-via `path:`; omitted soft points take catalog defaults). Write bind files for
-readers — comments, `summary`, goal, and the soft decisions the story cares
-about. `expect:` is an open assertion list (validate kinds at load). Prefer
-many YAML scenarios over bag-ops; discovery = add YAML.
+`cli_probe_classes` and run as `probe: {path: plans/….yaml}` (preferred) or
+inline `probe: {name: …}`. `run_recipe` uses `cli_recipe_adapter_classes` for
+execute adapters. Catalog shape stories use `instantiate_recipe` with a
+human-readable `RecipeBind` under `binds/`; lifecycle checks use `recipe_plan`
+under `plans/`. Write bind/plan files for readers — comments, `summary`, and
+the decisions the story cares about. `expect:` is an open assertion list
+(validate kinds at load). Prefer many YAML scenarios over bag-ops; discovery =
+add YAML.
 See [`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
 
 Live: `MECHA_STORY_BACKEND=live`, `MECHA_BASE_URL`, `MECHA_MODEL` (served id).

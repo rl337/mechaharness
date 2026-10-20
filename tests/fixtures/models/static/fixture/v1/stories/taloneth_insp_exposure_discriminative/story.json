@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings[^fineenvs-exposure].",
   "implementation": "`ExposureLedger` in `mechaharness.exposure_accounting` and `discriminative_report` in `mechaharness.discriminative_value` summarize arm exposure and tie telemetry.",
-  "validation": "Harness `cli` scenario `exposure_discriminative_report.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/exposure_discriminative_report.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-exposure",
