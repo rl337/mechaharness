@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -335,8 +336,8 @@ for <code class="docutils literal notranslate"><span class="pre">verify_repair</
 code-owned policy with escalation, shadow compare, evaluation telemetry,
 <code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code>, and <code class="docutils literal notranslate"><span class="pre">action_question_id</span></code> routing.</p></li>
 <li><p>Jev typed-judgment inspiration + requirements map, with Fangore domain
-stories: <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code>,
-<code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code>,
+stories: <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_matching_claim</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_context_budget_pack</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_jev_req_review_template_shape</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_task_route_simple_local</span></code>,
 <code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code>.</p></li>
 </ul>
 </section>
@@ -362,7 +363,7 @@ scorecards. Map: <code class="docutils literal notranslate"><span class="pre">do
 <li><p>Transactional durable graph resume: injectable <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> seam,
 <code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> reference backend, opt-in <code class="docutils literal notranslate"><span class="pre">EffectfulGraphNodeRunner</span></code>
 with effect intent/acceptance/reconciliation, and crash-injection probes.
-Story: <code class="docutils literal notranslate"><span class="pre">fangore_transactional_durable_resume</span></code>. Requirements:
+Story: <code class="docutils literal notranslate"><span class="pre">fangore_tdr_crash_after_accept_before_record</span></code>. Requirements:
 <code class="docutils literal notranslate"><span class="pre">docs/requirements/transactional-durable-resume.md</span></code>. Module doctests (and
 Sphinx API pages) document Config wiring and SQLite restart usage;
 pytest runs <code class="docutils literal notranslate"><span class="pre">--doctest-modules</span></code> over <code class="docutils literal notranslate"><span class="pre">src/mechaharness</span></code>.</p></li>

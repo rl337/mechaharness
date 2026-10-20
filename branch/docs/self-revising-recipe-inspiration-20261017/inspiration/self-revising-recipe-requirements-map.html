@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -187,7 +188,7 @@ JuneSpark may supply inference for proposals/evals within local budgets.</p>
 <td><p>Conflict neighbors / cycle / checkpoint</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">decision_conflict_checkpoint.py</span></code>, <code class="docutils literal notranslate"><span class="pre">ExecutionGraph.concurrent_write_conflicts</span></code>, <code class="docutils literal notranslate"><span class="pre">StopContract</span></code>, <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code>, decision-plane</p></td>
 <td><p>partial</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_transactional_durable_resume</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_decision_conflict_checkpoint</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_tdr_crash_after_accept_before_record</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_decision_conflict_checkpoint</span></code></p></td>
 <td><p>Pure helpers; the graph executor does not call them, so hosts drive the revisit loop and checkpoint</p></td>
 </tr>
 <tr class="row-even"><td><p>MH-SR-09</p></td>

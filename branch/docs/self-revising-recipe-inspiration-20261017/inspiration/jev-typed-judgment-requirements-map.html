@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -179,25 +180,25 @@ infrastructure.</p>
 <td><p>Citation support check</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">decision_plane_runtime.py</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_matching_claim</span></code> (+ uncertain / missing / growth siblings)</p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-US05</p></td>
 <td><p>RAG context picker</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code>, DP batch</p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_context_budget_pack</span></code> (+ filter / injection / missing-scores siblings)</p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-US06</p></td>
 <td><p>Requirements-aware review</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>, <code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_req_review_template_shape</span></code> (+ covered / gap / approve-missing-crash siblings)</p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-US07</p></td>
 <td><p>Task-specific router</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>, <code class="docutils literal notranslate"><span class="pre">routing.py</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_task_route_simple_local</span></code> (+ frontier / low-confidence / invalid siblings)</p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-US08</p></td>
 <td><p>Action safety firewall</p></td>

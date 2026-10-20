@@ -28,7 +28,7 @@ realizations. See
 | 9 | Soft vs hard | grants, stop, linkage | story | `fangore_insp_soft_vs_hard` | — |
 | 10 | Independent review | `graph_templates/independent_review.py` | story | `fangore_insp_independent_review` | Multi-reviewer aggregation runners |
 | 11 | Fix the process | `failure_attribution.py`, EventLog | story | `fangore_insp_failure_attribution` | Cross-run mining beyond unit helpers |
-| 12 | Durable resume | `graph.py`, `checkpoint_store.py`, `sqlite_checkpoint_store.py`, `external_effect.py`, fingerprint | story | `fangore_insp_durable_resume`, `fangore_transactional_durable_resume` | — |
+| 12 | Durable resume | `graph.py`, `checkpoint_store.py`, `sqlite_checkpoint_store.py`, `external_effect.py`, fingerprint | story | `fangore_insp_durable_resume`, `fangore_tdr_crash_*` | — |
 | 13 | Model routing | `routing.py` | story | `nubble_insp_model_routing` | Cache-transfer / energy frontier |
 | 14 | Harness hypotheses | `harness_experiment.py`, `research.py` | story | `taloneth_insp_harness_hypothesis` | Harness version always on traces |
 | 15 | Risk-scaled autonomy | `consequence.py`, `authority_gate.py` | story | `fangore_insp_risk_autonomy`, `fangore_insp_authority_gate` | Composed via `AuthorityGate` (not only AccessControl hot path) |

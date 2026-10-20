@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -120,7 +121,7 @@
 <td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.cli_universe</span></code>, <code class="docutils literal notranslate"><span class="pre">cli_infer_runner</span></code>, <code class="docutils literal notranslate"><span class="pre">cli_instrumentor</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>Story harness</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> with <code class="docutils literal notranslate"><span class="pre">scenarios/*.yaml</span></code></p></td>
+<td><p>Canonical: <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code> (persona-task YAML wrapping verbs). Legacy: <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> script YAML.</p></td>
 </tr>
 <tr class="row-even"><td><p>Stability</p></td>
 <td><p>evolving (Wave 1+: grow verbs as stories migrate)</p></td>
@@ -189,8 +190,12 @@ verbs drive the same session through the instrumentor</p></li>
 </section>
 <section id="story-layout-canonical-acceptance">
 <h2>Story layout (canonical acceptance)<a class="headerlink" href="#story-layout-canonical-acceptance" title="Link to this heading"></a></h2>
-<p><strong>All user stories migrate here.</strong> Acceptance is <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> +
-<code class="docutils literal notranslate"><span class="pre">scenarios/*.yaml</span></code>. One story may own many concise scenarios (one claim each):</p>
+<p>Product CLI scripts stay verb-led (<code class="docutils literal notranslate"><span class="pre">commands:</span></code> / instrumentor). <strong>Story
+acceptance</strong> is a separate harness wrapper: <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code> YAML with
+<code class="docutils literal notranslate"><span class="pre">environment</span></code> → <code class="docutils literal notranslate"><span class="pre">graph</span></code> → <code class="docutils literal notranslate"><span class="pre">steps</span></code> → <code class="docutils literal notranslate"><span class="pre">complete</span></code> → <code class="docutils literal notranslate"><span class="pre">cleanup</span></code> that <em>drives</em>
+those verbs (see <code class="docutils literal notranslate"><span class="pre">tests/stories/scenarios/user_story_scenario.py</span></code>). Legacy
+<code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> script scenarios remain until migrated.</p>
+<p>One story may own many concise scenarios (one claim each):</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>stories/&lt;id&gt;/
   story.json
   scenarios/
@@ -199,24 +204,26 @@ verbs drive the same session through the instrumentor</p></li>
   response.json          # cassette when needed
 </pre></div>
 </div>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
-<span class="nt">commands</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">infer</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Say hello.</span>
-<span class="nt">expect</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exactly</span>
-<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">event_types</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">access_check</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">graph_start</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">…</span><span class="p p-Indicator">]</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">positive</span>
-<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cost_units</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">equals</span>
-<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">total_tokens</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lte</span>
-<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">total_tokens</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nonempty</span>
-<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">text</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user_story</span>
+<span class="nt">environment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">family</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pass_through</span>
+<span class="w">  </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mock</span>
+<span class="nt">graph</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="nt">steps</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">do</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">infer</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Say hello.</span>
+<span class="nt">complete</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">expect</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exactly</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">event_types</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">access_check</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">graph_start</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">…</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">positive</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cost_units</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">equals</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">total_tokens</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="nt">cleanup</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 </pre></div>
 </div>
 <p>Inference-running verbs (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> that completes)
