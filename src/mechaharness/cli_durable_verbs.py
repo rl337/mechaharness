@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel, ConfigDict
 
@@ -13,7 +13,12 @@ from mechaharness.durable_generator_script import (
     ListRecipesBody,
     RebuildBody,
     StartBody,
+    StepObservation,
 )
+
+
+def _obs_dict(obs: Any) -> dict[str, Any]:
+    return cast(StepObservation, obs).as_expect_dict()
 
 
 class StartVerb(CliVerb):
@@ -21,7 +26,7 @@ class StartVerb(CliVerb):
     params_model = StartBody
 
     async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
-        return runtime.run_durable_start(params).as_expect_dict()
+        return _obs_dict(runtime.run_durable_start(params))
 
 
 class AnswerVerb(CliVerb):
@@ -29,7 +34,7 @@ class AnswerVerb(CliVerb):
     params_model = AnswerBody
 
     async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
-        return runtime.run_durable_answer(params).as_expect_dict()
+        return _obs_dict(runtime.run_durable_answer(params))
 
 
 class InspectVerb(CliVerb):
@@ -37,7 +42,7 @@ class InspectVerb(CliVerb):
     params_model = InspectBody
 
     async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
-        return runtime.run_durable_inspect(params).as_expect_dict()
+        return _obs_dict(runtime.run_durable_inspect(params))
 
 
 class RebuildVerb(CliVerb):
@@ -45,7 +50,7 @@ class RebuildVerb(CliVerb):
     params_model = RebuildBody
 
     async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
-        return runtime.run_durable_rebuild(params).as_expect_dict()
+        return _obs_dict(runtime.run_durable_rebuild(params))
 
 
 class ListRecipesVerb(CliVerb):
@@ -53,7 +58,7 @@ class ListRecipesVerb(CliVerb):
     params_model = ListRecipesBody
 
     async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
-        return runtime.run_durable_list_recipes(params).as_expect_dict()
+        return _obs_dict(runtime.run_durable_list_recipes(params))
 
 
 class DurableSessionParams(BaseModel):

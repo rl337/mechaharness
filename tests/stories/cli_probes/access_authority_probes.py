@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import BaseModel, ConfigDict
+
 from mechaharness.approval_interrupt import resume_approval, suspend_for_approval
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
+from mechaharness.cli_verb import CliProbe
 from mechaharness.consequence import ActionConsequence, ConsequencePolicy
 from mechaharness.core.access import (
     Ability,
@@ -72,9 +75,6 @@ from mechaharness.tool_result_freshness import ToolResultFreshnessPolicy
 from mechaharness.tools.base import ToolRegistry
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
 from tests.fakes import ScriptedInference
-from pydantic import BaseModel, ConfigDict
-
-from mechaharness.cli_verb import CliProbe
 from tests.support.di import make_harness
 
 

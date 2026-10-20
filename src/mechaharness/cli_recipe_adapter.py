@@ -23,7 +23,7 @@ class CliRecipeAdapter(ABC):
 
 
 def _event_dict(event: Any) -> dict[str, Any]:
-    data = event.model_dump(mode="json")
+    data = cast(dict[str, Any], event.model_dump(mode="json"))
     ts = data.get("ts")
     if isinstance(ts, str):
         data["ts"] = ts.replace("+00:00", "Z") if ts.endswith("+00:00") else ts

@@ -17,6 +17,12 @@ from tests.stories.cli_probes.acceptance_verbs import (
     run_check_inference_capture,
     run_host_kit_submit_once,
 )
+from tests.stories.cli_probes.access_authority_probes import (
+    access_authority_cli_probe_classes,
+)
+from tests.stories.cli_probes.context_management_probes import (
+    context_management_cli_probe_classes,
+)
 from tests.stories.cli_probes.decision_plane_probes import (
     ActionSafetyCaseCommand,
     CitationSupportCaseCommand,
@@ -50,6 +56,12 @@ from tests.stories.cli_probes.decision_plane_probes import (
     run_policy_replay,
     run_requirements_gap_case,
     run_task_route_case,
+)
+from tests.stories.cli_probes.evaluation_research_probes import (
+    evaluation_research_cli_probe_classes,
+)
+from tests.stories.cli_probes.graph_recipes_probes import (
+    graph_recipes_cli_probe_classes,
 )
 from tests.stories.cli_probes.graph_verbs import (
     BoundedRepairLoopCommand,
@@ -90,18 +102,6 @@ from tests.stories.cli_probes.graph_verbs import (
     run_transactional_durable_resume,
     run_validator_qualification,
     run_wake_reresolve_resume,
-)
-from tests.stories.cli_probes.access_authority_probes import (
-    access_authority_cli_probe_classes,
-)
-from tests.stories.cli_probes.context_management_probes import (
-    context_management_cli_probe_classes,
-)
-from tests.stories.cli_probes.evaluation_research_probes import (
-    evaluation_research_cli_probe_classes,
-)
-from tests.stories.cli_probes.graph_recipes_probes import (
-    graph_recipes_cli_probe_classes,
 )
 from tests.stories.cli_probes.lifecycle_extensions_probes import (
     lifecycle_extensions_cli_probe_classes,
