@@ -1,10 +1,8 @@
+# Plan document: ../plans/instruction_gotcha_metrics.yaml
 kind: cli
 commands:
 - probe:
-    name: instruction_gotcha_metrics
-    title: watch path
-    body: do not dump full memory
-    over_trigger: true
+    path: plans/instruction_gotcha_metrics.yaml
 expect:
 - kind: equals
   key: over_trigger_count

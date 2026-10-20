@@ -1,0 +1,7 @@
+# Probe plan for scenario `wrong_lane_deny.yaml`.
+# Story: Refuse work when the wrong inference profile is loaded
+
+summary: Refuse work when the wrong inference profile is loaded
+name: wrong_lane_deny
+active_lane: reason
+require_lane: judge

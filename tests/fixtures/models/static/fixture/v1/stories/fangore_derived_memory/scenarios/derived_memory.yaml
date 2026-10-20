@@ -1,7 +1,8 @@
+# Plan document: ../plans/derived_memory.yaml
 kind: cli
 commands:
 - probe:
-    name: derived_memory
+    path: plans/derived_memory.yaml
 expect:
 - kind: 'true'
   key: authority_outranks_popularity

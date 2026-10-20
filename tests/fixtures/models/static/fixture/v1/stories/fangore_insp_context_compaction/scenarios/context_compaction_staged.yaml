@@ -1,14 +1,8 @@
+# Plan document: ../plans/context_compaction_staged.yaml
 kind: cli
 commands:
 - probe:
-    name: context_compaction_staged
-    messages:
-    - role: user
-      content: a
-    - role: user
-      content: a
-    - role: assistant
-      content: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    path: plans/context_compaction_staged.yaml
 expect:
 - kind: includes
   key: discarded_classes

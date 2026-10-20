@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Every graph run must declare how much spend is allowed. Crossing the soft limit winds remaining steps down without treating the job as a hard failure. Crossing the hard limit stops the run immediately. Hard can also be unlimited when no ceiling applies. Related: `fangore_insp_budget_subgraph_rollup` for nested spend, and `fangore_insp_stop_contract` for repeating-step ceilings.[^insp-budget]",
   "implementation": "`BudgetPolicy` soft/hard limits on `GraphExecutor`. `CliInstrumentor` verb `graph_budget_limits`.",
-  "validation": "Harness `cli` scenario `soft_and_hard.yaml`.",
+  "validation": "Harness `cli` `probe` loads `plans/soft_and_hard.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-budget",

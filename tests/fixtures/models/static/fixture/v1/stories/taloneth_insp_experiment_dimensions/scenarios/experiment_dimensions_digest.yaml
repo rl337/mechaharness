@@ -1,13 +1,8 @@
+# Plan document: ../plans/experiment_dimensions_digest.yaml
 kind: cli
 commands:
 - probe:
-    name: experiment_dimensions_digest
-    fixed:
-      model_revision: m@1
-    varying:
-      tool_surface:
-      - Read
-      - Edit
+    path: plans/experiment_dimensions_digest.yaml
 expect:
 - kind: 'true'
   key: has_digest

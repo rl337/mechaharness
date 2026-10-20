@@ -1,0 +1,9 @@
+# Probe plan for scenario `efficiency_scorecard_build.yaml`.
+# Story: Keep multidimensional efficiency dimensions observable
+
+summary: Keep multidimensional efficiency dimensions observable
+name: efficiency_scorecard_build
+tool_calls: 3
+tokens_out: 1200
+latency_ms: 4000
+coordination_cost: 1.5

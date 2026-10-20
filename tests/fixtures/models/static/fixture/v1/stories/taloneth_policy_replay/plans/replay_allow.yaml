@@ -1,0 +1,5 @@
+# Probe plan for scenario `replay_allow.yaml`.
+# Story: Replay product policy from recorded facts and signals
+
+summary: Replay product policy from recorded facts and signals
+name: policy_replay

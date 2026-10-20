@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Before a write tool runs, Fangore's extension rewrites the path argument into a sandbox directory. The same write tool still runs \u2014 only the arguments change. Hard grants still apply to the rewritten call; the extension cannot widen permission by rewriting to a more privileged tool. The log shows that a rewrite ran and that the default tool still ran. Accepts inspiration requirement 20. Complements `fangore_insp_lifecycle_observe`.",
   "implementation": "`LifecycleExtension` with rewrite mode returns modified arguments at `BeforeTool`; `AbstractHarness.execute_tools` runs the same tool with rewritten args, then AccessControl still gates the call.",
-  "validation": "Harness `cli` scenario `lifecycle_extension_rewrite.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/lifecycle_extension_rewrite.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r20-rewrite",

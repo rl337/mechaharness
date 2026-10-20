@@ -1,0 +1,6 @@
+# Probe plan for scenario `workspace_isolation_acquire.yaml`.
+# Story: Acquire workspace isolation through a host provider seam
+
+summary: Acquire workspace isolation through a host provider seam
+name: workspace_isolation_acquire
+label: branch-a

@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore reviews a change against applicable user stories with isolated reviewers and atomic checks. When a check finds a missing requirement or a missing crash-location test in the facts, the harness asks for focused tests or deeper review. A judge saying approve never marks the change correct by itself. Related: `fangore_insp_independent_review`, `fangore_decision_plane_policy`.[^jev-us06]",
   "implementation": "Agentic Recipe `independent_review` provides isolated reviewer context. Agentic Recipe `decision_plane` runtime answers bounded coverage/gap questions. Host policy maps gaps and deterministic facts (for example missing crash tests) to `request_tests` or escalate; `mark_correct` is never emitted from judge confidence alone.",
-  "validation": "Harness `cli` scenarios for requirements gap outcomes + template shape.",
+  "validation": "Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "jev-us06",

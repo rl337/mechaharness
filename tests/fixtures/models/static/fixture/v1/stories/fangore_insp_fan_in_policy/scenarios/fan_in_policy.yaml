@@ -1,13 +1,8 @@
+# Plan document: ../plans/fan_in_policy.yaml
 kind: cli
 commands:
 - probe:
-    name: fan_in_policy
-    strategy: quorum
-    quorum: 2
-    results:
-    - true
-    - true
-    - false
+    path: plans/fan_in_policy.yaml
 expect:
 - kind: 'true'
   key: accepted

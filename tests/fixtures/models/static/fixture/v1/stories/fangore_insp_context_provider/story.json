@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06]. Related personal-agent freshness/provenance story: `fangore_insp_tool_result_freshness`[^insp-pa-01-provider].",
   "implementation": "`ContextProvider` / `StaticContextProvider` expose `index` then `load` with provenance and token estimates.",
-  "validation": "Harness `cli` scenario `context_provider_discovery.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/context_provider_discovery.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r06",

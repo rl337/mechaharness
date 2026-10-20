@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Taloneth needs mid-corpus experiment resume to remember which cases were already consumed so a crash cannot replay tasks and contaminate later training. Accepts FineEnvs resume integrity findings[^fineenvs-lineage].",
   "implementation": "`ExperimentCheckpoint` in `mechaharness.experiment_lineage` persists consumed case ids, sampler state, assignment, checkpoint identity, and evidence digests; `consume` refuses duplicates.",
-  "validation": "Harness `cli` scenario `experiment_lineage_resume.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/experiment_lineage_resume.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-lineage",

@@ -1,0 +1,13 @@
+# Probe plan for scenario `lifecycle_extension_block.yaml`.
+# Story: Skip one tool call without inventing a new plan
+
+summary: Skip one tool call without inventing a new plan
+name: lifecycle_extension_block
+prompt: Write a.txt
+grants:
+- core:fs.write
+tool_calls:
+- id: '1'
+  name: write_file
+  arguments:
+    path: a.txt

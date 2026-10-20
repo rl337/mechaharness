@@ -1,7 +1,8 @@
+# Plan document: ../plans/repo_topology.yaml
 kind: cli
 commands:
 - probe:
-    name: repo_topology
+    path: plans/repo_topology.yaml
 expect:
 - kind: 'true'
   key: has_omissions_or_entries

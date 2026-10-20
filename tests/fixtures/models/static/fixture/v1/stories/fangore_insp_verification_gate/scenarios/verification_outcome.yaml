@@ -1,8 +1,8 @@
+# Plan document: ../plans/verification_outcome.yaml
 kind: cli
 commands:
 - probe:
-    name: verification_outcome
-    require_verification: true
+    path: plans/verification_outcome.yaml
 expect:
 - kind: equals
   key: before_verify_completion

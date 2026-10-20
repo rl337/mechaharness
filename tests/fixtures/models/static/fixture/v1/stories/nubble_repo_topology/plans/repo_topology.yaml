@@ -1,0 +1,5 @@
+# Probe plan for scenario `repo_topology.yaml`.
+# Story: Budget repository topology maps and fall back when stale
+
+summary: Budget repository topology maps and fall back when stale
+name: repo_topology

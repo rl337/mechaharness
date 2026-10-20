@@ -1,35 +1,8 @@
+# Plan document: ../plans/simple_local.yaml
 kind: cli
 commands:
 - probe:
-    name: task_route_case
-    questions:
-    - id: route
-      kind: choice
-      options:
-      - id: local_small
-        label: Local small
-      - id: frontier
-        label: Frontier
-      - id: tool
-        label: Deterministic tool
-      - id: human
-        label: Human
-      allowed_actions:
-      - local_small
-      - frontier
-      - tool
-      - human
-    - id: complexity
-      kind: score
-      min: 0
-      max: 1
-    action_question_id: route
-    answers:
-      route: local_small
-      complexity: 0.2
-    confidence: 0.9
-    confidence_floor: 0.7
-    min_complexity_for_frontier: 0.7
+    path: plans/simple_local.yaml
 expect:
 - kind: equals
   key: final_action

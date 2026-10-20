@@ -1,0 +1,18 @@
+# Probe plan for scenario `checkpoint_fan_in_merge.yaml`.
+# Story: Resume a durable local plan after a crash
+
+summary: Resume a durable local plan after a crash
+name: local_plan_resume
+goal: ship patch
+state_revision: r1
+evidence_refs:
+- obs:1
+satisfied: []
+fan_in_budget: 4
+branches:
+- path: app.py
+  content: a
+  status: ok
+- path: app.py
+  content: b
+  status: ok

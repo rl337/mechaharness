@@ -1,22 +1,8 @@
+# Plan document: ../plans/exclude_injection.yaml
 kind: cli
 commands:
 - probe:
-    name: context_budget_case
-    token_budget: 120
-    min_relevance: 0.5
-    min_trust: 0.5
-    min_freshness: 0.3
-    candidates:
-    - id: safe
-      tokens: 60
-      relevance: 0.7
-      trust: 0.9
-      freshness: 0.8
-    - id: inject
-      tokens: 40
-      relevance: 0.99
-      trust: 0.1
-      freshness: 0.9
+    path: plans/exclude_injection.yaml
 expect:
 - kind: exactly
   key: selected_ids

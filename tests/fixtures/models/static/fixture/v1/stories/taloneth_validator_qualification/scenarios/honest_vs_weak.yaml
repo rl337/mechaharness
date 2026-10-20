@@ -1,13 +1,8 @@
+# Plan document: ../plans/honest_vs_weak.yaml
 kind: cli
 commands:
 - probe:
-    name: validator_qualification
-    good_fixtures:
-    - ok1
-    bad_fixtures:
-    - bad1
-    missing_fixtures:
-    - missing
+    path: plans/honest_vs_weak.yaml
 expect:
 - kind: 'true'
   key: honest_qualified

@@ -90,7 +90,7 @@ Graph lifecycle emits carry warehouse correlators (`graph_id`, `recipe_id`, `aut
 
 #### Validation
 
-Harness `cli` scenario `warehouse_correlators.yaml`: hard correlator and node-attempt rows.
+Harness `cli` `probe` loads `plans/warehouse_correlators.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -106,7 +106,7 @@ Nubble compares wall-clock critical path, duplicated context, and fan-in review 
 
 #### Validation
 
-Harness `cli` scenario `coordination_cost.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/coordination_cost.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -123,7 +123,7 @@ Nubble needs tool calls, tokens, latency, and coordination cost kept as separate
 
 #### Validation
 
-Harness `cli` scenario `efficiency_scorecard_build.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/efficiency_scorecard_build.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -139,7 +139,7 @@ Nubble sends environment deltas instead of repeating full snapshots while still 
 
 #### Validation
 
-Harness `cli` scenario `environment_delta.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/environment_delta.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -155,7 +155,7 @@ Missing environment capability must become a structured pre-exec failure, not a 
 
 #### Validation
 
-Harness `cli` scenario `grant_mismatch.yaml`.
+Harness `cli` `probe` loads `plans/grant_mismatch.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -220,7 +220,7 @@ Optional `recipe_id`, `recipe_version`, and `freshness_summary` (plus approval, 
 
 #### Validation
 
-Harness `cli` scenario `recipe_audit_dimensions.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/recipe_audit_dimensions.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -236,7 +236,7 @@ Nubble records how expensive resume is — rebuild tokens, tool calls, and wake-
 
 #### Validation
 
-Harness `cli` scenario `resume_cost.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/resume_cost.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -253,7 +253,7 @@ An auditor can rebuild a review from the saved decision log and trace alone: whi
 
 #### Validation
 
-Harness `cli` scenario `review_audit_reconstruct.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/review_audit_reconstruct.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -269,7 +269,7 @@ Nubble needs the observed run topology — retries, spawned reviewers, and termi
 
 #### Validation
 
-Harness `cli` scenario `roots_and_retry.yaml`: hard roots and retry link.
+Harness `cli` `probe` loads `plans/roots_and_retry.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -285,7 +285,7 @@ Nubble rejects incomplete traces that omit config fingerprint, routing, context 
 
 #### Validation
 
-Harness `cli` scenario `trace_envelope_complete.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/trace_envelope_complete.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -303,7 +303,7 @@ Nubble needs executor events and gateway capture to reconcile before a rollout i
 
 #### Validation
 
-Harness `cli` scenario `trace_reconciliation_check.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/trace_reconciliation_check.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -320,7 +320,7 @@ Nubble asks branches for isolation without hard-coding worktrees or containers �
 
 #### Validation
 
-Harness `cli` scenario `workspace_isolation_acquire.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/workspace_isolation_acquire.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -339,7 +339,7 @@ Covers: INF-02.
 
 #### Validation
 
-Harness `cli` scenario `wrong_lane_deny.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/wrong_lane_deny.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ### `nubble_model_affinity` — Keep model affinity inside a coherent work loop
 
@@ -365,7 +365,7 @@ Covers: CTX-08.
 
 #### Validation
 
-Harness `cli` scenario `repo_topology.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/repo_topology.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ### `nubble_run_cost_events` — Record cost and inference events for every harness run
 
@@ -391,7 +391,7 @@ Nubble is asked whether parallel agents sped things up. Wall time dropped, but t
 
 #### Validation
 
-Harness `cli` scenario `parallel_spans.yaml`: hard work/elapsed/notes. Unit: topology helpers in `tests/test_decision_log.py` where present.
+Harness `cli` `probe` loads `plans/parallel_spans.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ## Fangore's stories
 
@@ -417,7 +417,7 @@ After a failed verification, Fangore allows a limited repair-and-retry cycle. Wh
 
 #### Validation
 
-Harness `cli` scenario `verify_repair_succeeds.yaml`: hard `final_status`.
+Harness `cli` `probe` loads `plans/verify_repair_succeeds.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -449,7 +449,7 @@ Fangore delegates a child plan with fewer tools and grants than the parent. The 
 
 #### Validation
 
-Harness `cli` scenario `capability_envelope_narrow.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/capability_envelope_narrow.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -468,7 +468,7 @@ Covers: same-lane Completer flavors via pyiv Named/Matched.
 
 #### Validation
 
-Harness `cli` scenario `named_matched_flavors.yaml`: hard DI selection booleans. Unit: `tests/test_di.py`.
+Harness `cli` `probe` loads `plans/named_matched_flavors.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -486,7 +486,7 @@ Covers: host compound grants.
 
 #### Validation
 
-Harness `cli` scenario `grant_gate_write.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/grant_gate_write.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -504,7 +504,7 @@ Covers: host DI access policy.
 
 #### Validation
 
-Harness `cli` scenario `config_access_policy.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/config_access_policy.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -522,7 +522,7 @@ Covers: CTX-05.
 
 #### Validation
 
-Harness `cli` scenario `context_compiler_deficit.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/context_compiler_deficit.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -540,7 +540,7 @@ Covers: CTX-01, CTX-02, CTX-03, CTX-04.
 
 #### Validation
 
-Harness `cli` scenario `context_observation_chain.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/context_observation_chain.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ### `fangore_convergence_ceiling` — Stop agent loops that make no progress
 
@@ -552,7 +552,7 @@ Fangore’s repair loop keeps asking the same question and getting the same answ
 
 #### Validation
 
-Harness `cli` scenario `stagnation.yaml`: hard terminal/reason.
+Harness `cli` `probe` loads `plans/stagnation.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -584,7 +584,7 @@ Agentic Recipe `decision_plane` exposes a `decision_model` soft point (router/fl
 
 #### Validation
 
-Harness `cli` scenario `model_soft_point.yaml`. Hard expects decision_model soft point.
+Harness `cli` `probe` loads `plans/model_soft_point.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -600,7 +600,7 @@ Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed
 
 #### Validation
 
-Harness `cli` scenarios `accept_billing.yaml` / `low_confidence.yaml` / `invalid_team.yaml`.
+Harness `cli` `probe` loads `plans/low_confidence.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -619,7 +619,7 @@ Agentic Recipe `decision_plane` uses `project_decision_state` in `mechaharness.d
 
 #### Validation
 
-Harness `cli` scenario `project_state.yaml`. Hard expects projection without secrets.
+Harness `cli` `probe` loads `plans/project_state.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -636,7 +636,7 @@ Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state �
 
 #### Validation
 
-Harness `cli` scenario `template_shape.yaml`. Hard expects decision_plane template shape.
+Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -652,7 +652,7 @@ Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mecha
 
 #### Validation
 
-Harness `cli` scenario `shadow_compare.yaml`. Hard expects shadow does not control execution.
+Harness `cli` `probe` loads `plans/shadow_compare.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -668,7 +668,7 @@ Fangore needs decision metrics — which questions, projection fingerprint, answ
 
 #### Validation
 
-Harness `cli` scenario `telemetry_fields.yaml`. Hard expects telemetry fields without raw body.
+Harness `cli` `probe` loads `plans/telemetry_fields.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -687,7 +687,7 @@ Covers: POL-01.
 
 #### Validation
 
-Harness `cli` scenario `reject_invalid.yaml`. Hard expects rules/invalid rejection.
+Harness `cli` `probe` loads `plans/reject_invalid.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 
@@ -701,7 +701,7 @@ Covers: CTX-06, CTX-07.
 
 #### Validation
 
-Harness `cli` scenario `derived_memory.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/derived_memory.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ### `fangore_environment_repair_recipe` — Instantiate the environment repair Agentic Recipe
 
@@ -729,7 +729,7 @@ Fangore ships a host app with a produce → repair → consume plan. After linka
 
 #### Validation
 
-Harness `cli` scenario `authorized_local_pipe.yaml`: hard status/consume/deny/attempts/telemetry.
+Harness `cli` `probe` loads `plans/authorized_local_pipe.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -746,7 +746,7 @@ Fangore composes a plan that still names a step the host has not wired, and anot
 
 #### Validation
 
-Harness `cli` scenario `runner_stop_and_ok.yaml`: hard ok flags and exact edge codes.
+Harness `cli` `probe` loads `plans/runner_stop_and_ok.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -823,7 +823,7 @@ Fangore builds a host that dispatches a remote coding job from a durable plan. T
 
 #### Validation
 
-Harness `cli` scenario `dispatch_and_resume.yaml`: hard `scenario_results_exactly` for durable dispatch and uncertain-with-handle resume. Unit matrix: `tests/fixtures/host_kit/*.json` via `tests/test_host_kit.py`.
+Harness `cli` `probe` loads `plans/resume_uncertain_with_handle.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -841,7 +841,7 @@ Covers: POL-04, GAT-04.
 
 #### Validation
 
-Harness `cli` scenario `human_review_pending.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/human_review_pending.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -858,7 +858,7 @@ Models may suggest what to do about an alert, but fixed rules decide how far it 
 
 #### Validation
 
-Harness `cli` scenario `alert_escalation_stages.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/alert_escalation_stages.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -874,7 +874,7 @@ High-autonomy graphs must periodically attach labeled external anchors so branch
 
 #### Validation
 
-Harness `cli` scenario `anchor_evidence_require.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/anchor_evidence_require.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -890,7 +890,7 @@ High-consequence steps must pause on a durable approval interrupt with evidence,
 
 #### Validation
 
-Harness `cli` scenario `approval_interrupt_cycle.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/approval_interrupt_cycle.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -907,7 +907,7 @@ Checkpoints carry the authorization epoch so crash recovery after revocation doe
 
 #### Validation
 
-Harness `cli` scenario `auth_epoch_resume_refuse.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/auth_epoch_resume_refuse.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -923,7 +923,7 @@ Hard rules for consequential actions live outside model text. Untrusted forwarde
 
 #### Validation
 
-Harness `cli` scenario `authority_gate_evaluate.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/authority_gate_evaluate.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -939,7 +939,7 @@ When a parent step embeds a child graph, child node costs must count against the
 
 #### Validation
 
-Harness `cli` scenario `child_rollup.yaml`.
+Harness `cli` `probe` loads `plans/child_rollup.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -955,7 +955,7 @@ Long runs compact context through staged strategies that record which informatio
 
 #### Validation
 
-Harness `cli` scenario `context_compaction_staged.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/context_compaction_staged.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -972,7 +972,7 @@ Fangore keeps durable graph state large and shared while each node receives only
 
 #### Validation
 
-Harness `cli` scenario `context_layers_project.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/context_layers_project.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -989,7 +989,7 @@ Fangore's host memory source must advertise what it can supply before dumping la
 
 #### Validation
 
-Harness `cli` scenario `context_provider_discovery.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/context_provider_discovery.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1006,7 +1006,7 @@ Task-local evidence, policy, memory references, and approvals must not bleed acr
 
 #### Validation
 
-Harness `cli` scenario `cross_task_isolation_bleed.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1022,7 +1022,7 @@ After a decision is settled, the nodes it still conflicts with are revisited, an
 
 #### Validation
 
-Harness `cli` scenario `neighbor_revisit.yaml`.
+Harness `cli` `probe` loads `plans/no_conflicts.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1038,7 +1038,7 @@ Denied intents and side-effect classes survive graph retries and delegated paths
 
 #### Validation
 
-Harness `cli` scenario `denial_store_equivalence.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/denial_store_equivalence.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1086,7 +1086,7 @@ Long-running work checkpoints outside chat. If the harness or graph configuratio
 
 #### Validation
 
-Harness `cli` scenario `fingerprint_refuse.yaml`.
+Harness `cli` `probe` loads `plans/fingerprint_refuse.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1103,7 +1103,7 @@ Fangore embeds a child plan under a parent step. The child must run as its own g
 
 #### Validation
 
-Harness `cli` scenario `nested_child.yaml`.
+Harness `cli` `probe` loads `plans/nested_child.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1119,7 +1119,7 @@ Authority is rechecked when a consequential action actually runs — not only at
 
 #### Validation
 
-Harness `cli` scenario `effect_revalidation_check.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/effect_revalidation_check.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1151,7 +1151,7 @@ Every graph run needs a capability-scoped execution token: principal, expiry, tr
 
 #### Validation
 
-Harness `cli` scenario `execution_token_narrow.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/execution_token_narrow.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1167,7 +1167,7 @@ A run is not done until checkpoint durability, pending-node policy, and optional
 
 #### Validation
 
-Harness `cli` scenario `exit_clean_state.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/exit_clean_state.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1183,7 +1183,7 @@ When the same failure class repeats, Fangore needs structured attribution so the
 
 #### Validation
 
-Harness `cli` scenario `failure_attribution_trace.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/failure_attribution_trace.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1199,7 +1199,7 @@ Parallel branches rejoin through an explicit fan-in acceptance policy such as qu
 
 #### Validation
 
-Harness `cli` scenario `fan_in_policy.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/fan_in_policy.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1215,7 +1215,7 @@ Every graph run must declare how much spend is allowed. Crossing the soft limit 
 
 #### Validation
 
-Harness `cli` scenario `soft_and_hard.yaml`.
+Harness `cli` `probe` loads `plans/soft_and_hard.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1247,7 +1247,7 @@ Fangore needs success, rollback, and end paths declared as transitions — not i
 
 #### Validation
 
-Harness `cli` scenario `verify_rollback_end.yaml`: hard issues and verify kinds.
+Harness `cli` `probe` loads `plans/verify_rollback_end.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1312,7 +1312,7 @@ Handoffs preserve goals, exclusions, completed/pending work, decisions, rational
 
 #### Validation
 
-Harness `cli` scenario `handoff_record.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/handoff_record.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1347,7 +1347,7 @@ Fangore needs graphs that require exact token capture to fail before expensive w
 
 #### Validation
 
-Harness `cli` scenario `training_grade_required.yaml`: hard `linkage_ok` and exact `codes_exactly`. Unit: `tests/test_inference_capture.py`.
+Harness `cli` `probe` loads `plans/training_grade_required.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1379,7 +1379,7 @@ Scarce instruction components distinguish invariants from learned gotchas. Over-
 
 #### Validation
 
-Harness `cli` scenario `instruction_gotcha_metrics.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/instruction_gotcha_metrics.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1395,7 +1395,7 @@ Instruction components declare scope, authority, and estimated context cost so e
 
 #### Validation
 
-Harness `cli` scenario `instruction_scope_metadata.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/instruction_scope_metadata.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1411,7 +1411,7 @@ Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (ef
 
 #### Validation
 
-Harness `cli` scenario `isolation_io_contract.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/isolation_io_contract.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1430,7 +1430,7 @@ Before a dangerous tool runs, Fangore's extension blocks that single call. The d
 
 #### Validation
 
-Harness `cli` scenario `lifecycle_extension_block.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/lifecycle_extension_block.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1446,7 +1446,7 @@ Fangore binds an observe-only extension around each graph node attempt. The node
 
 #### Validation
 
-Harness `cli` scenario `lifecycle_extension_graph_observe.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/lifecycle_extension_graph_observe.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1462,7 +1462,7 @@ Fangore binds two host extensions that watch each tool call before it runs. The 
 
 #### Validation
 
-Harness `cli` scenario `lifecycle_extension_observe.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/lifecycle_extension_observe.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1478,7 +1478,7 @@ For one tool boundary, Fangore may substitute a different single-step outcome in
 
 #### Validation
 
-Harness `cli` scenario `lifecycle_extension_replace.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/lifecycle_extension_replace.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1494,7 +1494,7 @@ Before a write tool runs, Fangore's extension rewrites the path argument into a 
 
 #### Validation
 
-Harness `cli` scenario `lifecycle_extension_rewrite.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/lifecycle_extension_rewrite.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1510,7 +1510,7 @@ Fangore's injector can build services while a plan still names an unwired step. 
 
 #### Validation
 
-Harness `cli` scenario `missing_runner_and_ok.yaml`: hard runner codes and ok fingerprint.
+Harness `cli` `probe` loads `plans/missing_runner_and_ok.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1526,7 +1526,7 @@ Long loops accumulate verification debt; Fangore winds them down when independen
 
 #### Validation
 
-Harness `cli` scenario `loop_health.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/loop_health.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1542,7 +1542,7 @@ Cleanup and recovery operations declare idempotency and optional compensation so
 
 #### Validation
 
-Harness `cli` scenario `operation_compensation.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/operation_compensation.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1638,7 +1638,7 @@ High-consequence writes demand stronger controls and visible approval frequency;
 
 #### Validation
 
-Harness `cli` scenario `consequence_risk_scale.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/consequence_risk_scale.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1673,7 +1673,7 @@ Covers: GAT-01, GAT-02, GAT-03.
 
 #### Validation
 
-Harness `cli` scenario `tool_gating.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/tool_gating.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1690,7 +1690,7 @@ Sparse advisor counsel helps at hard boundaries while the active executor keeps 
 
 #### Validation
 
-Harness `cli` scenario `sparse_advisor.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/sparse_advisor.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1706,7 +1706,7 @@ Graph quality targets have owners and can be frozen so agents cannot silently mu
 
 #### Validation
 
-Harness `cli` scenario `state_governance_write.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/state_governance_write.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1722,7 +1722,7 @@ A repeating repair step without an explicit stop rule must fail validation befor
 
 #### Validation
 
-Harness `cli` scenario `missing_stop.yaml`: hard stop-contract codes.
+Harness `cli` `probe` loads `plans/missing_stop.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1738,7 +1738,7 @@ When verification fails, Fangore wants structured attribution naming the repair 
 
 #### Validation
 
-Harness `cli` scenario `select_produce.yaml`: hard rollback/repair targets.
+Harness `cli` `probe` loads `plans/select_produce.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1754,7 +1754,7 @@ Reusable Agentic Recipes expose soft points and stamp provenance onto concrete g
 
 #### Validation
 
-Harness `cli` scenario `graph_template_soft_points.yaml`. Hard expects on declared observation keys.
+Harness `cli` `instantiate_recipe` + `recipe_plan` demoted_refuse; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1771,7 +1771,7 @@ Read-only observers must not invoke mutating tools; preparation returns typed pr
 
 #### Validation
 
-Harness `cli` scenario `tool_phase_effect_guard.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/tool_phase_effect_guard.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1787,7 +1787,7 @@ Tool results that drive external decisions carry source and freshness metadata. 
 
 #### Validation
 
-Harness `cli` scenario `tool_result_freshness_reject.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/tool_result_freshness_reject.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1803,7 +1803,7 @@ Producing an answer is not the same as finishing the task when verification is r
 
 #### Validation
 
-Harness `cli` scenario `verification_outcome.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/verification_outcome.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1819,7 +1819,7 @@ Persistent goals live in the client orchestrator. When a goal wakes, MechaHarnes
 
 #### Validation
 
-Harness `cli` scenario `wake_resume.yaml`.
+Harness `cli` `probe` loads `plans/wake_resume.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1836,7 +1836,7 @@ Fangore limits concurrent active nodes and per-write-scope work so agents cannot
 
 #### Validation
 
-Harness `cli` scenario `wip_policy.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/wip_policy.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1853,7 +1853,7 @@ Before an agent deletes, pays, or publishes, Fangore runs a semantic risk check 
 
 #### Validation
 
-Harness `cli` scenarios per action safety case.
+Harness `cli` `probe` loads `plans/read_low_risk_with_grant.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1871,7 +1871,7 @@ Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a 
 
 #### Validation
 
-Harness `cli` scenarios per citation case. Hard expects claim_verified / escalate.
+Harness `cli` `probe` loads `plans/uncertain_support.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1888,7 +1888,7 @@ After retrieval, Fangore asks a decision model for relevance, trust, and freshne
 
 #### Validation
 
-Harness `cli` scenarios per context budget case.
+Harness `cli` `probe` loads `plans/missing_scores_fallback.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1905,7 +1905,7 @@ Agentic Recipe `independent_review` provides isolated reviewer context. Agentic 
 
 #### Validation
 
-Harness `cli` scenarios for requirements gap outcomes + template shape.
+Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1921,7 +1921,7 @@ Agentic Recipe `decision_plane` runtime (`run_decision_plane_policy`) answers a 
 
 #### Validation
 
-Harness `cli` scenarios per task route case.
+Harness `cli` `probe` loads `plans/simple_local.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1937,7 +1937,7 @@ A local plan fans out produce-then-consume work. The process dies mid-dispatch. 
 
 #### Validation
 
-Harness `cli` scenario `checkpoint_fan_in_merge.yaml`.
+Harness `cli` `probe` loads `plans/checkpoint_fan_in_merge.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2022,7 +2022,7 @@ Fangore's host dispatches a long-running coding job through a durable plan. The 
 
 #### Validation
 
-Harness `cli` scenario `crash_matrix.yaml`: hard `cases_exactly` per crash location.
+Harness `cli` `probe` loads `plans/crash_before_intent.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2078,7 +2078,7 @@ Covers: EXP-01, EXP-02, EXP-03, EXP-04.
 
 #### Validation
 
-Harness `cli` scenario `atk_research_reject.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/atk_research_reject.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2096,7 +2096,7 @@ Covers: CTX-09.
 
 #### Validation
 
-Harness `cli` scenario `cache_layout_experiment.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/cache_layout_experiment.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ### `taloneth_decision_plane_shadow_compare` — Compare shadowed decision-plane answers before promotion
 
@@ -2108,7 +2108,7 @@ Taloneth reviews shadow versus production answers on matched refund triage cases
 
 #### Validation
 
-Harness `cli` scenarios `disagree.yaml` / `candidate_unavailable.yaml`.
+Harness `cli` `probe` loads `plans/disagree.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2126,7 +2126,7 @@ Covers: JDG-01, JDG-02, JDG-03, JDG-04.
 
 #### Validation
 
-Harness `cli` scenario `batch_answers.yaml`. Hard expects answer count, errors, and answer ids.
+Harness `cli` `probe` loads `plans/batch_answers.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ### `taloneth_insp_component_ablation` — Ablate harness components against a matched corpus
 
@@ -2138,7 +2138,7 @@ Taloneth runs a component-ablation experiment that disables named harness pieces
 
 #### Validation
 
-Harness `cli` scenario `component_ablation_delta.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/component_ablation_delta.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2155,7 +2155,7 @@ When a person corrects the agent, the correction is recorded as outstanding spec
 
 #### Validation
 
-Harness `cli` scenario `specification_debt.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/specification_debt.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2171,7 +2171,7 @@ Taloneth needs cross-harness evaluation to classify invalid tool names and schem
 
 #### Validation
 
-Harness `cli` scenario `cross_harness_failure_classify.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/cross_harness_failure_classify.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2187,7 +2187,7 @@ Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by
 
 #### Validation
 
-Harness `cli` scenario `eval_claims_compose.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/eval_claims_compose.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2204,7 +2204,7 @@ Taloneth evaluates the same model under multiple harness configurations and must
 
 #### Validation
 
-Harness `cli` scenario `eval_matrix_aggregate.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/eval_matrix_aggregate.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2220,7 +2220,7 @@ Taloneth needs a dead sandbox or broken trace to count as unscorable execution f
 
 #### Validation
 
-Harness `cli` scenario `evaluation_outcome_filter.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/evaluation_outcome_filter.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2236,7 +2236,7 @@ Taloneth wires a versioned evaluator that can be marked held-out so self-improve
 
 #### Validation
 
-Harness `cli` scenario `evaluator_compose_run.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/evaluator_compose_run.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2254,7 +2254,7 @@ Taloneth needs every harness experiment to state which configuration axes are fi
 
 #### Validation
 
-Harness `cli` scenario `experiment_dimensions_digest.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/experiment_dimensions_digest.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2270,7 +2270,7 @@ Taloneth needs mid-corpus experiment resume to remember which cases were already
 
 #### Validation
 
-Harness `cli` scenario `experiment_lineage_resume.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/experiment_lineage_resume.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2286,7 +2286,7 @@ Taloneth needs equal rollout counts to still reveal unequal token and call expos
 
 #### Validation
 
-Harness `cli` scenario `exposure_discriminative_report.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/exposure_discriminative_report.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2302,7 +2302,7 @@ Taloneth needs harness experiments to satisfy correctness first and only then pr
 
 #### Validation
 
-Harness `cli` scenario `gated_objective_evaluate.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/gated_objective_evaluate.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2318,7 +2318,7 @@ Taloneth compares the same model and task under two graph configurations and nee
 
 #### Validation
 
-Harness `cli` scenario `harness_fingerprint_digest.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/harness_fingerprint_digest.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2334,7 +2334,7 @@ Taloneth captures unused extensions, dead soft points, and unexercised routes as
 
 #### Validation
 
-Harness `cli` scenario `harness_health.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/harness_health.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2351,7 +2351,7 @@ Taloneth writes the failure mode and expected metric before shipping a harness t
 
 #### Validation
 
-Harness `cli` scenario `harness_experiment_retire.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/harness_experiment_retire.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2367,7 +2367,7 @@ Taloneth needs exportable execution packs that carry harness fingerprint, rollou
 
 #### Validation
 
-Harness `cli` scenario `learning_export_pack.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/learning_export_pack.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2383,7 +2383,7 @@ Taloneth refuses silent weighted blends of verifier scores and wants gates and f
 
 #### Validation
 
-Harness `cli` scenario `objective_policy_aggregate.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/objective_policy_aggregate.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2431,7 +2431,7 @@ Repeated review feedback becomes an experiment, then a soft instruction, then a 
 
 #### Validation
 
-Harness `cli` scenario `rule_promotion.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/rule_promotion.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2482,7 +2482,7 @@ Taloneth treats an orchestration scaffold as temporary. When a with-versus-witho
 
 #### Validation
 
-Harness `cli` scenario `harness_experiment_retire.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/harness_experiment_retire.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2514,7 +2514,7 @@ Taloneth records isolated trials with cost and latency, then reports pass@k for 
 
 #### Validation
 
-Harness `cli` scenario `trial_reliability_metrics.yaml`. Hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/trial_reliability_metrics.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2534,7 +2534,7 @@ Covers: OBS-02.
 
 #### Validation
 
-Harness `cli` scenario `export_train.yaml`. Hard expects export lineage and no outcome leak.
+Harness `cli` `probe` loads `plans/export_train.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 ### `taloneth_policy_replay` — Replay product policy from recorded facts and signals
 
@@ -2548,7 +2548,7 @@ Covers: OBS-03.
 
 #### Validation
 
-Harness `cli` scenario `replay_allow.yaml`. Hard expects verdict kind.
+Harness `cli` `probe` loads `plans/replay_allow.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2590,4 +2590,4 @@ Before a schema validator gates done, known-good, known-bad, and missing fixture
 
 #### Validation
 
-Harness `cli` scenario `honest_vs_weak.yaml`: hard qualification booleans.
+Harness `cli` `probe` loads `plans/honest_vs_weak.yaml` (human-readable probe plan); hard expects on declared observation keys.

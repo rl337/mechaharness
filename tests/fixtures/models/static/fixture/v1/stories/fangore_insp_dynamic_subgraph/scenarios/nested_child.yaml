@@ -1,9 +1,8 @@
+# Plan document: ../plans/nested_child.yaml
 kind: cli
 commands:
 - probe:
-    name: dynamic_subgraph_nest
-    parent_goal: parent
-    child_goal: child
+    path: plans/nested_child.yaml
 expect:
 - kind: equals
   key: status

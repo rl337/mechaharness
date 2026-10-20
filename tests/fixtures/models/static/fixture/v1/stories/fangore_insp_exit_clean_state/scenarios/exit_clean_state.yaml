@@ -1,12 +1,8 @@
+# Plan document: ../plans/exit_clean_state.yaml
 kind: cli
 commands:
 - probe:
-    name: exit_clean_state
-    require_handoff_record: true
-    pending_nodes: []
-    checkpoint_durable: true
-    unresolved_effects: []
-    handoff_record_ref: handoff:1
+    path: plans/exit_clean_state.yaml
 expect:
 - kind: 'true'
   key: ok

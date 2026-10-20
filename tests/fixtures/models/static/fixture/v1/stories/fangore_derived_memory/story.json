@@ -5,6 +5,6 @@
   "kind": "cli",
   "narrative": "When derived memory is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval rank must not confer authority over approval rules.",
   "implementation": "`DerivedMemoryStore` / `DerivedMemoryRecord` separate provenance, validity, and retrieval priority. Consolidation is optional and idempotent; `retrieval_candidates` must not elevate non-authoritative rumors.\n\nCovers: CTX-06, CTX-07.",
-  "validation": "Harness `cli` scenario `derived_memory.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/derived_memory.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": []
 }

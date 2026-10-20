@@ -1,14 +1,8 @@
+# Plan document: ../plans/soft_and_hard.yaml
 kind: cli
 commands:
 - probe:
-    name: graph_budget_limits
-    node_cost: 1
-    soft_policy:
-      soft_limit: 1
-      hard_limit: null
-    hard_policy:
-      soft_limit: null
-      hard_limit: 1
+    path: plans/soft_and_hard.yaml
 expect:
 - kind: equals
   key: soft_status

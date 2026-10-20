@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore\u2019s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress \u2014 never fake success \u2014 and nested repair must share parent budget. Graph repeating nodes additionally require an explicit stop contract at linkage (`fangore_graph_linkage_preflight`). See inspiration requirements for stop contracts[^insp-stop].",
   "implementation": "`ConvergenceGuard` / `ConvergenceContract`; `CliInstrumentor` verb `convergence_ceiling`.",
-  "validation": "Harness `cli` scenario `stagnation.yaml`: hard terminal/reason.",
+  "validation": "Harness `cli` `probe` loads `plans/stagnation.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-stop",

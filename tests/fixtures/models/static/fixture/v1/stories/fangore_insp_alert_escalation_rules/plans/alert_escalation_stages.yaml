@@ -1,0 +1,26 @@
+# Probe plan for scenario `alert_escalation_stages.yaml`.
+# Story: Escalate alerts by deterministic once, repeated, and persistent rules
+
+summary: Escalate alerts by deterministic once, repeated, and persistent rules
+name: alert_escalation_stages
+policy:
+  repeated_at: 2
+  persistent_at: 4
+  overrides:
+    disk_full:
+    - 1
+    - 2
+alert: queue_lag
+counts:
+- 1
+- 2
+- 3
+- 4
+- 6
+override_alert: disk_full
+override_counts:
+- 1
+- 2
+unordered_policy:
+  repeated_at: 3
+  persistent_at: 3

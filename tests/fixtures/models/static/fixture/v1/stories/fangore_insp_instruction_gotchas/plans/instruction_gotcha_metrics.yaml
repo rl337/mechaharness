@@ -1,0 +1,8 @@
+# Probe plan for scenario `instruction_gotcha_metrics.yaml`.
+# Story: Measure gotcha trigger rates before promoting them
+
+summary: Measure gotcha trigger rates before promoting them
+name: instruction_gotcha_metrics
+title: watch path
+body: do not dump full memory
+over_trigger: true

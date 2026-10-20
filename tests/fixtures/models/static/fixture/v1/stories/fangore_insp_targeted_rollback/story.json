@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "When verification fails, Fangore wants structured attribution naming the repair target so the graph rolls back to that layer instead of restarting from scratch. Accepts WalkingLabs P08 guidance[^wl-p08-rollback].",
   "implementation": "`attribute_with_repair_target` / `select_rollback_target`; `CliInstrumentor` verb `targeted_rollback_select`.",
-  "validation": "Harness `cli` scenario `select_produce.yaml`: hard rollback/repair targets.",
+  "validation": "Harness `cli` `probe` loads `plans/select_produce.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-p08-rollback",

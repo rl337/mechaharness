@@ -1,0 +1,9 @@
+# Probe plan for scenario `harness_experiment_retire.yaml`.
+# Story: Express a harness change as a testable hypothesis
+
+summary: Express a harness change as a testable hypothesis
+name: harness_experiment_retire
+hypothesis: remove cache hint
+intervention: drop_cache_hint
+treatment_success: 0.6
+control_success: 0.85

@@ -1,16 +1,8 @@
+# Plan document: ../plans/tool_gating.yaml
 kind: cli
 commands:
 - probe:
-    name: tool_gating
-    prompt: Write a.txt
-    deny_grants: []
-    allow_grants:
-    - core:fs.write
-    tool_calls:
-    - id: '1'
-      name: write_file
-      arguments:
-        path: a.txt
+    path: plans/tool_gating.yaml
 expect:
 - kind: 'true'
   key: denied_without_grant

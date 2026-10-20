@@ -1,27 +1,8 @@
+# Plan document: ../plans/tool_phase_effect_guard.yaml
 kind: cli
 commands:
 - probe:
-    name: tool_phase_effect_guard
-    contracts:
-    - name: peek
-      tool_phase: observe
-      external_effects: read
-    - name: peek_alias
-      tool_phase: observe
-      external_effects: write
-    - name: draft_email
-      tool_phase: prepare
-      external_effects: none
-    - name: draft_send
-      tool_phase: prepare
-      external_effects: external
-    - name: mystery_observer
-      tool_phase: observe
-      external_effects: unknown
-    - name: send_email
-      tool_phase: execute
-      external_effects: external
-    alias_probe: peek_alias
+    path: plans/tool_phase_effect_guard.yaml
 expect:
 - kind: equals
   key: registered

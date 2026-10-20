@@ -1,15 +1,8 @@
+# Plan document: ../plans/warehouse_correlators.yaml
 kind: cli
 commands:
 - probe:
-    name: graph_event_correlators
-    graph_id: corr-graph
-    goal: ship the report
-    recipe_id: verify_repair
-    recipe_version: '1'
-    authorization_epoch: 3
-    nodes:
-    - a
-    - b
+    path: plans/warehouse_correlators.yaml
 expect:
 - kind: equals
   key: status

@@ -1,0 +1,9 @@
+# Probe plan for scenario `harness_health.yaml`.
+# Story: Snapshot harness health for cleanup evidence
+
+summary: Snapshot harness health for cleanup evidence
+name: harness_health
+unused_extensions:
+- acme:old
+dead_soft_points: []
+unexercised_routes: []

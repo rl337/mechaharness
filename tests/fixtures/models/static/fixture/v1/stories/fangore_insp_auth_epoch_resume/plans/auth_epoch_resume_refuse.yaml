@@ -1,0 +1,8 @@
+# Probe plan for scenario `auth_epoch_resume_refuse.yaml`.
+# Story: Refuse resumed effects when the authorization epoch advanced
+
+summary: Refuse resumed effects when the authorization epoch advanced
+name: auth_epoch_resume_refuse
+goal: epoch
+first_epoch: 2
+resume_epoch: 3

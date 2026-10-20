@@ -1,0 +1,13 @@
+# Probe plan for scenario `context_layers_project.yaml`.
+# Story: Project node-private context from shared graph state
+
+summary: Project node-private context from shared graph state
+name: context_layers_project
+shared:
+  goal: ship
+  notes:
+  - a
+needs:
+- goal
+exports:
+  result: ok

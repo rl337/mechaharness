@@ -1,11 +1,8 @@
+# Plan document: ../plans/failure_attribution_trace.yaml
 kind: cli
 commands:
 - probe:
-    name: failure_attribution_trace
-    errors:
-    - no_runner:x
-    - no_runner:y
-    - permission_denied
+    path: plans/failure_attribution_trace.yaml
 expect:
 - kind: includes
   key: categories

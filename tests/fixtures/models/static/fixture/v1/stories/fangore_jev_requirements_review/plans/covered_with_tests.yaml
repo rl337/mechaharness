@@ -1,0 +1,30 @@
+# Probe plan for scenario `covered_with_tests.yaml`.
+# Story: Escalate requirement gaps without treating a judge approve as correctness
+
+summary: Escalate requirement gaps without treating a judge approve as correctness
+name: requirements_gap_case
+reviewer_count: 2
+acceptance:
+- stories_covered
+- crash_tests_present
+questions:
+- id: coverage
+  kind: choice
+  options:
+  - id: covered
+    label: Covered
+  - id: gap
+    label: Gap
+  - id: unclear
+    label: Unclear
+  allowed_actions:
+  - covered
+  - gap
+  - unclear
+action_question_id: coverage
+answers:
+  coverage: covered
+confidence: 0.9
+confidence_floor: 0.7
+facts:
+  crash_tests_present: true

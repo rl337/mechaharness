@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Cleanup and recovery operations declare idempotency and optional compensation so retries do not double side effects. Accepts WalkingLabs L12 guidance[^wl-l12-idem].",
   "implementation": "`OperationContract.idempotent` and `compensation_strategy` in `mechaharness.operation_registry`.",
-  "validation": "Harness `cli` scenario `operation_compensation.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/operation_compensation.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l12-idem",

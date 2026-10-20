@@ -1,32 +1,8 @@
+# Plan document: ../plans/approve_but_missing_crash_tests.yaml
 kind: cli
 commands:
 - probe:
-    name: requirements_gap_case
-    reviewer_count: 2
-    acceptance:
-    - stories_covered
-    - crash_tests_present
-    questions:
-    - id: coverage
-      kind: choice
-      options:
-      - id: covered
-        label: Covered
-      - id: gap
-        label: Gap
-      - id: unclear
-        label: Unclear
-      allowed_actions:
-      - covered
-      - gap
-      - unclear
-    action_question_id: coverage
-    answers:
-      coverage: covered
-    confidence: 0.95
-    confidence_floor: 0.7
-    facts:
-      crash_tests_present: false
+    path: plans/approve_but_missing_crash_tests.yaml
 expect:
 - kind: equals
   key: outcome

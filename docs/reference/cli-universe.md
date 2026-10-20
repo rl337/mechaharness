@@ -28,6 +28,9 @@ Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`,
 durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`).
 Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
 (`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
+Probe stories load a human-readable plan under ``plans/``
+(``probe: {path: plans/….yaml}`` with ``name`` + params + optional ``summary``);
+inline ``probe: {name: …}`` remains valid for tiny cases.
 
 **Recipe parameterization** uses a human-readable
 :class:`~mechaharness.recipe_bind.RecipeBind` document (story ``binds/`` or

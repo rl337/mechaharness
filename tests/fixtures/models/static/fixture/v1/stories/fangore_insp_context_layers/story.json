@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore keeps durable graph state large and shared while each node receives only the private projection it needs; only explicit exports re-enter shared state. Accepts WalkingLabs L14 and L04 guidance[^wl-l14-layers][^wl-l04-layers].",
   "implementation": "`GraphSharedState`, `NodePrivateContext`, and `project_node_context` in `mechaharness.context_layers` formalize shared vs private layers and export-only write-back.",
-  "validation": "Harness `cli` scenario `context_layers_project.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/context_layers_project.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l14-layers",

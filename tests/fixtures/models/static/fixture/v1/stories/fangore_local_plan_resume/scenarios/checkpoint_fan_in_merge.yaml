@@ -1,20 +1,8 @@
+# Plan document: ../plans/checkpoint_fan_in_merge.yaml
 kind: cli
 commands:
 - probe:
-    name: local_plan_resume
-    goal: ship patch
-    state_revision: r1
-    evidence_refs:
-    - obs:1
-    satisfied: []
-    fan_in_budget: 4
-    branches:
-    - path: app.py
-      content: a
-      status: ok
-    - path: app.py
-      content: b
-      status: ok
+    path: plans/checkpoint_fan_in_merge.yaml
 expect:
 - kind: equals
   key: stale_preconditions_exactly

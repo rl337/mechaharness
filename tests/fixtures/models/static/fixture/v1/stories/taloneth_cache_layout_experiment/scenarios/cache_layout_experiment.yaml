@@ -1,7 +1,8 @@
+# Plan document: ../plans/cache_layout_experiment.yaml
 kind: cli
 commands:
 - probe:
-    name: cache_layout_experiment
+    path: plans/cache_layout_experiment.yaml
 expect:
 - kind: 'true'
   key: enabled_has_stable_prefix

@@ -1,0 +1,15 @@
+# Probe plan for scenario `grant_gate_write.yaml`.
+# Story: Compose read-only and write permission packs
+
+summary: Compose read-only and write permission packs
+name: grant_gate_write
+prompt: Write a.txt
+read_grants:
+- core:fs.read
+write_grants:
+- core:fs.write
+tool_calls:
+- id: '1'
+  name: write_file
+  arguments:
+    path: a.txt

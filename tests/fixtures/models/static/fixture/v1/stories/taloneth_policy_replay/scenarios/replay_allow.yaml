@@ -1,7 +1,8 @@
+# Plan document: ../plans/replay_allow.yaml
 kind: cli
 commands:
 - probe:
-    name: policy_replay
+    path: plans/replay_allow.yaml
 expect:
 - kind: equals
   key: verdict_kind

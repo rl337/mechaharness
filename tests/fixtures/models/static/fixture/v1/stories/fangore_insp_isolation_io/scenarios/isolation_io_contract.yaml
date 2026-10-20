@@ -1,13 +1,8 @@
+# Plan document: ../plans/isolation_io_contract.yaml
 kind: cli
 commands:
 - probe:
-    name: isolation_io_contract
-    effect_scope: workspace:branch
-    budget_share: 0.25
-    inputs:
-      goal: string
-    outputs:
-      summary: string
+    path: plans/isolation_io_contract.yaml
 expect:
 - kind: equals
   key: issues

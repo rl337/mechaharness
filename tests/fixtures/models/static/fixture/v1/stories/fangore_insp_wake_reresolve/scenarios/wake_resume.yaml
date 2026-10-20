@@ -1,8 +1,8 @@
+# Plan document: ../plans/wake_resume.yaml
 kind: cli
 commands:
 - probe:
-    name: wake_reresolve_resume
-    goal: wake
+    path: plans/wake_resume.yaml
 expect:
 - kind: 'true'
   key: resolve_ok

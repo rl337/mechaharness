@@ -1,0 +1,9 @@
+# Probe plan for scenario `operation_compensation.yaml`.
+# Story: Declare operation idempotency and compensation
+
+summary: Declare operation idempotency and compensation
+name: operation_compensation
+params:
+  name: cleanup
+  idempotent: true
+  compensation_strategy: noop_if_clean

@@ -1,0 +1,13 @@
+# Probe plan for scenario `config_access_policy.yaml`.
+# Story: Let the host app supply its own permission policy
+
+summary: Let the host app supply its own permission policy
+name: config_access_policy
+layers:
+- - core:fs.read
+- - core:fs.write
+must_allow:
+- core:fs.read
+- core:fs.write
+must_deny:
+- core:media.image

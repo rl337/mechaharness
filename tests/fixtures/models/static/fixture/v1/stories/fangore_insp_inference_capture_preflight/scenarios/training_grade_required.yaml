@@ -1,8 +1,8 @@
+# Plan document: ../plans/training_grade_required.yaml
 kind: cli
 commands:
 - probe:
-    name: check_inference_capture
-    required_inference_capture: training_grade
+    path: plans/training_grade_required.yaml
 expect:
 - kind: 'false'
   key: linkage_ok

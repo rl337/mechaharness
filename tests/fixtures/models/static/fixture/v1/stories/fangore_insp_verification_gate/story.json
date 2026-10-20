@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Producing an answer is not the same as finishing the task when verification is required. Accepts inspiration requirement 5[^insp-r05].",
   "implementation": "`OutcomeContract` in `mechaharness.outcome_contract` distinguishes `answer_generated`, `verified`, `complete`, and `failed`. `DefaultVerificationPolicy` selects the strongest sufficient oracle and gates completion through the outcome contract when `require_verification` is set.",
-  "validation": "Harness `cli` scenario `verification_outcome.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/verification_outcome.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r05",

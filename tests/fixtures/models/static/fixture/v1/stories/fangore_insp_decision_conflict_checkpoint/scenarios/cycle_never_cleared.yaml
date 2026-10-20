@@ -1,18 +1,8 @@
+# Plan document: ../plans/cycle_never_cleared.yaml
 kind: cli
 commands:
 - probe:
-    name: decision_conflict_neighbor_revisit
-    id: cycle_never_cleared
-    start: a
-    write_scopes:
-      a:
-      - repo:x
-      b:
-      - repo:x
-      - repo:y
-      c:
-      - repo:y
-    clears: []
+    path: plans/cycle_never_cleared.yaml
 expect:
 - kind: equals
   key: order

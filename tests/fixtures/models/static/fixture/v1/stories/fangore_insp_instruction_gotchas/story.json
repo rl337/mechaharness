@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8[^insp-r08].",
   "implementation": "`InstructionCatalog` / `InstructionComponent` track trigger, use, over/under rates; `promote` moves proposed gotchas to active after evaluation.",
-  "validation": "Harness `cli` scenario `instruction_gotcha_metrics.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `probe` loads `plans/instruction_gotcha_metrics.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r08",

@@ -1,0 +1,13 @@
+# Probe plan for scenario `authorized_local_pipe.yaml`.
+# Story: Run a local plan through an authorized graph executor
+
+summary: Run a local plan through an authorized graph executor
+name: graph_executor_run
+goal: local pipe
+produce_value: 1
+max_attempts: 2
+fail_until_attempt: 99
+check_deny: true
+grants:
+- core:graph.execute
+- core:graph.escalate

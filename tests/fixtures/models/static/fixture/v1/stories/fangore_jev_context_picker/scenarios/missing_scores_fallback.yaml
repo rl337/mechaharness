@@ -1,27 +1,8 @@
+# Plan document: ../plans/missing_scores_fallback.yaml
 kind: cli
 commands:
 - probe:
-    name: context_budget_case
-    token_budget: 120
-    min_relevance: 0.5
-    min_trust: 0.5
-    min_freshness: 0.3
-    candidates:
-    - id: ok
-      tokens: 40
-      relevance: 0.8
-      trust: 0.8
-      freshness: 0.8
-    - id: broken
-      tokens: 40
-      relevance: n/a
-      trust: 0.9
-      freshness: 0.9
-    - id: ok2
-      tokens: 40
-      relevance: 0.75
-      trust: 0.7
-      freshness: 0.6
+    path: plans/missing_scores_fallback.yaml
 expect:
 - kind: exactly
   key: selected_ids

@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Nubble loads graph events into a warehouse and cannot afford to open checkpoints to learn which graph, recipe, or authorization epoch produced a row. A multi-node run with a nested subgraph must stamp every event with the same graph id, recipe stamp, and epoch, and nested runs must point at their parent run so a flat table can rebuild per-node attempts[^obs-analytics].",
   "implementation": "Graph lifecycle emits carry warehouse correlators (`graph_id`, `recipe_id`, `authorization_epoch`, nest `parent_run_id` / `nest_depth`). `project_node_attempt_rows` projects attempt rows. `CliInstrumentor` verb `graph_event_correlators`.",
-  "validation": "Harness `cli` scenario `warehouse_correlators.yaml`: hard correlator and node-attempt rows.",
+  "validation": "Harness `cli` `probe` loads `plans/warehouse_correlators.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "obs-analytics",

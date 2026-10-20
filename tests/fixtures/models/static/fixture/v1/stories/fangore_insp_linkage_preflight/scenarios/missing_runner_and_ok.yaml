@@ -1,10 +1,8 @@
+# Plan document: ../plans/missing_runner_and_ok.yaml
 kind: cli
 commands:
 - probe:
-    name: graph_linkage_preflight
-    check_missing_runner: true
-    check_missing_stop: false
-    check_ok_linear: true
+    path: plans/missing_runner_and_ok.yaml
 expect:
 - kind: 'false'
   key: missing_runner_ok

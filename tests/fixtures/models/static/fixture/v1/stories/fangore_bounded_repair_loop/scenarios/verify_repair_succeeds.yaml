@@ -1,9 +1,8 @@
+# Plan document: ../plans/verify_repair_succeeds.yaml
 kind: cli
 commands:
 - probe:
-    name: bounded_repair_loop
-    max_attempts: 3
-    repaired_path: /tmp/story.png
+    path: plans/verify_repair_succeeds.yaml
 expect:
 - kind: equals
   key: final_status

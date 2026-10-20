@@ -1,0 +1,13 @@
+# Probe plan for scenario `lifecycle_extension_rewrite.yaml`.
+# Story: Change tool arguments without changing the workflow
+
+summary: Change tool arguments without changing the workflow
+name: lifecycle_extension_rewrite
+prompt: Write a.txt
+grants:
+- core:fs.write
+tool_calls:
+- id: '1'
+  name: write_file
+  arguments:
+    path: a.txt

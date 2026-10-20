@@ -1,11 +1,8 @@
+# Plan document: ../plans/operation_compensation.yaml
 kind: cli
 commands:
 - probe:
-    name: operation_compensation
-    params:
-      name: cleanup
-      idempotent: true
-      compensation_strategy: noop_if_clean
+    path: plans/operation_compensation.yaml
 expect:
 - kind: 'true'
   key: idempotent

@@ -1,12 +1,8 @@
+# Plan document: ../plans/dispatch_durable_ok.yaml
 kind: cli
 commands:
 - probe:
-    name: host_kit_submit_once
-    id: dispatch_durable_ok
-    mode: dispatch
-    durable: true
-    run_id: hk-dispatch-ok
-    task_id: t1
+    path: plans/dispatch_durable_ok.yaml
 expect:
 - kind: equals
   key: status

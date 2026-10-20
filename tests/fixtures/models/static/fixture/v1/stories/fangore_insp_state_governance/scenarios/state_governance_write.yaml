@@ -1,12 +1,8 @@
+# Plan document: ../plans/state_governance_write.yaml
 kind: cli
 commands:
 - probe:
-    name: state_governance_write
-    owner: ops
-    writers:
-    - ops
-    mutable: false
-    actor: agent
+    path: plans/state_governance_write.yaml
 expect:
 - kind: 'false'
   key: allowed

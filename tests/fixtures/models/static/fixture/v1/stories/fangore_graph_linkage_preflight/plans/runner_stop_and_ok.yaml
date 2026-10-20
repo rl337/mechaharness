@@ -1,0 +1,8 @@
+# Probe plan for scenario `runner_stop_and_ok.yaml`.
+# Story: Fail closed on missing graph linkage before work starts
+
+summary: Fail closed on missing graph linkage before work starts
+name: graph_linkage_preflight
+check_missing_runner: true
+check_missing_stop: true
+check_ok_linear: true

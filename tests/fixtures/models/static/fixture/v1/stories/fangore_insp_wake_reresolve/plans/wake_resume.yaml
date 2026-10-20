@@ -1,0 +1,6 @@
+# Probe plan for scenario `wake_resume.yaml`.
+# Story: Re-resolve linkage when resuming a woken run
+
+summary: Re-resolve linkage when resuming a woken run
+name: wake_reresolve_resume
+goal: wake

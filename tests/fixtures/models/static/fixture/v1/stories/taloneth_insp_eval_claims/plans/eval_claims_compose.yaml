@@ -1,0 +1,15 @@
+# Probe plan for scenario `eval_claims_compose.yaml`.
+# Story: Compose typed evaluation claims without opaque scores
+
+summary: Compose typed evaluation claims without opaque scores
+name: eval_claims_compose
+claims:
+- id: a
+  statement: a
+  status: pass
+- id: b
+  statement: b
+  status: fail
+- id: c
+  statement: c
+  status: unknown

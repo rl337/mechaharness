@@ -1,7 +1,8 @@
+# Plan document: ../plans/human_review_pending.yaml
 kind: cli
 commands:
 - probe:
-    name: human_review_pending
+    path: plans/human_review_pending.yaml
 expect:
 - kind: equals
   key: verdict_kinds

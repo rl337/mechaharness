@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore needs success, rollback, and end paths declared as transitions \u2014 not inferred from dependency edges alone \u2014 so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-transitions][^wl-p08-transitions].",
   "implementation": "`TransitionContract` / `inspect_transitions`; `CliInstrumentor` verb `graph_transition_inspect`.",
-  "validation": "Harness `cli` scenario `verify_rollback_end.yaml`: hard issues and verify kinds.",
+  "validation": "Harness `cli` `probe` loads `plans/verify_rollback_end.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l14-transitions",

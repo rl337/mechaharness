@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget \u2014 see `fangore_insp_budget_subgraph_rollup`. Hosts use the same nest path when tiling Agentic Recipes into a parent graph. Accepts inspiration requirement 3[^insp-r03].",
   "implementation": "`SubgraphNodeRunner.embed` + `GraphExecutor`. `CliInstrumentor` verb `dynamic_subgraph_nest`.",
-  "validation": "Harness `cli` scenario `nested_child.yaml`.",
+  "validation": "Harness `cli` `probe` loads `plans/nested_child.yaml` (human-readable probe plan); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r03",

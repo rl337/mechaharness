@@ -1,0 +1,13 @@
+# Probe plan for scenario `environment_delta.yaml`.
+# Story: Project environment context as versioned deltas
+
+summary: Project environment context as versioned deltas
+name: environment_delta
+before:
+  version: 1
+  data:
+    cwd: /app
+after:
+  version: 2
+  data:
+    cwd: /tmp

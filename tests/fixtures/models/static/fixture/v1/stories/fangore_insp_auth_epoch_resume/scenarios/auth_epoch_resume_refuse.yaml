@@ -1,10 +1,8 @@
+# Plan document: ../plans/auth_epoch_resume_refuse.yaml
 kind: cli
 commands:
 - probe:
-    name: auth_epoch_resume_refuse
-    goal: epoch
-    first_epoch: 2
-    resume_epoch: 3
+    path: plans/auth_epoch_resume_refuse.yaml
 expect:
 - kind: equals
   key: first_status

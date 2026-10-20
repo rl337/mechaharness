@@ -1,0 +1,5 @@
+# Probe plan for scenario `cache_layout_experiment.yaml`.
+# Story: Measure cache-aware prompt layout as an explicit experiment
+
+summary: Measure cache-aware prompt layout as an explicit experiment
+name: cache_layout_experiment

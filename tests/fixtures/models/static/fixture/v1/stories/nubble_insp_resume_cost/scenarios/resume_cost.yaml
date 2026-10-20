@@ -1,13 +1,8 @@
+# Plan document: ../plans/resume_cost.yaml
 kind: cli
 commands:
 - probe:
-    name: resume_cost
-    wake_to_first_productive_ms: 1000
-    rebuild_tokens: 400
-    rebuild_tool_calls: 2
-    provider_loads: 1
-    revalidation_work: 1
-    replayed_events: 5
+    path: plans/resume_cost.yaml
 expect:
 - kind: equals
   key: rebuild_tokens
