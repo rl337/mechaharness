@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any, cast
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -62,6 +63,7 @@ from mechaharness.host_kit import host_graph_executor, tapping_event_log
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
 from mechaharness.node_component import traversal_from_events
+from mechaharness.recipe_bind import InstantiateRecipeCommand
 from mechaharness.tools.base import Tool, ToolRegistry
 
 
@@ -276,6 +278,7 @@ class CliInstrumentor:
         )
         self._durable: DurableInstrumentor | None = None
         self._durable_script: DurableScript | None = None
+        self._bind_base_dir: Path | None = None
 
     @property
     def completer(self) -> Completer:
@@ -308,6 +311,14 @@ class CliInstrumentor:
     @property
     def tapped_event_types(self) -> list[str]:
         return list(self._tapped_types)
+
+    @property
+    def bind_base_dir(self) -> Path | None:
+        return self._bind_base_dir
+
+    @bind_base_dir.setter
+    def bind_base_dir(self, value: Path | None) -> None:
+        self._bind_base_dir = value
 
     def configure_durable_session(
         self,
@@ -520,6 +531,24 @@ class CliInstrumentor:
                 f"run_recipe has no adapter for {body.name!r}; known: {known}"
             )
         return cast(CliStepResult, await adapter.run(body, self))
+
+    async def instantiate_recipe(self, body: InstantiateRecipeCommand) -> CliStepResult:
+        """:class:`~mechaharness.recipe_bind.RecipeBind` → concrete graph."""
+        from mechaharness.recipe_bind import observe_instantiated_recipe
+        from mechaharness.recipe_runner import instantiate_recipe as expand_recipe
+
+        bind = body.resolve_bind(base_dir=self._bind_base_dir)
+        template, materialized = bind.resolve_template()
+        graph = expand_recipe(materialized.name, materialized.to_params())
+        observed = observe_instantiated_recipe(materialized, graph, template)
+        return CliStepResult(
+            verb="instantiate_recipe",
+            status="ok",
+            clock_iso=self._datetime.now_utc_iso(),
+            recipe_in_catalog=bool(observed["recipe_in_catalog"]),
+            subgraph_node_ids=list(observed["subgraph_node_ids"]),
+            fields=dict(observed["fields"]),
+        )
 
     def _set_clock(self, at: str) -> None:
         dts = self._datetime

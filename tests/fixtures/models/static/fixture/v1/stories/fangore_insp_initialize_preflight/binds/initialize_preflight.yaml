@@ -1,0 +1,12 @@
+# Initialize-preflight Agentic Recipe: linkage → capability → checkpoint → ready.
+# Substantive work starts only after these checks expand into a concrete plan.
+
+name: initialize_preflight
+summary: Expand initialize_preflight before substantive graph work.
+goal: preflight
+
+soft_bindings:
+  linkage_kind: preflight_linkage
+  capability_kind: preflight_capability
+  checkpoint_kind: preflight_checkpoint
+  ready_kind: preflight_ready

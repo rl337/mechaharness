@@ -1,0 +1,13 @@
+# Verify-repair Agentic Recipe: produce → verify → bounded repair → complete.
+# Soft points not listed here keep the catalog defaults.
+
+name: verify_repair
+summary: Tile verify-repair into a concrete plan with default runner kinds.
+goal: ship artifact with verify gate
+
+soft_bindings:
+  # Which node implementation runs each step
+  produce_kind: produce
+  verify_kind: verify
+  repair_kind: repair
+  complete_kind: complete

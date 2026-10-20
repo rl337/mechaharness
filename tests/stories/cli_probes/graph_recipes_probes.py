@@ -26,14 +26,9 @@ from mechaharness.graph_executor import (
     NodeOutcome,
 )
 from mechaharness.graph_templates import (
-    BoundedRetryTemplate,
     ConversationalToolLoopTemplate,
-    EnvironmentRepairTemplate,
     FanOutAggregateTemplate,
     GraphTemplateParams,
-    IndependentReviewTemplate,
-    InitializePreflightTemplate,
-    VerifyRepairTemplate,
     default_graph_templates,
 )
 from mechaharness.harness.base import AbstractHarness
@@ -80,29 +75,6 @@ async def run_graph_template_soft_points(inputs: dict[str, Any]) -> dict[str, An
         "source_workflow_ref": graph.source_workflow_ref,
         "catalog_soft_points_nonempty": soft_nonempty,
         "demoted_refused": refused,
-    }
-    return actual
-
-
-async def run_independent_review_template(inputs: dict[str, Any]) -> dict[str, Any]:
-    request = inputs
-    graph = IndependentReviewTemplate().instantiate(
-        GraphTemplateParams(
-            goal="review",
-            inputs={"reviewer_count": int(request.get("reviewer_count", 1))},
-            acceptance=list(request.get("acceptance") or []),
-        )
-    )
-    reviews = [n for n in graph.nodes if n.startswith("review_")]
-    actual = {
-        "review_count": len(reviews),
-        "omit_producer_reasoning": graph.nodes[reviews[0]].payload.get(
-            "omit_producer_reasoning"
-        ),
-        "retain_disagreement": graph.nodes["aggregate_reviews"].payload.get(
-            "retain_disagreement"
-        ),
-        "template_name": graph.template_name,
     }
     return actual
 
@@ -178,41 +150,6 @@ async def run_recipe_as_tool(inputs: dict[str, Any]) -> dict[str, Any]:
     return actual
 
 
-async def run_initialize_preflight_template(inputs: dict[str, Any]) -> dict[str, Any]:
-    request = inputs
-    graph = InitializePreflightTemplate().instantiate(
-        GraphTemplateParams(goal=str(request.get("goal") or "preflight"))
-    )
-    actual = {"nodes_include": sorted(graph.nodes)}
-    return actual
-
-
-async def run_environment_repair_recipe(inputs: dict[str, Any]) -> dict[str, Any]:
-    request = inputs
-    template = EnvironmentRepairTemplate()
-    graph = template.instantiate(
-        GraphTemplateParams(goal=str(request.get("goal") or "environment_repair"))
-    )
-    actual = {
-        "template_name": graph.template_name,
-        "nodes_include": list(graph.nodes),
-        "recipe_category": template.category,
-    }
-    return actual
-
-
-async def run_verify_repair_recipe(inputs: dict[str, Any]) -> dict[str, Any]:
-    request = inputs
-    graph = VerifyRepairTemplate().instantiate(
-        GraphTemplateParams(goal=str(request.get("goal") or "verify_repair"))
-    )
-    actual = {
-        "template_name": graph.template_name,
-        "nodes_include": list(graph.nodes),
-    }
-    return actual
-
-
 async def run_recipe_namespace_tile(inputs: dict[str, Any]) -> dict[str, Any]:
     request = inputs
     registry = default_graph_templates()
@@ -246,28 +183,6 @@ async def run_recipe_namespace_tile(inputs: dict[str, Any]) -> dict[str, Any]:
         == len(children),
         "parent_embed_kinds": [e.kind for e in embeds],
         "namespaced_prefix_left": prefix_left,
-    }
-    return actual
-
-
-async def run_bounded_retry_recipe(inputs: dict[str, Any]) -> dict[str, Any]:
-    request = inputs
-    graph = BoundedRetryTemplate().instantiate(
-        GraphTemplateParams(
-            goal=str(request.get("goal") or "bounded_retry"),
-            inputs={"max_attempts": int(request.get("max_attempts") or 3)},
-        )
-    )
-    attempt = graph.nodes["attempt"]
-    stop = attempt.stop_contract or {}
-    actual = {
-        "template_name": graph.template_name,
-        "nodes_include": list(graph.nodes),
-        "attempt_repeating": attempt.repeating,
-        "max_iterations": stop.get("max_iterations"),
-        "requires_effect_reconciliation": attempt.payload.get(
-            "requires_effect_reconciliation"
-        ),
     }
     return actual
 
@@ -357,35 +272,6 @@ async def run_registry_only_compose(inputs: dict[str, Any]) -> dict[str, Any]:
     return {"violations": results}
 
 
-async def run_produce_critique_refine_recipe(inputs: dict[str, Any]) -> dict[str, Any]:
-    """`produce_critique_refine` expands with isolated critique and node components (MH-PA-03)."""
-    from mechaharness.node_component import node_components_for
-    request = inputs
-    template = default_graph_templates().get("produce_critique_refine")
-    assert template is not None
-    graph = template.instantiate(
-        GraphTemplateParams(
-            goal=str(request["goal"]),
-            acceptance=list(request["acceptance"]),
-            soft_bindings=dict(request["soft_bindings"]),
-        )
-    )
-    comps = node_components_for(graph, template=template)
-    parents: dict[str, list[str]] = {}
-    for comp in comps:
-        parents.setdefault(comp.parent_node_id, []).append(comp.soft_point_name or comp.kind)
-    actual = {
-        "template_name": graph.template_name,
-        "nodes_include": list(graph.nodes),
-        "critic_isolated": graph.nodes["critique"].payload["isolated_context"]
-        and graph.nodes["critique"].payload["omit_producer_reasoning"],
-        "refine_max_iterations": graph.nodes["refine"].stop_contract["max_iterations"],
-        "component_parents": {k: sorted(v) for k, v in sorted(parents.items())},
-        "evolvable": template.evolvable_soft_point_names(),
-    }
-    return actual
-
-
 async def run_recipe_final_test_gate(inputs: dict[str, Any]) -> dict[str, Any]:
     """Promotion needs a passing held-out final-test result (MH-SR-07)."""
     from mechaharness.evaluator import FinalTestGateError
@@ -470,41 +356,6 @@ async def run_recipe_evolution_candidates(inputs: dict[str, Any]) -> dict[str, A
         "graphs_synthesized": any("graph" in c.model_dump() for c in proposal.candidates),
         "selected_bindings": picked.soft_bindings if picked else None,
         "selected_over_baseline": beaten.soft_bindings if beaten else None,
-    }
-    return actual
-
-
-async def run_safety_eval_recipe(inputs: dict[str, Any]) -> dict[str, Any]:
-    """`safety_eval` runs a scenario, reviews it in isolation, then scores it (MH-DOTS-08)."""
-    from mechaharness.node_component import node_components_for
-    request = inputs
-    registry = default_graph_templates()
-    template = registry.get("safety_eval")
-    assert template is not None
-    graph = template.instantiate(
-        GraphTemplateParams(
-            goal=str(request["goal"]),
-            inputs=dict(request["inputs"]),
-            acceptance=list(request["acceptance"]),
-        )
-    )
-    comps = node_components_for(graph, template=template)
-    parents: dict[str, list[str]] = {}
-    for comp in comps:
-        parents.setdefault(comp.parent_node_id, []).append(comp.soft_point_name or comp.kind)
-    score = graph.nodes["score"].payload
-    actual = {
-        "template_name": graph.template_name,
-        "nodes_include": list(graph.nodes),
-        "reviewer_isolated": graph.nodes["review"].payload["isolated_context"]
-        and graph.nodes["review"].payload["omit_producer_reasoning"],
-        "score_deterministic": score["deterministic"],
-        "report_fields": score["report_fields"],
-        "reported_versions": [score["model_version"], score["recipe_version"]],
-        "scenario_classes": graph.nodes["produce"].payload["scenario_classes"],
-        "evolvable": template.evolvable_soft_point_names(),
-        "component_parents": {k: sorted(v) for k, v in sorted(parents.items())},
-        "in_default_catalog": "safety_eval" in registry.names(),
     }
     return actual
 
@@ -646,22 +497,15 @@ async def run_evolution_ownership_split(inputs: dict[str, Any]) -> dict[str, Any
 
 GRAPH_RECIPES_HANDLERS: dict[str, Any] = {
     "graph_template_soft_points": run_graph_template_soft_points,
-    "independent_review_template": run_independent_review_template,
     "node_components": run_node_components,
     "traversal_contract": run_traversal_contract,
     "recipe_as_tool": run_recipe_as_tool,
-    "initialize_preflight_template": run_initialize_preflight_template,
-    "environment_repair_recipe": run_environment_repair_recipe,
-    "verify_repair_recipe": run_verify_repair_recipe,
     "recipe_namespace_tile": run_recipe_namespace_tile,
-    "bounded_retry_recipe": run_bounded_retry_recipe,
     "recipe_registry_versions": run_recipe_registry_versions,
     "soft_point_evolution_allowlist": run_soft_point_evolution_allowlist,
     "registry_only_compose": run_registry_only_compose,
-    "produce_critique_refine_recipe": run_produce_critique_refine_recipe,
     "recipe_final_test_gate": run_recipe_final_test_gate,
     "recipe_evolution_candidates": run_recipe_evolution_candidates,
-    "safety_eval_recipe": run_safety_eval_recipe,
     "recipe_port_search": run_recipe_port_search,
     "evolution_ownership_split": run_evolution_ownership_split,
 }

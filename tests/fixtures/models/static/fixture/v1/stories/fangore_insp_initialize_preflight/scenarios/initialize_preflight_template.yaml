@@ -1,11 +1,16 @@
+# Bind document: ../binds/initialize_preflight.yaml
 kind: cli
 commands:
-- probe:
-    name: initialize_preflight_template
-    goal: preflight
+- instantiate_recipe:
+    path: binds/initialize_preflight.yaml
 expect:
+- kind: 'true'
+  key: recipe_in_catalog
+- kind: equals
+  key: status
+  value: ok
 - kind: includes
-  key: nodes_include
+  key: subgraph_node_ids
   value:
   - linkage
   - capability_check

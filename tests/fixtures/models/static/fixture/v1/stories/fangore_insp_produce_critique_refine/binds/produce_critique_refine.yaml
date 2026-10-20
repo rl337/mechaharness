@@ -1,0 +1,23 @@
+# Produce-critique-refine Agentic Recipe:
+# produce → isolated critique → bounded refine → complete.
+
+name: produce_critique_refine
+summary: Isolated critic, three refine rounds, evolvable critique_prompt/max_rounds.
+goal: draft release notes
+
+acceptance:
+- no_unverified_claims
+
+soft_bindings:
+  produce_kind: produce
+  critique_kind: critique
+  refine_kind: refine
+  complete_kind: complete
+  # Critic voice (evolvable)
+  critique_prompt: List concrete defects against the acceptance criteria.
+  # Story claim: three refine rounds (catalog default is 2)
+  max_rounds: 3
+  # Critic must not see producer reasoning
+  omit_producer_reasoning: true
+  acceptance:
+  - no_unverified_claims

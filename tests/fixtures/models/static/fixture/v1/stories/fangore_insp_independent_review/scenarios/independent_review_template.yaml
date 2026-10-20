@@ -1,11 +1,14 @@
+# Bind document: ../binds/independent_review.yaml
 kind: cli
 commands:
-- probe:
-    name: independent_review_template
-    reviewer_count: 2
-    acceptance:
-    - lgtm
+- instantiate_recipe:
+    path: binds/independent_review.yaml
 expect:
+- kind: 'true'
+  key: recipe_in_catalog
+- kind: equals
+  key: status
+  value: ok
 - kind: equals
   key: review_count
   value: 2

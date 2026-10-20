@@ -45,6 +45,8 @@ class CliHarness:
         scenario = load_cli_scenario(path)
         config = self._build_config(case, backend, scenario)
         instrumentor = get_injector(config).inject(CliInstrumentor)
+        # Recipe bind files live under the story root (sibling of scenarios/).
+        instrumentor.bind_base_dir = path.parent.parent
         assertions = resolve_cli_assertions(config)
         result = await run_cli_scenario(scenario, instrumentor)
         scenario.assert_expect(result, assertions, label=case.label)

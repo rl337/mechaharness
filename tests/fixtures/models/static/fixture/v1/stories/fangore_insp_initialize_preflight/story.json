@@ -5,7 +5,7 @@
   "kind": "cli",
   "narrative": "Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance[^wl-l06-init].",
   "implementation": "Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight`) builds linkage \u2192 capability \u2192 checkpoint \u2192 ready as an ordinary `ExecutionGraph`.",
-  "validation": "Harness `cli` scenario `initialize_preflight_template.yaml`. Hard expects on declared observation keys.",
+  "validation": "Harness `cli` `instantiate_recipe` scenario loads `binds/*.yaml` (human-readable RecipeBind); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l06-init",
