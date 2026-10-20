@@ -15,3 +15,6 @@ expect:
   value: acme:graph_watch
 - kind: 'true'
   key: default_ran
+- kind: lte
+  key: cost_units
+  value: 1

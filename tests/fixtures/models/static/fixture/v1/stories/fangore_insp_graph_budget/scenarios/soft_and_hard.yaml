@@ -22,3 +22,6 @@ expect:
 - kind: equals
   key: hard_budget_level
   value: hard
+- kind: lte
+  key: cost_units
+  value: 2

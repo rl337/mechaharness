@@ -27,3 +27,6 @@ expect:
   - round_0/inference
   - round_0/tool_call:lookup:0
   - round_1/inference
+- kind: lte
+  key: cost_units
+  value: 2

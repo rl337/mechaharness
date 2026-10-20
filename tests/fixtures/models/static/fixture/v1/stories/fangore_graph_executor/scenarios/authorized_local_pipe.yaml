@@ -19,3 +19,6 @@ expect:
 - kind: equals
   key: flaky_attempts
   value: 2
+- kind: lte
+  key: cost_units
+  value: 4

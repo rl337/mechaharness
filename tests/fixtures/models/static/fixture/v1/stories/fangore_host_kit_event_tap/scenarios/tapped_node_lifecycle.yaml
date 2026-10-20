@@ -29,3 +29,6 @@ expect:
 - kind: lte
   key: total_tokens
   value: 32
+- kind: lte
+  key: cost_units
+  value: 1

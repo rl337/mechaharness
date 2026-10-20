@@ -29,3 +29,6 @@ expect:
 - kind: equals
   key: boundary_before
   value: post_effect_pre_record
+- kind: lte
+  key: cost_units
+  value: 1

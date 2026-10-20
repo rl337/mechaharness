@@ -15,6 +15,9 @@ expect:
   - core:graph_end
 - kind: positive
   key: cost_units
+- kind: lte
+  key: cost_units
+  value: 1
 - kind: equals
   key: prompt_tokens
   value: 8

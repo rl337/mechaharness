@@ -151,7 +151,7 @@ class CliStepResult(BaseModel):
             "subgraph_node_ids": list(self.subgraph_node_ids),
         }
         data.update(self.fields)
-        return data
+        return _merge_cost_observation(data)
 
 
 class CliRunResult(BaseModel):
@@ -200,7 +200,7 @@ class CliRunResult(BaseModel):
             "subgraph_node_ids": list(self.subgraph_node_ids),
         }
         data.update(self.fields)
-        return data
+        return _merge_cost_observation(data)
 
 
 class _CliToolLoopConfig(MechaHarnessConfig):
@@ -417,11 +417,18 @@ class CliInstrumentor:
             all_events = self._log.query()
         types = [e.type for e in all_events]
         event_dicts = [_event_dict(e) for e in all_events]
-        units = sum(
+        priced = sum(
             float(e.payload.get("units") or 0)
             for e in all_events
             if e.type == "core:cost"
         )
+        step_cost = max((float(s.cost_units) for s in steps), default=0.0)
+        field_budget = 0.0
+        for step in steps:
+            raw = step.fields.get("budget_spent")
+            if raw is not None:
+                field_budget = max(field_budget, float(raw))
+        units = max(priced, step_cost, field_budget)
         prompt, completion, total = _token_totals(event_dicts)
         return CliRunResult(
             steps=steps,
@@ -694,6 +701,15 @@ def _token_totals(events: Sequence[Mapping[str, Any]]) -> tuple[int, int, int]:
                 int(c) if c is not None else 0
             )
     return prompt, completion, total
+
+
+def _merge_cost_observation(data: dict[str, Any]) -> dict[str, Any]:
+    """Prefer the higher of priced ``cost_units`` and graph ``budget_spent``."""
+    priced = float(data.get("cost_units") or 0)
+    budget = data.get("budget_spent")
+    if budget is not None:
+        data["cost_units"] = max(priced, float(budget))
+    return data
 
 
 __all__ = [

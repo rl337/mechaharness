@@ -29,3 +29,6 @@ expect:
 - kind: equals
   key: boundary_before
   value: dispatch
+- kind: lte
+  key: cost_units
+  value: 1

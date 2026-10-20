@@ -19,3 +19,6 @@ expect:
 - kind: equals
   key: after_status
   value: cancelled
+- kind: lte
+  key: cost_units
+  value: 2

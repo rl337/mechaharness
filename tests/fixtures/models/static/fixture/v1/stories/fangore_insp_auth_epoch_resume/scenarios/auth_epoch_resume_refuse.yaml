@@ -19,3 +19,6 @@ expect:
 - kind: equals
   key: runner_calls_after_resume
   value: 0
+- kind: lte
+  key: cost_units
+  value: 1

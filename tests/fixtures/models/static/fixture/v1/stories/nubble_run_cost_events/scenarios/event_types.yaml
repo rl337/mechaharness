@@ -29,3 +29,6 @@ expect:
   value: 5
 - kind: nonempty
   key: text
+- kind: lte
+  key: cost_units
+  value: 1

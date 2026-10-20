@@ -261,15 +261,20 @@ async def run_host_kit_submit_once(
             )
         else:
             raise ValueError(f"unknown host_kit mode {body.mode!r}")
-        out = {
-            "status": result.status,
-            "dispatch_count": log.count,
-            "external_handle": effectful_external_handle(result, node_id),
-            "durability": store.durability,
-            "reconciliation_invoked": bool(
-                result.diagnostics.get("reconciliation_invoked")
-            ),
-        }
+        from tests.stories.cli_probes.graph_cost import with_graph_cost
+
+        out = with_graph_cost(
+            {
+                "status": result.status,
+                "dispatch_count": log.count,
+                "external_handle": effectful_external_handle(result, node_id),
+                "durability": store.durability,
+                "reconciliation_invoked": bool(
+                    result.diagnostics.get("reconciliation_invoked")
+                ),
+            },
+            result,
+        )
         if hasattr(store, "close"):
             store.close()
         return out

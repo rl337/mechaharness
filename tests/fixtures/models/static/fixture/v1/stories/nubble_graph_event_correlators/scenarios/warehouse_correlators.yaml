@@ -40,3 +40,6 @@ expect:
   - - nest
     - 1
     - succeeded
+- kind: lte
+  key: cost_units
+  value: 3

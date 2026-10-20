@@ -19,3 +19,6 @@ expect:
 - kind: equals
   key: effect_calls
   value: 0
+- kind: lte
+  key: cost_units
+  value: 1

@@ -12,3 +12,6 @@ expect:
   value: ok
 - kind: 'true'
   key: child_run_id_nonempty
+- kind: lte
+  key: cost_units
+  value: 1

@@ -281,12 +281,19 @@ async def run_lifecycle_extension_graph_observe(inputs: dict[str, Any]) -> dict[
         ),
         None,
     )
-    return {
-        "graph_status": result.status,
-        "boundary": before.payload.get("boundary") if before else None,
-        "extension_id": before.payload.get("extension_id") if before else None,
-        "default_ran": bool(before.payload.get("default_ran")) if before else False,
-    }
+    from tests.stories.cli_probes.graph_cost import with_graph_cost
+
+    return with_graph_cost(
+        {
+            "graph_status": result.status,
+            "boundary": before.payload.get("boundary") if before else None,
+            "extension_id": before.payload.get("extension_id") if before else None,
+            "default_ran": (
+                bool(before.payload.get("default_ran")) if before else False
+            ),
+        },
+        result,
+    )
 
 
 LIFECYCLE_HANDLERS: dict[str, Any] = {

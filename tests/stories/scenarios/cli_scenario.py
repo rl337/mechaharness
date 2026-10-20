@@ -104,6 +104,34 @@ class CliScenario(BaseModel):
                 assertions,
                 label=label,
             )
+            _require_cost_ceiling(
+                result.observation(), self.expect, label=label
+            )
+
+
+def _require_cost_ceiling(
+    observation: dict[str, Any],
+    specs: list[CliAssertionSpec],
+    *,
+    label: str,
+) -> None:
+    """Graph executions must declare a cost_units / budget_spent ceiling."""
+    if "budget_spent" not in observation:
+        return
+    covered = False
+    for spec in specs:
+        params = spec.params()
+        if params.get("key") not in {"cost_units", "budget_spent"}:
+            continue
+        if spec.kind in {"lte", "equals", "gte", "positive"}:
+            covered = True
+            break
+    if not covered:
+        raise AssertionError(
+            f"{label}: graph execution exposed budget_spent="
+            f"{observation.get('budget_spent')!r} but expect has no "
+            "lte/equals/gte/positive on cost_units or budget_spent"
+        )
 
 
 def load_cli_scenario(path: Path) -> CliScenario:
