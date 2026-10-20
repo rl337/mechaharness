@@ -2,17 +2,12 @@
 
 from __future__ import annotations
 
-import tempfile
-from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any, cast
 
 from pydantic import BaseModel, ConfigDict, Field
-from pyiv.time import MockDateTimeService
 
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.checkpoint_store import CheckpointStore
 from mechaharness.convergence import ConvergenceContract, ConvergenceGuard
 from mechaharness.core.access import (
     AccessPolicy,
@@ -29,18 +24,6 @@ from mechaharness.decision_conflict_checkpoint import (
 from mechaharness.decision_log import TopologySpan, compute_topology_metrics
 from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.event_correlators import project_node_attempt_rows
-from mechaharness.external_effect import (
-    ArmedCrashProbe,
-    CrashLocation,
-    CrashProbe,
-    EffectDispatchResult,
-    EffectReconciliation,
-    EffectReconciliationAction,
-    EffectRecord,
-    EffectState,
-    InjectedProcessCrash,
-    NoopCrashProbe,
-)
 from mechaharness.failure_attribution import (
     attribute_with_repair_target,
     select_rollback_target,
@@ -61,7 +44,6 @@ from mechaharness.graph import (
 )
 from mechaharness.graph_executor import (
     CallableGraphNodeRunner,
-    EffectfulGraphNodeRunner,
     GraphEscalation,
     GraphExecutor,
     GraphNodeRunnerRegistry,
@@ -86,7 +68,6 @@ from mechaharness.operation_registry import (
     default_operations,
 )
 from mechaharness.rollout_graph import build_rollout_graph
-from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
 from mechaharness.tools.base import ToolRegistry
 from tests.stories.cli_probes.graph_cost import with_graph_cost
 
@@ -632,14 +613,6 @@ class GraphBudgetSubgraphRollupCommand(BaseModel):
     node_cost: float = 1.0
 
 
-class TransactionalDurableResumeCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    goal: str = "downstream-coding-job"
-    run_id_prefix: str = "story-tdr"
-    crash_location: str
-
-
 class DecisionConflictNeighborRevisitCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -990,212 +963,6 @@ async def run_graph_budget_subgraph_rollup(
     )
 
 
-class _FakeCodingJobBackend:
-    def __init__(self) -> None:
-        self.dispatch_count = 0
-        self.reconcile_count = 0
-        self.observe_count = 0
-        self.jobs: dict[str, dict[str, Any]] = {}
-        self.unknown_effect_ids: set[str] = set()
-
-    def dispatch(self, effect_id: str) -> str:
-        self.dispatch_count += 1
-        handle = f"cursor-job-{effect_id}"
-        self.jobs[effect_id] = {"handle": handle, "status": "running"}
-        return handle
-
-    def lookup(self, effect_id: str, handle: str | None) -> dict[str, Any] | None:
-        if effect_id in self.unknown_effect_ids:
-            return None
-        job = self.jobs.get(effect_id)
-        if job is not None:
-            return job
-        if handle is not None:
-            for item in self.jobs.values():
-                if item.get("handle") == handle:
-                    return item
-        return None
-
-    def complete(self, effect_id: str) -> dict[str, Any]:
-        job = self.jobs.setdefault(
-            effect_id, {"handle": f"cursor-job-{effect_id}", "status": "running"}
-        )
-        job["status"] = "completed"
-        job["result"] = {"diff": "ok", "effect_id": effect_id}
-        return job
-
-
-class _CodingJobEffectRunner(EffectfulGraphNodeRunner):
-    def __init__(self, backend: _FakeCodingJobBackend) -> None:
-        self.backend = backend
-
-    def kinds(self) -> list[str]:
-        return ["coding_job"]
-
-    def backend_id(self) -> str:
-        return "fake.coding_job"
-
-    async def reconcile(
-        self,
-        node: GraphNode,
-        *,
-        effect: EffectRecord,
-        context: GraphRunContext,
-    ) -> EffectReconciliation:
-        del node, context
-        self.backend.reconcile_count += 1
-        job = self.backend.lookup(effect.effect_id, effect.external_handle)
-        if job is None:
-            if effect.state is EffectState.INTENDED:
-                return EffectReconciliation(action=EffectReconciliationAction.DISPATCH)
-            if effect.state is EffectState.UNCERTAIN:
-                return EffectReconciliation(
-                    action=EffectReconciliationAction.NEEDS_ATTENTION,
-                    error="uncertain_effect_unresolved",
-                )
-            return EffectReconciliation(
-                action=EffectReconciliationAction.NEEDS_ATTENTION,
-                error="effect_not_found",
-            )
-        handle = str(job["handle"])
-        if job.get("status") == "completed":
-            return EffectReconciliation(
-                action=EffectReconciliationAction.COMPLETE,
-                external_handle=handle,
-                outcome_payload=dict(job.get("result") or {}),
-                outcome_evidence={"job_status": "completed"},
-            )
-        return EffectReconciliation(
-            action=EffectReconciliationAction.OBSERVE,
-            external_handle=handle,
-        )
-
-    async def dispatch(
-        self,
-        node: GraphNode,
-        *,
-        effect: EffectRecord,
-        context: GraphRunContext,
-    ) -> EffectDispatchResult:
-        del node, context
-        handle = self.backend.dispatch(effect.effect_id)
-        return EffectDispatchResult(external_handle=handle)
-
-    async def observe(
-        self,
-        node: GraphNode,
-        *,
-        effect: EffectRecord,
-        context: GraphRunContext,
-    ) -> EffectReconciliation:
-        del node, context
-        self.backend.observe_count += 1
-        job = self.backend.complete(effect.effect_id)
-        return EffectReconciliation(
-            action=EffectReconciliationAction.COMPLETE,
-            external_handle=str(job["handle"]),
-            outcome_payload=dict(job.get("result") or {}),
-            outcome_evidence={"job_status": "completed"},
-        )
-
-
-def _tdr_executor(
-    *,
-    store: CheckpointStore,
-    backend: _FakeCodingJobBackend,
-    crash: CrashProbe,
-) -> GraphExecutor:
-    registry = GraphNodeRunnerRegistry([_CodingJobEffectRunner(backend)])
-
-    class Cfg(MechaHarnessConfig):
-        def get_inference_class(self) -> type[InferenceStrategy]:
-            return MockInferenceStrategy
-
-        def get_harness_class(self) -> type[AbstractHarness]:
-            return PassThroughHarness
-
-        def get_grants(self) -> list[object]:
-            return [GraphExecute]
-
-        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
-            return registry
-
-        def get_checkpoint_store(self) -> CheckpointStore:
-            return store
-
-        def get_crash_probe(self) -> CrashProbe:
-            return crash
-
-    return cast(GraphExecutor, get_injector(Cfg()).inject(GraphExecutor))
-
-
-async def run_transactional_durable_resume(
-    body: TransactionalDurableResumeCommand,
-) -> dict[str, Any]:
-    clock = MockDateTimeService(datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc))
-    location = body.crash_location
-    with tempfile.TemporaryDirectory(prefix="mh-cli-tdr-") as tmp:
-        db = Path(tmp) / f"{location}.sqlite"
-        store = SqliteCheckpointStore(db, datetime_service=clock)
-        backend = _FakeCodingJobBackend()
-        run_id = f"{body.run_id_prefix}-{location}"
-        crash_at: CrashLocation = location  # type: ignore[assignment]
-        first = _tdr_executor(
-            store=store, backend=backend, crash=ArmedCrashProbe(crash_at)
-        )
-        graph = ExecutionGraph(goal=body.goal)
-        graph.add_node(GraphNode(id="dispatch", kind="coding_job", max_attempts=3))
-        crashed = False
-        try:
-            await first.run(
-                graph,
-                budget_policy=BudgetPolicy.unlimited(),
-                run_id=run_id,
-            )
-        except InjectedProcessCrash:
-            crashed = True
-        effect_before = store.get_node_effect(run_id=run_id, node_id="dispatch")
-        boundary_before = store.latest_boundary(run_id=run_id)
-        dispatch_after_crash = backend.dispatch_count
-        resumed_exec = _tdr_executor(
-            store=store, backend=backend, crash=NoopCrashProbe()
-        )
-        resume_graph = ExecutionGraph(goal=body.goal)
-        resume_graph.add_node(
-            GraphNode(id="dispatch", kind="coding_job", max_attempts=3)
-        )
-        result = await resumed_exec.run(
-            resume_graph,
-            budget_policy=BudgetPolicy.unlimited(),
-            run_id=run_id,
-            resume=True,
-        )
-        effect_after = store.get_node_effect(run_id=run_id, node_id="dispatch")
-        node = result.graph.nodes["dispatch"]
-        out = with_graph_cost(
-            {
-                "crashed": crashed,
-                "status": result.status,
-                "node_status": node.status.value,
-                "dispatch_count": backend.dispatch_count,
-                "dispatch_count_after_crash": dispatch_after_crash,
-                "effect_state_before": (
-                    effect_before.state.value if effect_before else None
-                ),
-                "effect_state_after": (
-                    effect_after.state.value if effect_after else None
-                ),
-                "reconciliation_invoked": bool(
-                    result.diagnostics.get("reconciliation_invoked")
-                ),
-                "boundary_before": boundary_before,
-            },
-            result,
-        )
-        store.close()
-        return out
-
-
 def run_decision_conflict_neighbor_revisit(
     body: DecisionConflictNeighborRevisitCommand,
 ) -> dict[str, Any]:
@@ -1248,7 +1015,6 @@ __all__ = [
     "RolloutGraphBuildCommand",
     "TargetedRollbackSelectCommand",
     "TopologyEfficiencyCommand",
-    "TransactionalDurableResumeCommand",
     "ValidatorQualificationCommand",
     "WakeReresolveResumeCommand",
     "run_bounded_repair_loop",
@@ -1267,7 +1033,6 @@ __all__ = [
     "run_rollout_graph_build",
     "run_targeted_rollback_select",
     "run_topology_efficiency",
-    "run_transactional_durable_resume",
     "run_validator_qualification",
     "run_wake_reresolve_resume",
 ]

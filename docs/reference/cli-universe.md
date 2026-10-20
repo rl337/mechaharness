@@ -25,7 +25,8 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 
 Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`,
 `instantiate_recipe`, `tile_recipe`, `recipe_plan`, diagnostics, judge,
-durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`).
+durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`,
+`transactional_resume` for DR-10 crash-window durable coding-job resume).
 Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
 (`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
 Probe stories load a human-readable plan under ``plans/``

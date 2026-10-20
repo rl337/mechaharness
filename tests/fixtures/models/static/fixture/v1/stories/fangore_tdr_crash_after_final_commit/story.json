@@ -2,9 +2,9 @@
   "id": "fangore_tdr_crash_after_final_commit",
   "persona": "fangore",
   "title": "Resume after final commit with nothing left to dispatch",
-  "kind": "cli",
-  "narrative": "The durable coding job has fully committed when Fangore's process dies. On resume he loads the store and verifies the plan is already complete — no new dispatch and no reconciliation of an in-flight effect. Closes the crash matrix after `fangore_tdr_crash_after_reduce_before_checkpoint`. Self-revising checkpoint consumers build on this seam (see footnotes on `fangore_tdr_crash_before_intent`).",
-  "implementation": "`ArmedCrashProbe` + SQLite checkpoint durable resume for coding_job effects. `CliInstrumentor` probe `transactional_durable_resume`. Unit: `tests/fixtures/transactional_durable_resume/*.json`.",
-  "validation": "Harness `cli` `probe` loads `plans/crash_after_final_commit.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He dispatches a remote coding job on a durable plan; the MechaHarness process dies after the final checkpoint commit. After restart he opens the same durable store, resumes the plan, and verifies the remote job is submitted exactly once with the expected effect state for this crash window. Sibling windows: `fangore_tdr_crash_before_intent`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_reduce_before_checkpoint`, and `fangore_tdr_crash_after_final_commit`. Complements `fangore_insp_durable_resume` fingerprint refusal. Tracks transactional durable resume[^tdr-req] and MH-PA-05[^insp-pa-05]. He walks product steps (`transactional_resume`) and verifies completion from the structured observation expects on this scenario.",
+  "implementation": "`SqliteCheckpointStore` + `host_graph_executor` with `ArmedCrashProbe` for coding_job effects. Product CLI verb `transactional_resume` (`mechaharness.cli_transactional_resume`). Unit matrix: `tests/fixtures/transactional_durable_resume/*.json`.",
+  "validation": "Harness `user_story` scenario `crash_after_final_commit.yaml` drives product verb `transactional_resume` with `crash_location: after_final_commit`; hard expects on declared observation keys.",
   "footnotes": []
 }
