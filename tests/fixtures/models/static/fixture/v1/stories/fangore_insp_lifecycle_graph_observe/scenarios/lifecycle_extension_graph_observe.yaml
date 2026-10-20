@@ -1,0 +1,17 @@
+kind: cli
+commands:
+- probe:
+    name: lifecycle_extension_graph_observe
+    goal: lifecycle graph observe
+expect:
+- kind: equals
+  key: graph_status
+  value: ok
+- kind: equals
+  key: boundary
+  value: core:before_graph_node
+- kind: equals
+  key: extension_id
+  value: acme:graph_watch
+- kind: 'true'
+  key: default_ran

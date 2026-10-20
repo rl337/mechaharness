@@ -97,6 +97,9 @@ from tests.stories.cli_probes.context_management_probes import (
 from tests.stories.cli_probes.evaluation_research_probes import (
     evaluation_research_cli_probe_classes,
 )
+from tests.stories.cli_probes.lifecycle_extensions_probes import (
+    lifecycle_extensions_cli_probe_classes,
+)
 from tests.stories.cli_probes.pure_api_probes import pure_api_cli_probe_classes
 
 ParamsT = TypeVar("ParamsT", bound=BaseModel)
@@ -318,6 +321,7 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
     probes.update(pure_api_cli_probe_classes())
     probes.update(context_management_cli_probe_classes())
     probes.update(evaluation_research_cli_probe_classes())
+    probes.update(lifecycle_extensions_cli_probe_classes())
     return probes
 
 

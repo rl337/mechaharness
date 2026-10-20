@@ -1,0 +1,28 @@
+kind: cli
+commands:
+- probe:
+    name: lifecycle_extension_observe
+    prompt: Write a.txt
+    grants:
+    - core:fs.write
+    tool_calls:
+    - id: '1'
+      name: write_file
+      arguments:
+        path: a.txt
+expect:
+- kind: equals
+  key: extension_ids
+  value:
+  - acme:watch_a
+  - acme:watch_b
+- kind: equals
+  key: orders
+  value:
+  - 1
+  - 2
+- kind: 'true'
+  key: default_ran
+- kind: equals
+  key: tool_result
+  value: wrote a.txt

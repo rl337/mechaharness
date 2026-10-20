@@ -1430,7 +1430,7 @@ Before a dangerous tool runs, Fangore's extension blocks that single call. The d
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_block`. Soft expects blocked tool content, applied_block true, and default_ran false.
+Harness `cli` scenario `lifecycle_extension_block.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1446,7 +1446,7 @@ Fangore binds an observe-only extension around each graph node attempt. The node
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_graph_observe`. Soft expects a before_graph_node extension event and a successful graph run.
+Harness `cli` scenario `lifecycle_extension_graph_observe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1462,7 +1462,7 @@ Fangore binds two host extensions that watch each tool call before it runs. The 
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_observe`. Soft expects two extension ids in order, default_ran true, and the original tool path in the tool result.
+Harness `cli` scenario `lifecycle_extension_observe.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1478,7 +1478,7 @@ For one tool boundary, Fangore may substitute a different single-step outcome in
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_replace`. Soft expects replaced content, applied_replace true, and default_ran false.
+Harness `cli` scenario `lifecycle_extension_replace.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1494,7 +1494,7 @@ Before a write tool runs, Fangore's extension rewrites the path argument into a 
 
 #### Validation
 
-Harness `lifecycle_extensions` op `lifecycle_extension_rewrite`. Soft expects sandbox path in the tool result, applied_rewrite true, and default_ran true.
+Harness `cli` scenario `lifecycle_extension_rewrite.yaml`. Hard expects on declared observation keys.
 
 #### Footnotes
 
