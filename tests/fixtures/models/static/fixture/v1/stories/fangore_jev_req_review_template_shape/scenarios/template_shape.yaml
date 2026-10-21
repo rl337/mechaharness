@@ -1,5 +1,4 @@
 # user story: fangore_jev_req_review_template_shape
-# He instantiates `independent_review` with two reviewers and omitted producer reasoning.
 kind: user_story
 environment:
   family: pass_through
@@ -9,7 +8,8 @@ graph:
   bind: binds/independent_review.yaml
 steps:
 - do:
-    instantiate_recipe:
+    run_recipe:
+      name: independent_review
       path: binds/independent_review.yaml
 complete:
   expect:
@@ -18,4 +18,13 @@ complete:
     value: independent_review
   - kind: 'true'
     key: omit_producer_reasoning
+  - kind: equals
+    key: review_count
+    value: 2
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []
