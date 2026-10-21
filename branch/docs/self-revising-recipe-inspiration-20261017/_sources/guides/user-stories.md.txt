@@ -715,21 +715,21 @@ Covers: CTX-06, CTX-07.
 
 Harness `cli` `probe` loads `plans/derived_memory.yaml` (human-readable probe plan); hard expects on declared observation keys.
 
-### `fangore_environment_repair_recipe` — Instantiate the environment repair Agentic Recipe
+### `fangore_environment_repair_recipe` — Run the environment repair Agentic Recipe
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `environment_repair` recipe. Before dependent work continues, Fangore runs the environment-repair Agentic Recipe: diagnose missing substrate, attempt a bounded repair, then recheck. The recipe must expand to a concrete plan without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Before dependent work continues, he runs Agentic Recipe `environment_repair`: diagnose missing substrate, attempt a bounded repair, then recheck until the environment is ok — without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`. [^rc-env-repair]
 
 #### Implementation
 
-Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnose → bounded env repair → recheck as an ordinary `ExecutionGraph` with provenance stamps via `GraphTemplate.instantiate`.
+Agentic Recipe `environment_repair` via `EnvironmentRepairTemplate` / `environment_repair_runner` and product verb `run_recipe` (`EnvironmentRepairRecipeAdapter`).
 
 #### Validation
 
-Harness `user_story` scenario `environment_repair_recipe.yaml`: environment + graph + steps + complete expects.
+Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recipe`; expects environment_ok / repair_attempts plus shape keys.
 
 #### Footnotes
 
-1. [Recipes requirements (first-wave catalog)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — environment_repair owning story
+[^rc-env-repair]: [Recipes requirements (first-wave catalog)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — environment_repair owning story
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 
@@ -1379,15 +1379,15 @@ Harness `cli` `probe` loads `plans/training_grade_required.yaml` (human-readable
 
 ### `fangore_insp_initialize_preflight` — Run an initialize preflight recipe before work
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `initialize_preflight` recipe. Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe completes linkage, capability, and checkpoint checks. Accepts WalkingLabs L06 guidance. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^wl-l06-init]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs Agentic Recipe `initialize_preflight` so linkage, capability, and checkpoint checks complete before readiness — accepting WalkingLabs L06 guidance. [^wl-l06-init]
 
 #### Implementation
 
-Agentic Recipe `initialize_preflight` (`InitializePreflightTemplate` in `mechaharness.graph_templates.initialize_preflight`) builds linkage → capability → checkpoint → ready as an ordinary `ExecutionGraph`.
+Agentic Recipe `initialize_preflight` via `InitializePreflightTemplate` / `initialize_preflight_runner` and product verb `run_recipe` (`InitializePreflightRecipeAdapter`).
 
 #### Validation
 
-Harness `user_story` scenario `initialize_preflight_template.yaml`: environment + graph + steps + complete expects.
+Harness `user_story` scenario `initialize_preflight_template.yaml` drives `run_recipe`; expects preflight_ok plus node ids.
 
 #### Footnotes
 
