@@ -453,20 +453,15 @@ Harness `user_story` scenario `bounded_retry_recipe.yaml` drives `run_recipe`; e
 
 ### `fangore_capability_envelope_narrow` — Narrow child capability envelopes without silent inheritance
 
-Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent's full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes[^insp-envelope]. Child attenuation for Dots MH-DOTS-01[^insp-dots-01-narrow]; execution token fields: `fangore_insp_execution_token`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds a parent capability envelope in the environment, runs `capability_envelope` to narrow a child and attempt a widen, and verifies the child stays a subset while widen raises and delegation prefers child.
 
 #### Implementation
 
-`CapabilityEnvelope` in `mechaharness.capability_envelope` carries grants, tools, context provider ids, model class, budgets, and escalation policy. `narrow()` produces a child envelope that cannot widen parent grants or tools. Attached on `GraphRunContext.envelope` during graph runs. `DefaultDelegationPolicy` chooses inline versus child/subgraph using independence and pollution signals.
+`CapabilityEnvelope.narrow` plus `DefaultDelegationPolicy`. Story `environment.capability_envelope` binds Config `get_capability_envelope`; product verb `capability_envelope` exercises narrow/widen.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/capability_envelope_narrow.yaml` (human-readable probe plan); hard expects on declared observation keys.
-
-#### Footnotes
-
-[^insp-envelope]: [Inspiration requirements (delegation envelopes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 7 — CapabilityEnvelope; children must not inherit parent capabilities implicitly
-[^insp-dots-01-narrow]: [OpenAI Dots map (MH-DOTS-01 narrow)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Child attenuation; token fields in fangore_insp_execution_token
+Harness `user_story` scenario `capability_envelope_narrow.yaml` drives `capability_envelope`; expects narrow_ok / child_grant_count / widen_raises / delegation_choice.
 
 ### `fangore_completer_flavors` — Wire same-lane Completer flavors without forking the library
 
@@ -488,39 +483,27 @@ Harness `cli` `probe` loads `plans/named_matched_flavors.yaml` (human-readable p
 
 ### `fangore_compound_grants` — Compose read-only and write permission packs
 
-Fangore’s host app must not let agents write the filesystem by default. A read-only pack refuses the write tool; composing it with a write pack allows the same tool. He needs reusable permission packs instead of copy-pasted lists. Grant composition feeds personal-agent MH-PA-02 (`fangore_insp_authority_gate`)[^insp-pa-02-grants].
+Fangore starts the CLI host with family `tool_loop` and backend `mock`. A read-only environment pack refuses the write tool; composing it with a write pack via `environment.access_policy` layers allows the same tool. He walks `tool_loop` and verifies permission_denied vs allowed.
 
 #### Implementation
 
-`AccessPolicy` deny-by-default grants; `CompoundPolicy` unions packs; `AccessControl` enforces tool grants and emits access-check events. This is the permission half of tool gating — every tool call must pass access before side effects.
-
-Covers: host compound grants.
+`AccessPolicy` deny-by-default grants; `CompoundPolicy` unions packs via story `environment.access_policy` / Config `get_access_policy`. `AccessControl` enforces tool grants on the product `tool_loop` verb.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/grant_gate_write.yaml` (human-readable probe plan); hard expects on declared observation keys.
-
-#### Footnotes
-
-[^insp-pa-02-grants]: [Personal agent reliability map (MH-PA-02 grants)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Capability packs for authority gate
+Harness `user_story` scenarios `grant_gate_denied.yaml` and `grant_gate_allowed.yaml` drive `tool_loop` with environment grants; expects permission_denied / allowed.
 
 ### `fangore_config_access_policy` — Let the host app supply its own permission policy
 
-Fangore’s product needs permission rules defined by the application. He configures the harness once so composed packs from `fangore_compound_grants` are what the harness enforces.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. His product needs permission rules defined by the application. He declares a compound access policy in the story environment, runs `access_check`, and verifies composed packs allow read/write while denying media — bound through Config DI, not Settings bags.
 
 #### Implementation
 
-`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection — not Settings bags or hand-wired harness constructors. Fangore subclasses Config once; the injector builds `AccessControl` and the harness with those grants.
-
-Covers: host DI access policy.
+`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection. Story `environment.access_policy` / `grants` override those hooks; product verb `access_check` observes Config-injected `AccessControl`. Hosts also pass grants on `run_recipe(...)`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/config_access_policy.yaml` (human-readable probe plan); hard expects on declared observation keys.
-
-#### Footnotes
-
-1. [pyiv](https://rl337.org/pyiv/) — Config-hook dependency injection
+Harness `user_story` scenario `config_access_policy.yaml` drives `access_check` with environment compound policy; expects allows_compound / denies_missing.
 
 ### `fangore_context_compiler_deficit` — Report context deficits instead of silent truncation
 
@@ -906,32 +889,27 @@ Harness `cli` `probe` loads `plans/anchor_evidence_require.yaml` (human-readable
 
 ### `fangore_insp_approval_interrupt` — Suspend a graph for durable human approval
 
-High-consequence steps must pause on a durable approval interrupt with evidence, timeout policy, and actor provenance — then resume when a human decides. Accepts WalkingLabs P08 and L14 guidance[^wl-p08-approval][^wl-l14-approval].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `approval_interrupt` to suspend for durable human approval then resume with an actor provenance stamp.
 
 #### Implementation
 
-`ApprovalInterrupt`, `suspend_for_approval`, and `resume_approval` in `mechaharness.approval_interrupt` model pending/approved/rejected interrupts with checkpoint refs.
+`suspend_for_approval` / `resume_approval` via product verb `approval_interrupt`. Maps to durable advice/approval yields when hosts compose it into graphs later.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/approval_interrupt_cycle.yaml` (human-readable probe plan); hard expects on declared observation keys.
-
-#### Footnotes
-
-[^wl-p08-approval]: [WalkingLabs P08 First Explicit Graph](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/) — Human approval interrupt
-[^wl-l14-approval]: [WalkingLabs L14 Graph Engineering](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/) — Durable interrupts
+Harness `user_story` scenario `approval_interrupt_cycle.yaml` drives `approval_interrupt`; expects pending → approved with actor provenance.
 
 ### `fangore_insp_auth_epoch_resume` — Refuse resumed effects when the authorization epoch advanced
 
-Checkpoints carry the authorization epoch so crash recovery after revocation does not continue with stale authority. A resume under an envelope whose epoch differs from the checkpoint fails closed before any runner is invoked; pre-epoch checkpoints read as epoch 0. Effect ledger and idempotent resume ship in `fangore_tdr_crash_after_accept_before_record`. Tracks MH-DOTS-06[^insp-dots-06].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `auth_epoch_resume` so a graph checkpoint stamped at epoch 2 refuses resume under epoch 3 before any runner is invoked. Tracks MH-DOTS-06[^insp-dots-06].
 
 #### Implementation
 
-`ExecutionGraph.authorization_epoch` is stamped from the live `CapabilityEnvelope` at run time and persisted by every `CheckpointStore` (EventLog and SQLite) inside the graph checkpoint; `CheckpointStore.latest_authorization_epoch` reads it (0 when absent). `GraphExecutor.run(resume=True, envelope=...)` returns `failed` with `authorization_epoch_mismatch:<checkpoint>!=<live>` when they differ. Pending reviews and idempotency keys remain via `approval_interrupt` and the effect ledger.
+`GraphExecutor.run(resume=True, envelope=...)` returns `failed` with `authorization_epoch_mismatch`. Product verb `auth_epoch_resume`; story `environment.authorization_epoch` can stamp Config envelopes.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/auth_epoch_resume_refuse.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `auth_epoch_resume_refuse.yaml` drives `auth_epoch_resume`; expects resume_status failed and error_contains mismatch.
 
 #### Footnotes
 
@@ -939,15 +917,15 @@ Harness `cli` `probe` loads `plans/auth_epoch_resume_refuse.yaml` (human-readabl
 
 ### `fangore_insp_authority_gate` — Compose capability, impact, trust, and approval into one authority gate
 
-Hard rules for consequential actions live outside model text. Untrusted forwarded content must not authorize an external send; high-impact actions still require the configured authority. Related native paths: `fangore_insp_risk_autonomy`, `fangore_jev_action_safety`, `fangore_compound_grants`. Tracks MH-PA-02[^insp-pa-02].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `authority_gate` over a matrix of evaluate scenarios so untrusted forwarded content cannot authorize an external send and high-impact actions still require configured authority. Related: `fangore_compound_grants`. Tracks MH-PA-02[^insp-pa-02].
 
 #### Implementation
 
-`AuthorityGate.evaluate` composes `AccessControl` grants, `CapabilityEnvelope` (expiry, tools, grants), `ConsequencePolicy` (reversibility/impact class), source trust, a judgement `Verdict`, explicit approval, and an optional `DenialStore`, failing closed in that order. It returns `allow`, `deny`, or `ask_human` with reason codes. Every collaborator is optional so hosts adopt it incrementally.
+`AuthorityGate.evaluate` composes AccessControl, CapabilityEnvelope, ConsequencePolicy, trust, verdict, and approval. Product verb `authority_gate`. Hosts inject the gate via Config when wiring it onto graph soft-points later.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/authority_gate_evaluate.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `authority_gate_evaluate.yaml` drives `authority_gate`; expects the decisions matrix.
 
 #### Footnotes
 
@@ -955,15 +933,15 @@ Harness `cli` `probe` loads `plans/authority_gate_evaluate.yaml` (human-readable
 
 ### `fangore_insp_budget_subgraph_rollup` — Roll nested subgraph spend into the parent budget
 
-When a parent step embeds a child graph, child node costs must count against the same budget the parent is running under. After the child spends enough to hit the soft limit, later parent steps wind down instead of starting. Complements `fangore_insp_graph_budget` and `fangore_insp_dynamic_subgraph`.[^insp-budget-rollup]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He sets `environment.budget.soft_limit` to 2 and runs `run_budgeted_graph` with nest enabled so child node costs share the parent ledger. After soft wind-down, the later parent step is cancelled. [^insp-budget-rollup]
 
 #### Implementation
 
-`BudgetPolicy` subgraph rollup. `CliInstrumentor` verb `graph_budget_subgraph_rollup`.
+`Budget.child()` / nested `GraphExecutor` spend rollup. Product verb `run_budgeted_graph` with `nest: true`; story `environment.budget` binds the policy.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/child_rollup.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `child_rollup.yaml` drives nested `run_budgeted_graph`; expects soft_exhausted / after_status cancelled.
 
 #### Footnotes
 
@@ -1231,15 +1209,15 @@ Harness `cli` `probe` loads `plans/fan_in_policy.yaml` (human-readable probe pla
 
 ### `fangore_insp_graph_budget` — Enforce soft and hard spend limits on graph runs
 
-Every graph run must declare how much spend is allowed. Crossing the soft limit winds remaining steps down without treating the job as a hard failure. Crossing the hard limit stops the run immediately. Hard can also be unlimited when no ceiling applies. Related: `fangore_insp_budget_subgraph_rollup` for nested spend, and `fangore_insp_stop_contract` for repeating-step ceilings.[^insp-budget]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `run_budgeted_graph` with soft then hard policies on a two-node compute graph. Soft wind-down returns soft_exhausted; hard fail returns hard_budget_exceeded. Related: `fangore_insp_budget_subgraph_rollup`. [^insp-budget]
 
 #### Implementation
 
-`BudgetPolicy` soft/hard limits on `GraphExecutor`. `CliInstrumentor` verb `graph_budget_limits`.
+`BudgetPolicy` soft/hard limits on `GraphExecutor`. Product verb `run_budgeted_graph`; hosts also pass `budget_policy=` on `run_recipe` / story `environment.budget`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/soft_and_hard.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `soft_and_hard.yaml` drives `run_budgeted_graph`; expects soft_status / hard_status and error codes.
 
 #### Footnotes
 

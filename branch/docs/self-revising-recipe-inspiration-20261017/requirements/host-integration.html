@@ -200,6 +200,18 @@ from GitHub <code class="docutils literal notranslate"><span class="pre">main</s
 correlators, or promote guidance. Stale copies are a host ops concern;
 upstream keeps <code class="docutils literal notranslate"><span class="pre">agent-skills/</span></code> accurate in the same change as API shifts.</p>
 </section>
+<section id="host-08-authorization-and-budget-on-recipe-runs">
+<h3>HOST-08: Authorization and budget on recipe runs<a class="headerlink" href="#host-08-authorization-and-budget-on-recipe-runs" title="Link to this heading"></a></h3>
+<p>Hosts MUST be able to supply both an <strong>authorization policy</strong> (<code class="docutils literal notranslate"><span class="pre">grants</span></code> /
+<code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>) and a <strong>budget policy</strong> (or live
+<code class="docutils literal notranslate"><span class="pre">Budget</span></code>) when running recipes — via Config hooks and/or
+<code class="docutils literal notranslate"><span class="pre">run_recipe(...,</span> <span class="pre">grants=|access_policy=,</span> <span class="pre">budget_policy=,</span> <span class="pre">envelope=?)</span></code>.</p>
+<p>Defaults (host-kit permissive grants + <code class="docutils literal notranslate"><span class="pre">BudgetPolicy.unlimited()</span></code>) are
+intentional no-ops. Hosts that need deny-by-default or spend ceilings MUST
+pass policies; they MUST NOT assume unlimited spend when a ceiling is
+required. SoftPoint <code class="docutils literal notranslate"><span class="pre">kind=&quot;budget&quot;</span></code> is stop/turns, not <code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code>.</p>
+<p>See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a> and <a class="reference internal" href="../reference/budget.html"><span class="std std-doc">Budget</span></a>.</p>
+</section>
 </section>
 <section id="see-also">
 <h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
@@ -208,6 +220,8 @@ upstream keeps <code class="docutils literal notranslate"><span class="pre">agen
 <li><p><a class="reference internal" href="../guides/dependency-injection.html"><span class="std std-doc">Dependency injection</span></a></p></li>
 <li><p><a class="reference internal" href="../reference/inspiration-primitives.html"><span class="std std-doc">Inspiration primitives</span></a></p></li>
 <li><p><a class="reference internal" href="event-analytics-schema.html"><span class="std std-doc">Event analytics schema</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/budget.html"><span class="std std-doc">Budget</span></a></p></li>
 </ul>
 </section>
 </section>

@@ -76,6 +76,41 @@ error `ToolResult` and are not priced.
 `core:graph.escalate` before calling `GraphEscalation`. Node runners may declare
 extra grants via `GraphNodeRunner.required_grants()`.
 
+## Host recipe-run pattern
+
+Hosts choose **one** of these surfaces (omit → host-kit defaults:
+`GraphExecute` + `GraphEscalate` on `host_graph_executor`; Config
+`get_grants()` defaults to `[]`):
+
+1. **Config DI** — override `get_grants()` / `get_access_policy()` /
+   `get_capability_envelope()` on a `MechaHarnessConfig` subclass.
+2. **Per-run kwargs** — `run_recipe(..., grants=|access_policy=, envelope=?)`
+   (and optional `budget_policy=` — see [Budget](./budget.md)).
+3. **Story / fixture YAML** — `environment.grants` /
+   `environment.access_policy` / `environment.capability_envelope` /
+   `environment.authorization_epoch` on `user_story` scenarios bind (1)/(2).
+
+`access_policy` YAML shapes (parsed by
+`mechaharness.host_run_policies.access_policy_from_mapping`):
+
+```yaml
+grants: [core:fs.read, core:fs.write]
+# or compound layers
+access_policy:
+  layers:
+    - [core:fs.read]
+    - [core:fs.write]
+```
+
+Product verbs for walks: `access_check`, `capability_envelope`,
+`authority_gate`, `auth_epoch_resume`, `approval_interrupt`. Verb-scoped
+`grants:` on `tool_lifecycle` / `judge` is **not** the Config/environment
+bridge.
+
+When `environment.grants` / `access_policy` is set it **replaces** Config
+grants for that story (empty list = deny-all). Omit the field to keep
+defaults. Host-kit stays permissive until a host passes a tighter pack.
+
 ## Tools
 
 `Tool` / `ToolRegistry.tool()` accept `grants=` (classes or `namespace:name`

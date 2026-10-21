@@ -191,6 +191,38 @@ error <code class="docutils literal notranslate"><span class="pre">ToolResult</s
 <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> before calling <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>. Node runners may declare
 extra grants via <code class="docutils literal notranslate"><span class="pre">GraphNodeRunner.required_grants()</span></code>.</p>
 </section>
+<section id="host-recipe-run-pattern">
+<h2>Host recipe-run pattern<a class="headerlink" href="#host-recipe-run-pattern" title="Link to this heading"></a></h2>
+<p>Hosts choose <strong>one</strong> of these surfaces (omit → host-kit defaults:
+<code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code> + <code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code> on <code class="docutils literal notranslate"><span class="pre">host_graph_executor</span></code>; Config
+<code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">[]</span></code>):</p>
+<ol class="arabic simple">
+<li><p><strong>Config DI</strong> — override <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code> on a <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> subclass.</p></li>
+<li><p><strong>Per-run kwargs</strong> — <code class="docutils literal notranslate"><span class="pre">run_recipe(...,</span> <span class="pre">grants=|access_policy=,</span> <span class="pre">envelope=?)</span></code>
+(and optional <code class="docutils literal notranslate"><span class="pre">budget_policy=</span></code> — see <a class="reference internal" href="budget.html"><span class="std std-doc">Budget</span></a>).</p></li>
+<li><p><strong>Story / fixture YAML</strong> — <code class="docutils literal notranslate"><span class="pre">environment.grants</span></code> /
+<code class="docutils literal notranslate"><span class="pre">environment.access_policy</span></code> / <code class="docutils literal notranslate"><span class="pre">environment.capability_envelope</span></code> /
+<code class="docutils literal notranslate"><span class="pre">environment.authorization_epoch</span></code> on <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenarios bind (1)/(2).</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">access_policy</span></code> YAML shapes (parsed by
+<code class="docutils literal notranslate"><span class="pre">mechaharness.host_run_policies.access_policy_from_mapping</span></code>):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">grants</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">fs.read</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">fs.write</span><span class="p p-Indicator">]</span>
+<span class="c1"># or compound layers</span>
+<span class="nt">access_policy</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">layers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">fs.read</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">fs.write</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Product verbs for walks: <code class="docutils literal notranslate"><span class="pre">access_check</span></code>, <code class="docutils literal notranslate"><span class="pre">capability_envelope</span></code>,
+<code class="docutils literal notranslate"><span class="pre">authority_gate</span></code>, <code class="docutils literal notranslate"><span class="pre">auth_epoch_resume</span></code>, <code class="docutils literal notranslate"><span class="pre">approval_interrupt</span></code>. Verb-scoped
+<code class="docutils literal notranslate"><span class="pre">grants:</span></code> on <code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> is <strong>not</strong> the Config/environment
+bridge.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">environment.grants</span></code> / <code class="docutils literal notranslate"><span class="pre">access_policy</span></code> is set it <strong>replaces</strong> Config
+grants for that story (empty list = deny-all). Omit the field to keep
+defaults. Host-kit stays permissive until a host passes a tighter pack.</p>
+</section>
 <section id="tools">
 <h2>Tools<a class="headerlink" href="#tools" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Tool</span></code> / <code class="docutils literal notranslate"><span class="pre">ToolRegistry.tool()</span></code> accept <code class="docutils literal notranslate"><span class="pre">grants=</span></code> (classes or <code class="docutils literal notranslate"><span class="pre">namespace:name</span></code>
