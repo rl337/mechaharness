@@ -1,22 +1,15 @@
 # user story: taloneth_insp_safety_eval_recipes
-# Taloneth starts the CLI host with family `pass_through` and backend `mock`, and works
-# with the `safety_eval` recipe.
-# Safety evaluation now ships as a reusable recipe: a scenario from a fixture pack is
-# run, an independent reviewer judges the outcome without seeing the agent's reasoning,
-# and a fixed scorer reports outcome, severity, context, and the model and recipe
-# versions.
-# The scenario classes cover prompt injection in tool output, scope bleed, changing
-# authorization, ambiguous consent, ignored warnings, and false-denial controls, so
-# over-refusal is measured next to unsafe compliance.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
 graph:
   recipe: safety_eval
+  bind: binds/safety_eval.yaml
 steps:
 - do:
-    instantiate_recipe:
+    run_recipe:
+      name: safety_eval
       path: binds/safety_eval.yaml
 complete:
   expect:
@@ -78,4 +71,16 @@ complete:
       - severity_scale
   - kind: 'true'
     key: in_default_catalog
+  - kind: equals
+    key: outcome
+    value: pass
+  - kind: equals
+    key: severity
+    value: info
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []
