@@ -1,11 +1,50 @@
-# Plan document: ../plans/human_review_pending.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/human_review_pending.yaml
-expect:
-- kind: equals
-  key: verdict_kinds
-  value:
-  - ASK_HUMAN
-  - ALLOW
+# user story: fangore_human_review_pending
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# A privileged mutate is gated by JudgementPolicy: without a matching approval
+# digest the walk raises human review (bag register `ask`). The story expects
+# that yield and injects the approval into `ans`; the second decide allows.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    human_review_gate:
+      action: mutate
+      action_digest: sha256:story
+      policy_version: story-review
+      require_approval_for:
+      - mutate
+      signals:
+      - id: destructive
+        p_true: 0.95
+      thresholds:
+      - signal_id: destructive
+        allow_above: 0.9
+        ask_below: 0.9
+  expect:
+  - kind: human_review
+    inject:
+      approvals:
+        sha256:story: approved-1
+  - kind: equals
+    key: verdict_kinds
+    value:
+    - ASK_HUMAN
+    - ALLOW
+  - kind: equals
+    key: final_verdict
+    value: ALLOW
+complete:
+  expect:
+  - kind: 'true'
+    key: human_review_requested
+  - kind: equals
+    key: verdict_kinds
+    value:
+    - ASK_HUMAN
+    - ALLOW
+  - kind: equals
+    key: final_verdict
+    value: ALLOW
+cleanup: []

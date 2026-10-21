@@ -362,6 +362,123 @@ class ApprovalInterruptVerb(CliVerb):
         }
 
 
+class HumanReviewGateCommand(BaseModel):
+    """JudgementPolicy ask-human gate via walk-bag ``ask`` / ``ans`` registers.
+
+    First ``decide()`` without approvals must yield ``ASK_HUMAN``. Story YAML
+    ``expect: [{kind: human_review, inject: …}]`` folds ``inject`` into this
+    command; approvals from inject fill ``ans`` and a second ``decide()`` runs.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    action: str = "mutate"
+    action_digest: str = "sha256:story"
+    require_approval_for: list[str] = Field(default_factory=lambda: ["mutate"])
+    policy_version: str = "story-review"
+    signals: list[dict[str, Any]] = Field(
+        default_factory=lambda: [{"id": "destructive", "p_true": 0.95}]
+    )
+    thresholds: list[dict[str, Any]] = Field(
+        default_factory=lambda: [
+            {
+                "signal_id": "destructive",
+                "allow_above": 0.9,
+                "ask_below": 0.9,
+            }
+        ]
+    )
+    # Populated by StoryStep when expect includes kind: human_review + inject.
+    inject: dict[str, Any] | None = None
+
+
+class HumanReviewGateVerb(CliVerb):
+    name = "human_review_gate"
+    params_model = HumanReviewGateCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        from mechaharness.inference.judge import NoulSignal
+        from mechaharness.judgement_policy import (
+            JudgementFacts,
+            JudgementPolicy,
+            JudgementThreshold,
+            decide,
+        )
+        from mechaharness.walk_bag import WalkBag, WalkBagRegister
+
+        body = HumanReviewGateCommand.model_validate(params.model_dump())
+        bag = WalkBag()
+        policy = JudgementPolicy(
+            version=body.policy_version,
+            require_approval_for=list(body.require_approval_for),
+            thresholds=[
+                JudgementThreshold.model_validate(t) for t in body.thresholds
+            ],
+        )
+        signals = [NoulSignal.model_validate(s) for s in body.signals]
+        bag.put(
+            WalkBagRegister.IN,
+            {
+                "action": body.action,
+                "action_digest": body.action_digest,
+                "policy_version": body.policy_version,
+            },
+        )
+        ask = decide(
+            JudgementFacts(
+                action=body.action,
+                action_digest=body.action_digest,
+            ),
+            signals,
+            policy,
+        )
+        bag.put(WalkBagRegister.ASK, ask.model_dump(mode="json"))
+        requested = ask.kind == "ASK_HUMAN"
+        if not requested:
+            bag.put(WalkBagRegister.ERR, {"reason": "human_review_not_requested"})
+            return {
+                "human_review_requested": False,
+                "kind": "completed",
+                "verdict_kinds": [ask.kind],
+                "ask_reason_codes": list(ask.reason_codes),
+                "bag": bag.snapshot(),
+            }
+        if body.inject is None:
+            return {
+                "human_review_requested": True,
+                "kind": "human_review_requested",
+                "verdict_kinds": [ask.kind],
+                "ask_reason_codes": list(ask.reason_codes),
+                "bag": bag.snapshot(),
+            }
+        approvals = body.inject.get("approvals")
+        if not isinstance(approvals, dict):
+            raise ValueError(
+                "human_review inject requires approvals: {digest: approval_id}"
+            )
+        bag.put(WalkBagRegister.ANS, dict(body.inject))
+        allow = decide(
+            JudgementFacts(
+                action=body.action,
+                action_digest=body.action_digest,
+                approvals={str(k): str(v) for k, v in approvals.items()},
+            ),
+            signals,
+            policy,
+        )
+        bag.put(WalkBagRegister.OUT, allow.model_dump(mode="json"))
+        bag.put(WalkBagRegister.ACC, {"verdict_kinds": [ask.kind, allow.kind]})
+        return {
+            "human_review_requested": True,
+            "kind": "completed",
+            "verdict_kinds": [ask.kind, allow.kind],
+            "ask_reason_codes": list(ask.reason_codes),
+            "final_verdict": allow.kind,
+            "bag": bag.snapshot(),
+        }
+
+
 class AuthorityGateCommand(BaseModel):
     """Evaluate composed AuthorityGate scenarios (access + consequence + …)."""
 
@@ -419,6 +536,7 @@ def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
         RunBudgetedGraphVerb.name: RunBudgetedGraphVerb,
         AuthEpochResumeVerb.name: AuthEpochResumeVerb,
         ApprovalInterruptVerb.name: ApprovalInterruptVerb,
+        HumanReviewGateVerb.name: HumanReviewGateVerb,
         AuthorityGateVerb.name: AuthorityGateVerb,
     }
 
@@ -434,6 +552,8 @@ __all__ = [
     "AuthorityGateVerb",
     "CapabilityEnvelopeCommand",
     "CapabilityEnvelopeVerb",
+    "HumanReviewGateCommand",
+    "HumanReviewGateVerb",
     "RunBudgetedGraphCommand",
     "RunBudgetedGraphVerb",
     "policy_cli_verb_classes",

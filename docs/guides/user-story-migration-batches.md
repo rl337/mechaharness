@@ -205,7 +205,7 @@ _Historical list. Work via [G3](./user-story-recipe-expansion.md)
 - [x] `fangore_capability_envelope_narrow`
 - [x] `fangore_compound_grants`
 - [x] `fangore_config_access_policy`
-- [ ] `fangore_human_review_pending`
+- [x] `fangore_human_review_pending`
 - [ ] `fangore_insp_alert_escalation_rules`
 - [x] `fangore_insp_approval_interrupt`
 - [x] `fangore_insp_auth_epoch_resume`

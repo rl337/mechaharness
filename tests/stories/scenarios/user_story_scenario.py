@@ -98,11 +98,48 @@ class StoryStep(BaseModel):
 
     def to_command(self) -> CliParsedCommand:
         raw = dict(self.do)
+        # Fold expect human_review.inject into the verb params so the product
+        # façade can answer ask→ans on the walk bag during the same step.
         if self.expect is not None:
+            inject = _human_review_inject(self.expect)
+            if inject is not None:
+                verb = next(iter(raw))
+                params = raw[verb]
+                if params is None:
+                    params = {}
+                if not isinstance(params, dict):
+                    raise ValueError(
+                        f"step.do.{verb} must be a mapping to accept human_review inject"
+                    )
+                merged = dict(params)
+                if "inject" in merged and merged["inject"] != inject:
+                    raise ValueError(
+                        "step.do inject conflicts with expect human_review.inject"
+                    )
+                merged["inject"] = inject
+                raw = {verb: merged}
             raw["expect"] = self.expect
         if self.expect_error is not None:
             raw["expect_error"] = self.expect_error
         return parse_cli_commands([raw])[0]
+
+
+def _human_review_inject(expect: list[dict[str, Any]]) -> dict[str, Any] | None:
+    found: dict[str, Any] | None = None
+    for index, item in enumerate(expect):
+        if not isinstance(item, dict) or item.get("kind") != "human_review":
+            continue
+        inject = item.get("inject")
+        if inject is None:
+            continue
+        if not isinstance(inject, dict):
+            raise ValueError(
+                f"expect[{index}].inject must be a mapping when kind is human_review"
+            )
+        if found is not None:
+            raise ValueError("at most one expect human_review.inject per step")
+        found = dict(inject)
+    return found
 
 
 class CompleteBlock(BaseModel):
