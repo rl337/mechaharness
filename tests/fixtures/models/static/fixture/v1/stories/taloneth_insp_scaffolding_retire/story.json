@@ -2,10 +2,10 @@
   "id": "taloneth_insp_scaffolding_retire",
   "persona": "taloneth",
   "title": "Retire scaffolding that loses a controlled experiment",
-  "kind": "cli",
-  "narrative": "Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1[^insp-r01].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1[^insp-r01].",
   "implementation": "`HarnessExperiment` / `HarnessExperimentRunner` in `mechaharness.harness_experiment` express interventions as hypotheses with expected metrics, compare with/without arms, and list retirement candidates. Integrates with `ResearchLab` for offline evaluation. Trace fields expose experiment id, harness version, and assignment.",
-  "validation": "Harness `cli` `probe` loads `plans/harness_experiment_retire.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r01",

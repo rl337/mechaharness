@@ -2,10 +2,10 @@
   "id": "taloneth_insp_eval_claims",
   "persona": "taloneth",
   "title": "Compose typed evaluation claims without opaque scores",
-  "kind": "cli",
-  "narrative": "Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].",
   "implementation": "`Evidence`, `Claim`, and `compose_claims` in `mechaharness.eval_evidence` provide typed evidence pointers and binary assertion composition.",
-  "validation": "Harness `cli` `probe` loads `plans/eval_claims_compose.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "anth-evals-claims",

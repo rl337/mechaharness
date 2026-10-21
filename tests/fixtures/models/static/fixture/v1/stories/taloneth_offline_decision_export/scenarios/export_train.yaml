@@ -1,19 +1,43 @@
-# Plan document: ../plans/export_train.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/export_train.yaml
-expect:
-- kind: equals
-  key: record_count
-  value: 2
-- kind: 'false'
-  key: outcomes_leaked
-- kind: exactly
-  key: lineage
-  value:
-  - d1
-  - d2
-- kind: equals
-  key: split
-  value: train
+# user story: taloneth_offline_decision_export
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    offline_decision_export:
+      records:
+      - eventId: d1
+        stateHash: h1
+        policyVersion: p1
+        verdict: ALLOW
+        outcomeId: late-success
+        allowedCandidates:
+        - a
+        - b
+        excludedCandidates:
+          c: unauthorized
+      - eventId: d2
+        stateHash: h2
+        policyVersion: p1
+        verdict: ASK_HUMAN
+        terminationReason: interrupted
+        outcomeId: null
+      split: train
+      include_outcomes: false
+complete:
+  expect:
+  - kind: equals
+    key: record_count
+    value: 2
+  - kind: 'false'
+    key: outcomes_leaked
+  - kind: exactly
+    key: lineage
+    value:
+    - d1
+    - d2
+  - kind: equals
+    key: split
+    value: train
+cleanup: []

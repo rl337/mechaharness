@@ -2,10 +2,10 @@
   "id": "taloneth_insp_cross_harness_failure",
   "persona": "taloneth",
   "title": "Separate semantic task failure from invalid tool protocol",
-  "kind": "cli",
-  "narrative": "Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes[^fineenvs-xharness].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes[^fineenvs-xharness].",
   "implementation": "`CrossHarnessFailure` and `classify_cross_harness_failure` in `mechaharness.cross_harness_failure` emit taxonomy kinds usable as claims inside matrix cells.",
-  "validation": "Harness `cli` `probe` loads `plans/cross_harness_failure_classify.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-xharness",

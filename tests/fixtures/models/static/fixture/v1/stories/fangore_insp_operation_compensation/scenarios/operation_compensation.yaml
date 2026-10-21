@@ -1,11 +1,19 @@
-# Plan document: ../plans/operation_compensation.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/operation_compensation.yaml
-expect:
-- kind: 'true'
-  key: idempotent
-- kind: equals
-  key: compensation_strategy
-  value: noop_if_clean
+# user story: fangore_insp_operation_compensation
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    operation_compensation:
+      name: cleanup
+      idempotent: true
+      compensation_strategy: noop_if_clean
+complete:
+  expect:
+  - kind: 'true'
+    key: idempotent
+  - kind: equals
+    key: compensation_strategy
+    value: noop_if_clean
+cleanup: []

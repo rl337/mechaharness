@@ -1,12 +1,24 @@
-# Plan document: ../plans/named_matched_flavors.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/named_matched_flavors.yaml
-expect:
-- kind: 'true'
-  key: default_is_inference
-- kind: 'true'
-  key: flavor_selected
-- kind: 'true'
-  key: matched_selects_flavor
+# user story: fangore_completer_flavors
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    check_completer_flavors:
+      flavor_tags:
+      - reason
+      - code
+      - deep
+      matched_required:
+      - reason
+      - code
+complete:
+  expect:
+  - kind: 'true'
+    key: default_is_inference
+  - kind: 'true'
+    key: flavor_selected
+  - kind: 'true'
+    key: matched_selects_flavor
+cleanup: []

@@ -2,10 +2,10 @@
   "id": "taloneth_policy_replay",
   "persona": "taloneth",
   "title": "Replay product policy from recorded facts and signals",
-  "kind": "cli",
-  "narrative": "Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools \u2014 so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: `nubble_insp_review_audit_reconstruct`[^insp-dots-09-replay].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools \u2014 so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: `nubble_insp_review_audit_reconstruct`[^insp-dots-09-replay].",
   "implementation": "`replay_verdict` in `mechaharness.decision_log` re-runs `decide()` on recorded facts/signals/policy for deterministic audits.\n\nCovers: OBS-03.",
-  "validation": "Harness `cli` `probe` loads `plans/replay_allow.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-dots-09-replay",

@@ -1,10 +1,38 @@
-# Plan document: ../plans/harness_fingerprint_digest.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/harness_fingerprint_digest.yaml
-expect:
-- kind: 'true'
-  key: digests_differ
-- kind: 'true'
-  key: has_fingerprint
+# user story: taloneth_insp_harness_fingerprint
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    harness_fingerprint_digest:
+      summary:
+        model: model@r1
+        score: 0.9
+      a:
+        model_revision: model@r1
+        harness_family: react
+        harness_version: '2026.10'
+        config_fingerprint: cfg:aaa
+        tool_surface:
+        - Read
+        evaluator_id: demo:exists
+        environment_profile: local
+        task_id: task-1
+      b:
+        model_revision: model@r1
+        harness_family: react
+        harness_version: '2026.10'
+        config_fingerprint: cfg:bbb
+        tool_surface:
+        - Read
+        evaluator_id: demo:exists
+        environment_profile: local
+        task_id: task-1
+complete:
+  expect:
+  - kind: 'true'
+    key: digests_differ
+  - kind: 'true'
+    key: has_fingerprint
+cleanup: []

@@ -2,10 +2,10 @@
   "id": "fangore_insp_instruction_gotchas",
   "persona": "fangore",
   "title": "Measure gotcha trigger rates before promoting them",
-  "kind": "cli",
-  "narrative": "Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8[^insp-r08].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8[^insp-r08].",
   "implementation": "`InstructionCatalog` / `InstructionComponent` track trigger, use, over/under rates; `promote` moves proposed gotchas to active after evaluation.",
-  "validation": "Harness `cli` `probe` loads `plans/instruction_gotcha_metrics.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r08",

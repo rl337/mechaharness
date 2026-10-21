@@ -23,6 +23,20 @@ from tests.stories.cli_probes.clock_verbs import clock_cli_verb_classes
 from tests.stories.cli_probes.probe_verb import ProbeVerb
 
 
+def _probe_as_verb(probe_cls: type[CliProbe]) -> type[CliVerb]:
+    """Expose a story probe as a first-class verb for ``user_story`` walks."""
+
+    class _V(CliVerb):
+        async def run(self, params, runtime):  # type: ignore[no-untyped-def]
+            return await probe_cls().run(params, runtime)
+
+    _V.name = probe_cls.name
+    _V.params_model = probe_cls.params_model
+    _V.__name__ = f"{probe_cls.name}_verb"
+    _V.__qualname__ = _V.__name__
+    return _V
+
+
 class _CliMaps:
     def __init__(
         self,
@@ -108,6 +122,12 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         verbs = dict(super().cli_verb_classes())
         verbs.update(clock_cli_verb_classes())
         verbs[ProbeVerb.name] = ProbeVerb
+        # Promote remaining probes so migrated user_story YAML can call them
+        # without the ``probe:`` wrapper (G2/G5/G7). Prefer src product verbs
+        # when both exist.
+        for name, probe_cls in self.cli_probe_classes().items():
+            if name not in verbs:
+                verbs[name] = _probe_as_verb(probe_cls)
         return verbs
 
     def cli_probe_classes(self) -> dict[str, type[CliProbe]]:

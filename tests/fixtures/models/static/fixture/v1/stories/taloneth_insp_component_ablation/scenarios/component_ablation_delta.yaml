@@ -1,9 +1,20 @@
-# Plan document: ../plans/component_ablation_delta.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/component_ablation_delta.yaml
-expect:
-- kind: equals
-  key: success_delta
-  value: -0.3
+# user story: taloneth_insp_component_ablation
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    component_ablation_delta:
+      baseline_fingerprint: full
+      disabled_component_ids:
+      - advisor
+      task_corpus_ref: c1
+      baseline_success_rate: 0.8
+      ablated_success_rate: 0.5
+complete:
+  expect:
+  - kind: equals
+    key: success_delta
+    value: -0.3
+cleanup: []

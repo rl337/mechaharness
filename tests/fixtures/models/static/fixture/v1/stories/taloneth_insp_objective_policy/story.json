@@ -2,10 +2,10 @@
   "id": "taloneth_insp_objective_policy",
   "persona": "taloneth",
   "title": "Require an explicit policy before collapsing evaluator signals",
-  "kind": "cli",
-  "narrative": "Taloneth refuses silent weighted blends of verifier scores and wants gates and formula version written into the result. Accepts FineEnvs reward aggregation guidance[^fineenvs-objective].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth refuses silent weighted blends of verifier scores and wants gates and formula version written into the result. Accepts FineEnvs reward aggregation guidance[^fineenvs-objective].",
   "implementation": "`ObjectivePolicy` and `aggregate_objective` in `mechaharness.objective_policy` record component signals, formula, version, gates, and prerequisites on every scalar objective.",
-  "validation": "Harness `cli` `probe` loads `plans/objective_policy_aggregate.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-objective",

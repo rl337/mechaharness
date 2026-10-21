@@ -2,10 +2,10 @@
   "id": "taloneth_insp_experiment_dimensions",
   "persona": "taloneth",
   "title": "Declare fixed and varying harness experiment dimensions",
-  "kind": "cli",
-  "narrative": "Taloneth needs every harness experiment to state which configuration axes are fixed and which vary, with a reproducible digest on traces. Accepts FineEnvs harness-overfitting axes guidance[^fineenvs-dims].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs every harness experiment to state which configuration axes are fixed and which vary, with a reproducible digest on traces. Accepts FineEnvs harness-overfitting axes guidance[^fineenvs-dims].",
   "implementation": "`ExperimentDimensions` and `require_dimension_trace_fields` in `mechaharness.experiment_dimensions` canonicalize fixed/varying axes into a digest.",
-  "validation": "Harness `cli` `probe` loads `plans/experiment_dimensions_digest.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-dims",

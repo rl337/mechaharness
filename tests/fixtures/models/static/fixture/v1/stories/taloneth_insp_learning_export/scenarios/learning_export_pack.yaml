@@ -1,12 +1,20 @@
-# Plan document: ../plans/learning_export_pack.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/learning_export_pack.yaml
-expect:
-- kind: equals
-  key: schema_version
-  value: '1'
-- kind: equals
-  key: harness_fingerprint
-  value: fp:1
+# user story: taloneth_insp_learning_export
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    learning_export_pack:
+      harness_fingerprint: fp:1
+      rollout_graph_ref: rollout:1
+      split: train
+complete:
+  expect:
+  - kind: equals
+    key: schema_version
+    value: '1'
+  - kind: equals
+    key: harness_fingerprint
+    value: fp:1
+cleanup: []

@@ -1,13 +1,20 @@
-# Plan document: ../plans/sparse_advisor.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/sparse_advisor.yaml
-expect:
-- kind: 'true'
-  key: first_consult_ok
-- kind: 'true'
-  key: second_consult_blocked
-- kind: equals
-  key: observation_count
-  value: 1
+# user story: fangore_insp_sparse_advisor
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    sparse_advisor:
+      max_consultations: 1
+      trigger: consequential_planning
+complete:
+  expect:
+  - kind: 'true'
+    key: first_consult_ok
+  - kind: 'true'
+    key: second_consult_blocked
+  - kind: equals
+    key: observation_count
+    value: 1
+cleanup: []

@@ -1,11 +1,18 @@
-# Plan document: ../plans/consequence_risk_scale.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/consequence_risk_scale.yaml
-expect:
-- kind: 'true'
-  key: requires_stronger_controls
-- kind: equals
-  key: approval_frequency
-  value: 1.0
+# user story: fangore_insp_risk_autonomy
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    consequence_risk_scale:
+      action: fs.write
+      consequence: high
+complete:
+  expect:
+  - kind: 'true'
+    key: requires_stronger_controls
+  - kind: equals
+    key: approval_frequency
+    value: 1.0
+cleanup: []
