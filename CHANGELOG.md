@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `DecisionPlaneRecipeAdapter` (`run_recipe`). Restores
   `fangore_decision_plane_{projection,policy,shadow,telemetry}` and promotes
   recipe / model_policy stories off instantiate-only (G0).
+- **`verify_repair` / `bounded_retry` execute:** fixture runners +
+  `VerifyRepairRecipeAdapter` / `BoundedRetryRecipeAdapter` promote those
+  stories to `run_recipe` outcome walks (G1 batch 1).
 
 ### Removed
 

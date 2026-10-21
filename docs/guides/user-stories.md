@@ -435,21 +435,21 @@ Harness `cli` `probe` loads `plans/verify_repair_succeeds.yaml` (human-readable 
 
 [^insp-repair]: [Inspiration requirements (verification loops)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification is part of execution; structured enough to route repair
 
-### `fangore_bounded_retry_recipe` — Expand a bounded-retry Agentic Recipe with explicit escalation
+### `fangore_bounded_retry_recipe` — Run a bounded-retry Agentic Recipe with visible escalation
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `bounded_retry` recipe. Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_tdr_crash_before_intent` and sibling TDR crash-window stories. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `bounded_retry` with three fixture attempts that succeed on the last try, runs `run_recipe`, and verifies attempt_count, success without escalation, and the repeating attempt stop contract. Must compose with durable external-effect recovery from TDR crash-window stories. [^rc-bounded-retry]
 
 #### Implementation
 
-Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt → classify → permit_retry → backoff with a terminal escalate node and a StopContract on the repeating attempt. Attempt payloads carry deliberate attempt context and an effect-reconciliation flag (RT-01..05).
+Agentic Recipe `bounded_retry` via `BoundedRetryTemplate` / `bounded_retry_runner` and product verb `run_recipe` (`BoundedRetryRecipeAdapter`).
 
 #### Validation
 
-Harness `user_story` scenario `bounded_retry_recipe.yaml`: environment + graph + steps + complete expects.
+Harness `user_story` scenario `bounded_retry_recipe.yaml` drives `run_recipe`; expects attempt_count / attempt_succeeded / escalated plus shape keys.
 
 #### Footnotes
 
-1. [Recipes requirements (bounded retry)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — RT-01..05 reference recipe
+[^rc-bounded-retry]: [Recipes requirements (bounded retry)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — RT-01..05 reference recipe
 
 ### `fangore_capability_envelope_narrow` — Narrow child capability envelopes without silent inheritance
 
@@ -2275,17 +2275,17 @@ Harness `user_story` scenario `traversal_contract.yaml`: environment + graph + s
 
 [^june-nc-trav]: [Node components reference](https://github.com/rl337/mechaharness/blob/main/docs/reference/node-components.md) — Traversal section
 
-### `fangore_verify_repair_recipe` — Tile the verify-repair Agentic Recipe into a plan
+### `fangore_verify_repair_recipe` — Run the verify-repair Agentic Recipe until verification succeeds
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `verify_repair` recipe. Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair are visible graph steps with an explicit stop. Complements `fangore_bounded_repair_loop` for loop helper semantics. Native recipe contract for personal-agent MH-PA-03. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^insp-pa-03-verify]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `verify_repair` with a fixture artifact that fails the first verify, runs `run_recipe`, and verifies one repair attempt makes verification succeed under the stop contract. Complements `fangore_bounded_repair_loop` for loop helper semantics. [^insp-pa-03-verify]
 
 #### Implementation
 
-Agentic Recipe `verify_repair` (`VerifyRepairTemplate`) builds produce → verify → bounded repair → complete. Soft points bind runner kinds and stop contracts; instantiate stamps catalog provenance.
+Agentic Recipe `verify_repair` via `VerifyRepairTemplate` / `verify_repair_runner` and product verb `run_recipe` (`VerifyRepairRecipeAdapter`).
 
 #### Validation
 
-Harness `user_story` scenario `verify_repair_recipe.yaml`: environment + graph + steps + complete expects.
+Harness `user_story` scenario `verify_repair_recipe.yaml` drives `run_recipe`; expects verification_passed, repair_attempts, final_status plus shape keys.
 
 #### Footnotes
 
