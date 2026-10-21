@@ -292,10 +292,9 @@ class AuthEpochResumeVerb(CliVerb):
         graph.add_node(GraphNode(id="a", kind="compute"))
 
         def envelope(epoch: int) -> CapabilityEnvelope:
-            if runtime.capability_envelope is not None:
-                return runtime.capability_envelope.model_copy(
-                    update={"authorization_epoch": epoch}
-                )
+            parent = runtime.capability_envelope
+            if isinstance(parent, CapabilityEnvelope):
+                return parent.model_copy(update={"authorization_epoch": epoch})
             return CapabilityEnvelope(
                 grants=["core:graph.execute"], authorization_epoch=epoch
             )
