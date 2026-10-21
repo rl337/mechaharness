@@ -94,6 +94,7 @@ class UserStoryHarness:
         rag_retriever = self._build_rag_retriever(case, scenario)
         lifecycle_extensions = self._build_lifecycle_extensions(scenario)
 
+        access_kw = self._access_budget_kwargs(env)
         if env.backend == "anthropic":
             return self._anthropic_config(
                 backend,
@@ -103,6 +104,7 @@ class UserStoryHarness:
                 family=env.family,
                 judge_provider=judge_provider,
                 rag_retriever=rag_retriever,
+                access_kw=access_kw,
             )
         if env.backend == "openai_compat":
             return self._openai_compat_config(
@@ -113,6 +115,7 @@ class UserStoryHarness:
                 family=env.family,
                 judge_provider=judge_provider,
                 rag_retriever=rag_retriever,
+                access_kw=access_kw,
             )
         if env.backend != "mock":
             raise AssertionError(
@@ -132,7 +135,32 @@ class UserStoryHarness:
             judge_provider=judge_provider,
             rag_retriever=rag_retriever,
             lifecycle_extensions=lifecycle_extensions,
+            **access_kw,
         )
+
+    def _access_budget_kwargs(self, env: EnvironmentBlock) -> dict:
+        from mechaharness.host_run_policies import (
+            access_policy_from_mapping,
+            budget_policy_from_mapping,
+            capability_envelope_from_mapping,
+        )
+
+        kwargs: dict = {}
+        if env.access_policy is not None:
+            kwargs["access_policy"] = access_policy_from_mapping(env.access_policy)
+        elif env.grants is not None:
+            kwargs["grants"] = list(env.grants)
+        envelope = capability_envelope_from_mapping(
+            env.capability_envelope,
+            grants=env.grants,
+            authorization_epoch=env.authorization_epoch,
+        )
+        if envelope is not None:
+            kwargs["capability_envelope"] = envelope
+        budget = budget_policy_from_mapping(env.budget)
+        if budget is not None:
+            kwargs["budget_policy"] = budget
+        return kwargs
 
     def _build_judge_provider(
         self,
@@ -287,6 +315,7 @@ class UserStoryHarness:
         family: str,
         judge_provider: JudgeProvider | None = None,
         rag_retriever: object | None = None,
+        access_kw: dict | None = None,
     ) -> TestHarnessCliConfig:
         from mechaharness.rag import RagRetriever
 
@@ -316,6 +345,7 @@ class UserStoryHarness:
             harness_family=family,
             judge_provider=judge_provider,
             rag_retriever=rag_retriever if isinstance(rag_retriever, RagRetriever) else None,
+            **(access_kw or {}),
         )
 
     def _anthropic_config(
@@ -328,6 +358,7 @@ class UserStoryHarness:
         family: str,
         judge_provider: JudgeProvider | None = None,
         rag_retriever: object | None = None,
+        access_kw: dict | None = None,
     ) -> TestHarnessCliConfig:
         from mechaharness.rag import RagRetriever
 
@@ -357,4 +388,5 @@ class UserStoryHarness:
             harness_family=family,
             judge_provider=judge_provider,
             rag_retriever=rag_retriever if isinstance(rag_retriever, RagRetriever) else None,
+            **(access_kw or {}),
         )

@@ -202,14 +202,14 @@ _`tool_lifecycle` + host-bound extensions — see
 _Historical list. Work via [G3](./user-story-recipe-expansion.md)
 (authority gates on product graphs), not probe wrappers._ · **17** stories
 
-- [ ] `fangore_capability_envelope_narrow`
-- [ ] `fangore_compound_grants`
-- [ ] `fangore_config_access_policy`
+- [x] `fangore_capability_envelope_narrow`
+- [x] `fangore_compound_grants`
+- [x] `fangore_config_access_policy`
 - [ ] `fangore_human_review_pending`
 - [ ] `fangore_insp_alert_escalation_rules`
-- [ ] `fangore_insp_approval_interrupt`
-- [ ] `fangore_insp_auth_epoch_resume`
-- [ ] `fangore_insp_authority_gate`
+- [x] `fangore_insp_approval_interrupt`
+- [x] `fangore_insp_auth_epoch_resume`
+- [x] `fangore_insp_authority_gate`
 - [ ] `fangore_insp_cross_task_isolation`
 - [ ] `fangore_insp_denial_equivalence`
 - [ ] `fangore_insp_effect_revalidation`
@@ -282,10 +282,10 @@ _Historical list. Durable/budget execute
 - [ ] `fangore_graph_executor`
 - [ ] `fangore_graph_linkage_preflight`
 - [ ] `fangore_host_kit_submit_once`
-- [ ] `fangore_insp_budget_subgraph_rollup`
+- [x] `fangore_insp_budget_subgraph_rollup`
 - [ ] `fangore_insp_durable_resume`
 - [ ] `fangore_insp_dynamic_subgraph`
-- [ ] `fangore_insp_graph_budget`
+- [x] `fangore_insp_graph_budget`
 - [ ] `fangore_insp_graph_transitions`
 - [ ] `fangore_insp_linkage_preflight`
 - [ ] `fangore_insp_soft_vs_hard`

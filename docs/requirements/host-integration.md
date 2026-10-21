@@ -74,9 +74,25 @@ from GitHub `main` after MechaHarness releases that change public host APIs,
 correlators, or promote guidance. Stale copies are a host ops concern;
 upstream keeps `agent-skills/` accurate in the same change as API shifts.
 
+### HOST-08: Authorization and budget on recipe runs
+
+Hosts MUST be able to supply both an **authorization policy** (`grants` /
+`AccessPolicy` / `CapabilityEnvelope`) and a **budget policy** (or live
+`Budget`) when running recipes — via Config hooks and/or
+`run_recipe(..., grants=|access_policy=, budget_policy=, envelope=?)`.
+
+Defaults (host-kit permissive grants + `BudgetPolicy.unlimited()`) are
+intentional no-ops. Hosts that need deny-by-default or spend ceilings MUST
+pass policies; they MUST NOT assume unlimited spend when a ceiling is
+required. SoftPoint `kind="budget"` is stop/turns, not `BudgetPolicy`.
+
+See [Access control](../reference/access.md) and [Budget](../reference/budget.md).
+
 ## See also
 
 - [Agent skills for your project](../guides/agent-skills.md)
 - [Dependency injection](../guides/dependency-injection.md)
 - [Inspiration primitives](../reference/inspiration-primitives.md)
 - [Event analytics schema](./event-analytics-schema.md)
+- [Access control](../reference/access.md)
+- [Budget](../reference/budget.md)

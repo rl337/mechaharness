@@ -103,7 +103,8 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [HTTP API reference](./reference/api.md) | FastAPI routes |
 | [Event log](./reference/events.md) | Structured `EventLog` emit / query |
 | [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
-| [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, `core:access_check` |
+| [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, host recipe-run kwargs |
+| [Budget](./reference/budget.md) | Soft/hard spend, `BudgetPolicy`, recipe-run ceilings |
 | [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
 | [Graph templates and Agentic Recipes](./reference/graph-templates.md) | Recipe catalog + `GraphTemplate` substrate + soft points |
 | [Durable graph generators](./reference/durable-graph-generators.md) | `DurableGraphGenerator` start/resume/inspect; ScriptedDriver |

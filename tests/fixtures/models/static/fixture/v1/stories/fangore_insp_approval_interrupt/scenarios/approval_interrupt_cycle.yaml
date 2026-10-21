@@ -1,15 +1,24 @@
-# Plan document: ../plans/approval_interrupt_cycle.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/approval_interrupt_cycle.yaml
-expect:
-- kind: equals
-  key: initial_status
-  value: pending
-- kind: equals
-  key: final_status
-  value: approved
-- kind: contains
-  key: actor_contains
-  value: ops@acme
+# user story: fangore_insp_approval_interrupt
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    approval_interrupt:
+      reason: Deploy to production
+      decision: approve
+      actor: ops@acme
+      checkpoint: ckpt:1
+complete:
+  expect:
+  - kind: equals
+    key: initial_status
+    value: pending
+  - kind: equals
+    key: final_status
+    value: approved
+  - kind: contains
+    key: actor_contains
+    value: ops@acme
+cleanup: []

@@ -18,6 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from pyiv.time import DateTimeService, MockDateTimeService
 
 from mechaharness.budget import BudgetPolicy
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.cli_commands import (
     AdvanceClockCommand,
     InferCommand,
@@ -36,7 +37,12 @@ from mechaharness.cli_verb import (
 from mechaharness.cli_verb import (
     script_from_mapping as _script_from_mapping,
 )
-from mechaharness.core.access import CostAccountant, InMemoryCostAccountant
+from mechaharness.core.access import (
+    AccessControl,
+    CostAccountant,
+    GrantPolicyLike,
+    InMemoryCostAccountant,
+)
 from mechaharness.core.completer import Completer
 from mechaharness.core.events import (
     AgentRef,
@@ -59,6 +65,7 @@ from mechaharness.durable_generator_script import (
 from mechaharness.graph_executor import GraphNodeRunnerRegistry
 from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.host_kit import host_graph_executor, tapping_event_log
+from mechaharness.host_run_policies import resolve_run_budget
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
 from mechaharness.node_component import traversal_from_events
@@ -214,6 +221,8 @@ class _CliToolLoopConfig(MechaHarnessConfig):
         event_log: EventLog,
         agent_id: str,
         harness_family: str = "tool_loop",
+        grants: list[object] | None = None,
+        access_policy: GrantPolicyLike | None = None,
     ) -> None:
         self._completer = completer
         self._tools = tools
@@ -221,6 +230,8 @@ class _CliToolLoopConfig(MechaHarnessConfig):
         self._provided_event_log = event_log
         self._agent_id = agent_id
         self._harness_family = harness_family
+        self._grants = grants
+        self._access_policy = access_policy
         super().__init__()
 
     def get_inference_class(self) -> type[InferenceStrategy]:
@@ -250,6 +261,18 @@ class _CliToolLoopConfig(MechaHarnessConfig):
     def get_event_log(self) -> EventLog | None:
         return self._provided_event_log
 
+    def get_grants(self) -> list[object]:
+        if self._grants is not None:
+            return list(self._grants)
+        if self._access_policy is not None:
+            return list(self._access_policy.grants)
+        return super().get_grants()
+
+    def get_access_policy(self) -> GrantPolicyLike:
+        if self._access_policy is not None:
+            return self._access_policy
+        return super().get_access_policy()
+
     def configure(self) -> None:
         super().configure()
         if isinstance(self._completer, InferenceStrategy):
@@ -274,6 +297,11 @@ class CliInstrumentor:
         judge_provider: JudgeProvider | None = None,
         rag_retriever: Any | None = None,
         lifecycle_extensions: dict[str, Any] | None = None,
+        access_control: AccessControl | None = None,
+        capability_envelope: CapabilityEnvelope | None = None,
+        budget_policy: BudgetPolicy | None = None,
+        grants: Sequence[object] | None = None,
+        access_policy: GrantPolicyLike | None = None,
     ) -> None:
         self._completer = completer
         self._model = model
@@ -286,6 +314,11 @@ class CliInstrumentor:
         self._recipe_adapters = dict(recipe_adapters)
         self._tapped_types: list[str] = []
         self._datetime = datetime_service
+        self._access_control = access_control
+        self._capability_envelope = capability_envelope
+        self._budget_policy = budget_policy
+        self._grants = list(grants) if grants is not None else None
+        self._access_policy = access_policy
         store = event_log or InMemoryEventLog()
         stamped = StampingEventLog(store, self._datetime)
         self._log: EventLog = tapping_event_log(
@@ -303,6 +336,7 @@ class CliInstrumentor:
             runners=GraphNodeRunnerRegistry([self._runner]),
             event_log=self._log,
             agent_id=self._agent_id,
+            grants=self._grants,
         )
         self._durable: DurableInstrumentor | None = None
         self._durable_script: DurableScript | None = None
@@ -335,6 +369,40 @@ class CliInstrumentor:
     @property
     def lifecycle_extensions(self) -> dict[str, Any]:
         return self._lifecycle_extensions
+
+    @property
+    def access_control(self) -> AccessControl | None:
+        return self._access_control
+
+    @property
+    def capability_envelope(self) -> CapabilityEnvelope | None:
+        return self._capability_envelope
+
+    @property
+    def budget_policy(self) -> BudgetPolicy | None:
+        """Host-supplied spend ceiling; ``None`` → unlimited at run sites."""
+        return self._budget_policy
+
+    @property
+    def grants(self) -> list[object] | None:
+        return list(self._grants) if self._grants is not None else None
+
+    @property
+    def access_policy(self) -> GrantPolicyLike | None:
+        return self._access_policy
+
+    def resolve_budget_policy(
+        self,
+        *,
+        explicit: BudgetPolicy | None = None,
+        body_budget: Mapping[str, Any] | None = None,
+    ) -> BudgetPolicy:
+        """Prefer explicit / body override, else instrumentor default, else unlimited."""
+        return resolve_run_budget(
+            explicit=explicit,
+            runtime_default=self._budget_policy,
+            body_budget=body_budget,
+        )
 
     @property
     def event_log(self) -> EventLog:
@@ -495,7 +563,7 @@ class CliInstrumentor:
             graph.nodes[CLI_INFER_NODE_ID].payload["model"] = body.model
         result = await self._executor.run(
             graph,
-            budget_policy=BudgetPolicy.unlimited(),
+            budget_policy=self.resolve_budget_policy(),
         )
         after_events = self._log.query()[before:]
         node = result.graph.nodes.get(CLI_INFER_NODE_ID)
@@ -529,7 +597,12 @@ class CliInstrumentor:
             tools.register(self._tools.get(definition.name))
         if body.tool_name not in tools:
             tools.register(
-                Tool(body.tool_name, lambda: "ok", description="cli tool")
+                Tool(
+                    body.tool_name,
+                    lambda: "ok",
+                    description="cli tool",
+                    grants=list(body.tool_grants or []),
+                )
             )
         config = _CliToolLoopConfig(
             self._completer,
@@ -541,6 +614,8 @@ class CliInstrumentor:
             event_log=self._log,
             agent_id=self._agent_id,
             harness_family=body.family,
+            grants=self._grants,
+            access_policy=self._access_policy,
         )
         harness = get_injector(config).inject(
             AbstractHarness,
@@ -567,6 +642,9 @@ class CliInstrumentor:
             if e.type == "core:cost"
         )
         prompt, completion, total = _token_totals(event_dicts)
+        permission_denied = any(
+            "Permission denied" in (m.content or "") for m in result.messages
+        )
         return CliStepResult(
             verb="tool_loop",
             text=result.final_text,
@@ -580,6 +658,10 @@ class CliInstrumentor:
             clock_iso=self._datetime.now_utc_iso(),
             traversal_kinds=kinds,
             component_parent_ids=parents,
+            fields={
+                "permission_denied": permission_denied,
+                "allowed": not permission_denied and bool((result.final_text or "").strip()),
+            },
         )
 
     async def run_recipe(self, body: RunRecipeCommand) -> CliStepResult:
