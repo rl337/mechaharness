@@ -1572,17 +1572,17 @@ Harness `cli` `probe` loads `plans/operation_compensation.yaml` (human-readable 
 
 [^wl-l12-idem]: [WalkingLabs L12 Clean Session Handoffs](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/) — Idempotency
 
-### `fangore_insp_produce_critique_refine` — Register produce-critique-refine as a reusable recipe contract
+### `fangore_insp_produce_critique_refine` — Run produce-critique-refine as a reusable recipe contract
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `produce_critique_refine` recipe. Reusable subgraphs need typed inputs/outputs, applicability predicates, budgets, and traceable outcomes. Independent review and verify-repair already ship (`fangore_insp_independent_review`, `fangore_verify_repair_recipe`). Produce-critique-refine now ships as its own recipe; an optional three-round council with recorded dissent remains unshipped and non-default. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^insp-pa-03]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs Agentic Recipe `produce_critique_refine` with an isolated critic and bounded refine rounds that clear fixture findings under the stop contract. Independent review and verify-repair already ship. [^insp-pa-03]
 
 #### Implementation
 
-Agentic Recipe `produce_critique_refine` (`ProduceCritiqueRefineTemplate`) builds produce → isolated critique → bounded refine (repeating + StopContract) → complete. Soft points bind runner kinds, `critique_prompt`, `max_rounds`, critic isolation, and acceptance; `critique_prompt` and `max_rounds` are evolvable. Node components: `soft_point` per declared slot on the node that exposes it, plus `stop_contract` on `refine`. Registered in the default catalog.
+Agentic Recipe `produce_critique_refine` via `ProduceCritiqueRefineTemplate` / `produce_critique_refine_runner` and product verb `run_recipe` (`ProduceCritiqueRefineRecipeAdapter`).
 
 #### Validation
 
-Harness `user_story` scenario `produce_critique_refine_recipe.yaml`: environment + graph + steps + complete expects.
+Harness `user_story` scenario `produce_critique_refine_recipe.yaml` drives `run_recipe`; expects shape keys plus rounds_used / findings_cleared.
 
 #### Footnotes
 
@@ -2686,15 +2686,15 @@ Harness `user_story` scenario `parity_mismatch.yaml`: environment + graph + step
 
 ### `taloneth_insp_safety_eval_recipes` — Ship reusable safety evaluation recipes for injection and scope bleed
 
-Taloneth starts the CLI host with family `pass_through` and backend `mock`, and works with the `safety_eval` recipe. Safety evaluation now ships as a reusable recipe: a scenario from a fixture pack is run, an independent reviewer judges the outcome without seeing the agent's reasoning, and a fixed scorer reports outcome, severity, context, and the model and recipe versions. The scenario classes cover prompt injection in tool output, scope bleed, changing authorization, ambiguous consent, ignored warnings, and false-denial controls, so over-refusal is measured next to unsafe compliance. None of its settings can be tuned by an optimizer, so the measuring instrument cannot be tuned to pass. They walk product steps (instantiate_recipe) and verify completion from the structured observation expects on this scenario. [^insp-dots-08] Related: `taloneth_insp_eval_matrix`.
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. They run Agentic Recipe `safety_eval`: a fixture scenario is produced, an isolated reviewer judges without seeing agent reasoning, and a deterministic scorer reports outcome, severity, context, and model/recipe versions. Soft points are not evolvable. Related: `taloneth_insp_eval_matrix`. [^insp-dots-08]
 
 #### Implementation
 
-Agentic Recipe `safety_eval` (`SafetyEvalTemplate` in `graph_templates/safety_eval.py`) builds `produce` → isolated `review` → deterministic `score` and is registered in the default catalog. Soft points bind runner kinds, `scenario_classes`, `review_prompt`, `omit_producer_reasoning`, and `severity_scale`; none are evolvable. Declares a `TemplateIOContract` (`scenario` → `safety_report`). Node components: `soft_point` per slot on the node that exposes it (`produce`: kind + scenario classes; `review`: kind, prompt, isolation; `score`: kind + severity scale). Reference: `docs/reference/graph-templates/safety-eval.md`.
+Agentic Recipe `safety_eval` via `SafetyEvalTemplate` / `safety_eval_runner` and product verb `run_recipe` (`SafetyEvalRecipeAdapter`).
 
 #### Validation
 
-Harness `user_story` scenario `safety_eval_recipe.yaml`: environment + graph + steps + complete expects.
+Harness `user_story` scenario `safety_eval_recipe.yaml` drives `run_recipe`; expects shape keys plus outcome/severity.
 
 #### Footnotes
 
