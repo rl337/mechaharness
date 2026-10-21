@@ -2,9 +2,9 @@
   "id": "taloneth_validator_qualification",
   "persona": "taloneth",
   "title": "Qualify validators before they gate completion",
-  "kind": "cli",
-  "narrative": "Before a schema validator gates done, known-good, known-bad, and missing fixtures must run \u2014 including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see `fangore_refund_verdict`).",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Before a schema validator gates done, known-good, known-bad, and missing fixtures must run \u2014 including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see `fangore_refund_verdict`).",
   "implementation": "`qualify_validator` / `validator_qualified` in `mechaharness.graph` (VER-04). `CliInstrumentor` verb `validator_qualification`.",
-  "validation": "Harness `cli` `probe` loads `plans/honest_vs_weak.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": []
 }

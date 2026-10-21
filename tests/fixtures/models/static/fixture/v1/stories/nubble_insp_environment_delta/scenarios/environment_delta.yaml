@@ -1,9 +1,22 @@
-# Plan document: ../plans/environment_delta.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/environment_delta.yaml
-expect:
-- kind: equals
-  key: cwd
-  value: /tmp
+# user story: nubble_insp_environment_delta
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    environment_delta:
+      before:
+        version: 1
+        data:
+          cwd: /app
+      after:
+        version: 2
+        data:
+          cwd: /tmp
+complete:
+  expect:
+  - kind: equals
+    key: cwd
+    value: /tmp
+cleanup: []

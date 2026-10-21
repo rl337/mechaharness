@@ -2,10 +2,10 @@
   "id": "taloneth_insp_exposure_discriminative",
   "persona": "taloneth",
   "title": "Report unequal exposure and no-learning-signal ties",
-  "kind": "cli",
-  "narrative": "Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings[^fineenvs-exposure].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings[^fineenvs-exposure].",
   "implementation": "`ExposureLedger` in `mechaharness.exposure_accounting` and `discriminative_report` in `mechaharness.discriminative_value` summarize arm exposure and tie telemetry.",
-  "validation": "Harness `cli` `probe` loads `plans/exposure_discriminative_report.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-exposure",

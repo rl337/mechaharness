@@ -2,9 +2,9 @@
   "id": "nubble_repo_topology",
   "persona": "nubble",
   "title": "Budget repository topology maps and fall back when stale",
-  "kind": "cli",
-  "narrative": "Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback \u2014 not pretend the map is complete.",
+  "kind": "user_story",
+  "narrative": "Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback \u2014 not pretend the map is complete.",
   "implementation": "`RepositoryTopologyProvider` builds budgeted `TopologyView` entries with omissions and invalidation; stale maps fall back to source inspection.\n\nCovers: CTX-08.",
-  "validation": "Harness `cli` `probe` loads `plans/repo_topology.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": []
 }

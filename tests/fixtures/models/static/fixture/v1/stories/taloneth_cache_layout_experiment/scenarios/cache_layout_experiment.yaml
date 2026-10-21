@@ -1,8 +1,13 @@
-# Plan document: ../plans/cache_layout_experiment.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/cache_layout_experiment.yaml
-expect:
-- kind: 'true'
-  key: enabled_has_stable_prefix
+# user story: taloneth_cache_layout_experiment
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    cache_layout_experiment: {}
+complete:
+  expect:
+  - kind: 'true'
+    key: enabled_has_stable_prefix
+cleanup: []

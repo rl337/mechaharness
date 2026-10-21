@@ -1,13 +1,24 @@
-# Plan document: ../plans/experiment_dimensions_digest.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/experiment_dimensions_digest.yaml
-expect:
-- kind: 'true'
-  key: has_digest
-- kind: includes
-  key: varying_tools
-  value:
-  - Edit
-  - Read
+# user story: taloneth_insp_experiment_dimensions
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    experiment_dimensions_digest:
+      fixed:
+        model_revision: m@1
+      varying:
+        tool_surface:
+        - Read
+        - Edit
+complete:
+  expect:
+  - kind: 'true'
+    key: has_digest
+  - kind: includes
+    key: varying_tools
+    value:
+    - Edit
+    - Read
+cleanup: []

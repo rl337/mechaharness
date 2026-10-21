@@ -1,9 +1,15 @@
-# Plan document: ../plans/cross_harness_failure_classify.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/cross_harness_failure_classify.yaml
-expect:
-- kind: equals
-  key: kind
-  value: invalid_tool_name
+# user story: taloneth_insp_cross_harness_failure
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    cross_harness_failure_classify:
+      message: unknown tool foobar
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: invalid_tool_name
+cleanup: []

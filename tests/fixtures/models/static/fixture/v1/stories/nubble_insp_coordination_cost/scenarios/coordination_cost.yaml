@@ -1,9 +1,19 @@
-# Plan document: ../plans/coordination_cost.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/coordination_cost.yaml
-expect:
-- kind: equals
-  key: branch_count
-  value: 4
+# user story: nubble_insp_coordination_cost
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    coordination_cost:
+      branch_count: 4
+      wall_clock_critical_path_ms: 5000
+      aggregate_cost_usd: 0.4
+      duplicated_context_tokens: 100
+      fan_in_review_cost_usd: 0.05
+complete:
+  expect:
+  - kind: equals
+    key: branch_count
+    value: 4
+cleanup: []

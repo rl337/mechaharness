@@ -110,7 +110,7 @@ Harness `cli` `probe` loads `plans/warehouse_correlators.yaml` (human-readable p
 
 ### `nubble_insp_coordination_cost` — Report parallel coordination cost on fan-out
 
-Nubble compares wall-clock critical path, duplicated context, and fan-in review cost so parallelism is measured rather than assumed beneficial. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-coord][^wl-p08-coord].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble compares wall-clock critical path, duplicated context, and fan-in review cost so parallelism is measured rather than assumed beneficial. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-coord][^wl-p08-coord].
 
 #### Implementation
 
@@ -118,7 +118,7 @@ Nubble compares wall-clock critical path, duplicated context, and fan-in review 
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/coordination_cost.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -127,7 +127,7 @@ Harness `cli` `probe` loads `plans/coordination_cost.yaml` (human-readable probe
 
 ### `nubble_insp_efficiency_scorecard` — Keep multidimensional efficiency dimensions observable
 
-Nubble needs tool calls, tokens, latency, and coordination cost kept as separate efficiency dimensions rather than a single opaque proxy. Accepts FineEnvs tool-call efficiency observations[^fineenvs-efficiency].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble needs tool calls, tokens, latency, and coordination cost kept as separate efficiency dimensions rather than a single opaque proxy. Accepts FineEnvs tool-call efficiency observations[^fineenvs-efficiency].
 
 #### Implementation
 
@@ -135,7 +135,7 @@ Nubble needs tool calls, tokens, latency, and coordination cost kept as separate
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/efficiency_scorecard_build.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -143,7 +143,7 @@ Harness `cli` `probe` loads `plans/efficiency_scorecard_build.yaml` (human-reada
 
 ### `nubble_insp_environment_delta` — Project environment context as versioned deltas
 
-Nubble sends environment deltas instead of repeating full snapshots while still reconstructing deterministic state. Accepts WalkingLabs Codex guidance[^wl-codex-delta].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble sends environment deltas instead of repeating full snapshots while still reconstructing deterministic state. Accepts WalkingLabs Codex guidance[^wl-codex-delta].
 
 #### Implementation
 
@@ -151,7 +151,7 @@ Nubble sends environment deltas instead of repeating full snapshots while still 
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/environment_delta.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -240,7 +240,7 @@ Harness `cli` `probe` loads `plans/recipe_audit_dimensions.yaml` (human-readable
 
 ### `nubble_insp_resume_cost` — Measure wake-to-productive resume cost
 
-Nubble records how expensive resume is — rebuild tokens, tool calls, and wake-to-first-productive time — so continuity work can be optimized. Accepts WalkingLabs L05 and P03 guidance[^wl-l05-resume][^wl-p03-resume].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble records how expensive resume is — rebuild tokens, tool calls, and wake-to-first-productive time — so continuity work can be optimized. Accepts WalkingLabs L05 and P03 guidance[^wl-l05-resume][^wl-p03-resume].
 
 #### Implementation
 
@@ -248,7 +248,7 @@ Nubble records how expensive resume is — rebuild tokens, tool calls, and wake-
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/resume_cost.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -289,7 +289,7 @@ Harness `cli` `probe` loads `plans/roots_and_retry.yaml` (human-readable probe p
 
 ### `nubble_insp_trace_envelope` — Require provenance on every trace envelope
 
-Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace]. Trace audit substrate for personal-agent MH-PA-08[^insp-pa-08-trace].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace]. Trace audit substrate for personal-agent MH-PA-08[^insp-pa-08-trace].
 
 #### Implementation
 
@@ -297,7 +297,7 @@ Nubble rejects incomplete traces that omit config fingerprint, routing, context 
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/trace_envelope_complete.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -307,7 +307,7 @@ Harness `cli` `probe` loads `plans/trace_envelope_complete.yaml` (human-readable
 
 ### `nubble_insp_trace_reconciliation` — Reject rollouts when independent traces disagree
 
-Nubble needs executor events and gateway capture to reconcile before a rollout is accepted for training or self-improvement. Accepts FineEnvs independent trajectory checks[^fineenvs-reconcile]. Trace reconciliation for Dots MH-DOTS-09[^insp-dots-09-recon].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble needs executor events and gateway capture to reconcile before a rollout is accepted for training or self-improvement. Accepts FineEnvs independent trajectory checks[^fineenvs-reconcile]. Trace reconciliation for Dots MH-DOTS-09[^insp-dots-09-recon].
 
 #### Implementation
 
@@ -315,7 +315,7 @@ Nubble needs executor events and gateway capture to reconcile before a rollout i
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/trace_reconciliation_check.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -367,7 +367,7 @@ Harness `user_story` scenario `affinity_lane.yaml`: environment + graph + steps 
 
 ### `nubble_repo_topology` — Budget repository topology maps and fall back when stale
 
-Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback — not pretend the map is complete.
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback — not pretend the map is complete.
 
 #### Implementation
 
@@ -377,7 +377,7 @@ Covers: CTX-08.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/repo_topology.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 ### `nubble_run_cost_events` — Record cost and inference events for every harness run
 
@@ -395,7 +395,7 @@ Harness `user_story` scenarios `event_types.yaml` (environment + infer step + co
 
 ### `nubble_topology_efficiency` — Separate wall-clock speedup from total work and queue wait
 
-Nubble is asked whether parallel agents sped things up. Wall time dropped, but total work grew and queue waits hid under a vanity speedup. He needs metrics that separate critical path, total work, and elapsed time — and that refuse misleading efficiency claims without a serial baseline and worker-count note.
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble is asked whether parallel agents sped things up. Wall time dropped, but total work grew and queue waits hid under a vanity speedup. He needs metrics that separate critical path, total work, and elapsed time — and that refuse misleading efficiency claims without a serial baseline and worker-count note.
 
 #### Implementation
 
@@ -403,7 +403,7 @@ Nubble is asked whether parallel agents sped things up. Wall time dropped, but t
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/parallel_spans.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 ## Fangore's stories
 
@@ -465,7 +465,7 @@ Harness `user_story` scenario `capability_envelope_narrow.yaml` drives `capabili
 
 ### `fangore_completer_flavors` — Wire same-lane Completer flavors without forking the library
 
-Fangore’s product needs a deep code Completer beside the default reason Completer in one Config. He registers a second Named flavor and a small host harness that selects it with Annotated Matched tags — no marker-lane ABCs and no edits to MechaHarness enums.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore’s product needs a deep code Completer beside the default reason Completer in one Config. He registers a second Named flavor and a small host harness that selects it with Annotated Matched tags — no marker-lane ABCs and no edits to MechaHarness enums.
 
 #### Implementation
 
@@ -475,7 +475,7 @@ Covers: same-lane Completer flavors via pyiv Named/Matched.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/named_matched_flavors.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -507,7 +507,7 @@ Harness `user_story` scenario `config_access_policy.yaml` drives `access_check` 
 
 ### `fangore_context_compiler_deficit` — Report context deficits instead of silent truncation
 
-Mandatory blockers must not disappear when the prompt budget is tight. Success is a deficit report with unresolved gaps named. Related observation chain: `fangore_context_observation_chain`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Mandatory blockers must not disappear when the prompt budget is tight. Success is a deficit report with unresolved gaps named. Related observation chain: `fangore_context_observation_chain`.
 
 #### Implementation
 
@@ -517,7 +517,7 @@ Covers: CTX-05.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/context_compiler_deficit.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -525,7 +525,7 @@ Harness `cli` `probe` loads `plans/context_compiler_deficit.yaml` (human-readabl
 
 ### `fangore_context_observation_chain` — Keep original observations and refuse fabricated reductions
 
-Tool output must stay addressable as an immutable observation. A cheaper summary is allowed only when it points at a real observation; fabricated receipts must fail lookup. Compaction happens at semantic boundaries, and action fusion only for predeclared sequences. Compiler deficits remain `fangore_context_compiler_deficit`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Tool output must stay addressable as an immutable observation. A cheaper summary is allowed only when it points at a real observation; fabricated receipts must fail lookup. Compaction happens at semantic boundaries, and action fusion only for predeclared sequences. Compiler deficits remain `fangore_context_compiler_deficit`.
 
 #### Implementation
 
@@ -535,7 +535,7 @@ Covers: CTX-01, CTX-02, CTX-03, CTX-04.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/context_observation_chain.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 ### `fangore_convergence_ceiling` — Stop agent loops that make no progress
 
@@ -686,7 +686,7 @@ Harness `cli` `probe` loads `plans/reject_invalid.yaml` (human-readable probe pl
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 
-When derived memory is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval rank must not confer authority over approval rules.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. When derived memory is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval rank must not confer authority over approval rules.
 
 #### Implementation
 
@@ -696,7 +696,7 @@ Covers: CTX-06, CTX-07.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/derived_memory.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 ### `fangore_environment_repair_recipe` — Run the environment repair Agentic Recipe
 
@@ -873,7 +873,7 @@ Harness `cli` `probe` loads `plans/alert_escalation_stages.yaml` (human-readable
 
 ### `fangore_insp_anchor_evidence` — Require external anchor evidence on high-autonomy work
 
-High-autonomy graphs must periodically attach labeled external anchors so branches cannot drift on mutually reinforcing model judgments alone. Accepts WalkingLabs L14 guidance[^wl-l14-anchor].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. High-autonomy graphs must periodically attach labeled external anchors so branches cannot drift on mutually reinforcing model judgments alone. Accepts WalkingLabs L14 guidance[^wl-l14-anchor].
 
 #### Implementation
 
@@ -881,7 +881,7 @@ High-autonomy graphs must periodically attach labeled external anchors so branch
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/anchor_evidence_require.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -949,7 +949,7 @@ Harness `user_story` scenario `child_rollup.yaml` drives nested `run_budgeted_gr
 
 ### `fangore_insp_context_compaction` — Compact context in staged lossless then lossy steps
 
-Long runs compact context through staged strategies that record which information classes were discarded. Accepts WalkingLabs L05 and Claude Code design guidance[^wl-l05-compact][^wl-claude-compact].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Long runs compact context through staged strategies that record which information classes were discarded. Accepts WalkingLabs L05 and Claude Code design guidance[^wl-l05-compact][^wl-claude-compact].
 
 #### Implementation
 
@@ -957,7 +957,7 @@ Long runs compact context through staged strategies that record which informatio
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/context_compaction_staged.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -966,7 +966,7 @@ Harness `cli` `probe` loads `plans/context_compaction_staged.yaml` (human-readab
 
 ### `fangore_insp_context_layers` — Project node-private context from shared graph state
 
-Fangore keeps durable graph state large and shared while each node receives only the private projection it needs; only explicit exports re-enter shared state. Accepts WalkingLabs L14 and L04 guidance[^wl-l14-layers][^wl-l04-layers].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore keeps durable graph state large and shared while each node receives only the private projection it needs; only explicit exports re-enter shared state. Accepts WalkingLabs L14 and L04 guidance[^wl-l14-layers][^wl-l04-layers].
 
 #### Implementation
 
@@ -974,7 +974,7 @@ Fangore keeps durable graph state large and shared while each node receives only
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/context_layers_project.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -983,7 +983,7 @@ Harness `cli` `probe` loads `plans/context_layers_project.yaml` (human-readable 
 
 ### `fangore_insp_context_provider` — Discover context indices before loading large payloads
 
-Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06]. Related personal-agent freshness/provenance story: `fangore_insp_tool_result_freshness`[^insp-pa-01-provider].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06]. Related personal-agent freshness/provenance story: `fangore_insp_tool_result_freshness`[^insp-pa-01-provider].
 
 #### Implementation
 
@@ -991,7 +991,7 @@ Fangore's host memory source must advertise what it can supply before dumping la
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/context_provider_discovery.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1161,7 +1161,7 @@ Harness `cli` `probe` loads `plans/execution_token_narrow.yaml` (human-readable 
 
 ### `fangore_insp_exit_clean_state` — Require clean-state exit before handoff
 
-A run is not done until checkpoint durability, pending-node policy, and optional handoff records satisfy a clean-state exit contract. Accepts WalkingLabs L12 guidance[^wl-l12-exit].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. A run is not done until checkpoint durability, pending-node policy, and optional handoff records satisfy a clean-state exit contract. Accepts WalkingLabs L12 guidance[^wl-l12-exit].
 
 #### Implementation
 
@@ -1169,7 +1169,7 @@ A run is not done until checkpoint durability, pending-node policy, and optional
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/exit_clean_state.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1177,7 +1177,7 @@ Harness `cli` `probe` loads `plans/exit_clean_state.yaml` (human-readable probe 
 
 ### `fangore_insp_failure_attribution` — Attribute repeated failures to linkage or tools
 
-When the same failure class repeats, Fangore needs structured attribution so the process can improve — not one-off output patches. Accepts inspiration requirement 11[^insp-r11].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. When the same failure class repeats, Fangore needs structured attribution so the process can improve — not one-off output patches. Accepts inspiration requirement 11[^insp-r11].
 
 #### Implementation
 
@@ -1185,7 +1185,7 @@ When the same failure class repeats, Fangore needs structured attribution so the
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/failure_attribution_trace.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1193,7 +1193,7 @@ Harness `cli` `probe` loads `plans/failure_attribution_trace.yaml` (human-readab
 
 ### `fangore_insp_fan_in_policy` — Accept fan-in with a named quorum policy
 
-Parallel branches rejoin through an explicit fan-in acceptance policy such as quorum rather than an implicit reduce. Accepts WalkingLabs P08 guidance[^wl-p08-fanin].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Parallel branches rejoin through an explicit fan-in acceptance policy such as quorum rather than an implicit reduce. Accepts WalkingLabs P08 guidance[^wl-p08-fanin].
 
 #### Implementation
 
@@ -1201,7 +1201,7 @@ Parallel branches rejoin through an explicit fan-in acceptance policy such as qu
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/fan_in_policy.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1306,7 +1306,7 @@ Harness `user_story` scenario `session.yaml`: environment + graph + steps + comp
 
 ### `fangore_insp_handoff_record` — Capture why across session handoffs
 
-Handoffs preserve goals, exclusions, completed/pending work, decisions, rationale, rejected alternatives, risks, evidence, an expected verdict, and next action — hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: goals, exclusions, evidence, risks, and verdict are first-class. Also the typed handoff seam for Dots MH-DOTS-07[^insp-dots-07-handoff] (`fangore_insp_cross_task_isolation`).
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Handoffs preserve goals, exclusions, completed/pending work, decisions, rationale, rejected alternatives, risks, evidence, an expected verdict, and next action — hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: goals, exclusions, evidence, risks, and verdict are first-class. Also the typed handoff seam for Dots MH-DOTS-07[^insp-dots-07-handoff] (`fangore_insp_cross_task_isolation`).
 
 #### Implementation
 
@@ -1314,7 +1314,7 @@ Handoffs preserve goals, exclusions, completed/pending work, decisions, rational
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/handoff_record.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1341,7 +1341,7 @@ Harness `user_story` scenario `independent_review_template.yaml` drives `run_rec
 
 ### `fangore_insp_inference_capture_preflight` — Fail linkage when training-grade capture is unavailable
 
-Fangore needs graphs that require exact token capture to fail before expensive work when the active backend is evaluation-only. Accepts FineEnvs capture probing guidance[^fineenvs-capture].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs graphs that require exact token capture to fail before expensive work when the active backend is evaluation-only. Accepts FineEnvs capture probing guidance[^fineenvs-capture].
 
 #### Implementation
 
@@ -1349,7 +1349,7 @@ Fangore needs graphs that require exact token capture to fail before expensive w
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/training_grade_required.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1373,7 +1373,7 @@ Harness `user_story` scenario `initialize_preflight_template.yaml` drives `run_r
 
 ### `fangore_insp_instruction_gotchas` — Measure gotcha trigger rates before promoting them
 
-Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8[^insp-r08].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Scarce instruction components distinguish invariants from learned gotchas. Over-triggering is measurable, and promotion to active policy is explicit. Accepts inspiration requirement 8[^insp-r08].
 
 #### Implementation
 
@@ -1381,7 +1381,7 @@ Scarce instruction components distinguish invariants from learned gotchas. Over-
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/instruction_gotcha_metrics.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1389,7 +1389,7 @@ Harness `cli` `probe` loads `plans/instruction_gotcha_metrics.yaml` (human-reada
 
 ### `fangore_insp_instruction_scope` — Scope instruction components with authority and cost
 
-Instruction components declare scope, authority, and estimated context cost so entry files stay routers rather than encyclopedias. Accepts WalkingLabs L04 guidance[^wl-l04-instr].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Instruction components declare scope, authority, and estimated context cost so entry files stay routers rather than encyclopedias. Accepts WalkingLabs L04 guidance[^wl-l04-instr].
 
 #### Implementation
 
@@ -1397,7 +1397,7 @@ Instruction components declare scope, authority, and estimated context cost so e
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/instruction_scope_metadata.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1520,7 +1520,7 @@ Harness `cli` `probe` loads `plans/missing_runner_and_ok.yaml` (human-readable p
 
 ### `fangore_insp_loop_health` — Wind down loops when verification debt grows
 
-Long loops accumulate verification debt; Fangore winds them down when independent verification age or repeated failures exceed host thresholds. Accepts WalkingLabs L13 guidance[^wl-l13-loop].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Long loops accumulate verification debt; Fangore winds them down when independent verification age or repeated failures exceed host thresholds. Accepts WalkingLabs L13 guidance[^wl-l13-loop].
 
 #### Implementation
 
@@ -1528,7 +1528,7 @@ Long loops accumulate verification debt; Fangore winds them down when independen
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/loop_health.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1536,7 +1536,7 @@ Harness `cli` `probe` loads `plans/loop_health.yaml` (human-readable probe plan)
 
 ### `fangore_insp_operation_compensation` — Declare operation idempotency and compensation
 
-Cleanup and recovery operations declare idempotency and optional compensation so retries do not double side effects. Accepts WalkingLabs L12 guidance[^wl-l12-idem].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Cleanup and recovery operations declare idempotency and optional compensation so retries do not double side effects. Accepts WalkingLabs L12 guidance[^wl-l12-idem].
 
 #### Implementation
 
@@ -1544,7 +1544,7 @@ Cleanup and recovery operations declare idempotency and optional compensation so
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/operation_compensation.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1632,7 +1632,7 @@ Harness `user_story` scenario `registry_only_compose.yaml`: environment + graph 
 
 ### `fangore_insp_risk_autonomy` — Scale controls by action consequence class
 
-High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15[^insp-r15]. Contributes to personal-agent MH-PA-02; composed gate delta: `fangore_insp_authority_gate`[^insp-pa-02-risk].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. High-consequence writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts inspiration requirement 15[^insp-r15]. Contributes to personal-agent MH-PA-02; composed gate delta: `fangore_insp_authority_gate`[^insp-pa-02-risk].
 
 #### Implementation
 
@@ -1640,7 +1640,7 @@ High-consequence writes demand stronger controls and visible approval frequency;
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/consequence_risk_scale.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1684,7 +1684,7 @@ Harness `cli` `probe` loads `plans/tool_gating.yaml` (human-readable probe plan)
 
 ### `fangore_insp_sparse_advisor` — Consult an advisor without transferring task ownership
 
-Sparse advisor counsel helps at hard boundaries while the active executor keeps ownership. Budgets stop routine consultation. Accepts inspiration requirement 18[^insp-r18].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Sparse advisor counsel helps at hard boundaries while the active executor keeps ownership. Budgets stop routine consultation. Accepts inspiration requirement 18[^insp-r18].
 
 #### Implementation
 
@@ -1692,7 +1692,7 @@ Sparse advisor counsel helps at hard boundaries while the active executor keeps 
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/sparse_advisor.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1700,7 +1700,7 @@ Harness `cli` `probe` loads `plans/sparse_advisor.yaml` (human-readable probe pl
 
 ### `fangore_insp_state_governance` — Freeze graph metric ownership against agent writes
 
-Graph quality targets have owners and can be frozen so agents cannot silently mutate success criteria. Accepts WalkingLabs L14 guidance[^wl-l14-gov].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Graph quality targets have owners and can be frozen so agents cannot silently mutate success criteria. Accepts WalkingLabs L14 guidance[^wl-l14-gov].
 
 #### Implementation
 
@@ -1708,7 +1708,7 @@ Graph quality targets have owners and can be frozen so agents cannot silently mu
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/state_governance_write.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1716,7 +1716,7 @@ Harness `cli` `probe` loads `plans/state_governance_write.yaml` (human-readable 
 
 ### `fangore_insp_stop_contract` — Require a stop contract on repeating graph steps
 
-A repeating repair step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration requirement 4[^insp-r04]. Complements `fangore_insp_linkage_preflight` and `fangore_convergence_ceiling`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. A repeating repair step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration requirement 4[^insp-r04]. Complements `fangore_insp_linkage_preflight` and `fangore_convergence_ceiling`.
 
 #### Implementation
 
@@ -1724,7 +1724,7 @@ A repeating repair step without an explicit stop rule must fail validation befor
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/missing_stop.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1797,7 +1797,7 @@ Harness `cli` `probe` loads `plans/tool_result_freshness_reject.yaml` (human-rea
 
 ### `fangore_insp_verification_gate` — Keep answer-generated distinct from task-complete
 
-Producing an answer is not the same as finishing the task when verification is required. Accepts inspiration requirement 5[^insp-r05].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Producing an answer is not the same as finishing the task when verification is required. Accepts inspiration requirement 5[^insp-r05].
 
 #### Implementation
 
@@ -1805,7 +1805,7 @@ Producing an answer is not the same as finishing the task when verification is r
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/verification_outcome.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1830,7 +1830,7 @@ Harness `cli` `probe` loads `plans/wake_resume.yaml` (human-readable probe plan)
 
 ### `fangore_insp_wip_backpressure` — Apply WIP back-pressure without hard-coding WIP=1
 
-Fangore limits concurrent active nodes and per-write-scope work so agents cannot overreach, while hosts still choose thresholds rather than a universal WIP=1. Accepts WalkingLabs L07 and L08 guidance[^wl-l07-wip][^wl-l08-wip].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore limits concurrent active nodes and per-write-scope work so agents cannot overreach, while hosts still choose thresholds rather than a universal WIP=1. Accepts WalkingLabs L07 and L08 guidance[^wl-l07-wip][^wl-l08-wip].
 
 #### Implementation
 
@@ -1838,7 +1838,7 @@ Fangore limits concurrent active nodes and per-write-scope work so agents cannot
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/wip_policy.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2274,7 +2274,7 @@ Harness `user_story` scenario `verify_repair_recipe.yaml` drives `run_recipe`; e
 
 ### `taloneth_atk_research_reject` — Reject research candidates that fail verified success
 
-A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: `taloneth_validator_qualification`. Generic research loop for self-revising MH-SR-06; recipe-from-traces: `taloneth_insp_recipe_evolution_loop`[^insp-sr-06-research].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: `taloneth_validator_qualification`. Generic research loop for self-revising MH-SR-06; recipe-from-traces: `taloneth_insp_recipe_evolution_loop`[^insp-sr-06-research].
 
 #### Implementation
 
@@ -2284,7 +2284,7 @@ Covers: EXP-01, EXP-02, EXP-03, EXP-04.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/atk_research_reject.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2292,7 +2292,7 @@ Harness `cli` `probe` loads `plans/atk_research_reject.yaml` (human-readable pro
 
 ### `taloneth_cache_layout_experiment` — Measure cache-aware prompt layout as an explicit experiment
 
-Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.
 
 #### Implementation
 
@@ -2302,11 +2302,11 @@ Covers: CTX-09.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/cache_layout_experiment.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 ### `taloneth_decision_plane_shadow_compare` — Compare shadowed decision-plane answers before promotion
 
-Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: `fangore_decision_plane_shadow`, `taloneth_shadow_decision_backends`.[^rc-dp-shadow-t]
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: `fangore_decision_plane_shadow`, `taloneth_shadow_decision_backends`.[^rc-dp-shadow-t]
 
 #### Implementation
 
@@ -2314,7 +2314,7 @@ Taloneth reviews shadow versus production answers on matched refund triage cases
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/disagree.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2322,7 +2322,7 @@ Harness `cli` `probe` loads `plans/disagree.yaml` (human-readable probe plan); h
 
 ### `taloneth_fixture_judge_batch` — Validate judge question batches without a live model
 
-Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors — including partial failure reporting — without a GPU host.
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors — including partial failure reporting — without a GPU host.
 
 #### Implementation
 
@@ -2332,11 +2332,11 @@ Covers: JDG-01, JDG-02, JDG-03, JDG-04.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/batch_answers.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 ### `taloneth_insp_component_ablation` — Ablate harness components against a matched corpus
 
-Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance[^wl-l02-ablation][^wl-p01-ablation].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance[^wl-l02-ablation][^wl-p01-ablation].
 
 #### Implementation
 
@@ -2344,7 +2344,7 @@ Taloneth runs a component-ablation experiment that disables named harness pieces
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/component_ablation_delta.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2369,7 +2369,7 @@ Harness `cli` `probe` loads `plans/specification_debt.yaml` (human-readable prob
 
 ### `taloneth_insp_cross_harness_failure` — Separate semantic task failure from invalid tool protocol
 
-Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes[^fineenvs-xharness].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes[^fineenvs-xharness].
 
 #### Implementation
 
@@ -2377,7 +2377,7 @@ Taloneth needs cross-harness evaluation to classify invalid tool names and schem
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/cross_harness_failure_classify.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2385,7 +2385,7 @@ Harness `cli` `probe` loads `plans/cross_harness_failure_classify.yaml` (human-r
 
 ### `taloneth_insp_eval_claims` — Compose typed evaluation claims without opaque scores
 
-Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].
 
 #### Implementation
 
@@ -2393,7 +2393,7 @@ Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/eval_claims_compose.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2402,7 +2402,7 @@ Harness `cli` `probe` loads `plans/eval_claims_compose.yaml` (human-readable pro
 
 ### `taloneth_insp_eval_matrix` — Keep model-harness-task matrix cells for drill-down
 
-Taloneth evaluates the same model under multiple harness configurations and must keep every matrix cell so averages cannot hide a catastrophic compatibility failure. Accepts FineEnvs cross-harness matrix practice[^fineenvs-matrix].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth evaluates the same model under multiple harness configurations and must keep every matrix cell so averages cannot hide a catastrophic compatibility failure. Accepts FineEnvs cross-harness matrix practice[^fineenvs-matrix].
 
 #### Implementation
 
@@ -2410,7 +2410,7 @@ Taloneth evaluates the same model under multiple harness configurations and must
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/eval_matrix_aggregate.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2418,7 +2418,7 @@ Harness `cli` `probe` loads `plans/eval_matrix_aggregate.yaml` (human-readable p
 
 ### `taloneth_insp_evaluation_outcome` — Keep infrastructure failures out of task-success scores
 
-Taloneth needs a dead sandbox or broken trace to count as unscorable execution failure, not as proof the model answered incorrectly. Accepts FineEnvs reward separation guidance[^fineenvs-outcome].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs a dead sandbox or broken trace to count as unscorable execution failure, not as proof the model answered incorrectly. Accepts FineEnvs reward separation guidance[^fineenvs-outcome].
 
 #### Implementation
 
@@ -2426,7 +2426,7 @@ Taloneth needs a dead sandbox or broken trace to count as unscorable execution f
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/evaluation_outcome_filter.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2434,7 +2434,7 @@ Harness `cli` `probe` loads `plans/evaluation_outcome_filter.yaml` (human-readab
 
 ### `taloneth_insp_evaluator_compose` — Run a versioned held-out evaluator to claims
 
-Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon]. Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: `taloneth_insp_recipe_final_test_gate`[^insp-sr-07-eval].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon]. Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: `taloneth_insp_recipe_final_test_gate`[^insp-sr-07-eval].
 
 #### Implementation
 
@@ -2442,7 +2442,7 @@ Taloneth wires a versioned evaluator that can be marked held-out so self-improve
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/evaluator_compose_run.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2452,7 +2452,7 @@ Harness `cli` `probe` loads `plans/evaluator_compose_run.yaml` (human-readable p
 
 ### `taloneth_insp_experiment_dimensions` — Declare fixed and varying harness experiment dimensions
 
-Taloneth needs every harness experiment to state which configuration axes are fixed and which vary, with a reproducible digest on traces. Accepts FineEnvs harness-overfitting axes guidance[^fineenvs-dims].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs every harness experiment to state which configuration axes are fixed and which vary, with a reproducible digest on traces. Accepts FineEnvs harness-overfitting axes guidance[^fineenvs-dims].
 
 #### Implementation
 
@@ -2460,7 +2460,7 @@ Taloneth needs every harness experiment to state which configuration axes are fi
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/experiment_dimensions_digest.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2468,7 +2468,7 @@ Harness `cli` `probe` loads `plans/experiment_dimensions_digest.yaml` (human-rea
 
 ### `taloneth_insp_experiment_lineage` — Resume experiments without resampling consumed cases
 
-Taloneth needs mid-corpus experiment resume to remember which cases were already consumed so a crash cannot replay tasks and contaminate later training. Accepts FineEnvs resume integrity findings[^fineenvs-lineage].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs mid-corpus experiment resume to remember which cases were already consumed so a crash cannot replay tasks and contaminate later training. Accepts FineEnvs resume integrity findings[^fineenvs-lineage].
 
 #### Implementation
 
@@ -2476,7 +2476,7 @@ Taloneth needs mid-corpus experiment resume to remember which cases were already
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/experiment_lineage_resume.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2484,7 +2484,7 @@ Harness `cli` `probe` loads `plans/experiment_lineage_resume.yaml` (human-readab
 
 ### `taloneth_insp_exposure_discriminative` — Report unequal exposure and no-learning-signal ties
 
-Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings[^fineenvs-exposure].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings[^fineenvs-exposure].
 
 #### Implementation
 
@@ -2492,7 +2492,7 @@ Taloneth needs equal rollout counts to still reveal unequal token and call expos
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/exposure_discriminative_report.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2500,7 +2500,7 @@ Harness `cli` `probe` loads `plans/exposure_discriminative_report.yaml` (human-r
 
 ### `taloneth_insp_gated_objective` — Apply efficiency only after correctness gates pass
 
-Taloneth needs harness experiments to satisfy correctness first and only then prefer lower token use, matching gated FineEnvs reward design[^fineenvs-gated].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs harness experiments to satisfy correctness first and only then prefer lower token use, matching gated FineEnvs reward design[^fineenvs-gated].
 
 #### Implementation
 
@@ -2508,7 +2508,7 @@ Taloneth needs harness experiments to satisfy correctness first and only then pr
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/gated_objective_evaluate.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2516,7 +2516,7 @@ Harness `cli` `probe` loads `plans/gated_objective_evaluate.yaml` (human-readabl
 
 ### `taloneth_insp_harness_fingerprint` — Stamp evaluation results with harness configuration identity
 
-Taloneth compares the same model and task under two graph configurations and needs each result to carry which harness configuration produced it, not only the model name. Accepts FineEnvs multi-harness RL guidance[^fineenvs-fingerprint].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth compares the same model and task under two graph configurations and needs each result to carry which harness configuration produced it, not only the model name. Accepts FineEnvs multi-harness RL guidance[^fineenvs-fingerprint].
 
 #### Implementation
 
@@ -2524,7 +2524,7 @@ Taloneth compares the same model and task under two graph configurations and nee
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/harness_fingerprint_digest.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2532,7 +2532,7 @@ Harness `cli` `probe` loads `plans/harness_fingerprint_digest.yaml` (human-reada
 
 ### `taloneth_insp_harness_health` — Snapshot harness health for cleanup evidence
 
-Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance[^wl-l02-health][^wl-l12-health].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance[^wl-l02-health][^wl-l12-health].
 
 #### Implementation
 
@@ -2540,7 +2540,7 @@ Taloneth captures unused extensions, dead soft points, and unexercised routes as
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/harness_health.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2549,7 +2549,7 @@ Harness `cli` `probe` loads `plans/harness_health.yaml` (human-readable probe pl
 
 ### `taloneth_insp_harness_hypothesis` — Express a harness change as a testable hypothesis
 
-Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].
 
 #### Implementation
 
@@ -2557,7 +2557,7 @@ Taloneth writes the failure mode and expected metric before shipping a harness t
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/harness_experiment_retire.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2565,7 +2565,7 @@ Harness `cli` `probe` loads `plans/harness_experiment_retire.yaml` (human-readab
 
 ### `taloneth_insp_learning_export` — Export provenance-rich trajectories without owning training recipes
 
-Taloneth needs exportable execution packs that carry harness fingerprint, rollout refs, and outcomes so June can curate SFT or RL corpora without MechaHarness choosing the recipe. Accepts FineEnvs SFT-vs-RL reuse guidance[^fineenvs-export].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs exportable execution packs that carry harness fingerprint, rollout refs, and outcomes so June can curate SFT or RL corpora without MechaHarness choosing the recipe. Accepts FineEnvs SFT-vs-RL reuse guidance[^fineenvs-export].
 
 #### Implementation
 
@@ -2573,7 +2573,7 @@ Taloneth needs exportable execution packs that carry harness fingerprint, rollou
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/learning_export_pack.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2581,7 +2581,7 @@ Harness `cli` `probe` loads `plans/learning_export_pack.yaml` (human-readable pr
 
 ### `taloneth_insp_objective_policy` — Require an explicit policy before collapsing evaluator signals
 
-Taloneth refuses silent weighted blends of verifier scores and wants gates and formula version written into the result. Accepts FineEnvs reward aggregation guidance[^fineenvs-objective].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth refuses silent weighted blends of verifier scores and wants gates and formula version written into the result. Accepts FineEnvs reward aggregation guidance[^fineenvs-objective].
 
 #### Implementation
 
@@ -2589,7 +2589,7 @@ Taloneth refuses silent weighted blends of verifier scores and wants gates and f
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/objective_policy_aggregate.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2629,7 +2629,7 @@ Harness `user_story` scenario `recipe_final_test_gate.yaml`: environment + graph
 
 ### `taloneth_insp_rule_promotion` — Promote review feedback into a hard invariant with provenance
 
-Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo]. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (`taloneth_insp_correction_spec_debt`)[^insp-pa-07-promo] and self-revising MH-SR-05 (`fangore_insp_recipe_lineage_promote`)[^insp-sr-05-promo].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo]. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (`taloneth_insp_correction_spec_debt`)[^insp-pa-07-promo] and self-revising MH-SR-05 (`fangore_insp_recipe_lineage_promote`)[^insp-sr-05-promo].
 
 #### Implementation
 
@@ -2637,7 +2637,7 @@ Repeated review feedback becomes an experiment, then a soft instruction, then a 
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/rule_promotion.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2680,7 +2680,7 @@ Harness `user_story` scenario `safety_eval_recipe.yaml` drives `run_recipe`; exp
 
 ### `taloneth_insp_scaffolding_retire` — Retire scaffolding that loses a controlled experiment
 
-Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1[^insp-r01].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1[^insp-r01].
 
 #### Implementation
 
@@ -2688,7 +2688,7 @@ Taloneth treats an orchestration scaffold as temporary. When a with-versus-witho
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/harness_experiment_retire.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2712,7 +2712,7 @@ Harness `user_story` scenario `session.yaml`: environment + graph + steps + comp
 
 ### `taloneth_insp_trial_reliability` — Separate pass@k capability from pass^k reliability
 
-Taloneth records isolated trials with cost and latency, then reports pass@k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, τ-bench, and HumanEval[^anth-evals-trial][^arxiv-taubench][^arxiv-humaneval].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth records isolated trials with cost and latency, then reports pass@k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, τ-bench, and HumanEval[^anth-evals-trial][^arxiv-taubench][^arxiv-humaneval].
 
 #### Implementation
 
@@ -2720,7 +2720,7 @@ Taloneth records isolated trials with cost and latency, then reports pass@k for 
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/trial_reliability_metrics.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2730,7 +2730,7 @@ Harness `cli` `probe` loads `plans/trial_reliability_metrics.yaml` (human-readab
 
 ### `taloneth_offline_decision_export` — Export decision data without leaking future outcomes
 
-Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.
 
 #### Implementation
 
@@ -2740,11 +2740,11 @@ Covers: OBS-02.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/export_train.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 ### `taloneth_policy_replay` — Replay product policy from recorded facts and signals
 
-Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: `nubble_insp_review_audit_reconstruct`[^insp-dots-09-replay].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: `nubble_insp_review_audit_reconstruct`[^insp-dots-09-replay].
 
 #### Implementation
 
@@ -2754,7 +2754,7 @@ Covers: OBS-03.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/replay_allow.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2788,7 +2788,7 @@ Harness `cli` scenario `billing_allow.yaml` on `systemone/laya` cassette: hard `
 
 ### `taloneth_validator_qualification` — Qualify validators before they gate completion
 
-Before a schema validator gates done, known-good, known-bad, and missing fixtures must run — including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see `fangore_refund_verdict`).
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. Before a schema validator gates done, known-good, known-bad, and missing fixtures must run — including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see `fangore_refund_verdict`).
 
 #### Implementation
 
@@ -2796,4 +2796,4 @@ Before a schema validator gates done, known-good, known-bad, and missing fixture
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/honest_vs_weak.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.

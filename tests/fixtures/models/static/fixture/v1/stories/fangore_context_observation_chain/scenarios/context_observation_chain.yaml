@@ -1,12 +1,17 @@
-# Plan document: ../plans/context_observation_chain.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/context_observation_chain.yaml
-expect:
-- kind: 'true'
-  key: fabricated_receipt
-- kind: 'true'
-  key: fused
-- kind: 'true'
-  key: compacted
+# user story: fangore_context_observation_chain
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    context_observation_chain: {}
+complete:
+  expect:
+  - kind: 'true'
+    key: fabricated_receipt
+  - kind: 'true'
+    key: fused
+  - kind: 'true'
+    key: compacted
+cleanup: []

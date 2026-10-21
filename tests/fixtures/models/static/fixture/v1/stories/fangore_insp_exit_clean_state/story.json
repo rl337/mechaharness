@@ -2,10 +2,10 @@
   "id": "fangore_insp_exit_clean_state",
   "persona": "fangore",
   "title": "Require clean-state exit before handoff",
-  "kind": "cli",
-  "narrative": "A run is not done until checkpoint durability, pending-node policy, and optional handoff records satisfy a clean-state exit contract. Accepts WalkingLabs L12 guidance[^wl-l12-exit].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. A run is not done until checkpoint durability, pending-node policy, and optional handoff records satisfy a clean-state exit contract. Accepts WalkingLabs L12 guidance[^wl-l12-exit].",
   "implementation": "`CleanStateContract` / `ExitContract` and `evaluate_exit` in `mechaharness.exit_contract` check post-run clean-state invariants.",
-  "validation": "Harness `cli` `probe` loads `plans/exit_clean_state.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l12-exit",

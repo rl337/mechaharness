@@ -1,8 +1,18 @@
-# Plan document: ../plans/state_governance_write.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/state_governance_write.yaml
-expect:
-- kind: 'false'
-  key: allowed
+# user story: fangore_insp_state_governance
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    state_governance_write:
+      owner: ops
+      writers:
+      - ops
+      mutable: false
+      actor: agent
+complete:
+  expect:
+  - kind: 'false'
+    key: allowed
+cleanup: []

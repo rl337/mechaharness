@@ -1,11 +1,21 @@
-# Plan document: ../plans/exit_clean_state.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/exit_clean_state.yaml
-expect:
-- kind: 'true'
-  key: ok
-- kind: equals
-  key: issues
-  value: []
+# user story: fangore_insp_exit_clean_state
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    exit_clean_state:
+      require_handoff_record: true
+      pending_nodes: []
+      checkpoint_durable: true
+      unresolved_effects: []
+      handoff_record_ref: handoff:1
+complete:
+  expect:
+  - kind: 'true'
+    key: ok
+  - kind: equals
+    key: issues
+    value: []
+cleanup: []

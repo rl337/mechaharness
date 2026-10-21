@@ -1,11 +1,20 @@
-# Plan document: ../plans/harness_experiment_retire.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/harness_experiment_retire.yaml
-expect:
-- kind: equals
-  key: status
-  value: retired
-- kind: 'true'
-  key: retirement_candidates_nonempty
+# user story: taloneth_insp_harness_hypothesis
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    harness_experiment_retire:
+      hypothesis: remove cache hint
+      intervention: drop_cache_hint
+      treatment_success: 0.6
+      control_success: 0.85
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: retired
+  - kind: 'true'
+    key: retirement_candidates_nonempty
+cleanup: []
