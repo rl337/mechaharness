@@ -36,6 +36,15 @@ class EnvironmentBlock(BaseModel):
     rag_corpus: str | None = None
     # Optional story-host lifecycle extension ids (see tests.stories.hosts).
     lifecycle_extensions: list[str] = Field(default_factory=list)
+    # Authorization: omit → Config/host-kit defaults. Empty grants → deny-all.
+    grants: list[str] | None = None
+    # AccessPolicy / CompoundPolicy YAML (see host_run_policies.access_policy_from_mapping).
+    access_policy: Any | None = None
+    # CapabilityEnvelope mapping (Pydantic); optional authorization_epoch stamps it.
+    capability_envelope: dict[str, Any] | None = None
+    authorization_epoch: int | None = None
+    # BudgetPolicy YAML (soft_limit / hard_limit / unit). Omit → unlimited.
+    budget: dict[str, Any] | None = None
 
 
 class DurableGraphBlock(BaseModel):

@@ -1,10 +1,24 @@
-# Plan document: ../plans/config_access_policy.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/config_access_policy.yaml
-expect:
-- kind: 'true'
-  key: allows_compound
-- kind: 'true'
-  key: denies_missing
+# user story: fangore_config_access_policy
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  access_policy:
+    layers:
+    - - core:fs.read
+    - - core:fs.write
+steps:
+- do:
+    access_check:
+      must_allow:
+      - core:fs.read
+      - core:fs.write
+      must_deny:
+      - core:media.image
+complete:
+  expect:
+  - kind: 'true'
+    key: allows_compound
+  - kind: 'true'
+    key: denies_missing
+cleanup: []

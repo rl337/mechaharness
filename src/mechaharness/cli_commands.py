@@ -24,6 +24,8 @@ class ToolLoopCommand(BaseModel):
     model: str | None = None
     # Product harness family (tool_loop, react, openai_tools, …).
     family: str = "tool_loop"
+    # Grants required by the default registered tool (when not pre-registered).
+    tool_grants: list[str] | None = None
 
 
 class RunRecipeCommand(BaseModel):
@@ -42,6 +44,10 @@ class RunRecipeCommand(BaseModel):
     # Optional RecipeBind path or inline soft bindings (context_pack, etc.).
     path: str | None = None
     soft_bindings: dict[str, Any] | None = None
+    # Optional spend ceiling for this run (omit → instrumentor / unlimited).
+    budget: dict[str, Any] | None = None
+    # Optional grant pack for this run (omit → instrumentor / host-kit defaults).
+    grants: list[str] | None = None
 
 
 class SetClockCommand(BaseModel):

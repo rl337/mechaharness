@@ -30,6 +30,32 @@ def _event_dict(event: Any) -> dict[str, Any]:
     return data
 
 
+def _host_run_kwargs(body: RunRecipeCommand, runtime: Any) -> dict[str, Any]:
+    """Budget + authorization for ``run_recipe`` / ``GraphExecutor.run``.
+
+    Prefer per-command ``body.budget`` / ``body.grants``, else instrumentor
+    defaults, else unlimited / host-kit grants.
+    """
+    from mechaharness.host_run_policies import resolve_run_budget
+
+    resolve = getattr(runtime, "resolve_budget_policy", None)
+    if callable(resolve):
+        budget = resolve(body_budget=body.budget)
+    else:
+        budget = resolve_run_budget(
+            runtime_default=getattr(runtime, "budget_policy", None),
+            body_budget=body.budget,
+        )
+    kwargs: dict[str, Any] = {"budget_policy": budget}
+    if body.grants is not None:
+        kwargs["grants"] = list(body.grants)
+    elif getattr(runtime, "grants", None) is not None:
+        kwargs["grants"] = list(runtime.grants)
+    elif getattr(runtime, "access_policy", None) is not None:
+        kwargs["access_policy"] = runtime.access_policy
+    return kwargs
+
+
 class HarnessRunRecipeAdapter(CliRecipeAdapter):
     name = "harness_run"
 
@@ -149,7 +175,6 @@ class ConversationalToolLoopRecipeAdapter(CliRecipeAdapter):
         import json
         from collections.abc import Mapping
 
-        from mechaharness.budget import BudgetPolicy
         from mechaharness.cli_instrumentor import CliStepResult
         from mechaharness.conversational_tool_loop_runner import (
             ConversationalToolLoopRunner,
@@ -243,7 +268,7 @@ class ConversationalToolLoopRecipeAdapter(CliRecipeAdapter):
         )
         result = await executor.run(
             graph,
-            budget_policy=BudgetPolicy.unlimited(),
+            budget_policy=_host_run_kwargs(body, runtime)["budget_policy"],
             run_id="cli:conversational_tool_loop",
             skip_linkage=True,
         )
@@ -322,6 +347,7 @@ class ContextPackRecipeAdapter(CliRecipeAdapter):
             ],
             event_log=runtime.event_log,
             run_id="cli:context_pack",
+            **_host_run_kwargs(body, runtime),
         )
         pack = result.graph.nodes.get("pack")
         payload = dict(pack.payload) if pack is not None else {}
@@ -388,6 +414,7 @@ class DecisionPlaneRecipeAdapter(CliRecipeAdapter):
             runners=decision_plane_runners(),
             event_log=runtime.event_log,
             run_id="cli:decision_plane",
+            **_host_run_kwargs(body, runtime),
         )
         after_events = runtime.event_log.query()[before:]
         nodes = result.graph.nodes
@@ -531,6 +558,7 @@ class VerifyRepairRecipeAdapter(CliRecipeAdapter):
             runners=verify_repair_runners(),
             event_log=runtime.event_log,
             run_id="cli:verify_repair",
+            **_host_run_kwargs(body, runtime),
         )
         after_events = runtime.event_log.query()[before:]
         complete = result.graph.nodes.get("complete")
@@ -616,6 +644,7 @@ class BoundedRetryRecipeAdapter(CliRecipeAdapter):
             runners=bounded_retry_runners(),
             event_log=runtime.event_log,
             run_id="cli:bounded_retry",
+            **_host_run_kwargs(body, runtime),
         )
         after_events = runtime.event_log.query()[before:]
         attempt = result.graph.nodes.get("attempt")
@@ -704,6 +733,7 @@ class IndependentReviewRecipeAdapter(CliRecipeAdapter):
             runners=independent_review_runners(),
             event_log=runtime.event_log,
             run_id="cli:independent_review",
+            **_host_run_kwargs(body, runtime),
         )
         after_events = runtime.event_log.query()[before:]
         aggregate = result.graph.nodes.get("aggregate_reviews")
@@ -793,6 +823,7 @@ class EnvironmentRepairRecipeAdapter(CliRecipeAdapter):
             runners=environment_repair_runners(),
             event_log=runtime.event_log,
             run_id="cli:environment_repair",
+            **_host_run_kwargs(body, runtime),
         )
         after_events = runtime.event_log.query()[before:]
         recheck = result.graph.nodes.get("recheck")
@@ -863,6 +894,7 @@ class InitializePreflightRecipeAdapter(CliRecipeAdapter):
             runners=initialize_preflight_runners(),
             event_log=runtime.event_log,
             run_id="cli:initialize_preflight",
+            **_host_run_kwargs(body, runtime),
         )
         after_events = runtime.event_log.query()[before:]
         ready = result.graph.nodes.get("ready")
@@ -938,6 +970,7 @@ class ProduceCritiqueRefineRecipeAdapter(CliRecipeAdapter):
             runners=produce_critique_refine_runners(),
             event_log=runtime.event_log,
             run_id="cli:produce_critique_refine",
+            **_host_run_kwargs(body, runtime),
         )
         after_events = runtime.event_log.query()[before:]
         complete = result.graph.nodes.get("complete")
@@ -1011,6 +1044,7 @@ class SafetyEvalRecipeAdapter(CliRecipeAdapter):
             runners=safety_eval_runners(),
             event_log=runtime.event_log,
             run_id="cli:safety_eval",
+            **_host_run_kwargs(body, runtime),
         )
         after_events = runtime.event_log.query()[before:]
         score = result.graph.nodes.get("score")

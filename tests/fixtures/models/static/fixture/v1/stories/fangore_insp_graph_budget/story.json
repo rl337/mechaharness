@@ -2,10 +2,10 @@
   "id": "fangore_insp_graph_budget",
   "persona": "fangore",
   "title": "Enforce soft and hard spend limits on graph runs",
-  "kind": "cli",
-  "narrative": "Every graph run must declare how much spend is allowed. Crossing the soft limit winds remaining steps down without treating the job as a hard failure. Crossing the hard limit stops the run immediately. Hard can also be unlimited when no ceiling applies. Related: `fangore_insp_budget_subgraph_rollup` for nested spend, and `fangore_insp_stop_contract` for repeating-step ceilings.[^insp-budget]",
-  "implementation": "`BudgetPolicy` soft/hard limits on `GraphExecutor`. `CliInstrumentor` verb `graph_budget_limits`.",
-  "validation": "Harness `cli` `probe` loads `plans/soft_and_hard.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `run_budgeted_graph` with soft then hard policies on a two-node compute graph. Soft wind-down returns soft_exhausted; hard fail returns hard_budget_exceeded. Related: `fangore_insp_budget_subgraph_rollup`. [^insp-budget]",
+  "implementation": "`BudgetPolicy` soft/hard limits on `GraphExecutor`. Product verb `run_budgeted_graph`; hosts also pass `budget_policy=` on `run_recipe` / story `environment.budget`.",
+  "validation": "Harness `user_story` scenario `soft_and_hard.yaml` drives `run_budgeted_graph`; expects soft_status / hard_status and error codes.",
   "footnotes": [
     {
       "id": "insp-budget",

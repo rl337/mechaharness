@@ -5,9 +5,12 @@ from __future__ import annotations
 from pyiv.injector import Injector
 from pyiv.time import DateTimeService
 
+from mechaharness.budget import BudgetPolicy
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.cli_instrumentor import CliInstrumentor
 from mechaharness.cli_recipe_adapter import CliRecipeAdapter
 from mechaharness.cli_verb import CliProbe, CliVerb
+from mechaharness.core.access import AccessControl, GrantPolicyLike
 from mechaharness.core.completer import Completer
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints
 from mechaharness.harness.base import AbstractHarness
@@ -44,6 +47,10 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         rag_retriever: RagRetriever | None = None,
         lifecycle_extensions: dict[str, object] | None = None,
         harness_family: str = "pass_through",
+        grants: list[object] | None = None,
+        access_policy: GrantPolicyLike | None = None,
+        capability_envelope: CapabilityEnvelope | None = None,
+        budget_policy: BudgetPolicy | None = None,
     ) -> None:
         self._completer = completer
         self._datetime_service = datetime_service
@@ -53,12 +60,33 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         self._rag_retriever = rag_retriever
         self._lifecycle_extensions = dict(lifecycle_extensions or {})
         self._harness_family = harness_family
+        self._grants = grants
+        self._access_policy = access_policy
+        self._capability_envelope = capability_envelope
+        self._budget_policy = budget_policy
         super().__init__()
 
     def get_rag_retriever(self) -> type[RagRetriever] | RagRetriever:
         if self._rag_retriever is not None:
             return self._rag_retriever
         return super().get_rag_retriever()
+
+    def get_grants(self) -> list[object]:
+        if self._grants is not None:
+            return list(self._grants)
+        if self._access_policy is not None:
+            return list(self._access_policy.grants)
+        return super().get_grants()
+
+    def get_access_policy(self) -> GrantPolicyLike:
+        if self._access_policy is not None:
+            return self._access_policy
+        return super().get_access_policy()
+
+    def get_capability_envelope(self) -> CapabilityEnvelope:
+        if self._capability_envelope is not None:
+            return self._capability_envelope
+        return super().get_capability_envelope()
 
     def get_inference_class(self) -> type[InferenceStrategy]:
         if isinstance(self._completer, InferenceStrategy):
@@ -103,6 +131,11 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         judge = self._judge_provider
         rag = self._rag_retriever
         life = self._lifecycle_extensions
+        budget = self._budget_policy
+        grants = self.get_grants() if (
+            self._grants is not None or self._access_policy is not None
+        ) else None
+        access_policy = self._access_policy
         _expose_ctor_type_hints(_CliMaps)
 
         def make_cli(injector: Injector) -> CliInstrumentor:
@@ -117,6 +150,11 @@ class TestHarnessCliConfig(MechaHarnessConfig):
                 judge_provider=judge,
                 rag_retriever=rag,
                 lifecycle_extensions=life,
+                access_control=injector.inject(AccessControl),
+                capability_envelope=injector.inject(CapabilityEnvelope),
+                budget_policy=budget,
+                grants=grants,
+                access_policy=access_policy,
             )
 
         self.register(CliInstrumentor, make_cli)
