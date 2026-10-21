@@ -1,11 +1,11 @@
 {
   "id": "fangore_environment_repair_recipe",
   "persona": "fangore",
-  "title": "Instantiate the environment repair Agentic Recipe",
+  "title": "Run the environment repair Agentic Recipe",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `environment_repair` recipe. Before dependent work continues, Fangore runs the environment-repair Agentic Recipe: diagnose missing substrate, attempt a bounded repair, then recheck. The recipe must expand to a concrete plan without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.",
-  "implementation": "Agentic Recipe `environment_repair` (`EnvironmentRepairTemplate`) builds diagnose → bounded env repair → recheck as an ordinary `ExecutionGraph` with provenance stamps via `GraphTemplate.instantiate`.",
-  "validation": "Harness `user_story` scenario `environment_repair_recipe.yaml`: environment + graph + steps + complete expects.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Before dependent work continues, he runs Agentic Recipe `environment_repair`: diagnose missing substrate, attempt a bounded repair, then recheck until the environment is ok — without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`. [^rc-env-repair]",
+  "implementation": "Agentic Recipe `environment_repair` via `EnvironmentRepairTemplate` / `environment_repair_runner` and product verb `run_recipe` (`EnvironmentRepairRecipeAdapter`).",
+  "validation": "Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recipe`; expects environment_ok / repair_attempts plus shape keys.",
   "footnotes": [
     {
       "id": "rc-env-repair",

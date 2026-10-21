@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`independent_review` execute:** `independent_review_runner` +
   `IndependentReviewRecipeAdapter` promote inspiration + JEV shape stories
   (G1 batch 3).
+- **`environment_repair` / `initialize_preflight` execute:** fixture runners +
+  adapters promote those stories to `run_recipe` (G1 batch 4).
 
 ### Removed
 
