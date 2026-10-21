@@ -1,8 +1,7 @@
-# Probe plan for scenario `lifecycle_extension_rewrite.yaml`.
+# Lifecycle case plan for scenario `lifecycle_extension_rewrite.yaml`.
 # Story: Change tool arguments without changing the workflow
-
 summary: Change tool arguments without changing the workflow
-name: lifecycle_extension_rewrite
+case: rewrite
 prompt: Write a.txt
 grants:
 - core:fs.write

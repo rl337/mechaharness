@@ -1446,15 +1446,15 @@ Harness `cli` `probe` loads `plans/isolation_io_contract.yaml` (human-readable p
 
 ### `fangore_insp_lifecycle_block` — Skip one tool call without inventing a new plan
 
-Before a dangerous tool runs, Fangore's extension blocks that single call. The default tool does not run; the agent receives a structured skip for that step. Blocking one call does not insert a new step in a durable plan graph and does not bypass host hard-deny rules for other calls. Complements `fangore_insp_lifecycle_observe` and `fangore_insp_soft_vs_hard`. Accepts inspiration requirement 20.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a lifecycle_case plan (`block`) for: Skip one tool call without inventing a new plan. He performs product step `lifecycle_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-`LifecycleExtension` with block mode returns block at `BeforeTool`; `AbstractHarness.execute_tools` skips tool execution and emits an error tool result plus `core:extension_applied` with default_ran false.
+`LifecycleExtensionRegistry` via Config `get_lifecycle_extension_registry`, dispatched at tool/graph boundaries. Product CLI verb `lifecycle_case` (`mechaharness.cli_lifecycle_case`) with `case: block` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/lifecycle_extension_block.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `lifecycle_extension_block.yaml` drive product verb `lifecycle_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1462,15 +1462,15 @@ Harness `cli` `probe` loads `plans/lifecycle_extension_block.yaml` (human-readab
 
 ### `fangore_insp_lifecycle_graph_observe` — Watch graph node attempts without replacing failure policy
 
-Fangore binds an observe-only extension around each graph node attempt. The node still runs through the normal runner and failure policy. The log records the extension at the graph-node boundary. This does not invent a second plan graph. Complements `fangore_insp_lifecycle_observe`. Accepts inspiration requirement 20.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a lifecycle_case plan (`graph_observe`) for: Watch graph node attempts without replacing failure policy. He performs product step `lifecycle_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole executor-level retry brain (distinct from the planned `bounded_retry` Agentic Recipe, which makes retry a visible subgraph).
+`LifecycleExtensionRegistry` via Config `get_lifecycle_extension_registry`, dispatched at tool/graph boundaries. Product CLI verb `lifecycle_case` (`mechaharness.cli_lifecycle_case`) with `case: graph_observe` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/lifecycle_extension_graph_observe.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `lifecycle_extension_graph_observe.yaml` drive product verb `lifecycle_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1478,15 +1478,15 @@ Harness `cli` `probe` loads `plans/lifecycle_extension_graph_observe.yaml` (huma
 
 ### `fangore_insp_lifecycle_observe` — Watch tool calls in a fixed order without changing them
 
-Fangore binds two host extensions that watch each tool call before it runs. The first always runs before the second. The tool still executes with the original arguments. The run log records both extensions, their order, and that the default tool action still ran. Accepts inspiration requirement 20[^insp-r20]. Complements `fangore_insp_soft_vs_hard`: watching is not permission.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a lifecycle_case plan (`observe`) for: Watch tool calls in a fixed order without changing them. He performs product step `lifecycle_case` and verifies completion from the structured observation expects on each scenario. [^insp-r20]
 
 #### Implementation
 
-`LifecycleExtensionRegistry` (Config hook `get_lifecycle_extension_registry`) dispatches ordered observe extensions at `BeforeTool` / `AfterTool` inside `AbstractHarness.execute_tools`, emitting `core:extension_applied` provenance. Mutative modes are not required for this story.
+`LifecycleExtensionRegistry` via Config `get_lifecycle_extension_registry`, dispatched at tool/graph boundaries. Product CLI verb `lifecycle_case` (`mechaharness.cli_lifecycle_case`) with `case: observe` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/lifecycle_extension_observe.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `lifecycle_extension_observe.yaml` drive product verb `lifecycle_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1494,15 +1494,15 @@ Harness `cli` `probe` loads `plans/lifecycle_extension_observe.yaml` (human-read
 
 ### `fangore_insp_lifecycle_replace` — Hand off one tool step without a dotted-line graph node
 
-For one tool boundary, Fangore may substitute a different single-step outcome instead of running the original tool. That substitution is not a hidden extra node in the execution graph; multi-step repair or fan-out still uses an explicit plan. Complements `fangore_insp_lifecycle_rewrite`. Accepts inspiration requirement 20.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a lifecycle_case plan (`replace`) for: Hand off one tool step without a dotted-line graph node. He performs product step `lifecycle_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-`LifecycleExtension` with replace mode returns `replace_content` at `BeforeTool`; the harness emits that content as the tool result without executing the tool and without adding graph nodes.
+`LifecycleExtensionRegistry` via Config `get_lifecycle_extension_registry`, dispatched at tool/graph boundaries. Product CLI verb `lifecycle_case` (`mechaharness.cli_lifecycle_case`) with `case: replace` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/lifecycle_extension_replace.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `lifecycle_extension_replace.yaml` drive product verb `lifecycle_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1510,15 +1510,15 @@ Harness `cli` `probe` loads `plans/lifecycle_extension_replace.yaml` (human-read
 
 ### `fangore_insp_lifecycle_rewrite` — Change tool arguments without changing the workflow
 
-Before a write tool runs, Fangore's extension rewrites the path argument into a sandbox directory. The same write tool still runs — only the arguments change. Hard grants still apply to the rewritten call; the extension cannot widen permission by rewriting to a more privileged tool. The log shows that a rewrite ran and that the default tool still ran. Accepts inspiration requirement 20. Complements `fangore_insp_lifecycle_observe`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a lifecycle_case plan (`rewrite`) for: Change tool arguments without changing the workflow. He performs product step `lifecycle_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-`LifecycleExtension` with rewrite mode returns modified arguments at `BeforeTool`; `AbstractHarness.execute_tools` runs the same tool with rewritten args, then AccessControl still gates the call.
+`LifecycleExtensionRegistry` via Config `get_lifecycle_extension_registry`, dispatched at tool/graph boundaries. Product CLI verb `lifecycle_case` (`mechaharness.cli_lifecycle_case`) with `case: rewrite` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/lifecycle_extension_rewrite.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `lifecycle_extension_rewrite.yaml` drive product verb `lifecycle_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 

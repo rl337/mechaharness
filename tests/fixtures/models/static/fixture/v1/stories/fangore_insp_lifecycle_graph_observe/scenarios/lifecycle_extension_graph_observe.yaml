@@ -1,20 +1,29 @@
-# Plan document: ../plans/lifecycle_extension_graph_observe.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/lifecycle_extension_graph_observe.yaml
-expect:
-- kind: equals
-  key: graph_status
-  value: ok
-- kind: equals
-  key: boundary
-  value: core:before_graph_node
-- kind: equals
-  key: extension_id
-  value: acme:graph_watch
-- kind: 'true'
-  key: default_ran
-- kind: lte
-  key: cost_units
-  value: 1
+# user story: fangore_insp_lifecycle_graph_observe
+# Fangore starts the CLI host, runs lifecycle_case for plan
+# `plans/lifecycle_extension_graph_observe.yaml` (graph_observe), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    lifecycle_case:
+      path: plans/lifecycle_extension_graph_observe.yaml
+complete:
+  expect:
+  - kind: equals
+    key: graph_status
+    value: ok
+  - kind: equals
+    key: boundary
+    value: core:before_graph_node
+  - kind: equals
+    key: extension_id
+    value: acme:graph_watch
+  - kind: 'true'
+    key: default_ran
+  - kind: lte
+    key: cost_units
+    value: 1
+cleanup: []

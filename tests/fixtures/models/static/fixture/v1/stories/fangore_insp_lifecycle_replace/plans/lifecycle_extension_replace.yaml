@@ -1,8 +1,7 @@
-# Probe plan for scenario `lifecycle_extension_replace.yaml`.
+# Lifecycle case plan for scenario `lifecycle_extension_replace.yaml`.
 # Story: Hand off one tool step without a dotted-line graph node
-
 summary: Hand off one tool step without a dotted-line graph node
-name: lifecycle_extension_replace
+case: replace
 prompt: Write a.txt
 grants:
 - core:fs.write

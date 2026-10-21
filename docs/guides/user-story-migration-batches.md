@@ -17,9 +17,9 @@ exists for that claim.
 
 ## Counts
 
-- Done (`user_story`): **72** (3 pilots + Wave 1 A–F + Wave 2 P1–P3)
+- Done (`user_story`): **77** (3 pilots + Wave 1 A–F + Wave 2 P1–P4)
 - Ready (product CLI verbs, no probe): **0**
-- Blocked on probe → product verb: **101**
+- Blocked on probe → product verb: **96**
 
 ## Wave order
 
@@ -167,15 +167,15 @@ _`decision_case` (`plane_recipe` / `projection` / `policy` / `shadow` / `telemet
 - [x] `fangore_decision_plane_shadow`
 - [x] `fangore_decision_plane_telemetry`
 
-### Batch P4 — Lifecycle extensions
+### Batch P4 — Lifecycle extensions — **done** (Wave 2)
 
-_Product lifecycle verb or host extension CLI_ · **5** stories
+_`lifecycle_case` product verb (`observe` / `rewrite` / `block` / `replace` / `graph_observe`)_ · **5** stories
 
-- [ ] `fangore_insp_lifecycle_block`
-- [ ] `fangore_insp_lifecycle_graph_observe`
-- [ ] `fangore_insp_lifecycle_observe`
-- [ ] `fangore_insp_lifecycle_replace`
-- [ ] `fangore_insp_lifecycle_rewrite`
+- [x] `fangore_insp_lifecycle_block`
+- [x] `fangore_insp_lifecycle_graph_observe`
+- [x] `fangore_insp_lifecycle_observe`
+- [x] `fangore_insp_lifecycle_replace`
+- [x] `fangore_insp_lifecycle_rewrite`
 
 ### Batch P5 — Access / authority
 

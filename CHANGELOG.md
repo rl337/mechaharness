@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `action_safety`, plus P3 `plane_recipe` / `projection` / `policy` /
   `shadow` / `telemetry` / `model_policy`). Wave 2 P2–P3 stories migrate onto
   `kind: user_story`.
+- **Product CLI verb `lifecycle_case`:** lifecycle-extension case plans
+  (`observe` / `rewrite` / `block` / `replace` / `graph_observe`). Wave 2 P4
+  `fangore_insp_lifecycle_*` stories migrate onto `kind: user_story`.
 
 ### Changed
 
