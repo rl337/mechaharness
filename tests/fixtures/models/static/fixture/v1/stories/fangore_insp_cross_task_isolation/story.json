@@ -1,17 +1,23 @@
 {
   "id": "fangore_insp_cross_task_isolation",
   "persona": "fangore",
-  "title": "Prevent intervening tasks from contaminating authority and evidence",
+  "title": "Isolate job-lane run data; share only via brokered observe or handoff",
   "kind": "cli",
-  "narrative": "Task-local evidence, policy, memory references, and approvals must not bleed across intervening tasks unless an explicit typed handoff shares them. Related contracts: `fangore_insp_isolation_io`, `fangore_insp_handoff_record`. Tracks MH-DOTS-07[^insp-dots-07].",
-  "implementation": "`CrossTaskIsolationGuard` scopes visible refs per task from `IsolationContract.input_context_refs`; `publish` makes a ref task-local, and `share` is the only path to another task, requiring a `HandoffRecord` whose `evidence_refs` the source can read. Zero, five, and ten intervening tasks never see the published refs. Workspace and effect isolation stay in `workspace_isolation` and `IsolationContract`.",
-  "validation": "Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "narrative": "Fangore's product treats each pipeline identity as a JobLane (e.g. assets.generate vs billing.settle). Runs in the same lane may observe earlier runs in that lane's sequence; other lanes must not see bags, meta, or artifact URLs unless the publisher's exposure policy and/or standing grants (or a one-shot HandoffRecord) allow it. Related: `fangore_insp_isolation_io` (subgraph I/O contracts), `fangore_insp_handoff_record` (handoff schema). Tracks MH-DOTS-07[^insp-dots-07]; product shape is JobLaneBroker[^jl-broker].",
+  "implementation": "Target: `JobLane` + `JobLaneBroker` (JL-01..10) owning per-lane run sequences and WalkBags; `observe` with selectors latest / before(t) / run_id; exposure policy on meta and keys. Interim probe still exercises `CrossTaskIsolationGuard` until the broker lands and this story retargets into the JL story matrix in `docs/requirements/job-lane-broker.md`.",
+  "validation": "Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` until migration; then `user_story` multi-lane YAML with step-level `lane` / `lane_observe` expects grant vs deny.",
   "footnotes": [
     {
       "id": "insp-dots-07",
       "label": "OpenAI Dots agent safety (MH-DOTS-07)",
       "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md",
-      "note": "Cross-task context isolation"
+      "note": "Cross-task context isolation → job-lane broker"
+    },
+    {
+      "id": "jl-broker",
+      "label": "Job lane broker requirements",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md",
+      "note": "JL vocabulary, YAML surface, story matrix"
     }
   ]
 }
