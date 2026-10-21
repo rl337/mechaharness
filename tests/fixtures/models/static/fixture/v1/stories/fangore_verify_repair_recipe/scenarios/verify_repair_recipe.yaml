@@ -1,18 +1,15 @@
 # user story: fangore_verify_repair_recipe
-# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
-# with the `verify_repair` recipe.
-# Fangore tiles the verify-repair Agentic Recipe so produce, verify, and bounded repair
-# are visible graph steps with an explicit stop.
-# Complements `fangore_bounded_repair_loop` for loop helper semantics.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
 graph:
   recipe: verify_repair
+  bind: binds/verify_repair.yaml
 steps:
 - do:
-    instantiate_recipe:
+    run_recipe:
+      name: verify_repair
       path: binds/verify_repair.yaml
 complete:
   expect:
@@ -31,4 +28,18 @@ complete:
     - verify
     - repair
     - complete
+  - kind: 'true'
+    key: verification_passed
+  - kind: equals
+    key: repair_attempts
+    value: 1
+  - kind: equals
+    key: final_status
+    value: succeeded
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

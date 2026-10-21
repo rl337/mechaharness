@@ -487,6 +487,180 @@ def _mapping_keys(value: Any) -> list[str]:
     return []
 
 
+class VerifyRepairRecipeAdapter(CliRecipeAdapter):
+    """Execute ``verify_repair``: produce → verify → repair → complete."""
+
+    name = "verify_repair"
+
+    async def run(self, body: RunRecipeCommand, runtime: Any) -> Any:
+        from pathlib import Path
+
+        from mechaharness.cli_instrumentor import CliStepResult
+        from mechaharness.graph_templates import GraphTemplateParams
+        from mechaharness.recipe_bind import RecipeBind, observe_instantiated_recipe
+        from mechaharness.recipe_runner import get_recipe, list_recipes, run_recipe
+        from mechaharness.verify_repair_runner import verify_repair_runners
+
+        catalog = {row["name"] for row in list_recipes()}
+        soft: dict[str, Any] = dict(body.soft_bindings or {})
+        inputs: dict[str, Any] = {}
+        acceptance: list[Any] = []
+        goal = "verify_repair"
+        bind: RecipeBind | None = None
+        if body.path:
+            base = getattr(runtime, "bind_base_dir", None)
+            path = Path(body.path)
+            if not path.is_absolute() and base is not None:
+                path = Path(base) / path
+            bind = RecipeBind.from_path(path)
+            soft = {**bind.soft_bindings, **soft}
+            inputs = dict(bind.inputs)
+            acceptance = list(bind.acceptance)
+            goal = bind.goal or bind.name or goal
+        params = GraphTemplateParams(
+            goal=goal,
+            soft_bindings=soft,
+            inputs=inputs,
+            acceptance=acceptance,
+            stop_contract=bind.stop_contract if bind is not None else None,
+        )
+        before = len(runtime.event_log.query())
+        result = await run_recipe(
+            "verify_repair",
+            params=params,
+            runners=verify_repair_runners(),
+            event_log=runtime.event_log,
+            run_id="cli:verify_repair",
+        )
+        after_events = runtime.event_log.query()[before:]
+        complete = result.graph.nodes.get("complete")
+        repair = result.graph.nodes.get("repair")
+        verify = result.graph.nodes.get("verify")
+        complete_payload = dict(complete.payload) if complete else {}
+        repair_payload = dict(repair.payload) if repair else {}
+        verify_payload = dict(verify.payload) if verify else {}
+        shape_fields: dict[str, Any] = {}
+        if bind is not None:
+            template = get_recipe("verify_repair")
+            observed = observe_instantiated_recipe(
+                bind, result.graph, template
+            )
+            shape_fields = dict(observed["fields"])
+        fields = {
+            **shape_fields,
+            "template_name": "verify_repair",
+            "verification_passed": bool(
+                complete_payload.get("verification_passed")
+                or repair_payload.get("verification_passed")
+                or verify_payload.get("verification_passed")
+            ),
+            "repair_attempts": int(
+                complete_payload.get("repair_attempts")
+                or repair_payload.get("repair_attempts")
+                or 0
+            ),
+            "final_status": complete_payload.get("final_status") or result.status,
+            "budget_spent": float(result.budget_spent),
+        }
+        return CliStepResult(
+            verb="run_recipe",
+            text=None,
+            status=result.status,
+            event_types=[e.type for e in after_events],
+            clock_iso=runtime.datetime_service.now_utc_iso(),
+            recipe_in_catalog="verify_repair" in catalog,
+            subgraph_node_ids=list(result.graph.nodes),
+            cost_units=float(result.budget_spent),
+            fields=fields,
+        )
+
+
+class BoundedRetryRecipeAdapter(CliRecipeAdapter):
+    """Execute ``bounded_retry``: attempt → classify → permit → backoff/escalate."""
+
+    name = "bounded_retry"
+
+    async def run(self, body: RunRecipeCommand, runtime: Any) -> Any:
+        from pathlib import Path
+
+        from mechaharness.bounded_retry_runner import bounded_retry_runners
+        from mechaharness.cli_instrumentor import CliStepResult
+        from mechaharness.graph_templates import GraphTemplateParams
+        from mechaharness.recipe_bind import RecipeBind, observe_instantiated_recipe
+        from mechaharness.recipe_runner import get_recipe, list_recipes, run_recipe
+
+        catalog = {row["name"] for row in list_recipes()}
+        soft: dict[str, Any] = dict(body.soft_bindings or {})
+        inputs: dict[str, Any] = {}
+        goal = "bounded_retry"
+        bind: RecipeBind | None = None
+        if body.path:
+            base = getattr(runtime, "bind_base_dir", None)
+            path = Path(body.path)
+            if not path.is_absolute() and base is not None:
+                path = Path(base) / path
+            bind = RecipeBind.from_path(path)
+            soft = {**bind.soft_bindings, **soft}
+            inputs = dict(bind.inputs)
+            goal = bind.goal or bind.name or goal
+        params = GraphTemplateParams(
+            goal=goal,
+            soft_bindings=soft,
+            inputs=inputs,
+            stop_contract=bind.stop_contract if bind is not None else None,
+        )
+        before = len(runtime.event_log.query())
+        result = await run_recipe(
+            "bounded_retry",
+            params=params,
+            runners=bounded_retry_runners(),
+            event_log=runtime.event_log,
+            run_id="cli:bounded_retry",
+        )
+        after_events = runtime.event_log.query()[before:]
+        attempt = result.graph.nodes.get("attempt")
+        permit = result.graph.nodes.get("permit_retry")
+        escalate = result.graph.nodes.get("escalate")
+        backoff = result.graph.nodes.get("backoff")
+        shape_fields: dict[str, Any] = {}
+        if bind is not None:
+            template = get_recipe("bounded_retry")
+            observed = observe_instantiated_recipe(bind, result.graph, template)
+            shape_fields = dict(observed["fields"])
+        fields = {
+            **shape_fields,
+            "template_name": "bounded_retry",
+            "attempt_count": int(
+                (attempt.payload.get("attempt_count") if attempt else None)
+                or (permit.payload.get("attempt_count") if permit else None)
+                or 0
+            ),
+            "attempt_succeeded": bool(
+                (attempt.payload.get("attempt_succeeded") if attempt else False)
+                or (permit.payload.get("attempt_succeeded") if permit else False)
+            ),
+            "retry_permitted": bool(
+                permit.payload.get("retry_permitted") if permit else False
+            ),
+            "escalated": bool(escalate.payload.get("escalated") if escalate else False),
+            "backoff_applied": bool(
+                backoff.payload.get("backoff_applied") if backoff else False
+            ),
+            "budget_spent": float(result.budget_spent),
+        }
+        return CliStepResult(
+            verb="run_recipe",
+            text=None,
+            status=result.status,
+            event_types=[e.type for e in after_events],
+            clock_iso=runtime.datetime_service.now_utc_iso(),
+            recipe_in_catalog="bounded_retry" in catalog,
+            subgraph_node_ids=list(result.graph.nodes),
+            cost_units=float(result.budget_spent),
+            fields=fields,
+        )
+
+
 def default_cli_recipe_adapter_classes() -> dict[str, type[CliRecipeAdapter]]:
     return {
         HarnessRunRecipeAdapter.name: HarnessRunRecipeAdapter,
@@ -494,6 +668,8 @@ def default_cli_recipe_adapter_classes() -> dict[str, type[CliRecipeAdapter]]:
         ConversationalToolLoopRecipeAdapter.name: ConversationalToolLoopRecipeAdapter,
         ContextPackRecipeAdapter.name: ContextPackRecipeAdapter,
         DecisionPlaneRecipeAdapter.name: DecisionPlaneRecipeAdapter,
+        VerifyRepairRecipeAdapter.name: VerifyRepairRecipeAdapter,
+        BoundedRetryRecipeAdapter.name: BoundedRetryRecipeAdapter,
     }
 
 
@@ -514,10 +690,13 @@ def resolve_cli_recipe_adapters(config: Any) -> dict[str, CliRecipeAdapter]:
 
 __all__ = [
     "BackendDescribeRecipeAdapter",
+    "BoundedRetryRecipeAdapter",
     "CliRecipeAdapter",
     "ContextPackRecipeAdapter",
     "ConversationalToolLoopRecipeAdapter",
+    "DecisionPlaneRecipeAdapter",
     "HarnessRunRecipeAdapter",
+    "VerifyRepairRecipeAdapter",
     "default_cli_recipe_adapter_classes",
     "resolve_cli_recipe_adapters",
 ]

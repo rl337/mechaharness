@@ -1,20 +1,15 @@
 # user story: fangore_bounded_retry_recipe
-# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
-# with the `bounded_retry` recipe.
-# Fangore needs retries that are visible: classify the failure, decide whether another
-# attempt is allowed, apply backoff, and escalate when attempts are exhausted — not an
-# invisible executor loop.
-# Must compose with durable external-effect recovery from
-# `fangore_tdr_crash_before_intent` and sibling TDR crash-window stories.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
 graph:
   recipe: bounded_retry
+  bind: binds/bounded_retry.yaml
 steps:
 - do:
-    instantiate_recipe:
+    run_recipe:
+      name: bounded_retry
       path: binds/bounded_retry.yaml
 complete:
   expect:
@@ -41,4 +36,17 @@ complete:
     value: 3
   - kind: 'true'
     key: requires_effect_reconciliation
+  - kind: equals
+    key: attempt_count
+    value: 3
+  - kind: 'true'
+    key: attempt_succeeded
+  - kind: 'false'
+    key: escalated
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []
