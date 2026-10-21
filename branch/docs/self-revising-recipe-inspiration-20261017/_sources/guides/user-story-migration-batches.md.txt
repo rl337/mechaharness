@@ -225,51 +225,51 @@ _Historical list. Work via [G3](./user-story-recipe-expansion.md)
 _Historical list. Extend `context_pack` / `ContextProvider`
 ([G2](./user-story-recipe-expansion.md))._ · **11** stories
 
-- [ ] `fangore_context_compiler_deficit`
-- [ ] `fangore_context_observation_chain`
-- [ ] `fangore_derived_memory`
-- [ ] `fangore_insp_anchor_evidence`
-- [ ] `fangore_insp_context_compaction`
-- [ ] `fangore_insp_context_layers`
-- [ ] `fangore_insp_context_provider`
-- [ ] `fangore_insp_instruction_gotchas`
-- [ ] `fangore_insp_instruction_scope`
-- [ ] `nubble_repo_topology`
-- [ ] `taloneth_cache_layout_experiment`
+- [x] `fangore_context_compiler_deficit`
+- [x] `fangore_context_observation_chain`
+- [x] `fangore_derived_memory`
+- [x] `fangore_insp_anchor_evidence`
+- [x] `fangore_insp_context_compaction`
+- [x] `fangore_insp_context_layers`
+- [x] `fangore_insp_context_provider`
+- [x] `fangore_insp_instruction_gotchas`
+- [x] `fangore_insp_instruction_scope`
+- [x] `nubble_repo_topology`
+- [x] `taloneth_cache_layout_experiment`
 
 ### Batch P7 — Eval / research → **G5**
 
 _Historical list. Prefer eval recipes / export graphs
 ([G5](./user-story-recipe-expansion.md))._ · **28** stories
 
-- [ ] `fangore_insp_failure_attribution`
-- [ ] `nubble_insp_efficiency_scorecard`
-- [ ] `nubble_insp_trace_envelope`
-- [ ] `nubble_insp_trace_reconciliation`
-- [ ] `taloneth_atk_research_reject`
-- [ ] `taloneth_decision_plane_shadow_compare`
-- [ ] `taloneth_fixture_judge_batch`
-- [ ] `taloneth_insp_component_ablation`
-- [ ] `taloneth_insp_cross_harness_failure`
-- [ ] `taloneth_insp_eval_claims`
-- [ ] `taloneth_insp_eval_matrix`
-- [ ] `taloneth_insp_evaluation_outcome`
-- [ ] `taloneth_insp_evaluator_compose`
-- [ ] `taloneth_insp_experiment_dimensions`
-- [ ] `taloneth_insp_experiment_lineage`
-- [ ] `taloneth_insp_exposure_discriminative`
-- [ ] `taloneth_insp_gated_objective`
-- [ ] `taloneth_insp_harness_fingerprint`
-- [ ] `taloneth_insp_harness_health`
-- [ ] `taloneth_insp_harness_hypothesis`
-- [ ] `taloneth_insp_learning_export`
-- [ ] `taloneth_insp_objective_policy`
-- [ ] `taloneth_insp_rule_promotion`
-- [ ] `taloneth_insp_scaffolding_retire`
-- [ ] `taloneth_insp_trial_reliability`
-- [ ] `taloneth_offline_decision_export`
-- [ ] `taloneth_policy_replay`
-- [ ] `taloneth_validator_qualification`
+- [x] `fangore_insp_failure_attribution`
+- [x] `nubble_insp_efficiency_scorecard`
+- [x] `nubble_insp_trace_envelope`
+- [x] `nubble_insp_trace_reconciliation`
+- [x] `taloneth_atk_research_reject`
+- [x] `taloneth_decision_plane_shadow_compare`
+- [x] `taloneth_fixture_judge_batch`
+- [x] `taloneth_insp_component_ablation`
+- [x] `taloneth_insp_cross_harness_failure`
+- [x] `taloneth_insp_eval_claims`
+- [x] `taloneth_insp_eval_matrix`
+- [x] `taloneth_insp_evaluation_outcome`
+- [x] `taloneth_insp_evaluator_compose`
+- [x] `taloneth_insp_experiment_dimensions`
+- [x] `taloneth_insp_experiment_lineage`
+- [x] `taloneth_insp_exposure_discriminative`
+- [x] `taloneth_insp_gated_objective`
+- [x] `taloneth_insp_harness_fingerprint`
+- [x] `taloneth_insp_harness_health`
+- [x] `taloneth_insp_harness_hypothesis`
+- [x] `taloneth_insp_learning_export`
+- [x] `taloneth_insp_objective_policy`
+- [x] `taloneth_insp_rule_promotion`
+- [x] `taloneth_insp_scaffolding_retire`
+- [x] `taloneth_insp_trial_reliability`
+- [x] `taloneth_offline_decision_export`
+- [x] `taloneth_policy_replay`
+- [x] `taloneth_validator_qualification`
 
 ### Batch P8 — Graph executor / budgets → **G4** (+ some **G1**)
 
@@ -302,23 +302,23 @@ _Historical list. Thin diagnostic verbs ok when not subgraph control
 ([G7](./user-story-recipe-expansion.md));
 otherwise invent a recipe. Do not demote valid persona claims to unit-only._ · **17** stories
 
-- [ ] `fangore_completer_flavors`
-- [ ] `fangore_insp_exit_clean_state`
-- [ ] `fangore_insp_fan_in_policy`
-- [ ] `fangore_insp_handoff_record`
-- [ ] `fangore_insp_inference_capture_preflight`
-- [ ] `fangore_insp_loop_health`
-- [ ] `fangore_insp_operation_compensation`
-- [ ] `fangore_insp_risk_autonomy`
-- [ ] `fangore_insp_sparse_advisor`
-- [ ] `fangore_insp_state_governance`
-- [ ] `fangore_insp_stop_contract`
-- [ ] `fangore_insp_verification_gate`
-- [ ] `fangore_insp_wip_backpressure`
-- [ ] `nubble_insp_coordination_cost`
-- [ ] `nubble_insp_environment_delta`
-- [ ] `nubble_insp_resume_cost`
-- [ ] `nubble_topology_efficiency`
+- [x] `fangore_completer_flavors`
+- [x] `fangore_insp_exit_clean_state`
+- [x] `fangore_insp_fan_in_policy`
+- [x] `fangore_insp_handoff_record`
+- [x] `fangore_insp_inference_capture_preflight`
+- [x] `fangore_insp_loop_health`
+- [x] `fangore_insp_operation_compensation`
+- [x] `fangore_insp_risk_autonomy`
+- [x] `fangore_insp_sparse_advisor`
+- [x] `fangore_insp_state_governance`
+- [x] `fangore_insp_stop_contract`
+- [x] `fangore_insp_verification_gate`
+- [x] `fangore_insp_wip_backpressure`
+- [x] `nubble_insp_coordination_cost`
+- [x] `nubble_insp_environment_delta`
+- [x] `nubble_insp_resume_cost`
+- [x] `nubble_topology_efficiency`
 
 ## Related
 
