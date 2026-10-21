@@ -2,10 +2,10 @@
   "id": "fangore_graph_linkage_preflight",
   "persona": "fangore",
   "title": "Fail closed on missing graph linkage before work starts",
-  "kind": "cli",
-  "narrative": "Fangore composes a plan that still names a step the host has not wired, and another repeating step without a stop rule. The library must refuse those plans before any runner work starts, naming the missing edge so operators can fix wiring instead of debugging a mid-run crash. Complements `fangore_graph_executor` (authorized run once linkage is sound) and `fangore_convergence_ceiling` (budgets once a loop is allowed). See the inspiration requirements for linkage versus dependency injection and stop contracts[^insp-linkage].",
-  "implementation": "`DefaultLinkageResolver` preflight; `CliInstrumentor` verb `graph_linkage_preflight`.",
-  "validation": "Harness `cli` `probe` loads `plans/runner_stop_and_ok.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore composes a plan that still names a step the host has not wired, and another repeating step without a stop rule. The library must refuse those plans before any runner work starts, naming the missing edge so operators can fix wiring instead of debugging a mid-run crash. Complements `fangore_graph_executor` (authorized run once linkage is sound) and `fangore_convergence_ceiling` (budgets once a loop is allowed). See the inspiration requirements for linkage versus dependency injection and stop contracts[^insp-linkage].",
+  "implementation": "`DefaultLinkageResolver` preflight; `CliInstrumentor` verb `graph_linkage_preflight`.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-linkage",

@@ -132,11 +132,11 @@ P1–P4 are done (reopen P3 demotions via G0). For P5–P10, do **not** add thin
 
 _Catch-all residuals — assign per claim when pulled_ · **5** stories
 
-- [ ] `fangore_decision_surface_reject`
-- [ ] `fangore_insp_decision_conflict_checkpoint`
-- [ ] `nubble_insp_recipe_audit_dimensions`
-- [ ] `nubble_insp_review_audit_reconstruct`
-- [ ] `taloneth_insp_correction_spec_debt`
+- [x] `fangore_decision_surface_reject`
+- [x] `fangore_insp_decision_conflict_checkpoint`
+- [x] `nubble_insp_recipe_audit_dimensions`
+- [x] `nubble_insp_review_audit_reconstruct`
+- [x] `taloneth_insp_correction_spec_debt`
 
 ### Batch P1 — TDR crash windows — **done** (Wave 2)
 
@@ -214,11 +214,11 @@ _Historical list. Work via [G3](./user-story-recipe-expansion.md)
 - [x] `fangore_insp_denial_equivalence`
 - [ ] `fangore_insp_effect_revalidation`
 - [x] `fangore_insp_execution_token`
-- [ ] `fangore_insp_isolation_io`
+- [x] `fangore_insp_isolation_io`
 - [x] `fangore_insp_tool_effect_classes`
 - [x] `fangore_insp_tool_result_freshness`
-- [ ] `nubble_insp_workspace_isolation`
-- [ ] `nubble_lane_load_hint`
+- [x] `nubble_insp_workspace_isolation`
+- [x] `nubble_lane_load_hint`
 
 ### Batch P6 — Context management → **G2**
 
@@ -278,23 +278,23 @@ _Historical list. Durable/budget execute
 `fangore_bounded_repair_loop` → verify_repair in G1._ · **18** stories
 
 - [x] `fangore_bounded_repair_loop`
-- [ ] `fangore_convergence_ceiling`
-- [ ] `fangore_graph_executor`
-- [ ] `fangore_graph_linkage_preflight`
-- [ ] `fangore_host_kit_submit_once`
+- [x] `fangore_convergence_ceiling`
+- [x] `fangore_graph_executor`
+- [x] `fangore_graph_linkage_preflight`
+- [x] `fangore_host_kit_submit_once`
 - [x] `fangore_insp_budget_subgraph_rollup`
-- [ ] `fangore_insp_durable_resume`
-- [ ] `fangore_insp_dynamic_subgraph`
+- [x] `fangore_insp_durable_resume`
+- [x] `fangore_insp_dynamic_subgraph`
 - [x] `fangore_insp_graph_budget`
-- [ ] `fangore_insp_graph_transitions`
-- [ ] `fangore_insp_linkage_preflight`
-- [ ] `fangore_insp_soft_vs_hard`
-- [ ] `fangore_insp_targeted_rollback`
-- [ ] `fangore_insp_wake_reresolve`
+- [x] `fangore_insp_graph_transitions`
+- [x] `fangore_insp_linkage_preflight`
+- [x] `fangore_insp_soft_vs_hard`
+- [x] `fangore_insp_targeted_rollback`
+- [x] `fangore_insp_wake_reresolve`
 - [ ] `fangore_local_plan_resume`
-- [ ] `nubble_graph_event_correlators`
-- [ ] `nubble_insp_environment_linkage`
-- [ ] `nubble_insp_rollout_graph`
+- [x] `nubble_graph_event_correlators`
+- [x] `nubble_insp_environment_linkage`
+- [x] `nubble_insp_rollout_graph`
 
 ### Batch P9 — Pure API / policy helpers → **G7** / selective recipes
 

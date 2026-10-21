@@ -1,13 +1,37 @@
-# Plan document: ../plans/reject_invalid.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/reject_invalid.yaml
-expect:
-- kind: 'false'
-  key: rules_rejected
-- kind: 'true'
-  key: invalid_choice_rejected
-- kind: equals
-  key: rules_source
-  value: rules
+# user story: fangore_decision_surface_reject
+# Migrated from probe plan `reject_invalid.yaml` → product/test verb `decision_surface_reject`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    decision_surface_reject:
+      question:
+        kind: choice
+        id: route
+        instructions: Which team owns this?
+        options:
+        - id: billing
+          description: Billing
+        - id: technical
+          description: Technical
+      allowed_actions:
+      - billing
+      - technical
+      answers:
+        route: billing
+      invalid_choice: pirate-crew
+      state:
+        ticket: double charge
+  expect: &id001
+  - kind: 'false'
+    key: rules_rejected
+  - kind: 'true'
+    key: invalid_choice_rejected
+  - kind: equals
+    key: rules_source
+    value: rules
+complete:
+  expect: *id001
+cleanup: []

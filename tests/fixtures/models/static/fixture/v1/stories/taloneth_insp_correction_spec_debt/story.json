@@ -2,10 +2,10 @@
   "id": "taloneth_insp_correction_spec_debt",
   "persona": "taloneth",
   "title": "Capture corrections as reviewed specification debt before policy change",
-  "kind": "cli",
-  "narrative": "When a person corrects the agent, the correction is recorded as outstanding specification debt: the correction text, the scenarios that failed, and a link to the rule-promotion record it may harden into. The record stays flagged for human review until someone accepts it, and the host (not the library) generates the regression test and attaches it. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].",
-  "implementation": "`SpecificationDebtRecord`, `SpecificationDebtLedger`, and `capture_correction()` in `specification_debt.py` hold the correction, `failing_scenario_refs`, `promotion_record_id` (from `PromotionRecord.record_id`), `review_required`, and a host-filled `generated_test_ref`; `link_test()` and `approve()` move status `open` \u2192 `test_linked` \u2192 `closed`. The library owns only the ledger schema; test generation stays with the host.",
-  "validation": "Harness `cli` `probe` loads `plans/specification_debt.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. When a person corrects the agent, the correction is recorded as outstanding specification debt: the correction text, the scenarios that failed, and a link to the rule-promotion record it may harden into. The record stays flagged for human review until someone accepts it, and the host (not the library) generates the regression test and attaches it. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].",
+  "implementation": "`SpecificationDebtRecord`, `SpecificationDebtLedger`, and `capture_correction()` in `specification_debt.py` hold the correction, `failing_scenario_refs`, `promotion_record_id` (from `PromotionRecord.record_id`), `review_required`, and a host-filled `generated_test_ref`; `link_test()` and `approve()` move status `open` \u2192 `test_linked` \u2192 `closed`. The library owns only the ledger schema; test generation stays with the host.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-pa-07",

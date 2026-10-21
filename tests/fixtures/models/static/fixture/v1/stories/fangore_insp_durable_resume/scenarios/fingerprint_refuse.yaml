@@ -1,18 +1,26 @@
-# Plan document: ../plans/fingerprint_refuse.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/fingerprint_refuse.yaml
-expect:
-- kind: equals
-  key: first_status
-  value: ok
-- kind: equals
-  key: resume_status
-  value: failed
-- kind: equals
-  key: error_code
-  value: incompatible_checkpoint_fingerprint
-- kind: lte
-  key: cost_units
-  value: 1
+# user story: fangore_insp_durable_resume
+# Migrated from probe plan `fingerprint_refuse.yaml` → product/test verb `checkpoint_fingerprint_refuse`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    checkpoint_fingerprint_refuse:
+      goal: fp
+  expect: &id001
+  - kind: equals
+    key: first_status
+    value: ok
+  - kind: equals
+    key: resume_status
+    value: failed
+  - kind: equals
+    key: error_code
+    value: incompatible_checkpoint_fingerprint
+  - kind: lte
+    key: cost_units
+    value: 1
+complete:
+  expect: *id001
+cleanup: []

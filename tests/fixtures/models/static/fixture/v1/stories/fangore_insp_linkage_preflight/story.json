@@ -2,10 +2,10 @@
   "id": "fangore_insp_linkage_preflight",
   "persona": "fangore",
   "title": "Resolve graph linkage before any node runs",
-  "kind": "cli",
-  "narrative": "Fangore's injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2[^insp-r02]. Related: `fangore_insp_stop_contract`.",
-  "implementation": "`DefaultLinkageResolver` runner preflight; `CliInstrumentor` verb `graph_linkage_preflight`.",
-  "validation": "Harness `cli` `probe` loads `plans/missing_runner_and_ok.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore's injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2[^insp-r02]. Related: `fangore_insp_stop_contract`.",
+  "implementation": "`DefaultLinkageResolver` runner preflight; `CliInstrumentor` verb `graph_linkage_preflight`.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r02",

@@ -2,10 +2,10 @@
   "id": "fangore_insp_wake_reresolve",
   "persona": "fangore",
   "title": "Re-resolve linkage when resuming a woken run",
-  "kind": "cli",
-  "narrative": "Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17]. Wake re-resolve for Dots MH-DOTS-02; effect-dispatch revalidation: `fangore_insp_effect_revalidation`[^insp-dots-02-wake].",
-  "implementation": "`GraphExecutor` wake resolve + resume. `CliInstrumentor` verb `wake_reresolve_resume`.",
-  "validation": "Harness `cli` `probe` loads `plans/wake_resume.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17]. Wake re-resolve for Dots MH-DOTS-02; effect-dispatch revalidation: `fangore_insp_effect_revalidation`[^insp-dots-02-wake].",
+  "implementation": "`GraphExecutor` wake resolve + resume. `CliInstrumentor` verb `wake_reresolve_resume`.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r17",
