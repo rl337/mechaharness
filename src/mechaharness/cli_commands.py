@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -37,6 +39,9 @@ class RunRecipeCommand(BaseModel):
     max_iterations: int = 4
     tool_name: str = "lookup"
     model: str | None = None
+    # Optional RecipeBind path or inline soft bindings (context_pack, etc.).
+    path: str | None = None
+    soft_bindings: dict[str, Any] | None = None
 
 
 class SetClockCommand(BaseModel):

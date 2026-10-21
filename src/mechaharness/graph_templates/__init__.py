@@ -44,6 +44,7 @@ from mechaharness.graph_templates.catalog import (
     default_graph_template_classes,
     default_graph_templates,
 )
+from mechaharness.graph_templates.context_pack import ContextPackTemplate
 from mechaharness.graph_templates.conversational_tool_loop import (
     ConversationalToolLoopTemplate,
 )
@@ -63,6 +64,7 @@ from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
 __all__ = [
     "BackendDescribeTemplate",
     "BoundedRetryTemplate",
+    "ContextPackTemplate",
     "ConversationalToolLoopTemplate",
     "DecisionPlaneTemplate",
     "DemoGuidanceTemplate",

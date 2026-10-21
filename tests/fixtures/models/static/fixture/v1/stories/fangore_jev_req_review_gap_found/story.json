@@ -3,8 +3,8 @@
   "persona": "fangore",
   "title": "Escalate when a requirement gap appears in the facts",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (requirements_gap) for: Escalate when a requirement gap appears in the facts. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
-  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: requirements_gap` plans.",
-  "validation": "Harness `user_story` scenario(s) `gap_found.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He judges requirements coverage over a PR diff and story facts, then applies crash-test policy. He verifies completion from structured observation expects.",
+  "implementation": "Product verb `judge` over PR/story state; code-owned outcome from coverage + crash_tests_present.",
+  "validation": "user_story `gap_found.yaml` judge + cassette; expect outcome=request_tests.",
   "footnotes": []
 }

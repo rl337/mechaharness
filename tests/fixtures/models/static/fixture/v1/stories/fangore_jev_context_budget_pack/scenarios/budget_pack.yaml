@@ -1,22 +1,31 @@
 # user story: fangore_jev_context_budget_pack
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/budget_pack.yaml` (context_budget), and verifies completion.
+# Fangore packs RAG hits via context_pack recipe (retrieve→pack).
 kind: user_story
 environment:
   family: pass_through
   backend: mock
-graph: null
+  rag_corpus: binds/corpus.yaml
+graph:
+  recipe: context_pack
+  bind: binds/pack.yaml
 steps:
 - do:
-    decision_case:
-      path: plans/budget_pack.yaml
+    run_recipe:
+      name: context_pack
+      path: binds/pack.yaml
 complete:
   expect:
-  - kind: exactly
+  - kind: equals
     key: selected_ids
     value:
     - c
     - a
   - kind: 'true'
     key: within_budget
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

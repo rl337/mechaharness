@@ -272,12 +272,16 @@ class CliInstrumentor:
         agent_id: str = "cli",
         tools: ToolRegistry | None = None,
         judge_provider: JudgeProvider | None = None,
+        rag_retriever: Any | None = None,
+        lifecycle_extensions: dict[str, Any] | None = None,
     ) -> None:
         self._completer = completer
         self._model = model
         self._agent_id = agent_id
         self._tools = tools if tools is not None else ToolRegistry()
         self._judge_provider = judge_provider
+        self._rag_retriever = rag_retriever
+        self._lifecycle_extensions = dict(lifecycle_extensions or {})
         self._verbs = dict(verbs)
         self._recipe_adapters = dict(recipe_adapters)
         self._tapped_types: list[str] = []
@@ -323,6 +327,14 @@ class CliInstrumentor:
     @property
     def judge_provider(self) -> JudgeProvider | None:
         return self._judge_provider
+
+    @property
+    def rag_retriever(self) -> Any | None:
+        return self._rag_retriever
+
+    @property
+    def lifecycle_extensions(self) -> dict[str, Any]:
+        return self._lifecycle_extensions
 
     @property
     def event_log(self) -> EventLog:

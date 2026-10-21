@@ -113,6 +113,7 @@ from mechaharness.lifecycle_extension import (
 )
 from mechaharness.linkage_resolver import DefaultLinkageResolver, LinkageResolver
 from mechaharness.operation_registry import OperationRegistry, default_operations
+from mechaharness.rag import RagRetriever, UnboundRagRetriever
 from mechaharness.recipe_lifecycle.evolution_campaign_hooks import (
     EvolutionCampaignHooks,
     NoopEvolutionCampaignHooks,
@@ -409,6 +410,7 @@ class MechaHarnessConfig(Config):
         self._register_binding(
             LifecycleExtensionRegistry, self.get_lifecycle_extension_registry()
         )
+        self._register_binding(RagRetriever, self.get_rag_retriever())
         self._register_binding(CrashProbe, self.get_crash_probe())
         self._register_binding(
             RecipePromotionPolicy, self.get_recipe_promotion_policy()
@@ -919,6 +921,10 @@ class MechaHarnessConfig(Config):
     def get_lifecycle_extension_registry(self) -> LifecycleExtensionRegistry:
         """Ordered lifecycle extensions (default: empty)."""
         return empty_lifecycle_extension_registry()
+
+    def get_rag_retriever(self) -> type[RagRetriever] | RagRetriever:
+        """Host RAG retrieve seam (default: unbound — must override for context_pack)."""
+        return UnboundRagRetriever
 
     def inference_classes(self) -> dict[str, type[InferenceStrategy]]:
         """Named backend map. Hosts merge via ``super().inference_classes()``."""

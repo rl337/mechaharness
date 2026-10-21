@@ -1,0 +1,11 @@
+name: independent_review
+summary: Shape a requirements-aware review with isolated checkers
+goal: requirements review
+acceptance:
+- stories_covered
+- crash_tests_present
+inputs:
+  reviewer_count: 2
+soft_bindings:
+  reviewer_count: 2
+  omit_producer_reasoning: true

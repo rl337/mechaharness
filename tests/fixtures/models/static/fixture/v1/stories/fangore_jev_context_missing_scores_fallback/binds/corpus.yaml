@@ -1,0 +1,16 @@
+candidates:
+- id: ok
+  tokens: 40
+  relevance: 0.8
+  trust: 0.8
+  freshness: 0.8
+- id: broken
+  tokens: 40
+  relevance: n/a
+  trust: 0.9
+  freshness: 0.9
+- id: ok2
+  tokens: 40
+  relevance: 0.75
+  trust: 0.7
+  freshness: 0.6

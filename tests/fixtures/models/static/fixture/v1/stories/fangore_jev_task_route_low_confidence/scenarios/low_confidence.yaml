@@ -1,6 +1,5 @@
 # user story: fangore_jev_task_route_low_confidence
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/low_confidence.yaml` (task_route), and verifies completion.
+# He escalates when the router confidence is below the floor.
 kind: user_story
 environment:
   family: pass_through
@@ -8,8 +7,32 @@ environment:
 graph: null
 steps:
 - do:
-    decision_case:
-      path: plans/low_confidence.yaml
+    judge:
+      state: 'WORKLOAD: unclear ops request.'
+      questions:
+      - id: route
+        kind: choice
+        instructions: Choose the execution lane for this workload.
+        options:
+        - id: local_small
+          description: local_small
+        - id: frontier
+          description: frontier
+        - id: tool
+          description: tool
+        - id: human
+          description: human
+        allowed_actions:
+        - local_small
+        - frontier
+        - tool
+        - human
+      action_question_id: route
+      confidence_floor: 0.7
+      facts:
+        complexity: 0.5
+      quality_complexity_floor: 0.7
+      quality_override_action: frontier
 complete:
   expect:
   - kind: 'true'

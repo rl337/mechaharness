@@ -1,15 +1,16 @@
 # user story: fangore_decision_plane_telemetry
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/telemetry_fields.yaml` (telemetry), and verifies completion.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
-graph: null
+graph:
+  recipe: decision_plane
+  bind: binds/telemetry_fields.yaml
 steps:
 - do:
-    decision_case:
-      path: plans/telemetry_fields.yaml
+    run_recipe:
+      name: decision_plane
+      path: binds/telemetry_fields.yaml
 complete:
   expect:
   - kind: 'true'
@@ -27,4 +28,10 @@ complete:
     value: 42
   - kind: 'false'
     key: includes_raw_body
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

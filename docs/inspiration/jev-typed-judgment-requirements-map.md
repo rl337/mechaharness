@@ -13,19 +13,19 @@ infrastructure.
 
 | ID | Topic | Modules | Library | Story |
 |----|-------|---------|---------|-------|
-| MH-JEV-01 | Typed judgment contract | `inference/judge.py`, `decision_surfaces.py` | story | `fangore_refund_verdict`, `fangore_decision_plane_recipe` |
-| MH-JEV-02 | Batch judgments | `decision_plane_runtime.py`, `JudgeRequest` | story | `fangore_decision_plane_policy`, `taloneth_fixture_judge_batch` |
-| MH-JEV-03 | Calibration / abstention | `judgement_policy.py`, DP confidence floor | partial | `fangore_decision_plane_policy` (thresholds); deeper calibration corpus still open |
-| MH-JEV-04 | Provenance / replay | `decision_log.py`, DP telemetry | story | `taloneth_policy_replay`, `fangore_decision_plane_telemetry` |
-| MH-JEV-05 | Hard execution boundary | `core/access.py`, `consequence.py`, DP envelopes | story | `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety` |
-| MH-JEV-06 | Escalation / bounded loops | `decision_plane`, `verify_repair`, `bounded_retry` | story | `fangore_decision_plane_policy`, `fangore_verify_repair_recipe` |
+| MH-JEV-01 | Typed judgment contract | `inference/judge.py`, `cli_host_verbs.JudgeVerb` | story | `fangore_refund_verdict`, `fangore_jev_citation_*`, `fangore_decision_plane_recipe` |
+| MH-JEV-02 | Batch judgments | `JudgeRequest`, `taloneth_fixture_judge_batch` | story | `taloneth_fixture_judge_batch` |
+| MH-JEV-03 | Calibration / abstention | `judgement_policy.py`, judge confidence floor | partial | citation uncertain + task_route low_confidence; deeper calibration corpus still open |
+| MH-JEV-04 | Provenance / replay | `decision_log.py`, DP telemetry | unit/story | `taloneth_policy_replay`; DP telemetry unit in `test_decision_plane_runtime` |
+| MH-JEV-05 | Hard execution boundary | `core/access.py`, `JudgeVerb` grants | story | `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety` |
+| MH-JEV-06 | Escalation / bounded loops | judge escalate + `verify_repair` | story | JEV escalate stories, `fangore_verify_repair_recipe` |
 | MH-JEV-07 | Static-data tests | `FixtureJudgeProvider`, story fixtures | story | `taloneth_fixture_judge_batch`, JEV domain stories below |
-| MH-JEV-08 | Comparative evaluation | `compare_shadow_decision`, eval matrix | story | `fangore_decision_plane_shadow`, `taloneth_decision_plane_shadow_compare` |
-| MH-JEV-US04 | Citation support check | `decision_plane_runtime.py` | story | `fangore_jev_citation_matching_claim` (+ uncertain / missing / growth siblings) |
-| MH-JEV-US05 | RAG context picker | `assemble_context_within_budget`, DP batch | story | `fangore_jev_context_budget_pack` (+ filter / injection / missing-scores siblings) |
-| MH-JEV-US06 | Requirements-aware review | `decision_plane`, `independent_review` | story | `fangore_jev_req_review_template_shape` (+ covered / gap / approve-missing-crash siblings) |
-| MH-JEV-US07 | Task-specific router | `decision_plane`, `routing.py` | story | `fangore_jev_task_route_simple_local` (+ frontier / low-confidence / invalid siblings) |
-| MH-JEV-US08 | Action safety firewall | `AccessControl` + DP semantic risk | story | `fangore_jev_action_safety` |
+| MH-JEV-08 | Comparative evaluation | `compare_shadow_decision`, eval matrix | unit/story | unit + `taloneth_decision_plane_shadow_compare` |
+| MH-JEV-US04 | Citation support check | `judge` verb + cassette | story | `fangore_jev_citation_matching_claim` (+ uncertain / missing / growth siblings) |
+| MH-JEV-US05 | RAG context picker | `context_pack` recipe + `RagRetriever` | story | `fangore_jev_context_budget_pack` (+ filter / injection / missing-scores siblings) |
+| MH-JEV-US06 | Requirements-aware review | `independent_review` + `judge` | story | `fangore_jev_req_review_template_shape` (+ covered / gap / approve-missing-crash siblings) |
+| MH-JEV-US07 | Task-specific router | `judge` + quality facts | story | `fangore_jev_task_route_simple_local` (+ frontier / low-confidence / invalid siblings) |
+| MH-JEV-US08 | Action safety firewall | `judge` + hard `AccessPolicy` | story | `fangore_jev_action_safety` |
 | MH-JEV-US01–03 | Triage / lead / moderation packs | host bindings on `decision_plane` | surface | US01 pattern covered by decision-plane policy stories |
 | MH-JEV-US09–10 | Browser / game reflex | — | gap | Experimental; not library-owned yet |
 

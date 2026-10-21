@@ -1,0 +1,9 @@
+name: context_pack
+summary: Assemble RAG context from scored candidates within a token budget
+goal: pack context
+soft_bindings:
+  query: support policy
+  token_budget: 120
+  min_relevance: 0.5
+  min_trust: 0.5
+  min_freshness: 0.3

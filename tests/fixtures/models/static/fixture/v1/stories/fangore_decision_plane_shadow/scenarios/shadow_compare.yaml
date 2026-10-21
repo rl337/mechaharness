@@ -1,15 +1,16 @@
 # user story: fangore_decision_plane_shadow
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/shadow_compare.yaml` (shadow), and verifies completion.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
-graph: null
+graph:
+  recipe: decision_plane
+  bind: binds/shadow_compare.yaml
 steps:
 - do:
-    decision_case:
-      path: plans/shadow_compare.yaml
+    run_recipe:
+      name: decision_plane
+      path: binds/shadow_compare.yaml
 complete:
   expect:
   - kind: equals
@@ -22,4 +23,10 @@ complete:
   - kind: equals
     key: agreement
     value: false
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

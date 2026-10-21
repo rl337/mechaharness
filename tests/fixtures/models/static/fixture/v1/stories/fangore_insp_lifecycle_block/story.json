@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Skip one tool call without inventing a new plan",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a lifecycle_case plan (`block`) for: Skip one tool call without inventing a new plan. He performs product step `lifecycle_case` and verifies completion from the structured observation expects on each scenario.",
-  "implementation": "`LifecycleExtensionRegistry` via Config `get_lifecycle_extension_registry`, dispatched at tool/graph boundaries. Product CLI verb `lifecycle_case` (`mechaharness.cli_lifecycle_case`) with `case: block` plans.",
-  "validation": "Harness `user_story` scenario(s) `lifecycle_extension_block.yaml` drive product verb `lifecycle_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds host lifecycle extensions ['acme:block_write'] and runs product step `tool_lifecycle` (mode=tool). He verifies extension effects on the tool/graph path.",
+  "implementation": "Product verb `tool_lifecycle` (`ToolLifecycleVerb`) with Config/host-bound `LifecycleExtension` instances (story fixtures under tests.stories.hosts).",
+  "validation": "user_story `lifecycle_extension_block.yaml` tool_lifecycle; hard expects on extension observations.",
   "footnotes": [
     {
       "id": "insp-r20-block",

@@ -17,15 +17,25 @@ exists for that claim.
 
 ## Counts
 
-- Done (`user_story`): **77** (3 pilots + Wave 1 A–F + Wave 2 P1–P4)
-- Ready (product CLI verbs, no probe): **0**
-- Blocked on probe → product verb: **96**
+- Done (`user_story`): regenerate via `scripts/generate_user_stories_md.py`
+- Wave 3 (P2–P4 rewrite): case bags removed; see
+  [instrumentation migration](./user-story-instrumentation-migration.md)
+- **Wave 4+:** remaining work is **recipe-first groups G0–G7**, not thin-verb
+  then YAML wrap — see
+  [recipe expansion](./user-story-recipe-expansion.md)
 
 ## Wave order
 
 1. **Product batches A–F** (mechanical YAML + narrative tighten; no new verbs) — done.
-2. **Probe batches P1–P10** (each wave may add a thin product verb, then migrate).
-3. After each batch: regenerate `docs/guides/user-stories.md`, ratchet
+2. **Probe batches P1–P4** — done (P3 demotions retracted; restore in G0).
+3. **Instrumentation (Wave 3)** — case-bag verbs removed; gold =
+   soft-bind + execute + cassette/live
+   ([plan](./user-story-instrumentation-migration.md)).
+4. **Recipe expansion (Wave 4+)** — invent/extend Agentic Recipes + runners,
+   then migrate probes / promote shape-only stories
+   ([groups](./user-story-recipe-expansion.md)). P5–P10 checklists below are
+   **historical inventory**; work them via G0–G7, not as probe→thin-verb waves.
+5. After each batch: regenerate `docs/guides/user-stories.md`, ratchet
    `fail_under` if coverage rose, keep `./run_checks.sh` green.
 
 ### Per-story checklist
@@ -50,9 +60,11 @@ _start/answer/inspect/rebuild → user_story with graph.durable_ · **7** storie
 - [x] `nubble_insp_guidance_cost_budget`
 - [x] `taloneth_insp_scripted_driver_replay`
 
-### Batch B — Recipe shape (instantiate/tile)
+### Batch B — Recipe shape (instantiate/tile) — **done interim** · promote via **G1**
 
-_instantiate_recipe / tile_recipe + binds/_ · **11** stories
+_instantiate_recipe / tile_recipe + binds/_ · **11** stories.
+Many claims are outcome walks — promote to execute when runners land
+([G1](./user-story-recipe-expansion.md)).
 
 - [x] `fangore_bounded_retry_recipe`
 - [x] `fangore_environment_repair_recipe`
@@ -66,9 +78,11 @@ _instantiate_recipe / tile_recipe + binds/_ · **11** stories
 - [x] `fangore_verify_repair_recipe`
 - [x] `taloneth_insp_safety_eval_recipes`
 
-### Batch C — Recipe plan lifecycle
+### Batch C — Recipe plan lifecycle — **done interim** · see **G6**
 
-_recipe_plan + plans/_ · **10** stories
+_recipe_plan + plans/_ · **10** stories.
+Keep for registry lifecycle claims; promote to execute when the story is “run
+the evolved recipe” ([G6](./user-story-recipe-expansion.md)).
 
 - [x] `fangore_insp_evolution_ownership_split`
 - [x] `fangore_insp_recipe_lineage_promote`
@@ -108,14 +122,15 @@ _infer + environment_ · **1** stories
 
 - [x] `fangore_host_kit_event_tap`
 
-## Probe batches (P1–P10) — verb then convert
+## Probe batches (P1–P10) — historical inventory
 
-Do not force `user_story` while the only driver is `probe:`. Add or reuse a
-product verb first, then migrate the batch.
+P1–P4 are done (reopen P3 demotions via G0). For P5–P10, do **not** add thin
+`*_case` verbs then YAML-wrap. Invent/extend the Agentic Recipe, then migrate
+([recipe expansion](./user-story-recipe-expansion.md)).
 
-### Batch P10 — Misc probes
+### Batch P10 — Misc probes → distribute across G0–G7
 
-_Catch-all residuals_ · **5** stories
+_Catch-all residuals — assign per claim when pulled_ · **5** stories
 
 - [ ] `fangore_decision_surface_reject`
 - [ ] `fangore_insp_decision_conflict_checkpoint`
@@ -134,9 +149,11 @@ _`transactional_resume` product verb_ · **6** stories
 - [x] `fangore_tdr_crash_after_reduce_before_checkpoint`
 - [x] `fangore_tdr_crash_before_intent`
 
-### Batch P2 — JEV decision cases — **done** (Wave 2)
+### Batch P2 — JEV decision cases — **done** (Wave 2) · **Wave 3 done**
 
-_`decision_case` product verb (`case:` plans)_ · **17** stories
+_`judge` / `context_pack` / `instantiate_recipe` — see
+[instrumentation migration](./user-story-instrumentation-migration.md)_ ·
+**17** stories
 
 - [x] `fangore_jev_action_safety`
 - [x] `fangore_jev_citation_growth_mismatch`
@@ -156,9 +173,10 @@ _`decision_case` product verb (`case:` plans)_ · **17** stories
 - [x] `fangore_jev_task_route_low_confidence`
 - [x] `fangore_jev_task_route_simple_local`
 
-### Batch P3 — Decision plane core — **done** (Wave 2)
+### Batch P3 — Decision plane core — **done** (G0 execute)
 
-_`decision_case` (`plane_recipe` / `projection` / `policy` / `shadow` / `telemetry` / `model_policy`)_ · **6** stories
+_`run_recipe` + `DecisionPlaneRecipeAdapter` / `decision_plane_runner`
+([recipe expansion G0](./user-story-recipe-expansion.md))._
 
 - [x] `fangore_decision_plane_model_policy`
 - [x] `fangore_decision_plane_policy`
@@ -167,9 +185,11 @@ _`decision_case` (`plane_recipe` / `projection` / `policy` / `shadow` / `telemet
 - [x] `fangore_decision_plane_shadow`
 - [x] `fangore_decision_plane_telemetry`
 
-### Batch P4 — Lifecycle extensions — **done** (Wave 2)
+### Batch P4 — Lifecycle extensions — **done** (Wave 2) · **Wave 3 done**
 
-_`lifecycle_case` product verb (`observe` / `rewrite` / `block` / `replace` / `graph_observe`)_ · **5** stories
+_`tool_lifecycle` + host-bound extensions — see
+[instrumentation migration](./user-story-instrumentation-migration.md)_ ·
+**5** stories
 
 - [x] `fangore_insp_lifecycle_block`
 - [x] `fangore_insp_lifecycle_graph_observe`
@@ -177,9 +197,10 @@ _`lifecycle_case` product verb (`observe` / `rewrite` / `block` / `replace` / `g
 - [x] `fangore_insp_lifecycle_replace`
 - [x] `fangore_insp_lifecycle_rewrite`
 
-### Batch P5 — Access / authority
+### Batch P5 — Access / authority → **G3**
 
-_Grants, epochs, envelopes — product verbs TBD_ · **17** stories
+_Historical list. Work via [G3](./user-story-recipe-expansion.md)
+(authority gates on product graphs), not probe wrappers._ · **17** stories
 
 - [ ] `fangore_capability_envelope_narrow`
 - [ ] `fangore_compound_grants`
@@ -199,9 +220,10 @@ _Grants, epochs, envelopes — product verbs TBD_ · **17** stories
 - [ ] `nubble_insp_workspace_isolation`
 - [ ] `nubble_lane_load_hint`
 
-### Batch P6 — Context management
+### Batch P6 — Context management → **G2**
 
-_Context assembly verbs TBD_ · **11** stories
+_Historical list. Extend `context_pack` / `ContextProvider`
+([G2](./user-story-recipe-expansion.md))._ · **11** stories
 
 - [ ] `fangore_context_compiler_deficit`
 - [ ] `fangore_context_observation_chain`
@@ -215,9 +237,10 @@ _Context assembly verbs TBD_ · **11** stories
 - [ ] `nubble_repo_topology`
 - [ ] `taloneth_cache_layout_experiment`
 
-### Batch P7 — Eval / research
+### Batch P7 — Eval / research → **G5**
 
-_Taloneth eval probes → product verbs TBD_ · **28** stories
+_Historical list. Prefer eval recipes / export graphs
+([G5](./user-story-recipe-expansion.md))._ · **28** stories
 
 - [ ] `fangore_insp_failure_attribution`
 - [ ] `nubble_insp_efficiency_scorecard`
@@ -248,9 +271,11 @@ _Taloneth eval probes → product verbs TBD_ · **28** stories
 - [ ] `taloneth_policy_replay`
 - [ ] `taloneth_validator_qualification`
 
-### Batch P8 — Graph executor / budgets
+### Batch P8 — Graph executor / budgets → **G4** (+ some **G1**)
 
-_Executor/budget/resume probes → durable/run_recipe_ · **18** stories
+_Historical list. Durable/budget execute
+([G4](./user-story-recipe-expansion.md));
+`fangore_bounded_repair_loop` → verify_repair in G1._ · **18** stories
 
 - [ ] `fangore_bounded_repair_loop`
 - [ ] `fangore_convergence_ceiling`
@@ -271,9 +296,11 @@ _Executor/budget/resume probes → durable/run_recipe_ · **18** stories
 - [ ] `nubble_insp_environment_linkage`
 - [ ] `nubble_insp_rollout_graph`
 
-### Batch P9 — Pure API / policy helpers
+### Batch P9 — Pure API / policy helpers → **G7** / selective recipes
 
-_fan_in, wip, sparse advisor — product diagnostic verbs or stay unit_ · **17** stories
+_Historical list. Thin diagnostic verbs ok when not subgraph control
+([G7](./user-story-recipe-expansion.md));
+otherwise invent a recipe. Do not demote valid persona claims to unit-only._ · **17** stories
 
 - [ ] `fangore_completer_flavors`
 - [ ] `fangore_insp_exit_clean_state`
@@ -295,6 +322,8 @@ _fan_in, wip, sparse advisor — product diagnostic verbs or stay unit_ · **17*
 
 ## Related
 
+- [User-story recipe expansion](./user-story-recipe-expansion.md) — Wave 4+ working groups
+- [User-story instrumentation migration](./user-story-instrumentation-migration.md)
 - [`.cursor/skills/user-stories/SKILL.md`](../../.cursor/skills/user-stories/SKILL.md)
 - [`docs/reference/cli-universe.md`](../reference/cli-universe.md)
 - `tests/stories/scenarios/user_story_scenario.py`

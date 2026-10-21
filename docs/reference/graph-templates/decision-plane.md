@@ -74,6 +74,21 @@ assert graph.template_name == "decision_plane"
 | `compare_shadow_decision` | Candidate vs production; production controls |
 | `build_decision_plane_telemetry` | Evaluation-ready metrics without raw context |
 
+Execute walk: `mechaharness.decision_plane_runner` + CLI
+`DecisionPlaneRecipeAdapter` (`run_recipe name=decision_plane`).
+
+## Node components
+
+| Graph node | Components |
+|------------|------------|
+| `project_state` | `soft_point` (`project_kind`, `state_projection`, `facts`) |
+| `ask_batch` | `soft_point` (`ask_kind`, `questions`, `confidence_floor`, `decision_model`); `inference` when a live judge is bound |
+| `apply_policy` | `soft_point` (`policy_kind`, `confidence_floor`) |
+| `escalate` | `soft_point` (`escalate_kind`) |
+| `shadow_ask` | `soft_point` (`shadow_ask_kind`, `shadow_mode`) |
+
+See [Node components](../node-components.md).
+
 ## Related
 
 - [Graph templates and Agentic Recipes](../graph-templates.md)

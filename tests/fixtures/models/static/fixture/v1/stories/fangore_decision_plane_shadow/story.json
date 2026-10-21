@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Shadow a small decision model without giving it control",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`shadow`) for: Shadow a small decision model without giving it control. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rc-dp-shadow]",
-  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: shadow` plans.",
-  "validation": "Harness `user_story` scenario(s) `shadow_compare.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `decision_plane` with `shadow_mode` and divergent production vs shadow fixture answers. He performs `run_recipe` and verifies production still controls while both outcomes are recorded and disagree. [^rc-dp-shadow]",
+  "implementation": "Agentic Recipe `decision_plane` via `ShadowAskRunner` / `compare_shadow_decision` semantics. Product CLI verb `run_recipe` with `DecisionPlaneRecipeAdapter`.",
+  "validation": "Harness `user_story` scenario `shadow_compare.yaml` drives `run_recipe`; hard expects on production_action / agreement keys.",
   "footnotes": [
     {
       "id": "rc-dp-shadow",

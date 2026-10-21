@@ -1,0 +1,30 @@
+name: decision_plane
+summary: Project decision state and facts without calling a model
+goal: project ticket state
+soft_bindings:
+  confidence_floor: 0.7
+  shadow_mode: false
+  questions:
+  - id: team
+    kind: choice
+    options:
+    - id: billing
+    - id: technical
+    allowed_actions:
+    - billing
+    - technical
+  facts:
+    duplicate_charge: true
+    amount_cents: 1200
+inputs:
+  raw_context:
+    ticket_id: T-9
+    channel: email
+    body: charged twice
+    secret: do-not-emit
+  project_keys:
+  - ticket_id
+  - channel
+  fixture_answers:
+    team: billing
+  confidence: 0.95

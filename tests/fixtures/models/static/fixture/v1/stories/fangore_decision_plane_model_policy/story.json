@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Bind a decision model flavor without baking size into the recipe",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`model_policy`) for: Bind a decision model flavor without baking size into the recipe. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rc-dp-size]",
-  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: model_policy` plans.",
-  "validation": "Harness `user_story` scenario(s) `model_soft_point.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He soft-binds `decision_model` on the `decision_plane` recipe without baking a parameter count into the template, runs `run_recipe`, and verifies ask_batch carries the flavor ref. [^rc-dp-size]",
+  "implementation": "Agentic Recipe `decision_plane` soft point `decision_model` via `run_recipe` / `DecisionPlaneRecipeAdapter`.",
+  "validation": "user_story model_soft_point.yaml run_recipe; soft_point_decision_model / ask_model_ref.",
   "footnotes": [
     {
       "id": "rc-dp-size",

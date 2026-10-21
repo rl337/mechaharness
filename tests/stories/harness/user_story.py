@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from datetime import datetime, timezone
 
@@ -67,10 +68,16 @@ class UserStoryHarness:
         scenario: UserStoryScenario,
     ) -> TestHarnessCliConfig:
         env = scenario.environment
-        response_path = case.path("response.json")
         response: dict = {}
-        if response_path.is_file():
-            response = case.load_json("response.json")
+        scenario_path = case.scenario_path()
+        if scenario_path is not None:
+            per_scenario = scenario_path.with_suffix(".response.json")
+            if per_scenario.is_file():
+                response = json.loads(per_scenario.read_text(encoding="utf-8"))
+        if not response:
+            response_path = case.path("response.json")
+            if response_path.is_file():
+                response = case.load_json("response.json")
         model = (
             os.environ.get("MECHA_MODEL", "").strip()
             or str(response.get("model") or "")
@@ -78,10 +85,14 @@ class UserStoryHarness:
         )
         clock = _parse_clock(env.clock)
         loop_family, tool_name = self._tool_loop_needs(scenario, env)
-        needs_judge = any(next(iter(s.do)) == "judge_route" for s in scenario.steps)
+        needs_judge = any(
+            next(iter(s.do)) in {"judge", "judge_route"} for s in scenario.steps
+        )
         judge_provider: JudgeProvider | None = None
         if needs_judge:
             judge_provider = self._build_judge_provider(case, backend, response)
+        rag_retriever = self._build_rag_retriever(case, scenario)
+        lifecycle_extensions = self._build_lifecycle_extensions(scenario)
 
         if env.backend == "anthropic":
             return self._anthropic_config(
@@ -91,6 +102,7 @@ class UserStoryHarness:
                 model=model,
                 family=env.family,
                 judge_provider=judge_provider,
+                rag_retriever=rag_retriever,
             )
         if env.backend == "openai_compat":
             return self._openai_compat_config(
@@ -100,6 +112,7 @@ class UserStoryHarness:
                 model=model,
                 family=env.family,
                 judge_provider=judge_provider,
+                rag_retriever=rag_retriever,
             )
         if env.backend != "mock":
             raise AssertionError(
@@ -117,6 +130,8 @@ class UserStoryHarness:
             model=model,
             harness_family=env.family,
             judge_provider=judge_provider,
+            rag_retriever=rag_retriever,
+            lifecycle_extensions=lifecycle_extensions,
         )
 
     def _build_judge_provider(
@@ -142,8 +157,54 @@ class UserStoryHarness:
                 client=AsyncUrllibHttpClient(),
             )
         raise AssertionError(
-            f"{case.label}: judge_route unsupported adapter {case.adapter!r}"
+            f"{case.label}: judge unsupported adapter {case.adapter!r}"
         )
+
+    def _build_rag_retriever(
+        self,
+        case: StoryCase,
+        scenario: UserStoryScenario,
+    ):
+        from pathlib import Path
+
+        import yaml
+
+        from mechaharness.rag import FixtureRagRetriever
+
+        corpus = scenario.environment.rag_corpus
+        if not corpus:
+            return None
+        path = case.path(corpus)
+        if not Path(path).is_file():
+            raise AssertionError(f"{case.label}: missing rag_corpus {corpus}")
+        raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+        if isinstance(raw, dict) and "candidates" in raw:
+            candidates = list(raw["candidates"])
+        elif isinstance(raw, list):
+            candidates = raw
+        else:
+            raise AssertionError(
+                f"{case.label}: rag_corpus must be a candidate list or "
+                "{candidates: [...]}"
+            )
+        return FixtureRagRetriever(candidates)
+
+    def _build_lifecycle_extensions(
+        self,
+        scenario: UserStoryScenario,
+    ) -> dict[str, object]:
+        from tests.stories.hosts.lifecycle_extensions import STORY_LIFECYCLE_EXTENSIONS
+
+        out: dict[str, object] = {}
+        for eid in scenario.environment.lifecycle_extensions:
+            cls = STORY_LIFECYCLE_EXTENSIONS.get(eid)
+            if cls is None:
+                raise AssertionError(
+                    f"unknown lifecycle extension {eid!r}; "
+                    f"known: {sorted(STORY_LIFECYCLE_EXTENSIONS)}"
+                )
+            out[eid] = cls()
+        return out
 
     def _tool_loop_needs(
         self, scenario: UserStoryScenario, env: EnvironmentBlock
@@ -225,7 +286,10 @@ class UserStoryHarness:
         model: str,
         family: str,
         judge_provider: JudgeProvider | None = None,
+        rag_retriever: object | None = None,
     ) -> TestHarnessCliConfig:
+        from mechaharness.rag import RagRetriever
+
         settings = Settings(
             inference_backend="openai_compat",
             harness_family=family,
@@ -251,6 +315,7 @@ class UserStoryHarness:
             model=model,
             harness_family=family,
             judge_provider=judge_provider,
+            rag_retriever=rag_retriever if isinstance(rag_retriever, RagRetriever) else None,
         )
 
     def _anthropic_config(
@@ -262,7 +327,10 @@ class UserStoryHarness:
         model: str,
         family: str,
         judge_provider: JudgeProvider | None = None,
+        rag_retriever: object | None = None,
     ) -> TestHarnessCliConfig:
+        from mechaharness.rag import RagRetriever
+
         settings = Settings(
             inference_backend="anthropic",
             harness_family=family,
@@ -288,4 +356,5 @@ class UserStoryHarness:
             model=settings.model,
             harness_family=family,
             judge_provider=judge_provider,
+            rag_retriever=rag_retriever if isinstance(rag_retriever, RagRetriever) else None,
         )

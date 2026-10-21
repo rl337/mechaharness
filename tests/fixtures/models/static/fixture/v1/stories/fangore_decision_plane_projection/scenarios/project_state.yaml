@@ -1,15 +1,16 @@
 # user story: fangore_decision_plane_projection
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/project_state.yaml` (projection), and verifies completion.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
-graph: null
+graph:
+  recipe: decision_plane
+  bind: binds/project_state.yaml
 steps:
 - do:
-    decision_case:
-      path: plans/project_state.yaml
+    run_recipe:
+      name: decision_plane
+      path: binds/project_state.yaml
 complete:
   expect:
   - kind: equals
@@ -28,4 +29,10 @@ complete:
     key: no_model_invocation
   - kind: 'true'
     key: facts_fingerprint_nonempty
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

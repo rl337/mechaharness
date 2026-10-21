@@ -1,15 +1,16 @@
 # user story: fangore_jev_req_review_template_shape
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/template_shape.yaml` (requirements_gap), and verifies completion.
+# He instantiates `independent_review` with two reviewers and omitted producer reasoning.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
-graph: null
+graph:
+  recipe: independent_review
+  bind: binds/independent_review.yaml
 steps:
 - do:
-    decision_case:
-      path: plans/template_shape.yaml
+    instantiate_recipe:
+      path: binds/independent_review.yaml
 complete:
   expect:
   - kind: equals

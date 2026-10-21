@@ -12,16 +12,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Product CLI verb `transactional_resume`:** crash-window durable coding-job
   resume via `host_graph_executor` + `ArmedCrashProbe` (DR-10). Wave 2 P1
   stories (`fangore_tdr_crash_*`) migrate onto `kind: user_story`.
-- **Product CLI verb `decision_case`:** JEV / decision-plane case plans
-  (`citation_support`, `context_budget`, `requirements_gap`, `task_route`,
-  `action_safety`, plus P3 `plane_recipe` / `projection` / `policy` /
-  `shadow` / `telemetry` / `model_policy`). Wave 2 P2–P3 stories migrate onto
-  `kind: user_story`.
-- **Product CLI verb `lifecycle_case`:** lifecycle-extension case plans
-  (`observe` / `rewrite` / `block` / `replace` / `graph_observe`). Wave 2 P4
-  `fangore_insp_lifecycle_*` stories migrate onto `kind: user_story`.
+- **Product CLI verb `judge`:** judge-lane twin of `infer` (typed questions over
+  state via `JudgeProvider` + cassette/live). JEV citation / route / safety /
+  requirements stories walk this verb with real inputs.
+- **Agentic Recipe `context_pack`:** host `RagRetriever` →
+  `assemble_context_within_budget` (fixture retriever for stories).
+- **Product CLI verb `tool_lifecycle`:** Config-bound lifecycle extensions on
+  tool-loop or tiny graph (replaces `lifecycle_case`).
+- **Product CLI verb `assemble_context`:** thin pack leaf for already-scored
+  candidate lists.
+- **`decision_plane` execute:** `decision_plane_runner` +
+  `DecisionPlaneRecipeAdapter` (`run_recipe`). Restores
+  `fangore_decision_plane_{projection,policy,shadow,telemetry}` and promotes
+  recipe / model_policy stories off instantiate-only (G0).
+
+### Removed
+
+- **Case-bag verbs `decision_case` and `lifecycle_case`:** replaced by
+  instrumented `judge` / `context_pack` / `tool_lifecycle` / `instantiate_recipe`
+  walks (Wave 3).
 
 ### Changed
+
+- **User-story litmus (recipe expansion):** missing graph path ⇒ add Agentic
+  Recipe / runners, do not demote valid persona claims. Wave 3 demotion of
+  `fangore_decision_plane_{projection,policy,shadow,telemetry}` retracted —
+  restore under G0
+  (recipe expansion guide). Remaining
+  probe batches regrouped as G0–G7 (recipe-first), not thin-verb then YAML.
 
 - **Story harness redesign:** `story.json` `kind` is now a reusable harness
   family (`pure_api`, `access_authority`, `graph_execution`, …) under
