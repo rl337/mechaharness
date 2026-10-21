@@ -217,6 +217,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.openai_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAICompatStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference.systemone</span><span class="w"> </span><span class="kn">import</span> <span class="n">SystemOneJudgeProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.inference_capture</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceCapture</span><span class="p">,</span> <span class="n">empty_inference_capture</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.job_lane_broker</span><span class="w"> </span><span class="kn">import</span> <span class="n">JobLaneBroker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.lifecycle_extension</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span>
     <span class="n">empty_lifecycle_extension_registry</span><span class="p">,</span>
@@ -563,6 +564,14 @@
             <span class="n">AccessControl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_access_control</span><span class="p">(),</span> <span class="n">make_access_control</span>
         <span class="p">)</span>
 
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_job_lane_broker</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JobLaneBroker</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">injector</span>
+            <span class="k">return</span> <span class="n">JobLaneBroker</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
+            <span class="n">JobLaneBroker</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_job_lane_broker</span><span class="p">(),</span> <span class="n">make_job_lane_broker</span>
+        <span class="p">)</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">make_cost_accountant</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostAccountant</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">InMemoryCostAccountant</span><span class="p">(</span><span class="n">event_log</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">EventLog</span><span class="p">))</span>
 
@@ -767,6 +776,13 @@
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_access_control">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_access_control</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessControl</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">AccessControl</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Optional ``AccessControl`` override. ``None`` → inject ``EventLog``."""</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_job_lane_broker">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_job_lane_broker">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_job_lane_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JobLaneBroker</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">JobLaneBroker</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Optional ``JobLaneBroker`` override. ``None`` → empty catalog factory."""</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 

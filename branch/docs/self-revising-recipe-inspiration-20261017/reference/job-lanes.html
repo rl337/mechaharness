@@ -113,7 +113,7 @@
 <p>Lane-scoped run sequences, WalkBags, and authorized observe. Module target:
 <code class="docutils literal notranslate"><span class="pre">mechaharness.job_lane_broker</span></code> (shim-deprecate
 <code class="docutils literal notranslate"><span class="pre">mechaharness.isolation.cross_task_isolation.CrossTaskIsolationGuard</span></code>).</p>
-<p>Stability: evolving (design landed; implementation tracks JL-* stories).</p>
+<p>Stability: evolving (types + Config bind + CLI verbs + JL stories landed).</p>
 <section id="surface">
 <h2>Surface<a class="headerlink" href="#surface" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
@@ -127,12 +127,15 @@
 <td><p><code class="docutils literal notranslate"><span class="pre">JobLane</span></code>, <code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code>, exposure / grant records</p></td>
 </tr>
 <tr class="row-odd"><td><p>DI</p></td>
-<td><p>Config bind (proposed <code class="docutils literal notranslate"><span class="pre">get_job_lane_broker()</span></code>); inject — no locator</p></td>
+<td><p>Config <code class="docutils literal notranslate"><span class="pre">get_job_lane_broker()</span></code>; inject — no locator</p></td>
 </tr>
-<tr class="row-even"><td><p>Normative</p></td>
+<tr class="row-even"><td><p>CLI</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lane_publish</span></code>, <code class="docutils literal notranslate"><span class="pre">lane_observe</span></code>, <code class="docutils literal notranslate"><span class="pre">lane_grant</span></code>, <code class="docutils literal notranslate"><span class="pre">lane_handoff</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Normative</p></td>
 <td><p><a class="reference internal" href="../requirements/job-lane-broker.html"><span class="std std-doc">Job lane broker requirements</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p>Provenance</p></td>
+<tr class="row-even"><td><p>Provenance</p></td>
 <td><p>MH-DOTS-07 (productized as lanes, not intervening-task loops)</p></td>
 </tr>
 </tbody>

@@ -1024,20 +1024,20 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `fangore_insp_cross_task_isolation` — Isolate job-lane run data; share only via brokered observe or handoff
 
-Fangore's product treats each pipeline identity as a JobLane (e.g. assets.generate vs billing.settle). Runs in the same lane may observe earlier runs in that lane's sequence; other lanes must not see bags, meta, or artifact URLs unless the publisher's exposure policy and/or standing grants (or a one-shot HandoffRecord) allow it. Related: `fangore_insp_isolation_io` (subgraph I/O contracts), `fangore_insp_handoff_record` (handoff schema). Tracks MH-DOTS-07[^insp-dots-07]; product shape is JobLaneBroker[^jl-broker].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He treats each pipeline as a JobLane: assets publishes refs that do not bleed to billing until an explicit `lane_handoff`, matching MH-DOTS-07 as productized JobLaneBroker. Focused claims also live in `fangore_job_lane_*` stories (same-lane lineage, cross deny, meta allowlist, artifacts, before selector, handoff).
 
 #### Implementation
 
-Target: `JobLane` + `JobLaneBroker` (JL-01..10) owning per-lane run sequences and WalkBags; `observe` with selectors latest / before(t) / run_id; exposure policy on meta and keys. Interim probe still exercises `CrossTaskIsolationGuard` until the broker lands and this story retargets into the JL story matrix in `docs/requirements/job-lane-broker.md`.
+`JobLane` + `JobLaneBroker` (JL-01..10) in `mechaharness.job_lane_broker`; CLI verbs `lane_publish` / `lane_observe` / `lane_handoff`. Deprecated shim: `CrossTaskIsolationGuard`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` until migration; then `user_story` multi-lane YAML with step-level `lane` / `lane_observe` expects grant vs deny.
+Harness `user_story` scenario `cross_task_isolation_bleed.yaml`; matrix stories `fangore_job_lane_*`.
 
 #### Footnotes
 
-[^insp-dots-07]: [OpenAI Dots agent safety (MH-DOTS-07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Cross-task context isolation → job-lane broker
-[^jl-broker]: [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — JL vocabulary, YAML surface, story matrix
+1. [OpenAI Dots agent safety (MH-DOTS-07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Cross-task context isolation → job-lane broker
+2. [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — JL vocabulary, YAML surface, story matrix
 
 ### `fangore_insp_decision_conflict_checkpoint` — Checkpoint after conflict-free decisions without revisiting cleared cycles
 
@@ -2115,6 +2115,102 @@ user_story judge; expect final_action=local_small.
 #### Footnotes
 
 1. [Jev typed-judgment inspiration (MH-JEV-US07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Task-specific model/workflow router
+
+### `fangore_job_lane_cross_deny` — Cross-lane observe denies without exposure or grant
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets publishes `asset_urls` under deny-all exposure. Billing calls `lane_observe` for that key and receives a typed deny — no silent bleed across JobLanes.
+
+#### Implementation
+
+`JobLaneBroker.observe` returns `status: denied` when publisher exposure and standing grants/handoffs do not allow the caller (JL-05..06).
+
+#### Validation
+
+Harness `user_story` scenario `cross_deny.yaml`.
+
+#### Footnotes
+
+1. [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — Cross-lane deny-by-default
+
+### `fangore_job_lane_handoff_oneshot` — HandoffRecord unlocks named refs once across lanes
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets publishes two memo keys under deny-all exposure, then hands off only `memo:1` to billing via `lane_handoff`. Billing observes the shared ref and is denied the unshared one; a ghost handoff refuses.
+
+#### Implementation
+
+`JobLaneBroker.handoff` consumes `HandoffRecord.evidence_refs`; verbs `lane_publish` / `lane_handoff` / `lane_observe`.
+
+#### Validation
+
+Harness `user_story` scenario `handoff_oneshot.yaml`.
+
+#### Footnotes
+
+1. [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — One-shot handoff share
+
+### `fangore_job_lane_key_expose_artifacts` — FileArtifact URLs observe after key exposure allowlist
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets publishes a `FileArtifact` under `asset_urls` with `allow_lanes` for billing. Billing observes `latest` and receives the URL payload (JL-08).
+
+#### Implementation
+
+`FileArtifact` on the run WalkBag; `JobLane.keys.asset_urls` exposure; `lane_publish` / `lane_observe`.
+
+#### Validation
+
+Harness `user_story` scenario `key_expose_artifacts.yaml`.
+
+#### Footnotes
+
+1. [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — JL-08 FileArtifact under exposed keys
+
+### `fangore_job_lane_meta_allowlist` — Lane meta is open only to allowlisted caller lanes
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets exposes run meta only to `billing.settle`. Billing observes meta successfully; a third lane is denied.
+
+#### Implementation
+
+`JobLane.meta` `ExposureRule` with `allow_lanes`; `lane_observe` with `meta: true` (JL-06).
+
+#### Validation
+
+Harness `user_story` scenario `meta_allowlist.yaml`.
+
+#### Footnotes
+
+1. [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — Meta exposure allowlist
+
+### `fangore_job_lane_observe_before` — before(t) selector returns the last eligible lane run
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He publishes two runs on `assets.generate` with distinct `started_at` stamps, then observes with `before` a midpoint timestamp and gets the earlier run (JL-04).
+
+#### Implementation
+
+`ObserveSelector.before` / `at_or_before` on `JobLaneBroker.observe`; `lane_publish.started_at`.
+
+#### Validation
+
+Harness `user_story` scenario `observe_before.yaml`.
+
+#### Footnotes
+
+1. [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — JL-04 run sequence selectors
+
+### `fangore_job_lane_same_lane_lineage` — Later run in a job lane observes an earlier run's key
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He configures JobLane `assets.generate`, publishes `asset_urls` on an early run, then from a later run in the same lane observes `latest` and reads the published artifact URL. Same-lane lineage is allowed by default (JL-07).
+
+#### Implementation
+
+`JobLaneBroker` in `mechaharness.job_lane_broker`; product verbs `lane_publish` / `lane_observe` in `cli_policy_verbs`; story Config binds via `environment.job_lanes` and step `lane` / `run_id` (JL-01..10).
+
+#### Validation
+
+Harness `user_story` scenario `same_lane_lineage.yaml`.
+
+#### Footnotes
+
+1. [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — JL-07 same-lane observe
 
 ### `fangore_local_plan_resume` — Resume a durable local plan after a crash
 
