@@ -607,7 +607,9 @@ class DenialEquivalenceVerb(CliVerb):
         first = gate.evaluate(
             action=denied["effect_class"],
             verdict=Verdict(
-                kind="DENY", reasonCodes=["user_denied"], policyVersion="1"
+                kind="DENY",
+                reason_codes=["user_denied"],
+                policy_version="1",
             ),
             action_digest=first_digest,
             tool_name=denied["tool_name"],
