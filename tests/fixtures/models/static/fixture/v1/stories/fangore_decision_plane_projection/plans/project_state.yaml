@@ -1,8 +1,7 @@
-# Probe plan for scenario `project_state.yaml`.
+# Decision case plan for scenario `project_state.yaml`.
 # Story: Project decision state and facts without calling a model
-
 summary: Project decision state and facts without calling a model
-name: decision_plane_projection
+case: projection
 raw_context:
   ticket_id: T-9
   channel: email

@@ -1,8 +1,7 @@
-# Probe plan for scenario `template_shape.yaml`.
+# Decision case plan for scenario `template_shape.yaml`.
 # Story: Run a typed decision-plane Agentic Recipe with batched questions
-
 summary: Run a typed decision-plane Agentic Recipe with batched questions
-name: decision_plane_recipe
+case: plane_recipe
 goal: route refund triage
 state_projection:
   ticket_id: T-1

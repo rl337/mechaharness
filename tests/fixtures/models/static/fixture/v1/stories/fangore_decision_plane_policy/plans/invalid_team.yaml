@@ -1,8 +1,7 @@
-# Probe plan for scenario `invalid_team.yaml`.
+# Decision case plan for scenario `invalid_team.yaml`.
 # Story: Let code own the final decision-plane action with escalation
-
 summary: Let code own the final decision-plane action with escalation
-name: decision_plane_policy_case
+case: policy
 questions:
 - id: team
   kind: choice

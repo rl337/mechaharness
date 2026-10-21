@@ -2,10 +2,10 @@
   "id": "fangore_decision_plane_recipe",
   "persona": "fangore",
   "title": "Run a typed decision-plane Agentic Recipe with batched questions",
-  "kind": "cli",
-  "narrative": "Fangore projects only the state a decision needs, asks several bounded questions in one model step, keeps exact facts in code, and lets product policy choose the final action \u2014 escalating when confidence is too low. Builds on `fangore_decision_surface_reject` for allowed-action envelopes.",
-  "implementation": "Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state \u2192 ask_batch \u2192 apply_policy with an escalate exit and optional shadow_ask. Structural coverage for DP-01..03 and graph-shaped DP-05..07; runtime policy/telemetry lives in `mechaharness.decision_plane_runtime` and stories `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`.",
-  "validation": "Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`plane_recipe`) for: Run a typed decision-plane Agentic Recipe with batched questions. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
+  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: plane_recipe` plans.",
+  "validation": "Harness `user_story` scenario(s) `template_shape.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-decision-plane",

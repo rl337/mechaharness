@@ -588,15 +588,15 @@ Harness `user_story` scenario `expanded_rounds.yaml`: environment + graph + step
 
 ### `fangore_decision_plane_model_policy` — Bind a decision model flavor without baking size into the recipe
 
-Fangore swaps which decision model answers the batch — local small, hosted, or a future class — by host policy and soft binding, not by a parameter-count field inside the recipe. Related: `fangore_completer_flavors`, `fangore_decision_plane_recipe`.[^rc-dp-size]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`model_policy`) for: Bind a decision model flavor without baking size into the recipe. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rc-dp-size]
 
 #### Implementation
 
-Agentic Recipe `decision_plane` exposes a `decision_model` soft point (router/flavor ref). Instantiation and runtime treat model identity as routing policy (DP-09); no fixed parameter-count architecture field.
+Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: model_policy` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/model_soft_point.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `model_soft_point.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -604,15 +604,15 @@ Harness `cli` `probe` loads `plans/model_soft_point.yaml` (human-readable probe 
 
 ### `fangore_decision_plane_policy` — Let code own the final decision-plane action with escalation
 
-A small decision model answers several triage questions in one call — which team, how risky — but only allowed teams are exposed, and product policy chooses route or escalate when confidence is low or an answer is off-list. Exact duplicate-charge math stays in facts, not in the model. Related: `fangore_decision_surface_reject`, `fangore_refund_verdict`.[^rvania-policy][^rc-dp-policy] Native model-proposes/code-decides path for personal-agent MH-PA-06; alert escalation catalog is `fangore_insp_alert_escalation_rules`[^insp-pa-06-dp]. Decision-plane resolve is not the self-revising neighbor CR loop (`fangore_insp_decision_conflict_checkpoint`)[^insp-sr-08-dp].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`policy`) for: Let code own the final decision-plane action with escalation. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rvania-policy] [^rc-dp-policy] [^insp-pa-06-dp] [^insp-sr-08-dp]
 
 #### Implementation
 
-Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed questions in one invocation (DP-02); `reject_invalid_choice` / envelopes enforce valid actions (DP-05); `apply_decision_plane_policy` owns the final action or routable escalation from confidence/validity (DP-04, DP-06). Model signals are evidence only.
+Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: policy` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/low_confidence.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `accept_billing.yaml`, `invalid_team.yaml`, `low_confidence.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -623,15 +623,15 @@ Harness `cli` `probe` loads `plans/low_confidence.yaml` (human-readable probe pl
 
 ### `fangore_decision_plane_projection` — Project decision state and facts without calling a model
 
-Fangore prepares a refund-routing decision by sending only structured ticket state into the decision plane and computing exact amounts in code. He must be able to unit-test that projection and those facts with no model call. Complements `fangore_decision_plane_recipe` and `fangore_refund_verdict`.[^rvania-decision][^rc-dp-proj]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`projection`) for: Project decision state and facts without calling a model. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rvania-decision] [^rc-dp-proj]
 
 #### Implementation
 
-Agentic Recipe `decision_plane` uses `project_decision_state` in `mechaharness.decision_plane_runtime` to build a serializable state projection and attach deterministic facts outside inference (DP-01, DP-03).
+Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: projection` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/project_state.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `project_state.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -640,15 +640,15 @@ Harness `cli` `probe` loads `plans/project_state.yaml` (human-readable probe pla
 
 ### `fangore_decision_plane_recipe` — Run a typed decision-plane Agentic Recipe with batched questions
 
-Fangore projects only the state a decision needs, asks several bounded questions in one model step, keeps exact facts in code, and lets product policy choose the final action — escalating when confidence is too low. Builds on `fangore_decision_surface_reject` for allowed-action envelopes.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`plane_recipe`) for: Run a typed decision-plane Agentic Recipe with batched questions. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state → ask_batch → apply_policy with an escalate exit and optional shadow_ask. Structural coverage for DP-01..03 and graph-shaped DP-05..07; runtime policy/telemetry lives in `mechaharness.decision_plane_runtime` and stories `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`.
+Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: plane_recipe` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `template_shape.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -656,15 +656,15 @@ Harness `cli` `probe` loads `plans/template_shape.yaml` (human-readable probe pl
 
 ### `fangore_decision_plane_shadow` — Shadow a small decision model without giving it control
 
-Before moving refund triage off the production decision path, Fangore runs a candidate small model in shadow: it still answers the same batched questions, but production policy keeps control and both outcomes are kept for comparison. Related: `taloneth_shadow_decision_backends`, `fangore_decision_plane_policy`.[^rc-dp-shadow]
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`shadow`) for: Shadow a small decision model without giving it control. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rc-dp-shadow]
 
 #### Implementation
 
-Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mechaharness.decision_plane_runtime` records candidate and production typed results while `controls_execution` stays on the production path (DP-07).
+Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: shadow` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/shadow_compare.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `shadow_compare.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -672,15 +672,15 @@ Harness `cli` `probe` loads `plans/shadow_compare.yaml` (human-readable probe pl
 
 ### `fangore_decision_plane_telemetry` — Export evaluation-ready decision-plane telemetry without raw context
 
-Fangore needs decision metrics — which questions, projection fingerprint, answers, confidence, final policy action, escalation reason, and cost — without dumping the full ticket body into the aggregate stream. Related: `fangore_decision_plane_policy`, `taloneth_offline_decision_export`.[^rc-dp-telemetry] Decision telemetry for personal-agent MH-PA-08; recipe-selection/freshness audit dimensions: `nubble_insp_recipe_audit_dimensions`[^insp-pa-08-telem].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`telemetry`) for: Export evaluation-ready decision-plane telemetry without raw context. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rc-dp-telemetry] [^insp-pa-08-telem]
 
 #### Implementation
 
-`build_decision_plane_telemetry` in `mechaharness.decision_plane_runtime` emits evaluation-ready fields for the `decision_plane` recipe (DP-08) and omits raw sensitive projection payloads from the aggregate record.
+Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: telemetry` plans.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/telemetry_fields.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario(s) `telemetry_fields.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.
 
 #### Footnotes
 

@@ -1,8 +1,7 @@
-# Probe plan for scenario `shadow_compare.yaml`.
+# Decision case plan for scenario `shadow_compare.yaml`.
 # Story: Shadow a small decision model without giving it control
-
 summary: Shadow a small decision model without giving it control
-name: decision_plane_shadow
+case: shadow
 questions:
 - id: team
   kind: choice

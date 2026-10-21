@@ -24,24 +24,12 @@ from tests.stories.cli_probes.context_management_probes import (
     context_management_cli_probe_classes,
 )
 from tests.stories.cli_probes.decision_plane_probes import (
-    DecisionPlaneModelPolicyCommand,
-    DecisionPlanePolicyCaseCommand,
-    DecisionPlaneProjectionCommand,
-    DecisionPlaneRecipeCommand,
-    DecisionPlaneShadowCommand,
     DecisionPlaneShadowCompareCommand,
-    DecisionPlaneTelemetryCommand,
     DecisionSurfaceRejectCommand,
     FixtureJudgeBatchCommand,
     OfflineDecisionExportCommand,
     PolicyReplayCommand,
-    run_decision_plane_model_policy,
-    run_decision_plane_policy_case,
-    run_decision_plane_projection,
-    run_decision_plane_recipe,
-    run_decision_plane_shadow,
     run_decision_plane_shadow_compare,
-    run_decision_plane_telemetry,
     run_decision_surface_reject,
     run_fixture_judge_batch,
     run_offline_decision_export,
@@ -244,36 +232,6 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
         ),
         "policy_replay": _probe(
             "policy_replay", PolicyReplayCommand, run_policy_replay
-        ),
-        "decision_plane_recipe": _probe(
-            "decision_plane_recipe",
-            DecisionPlaneRecipeCommand,
-            run_decision_plane_recipe,
-        ),
-        "decision_plane_projection": _probe(
-            "decision_plane_projection",
-            DecisionPlaneProjectionCommand,
-            run_decision_plane_projection,
-        ),
-        "decision_plane_policy_case": _probe(
-            "decision_plane_policy_case",
-            DecisionPlanePolicyCaseCommand,
-            run_decision_plane_policy_case,
-        ),
-        "decision_plane_shadow": _probe(
-            "decision_plane_shadow",
-            DecisionPlaneShadowCommand,
-            run_decision_plane_shadow,
-        ),
-        "decision_plane_telemetry": _probe(
-            "decision_plane_telemetry",
-            DecisionPlaneTelemetryCommand,
-            run_decision_plane_telemetry,
-        ),
-        "decision_plane_model_policy": _probe(
-            "decision_plane_model_policy",
-            DecisionPlaneModelPolicyCommand,
-            run_decision_plane_model_policy,
         ),
         "decision_plane_shadow_compare": _probe(
             "decision_plane_shadow_compare",

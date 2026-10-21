@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stories (`fangore_tdr_crash_*`) migrate onto `kind: user_story`.
 - **Product CLI verb `decision_case`:** JEV / decision-plane case plans
   (`citation_support`, `context_budget`, `requirements_gap`, `task_route`,
-  `action_safety`). Wave 2 P2 `fangore_jev_*` stories migrate onto
+  `action_safety`, plus P3 `plane_recipe` / `projection` / `policy` /
+  `shadow` / `telemetry` / `model_policy`). Wave 2 P2–P3 stories migrate onto
   `kind: user_story`.
 
 ### Changed

@@ -1,8 +1,7 @@
-# Probe plan for scenario `model_soft_point.yaml`.
+# Decision case plan for scenario `model_soft_point.yaml`.
 # Story: Bind a decision model flavor without baking size into the recipe
-
 summary: Bind a decision model flavor without baking size into the recipe
-name: decision_plane_model_policy
+case: model_policy
 state_projection:
   ticket_id: T-1
 questions:

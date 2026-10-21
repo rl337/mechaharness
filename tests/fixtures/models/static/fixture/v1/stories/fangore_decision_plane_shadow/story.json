@@ -2,10 +2,10 @@
   "id": "fangore_decision_plane_shadow",
   "persona": "fangore",
   "title": "Shadow a small decision model without giving it control",
-  "kind": "cli",
-  "narrative": "Before moving refund triage off the production decision path, Fangore runs a candidate small model in shadow: it still answers the same batched questions, but production policy keeps control and both outcomes are kept for comparison. Related: `taloneth_shadow_decision_backends`, `fangore_decision_plane_policy`.[^rc-dp-shadow]",
-  "implementation": "Agentic Recipe `decision_plane` shadow mode: `compare_shadow_decision` in `mechaharness.decision_plane_runtime` records candidate and production typed results while `controls_execution` stays on the production path (DP-07).",
-  "validation": "Harness `cli` `probe` loads `plans/shadow_compare.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`shadow`) for: Shadow a small decision model without giving it control. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rc-dp-shadow]",
+  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: shadow` plans.",
+  "validation": "Harness `user_story` scenario(s) `shadow_compare.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-dp-shadow",

@@ -1,8 +1,7 @@
-# Probe plan for scenario `telemetry_fields.yaml`.
+# Decision case plan for scenario `telemetry_fields.yaml`.
 # Story: Export evaluation-ready decision-plane telemetry without raw context
-
 summary: Export evaluation-ready decision-plane telemetry without raw context
-name: decision_plane_telemetry
+case: telemetry
 questions:
 - id: team
   kind: choice

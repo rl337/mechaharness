@@ -14,17 +14,11 @@ from mechaharness.decision_log import (
 from mechaharness.decision_plane_runtime import (
     build_decision_plane_telemetry,
     compare_shadow_decision,
-    project_decision_state,
-    run_decision_plane_policy,
 )
 from mechaharness.decision_surfaces import (
     DecisionSurface,
     RulesDecisionBackend,
     reject_invalid_choice,
-)
-from mechaharness.graph_templates import (
-    DecisionPlaneTemplate,
-    GraphTemplateParams,
 )
 from mechaharness.inference.judge import (
     ChoiceOption,
@@ -192,211 +186,6 @@ def run_policy_replay(body: PolicyReplayCommand) -> dict[str, Any]:
     return {"verdict_kind": verdict.kind}
 
 
-class DecisionPlaneRecipeCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    goal: str = "decision_plane"
-    state_projection: dict[str, Any] = Field(default_factory=dict)
-    facts: dict[str, Any] = Field(default_factory=dict)
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    confidence_floor: float = 0.7
-    shadow_mode: bool = False
-
-
-def run_decision_plane_recipe(body: DecisionPlaneRecipeCommand) -> dict[str, Any]:
-    graph = DecisionPlaneTemplate().instantiate(
-        GraphTemplateParams(
-            goal=body.goal,
-            inputs={
-                "state_projection": dict(body.state_projection),
-                "facts": dict(body.facts),
-                "questions": list(body.questions),
-                "confidence_floor": body.confidence_floor,
-                "shadow_mode": body.shadow_mode,
-            },
-        )
-    )
-    ask = graph.nodes["ask_batch"]
-    project = graph.nodes["project_state"]
-    return {
-        "template_name": graph.template_name,
-        "nodes": sorted(graph.nodes),
-        "ask_batch_question_count": len(ask.payload.get("questions") or []),
-        "facts_on_project_not_ask": "facts" in project.payload
-        and "facts" not in ask.payload,
-        "confidence_floor": ask.payload.get("confidence_floor"),
-    }
-
-
-class DecisionPlaneProjectionCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    raw_context: dict[str, Any] = Field(default_factory=dict)
-    project_keys: list[str] = Field(default_factory=list)
-    facts: dict[str, Any] = Field(default_factory=dict)
-
-
-def run_decision_plane_projection(
-    body: DecisionPlaneProjectionCommand,
-) -> dict[str, Any]:
-    proj = project_decision_state(
-        dict(body.raw_context),
-        project_keys=list(body.project_keys),
-        facts=dict(body.facts),
-    )
-    return {
-        "projection": proj.state,
-        "facts": list(proj.facts),
-        "projection_has_secret": "secret" in proj.state,
-        "no_model_invocation": True,
-        "facts_fingerprint_nonempty": bool(proj.facts_fingerprint),
-    }
-
-
-class DecisionPlanePolicyCaseCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    escalation_route: str = "host_policy"
-    answers: dict[str, Any] = Field(default_factory=dict)
-    confidence: float | None = None
-    confidence_floor: float = 0.7
-    action_question_id: str | None = None
-
-
-async def run_decision_plane_policy_case(
-    body: DecisionPlanePolicyCaseCommand,
-) -> dict[str, Any]:
-    kwargs: dict[str, Any] = {
-        "questions": list(body.questions),
-        "answers": dict(body.answers),
-        "confidence": body.confidence,
-        "confidence_floor": body.confidence_floor,
-        "escalation_route": body.escalation_route,
-    }
-    if body.action_question_id is not None:
-        kwargs["action_question_id"] = body.action_question_id
-    result = await run_decision_plane_policy(**kwargs)
-    return {
-        "final_action": result.final_action,
-        "escalate": result.escalate,
-        "escalation_reason": result.escalation_reason,
-        "escalation_route": result.escalation_route,
-        "batch_invocation_count": result.batch_invocation_count,
-    }
-
-
-class DecisionPlaneShadowCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    production_answers: dict[str, Any] = Field(default_factory=dict)
-    shadow_answers: dict[str, Any] | None = None
-    confidence: float | None = None
-    confidence_floor: float = 0.7
-
-
-async def run_decision_plane_shadow(
-    body: DecisionPlaneShadowCommand,
-) -> dict[str, Any]:
-    cmp = await compare_shadow_decision(
-        questions=list(body.questions),
-        production_answers=dict(body.production_answers),
-        shadow_answers=body.shadow_answers,
-        confidence=body.confidence,
-        confidence_floor=body.confidence_floor,
-    )
-    return {
-        "production_action": cmp.production.final_action,
-        "shadow_controls_execution": cmp.shadow_controls_execution,
-        "both_outcomes_recorded": cmp.shadow is not None,
-        "agreement": cmp.agreement,
-        "shadow_unavailable": cmp.shadow_unavailable,
-        "shadow_action": cmp.shadow.final_action if cmp.shadow is not None else None,
-    }
-
-
-class DecisionPlaneTelemetryCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    state_projection: dict[str, Any] = Field(default_factory=dict)
-    answers: dict[str, Any] = Field(default_factory=dict)
-    confidence: float | None = None
-    final_action: str | None = None
-    model_ref: str | None = None
-    latency_ms: float | None = None
-    raw_body: Any = None
-
-
-async def run_decision_plane_telemetry(
-    body: DecisionPlaneTelemetryCommand,
-) -> dict[str, Any]:
-    questions = list(body.questions)
-    proj = project_decision_state(
-        {**dict(body.state_projection), "body": body.raw_body},
-        project_keys=list(body.state_projection.keys()),
-        facts={},
-    )
-    policy = await run_decision_plane_policy(
-        questions=questions,
-        answers=dict(body.answers),
-        confidence=body.confidence,
-        confidence_floor=0.7,
-    )
-    if body.final_action and not policy.escalate:
-        policy.final_action = body.final_action
-    tel = build_decision_plane_telemetry(
-        questions=questions,
-        projection=proj,
-        policy=policy,
-        model_ref=body.model_ref,
-        latency_ms=body.latency_ms,
-        raw_context={"body": body.raw_body},
-    )
-    dumped = tel.model_dump(mode="json")
-    return {
-        "has_question_schema_ids": bool(tel.question_schema_ids),
-        "has_projection_fingerprint": bool(tel.projection_fingerprint),
-        "final_action": tel.final_action,
-        "model_ref": tel.model_ref,
-        "latency_ms": tel.latency_ms,
-        "includes_raw_body": "raw_body" in dumped or "body" in dumped,
-    }
-
-
-class DecisionPlaneModelPolicyCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    state_projection: dict[str, Any] = Field(default_factory=dict)
-    questions: list[dict[str, Any]] = Field(default_factory=list)
-    decision_model: Any = None
-
-
-def run_decision_plane_model_policy(
-    body: DecisionPlaneModelPolicyCommand,
-) -> dict[str, Any]:
-    template = DecisionPlaneTemplate()
-    graph = template.instantiate(
-        GraphTemplateParams(
-            goal="model policy",
-            inputs={
-                "state_projection": dict(body.state_projection),
-                "questions": list(body.questions),
-            },
-            soft_bindings={"decision_model": body.decision_model},
-        )
-    )
-    describe = template.describe()
-    return {
-        "soft_point_decision_model": any(
-            p.get("name") == "decision_model" for p in describe.get("soft_points") or []
-        ),
-        "ask_model_ref": graph.nodes["ask_batch"].payload.get("model_ref"),
-        "describe_has_param_count": "param_count" in describe,
-    }
-
-
 class DecisionPlaneShadowCompareCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -434,24 +223,12 @@ async def run_decision_plane_shadow_compare(
 
 
 __all__ = [
-    "DecisionPlaneModelPolicyCommand",
-    "DecisionPlanePolicyCaseCommand",
-    "DecisionPlaneProjectionCommand",
-    "DecisionPlaneRecipeCommand",
-    "DecisionPlaneShadowCommand",
     "DecisionPlaneShadowCompareCommand",
-    "DecisionPlaneTelemetryCommand",
     "DecisionSurfaceRejectCommand",
     "FixtureJudgeBatchCommand",
     "OfflineDecisionExportCommand",
     "PolicyReplayCommand",
-    "run_decision_plane_model_policy",
-    "run_decision_plane_policy_case",
-    "run_decision_plane_projection",
-    "run_decision_plane_recipe",
-    "run_decision_plane_shadow",
     "run_decision_plane_shadow_compare",
-    "run_decision_plane_telemetry",
     "run_decision_surface_reject",
     "run_fixture_judge_batch",
     "run_offline_decision_export",

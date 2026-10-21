@@ -1,8 +1,7 @@
-# Probe plan for scenario `low_confidence.yaml`.
+# Decision case plan for scenario `low_confidence.yaml`.
 # Story: Let code own the final decision-plane action with escalation
-
 summary: Let code own the final decision-plane action with escalation
-name: decision_plane_policy_case
+case: policy
 questions:
 - id: team
   kind: choice

@@ -2,10 +2,10 @@
   "id": "fangore_decision_plane_telemetry",
   "persona": "fangore",
   "title": "Export evaluation-ready decision-plane telemetry without raw context",
-  "kind": "cli",
-  "narrative": "Fangore needs decision metrics \u2014 which questions, projection fingerprint, answers, confidence, final policy action, escalation reason, and cost \u2014 without dumping the full ticket body into the aggregate stream. Related: `fangore_decision_plane_policy`, `taloneth_offline_decision_export`.[^rc-dp-telemetry] Decision telemetry for personal-agent MH-PA-08; recipe-selection/freshness audit dimensions: `nubble_insp_recipe_audit_dimensions`[^insp-pa-08-telem].",
-  "implementation": "`build_decision_plane_telemetry` in `mechaharness.decision_plane_runtime` emits evaluation-ready fields for the `decision_plane` recipe (DP-08) and omits raw sensitive projection payloads from the aggregate record.",
-  "validation": "Harness `cli` `probe` loads `plans/telemetry_fields.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`telemetry`) for: Export evaluation-ready decision-plane telemetry without raw context. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rc-dp-telemetry] [^insp-pa-08-telem]",
+  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: telemetry` plans.",
+  "validation": "Harness `user_story` scenario(s) `telemetry_fields.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rc-dp-telemetry",

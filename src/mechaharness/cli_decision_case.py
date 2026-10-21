@@ -1,9 +1,9 @@
 """Product CLI verb: decision-plane case plans for JEV / host judgement walks.
 
 One verb (``decision_case``) loads a human-readable YAML plan whose ``case:``
-field selects the check — citation support, context budget packing,
-requirements-gap review, task routing, or action-safety vs hard grants.
-Stories and hosts share the same document shape under ``plans/``.
+field selects the check — JEV cases, recipe shape, projection, policy,
+shadow, telemetry, or model soft-point binding. Stories and hosts share the
+same document shape under ``plans/``.
 """
 
 from __future__ import annotations
@@ -18,9 +18,16 @@ from mechaharness.cli_verb import CliVerb
 from mechaharness.core.access import AccessPolicy
 from mechaharness.decision_plane_runtime import (
     assemble_context_within_budget,
+    build_decision_plane_telemetry,
+    compare_shadow_decision,
+    project_decision_state,
     run_decision_plane_policy,
 )
-from mechaharness.graph_templates import GraphTemplateParams, IndependentReviewTemplate
+from mechaharness.graph_templates import (
+    DecisionPlaneTemplate,
+    GraphTemplateParams,
+    IndependentReviewTemplate,
+)
 
 CaseKind = Literal[
     "citation_support",
@@ -28,7 +35,27 @@ CaseKind = Literal[
     "requirements_gap",
     "task_route",
     "action_safety",
+    "plane_recipe",
+    "projection",
+    "policy",
+    "shadow",
+    "telemetry",
+    "model_policy",
 ]
+
+_LEGACY_PROBE_NAMES: dict[str, CaseKind] = {
+    "citation_support_case": "citation_support",
+    "context_budget_case": "context_budget",
+    "requirements_gap_case": "requirements_gap",
+    "task_route_case": "task_route",
+    "action_safety_case": "action_safety",
+    "decision_plane_recipe": "plane_recipe",
+    "decision_plane_projection": "projection",
+    "decision_plane_policy_case": "policy",
+    "decision_plane_shadow": "shadow",
+    "decision_plane_telemetry": "telemetry",
+    "decision_plane_model_policy": "model_policy",
+}
 
 
 class CitationSupportCase(BaseModel):
@@ -229,12 +256,238 @@ class ActionSafetyCase(BaseModel):
         }
 
 
+class PlaneRecipeCase(BaseModel):
+    """Instantiate Agentic Recipe ``decision_plane`` and inspect shape."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case: Literal["plane_recipe"] = "plane_recipe"
+    summary: str = ""
+    goal: str = "decision_plane"
+    state_projection: dict[str, Any] = Field(default_factory=dict)
+    facts: dict[str, Any] = Field(default_factory=dict)
+    questions: list[dict[str, Any]] = Field(default_factory=list)
+    confidence_floor: float = 0.7
+    shadow_mode: bool = False
+
+    async def run(self) -> dict[str, Any]:
+        graph = DecisionPlaneTemplate().instantiate(
+            GraphTemplateParams(
+                goal=self.goal,
+                inputs={
+                    "state_projection": dict(self.state_projection),
+                    "facts": dict(self.facts),
+                    "questions": list(self.questions),
+                    "confidence_floor": self.confidence_floor,
+                    "shadow_mode": self.shadow_mode,
+                },
+            )
+        )
+        ask = graph.nodes["ask_batch"]
+        project = graph.nodes["project_state"]
+        return {
+            "summary": self.summary,
+            "template_name": graph.template_name,
+            "nodes": sorted(graph.nodes),
+            "ask_batch_question_count": len(ask.payload.get("questions") or []),
+            "facts_on_project_not_ask": "facts" in project.payload
+            and "facts" not in ask.payload,
+            "confidence_floor": ask.payload.get("confidence_floor"),
+        }
+
+
+class ProjectionCase(BaseModel):
+    """Project decision state and facts without calling a model."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case: Literal["projection"] = "projection"
+    summary: str = ""
+    raw_context: dict[str, Any] = Field(default_factory=dict)
+    project_keys: list[str] = Field(default_factory=list)
+    facts: dict[str, Any] = Field(default_factory=dict)
+
+    async def run(self) -> dict[str, Any]:
+        proj = project_decision_state(
+            dict(self.raw_context),
+            project_keys=list(self.project_keys),
+            facts=dict(self.facts),
+        )
+        return {
+            "summary": self.summary,
+            "projection": proj.state,
+            "facts": list(proj.facts),
+            "projection_has_secret": "secret" in proj.state,
+            "no_model_invocation": True,
+            "facts_fingerprint_nonempty": bool(proj.facts_fingerprint),
+        }
+
+
+class PolicyCase(BaseModel):
+    """Code-owned final action with escalation (DP-02 / DP-03)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case: Literal["policy"] = "policy"
+    summary: str = ""
+    questions: list[dict[str, Any]] = Field(default_factory=list)
+    escalation_route: str = "host_policy"
+    answers: dict[str, Any] = Field(default_factory=dict)
+    confidence: float | None = None
+    confidence_floor: float = 0.7
+    action_question_id: str | None = None
+
+    async def run(self) -> dict[str, Any]:
+        kwargs: dict[str, Any] = {
+            "questions": list(self.questions),
+            "answers": dict(self.answers),
+            "confidence": self.confidence,
+            "confidence_floor": self.confidence_floor,
+            "escalation_route": self.escalation_route,
+        }
+        if self.action_question_id is not None:
+            kwargs["action_question_id"] = self.action_question_id
+        result = await run_decision_plane_policy(**kwargs)
+        return {
+            "summary": self.summary,
+            "final_action": result.final_action,
+            "escalate": result.escalate,
+            "escalation_reason": result.escalation_reason,
+            "escalation_route": result.escalation_route,
+            "batch_invocation_count": result.batch_invocation_count,
+        }
+
+
+class ShadowCase(BaseModel):
+    """Shadow a candidate model without giving it control (DP-07)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case: Literal["shadow"] = "shadow"
+    summary: str = ""
+    questions: list[dict[str, Any]] = Field(default_factory=list)
+    production_answers: dict[str, Any] = Field(default_factory=dict)
+    shadow_answers: dict[str, Any] | None = None
+    confidence: float | None = None
+    confidence_floor: float = 0.7
+
+    async def run(self) -> dict[str, Any]:
+        cmp = await compare_shadow_decision(
+            questions=list(self.questions),
+            production_answers=dict(self.production_answers),
+            shadow_answers=self.shadow_answers,
+            confidence=self.confidence,
+            confidence_floor=self.confidence_floor,
+        )
+        return {
+            "summary": self.summary,
+            "production_action": cmp.production.final_action,
+            "shadow_controls_execution": cmp.shadow_controls_execution,
+            "both_outcomes_recorded": cmp.shadow is not None,
+            "agreement": cmp.agreement,
+            "shadow_unavailable": cmp.shadow_unavailable,
+            "shadow_action": cmp.shadow.final_action if cmp.shadow is not None else None,
+        }
+
+
+class TelemetryCase(BaseModel):
+    """Evaluation-ready telemetry without raw sensitive context (DP-08)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case: Literal["telemetry"] = "telemetry"
+    summary: str = ""
+    questions: list[dict[str, Any]] = Field(default_factory=list)
+    state_projection: dict[str, Any] = Field(default_factory=dict)
+    answers: dict[str, Any] = Field(default_factory=dict)
+    confidence: float | None = None
+    final_action: str | None = None
+    model_ref: str | None = None
+    latency_ms: float | None = None
+    raw_body: Any = None
+
+    async def run(self) -> dict[str, Any]:
+        questions = list(self.questions)
+        proj = project_decision_state(
+            {**dict(self.state_projection), "body": self.raw_body},
+            project_keys=list(self.state_projection.keys()),
+            facts={},
+        )
+        policy = await run_decision_plane_policy(
+            questions=questions,
+            answers=dict(self.answers),
+            confidence=self.confidence,
+            confidence_floor=0.7,
+        )
+        if self.final_action and not policy.escalate:
+            policy.final_action = self.final_action
+        tel = build_decision_plane_telemetry(
+            questions=questions,
+            projection=proj,
+            policy=policy,
+            model_ref=self.model_ref,
+            latency_ms=self.latency_ms,
+            raw_context={"body": self.raw_body},
+        )
+        dumped = tel.model_dump(mode="json")
+        return {
+            "summary": self.summary,
+            "has_question_schema_ids": bool(tel.question_schema_ids),
+            "has_projection_fingerprint": bool(tel.projection_fingerprint),
+            "final_action": tel.final_action,
+            "model_ref": tel.model_ref,
+            "latency_ms": tel.latency_ms,
+            "includes_raw_body": "raw_body" in dumped or "body" in dumped,
+        }
+
+
+class ModelPolicyCase(BaseModel):
+    """Bind ``decision_model`` soft point without baking size into the recipe."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case: Literal["model_policy"] = "model_policy"
+    summary: str = ""
+    state_projection: dict[str, Any] = Field(default_factory=dict)
+    questions: list[dict[str, Any]] = Field(default_factory=list)
+    decision_model: Any = None
+
+    async def run(self) -> dict[str, Any]:
+        template = DecisionPlaneTemplate()
+        graph = template.instantiate(
+            GraphTemplateParams(
+                goal="model policy",
+                inputs={
+                    "state_projection": dict(self.state_projection),
+                    "questions": list(self.questions),
+                },
+                soft_bindings={"decision_model": self.decision_model},
+            )
+        )
+        describe = template.describe()
+        return {
+            "summary": self.summary,
+            "soft_point_decision_model": any(
+                p.get("name") == "decision_model"
+                for p in describe.get("soft_points") or []
+            ),
+            "ask_model_ref": graph.nodes["ask_batch"].payload.get("model_ref"),
+            "describe_has_param_count": "param_count" in describe,
+        }
+
+
 DecisionCaseDocument = Union[
     CitationSupportCase,
     ContextBudgetCase,
     RequirementsGapCase,
     TaskRouteCase,
     ActionSafetyCase,
+    PlaneRecipeCase,
+    ProjectionCase,
+    PolicyCase,
+    ShadowCase,
+    TelemetryCase,
+    ModelPolicyCase,
 ]
 
 _CASE_MODELS: dict[str, type[BaseModel]] = {
@@ -243,15 +496,20 @@ _CASE_MODELS: dict[str, type[BaseModel]] = {
     "requirements_gap": RequirementsGapCase,
     "task_route": TaskRouteCase,
     "action_safety": ActionSafetyCase,
+    "plane_recipe": PlaneRecipeCase,
+    "projection": ProjectionCase,
+    "policy": PolicyCase,
+    "shadow": ShadowCase,
+    "telemetry": TelemetryCase,
+    "model_policy": ModelPolicyCase,
 }
 
 
 def load_decision_case(raw: dict[str, Any]) -> DecisionCaseDocument:
     case = raw.get("case")
     if case is None and "name" in raw:
-        # Legacy probe plan name → case id (citation_support_case → citation_support).
         name = str(raw["name"])
-        case = name[: -len("_case")] if name.endswith("_case") else name
+        case = _LEGACY_PROBE_NAMES.get(name, name)
         raw = {**raw, "case": case}
         raw.pop("name", None)
     if case not in _CASE_MODELS:
@@ -320,8 +578,14 @@ __all__ = [
     "DecisionCaseCommand",
     "DecisionCaseDocument",
     "DecisionCaseVerb",
+    "ModelPolicyCase",
+    "PlaneRecipeCase",
+    "PolicyCase",
+    "ProjectionCase",
     "RequirementsGapCase",
+    "ShadowCase",
     "TaskRouteCase",
+    "TelemetryCase",
     "load_decision_case",
     "load_decision_case_path",
     "run_decision_case_document",

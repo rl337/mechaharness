@@ -1,16 +1,25 @@
-# Plan document: ../plans/shadow_compare.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/shadow_compare.yaml
-expect:
-- kind: equals
-  key: production_action
-  value: billing
-- kind: 'false'
-  key: shadow_controls_execution
-- kind: 'true'
-  key: both_outcomes_recorded
-- kind: equals
-  key: agreement
-  value: false
+# user story: fangore_decision_plane_shadow
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/shadow_compare.yaml` (shadow), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/shadow_compare.yaml
+complete:
+  expect:
+  - kind: equals
+    key: production_action
+    value: billing
+  - kind: 'false'
+    key: shadow_controls_execution
+  - kind: 'true'
+    key: both_outcomes_recorded
+  - kind: equals
+    key: agreement
+    value: false
+cleanup: []
