@@ -892,6 +892,155 @@ class InitializePreflightRecipeAdapter(CliRecipeAdapter):
         )
 
 
+class ProduceCritiqueRefineRecipeAdapter(CliRecipeAdapter):
+    """Execute ``produce_critique_refine``: produce → critique → refine → complete."""
+
+    name = "produce_critique_refine"
+
+    async def run(self, body: RunRecipeCommand, runtime: Any) -> Any:
+        from pathlib import Path
+
+        from mechaharness.cli_instrumentor import CliStepResult
+        from mechaharness.graph_templates import GraphTemplateParams
+        from mechaharness.produce_critique_refine_runner import (
+            produce_critique_refine_runners,
+        )
+        from mechaharness.recipe_bind import RecipeBind, observe_instantiated_recipe
+        from mechaharness.recipe_runner import get_recipe, list_recipes, run_recipe
+
+        catalog = {row["name"] for row in list_recipes()}
+        soft: dict[str, Any] = dict(body.soft_bindings or {})
+        inputs: dict[str, Any] = {}
+        acceptance: list[Any] = []
+        goal = "produce_critique_refine"
+        bind: RecipeBind | None = None
+        if body.path:
+            base = getattr(runtime, "bind_base_dir", None)
+            path = Path(body.path)
+            if not path.is_absolute() and base is not None:
+                path = Path(base) / path
+            bind = RecipeBind.from_path(path)
+            soft = {**bind.soft_bindings, **soft}
+            inputs = dict(bind.inputs)
+            acceptance = list(bind.acceptance)
+            goal = bind.goal or bind.name or goal
+        params = GraphTemplateParams(
+            goal=goal,
+            soft_bindings=soft,
+            inputs=inputs,
+            acceptance=acceptance,
+            stop_contract=bind.stop_contract if bind is not None else None,
+        )
+        before = len(runtime.event_log.query())
+        result = await run_recipe(
+            "produce_critique_refine",
+            params=params,
+            runners=produce_critique_refine_runners(),
+            event_log=runtime.event_log,
+            run_id="cli:produce_critique_refine",
+        )
+        after_events = runtime.event_log.query()[before:]
+        complete = result.graph.nodes.get("complete")
+        complete_payload = dict(complete.payload) if complete else {}
+        shape_fields: dict[str, Any] = {}
+        if bind is not None:
+            template = get_recipe("produce_critique_refine")
+            observed = observe_instantiated_recipe(bind, result.graph, template)
+            shape_fields = dict(observed["fields"])
+        fields = {
+            **shape_fields,
+            "template_name": "produce_critique_refine",
+            "rounds_used": int(complete_payload.get("rounds_used") or 0),
+            "findings_cleared": bool(complete_payload.get("findings_cleared")),
+            "final_status": complete_payload.get("final_status") or result.status,
+            "budget_spent": float(result.budget_spent),
+        }
+        return CliStepResult(
+            verb="run_recipe",
+            text=None,
+            status=result.status,
+            event_types=[e.type for e in after_events],
+            clock_iso=runtime.datetime_service.now_utc_iso(),
+            recipe_in_catalog="produce_critique_refine" in catalog,
+            subgraph_node_ids=list(result.graph.nodes),
+            cost_units=float(result.budget_spent),
+            fields=fields,
+        )
+
+
+class SafetyEvalRecipeAdapter(CliRecipeAdapter):
+    """Execute ``safety_eval``: produce → review → score."""
+
+    name = "safety_eval"
+
+    async def run(self, body: RunRecipeCommand, runtime: Any) -> Any:
+        from pathlib import Path
+
+        from mechaharness.cli_instrumentor import CliStepResult
+        from mechaharness.graph_templates import GraphTemplateParams
+        from mechaharness.recipe_bind import RecipeBind, observe_instantiated_recipe
+        from mechaharness.recipe_runner import get_recipe, list_recipes, run_recipe
+        from mechaharness.safety_eval_runner import safety_eval_runners
+
+        catalog = {row["name"] for row in list_recipes()}
+        soft: dict[str, Any] = dict(body.soft_bindings or {})
+        inputs: dict[str, Any] = {}
+        acceptance: list[Any] = []
+        goal = "safety_eval"
+        bind: RecipeBind | None = None
+        if body.path:
+            base = getattr(runtime, "bind_base_dir", None)
+            path = Path(body.path)
+            if not path.is_absolute() and base is not None:
+                path = Path(base) / path
+            bind = RecipeBind.from_path(path)
+            soft = {**bind.soft_bindings, **soft}
+            inputs = dict(bind.inputs)
+            acceptance = list(bind.acceptance)
+            goal = bind.goal or bind.name or goal
+        params = GraphTemplateParams(
+            goal=goal,
+            soft_bindings=soft,
+            inputs=inputs,
+            acceptance=acceptance,
+        )
+        before = len(runtime.event_log.query())
+        result = await run_recipe(
+            "safety_eval",
+            params=params,
+            runners=safety_eval_runners(),
+            event_log=runtime.event_log,
+            run_id="cli:safety_eval",
+        )
+        after_events = runtime.event_log.query()[before:]
+        score = result.graph.nodes.get("score")
+        score_payload = dict(score.payload) if score else {}
+        shape_fields: dict[str, Any] = {}
+        if bind is not None:
+            template = get_recipe("safety_eval")
+            observed = observe_instantiated_recipe(bind, result.graph, template)
+            shape_fields = dict(observed["fields"])
+        fields = {
+            **shape_fields,
+            "template_name": "safety_eval",
+            "safety_report": score_payload.get("safety_report"),
+            "outcome": score_payload.get("outcome"),
+            "severity": score_payload.get("severity"),
+            "budget_spent": float(result.budget_spent),
+        }
+        return CliStepResult(
+            verb="run_recipe",
+            text=None,
+            status=result.status,
+            event_types=[e.type for e in after_events],
+            clock_iso=runtime.datetime_service.now_utc_iso(),
+            recipe_in_catalog="safety_eval" in catalog,
+            subgraph_node_ids=list(result.graph.nodes),
+            cost_units=float(result.budget_spent),
+            fields=fields,
+        )
+
+
 def default_cli_recipe_adapter_classes() -> dict[str, type[CliRecipeAdapter]]:
     return {
         HarnessRunRecipeAdapter.name: HarnessRunRecipeAdapter,
@@ -904,6 +1053,8 @@ def default_cli_recipe_adapter_classes() -> dict[str, type[CliRecipeAdapter]]:
         IndependentReviewRecipeAdapter.name: IndependentReviewRecipeAdapter,
         EnvironmentRepairRecipeAdapter.name: EnvironmentRepairRecipeAdapter,
         InitializePreflightRecipeAdapter.name: InitializePreflightRecipeAdapter,
+        ProduceCritiqueRefineRecipeAdapter.name: ProduceCritiqueRefineRecipeAdapter,
+        SafetyEvalRecipeAdapter.name: SafetyEvalRecipeAdapter,
     }
 
 
@@ -933,6 +1084,8 @@ __all__ = [
     "HarnessRunRecipeAdapter",
     "IndependentReviewRecipeAdapter",
     "InitializePreflightRecipeAdapter",
+    "ProduceCritiqueRefineRecipeAdapter",
+    "SafetyEvalRecipeAdapter",
     "VerifyRepairRecipeAdapter",
     "default_cli_recipe_adapter_classes",
     "resolve_cli_recipe_adapters",

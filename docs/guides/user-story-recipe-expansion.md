@@ -73,8 +73,8 @@ Catalog already has templates; stories only instantiate. Add runners +
 | `independent_review` | `fangore_insp_independent_review`, req-review shape | **done** (batch 3) |
 | `environment_repair` | `fangore_environment_repair_recipe` | **done** (batch 4) |
 | `initialize_preflight` | `fangore_insp_initialize_preflight` | **done** (batch 4) |
-| `produce_critique_refine` | `fangore_insp_produce_critique_refine` | pending |
-| `safety_eval` | `taloneth_insp_safety_eval_recipes` | pending |
+| `produce_critique_refine` | `fangore_insp_produce_critique_refine` | **done** (batch 5) |
+| `safety_eval` | `taloneth_insp_safety_eval_recipes` | **done** (batch 5) |
 
 ### G2 — Context / RAG lane (extend G0 pattern)
 

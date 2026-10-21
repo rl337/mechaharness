@@ -1,19 +1,15 @@
 # user story: fangore_insp_produce_critique_refine
-# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
-# with the `produce_critique_refine` recipe.
-# Reusable subgraphs need typed inputs/outputs, applicability predicates, budgets, and
-# traceable outcomes.
-# Independent review and verify-repair already ship (`fangore_insp_independent_review`,
-# `fangore_verify_repair_recipe`).
 kind: user_story
 environment:
   family: pass_through
   backend: mock
 graph:
   recipe: produce_critique_refine
+  bind: binds/produce_critique_refine.yaml
 steps:
 - do:
-    instantiate_recipe:
+    run_recipe:
+      name: produce_critique_refine
       path: binds/produce_critique_refine.yaml
 complete:
   expect:
@@ -58,4 +54,15 @@ complete:
     value:
     - critique_prompt
     - max_rounds
+  - kind: equals
+    key: rounds_used
+    value: 2
+  - kind: 'true'
+    key: findings_cleared
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

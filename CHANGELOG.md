@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (G1 batch 3).
 - **`environment_repair` / `initialize_preflight` execute:** fixture runners +
   adapters promote those stories to `run_recipe` (G1 batch 4).
+- **`produce_critique_refine` / `safety_eval` execute:** fixture runners +
+  adapters complete G1 control-recipe promotion (G1 batch 5).
 
 ### Removed
 
