@@ -69,7 +69,7 @@ Catalog already has templates; stories only instantiate. Add runners +
 |--------|---------|--------|
 | `verify_repair` | `fangore_verify_repair_recipe` | **done** (batch 1) |
 | `bounded_retry` | `fangore_bounded_retry_recipe` | **done** (batch 1) |
-| `verify_repair` | `fangore_bounded_repair_loop` (probe) | next |
+| `verify_repair` | `fangore_bounded_repair_loop` | **done** (batch 2; was probe) |
 | `independent_review` | `fangore_insp_independent_review`, req-review shape | pending |
 | `environment_repair` | `fangore_environment_repair_recipe` | pending |
 | `initialize_preflight` | `fangore_insp_initialize_preflight` | pending |
