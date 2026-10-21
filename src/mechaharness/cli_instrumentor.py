@@ -19,7 +19,6 @@ from pyiv.time import DateTimeService, MockDateTimeService
 
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.job_lane_broker import JobLaneBroker
 from mechaharness.cli_commands import (
     AdvanceClockCommand,
     InferCommand,
@@ -69,6 +68,7 @@ from mechaharness.host_kit import host_graph_executor, tapping_event_log
 from mechaharness.host_run_policies import resolve_run_budget
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
+from mechaharness.job_lane_broker import JobLaneBroker
 from mechaharness.node_component import traversal_from_events
 from mechaharness.recipe_bind import InstantiateRecipeCommand, TileRecipeCommand
 from mechaharness.recipe_plan import RecipePlanCommand
