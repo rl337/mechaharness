@@ -202,6 +202,12 @@ _`tool_lifecycle` + host-bound extensions — see
 _Historical list. Work via [G3](./user-story-recipe-expansion.md)
 (authority gates on product graphs), not probe wrappers._ · **17** stories
 
+Job-lane isolation (former cross-task bleed) is specified in
+[job-lane-broker requirements](../requirements/job-lane-broker.md): multi-lane
+`environment.job_lanes`, per-step `lane` / `run_id`, brokered `lane_observe`,
+and a split story matrix (same-lane lineage, cross-lane deny, meta/key
+exposure, artifacts, handoff).
+
 - [x] `fangore_capability_envelope_narrow`
 - [x] `fangore_compound_grants`
 - [x] `fangore_config_access_policy`
@@ -210,7 +216,7 @@ _Historical list. Work via [G3](./user-story-recipe-expansion.md)
 - [x] `fangore_insp_approval_interrupt`
 - [x] `fangore_insp_auth_epoch_resume`
 - [x] `fangore_insp_authority_gate`
-- [ ] `fangore_insp_cross_task_isolation`
+- [ ] `fangore_insp_cross_task_isolation` — retarget to [JobLaneBroker / JL story matrix](../requirements/job-lane-broker.md); not a thin isolation verb
 - [x] `fangore_insp_denial_equivalence`
 - [ ] `fangore_insp_effect_revalidation`
 - [x] `fangore_insp_execution_token`

@@ -14,7 +14,7 @@ absorb them.
 | Tool phase O/P/E | MH-DOTS-03 | on `Tool` / contracts | `operation_registry` / `host_apis` (`tool_phase` shim) |
 | Effect revalidation | MH-DOTS-02 | used by `GraphExecutor`; shares `CapabilityEnvelope.authority_issue` with `AuthorityGate` | `effect_revalidation` |
 | Tool result freshness | MH-PA-01 | `get_tool_result_freshness_policy()` | `tool_result_freshness` |
-| Cross-task isolation | MH-DOTS-07 | helper | `isolation` / `host_apis` |
+| Job lanes / broker (was cross-task isolation) | MH-DOTS-07 | Config DI (JL-02) | `job_lane_broker` (shim: `isolation.cross_task_isolation`) / `host_apis` |
 | Alert escalation | MH-PA-06 | host-driven helper (no soft point) | `alert_escalation` / `host_apis` |
 | Specification debt | MH-PA-07 | schema | `rule_promotion` / `host_apis` (`specification_debt` shim) |
 | Decision conflict helpers | MH-SR-08 | host-driven | `decision_conflict_checkpoint` |

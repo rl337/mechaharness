@@ -3,8 +3,8 @@
   "persona": "fangore",
   "title": "Capture why across session handoffs",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Handoffs preserve goals, exclusions, completed/pending work, decisions, rationale, rejected alternatives, risks, evidence, an expected verdict, and next action \u2014 hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: goals, exclusions, evidence, risks, and verdict are first-class. Also the typed handoff seam for Dots MH-DOTS-07[^insp-dots-07-handoff] (`fangore_insp_cross_task_isolation`).",
-  "implementation": "`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema (typed `goals`, `exclusions`, and `verdict` fields); storage remains host-owned. `CrossTaskIsolationGuard.share` consumes `evidence_refs` as the explicit sharing path.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Handoffs preserve goals, exclusions, completed/pending work, decisions, rationale, rejected alternatives, risks, evidence, an expected verdict, and next action \u2014 hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: goals, exclusions, evidence, risks, and verdict are first-class. Also the one-shot typed share seam for job-lane observe (MH-DOTS-07 / JL handoff) alongside standing lane grants (`fangore_insp_cross_task_isolation` / JobLaneBroker)[^insp-dots-07-handoff].",
+  "implementation": "`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema (typed `goals`, `exclusions`, and `verdict` fields); storage remains host-owned. `JobLaneBroker` (shim: `CrossTaskIsolationGuard.share`) consumes `evidence_refs` as the one-shot cross-lane share path; standing exposure/grants live on the lane.",
   "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {

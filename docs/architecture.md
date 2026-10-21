@@ -76,6 +76,8 @@ registers `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
 `AdvisorPolicy`, `GraphTemplateRegistry`, `ContextProviderRegistry`,
 `CapabilityEnvelope`, `LifecycleExtensionRegistry`, `GraphExecutor`,
 `DurableGraphGenerator`, `GeneratorRunStore`, and `GeneratorControllerAuth`.
+(`JobLaneBroker` is the planned Config-bound owner of per-lane run sequences
+and authorized observe — see [Job lanes](./reference/job-lanes.md).)
 Subclasses override `get_inference_class()` and `get_harness_class()` (called
 from the Config constructor). Override `get_access_policy()` (or
 `get_grants()`) for deny-by-default tool grants; compose reusable sets with

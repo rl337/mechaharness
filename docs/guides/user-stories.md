@@ -1022,21 +1022,22 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 [^insp-r06]: [Inspiration requirements (req 6: scoped context)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 6 — scoped context
 [^insp-pa-01-provider]: [Personal agent reliability map (MH-PA-01 provider)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Context provider provenance adjacent to MH-PA-01
 
-### `fangore_insp_cross_task_isolation` — Prevent intervening tasks from contaminating authority and evidence
+### `fangore_insp_cross_task_isolation` — Isolate job-lane run data; share only via brokered observe or handoff
 
-Task-local evidence, policy, memory references, and approvals must not bleed across intervening tasks unless an explicit typed handoff shares them. Related contracts: `fangore_insp_isolation_io`, `fangore_insp_handoff_record`. Tracks MH-DOTS-07[^insp-dots-07].
+Fangore's product treats each pipeline identity as a JobLane (e.g. assets.generate vs billing.settle). Runs in the same lane may observe earlier runs in that lane's sequence; other lanes must not see bags, meta, or artifact URLs unless the publisher's exposure policy and/or standing grants (or a one-shot HandoffRecord) allow it. Related: `fangore_insp_isolation_io` (subgraph I/O contracts), `fangore_insp_handoff_record` (handoff schema). Tracks MH-DOTS-07[^insp-dots-07]; product shape is JobLaneBroker[^jl-broker].
 
 #### Implementation
 
-`CrossTaskIsolationGuard` scopes visible refs per task from `IsolationContract.input_context_refs`; `publish` makes a ref task-local, and `share` is the only path to another task, requiring a `HandoffRecord` whose `evidence_refs` the source can read. Zero, five, and ten intervening tasks never see the published refs. Workspace and effect isolation stay in `workspace_isolation` and `IsolationContract`.
+Target: `JobLane` + `JobLaneBroker` (JL-01..10) owning per-lane run sequences and WalkBags; `observe` with selectors latest / before(t) / run_id; exposure policy on meta and keys. Interim probe still exercises `CrossTaskIsolationGuard` until the broker lands and this story retargets into the JL story matrix in `docs/requirements/job-lane-broker.md`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` until migration; then `user_story` multi-lane YAML with step-level `lane` / `lane_observe` expects grant vs deny.
 
 #### Footnotes
 
-[^insp-dots-07]: [OpenAI Dots agent safety (MH-DOTS-07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Cross-task context isolation
+[^insp-dots-07]: [OpenAI Dots agent safety (MH-DOTS-07)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Cross-task context isolation → job-lane broker
+[^jl-broker]: [Job lane broker requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md) — JL vocabulary, YAML surface, story matrix
 
 ### `fangore_insp_decision_conflict_checkpoint` — Checkpoint after conflict-free decisions without revisiting cleared cycles
 
@@ -1338,11 +1339,11 @@ Harness `user_story` scenario `session.yaml`: environment + graph + steps + comp
 
 ### `fangore_insp_handoff_record` — Capture why across session handoffs
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. Handoffs preserve goals, exclusions, completed/pending work, decisions, rationale, rejected alternatives, risks, evidence, an expected verdict, and next action — hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: goals, exclusions, evidence, risks, and verdict are first-class. Also the typed handoff seam for Dots MH-DOTS-07[^insp-dots-07-handoff] (`fangore_insp_cross_task_isolation`).
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Handoffs preserve goals, exclusions, completed/pending work, decisions, rationale, rejected alternatives, risks, evidence, an expected verdict, and next action — hosts store the record. Accepts WalkingLabs L05 guidance[^wl-l05-handoff]. Maps to personal-agent MH-PA-04[^insp-pa-04]: goals, exclusions, evidence, risks, and verdict are first-class. Also the one-shot typed share seam for job-lane observe (MH-DOTS-07 / JL handoff) alongside standing lane grants (`fangore_insp_cross_task_isolation` / JobLaneBroker)[^insp-dots-07-handoff].
 
 #### Implementation
 
-`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema (typed `goals`, `exclusions`, and `verdict` fields); storage remains host-owned. `CrossTaskIsolationGuard.share` consumes `evidence_refs` as the explicit sharing path.
+`HandoffRecord` in `mechaharness.handoff_record` is the reusable schema (typed `goals`, `exclusions`, and `verdict` fields); storage remains host-owned. `JobLaneBroker` (shim: `CrossTaskIsolationGuard.share`) consumes `evidence_refs` as the one-shot cross-lane share path; standing exposure/grants live on the lane.
 
 #### Validation
 
@@ -1437,7 +1438,7 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `fangore_insp_isolation_io` — Validate isolation and template I/O contracts
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation]. Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso] and Dots MH-DOTS-07 isolation substrate (`fangore_insp_cross_task_isolation`)[^insp-dots-07-iso].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation]. Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso]. This is nest I/O — not JobLaneBroker lane isolation (see MH-DOTS-07 / JL stories)[^insp-dots-07-iso].
 
 #### Implementation
 

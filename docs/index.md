@@ -37,7 +37,9 @@ Published site: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness
    [Event log](./reference/events.md).
 
 Also in the core model: deny-by-default grants and `CompoundPolicy`
-([Access control](./reference/access.md)), host-extendable open identity
+([Access control](./reference/access.md)), **job lanes** — pipeline
+identities with brokered run sequences and authorized observe
+([Job lanes](./reference/job-lanes.md)), host-extendable open identity
 for events and grants ([Architecture](./architecture.md)), **Agentic
 Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
 ([Graph templates and Agentic Recipes](./reference/graph-templates.md)),
@@ -104,6 +106,8 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Event log](./reference/events.md) | Structured `EventLog` emit / query |
 | [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
 | [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, host recipe-run kwargs |
+| [Job lanes](./reference/job-lanes.md) | `JobLane` / `JobLaneBroker`: run sequences, observe, exposure |
+| [Job lane broker requirements](./requirements/job-lane-broker.md) | JL-01..10: lane bags, selectors, grants, story YAML |
 | [Budget](./reference/budget.md) | Soft/hard spend, `BudgetPolicy`, recipe-run ceilings |
 | [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
 | [Graph templates and Agentic Recipes](./reference/graph-templates.md) | Recipe catalog + `GraphTemplate` substrate + soft points |
