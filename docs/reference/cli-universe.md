@@ -27,7 +27,8 @@ Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`,
 `instantiate_recipe`, `tile_recipe`, `recipe_plan`, diagnostics, judge,
 durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`,
 `transactional_resume` for DR-10 crash-window durable coding-job resume,
-`decision_case` for JEV / decision-plane case plans).
+`decision_case` for JEV / decision-plane case plans,
+`lifecycle_case` for lifecycle-extension case plans).
 Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
 (`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
 Probe stories load a human-readable plan under ``plans/``
@@ -220,3 +221,14 @@ one verb, document-selected behavior via ``case:``:
 | `shadow` | shadow compare without control |
 | `telemetry` | evaluation-ready telemetry fields |
 | `model_policy` | `decision_model` soft point binding |
+
+``lifecycle_case`` loads a lifecycle-extension plan under ``plans/`` — one
+verb, document-selected behavior via ``case:``:
+
+| ``case:`` | Coverage |
+|-----------|----------|
+| `observe` | ordered BeforeTool watchers |
+| `rewrite` | rewrite tool arguments |
+| `block` | block tool call with host message |
+| `replace` | replace tool result without executing |
+| `graph_observe` | BeforeGraphNode observe without policy change |

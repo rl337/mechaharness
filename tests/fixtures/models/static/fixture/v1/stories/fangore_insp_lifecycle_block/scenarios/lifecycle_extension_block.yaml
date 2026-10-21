@@ -1,13 +1,22 @@
-# Plan document: ../plans/lifecycle_extension_block.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/lifecycle_extension_block.yaml
-expect:
-- kind: equals
-  key: tool_result
-  value: blocked by host extension
-- kind: 'true'
-  key: applied_block
-- kind: 'false'
-  key: default_ran
+# user story: fangore_insp_lifecycle_block
+# Fangore starts the CLI host, runs lifecycle_case for plan
+# `plans/lifecycle_extension_block.yaml` (block), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    lifecycle_case:
+      path: plans/lifecycle_extension_block.yaml
+complete:
+  expect:
+  - kind: equals
+    key: tool_result
+    value: blocked by host extension
+  - kind: 'true'
+    key: applied_block
+  - kind: 'false'
+    key: default_ran
+cleanup: []

@@ -225,6 +225,7 @@ def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
     """Host CLI catalog (infer / tools / recipes / diagnostics / judge / durable)."""
     from mechaharness.cli_decision_case import DecisionCaseVerb
     from mechaharness.cli_durable_verbs import durable_cli_verb_classes
+    from mechaharness.cli_lifecycle_case import LifecycleCaseVerb
     from mechaharness.cli_transactional_resume import TransactionalResumeVerb
 
     verbs: dict[str, type[CliVerb]] = {
@@ -235,6 +236,7 @@ def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
         TileRecipeVerb.name: TileRecipeVerb,
         RecipePlanVerb.name: RecipePlanVerb,
         DecisionCaseVerb.name: DecisionCaseVerb,
+        LifecycleCaseVerb.name: LifecycleCaseVerb,
         JudgeRouteVerb.name: JudgeRouteVerb,
         ReplayModelInputVerb.name: ReplayModelInputVerb,
         RouteCapabilitiesVerb.name: RouteCapabilitiesVerb,

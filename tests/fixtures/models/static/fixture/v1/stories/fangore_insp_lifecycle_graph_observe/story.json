@@ -2,10 +2,10 @@
   "id": "fangore_insp_lifecycle_graph_observe",
   "persona": "fangore",
   "title": "Watch graph node attempts without replacing failure policy",
-  "kind": "cli",
-  "narrative": "Fangore binds an observe-only extension around each graph node attempt. The node still runs through the normal runner and failure policy. The log records the extension at the graph-node boundary. This does not invent a second plan graph. Complements `fangore_insp_lifecycle_observe`. Accepts inspiration requirement 20.",
-  "implementation": "`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole executor-level retry brain (distinct from the planned `bounded_retry` Agentic Recipe, which makes retry a visible subgraph).",
-  "validation": "Harness `cli` `probe` loads `plans/lifecycle_extension_graph_observe.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a lifecycle_case plan (`graph_observe`) for: Watch graph node attempts without replacing failure policy. He performs product step `lifecycle_case` and verifies completion from the structured observation expects on each scenario.",
+  "implementation": "`LifecycleExtensionRegistry` via Config `get_lifecycle_extension_registry`, dispatched at tool/graph boundaries. Product CLI verb `lifecycle_case` (`mechaharness.cli_lifecycle_case`) with `case: graph_observe` plans.",
+  "validation": "Harness `user_story` scenario(s) `lifecycle_extension_graph_observe.yaml` drive product verb `lifecycle_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r20-graph",

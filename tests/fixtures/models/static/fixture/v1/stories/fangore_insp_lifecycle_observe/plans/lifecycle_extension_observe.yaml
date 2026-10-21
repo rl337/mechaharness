@@ -1,8 +1,7 @@
-# Probe plan for scenario `lifecycle_extension_observe.yaml`.
+# Lifecycle case plan for scenario `lifecycle_extension_observe.yaml`.
 # Story: Watch tool calls in a fixed order without changing them
-
 summary: Watch tool calls in a fixed order without changing them
-name: lifecycle_extension_observe
+case: observe
 prompt: Write a.txt
 grants:
 - core:fs.write

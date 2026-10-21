@@ -2,10 +2,10 @@
   "id": "fangore_insp_lifecycle_rewrite",
   "persona": "fangore",
   "title": "Change tool arguments without changing the workflow",
-  "kind": "cli",
-  "narrative": "Before a write tool runs, Fangore's extension rewrites the path argument into a sandbox directory. The same write tool still runs \u2014 only the arguments change. Hard grants still apply to the rewritten call; the extension cannot widen permission by rewriting to a more privileged tool. The log shows that a rewrite ran and that the default tool still ran. Accepts inspiration requirement 20. Complements `fangore_insp_lifecycle_observe`.",
-  "implementation": "`LifecycleExtension` with rewrite mode returns modified arguments at `BeforeTool`; `AbstractHarness.execute_tools` runs the same tool with rewritten args, then AccessControl still gates the call.",
-  "validation": "Harness `cli` `probe` loads `plans/lifecycle_extension_rewrite.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a lifecycle_case plan (`rewrite`) for: Change tool arguments without changing the workflow. He performs product step `lifecycle_case` and verifies completion from the structured observation expects on each scenario.",
+  "implementation": "`LifecycleExtensionRegistry` via Config `get_lifecycle_extension_registry`, dispatched at tool/graph boundaries. Product CLI verb `lifecycle_case` (`mechaharness.cli_lifecycle_case`) with `case: rewrite` plans.",
+  "validation": "Harness `user_story` scenario(s) `lifecycle_extension_rewrite.yaml` drive product verb `lifecycle_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r20-rewrite",
