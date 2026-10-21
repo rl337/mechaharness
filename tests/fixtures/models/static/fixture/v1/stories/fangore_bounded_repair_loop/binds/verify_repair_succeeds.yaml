@@ -1,0 +1,18 @@
+# Bound verify → repair → retry under an explicit stop contract.
+name: verify_repair
+summary: Bound verification repair loops to a fixed number of attempts
+goal: repair until verify passes
+soft_bindings:
+  produce_kind: produce
+  verify_kind: verify
+  repair_kind: repair
+  complete_kind: complete
+stop_contract:
+  version: "1"
+  max_iterations: 3
+inputs:
+  initial_verify_ok: false
+  repairs_needed: 1
+  artifact:
+    text: story.png
+    ok: false

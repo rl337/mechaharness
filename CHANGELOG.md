@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`verify_repair` / `bounded_retry` execute:** fixture runners +
   `VerifyRepairRecipeAdapter` / `BoundedRetryRecipeAdapter` promote those
   stories to `run_recipe` outcome walks (G1 batch 1).
+- **`fangore_bounded_repair_loop`:** migrated from `bounded_repair_loop` probe
+  onto `verify_repair` `run_recipe` (G1 batch 2).
 
 ### Removed
 
