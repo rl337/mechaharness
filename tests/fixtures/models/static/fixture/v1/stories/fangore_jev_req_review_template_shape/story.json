@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Shape a requirements-aware review with isolated checkers",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He instantiates `independent_review` with two reviewers and omitted producer reasoning. He verifies completion from structured observation expects.",
-  "implementation": "Agentic Recipe `independent_review` via `instantiate_recipe`.",
-  "validation": "user_story instantiate_recipe; expects template_name / omit_producer_reasoning.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `independent_review` with two reviewers and omitted producer reasoning, then verifies the isolated review shape from the run observation. [^jev-us06]",
+  "implementation": "Agentic Recipe `independent_review` via `run_recipe` / `IndependentReviewRecipeAdapter`.",
+  "validation": "user_story run_recipe; expects template_name / omit_producer_reasoning / review_count.",
   "footnotes": [
     {
       "id": "jev-us06",

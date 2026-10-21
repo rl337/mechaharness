@@ -661,6 +661,94 @@ class BoundedRetryRecipeAdapter(CliRecipeAdapter):
         )
 
 
+class IndependentReviewRecipeAdapter(CliRecipeAdapter):
+    """Execute ``independent_review``: produce → isolated reviews → aggregate."""
+
+    name = "independent_review"
+
+    async def run(self, body: RunRecipeCommand, runtime: Any) -> Any:
+        from pathlib import Path
+
+        from mechaharness.cli_instrumentor import CliStepResult
+        from mechaharness.graph_templates import GraphTemplateParams
+        from mechaharness.independent_review_runner import independent_review_runners
+        from mechaharness.recipe_bind import RecipeBind, observe_instantiated_recipe
+        from mechaharness.recipe_runner import get_recipe, list_recipes, run_recipe
+
+        catalog = {row["name"] for row in list_recipes()}
+        soft: dict[str, Any] = dict(body.soft_bindings or {})
+        inputs: dict[str, Any] = {}
+        acceptance: list[Any] = []
+        goal = "independent_review"
+        bind: RecipeBind | None = None
+        if body.path:
+            base = getattr(runtime, "bind_base_dir", None)
+            path = Path(body.path)
+            if not path.is_absolute() and base is not None:
+                path = Path(base) / path
+            bind = RecipeBind.from_path(path)
+            soft = {**bind.soft_bindings, **soft}
+            inputs = dict(bind.inputs)
+            acceptance = list(bind.acceptance)
+            goal = bind.goal or bind.name or goal
+        params = GraphTemplateParams(
+            goal=goal,
+            soft_bindings=soft,
+            inputs=inputs,
+            acceptance=acceptance,
+        )
+        before = len(runtime.event_log.query())
+        result = await run_recipe(
+            "independent_review",
+            params=params,
+            runners=independent_review_runners(),
+            event_log=runtime.event_log,
+            run_id="cli:independent_review",
+        )
+        after_events = runtime.event_log.query()[before:]
+        aggregate = result.graph.nodes.get("aggregate_reviews")
+        agg_payload = dict(aggregate.payload) if aggregate else {}
+        shape_fields: dict[str, Any] = {}
+        if bind is not None:
+            template = get_recipe("independent_review")
+            observed = observe_instantiated_recipe(bind, result.graph, template)
+            shape_fields = dict(observed["fields"])
+        fields = {
+            **shape_fields,
+            "template_name": "independent_review",
+            "review_count": int(
+                agg_payload.get("review_count")
+                or shape_fields.get("review_count")
+                or 0
+            ),
+            "omit_producer_reasoning": bool(
+                agg_payload.get("omit_producer_reasoning")
+                if "omit_producer_reasoning" in agg_payload
+                else shape_fields.get("omit_producer_reasoning", True)
+            ),
+            "retain_disagreement": bool(
+                agg_payload.get("retain_disagreement")
+                if "retain_disagreement" in agg_payload
+                else shape_fields.get("retain_disagreement", True)
+            ),
+            "disagreement_retained": bool(agg_payload.get("disagreement_retained")),
+            "finding_count": int(agg_payload.get("finding_count") or 0),
+            "findings": list(agg_payload.get("findings") or []),
+            "budget_spent": float(result.budget_spent),
+        }
+        return CliStepResult(
+            verb="run_recipe",
+            text=None,
+            status=result.status,
+            event_types=[e.type for e in after_events],
+            clock_iso=runtime.datetime_service.now_utc_iso(),
+            recipe_in_catalog="independent_review" in catalog,
+            subgraph_node_ids=list(result.graph.nodes),
+            cost_units=float(result.budget_spent),
+            fields=fields,
+        )
+
+
 def default_cli_recipe_adapter_classes() -> dict[str, type[CliRecipeAdapter]]:
     return {
         HarnessRunRecipeAdapter.name: HarnessRunRecipeAdapter,
@@ -670,6 +758,7 @@ def default_cli_recipe_adapter_classes() -> dict[str, type[CliRecipeAdapter]]:
         DecisionPlaneRecipeAdapter.name: DecisionPlaneRecipeAdapter,
         VerifyRepairRecipeAdapter.name: VerifyRepairRecipeAdapter,
         BoundedRetryRecipeAdapter.name: BoundedRetryRecipeAdapter,
+        IndependentReviewRecipeAdapter.name: IndependentReviewRecipeAdapter,
     }
 
 
@@ -696,6 +785,7 @@ __all__ = [
     "ConversationalToolLoopRecipeAdapter",
     "DecisionPlaneRecipeAdapter",
     "HarnessRunRecipeAdapter",
+    "IndependentReviewRecipeAdapter",
     "VerifyRepairRecipeAdapter",
     "default_cli_recipe_adapter_classes",
     "resolve_cli_recipe_adapters",

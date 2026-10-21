@@ -1,17 +1,15 @@
 # user story: fangore_insp_independent_review
-# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
-# with the `independent_review` recipe.
-# Independent review must not reuse the producer's accumulated reasoning by default.
-# Reviewers see the artifact and acceptance contract; disagreement is retained.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
 graph:
   recipe: independent_review
+  bind: binds/independent_review.yaml
 steps:
 - do:
-    instantiate_recipe:
+    run_recipe:
+      name: independent_review
       path: binds/independent_review.yaml
 complete:
   expect:
@@ -27,7 +25,18 @@ complete:
     key: omit_producer_reasoning
   - kind: 'true'
     key: retain_disagreement
+  - kind: 'true'
+    key: disagreement_retained
+  - kind: equals
+    key: finding_count
+    value: 2
   - kind: equals
     key: template_name
     value: independent_review
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

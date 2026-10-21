@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stories to `run_recipe` outcome walks (G1 batch 1).
 - **`fangore_bounded_repair_loop`:** migrated from `bounded_repair_loop` probe
   onto `verify_repair` `run_recipe` (G1 batch 2).
+- **`independent_review` execute:** `independent_review_runner` +
+  `IndependentReviewRecipeAdapter` promote inspiration + JEV shape stories
+  (G1 batch 3).
 
 ### Removed
 
