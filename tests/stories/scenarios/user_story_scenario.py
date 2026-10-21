@@ -45,6 +45,10 @@ class EnvironmentBlock(BaseModel):
     authorization_epoch: int | None = None
     # BudgetPolicy YAML (soft_limit / hard_limit / unit). Omit → unlimited.
     budget: dict[str, Any] | None = None
+    # JobLaneBroker catalog (lane_id → exposure meta/keys). Omit → empty broker.
+    job_lanes: dict[str, Any] | None = None
+    # Optional standing grants beyond lane exposure ({from_lane, to_lane, keys, meta}).
+    lane_grants: list[dict[str, Any]] | None = None
 
 
 class DurableGraphBlock(BaseModel):
@@ -80,6 +84,9 @@ class StoryStep(BaseModel):
     do: dict[str, Any]
     expect: list[dict[str, Any]] | None = None
     expect_error: str | None = None
+    # Writer/caller JobLane identity for lane_* verbs (JL-10).
+    lane: str | None = None
+    run_id: str | None = None
 
     @model_validator(mode="after")
     def _one_verb_no_probe(self) -> StoryStep:
@@ -98,24 +105,34 @@ class StoryStep(BaseModel):
 
     def to_command(self) -> CliParsedCommand:
         raw = dict(self.do)
+        verb = next(iter(raw))
+        params = raw[verb]
+        if params is None:
+            params = {}
+        if not isinstance(params, dict):
+            raise ValueError(f"step.do.{verb} must be a mapping")
+        merged = dict(params)
+        if self.lane is not None:
+            if "caller_lane" in merged and merged["caller_lane"] != self.lane:
+                raise ValueError(
+                    "step.lane conflicts with step.do caller_lane"
+                )
+            merged["caller_lane"] = self.lane
+        if self.run_id is not None:
+            if "run_id" in merged and merged["run_id"] != self.run_id:
+                raise ValueError("step.run_id conflicts with step.do run_id")
+            merged["run_id"] = self.run_id
+        raw = {verb: merged}
         # Fold expect human_review.inject into the verb params so the product
         # façade can answer ask→ans on the walk bag during the same step.
         if self.expect is not None:
             inject = _human_review_inject(self.expect)
             if inject is not None:
-                verb = next(iter(raw))
-                params = raw[verb]
-                if params is None:
-                    params = {}
-                if not isinstance(params, dict):
-                    raise ValueError(
-                        f"step.do.{verb} must be a mapping to accept human_review inject"
-                    )
-                merged = dict(params)
                 if "inject" in merged and merged["inject"] != inject:
                     raise ValueError(
                         "step.do inject conflicts with expect human_review.inject"
                     )
+                merged = dict(merged)
                 merged["inject"] = inject
                 raw = {verb: merged}
             raw["expect"] = self.expect

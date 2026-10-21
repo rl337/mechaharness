@@ -17,6 +17,7 @@ from mechaharness.harness.base import AbstractHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
+from mechaharness.job_lane_broker import JobLaneBroker
 from mechaharness.rag import RagRetriever
 from tests.stories.cli_probes.catalog import story_cli_probe_classes
 from tests.stories.cli_probes.clock_verbs import clock_cli_verb_classes
@@ -65,6 +66,7 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         access_policy: GrantPolicyLike | None = None,
         capability_envelope: CapabilityEnvelope | None = None,
         budget_policy: BudgetPolicy | None = None,
+        job_lane_broker: JobLaneBroker | None = None,
     ) -> None:
         self._completer = completer
         self._datetime_service = datetime_service
@@ -78,6 +80,7 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         self._access_policy = access_policy
         self._capability_envelope = capability_envelope
         self._budget_policy = budget_policy
+        self._job_lane_broker = job_lane_broker
         super().__init__()
 
     def get_rag_retriever(self) -> type[RagRetriever] | RagRetriever:
@@ -101,6 +104,11 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         if self._capability_envelope is not None:
             return self._capability_envelope
         return super().get_capability_envelope()
+
+    def get_job_lane_broker(self) -> JobLaneBroker | type[JobLaneBroker] | None:
+        if self._job_lane_broker is not None:
+            return self._job_lane_broker
+        return super().get_job_lane_broker()
 
     def get_inference_class(self) -> type[InferenceStrategy]:
         if isinstance(self._completer, InferenceStrategy):
@@ -175,6 +183,7 @@ class TestHarnessCliConfig(MechaHarnessConfig):
                 budget_policy=budget,
                 grants=grants,
                 access_policy=access_policy,
+                job_lane_broker=injector.inject(JobLaneBroker),
             )
 
         self.register(CliInstrumentor, make_cli)

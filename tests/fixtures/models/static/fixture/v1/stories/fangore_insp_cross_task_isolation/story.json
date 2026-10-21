@@ -2,10 +2,10 @@
   "id": "fangore_insp_cross_task_isolation",
   "persona": "fangore",
   "title": "Isolate job-lane run data; share only via brokered observe or handoff",
-  "kind": "cli",
-  "narrative": "Fangore's product treats each pipeline identity as a JobLane (e.g. assets.generate vs billing.settle). Runs in the same lane may observe earlier runs in that lane's sequence; other lanes must not see bags, meta, or artifact URLs unless the publisher's exposure policy and/or standing grants (or a one-shot HandoffRecord) allow it. Related: `fangore_insp_isolation_io` (subgraph I/O contracts), `fangore_insp_handoff_record` (handoff schema). Tracks MH-DOTS-07[^insp-dots-07]; product shape is JobLaneBroker[^jl-broker].",
-  "implementation": "Target: `JobLane` + `JobLaneBroker` (JL-01..10) owning per-lane run sequences and WalkBags; `observe` with selectors latest / before(t) / run_id; exposure policy on meta and keys. Interim probe still exercises `CrossTaskIsolationGuard` until the broker lands and this story retargets into the JL story matrix in `docs/requirements/job-lane-broker.md`.",
-  "validation": "Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` until migration; then `user_story` multi-lane YAML with step-level `lane` / `lane_observe` expects grant vs deny.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He treats each pipeline as a JobLane: assets publishes refs that do not bleed to billing until an explicit `lane_handoff`, matching MH-DOTS-07 as productized JobLaneBroker. Focused claims also live in `fangore_job_lane_*` stories (same-lane lineage, cross deny, meta allowlist, artifacts, before selector, handoff).",
+  "implementation": "`JobLane` + `JobLaneBroker` (JL-01..10) in `mechaharness.job_lane_broker`; CLI verbs `lane_publish` / `lane_observe` / `lane_handoff`. Deprecated shim: `CrossTaskIsolationGuard`.",
+  "validation": "Harness `user_story` scenario `cross_task_isolation_bleed.yaml`; matrix stories `fangore_job_lane_*`.",
   "footnotes": [
     {
       "id": "insp-dots-07",

@@ -1,0 +1,51 @@
+# user story: fangore_job_lane_meta_allowlist
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  job_lanes:
+    assets.generate:
+      meta: {mode: allow_lanes, lanes: [billing.settle]}
+      keys: {}
+    billing.settle:
+      meta: {mode: open}
+      keys: {}
+    audit.review:
+      meta: {mode: open}
+      keys: {}
+steps:
+- do:
+    lane_publish:
+      keys: {}
+      meta: {trigger: cron}
+  lane: assets.generate
+  run_id: gen-meta
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector: {latest: true}
+      meta: true
+  lane: billing.settle
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: run_id
+    value: gen-meta
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector: {latest: true}
+      meta: true
+  lane: audit.review
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+cleanup: []

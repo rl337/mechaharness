@@ -216,7 +216,7 @@ exposure, artifacts, handoff).
 - [x] `fangore_insp_approval_interrupt`
 - [x] `fangore_insp_auth_epoch_resume`
 - [x] `fangore_insp_authority_gate`
-- [ ] `fangore_insp_cross_task_isolation` — retarget to [JobLaneBroker / JL story matrix](../requirements/job-lane-broker.md); not a thin isolation verb
+- [x] `fangore_insp_cross_task_isolation` — retargeted to [JobLaneBroker](../requirements/job-lane-broker.md) + `fangore_job_lane_*` matrix
 - [x] `fangore_insp_denial_equivalence`
 - [ ] `fangore_insp_effect_revalidation`
 - [x] `fangore_insp_execution_token`

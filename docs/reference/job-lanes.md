@@ -4,14 +4,15 @@ Lane-scoped run sequences, WalkBags, and authorized observe. Module target:
 `mechaharness.job_lane_broker` (shim-deprecate
 `mechaharness.isolation.cross_task_isolation.CrossTaskIsolationGuard`).
 
-Stability: evolving (design landed; implementation tracks JL-* stories).
+Stability: evolving (types + Config bind + CLI verbs + JL stories landed).
 
 ## Surface
 
 | Item | Value |
 |------|-------|
 | Types | `JobLane`, `JobLaneBroker`, exposure / grant records |
-| DI | Config bind (proposed `get_job_lane_broker()`); inject — no locator |
+| DI | Config `get_job_lane_broker()`; inject — no locator |
+| CLI | `lane_publish`, `lane_observe`, `lane_grant`, `lane_handoff` |
 | Normative | [Job lane broker requirements](../requirements/job-lane-broker.md) |
 | Provenance | MH-DOTS-07 (productized as lanes, not intervening-task loops) |
 

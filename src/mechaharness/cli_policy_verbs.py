@@ -936,6 +936,191 @@ class LocalPlanResumeVerb(CliVerb):
         }
 
 
+class LanePublishCommand(BaseModel):
+    """Append/open a lane run and put keys onto its WalkBag."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    caller_lane: str
+    run_id: str
+    keys: dict[str, Any] = Field(default_factory=dict)
+    started_at: str | None = None
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+
+class LanePublishVerb(CliVerb):
+    name = "lane_publish"
+    params_model = LanePublishCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        from mechaharness.iso_timestamp import parse_iso_timestamp
+        from mechaharness.job_lane_broker import JobLaneBroker
+        from mechaharness.walk_bag import FileArtifact
+
+        body = LanePublishCommand.model_validate(params.model_dump())
+        broker = getattr(runtime, "job_lane_broker", None)
+        if broker is None:
+            raise RuntimeError(
+                "lane_publish requires JobLaneBroker on the instrumentor "
+                "(bind via Config get_job_lane_broker / environment.job_lanes)"
+            )
+        assert isinstance(broker, JobLaneBroker)
+        started = parse_iso_timestamp(body.started_at) if body.started_at else None
+        if started is None and body.started_at:
+            raise ValueError(f"invalid started_at {body.started_at!r}")
+        if started is None:
+            started = runtime.datetime_service.now_utc()
+        bag = broker.open_run(
+            body.caller_lane,
+            body.run_id,
+            started_at=started,
+            meta=body.meta or None,
+        )
+        published: dict[str, Any] = {}
+        for key, raw in body.keys.items():
+            value: Any = raw
+            if isinstance(raw, dict) and ("url" in raw or "path" in raw):
+                value = FileArtifact.model_validate(raw)
+            broker.put(body.caller_lane, body.run_id, key, value)
+            published[key] = (
+                value.model_dump(exclude_none=True)
+                if isinstance(value, FileArtifact)
+                else value
+            )
+        return {
+            "status": "ok",
+            "lane": body.caller_lane,
+            "run_id": body.run_id,
+            "keys": sorted(published),
+            "published": published,
+            "bag": bag.snapshot(),
+        }
+
+
+class LaneObserveCommand(BaseModel):
+    """Brokered observe of another (or same) lane run key/meta."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    caller_lane: str
+    target_lane: str
+    selector: dict[str, Any]
+    key: str | None = None
+    meta: bool = False
+
+
+class LaneObserveVerb(CliVerb):
+    name = "lane_observe"
+    params_model = LaneObserveCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        from mechaharness.job_lane_broker import JobLaneBroker, ObserveSelector
+
+        body = LaneObserveCommand.model_validate(params.model_dump())
+        broker = getattr(runtime, "job_lane_broker", None)
+        if broker is None:
+            raise RuntimeError(
+                "lane_observe requires JobLaneBroker on the instrumentor "
+                "(bind via Config get_job_lane_broker / environment.job_lanes)"
+            )
+        assert isinstance(broker, JobLaneBroker)
+        result = broker.observe(
+            body.caller_lane,
+            body.target_lane,
+            selector=ObserveSelector.model_validate(body.selector),
+            key=body.key,
+            meta=body.meta,
+        )
+        return result.model_dump(exclude_none=True)
+
+
+class LaneGrantCommand(BaseModel):
+    """Standing grant: caller lane may observe publisher keys/meta."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    from_lane: str
+    to_lane: str
+    keys: list[str] = Field(default_factory=list)
+    meta: bool = False
+
+
+class LaneGrantVerb(CliVerb):
+    name = "lane_grant"
+    params_model = LaneGrantCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        from mechaharness.job_lane_broker import JobLaneBroker
+
+        body = LaneGrantCommand.model_validate(params.model_dump())
+        broker = getattr(runtime, "job_lane_broker", None)
+        if broker is None:
+            raise RuntimeError(
+                "lane_grant requires JobLaneBroker on the instrumentor"
+            )
+        assert isinstance(broker, JobLaneBroker)
+        broker.grant(
+            from_lane=body.from_lane,
+            to_lane=body.to_lane,
+            keys=list(body.keys),
+            meta=body.meta,
+        )
+        return {
+            "status": "ok",
+            "from_lane": body.from_lane,
+            "to_lane": body.to_lane,
+            "keys": list(body.keys),
+            "meta": body.meta,
+        }
+
+
+class LaneHandoffCommand(BaseModel):
+    """One-shot HandoffRecord share of evidence_refs across lanes."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    from_lane: str
+    to_lane: str
+    evidence_refs: list[str] = Field(default_factory=list)
+    handoff: dict[str, Any] | None = None
+
+
+class LaneHandoffVerb(CliVerb):
+    name = "lane_handoff"
+    params_model = LaneHandoffCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        from mechaharness.handoff_record import HandoffRecord
+        from mechaharness.job_lane_broker import IsolationViolation, JobLaneBroker
+
+        body = LaneHandoffCommand.model_validate(params.model_dump())
+        broker = getattr(runtime, "job_lane_broker", None)
+        if broker is None:
+            raise RuntimeError(
+                "lane_handoff requires JobLaneBroker on the instrumentor"
+            )
+        assert isinstance(broker, JobLaneBroker)
+        if body.handoff is not None:
+            record = HandoffRecord.model_validate(body.handoff)
+        else:
+            record = HandoffRecord(evidence_refs=list(body.evidence_refs))
+        try:
+            broker.handoff(body.from_lane, body.to_lane, record)
+        except IsolationViolation as exc:
+            return {
+                "status": "denied",
+                "error": str(exc),
+                "from_lane": body.from_lane,
+                "to_lane": body.to_lane,
+            }
+        return {
+            "status": "ok",
+            "from_lane": body.from_lane,
+            "to_lane": body.to_lane,
+            "evidence_refs": list(record.evidence_refs),
+        }
+
+
 def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
     return {
         AccessCheckVerb.name: AccessCheckVerb,
@@ -951,6 +1136,10 @@ def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
         ToolResultFreshnessVerb.name: ToolResultFreshnessVerb,
         ToolPhaseGuardVerb.name: ToolPhaseGuardVerb,
         LocalPlanResumeVerb.name: LocalPlanResumeVerb,
+        LanePublishVerb.name: LanePublishVerb,
+        LaneObserveVerb.name: LaneObserveVerb,
+        LaneGrantVerb.name: LaneGrantVerb,
+        LaneHandoffVerb.name: LaneHandoffVerb,
     }
 
 
@@ -973,6 +1162,14 @@ __all__ = [
     "ExecutionTokenVerb",
     "HumanReviewGateCommand",
     "HumanReviewGateVerb",
+    "LaneGrantCommand",
+    "LaneGrantVerb",
+    "LaneHandoffCommand",
+    "LaneHandoffVerb",
+    "LaneObserveCommand",
+    "LaneObserveVerb",
+    "LanePublishCommand",
+    "LanePublishVerb",
     "LocalPlanResumeCommand",
     "LocalPlanResumeVerb",
     "RunBudgetedGraphCommand",
