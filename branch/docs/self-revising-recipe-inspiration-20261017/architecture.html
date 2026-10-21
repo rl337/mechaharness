@@ -184,6 +184,8 @@ registers <code class="docutils literal notranslate"><span class="pre">Settings<
 <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">ContextProviderRegistry</span></code>,
 <code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>, <code class="docutils literal notranslate"><span class="pre">LifecycleExtensionRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code>,
 <code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code>, <code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code>, and <code class="docutils literal notranslate"><span class="pre">GeneratorControllerAuth</span></code>.
+(<code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code> is the planned Config-bound owner of per-lane run sequences
+and authorized observe — see <a class="reference internal" href="reference/job-lanes.html"><span class="std std-doc">Job lanes</span></a>.)
 Subclasses override <code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called
 from the Config constructor). Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (or
 <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>) for deny-by-default tool grants; compose reusable sets with

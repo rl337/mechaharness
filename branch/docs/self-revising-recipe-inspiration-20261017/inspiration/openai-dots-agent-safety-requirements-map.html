@@ -175,11 +175,11 @@ user-facing policy configuration.</p>
 <td><p>—</p></td>
 </tr>
 <tr class="row-even"><td><p>MH-DOTS-07</p></td>
-<td><p>Cross-task context isolation</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">isolation/cross_task_isolation.py</span></code>, <code class="docutils literal notranslate"><span class="pre">isolation/isolation_contract.py</span></code>, <code class="docutils literal notranslate"><span class="pre">isolation/workspace_isolation.py</span></code>, <code class="docutils literal notranslate"><span class="pre">handoff_record.py</span></code></p></td>
-<td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_isolation_io</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_handoff_record</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_cross_task_isolation</span></code></p></td>
-<td><p>—</p></td>
+<td><p>Job-lane isolation / brokered observe (was “cross-task”)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">job_lane_broker</span></code> (target; shim <code class="docutils literal notranslate"><span class="pre">isolation/cross_task_isolation.py</span></code>), <code class="docutils literal notranslate"><span class="pre">isolation/isolation_contract.py</span></code>, <code class="docutils literal notranslate"><span class="pre">isolation/workspace_isolation.py</span></code>, <code class="docutils literal notranslate"><span class="pre">handoff_record.py</span></code>, <code class="docutils literal notranslate"><span class="pre">walk_bag.py</span></code></p></td>
+<td><p>partial</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_isolation_io</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_handoff_record</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_cross_task_isolation</span></code> (retarget → JL story matrix)</p></td>
+<td><p>Implement <code class="docutils literal notranslate"><span class="pre">JobLane</span></code> / <code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code>; split stories per <a class="reference internal" href="../requirements/job-lane-broker.html"><span class="std std-doc">JL requirements</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-DOTS-08</p></td>
 <td><p>Safety evaluation recipes</p></td>

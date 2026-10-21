@@ -341,6 +341,11 @@ the evolved recipe” (<a class="reference internal" href="user-story-recipe-exp
 <h3>Batch P5 — Access / authority → <strong>G3</strong><a class="headerlink" href="#batch-p5-access-authority-g3" title="Link to this heading"></a></h3>
 <p><em>Historical list. Work via <a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">G3</span></a>
 (authority gates on product graphs), not probe wrappers.</em> · <strong>17</strong> stories</p>
+<p>Job-lane isolation (former cross-task bleed) is specified in
+<a class="reference internal" href="../requirements/job-lane-broker.html"><span class="std std-doc">job-lane-broker requirements</span></a>: multi-lane
+<code class="docutils literal notranslate"><span class="pre">environment.job_lanes</span></code>, per-step <code class="docutils literal notranslate"><span class="pre">lane</span></code> / <code class="docutils literal notranslate"><span class="pre">run_id</span></code>, brokered <code class="docutils literal notranslate"><span class="pre">lane_observe</span></code>,
+and a split story matrix (same-lane lineage, cross-lane deny, meta/key
+exposure, artifacts, handoff).</p>
 <ul class="simple">
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_capability_envelope_narrow</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code></p></li>
@@ -350,7 +355,7 @@ the evolved recipe” (<a class="reference internal" href="user-story-recipe-exp
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_approval_interrupt</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_auth_epoch_resume</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_authority_gate</span></code></p></li>
-<li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_insp_cross_task_isolation</span></code></p></li>
+<li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_insp_cross_task_isolation</span></code> — retarget to <a class="reference internal" href="../requirements/job-lane-broker.html"><span class="std std-doc">JobLaneBroker / JL story matrix</span></a>; not a thin isolation verb</p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_denial_equivalence</span></code></p></li>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_insp_effect_revalidation</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_execution_token</span></code></p></li>
