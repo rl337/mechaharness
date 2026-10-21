@@ -32,6 +32,10 @@ class EnvironmentBlock(BaseModel):
     backend: str = "mock"
     # ISO-8601 instant for MockDateTimeService; omit for harness default.
     clock: str | None = None
+    # Optional FixtureRagRetriever corpus (YAML path under the story dir).
+    rag_corpus: str | None = None
+    # Optional story-host lifecycle extension ids (see tests.stories.hosts).
+    lifecycle_extensions: list[str] = Field(default_factory=list)
 
 
 class DurableGraphBlock(BaseModel):

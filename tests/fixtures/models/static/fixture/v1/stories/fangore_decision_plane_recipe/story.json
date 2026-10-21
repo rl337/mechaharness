@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Run a typed decision-plane Agentic Recipe with batched questions",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`plane_recipe`) for: Run a typed decision-plane Agentic Recipe with batched questions. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
-  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: plane_recipe` plans.",
-  "validation": "Harness `user_story` scenario(s) `template_shape.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He soft-binds questions/state/facts on the `decision_plane` Agentic Recipe, runs it via `run_recipe`, and verifies the typed batch path yields a code-owned final action. [^rc-decision-plane]",
+  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` runners and product verb `run_recipe` (`DecisionPlaneRecipeAdapter`).",
+  "validation": "user_story template_shape.yaml run_recipe; template_name/has_soft_point/final_action.",
   "footnotes": [
     {
       "id": "rc-decision-plane",

@@ -1,6 +1,5 @@
 # user story: fangore_jev_citation_growth_mismatch
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/growth_mismatch.yaml` (citation_support), and verifies completion.
+# Fangore judges citation support over source+claim via product verb `judge`.
 kind: user_story
 environment:
   family: pass_through
@@ -8,8 +7,30 @@ environment:
 graph: null
 steps:
 - do:
-    decision_case:
-      path: plans/growth_mismatch.yaml
+    judge:
+      state_path: inputs/state.txt
+      questions:
+      - id: support
+        kind: choice
+        instructions: Does the source support the claim?
+        options:
+        - id: supported
+          description: Supported
+        - id: contradicted
+          description: Contradicted
+        - id: insufficient
+          description: Insufficient
+        - id: unavailable
+          description: Unavailable
+        allowed_actions:
+        - supported
+        - contradicted
+        - insufficient
+        - unavailable
+      question_set_version: citation-v1
+      action_question_id: support
+      confidence_floor: 0.7
+      verified_selected: supported
 complete:
   expect:
   - kind: 'false'

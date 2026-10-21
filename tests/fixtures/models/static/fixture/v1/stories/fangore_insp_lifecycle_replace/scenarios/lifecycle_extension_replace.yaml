@@ -1,15 +1,26 @@
 # user story: fangore_insp_lifecycle_replace
-# Fangore starts the CLI host, runs lifecycle_case for plan
-# `plans/lifecycle_extension_replace.yaml` (replace), and verifies completion.
+# Config-bound lifecycle extensions via tool_lifecycle.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
+  lifecycle_extensions: &id001
+  - acme:replace_write
 graph: null
 steps:
 - do:
-    lifecycle_case:
-      path: plans/lifecycle_extension_replace.yaml
+    tool_lifecycle:
+      mode: tool
+      prompt: write
+      grants:
+      - core:fs.write
+      tool_calls:
+      - id: c1
+        name: write_file
+        arguments:
+          path: a.txt
+      extension_ids: *id001
+      goal: lifecycle
 complete:
   expect:
   - kind: equals

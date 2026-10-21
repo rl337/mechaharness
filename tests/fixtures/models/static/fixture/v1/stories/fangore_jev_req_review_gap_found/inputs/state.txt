@@ -1,0 +1,6 @@
+PR DIFF:
++ def handle_refund():
++     charge_once()
+
+USER STORIES:
+- Crash on double charge must be covered by tests.

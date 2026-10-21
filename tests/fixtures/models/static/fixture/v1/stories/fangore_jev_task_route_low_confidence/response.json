@@ -1,1 +1,13 @@
-{}
+{
+  "answers": {
+    "route": {
+      "selected": "frontier",
+      "probabilities": {
+        "local_small": 0.2333333333333333,
+        "frontier": 0.3,
+        "tool": 0.2333333333333333,
+        "human": 0.2333333333333333
+      }
+    }
+  }
+}

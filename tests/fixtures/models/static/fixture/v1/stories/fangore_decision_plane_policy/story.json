@@ -3,15 +3,15 @@
   "persona": "fangore",
   "title": "Let code own the final decision-plane action with escalation",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`policy`) for: Let code own the final decision-plane action with escalation. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rvania-policy] [^rc-dp-policy] [^insp-pa-06-dp] [^insp-sr-08-dp]",
-  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: policy` plans.",
-  "validation": "Harness `user_story` scenario(s) `accept_billing.yaml`, `invalid_team.yaml`, `low_confidence.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `decision_plane` with batched triage questions and fixture answers. He performs `run_recipe` and verifies code-owned policy accepts billing, rejects illegal choices, and escalates below the confidence floor. [^rvania-policy] [^rc-dp-policy] [^insp-pa-06-dp] [^insp-sr-08-dp]",
+  "implementation": "Agentic Recipe `decision_plane` via `AskBatchRunner` / `ApplyPolicyRunner` / `run_decision_plane_policy`. Product CLI verb `run_recipe` with `DecisionPlaneRecipeAdapter`.",
+  "validation": "Harness `user_story` scenarios `accept_billing.yaml`, `invalid_team.yaml`, `low_confidence.yaml` drive `run_recipe`; hard expects on final_action / escalate keys.",
   "footnotes": [
     {
       "id": "rvania-policy",
       "label": "Move Routine Decisions Off Your Big Model (rvaniaaaa)",
       "url": "https://x.com/rvaniaaaa/status/2107453108611662172",
-      "note": "Rules 2,3,5,6,7 \u2014 batch ask; allowed levels; code policy; confidence; valid actions"
+      "note": "Rules 2,3,5,6,7 — batch ask; allowed levels; code policy; confidence; valid actions"
     },
     {
       "id": "rc-dp-policy",
@@ -29,7 +29,7 @@
       "id": "insp-sr-08-dp",
       "label": "Self-revising recipe map (MH-SR-08 decision plane)",
       "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md",
-      "note": "Decision resolve \u2260 neighbor CR loop"
+      "note": "Decision resolve ≠ neighbor CR loop"
     }
   ]
 }

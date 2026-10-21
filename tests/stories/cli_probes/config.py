@@ -14,6 +14,7 @@ from mechaharness.harness.base import AbstractHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
+from mechaharness.rag import RagRetriever
 from tests.stories.cli_probes.catalog import story_cli_probe_classes
 from tests.stories.cli_probes.clock_verbs import clock_cli_verb_classes
 from tests.stories.cli_probes.probe_verb import ProbeVerb
@@ -40,6 +41,8 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         model: str = "cli-default",
         agent_id: str = "cli",
         judge_provider: JudgeProvider | None = None,
+        rag_retriever: RagRetriever | None = None,
+        lifecycle_extensions: dict[str, object] | None = None,
         harness_family: str = "pass_through",
     ) -> None:
         self._completer = completer
@@ -47,8 +50,15 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         self._model = model
         self._agent_id = agent_id
         self._judge_provider = judge_provider
+        self._rag_retriever = rag_retriever
+        self._lifecycle_extensions = dict(lifecycle_extensions or {})
         self._harness_family = harness_family
         super().__init__()
+
+    def get_rag_retriever(self) -> type[RagRetriever] | RagRetriever:
+        if self._rag_retriever is not None:
+            return self._rag_retriever
+        return super().get_rag_retriever()
 
     def get_inference_class(self) -> type[InferenceStrategy]:
         if isinstance(self._completer, InferenceStrategy):
@@ -85,10 +95,14 @@ class TestHarnessCliConfig(MechaHarnessConfig):
             self.register_instance(InferenceStrategy, self._completer)
         if self._judge_provider is not None:
             self.register_instance(JudgeProvider, self._judge_provider)
+        if self._rag_retriever is not None:
+            self.register_instance(RagRetriever, self._rag_retriever)
 
         model = self._model
         agent_id = self._agent_id
         judge = self._judge_provider
+        rag = self._rag_retriever
+        life = self._lifecycle_extensions
         _expose_ctor_type_hints(_CliMaps)
 
         def make_cli(injector: Injector) -> CliInstrumentor:
@@ -101,6 +115,8 @@ class TestHarnessCliConfig(MechaHarnessConfig):
                 model=model,
                 agent_id=agent_id,
                 judge_provider=judge,
+                rag_retriever=rag,
+                lifecycle_extensions=life,
             )
 
         self.register(CliInstrumentor, make_cli)

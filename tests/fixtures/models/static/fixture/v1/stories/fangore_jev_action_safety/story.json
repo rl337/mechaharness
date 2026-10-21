@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Let hard grants win over semantic risk classification",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (action_safety) for: Let hard grants win over semantic risk classification. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^jev-us08] [^insp-dots-04] [^insp-pa-02-safety]",
-  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: action_safety` plans.",
-  "validation": "Harness `user_story` scenario(s) `delete_low_risk_no_grant.yaml`, `read_high_risk_with_grant.yaml`, `read_low_risk_with_grant.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He judges semantic risk of a proposed action and applies hard AccessPolicy grants so hard grants always win. He verifies decision / hard_won / grants_unchanged.",
+  "implementation": "Product verb `judge` with risk_question_id + required_abilities/grants; hard AccessPolicy gates over semantic risk.",
+  "validation": "user_story scenarios with per-scenario cassettes; hard expects on decision keys.",
   "footnotes": [
     {
       "id": "jev-us08",

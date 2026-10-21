@@ -3,8 +3,8 @@
   "persona": "fangore",
   "title": "Refuse to verify a claim with no source",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (citation_support) for: Refuse to verify a claim with no source. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
-  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: citation_support` plans.",
-  "validation": "Harness `user_story` scenario(s) `missing_source.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (FixtureJudgeProvider cassette) for: Refuse to verify a claim with no source. He verifies claim_verified / escalate from the typed support answer and confidence floor.",
+  "implementation": "Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via injected JudgeProvider. Code-owned claim_verified = selected==supported \u2227 conf\u2265floor.",
+  "validation": "Harness `user_story` scenario `missing_source.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate.",
   "footnotes": []
 }

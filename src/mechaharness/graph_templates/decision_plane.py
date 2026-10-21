@@ -144,17 +144,46 @@ class DecisionPlaneTemplate(GraphTemplate):
             bindings.get("shadow_mode", inputs.get("shadow_mode", False))
         )
         decision_model = bindings.get("decision_model", inputs.get("decision_model"))
+        escalation_route = str(
+            bindings.get(
+                "escalation_route",
+                inputs.get("escalation_route", "host_policy"),
+            )
+        )
+        action_question_id = str(
+            bindings.get(
+                "action_question_id",
+                inputs.get("action_question_id", "team"),
+            )
+        )
+        # Execute-time fixtures (stories / host tests): answers, confidence, etc.
+        raw_context = _as_dict(inputs.get("raw_context"))
+        project_keys = _as_list(inputs.get("project_keys"))
+        fixture_answers = _as_dict(
+            inputs.get("fixture_answers")
+            or inputs.get("production_answers")
+            or inputs.get("answers")
+        )
+        shadow_answers = _as_dict(inputs.get("shadow_answers"))
+        confidence = inputs.get("confidence")
+        latency_ms = inputs.get("latency_ms")
+        raw_body = inputs.get("raw_body")
 
         graph = ExecutionGraph(goal=params.goal or self.name, version=self.version)
+        project_payload: dict[str, Any] = {
+            "phase": "project_state",
+            "state_projection": projection,
+            "facts": facts,
+        }
+        if raw_context:
+            project_payload["raw_context"] = raw_context
+        if project_keys:
+            project_payload["project_keys"] = project_keys
         project = make_node(
             id="project_state",
             kind=str(bindings.get("project_kind", "project_state")),
             goal="project decision state",
-            payload={
-                "phase": "project_state",
-                "state_projection": projection,
-                "facts": facts,
-            },
+            payload=project_payload,
         )
         ask_payload: dict[str, Any] = {
             "phase": "ask_batch",
@@ -162,9 +191,21 @@ class DecisionPlaneTemplate(GraphTemplate):
             "allowed_action_envelopes": _envelopes(questions),
             "confidence_floor": confidence_floor,
             "inference_mode": "batch",
+            "action_question_id": action_question_id,
+            "escalation_route": escalation_route,
         }
         if decision_model is not None:
             ask_payload["model_ref"] = str(decision_model)
+        elif inputs.get("model_ref") is not None:
+            ask_payload["model_ref"] = str(inputs["model_ref"])
+        if fixture_answers:
+            ask_payload["fixture_answers"] = fixture_answers
+        if confidence is not None:
+            ask_payload["confidence"] = confidence
+        if latency_ms is not None:
+            ask_payload["latency_ms"] = latency_ms
+        if raw_body is not None:
+            ask_payload["raw_body"] = raw_body
         ask = make_node(
             id="ask_batch",
             kind=str(bindings.get("ask_kind", "ask_batch")),
@@ -182,6 +223,8 @@ class DecisionPlaneTemplate(GraphTemplate):
                 "facts_ref": "project_state",
                 "signals_ref": "ask_batch",
                 "confidence_floor": confidence_floor,
+                "escalation_route": escalation_route,
+                "action_question_id": action_question_id,
             },
         )
         escalate = make_node(
@@ -191,7 +234,7 @@ class DecisionPlaneTemplate(GraphTemplate):
             depends_on=[policy.id],
             payload={
                 "phase": "escalate",
-                "route": bindings.get("escalation_route", "host_policy"),
+                "route": escalation_route,
             },
         )
         for node in (project, ask, policy, escalate):
@@ -221,17 +264,28 @@ class DecisionPlaneTemplate(GraphTemplate):
             )
         )
         if shadow_mode:
+            shadow_payload: dict[str, Any] = {
+                "phase": "shadow_ask",
+                "questions": questions,
+                "confidence_floor": confidence_floor,
+                "controls_execution": False,
+                "action_question_id": action_question_id,
+                "escalation_route": escalation_route,
+            }
+            if shadow_answers:
+                shadow_payload["shadow_answers"] = shadow_answers
+            if confidence is not None:
+                shadow_payload["confidence"] = confidence
+            if latency_ms is not None:
+                shadow_payload["latency_ms"] = latency_ms
+            if raw_body is not None:
+                shadow_payload["raw_body"] = raw_body
             shadow = make_node(
                 id="shadow_ask",
                 kind=str(bindings.get("shadow_ask_kind", "shadow_ask")),
                 goal="shadow decision path (non-gating)",
                 depends_on=[project.id],
-                payload={
-                    "phase": "shadow_ask",
-                    "questions": questions,
-                    "confidence_floor": confidence_floor,
-                    "controls_execution": False,
-                },
+                payload=shadow_payload,
             )
             graph.add_node(shadow)
             graph.add_dependency(

@@ -1,15 +1,16 @@
 # user story: fangore_decision_plane_policy
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/accept_billing.yaml` (policy), and verifies completion.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
-graph: null
+graph:
+  recipe: decision_plane
+  bind: binds/accept_billing.yaml
 steps:
 - do:
-    decision_case:
-      path: plans/accept_billing.yaml
+    run_recipe:
+      name: decision_plane
+      path: binds/accept_billing.yaml
 complete:
   expect:
   - kind: equals
@@ -23,4 +24,10 @@ complete:
   - kind: equals
     key: escalation_route
     value: host_policy
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

@@ -1,1 +1,13 @@
-{}
+{
+  "answers": {
+    "support": {
+      "selected": "contradicted",
+      "probabilities": {
+        "supported": 0.01666666666666668,
+        "contradicted": 0.95,
+        "insufficient": 0.01666666666666668,
+        "unavailable": 0.01666666666666668
+      }
+    }
+  }
+}

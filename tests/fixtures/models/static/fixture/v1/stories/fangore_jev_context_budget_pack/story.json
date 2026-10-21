@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Pack scored RAG candidates into a fixed token budget",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (context_budget) for: Pack scored RAG candidates into a fixed token budget. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^jev-us05]",
-  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: context_budget` plans.",
-  "validation": "Harness `user_story` scenario(s) `budget_pack.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds a FixtureRagRetriever corpus and loads the `context_pack` Agentic Recipe for: Pack scored RAG candidates into a fixed token budget. He runs `run_recipe` context_pack (retrieve \u2192 pack via `assemble_context_within_budget`) and verifies selected_ids / within_budget. [^jev-us05]",
+  "implementation": "Agentic Recipe `context_pack` (`ContextPackTemplate`): `rag_retrieve` \u2192 `rag_pack`. Host binds `RagRetriever` (story: `FixtureRagRetriever` via `environment.rag_corpus`). Pack calls `assemble_context_within_budget`. Product verb `run_recipe`.",
+  "validation": "Harness `user_story` scenario `budget_pack.yaml`: environment.rag_corpus + graph.recipe context_pack + run_recipe; hard expects on selected_ids / within_budget.",
   "footnotes": [
     {
       "id": "jev-us05",

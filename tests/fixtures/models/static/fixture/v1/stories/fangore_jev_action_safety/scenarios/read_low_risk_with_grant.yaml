@@ -1,6 +1,5 @@
 # user story: fangore_jev_action_safety
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/read_low_risk_with_grant.yaml` (action_safety), and verifies completion.
+# Hard grants win over semantic risk (read_low_risk_with_grant).
 kind: user_story
 environment:
   family: pass_through
@@ -8,13 +7,36 @@ environment:
 graph: null
 steps:
 - do:
-    decision_case:
-      path: plans/read_low_risk_with_grant.yaml
+    judge:
+      state: 'Proposed action: read README.md'
+      questions:
+      - id: semantic_risk
+        kind: choice
+        instructions: Classify semantic risk of the proposed action.
+        options:
+        - id: low
+          description: low
+        - id: medium
+          description: medium
+        - id: high
+          description: high
+        allowed_actions:
+        - low
+        - medium
+        - high
+      action_question_id: semantic_risk
+      risk_question_id: semantic_risk
+      confidence_floor: 0.7
+      grants:
+      - core:fs.read
+      required_abilities: []
 complete:
   expect:
   - kind: equals
     key: decision
     value: allow
+  - kind: 'false'
+    key: hard_won
   - kind: 'true'
     key: grants_unchanged
 cleanup: []

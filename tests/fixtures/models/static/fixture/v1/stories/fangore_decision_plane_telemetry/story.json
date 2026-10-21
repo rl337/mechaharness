@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Export evaluation-ready decision-plane telemetry without raw context",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`telemetry`) for: Export evaluation-ready decision-plane telemetry without raw context. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rc-dp-telemetry] [^insp-pa-08-telem]",
-  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: telemetry` plans.",
-  "validation": "Harness `user_story` scenario(s) `telemetry_fields.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `decision_plane` with projection, fixture answers, model_ref, and a raw body that must not appear in telemetry. He performs `run_recipe` and verifies evaluation-ready fields without raw context. [^rc-dp-telemetry] [^insp-pa-08-telem]",
+  "implementation": "Agentic Recipe `decision_plane` via `build_decision_plane_telemetry` / `DecisionPlaneRecipeAdapter`. Product CLI verb `run_recipe`.",
+  "validation": "Harness `user_story` scenario `telemetry_fields.yaml` drives `run_recipe`; hard expects on telemetry observation keys.",
   "footnotes": [
     {
       "id": "rc-dp-telemetry",

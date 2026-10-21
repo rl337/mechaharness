@@ -1,15 +1,16 @@
 # user story: fangore_decision_plane_policy
-# Fangore starts the CLI host, runs decision_case for plan
-# `plans/invalid_team.yaml` (policy), and verifies completion.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
-graph: null
+graph:
+  recipe: decision_plane
+  bind: binds/invalid_team.yaml
 steps:
 - do:
-    decision_case:
-      path: plans/invalid_team.yaml
+    run_recipe:
+      name: decision_plane
+      path: binds/invalid_team.yaml
 complete:
   expect:
   - kind: 'true'
@@ -17,4 +18,10 @@ complete:
   - kind: equals
     key: escalation_reason
     value: choice_not_allowed
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

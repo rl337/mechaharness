@@ -3,8 +3,8 @@
   "persona": "fangore",
   "title": "Force frontier when quality policy rejects the cheap lane",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (task_route) for: Force frontier when quality policy rejects the cheap lane. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario.",
-  "implementation": "Agentic Recipe `decision_plane` via `run_decision_plane_policy` / `assemble_context_within_budget` / `IndependentReviewTemplate` as needed. Product CLI verb `decision_case` (`mechaharness.cli_decision_case`) with `case: task_route` plans.",
-  "validation": "Harness `user_story` scenario(s) `complex_forces_frontier.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He judges a cheap lane but quality policy forces frontier on high complexity. He verifies completion from structured observation expects.",
+  "implementation": "Product verb `judge` + code-owned quality override on complexity facts.",
+  "validation": "user_story judge; expect final_action=frontier.",
   "footnotes": []
 }
