@@ -58,11 +58,6 @@ from mechaharness.isolation.workspace_isolation import (
     InMemoryWorkspaceIsolationProvider,
     WorkspaceIsolationRequest,
 )
-from mechaharness.operation_registry import (
-    OperationContract,
-    OperationRegistry,
-)
-from mechaharness.tool_result_freshness import ToolResultFreshnessPolicy
 from mechaharness.tools.base import ToolRegistry
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
 from tests.fakes import ScriptedInference
@@ -376,51 +371,6 @@ async def run_state_governance_write(inputs: dict[str, Any]) -> dict[str, Any]:
     return actual
 
 
-async def run_execution_token_narrow(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Child envelopes attenuate token fields and refuse widening (MH-DOTS-01)."""
-    request = inputs
-    parent = CapabilityEnvelope.model_validate(request["parent"])
-    outcomes: dict[str, str] = {}
-    children: dict[str, CapabilityEnvelope] = {}
-    for attempt in request["attempts"]:
-        try:
-            children[attempt["id"]] = parent.narrow(**attempt["narrow"])
-            outcomes[attempt["id"]] = "ok"
-        except ValueError as exc:
-            reason = str(exc).removeprefix("child envelope ").split(":")[0]
-            outcomes[attempt["id"]] = f"refused:{reason}"
-    inherited = children.get(str(request.get("inherit_attempt") or ""))
-    actual = {
-        "outcomes": outcomes,
-        "refused_ids": sorted(k for k, v in outcomes.items() if v.startswith("refused")),
-        "accepted_ids": sorted(k for k, v in outcomes.items() if v == "ok"),
-        "inherited_principal": inherited.principal if inherited else None,
-        "inherited_epoch": inherited.authorization_epoch if inherited else None,
-    }
-    return actual
-
-
-async def run_tool_phase_effect_guard(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Observe/prepare tools cannot register write/external effects (MH-DOTS-03)."""
-    request = inputs
-    registry = OperationRegistry()
-    registered: list[str] = []
-    refused: list[str] = []
-    for raw in request["contracts"]:
-        contract = OperationContract.model_validate(raw)
-        try:
-            registry.register(contract.name, lambda **_: None, contract=contract)
-            registered.append(contract.name)
-        except ValueError:
-            refused.append(contract.name)
-    actual = {
-        "registered": registered,
-        "refused": refused,
-        "alias_supported": registry.supports(str(request.get("alias_probe") or "")),
-    }
-    return actual
-
-
 async def run_auth_epoch_resume_refuse(inputs: dict[str, Any]) -> dict[str, Any]:
     """Resume fails closed when the live authorization epoch differs (MH-DOTS-06)."""
     request = inputs
@@ -486,24 +436,6 @@ async def run_auth_epoch_resume_refuse(inputs: dict[str, Any]) -> dict[str, Any]
         first,
         resumed,
     )
-    return actual
-
-
-async def run_tool_result_freshness_reject(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Expired or too-old tool results are rejected before a decision (MH-PA-01)."""
-    from mechaharness.iso_timestamp import parse_iso_timestamp
-    request = inputs
-    now = parse_iso_timestamp(request["now"])
-    policy = ToolResultFreshnessPolicy(**(request.get("policy") or {}))
-    rejected: list[str] = []
-    passed: list[str] = []
-    for raw in request["results"]:
-        result = ToolResult.model_validate(raw)
-        checked = policy.reject_if_stale(result, now=now)
-        (rejected if checked.is_error and not result.is_error else passed).append(
-            result.tool_call_id
-        )
-    actual = {"rejected_ids": rejected, "passed_ids": passed}
     return actual
 
 
@@ -602,45 +534,6 @@ async def run_authority_gate_evaluate(inputs: dict[str, Any]) -> dict[str, Any]:
     return {"decisions": decisions}
 
 
-async def run_denial_store_equivalence(inputs: dict[str, Any]) -> dict[str, Any]:
-    """A denied intent stays denied across tools until explicitly lifted (MH-DOTS-05)."""
-    from mechaharness.authority_gate import AuthorityGate
-    from mechaharness.denial_store import InMemoryDenialStore, equivalent_action_digest
-    from mechaharness.judgement_policy import Verdict
-    request = inputs
-    store = InMemoryDenialStore()
-    gate = AuthorityGate(denials=store)
-    denied = request["denied"]
-    first_digest = equivalent_action_digest(denied["effect_class"], denied["target"])
-    first = gate.evaluate(
-        action=denied["effect_class"],
-        verdict=Verdict(kind="DENY", reasonCodes=["user_denied"], policyVersion="1"),
-        action_digest=first_digest,
-        tool_name=denied["tool_name"],
-    )
-    retries: dict[str, str] = {}
-    for retry in request["retries"]:
-        digest = equivalent_action_digest(retry["effect_class"], retry["target"])
-        decision = gate.evaluate(
-            action=retry["effect_class"],
-            approved=True,
-            action_digest=digest,
-            tool_name=retry["tool_name"],
-        )
-        retries[retry["id"]] = ":".join([decision.outcome, *decision.reason_codes])
-    lifted = store.lift(first_digest)
-    after_lift = gate.evaluate(
-        action=denied["effect_class"], approved=True, action_digest=first_digest
-    )
-    actual = {
-        "first": ":".join([first.outcome, *first.reason_codes]),
-        "retries": retries,
-        "lifted": lifted,
-        "after_lift": after_lift.outcome,
-    }
-    return actual
-
-
 async def run_cross_task_isolation_bleed(inputs: dict[str, Any]) -> dict[str, Any]:
     """Task-local refs do not bleed across intervening tasks (MH-DOTS-07)."""
     from mechaharness.isolation.cross_task_isolation import (
@@ -676,28 +569,6 @@ async def run_cross_task_isolation_bleed(inputs: dict[str, Any]) -> dict[str, An
         "receiver_reads_shared": guard.can_read("receiver", shared.evidence_refs[0]),
         "receiver_reads_unshared": guard.can_read("receiver", request["published_refs"][-1]),
         "ghost_handoff_refused": ghost_refused,
-    }
-    return actual
-
-
-async def run_alert_escalation_stages(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Counts map to log / surface / propose with no model in the loop (MH-PA-06)."""
-    from mechaharness.alert_escalation import AlertEscalationPolicy, AlertOccurrenceCounter
-    request = inputs
-    policy = AlertEscalationPolicy.model_validate(request["policy"])
-    counter = AlertOccurrenceCounter(policy)
-    try:
-        AlertEscalationPolicy.model_validate(request["unordered_policy"])
-        unordered_refused = False
-    except ValueError:
-        unordered_refused = True
-    actual = {
-        "ladder": [policy.evaluate(request["alert"], n) for n in request["counts"]],
-        "override_ladder": [
-            policy.evaluate(request["override_alert"], n) for n in request["override_counts"]
-        ],
-        "counter_walk": [counter.record(request["alert"]) for _ in request["counts"]],
-        "unordered_refused": unordered_refused,
     }
     return actual
 
@@ -782,15 +653,10 @@ ACCESS_AUTHORITY_HANDLERS: dict[str, Any] = {
     "approval_interrupt_cycle": run_approval_interrupt_cycle,
     "workspace_isolation_acquire": run_workspace_isolation_acquire,
     "state_governance_write": run_state_governance_write,
-    "execution_token_narrow": run_execution_token_narrow,
-    "tool_phase_effect_guard": run_tool_phase_effect_guard,
     "auth_epoch_resume_refuse": run_auth_epoch_resume_refuse,
-    "tool_result_freshness_reject": run_tool_result_freshness_reject,
     "effect_revalidation_check": run_effect_revalidation_check,
     "authority_gate_evaluate": run_authority_gate_evaluate,
-    "denial_store_equivalence": run_denial_store_equivalence,
     "cross_task_isolation_bleed": run_cross_task_isolation_bleed,
-    "alert_escalation_stages": run_alert_escalation_stages,
     "recipe_audit_dimensions": run_recipe_audit_dimensions,
     "review_audit_reconstruct": run_review_audit_reconstruct,
 }

@@ -529,6 +529,243 @@ class AuthorityGateVerb(CliVerb):
         return {"decisions": decisions}
 
 
+class ExecutionTokenCommand(BaseModel):
+    """Attenuate CapabilityEnvelope token fields across narrow attempts."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    parent: dict[str, Any]
+    attempts: list[dict[str, Any]] = Field(default_factory=list)
+    inherit_attempt: str | None = None
+
+
+class ExecutionTokenVerb(CliVerb):
+    name = "execution_token"
+    params_model = ExecutionTokenCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        from mechaharness.walk_bag import WalkBag, WalkBagRegister
+
+        body = ExecutionTokenCommand.model_validate(params.model_dump())
+        bag = WalkBag()
+        parent = CapabilityEnvelope.model_validate(body.parent)
+        bag.put(WalkBagRegister.IN, body.parent)
+        outcomes: dict[str, str] = {}
+        children: dict[str, CapabilityEnvelope] = {}
+        for attempt in body.attempts:
+            attempt_id = str(attempt["id"])
+            try:
+                children[attempt_id] = parent.narrow(**dict(attempt["narrow"]))
+                outcomes[attempt_id] = "ok"
+            except ValueError as exc:
+                reason = str(exc).removeprefix("child envelope ").split(":")[0]
+                outcomes[attempt_id] = f"refused:{reason}"
+        inherited = children.get(str(body.inherit_attempt or ""))
+        out = {
+            "outcomes": outcomes,
+            "refused_ids": sorted(
+                k for k, v in outcomes.items() if v.startswith("refused")
+            ),
+            "accepted_ids": sorted(k for k, v in outcomes.items() if v == "ok"),
+            "inherited_principal": inherited.principal if inherited else None,
+            "inherited_epoch": inherited.authorization_epoch if inherited else None,
+        }
+        bag.put(WalkBagRegister.OUT, out)
+        return {**out, "bag": bag.snapshot()}
+
+
+class DenialEquivalenceCommand(BaseModel):
+    """Persist a denial and block equivalent actions until lift()."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    denied: dict[str, Any]
+    retries: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class DenialEquivalenceVerb(CliVerb):
+    name = "denial_equivalence"
+    params_model = DenialEquivalenceCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        from mechaharness.authority_gate import AuthorityGate
+        from mechaharness.denial_store import InMemoryDenialStore, equivalent_action_digest
+        from mechaharness.judgement_policy import Verdict
+        from mechaharness.walk_bag import WalkBag, WalkBagRegister
+
+        body = DenialEquivalenceCommand.model_validate(params.model_dump())
+        bag = WalkBag()
+        bag.put(WalkBagRegister.IN, {"denied": body.denied, "retries": body.retries})
+        store = InMemoryDenialStore()
+        gate = AuthorityGate(denials=store)
+        denied = body.denied
+        first_digest = equivalent_action_digest(
+            denied["effect_class"], denied["target"]
+        )
+        first = gate.evaluate(
+            action=denied["effect_class"],
+            verdict=Verdict(
+                kind="DENY", reasonCodes=["user_denied"], policyVersion="1"
+            ),
+            action_digest=first_digest,
+            tool_name=denied["tool_name"],
+        )
+        retries: dict[str, str] = {}
+        for retry in body.retries:
+            digest = equivalent_action_digest(retry["effect_class"], retry["target"])
+            decision = gate.evaluate(
+                action=retry["effect_class"],
+                approved=True,
+                action_digest=digest,
+                tool_name=retry["tool_name"],
+            )
+            retries[retry["id"]] = ":".join(
+                [decision.outcome, *decision.reason_codes]
+            )
+        lifted = store.lift(first_digest)
+        after_lift = gate.evaluate(
+            action=denied["effect_class"],
+            approved=True,
+            action_digest=first_digest,
+        )
+        out = {
+            "first": ":".join([first.outcome, *first.reason_codes]),
+            "retries": retries,
+            "lifted": lifted,
+            "after_lift": after_lift.outcome,
+        }
+        bag.put(WalkBagRegister.OUT, out)
+        return {**out, "bag": bag.snapshot()}
+
+
+class AlertEscalationCommand(BaseModel):
+    """Map occurrence counts to log / surface / propose stages."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    policy: dict[str, Any]
+    alert: str
+    counts: list[int] = Field(default_factory=list)
+    override_alert: str
+    override_counts: list[int] = Field(default_factory=list)
+    unordered_policy: dict[str, Any]
+
+
+class AlertEscalationVerb(CliVerb):
+    name = "alert_escalation"
+    params_model = AlertEscalationCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        from mechaharness.alert_escalation import (
+            AlertEscalationPolicy,
+            AlertOccurrenceCounter,
+        )
+        from mechaharness.walk_bag import WalkBag, WalkBagRegister
+
+        body = AlertEscalationCommand.model_validate(params.model_dump())
+        bag = WalkBag()
+        bag.put(WalkBagRegister.IN, body.model_dump())
+        policy = AlertEscalationPolicy.model_validate(body.policy)
+        counter = AlertOccurrenceCounter(policy)
+        try:
+            AlertEscalationPolicy.model_validate(body.unordered_policy)
+            unordered_refused = False
+        except ValueError:
+            unordered_refused = True
+        out = {
+            "ladder": [policy.evaluate(body.alert, n) for n in body.counts],
+            "override_ladder": [
+                policy.evaluate(body.override_alert, n) for n in body.override_counts
+            ],
+            "counter_walk": [counter.record(body.alert) for _ in body.counts],
+            "unordered_refused": unordered_refused,
+        }
+        bag.put(WalkBagRegister.OUT, out)
+        return {**out, "bag": bag.snapshot()}
+
+
+class ToolResultFreshnessCommand(BaseModel):
+    """Reject stale ToolResult evidence before a decision."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    now: str
+    policy: dict[str, Any] = Field(default_factory=dict)
+    results: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class ToolResultFreshnessVerb(CliVerb):
+    name = "tool_result_freshness"
+    params_model = ToolResultFreshnessCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        from mechaharness.core.types import ToolResult
+        from mechaharness.iso_timestamp import parse_iso_timestamp
+        from mechaharness.tool_result_freshness import ToolResultFreshnessPolicy
+        from mechaharness.walk_bag import WalkBag, WalkBagRegister
+
+        body = ToolResultFreshnessCommand.model_validate(params.model_dump())
+        bag = WalkBag()
+        bag.put(WalkBagRegister.IN, {"now": body.now, "policy": body.policy})
+        now = parse_iso_timestamp(body.now)
+        policy = ToolResultFreshnessPolicy(**body.policy)
+        rejected: list[str] = []
+        passed: list[str] = []
+        for raw in body.results:
+            result = ToolResult.model_validate(raw)
+            checked = policy.reject_if_stale(result, now=now)
+            (
+                rejected if checked.is_error and not result.is_error else passed
+            ).append(result.tool_call_id)
+        out = {"rejected_ids": rejected, "passed_ids": passed}
+        bag.put(WalkBagRegister.OUT, out)
+        return {**out, "bag": bag.snapshot()}
+
+
+class ToolPhaseGuardCommand(BaseModel):
+    """Refuse observe/prepare contracts that smuggle write/external effects."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    contracts: list[dict[str, Any]] = Field(default_factory=list)
+    alias_probe: str = ""
+
+
+class ToolPhaseGuardVerb(CliVerb):
+    name = "tool_phase_guard"
+    params_model = ToolPhaseGuardCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        from mechaharness.operation_registry import OperationContract, OperationRegistry
+        from mechaharness.walk_bag import WalkBag, WalkBagRegister
+
+        body = ToolPhaseGuardCommand.model_validate(params.model_dump())
+        bag = WalkBag()
+        bag.put(WalkBagRegister.IN, {"contracts": body.contracts})
+        registry = OperationRegistry()
+        registered: list[str] = []
+        refused: list[str] = []
+        for raw in body.contracts:
+            contract = OperationContract.model_validate(raw)
+            try:
+                registry.register(contract.name, lambda **_: None, contract=contract)
+                registered.append(contract.name)
+            except ValueError:
+                refused.append(contract.name)
+        out = {
+            "registered": registered,
+            "refused": refused,
+            "alias_supported": registry.supports(body.alias_probe),
+        }
+        bag.put(WalkBagRegister.OUT, out)
+        return {**out, "bag": bag.snapshot()}
+
+
 def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
     return {
         AccessCheckVerb.name: AccessCheckVerb,
@@ -538,12 +775,19 @@ def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
         ApprovalInterruptVerb.name: ApprovalInterruptVerb,
         HumanReviewGateVerb.name: HumanReviewGateVerb,
         AuthorityGateVerb.name: AuthorityGateVerb,
+        ExecutionTokenVerb.name: ExecutionTokenVerb,
+        DenialEquivalenceVerb.name: DenialEquivalenceVerb,
+        AlertEscalationVerb.name: AlertEscalationVerb,
+        ToolResultFreshnessVerb.name: ToolResultFreshnessVerb,
+        ToolPhaseGuardVerb.name: ToolPhaseGuardVerb,
     }
 
 
 __all__ = [
     "AccessCheckCommand",
     "AccessCheckVerb",
+    "AlertEscalationCommand",
+    "AlertEscalationVerb",
     "ApprovalInterruptCommand",
     "ApprovalInterruptVerb",
     "AuthEpochResumeCommand",
@@ -552,9 +796,17 @@ __all__ = [
     "AuthorityGateVerb",
     "CapabilityEnvelopeCommand",
     "CapabilityEnvelopeVerb",
+    "DenialEquivalenceCommand",
+    "DenialEquivalenceVerb",
+    "ExecutionTokenCommand",
+    "ExecutionTokenVerb",
     "HumanReviewGateCommand",
     "HumanReviewGateVerb",
     "RunBudgetedGraphCommand",
     "RunBudgetedGraphVerb",
+    "ToolPhaseGuardCommand",
+    "ToolPhaseGuardVerb",
+    "ToolResultFreshnessCommand",
+    "ToolResultFreshnessVerb",
     "policy_cli_verb_classes",
 ]

@@ -2,10 +2,10 @@
   "id": "fangore_insp_execution_token",
   "persona": "fangore",
   "title": "Carry principal, expiry, and trust origin on every graph invocation",
-  "kind": "cli",
-  "narrative": "Every graph run needs a capability-scoped execution token: principal, expiry, trust origin, and authorization epoch alongside grants and tools. Child graphs receive attenuated authority only (`fangore_capability_envelope_narrow`, `fangore_capability_envelope_narrow`): a child cannot raise the authorization epoch, swap principal or trust origin, or outlive the parent's expiry. Tracks MH-DOTS-01[^insp-dots-01].",
-  "implementation": "`CapabilityEnvelope` carries `principal`, `expires_at`, `trust_origin`, and `authorization_epoch`; `narrow()` refuses a higher epoch, a different non-None principal or trust origin, and a later (or unorderable opaque) `expires_at`, and inherits omitted fields. `is_expired()` checks ISO expiry. Run identity stays on `GraphRunContext`; allowed operations are the envelope's grants and tools.",
-  "validation": "Harness `cli` `probe` loads `plans/execution_token_narrow.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `execution_token` so a parent CapabilityEnvelope (principal, expiry, trust origin, authorization epoch) can only attenuate into children: a child cannot raise the epoch, swap principal or trust origin, or outlive the parent's expiry. Tracks MH-DOTS-01[^insp-dots-01].",
+  "implementation": "`CapabilityEnvelope.narrow()` via product verb `execution_token` (`cli_policy_verbs`); walk-bag registers `in`/`out` carry parent and outcomes. Related: `fangore_capability_envelope_narrow`.",
+  "validation": "Harness `user_story` walks `execution_token`; expects attenuate ok and refuse raise/swap/outlive attempts.",
   "footnotes": [
     {
       "id": "insp-dots-01",
