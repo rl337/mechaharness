@@ -838,17 +838,17 @@ Harness `cli` `probe` loads `plans/resume_uncertain_with_handle.yaml` (human-rea
 
 ### `fangore_human_review_pending` — Hold mutations until a matching human approval exists
 
-Fangore’s product allows an agent to propose a privileged write, but the write must not run until a human approval matches the action digest. Without that token, policy returns ask-human — not allow. ASK_HUMAN path for Dots MH-DOTS-04[^insp-dots-04-pending] and approval interrupt for MH-DOTS-02[^insp-dots-02-review].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. A privileged mutate is gated by JudgementPolicy: without a matching approval digest the walk raises human review onto walk-bag register `ask`. The story step expects that request and injects the approval into `ans`; the second decide allows. ASK_HUMAN path for Dots MH-DOTS-04[^insp-dots-04-pending] and approval interrupt for MH-DOTS-02[^insp-dots-02-review].
 
 #### Implementation
 
-`JudgementPolicy.require_approval_for` plus `JudgementFacts.approvals` / `action_digest` in `decide()`: missing approval yields `ASK_HUMAN` with `MISSING_APPROVAL`. Approvals bind to executed args via digest keys.
+`WalkBag` / `WalkBagRegister` (`ask`/`ans`) in `mechaharness.walk_bag`; `HumanReviewGateVerb` (`human_review_gate`) in `cli_policy_verbs` over `JudgementPolicy.require_approval_for` + `decide()`; story `expect` kind `human_review` with `inject` folded into the verb by the user_story harness.
 
 Covers: POL-04, GAT-04.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/human_review_pending.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks `human_review_gate` with `expect: human_review` + inject; hard expects on `verdict_kinds` / `final_verdict`.
 
 #### Footnotes
 

@@ -89,7 +89,7 @@ from __future__ import annotations
 import inspect
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Literal, Union
 from uuid import uuid4
@@ -145,6 +145,7 @@ from mechaharness.linkage_resolver import (
     LinkageError,
     LinkageResolver,
 )
+from mechaharness.walk_bag import WalkBag
 
 
 class GraphFailureAction(str, Enum):
@@ -169,7 +170,11 @@ class NodeOutcome(BaseModel):
 
 @dataclass(frozen=True)
 class GraphRunContext:
-    """Per-run identity passed to node runners and escalation."""
+    """Per-run identity passed to node runners and escalation.
+
+    ``bag`` is a mutable :class:`~mechaharness.walk_bag.WalkBag` held by the
+    frozen context (register ABI for node→node data; see ``walk_bag``).
+    """
 
     graph: ExecutionGraph
     run_id: str
@@ -178,6 +183,7 @@ class GraphRunContext:
     parent_agent_id: str | None = None
     envelope: CapabilityEnvelope | None = None
     config_fingerprint: str | None = None
+    bag: WalkBag = field(default_factory=WalkBag)
 
 
 class GraphResult(BaseModel):

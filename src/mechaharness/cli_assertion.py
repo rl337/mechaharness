@@ -256,6 +256,33 @@ class ContainsAssertion(CliAssertion):
             raise AssertionError(f"{body.key}: {body.value!r} not in {got!r}")
 
 
+class _HumanReviewParams(BaseModel):
+    """Fail unless the step requested human review.
+
+    ``inject`` is folded into verb params by the user_story step harness and
+    ignored at assert time.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    inject: dict[str, Any] | None = None
+
+
+class HumanReviewAssertion(CliAssertion):
+    """Observation must report ``human_review_requested: true``."""
+
+    kind = "human_review"
+    params_model = _HumanReviewParams
+
+    def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
+        del params
+        if observation.get("human_review_requested") is not True:
+            raise AssertionError(
+                "human review was not requested "
+                f"(human_review_requested={observation.get('human_review_requested')!r})"
+            )
+
+
 def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
     return {
         EqualsAssertion.kind: EqualsAssertion,
@@ -269,6 +296,7 @@ def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
         GteAssertion.kind: GteAssertion,
         LteAssertion.kind: LteAssertion,
         ContainsAssertion.kind: ContainsAssertion,
+        HumanReviewAssertion.kind: HumanReviewAssertion,
     }
 
 

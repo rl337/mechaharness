@@ -53,19 +53,10 @@ from mechaharness.harness.base import AbstractHarness, HarnessConfig
 from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.base import InferenceStrategy
-from mechaharness.inference.judge import (
-    NoulSignal,
-)
 from mechaharness.isolation.isolation_contract import IsolationContract, TemplateIOContract
 from mechaharness.isolation.workspace_isolation import (
     InMemoryWorkspaceIsolationProvider,
     WorkspaceIsolationRequest,
-)
-from mechaharness.judgement_policy import (
-    JudgementFacts,
-    JudgementPolicy,
-    JudgementThreshold,
-    decide,
 )
 from mechaharness.operation_registry import (
     OperationContract,
@@ -211,32 +202,6 @@ async def run_config_access_policy(inputs: dict[str, Any]) -> dict[str, Any]:
     allows = all(control.allows([g]) for g in request["must_allow"])
     denies = all(not control.allows([g]) for g in request["must_deny"])
     actual = {"allows_compound": allows, "denies_missing": denies}
-    return actual
-
-
-async def run_human_review_pending(inputs: dict[str, Any]) -> dict[str, Any]:
-    policy = JudgementPolicy(
-        version="story-review",
-        require_approval_for=["mutate"],
-        thresholds=[
-            JudgementThreshold(signal_id="destructive", allow_above=0.9, ask_below=0.9),
-        ],
-    )
-    ask = decide(
-        JudgementFacts(action="mutate", action_digest="sha256:story"),
-        [NoulSignal(id="destructive", p_true=0.95)],
-        policy,
-    )
-    allow = decide(
-        JudgementFacts(
-            action="mutate",
-            action_digest="sha256:story",
-            approvals={"sha256:story": "approved-1"},
-        ),
-        [NoulSignal(id="destructive", p_true=0.95)],
-        policy,
-    )
-    actual = {"verdict_kinds": [ask.kind, allow.kind]}
     return actual
 
 
@@ -810,7 +775,6 @@ ACCESS_AUTHORITY_HANDLERS: dict[str, Any] = {
     "wrong_lane_deny": run_wrong_lane_deny,
     "grant_gate_write": run_grant_gate_write,
     "config_access_policy": run_config_access_policy,
-    "human_review_pending": run_human_review_pending,
     "tool_gating": run_tool_gating,
     "capability_envelope_narrow": run_capability_envelope_narrow,
     "consequence_risk_scale": run_consequence_risk_scale,
