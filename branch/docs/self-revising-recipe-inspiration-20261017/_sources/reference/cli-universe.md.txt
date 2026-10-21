@@ -23,12 +23,11 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.
 | Event stamps | `StampingEventLog` over injectable `DateTimeService` |
 | Event tap | `tapping_event_log` on the blessed executor path (HF-05) |
 
-Production verbs stay lean (`infer`, `tool_loop`, `run_recipe`,
-`instantiate_recipe`, `tile_recipe`, `recipe_plan`, diagnostics, judge,
+Production verbs stay lean (`infer`, `judge` / `judge_route`, `tool_loop`,
+`tool_lifecycle`, `run_recipe` (incl. `context_pack`), `instantiate_recipe`,
+`tile_recipe`, `recipe_plan`, `assemble_context`, diagnostics,
 durable IoC `start`/`answer`/`inspect`/`rebuild`/`list_recipes`,
-`transactional_resume` for DR-10 crash-window durable coding-job resume,
-`decision_case` for JEV / decision-plane case plans,
-`lifecycle_case` for lifecycle-extension case plans).
+`transactional_resume` for DR-10 crash-window durable coding-job resume).
 Test-only clocks and the `probe` verb join via `TestHarnessCliConfig`
 (`tests/stories/cli_probes`). Story probes register on `cli_probe_classes`.
 Probe stories load a human-readable plan under ``plans/``
@@ -205,30 +204,12 @@ document-selected behavior via ``plan:``:
 ``run_recipe`` remains for **execute** adapters (`harness_run`,
 `backend_describe`, `conversational_tool_loop`).
 
-``decision_case`` loads a judgement / decision-plane case under ``plans/`` —
-one verb, document-selected behavior via ``case:``:
+``judge`` is the judge-lane twin of ``infer`` (typed questions over state via
+``JudgeProvider`` + cassette/live). ``judge_route`` adds ``JudgementPolicy``.
 
-| ``case:`` | Coverage |
-|-----------|----------|
-| `citation_support` | claim verified / escalate |
-| `context_budget` | RAG pack within token budget |
-| `requirements_gap` | independent_review + coverage outcome |
-| `task_route` | lane route + quality override |
-| `action_safety` | hard grants vs semantic risk |
-| `plane_recipe` | `decision_plane` template shape |
-| `projection` | state projection without model call |
-| `policy` | final action + escalation |
-| `shadow` | shadow compare without control |
-| `telemetry` | evaluation-ready telemetry fields |
-| `model_policy` | `decision_model` soft point binding |
+``context_pack`` Agentic Recipe (`run_recipe`) binds host ``RagRetriever`` then
+packs with ``assemble_context_within_budget``. ``assemble_context`` remains a
+thin leaf verb for already-scored candidate lists.
 
-``lifecycle_case`` loads a lifecycle-extension plan under ``plans/`` — one
-verb, document-selected behavior via ``case:``:
-
-| ``case:`` | Coverage |
-|-----------|----------|
-| `observe` | ordered BeforeTool watchers |
-| `rewrite` | rewrite tool arguments |
-| `block` | block tool call with host message |
-| `replace` | replace tool result without executing |
-| `graph_observe` | BeforeGraphNode observe without policy change |
+``tool_lifecycle`` runs a tool-loop or tiny graph with Config-bound
+``LifecycleExtension`` instances (no ``case:`` bag).

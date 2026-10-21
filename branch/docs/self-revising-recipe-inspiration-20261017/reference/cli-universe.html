@@ -164,12 +164,11 @@ grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
 </tr>
 </tbody>
 </table>
-<p>Production verbs stay lean (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>,
-<code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code>, diagnostics, judge,
+<p>Production verbs stay lean (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">judge_route</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>,
+<code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> (incl. <code class="docutils literal notranslate"><span class="pre">context_pack</span></code>), <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code>,
+<code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code>, <code class="docutils literal notranslate"><span class="pre">assemble_context</span></code>, diagnostics,
 durable IoC <code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">answer</span></code>/<code class="docutils literal notranslate"><span class="pre">inspect</span></code>/<code class="docutils literal notranslate"><span class="pre">rebuild</span></code>/<code class="docutils literal notranslate"><span class="pre">list_recipes</span></code>,
-<code class="docutils literal notranslate"><span class="pre">transactional_resume</span></code> for DR-10 crash-window durable coding-job resume,
-<code class="docutils literal notranslate"><span class="pre">decision_case</span></code> for JEV / decision-plane case plans,
-<code class="docutils literal notranslate"><span class="pre">lifecycle_case</span></code> for lifecycle-extension case plans).
+<code class="docutils literal notranslate"><span class="pre">transactional_resume</span></code> for DR-10 crash-window durable coding-job resume).
 Test-only clocks and the <code class="docutils literal notranslate"><span class="pre">probe</span></code> verb join via <code class="docutils literal notranslate"><span class="pre">TestHarnessCliConfig</span></code>
 (<code class="docutils literal notranslate"><span class="pre">tests/stories/cli_probes</span></code>). Story probes register on <code class="docutils literal notranslate"><span class="pre">cli_probe_classes</span></code>.
 Probe stories load a human-readable plan under <code class="docutils literal notranslate"><span class="pre">plans/</span></code>
@@ -379,76 +378,13 @@ document-selected behavior via <code class="docutils literal notranslate"><span 
 </table>
 <p><code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> remains for <strong>execute</strong> adapters (<code class="docutils literal notranslate"><span class="pre">harness_run</span></code>,
 <code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>).</p>
-<p><code class="docutils literal notranslate"><span class="pre">decision_case</span></code> loads a judgement / decision-plane case under <code class="docutils literal notranslate"><span class="pre">plans/</span></code> —
-one verb, document-selected behavior via <code class="docutils literal notranslate"><span class="pre">case:</span></code>:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">case:</span></code></p></th>
-<th class="head"><p>Coverage</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">citation_support</span></code></p></td>
-<td><p>claim verified / escalate</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">context_budget</span></code></p></td>
-<td><p>RAG pack within token budget</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">requirements_gap</span></code></p></td>
-<td><p>independent_review + coverage outcome</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">task_route</span></code></p></td>
-<td><p>lane route + quality override</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">action_safety</span></code></p></td>
-<td><p>hard grants vs semantic risk</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plane_recipe</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> template shape</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">projection</span></code></p></td>
-<td><p>state projection without model call</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">policy</span></code></p></td>
-<td><p>final action + escalation</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">shadow</span></code></p></td>
-<td><p>shadow compare without control</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">telemetry</span></code></p></td>
-<td><p>evaluation-ready telemetry fields</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_policy</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">decision_model</span></code> soft point binding</p></td>
-</tr>
-</tbody>
-</table>
-<p><code class="docutils literal notranslate"><span class="pre">lifecycle_case</span></code> loads a lifecycle-extension plan under <code class="docutils literal notranslate"><span class="pre">plans/</span></code> — one
-verb, document-selected behavior via <code class="docutils literal notranslate"><span class="pre">case:</span></code>:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">case:</span></code></p></th>
-<th class="head"><p>Coverage</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">observe</span></code></p></td>
-<td><p>ordered BeforeTool watchers</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rewrite</span></code></p></td>
-<td><p>rewrite tool arguments</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">block</span></code></p></td>
-<td><p>block tool call with host message</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">replace</span></code></p></td>
-<td><p>replace tool result without executing</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">graph_observe</span></code></p></td>
-<td><p>BeforeGraphNode observe without policy change</p></td>
-</tr>
-</tbody>
-</table>
+<p><code class="docutils literal notranslate"><span class="pre">judge</span></code> is the judge-lane twin of <code class="docutils literal notranslate"><span class="pre">infer</span></code> (typed questions over state via
+<code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code> + cassette/live). <code class="docutils literal notranslate"><span class="pre">judge_route</span></code> adds <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">context_pack</span></code> Agentic Recipe (<code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>) binds host <code class="docutils literal notranslate"><span class="pre">RagRetriever</span></code> then
+packs with <code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code>. <code class="docutils literal notranslate"><span class="pre">assemble_context</span></code> remains a
+thin leaf verb for already-scored candidate lists.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> runs a tool-loop or tiny graph with Config-bound
+<code class="docutils literal notranslate"><span class="pre">LifecycleExtension</span></code> instances (no <code class="docutils literal notranslate"><span class="pre">case:</span></code> bag).</p>
 </section>
 </section>
 

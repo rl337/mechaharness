@@ -122,19 +122,38 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">transactional_resume</span></code>:</strong> crash-window durable coding-job
 resume via <code class="docutils literal notranslate"><span class="pre">host_graph_executor</span></code> + <code class="docutils literal notranslate"><span class="pre">ArmedCrashProbe</span></code> (DR-10). Wave 2 P1
 stories (<code class="docutils literal notranslate"><span class="pre">fangore_tdr_crash_*</span></code>) migrate onto <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code>.</p></li>
-<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">decision_case</span></code>:</strong> JEV / decision-plane case plans
-(<code class="docutils literal notranslate"><span class="pre">citation_support</span></code>, <code class="docutils literal notranslate"><span class="pre">context_budget</span></code>, <code class="docutils literal notranslate"><span class="pre">requirements_gap</span></code>, <code class="docutils literal notranslate"><span class="pre">task_route</span></code>,
-<code class="docutils literal notranslate"><span class="pre">action_safety</span></code>, plus P3 <code class="docutils literal notranslate"><span class="pre">plane_recipe</span></code> / <code class="docutils literal notranslate"><span class="pre">projection</span></code> / <code class="docutils literal notranslate"><span class="pre">policy</span></code> /
-<code class="docutils literal notranslate"><span class="pre">shadow</span></code> / <code class="docutils literal notranslate"><span class="pre">telemetry</span></code> / <code class="docutils literal notranslate"><span class="pre">model_policy</span></code>). Wave 2 P2–P3 stories migrate onto
-<code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code>.</p></li>
-<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">lifecycle_case</span></code>:</strong> lifecycle-extension case plans
-(<code class="docutils literal notranslate"><span class="pre">observe</span></code> / <code class="docutils literal notranslate"><span class="pre">rewrite</span></code> / <code class="docutils literal notranslate"><span class="pre">block</span></code> / <code class="docutils literal notranslate"><span class="pre">replace</span></code> / <code class="docutils literal notranslate"><span class="pre">graph_observe</span></code>). Wave 2 P4
-<code class="docutils literal notranslate"><span class="pre">fangore_insp_lifecycle_*</span></code> stories migrate onto <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code>.</p></li>
+<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">judge</span></code>:</strong> judge-lane twin of <code class="docutils literal notranslate"><span class="pre">infer</span></code> (typed questions over
+state via <code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code> + cassette/live). JEV citation / route / safety /
+requirements stories walk this verb with real inputs.</p></li>
+<li><p><strong>Agentic Recipe <code class="docutils literal notranslate"><span class="pre">context_pack</span></code>:</strong> host <code class="docutils literal notranslate"><span class="pre">RagRetriever</span></code> →
+<code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code> (fixture retriever for stories).</p></li>
+<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code>:</strong> Config-bound lifecycle extensions on
+tool-loop or tiny graph (replaces <code class="docutils literal notranslate"><span class="pre">lifecycle_case</span></code>).</p></li>
+<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">assemble_context</span></code>:</strong> thin pack leaf for already-scored
+candidate lists.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> execute:</strong> <code class="docutils literal notranslate"><span class="pre">decision_plane_runner</span></code> +
+<code class="docutils literal notranslate"><span class="pre">DecisionPlaneRecipeAdapter</span></code> (<code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>). Restores
+<code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_{projection,policy,shadow,telemetry}</span></code> and promotes
+recipe / model_policy stories off instantiate-only (G0).</p></li>
+</ul>
+</section>
+<section id="removed">
+<h3>Removed<a class="headerlink" href="#removed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Case-bag verbs <code class="docutils literal notranslate"><span class="pre">decision_case</span></code> and <code class="docutils literal notranslate"><span class="pre">lifecycle_case</span></code>:</strong> replaced by
+instrumented <code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">context_pack</span></code> / <code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> / <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code>
+walks (Wave 3).</p></li>
 </ul>
 </section>
 <section id="changed">
 <h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
 <ul class="simple">
+<li><p><strong>User-story litmus (recipe expansion):</strong> missing graph path ⇒ add Agentic
+Recipe / runners, do not demote valid persona claims. Wave 3 demotion of
+<code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_{projection,policy,shadow,telemetry}</span></code> retracted —
+restore under G0
+(recipe expansion guide). Remaining
+probe batches regrouped as G0–G7 (recipe-first), not thin-verb then YAML.</p></li>
 <li><p><strong>Story harness redesign:</strong> <code class="docutils literal notranslate"><span class="pre">story.json</span></code> <code class="docutils literal notranslate"><span class="pre">kind</span></code> is now a reusable harness
 family (<code class="docutils literal notranslate"><span class="pre">pure_api</span></code>, <code class="docutils literal notranslate"><span class="pre">access_authority</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code>, …) under
 <code class="docutils literal notranslate"><span class="pre">tests/stories/harness/</span></code>; <code class="docutils literal notranslate"><span class="pre">request.json</span></code> requires <code class="docutils literal notranslate"><span class="pre">op</span></code> for the surface within

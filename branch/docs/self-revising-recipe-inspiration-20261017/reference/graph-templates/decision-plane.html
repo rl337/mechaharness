@@ -251,6 +251,36 @@ code, and escalate when confidence is too low.</p>
 </tr>
 </tbody>
 </table>
+<p>Execute walk: <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_plane_runner</span></code> + CLI
+<code class="docutils literal notranslate"><span class="pre">DecisionPlaneRecipeAdapter</span></code> (<code class="docutils literal notranslate"><span class="pre">run_recipe</span> <span class="pre">name=decision_plane</span></code>).</p>
+</section>
+<section id="node-components">
+<h2>Node components<a class="headerlink" href="#node-components" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Graph node</p></th>
+<th class="head"><p>Components</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">project_state</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">project_kind</span></code>, <code class="docutils literal notranslate"><span class="pre">state_projection</span></code>, <code class="docutils literal notranslate"><span class="pre">facts</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ask_batch</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">ask_kind</span></code>, <code class="docutils literal notranslate"><span class="pre">questions</span></code>, <code class="docutils literal notranslate"><span class="pre">confidence_floor</span></code>, <code class="docutils literal notranslate"><span class="pre">decision_model</span></code>); <code class="docutils literal notranslate"><span class="pre">inference</span></code> when a live judge is bound</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">apply_policy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">policy_kind</span></code>, <code class="docutils literal notranslate"><span class="pre">confidence_floor</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">escalate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">escalate_kind</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">shadow_ask</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">shadow_ask_kind</span></code>, <code class="docutils literal notranslate"><span class="pre">shadow_mode</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+<p>See <a class="reference internal" href="../node-components.html"><span class="std std-doc">Node components</span></a>.</p>
 </section>
 <section id="related">
 <h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>

@@ -141,16 +141,26 @@ exists for that claim.</p>
 <section id="counts">
 <h2>Counts<a class="headerlink" href="#counts" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Done (<code class="docutils literal notranslate"><span class="pre">user_story</span></code>): <strong>77</strong> (3 pilots + Wave 1 A–F + Wave 2 P1–P4)</p></li>
-<li><p>Ready (product CLI verbs, no probe): <strong>0</strong></p></li>
-<li><p>Blocked on probe → product verb: <strong>96</strong></p></li>
+<li><p>Done (<code class="docutils literal notranslate"><span class="pre">user_story</span></code>): regenerate via <code class="docutils literal notranslate"><span class="pre">scripts/generate_user_stories_md.py</span></code></p></li>
+<li><p>Wave 3 (P2–P4 rewrite): case bags removed; see
+<a class="reference internal" href="user-story-instrumentation-migration.html"><span class="std std-doc">instrumentation migration</span></a></p></li>
+<li><p><strong>Wave 4+:</strong> remaining work is <strong>recipe-first groups G0–G7</strong>, not thin-verb
+then YAML wrap — see
+<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">recipe expansion</span></a></p></li>
 </ul>
 </section>
 <section id="wave-order">
 <h2>Wave order<a class="headerlink" href="#wave-order" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p><strong>Product batches A–F</strong> (mechanical YAML + narrative tighten; no new verbs) — done.</p></li>
-<li><p><strong>Probe batches P1–P10</strong> (each wave may add a thin product verb, then migrate).</p></li>
+<li><p><strong>Probe batches P1–P4</strong> — done (P3 demotions retracted; restore in G0).</p></li>
+<li><p><strong>Instrumentation (Wave 3)</strong> — case-bag verbs removed; gold =
+soft-bind + execute + cassette/live
+(<a class="reference internal" href="user-story-instrumentation-migration.html"><span class="std std-doc">plan</span></a>).</p></li>
+<li><p><strong>Recipe expansion (Wave 4+)</strong> — invent/extend Agentic Recipes + runners,
+then migrate probes / promote shape-only stories
+(<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">groups</span></a>). P5–P10 checklists below are
+<strong>historical inventory</strong>; work them via G0–G7, not as probe→thin-verb waves.</p></li>
 <li><p>After each batch: regenerate <code class="docutils literal notranslate"><span class="pre">docs/guides/user-stories.md</span></code>, ratchet
 <code class="docutils literal notranslate"><span class="pre">fail_under</span></code> if coverage rose, keep <code class="docutils literal notranslate"><span class="pre">./run_checks.sh</span></code> green.</p></li>
 </ol>
@@ -180,9 +190,11 @@ exists for that claim.</p>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">taloneth_insp_scripted_driver_replay</span></code></p></li>
 </ul>
 </section>
-<section id="batch-b-recipe-shape-instantiate-tile">
-<h3>Batch B — Recipe shape (instantiate/tile)<a class="headerlink" href="#batch-b-recipe-shape-instantiate-tile" title="Link to this heading"></a></h3>
-<p><em>instantiate_recipe / tile_recipe + binds/</em> · <strong>11</strong> stories</p>
+<section id="batch-b-recipe-shape-instantiate-tile-done-interim-promote-via-g1">
+<h3>Batch B — Recipe shape (instantiate/tile) — <strong>done interim</strong> · promote via <strong>G1</strong><a class="headerlink" href="#batch-b-recipe-shape-instantiate-tile-done-interim-promote-via-g1" title="Link to this heading"></a></h3>
+<p><em>instantiate_recipe / tile_recipe + binds/</em> · <strong>11</strong> stories.
+Many claims are outcome walks — promote to execute when runners land
+(<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">G1</span></a>).</p>
 <ul class="simple">
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_environment_repair_recipe</span></code></p></li>
@@ -197,9 +209,11 @@ exists for that claim.</p>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">taloneth_insp_safety_eval_recipes</span></code></p></li>
 </ul>
 </section>
-<section id="batch-c-recipe-plan-lifecycle">
-<h3>Batch C — Recipe plan lifecycle<a class="headerlink" href="#batch-c-recipe-plan-lifecycle" title="Link to this heading"></a></h3>
-<p><em>recipe_plan + plans/</em> · <strong>10</strong> stories</p>
+<section id="batch-c-recipe-plan-lifecycle-done-interim-see-g6">
+<h3>Batch C — Recipe plan lifecycle — <strong>done interim</strong> · see <strong>G6</strong><a class="headerlink" href="#batch-c-recipe-plan-lifecycle-done-interim-see-g6" title="Link to this heading"></a></h3>
+<p><em>recipe_plan + plans/</em> · <strong>10</strong> stories.
+Keep for registry lifecycle claims; promote to execute when the story is “run
+the evolved recipe” (<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">G6</span></a>).</p>
 <ul class="simple">
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_evolution_ownership_split</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_recipe_lineage_promote</span></code></p></li>
@@ -244,13 +258,14 @@ exists for that claim.</p>
 </ul>
 </section>
 </section>
-<section id="probe-batches-p1p10-verb-then-convert">
-<h2>Probe batches (P1–P10) — verb then convert<a class="headerlink" href="#probe-batches-p1p10-verb-then-convert" title="Link to this heading"></a></h2>
-<p>Do not force <code class="docutils literal notranslate"><span class="pre">user_story</span></code> while the only driver is <code class="docutils literal notranslate"><span class="pre">probe:</span></code>. Add or reuse a
-product verb first, then migrate the batch.</p>
-<section id="batch-p10-misc-probes">
-<h3>Batch P10 — Misc probes<a class="headerlink" href="#batch-p10-misc-probes" title="Link to this heading"></a></h3>
-<p><em>Catch-all residuals</em> · <strong>5</strong> stories</p>
+<section id="probe-batches-p1p10-historical-inventory">
+<h2>Probe batches (P1–P10) — historical inventory<a class="headerlink" href="#probe-batches-p1p10-historical-inventory" title="Link to this heading"></a></h2>
+<p>P1–P4 are done (reopen P3 demotions via G0). For P5–P10, do <strong>not</strong> add thin
+<code class="docutils literal notranslate"><span class="pre">*_case</span></code> verbs then YAML-wrap. Invent/extend the Agentic Recipe, then migrate
+(<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">recipe expansion</span></a>).</p>
+<section id="batch-p10-misc-probes-distribute-across-g0g7">
+<h3>Batch P10 — Misc probes → distribute across G0–G7<a class="headerlink" href="#batch-p10-misc-probes-distribute-across-g0g7" title="Link to this heading"></a></h3>
+<p><em>Catch-all residuals — assign per claim when pulled</em> · <strong>5</strong> stories</p>
 <ul class="simple">
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_decision_surface_reject</span></code></p></li>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_insp_decision_conflict_checkpoint</span></code></p></li>
@@ -271,9 +286,11 @@ product verb first, then migrate the batch.</p>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_tdr_crash_before_intent</span></code></p></li>
 </ul>
 </section>
-<section id="batch-p2-jev-decision-cases-done-wave-2">
-<h3>Batch P2 — JEV decision cases — <strong>done</strong> (Wave 2)<a class="headerlink" href="#batch-p2-jev-decision-cases-done-wave-2" title="Link to this heading"></a></h3>
-<p><em><code class="docutils literal notranslate"><span class="pre">decision_case</span></code> product verb (<code class="docutils literal notranslate"><span class="pre">case:</span></code> plans)</em> · <strong>17</strong> stories</p>
+<section id="batch-p2-jev-decision-cases-done-wave-2-wave-3-done">
+<h3>Batch P2 — JEV decision cases — <strong>done</strong> (Wave 2) · <strong>Wave 3 done</strong><a class="headerlink" href="#batch-p2-jev-decision-cases-done-wave-2-wave-3-done" title="Link to this heading"></a></h3>
+<p><em><code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">context_pack</span></code> / <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> — see
+<a class="reference internal" href="user-story-instrumentation-migration.html"><span class="std std-doc">instrumentation migration</span></a></em> ·
+<strong>17</strong> stories</p>
 <ul class="simple">
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_growth_mismatch</span></code></p></li>
@@ -294,9 +311,10 @@ product verb first, then migrate the batch.</p>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_jev_task_route_simple_local</span></code></p></li>
 </ul>
 </section>
-<section id="batch-p3-decision-plane-core-done-wave-2">
-<h3>Batch P3 — Decision plane core — <strong>done</strong> (Wave 2)<a class="headerlink" href="#batch-p3-decision-plane-core-done-wave-2" title="Link to this heading"></a></h3>
-<p><em><code class="docutils literal notranslate"><span class="pre">decision_case</span></code> (<code class="docutils literal notranslate"><span class="pre">plane_recipe</span></code> / <code class="docutils literal notranslate"><span class="pre">projection</span></code> / <code class="docutils literal notranslate"><span class="pre">policy</span></code> / <code class="docutils literal notranslate"><span class="pre">shadow</span></code> / <code class="docutils literal notranslate"><span class="pre">telemetry</span></code> / <code class="docutils literal notranslate"><span class="pre">model_policy</span></code>)</em> · <strong>6</strong> stories</p>
+<section id="batch-p3-decision-plane-core-done-g0-execute">
+<h3>Batch P3 — Decision plane core — <strong>done</strong> (G0 execute)<a class="headerlink" href="#batch-p3-decision-plane-core-done-g0-execute" title="Link to this heading"></a></h3>
+<p><em><code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> + <code class="docutils literal notranslate"><span class="pre">DecisionPlaneRecipeAdapter</span></code> / <code class="docutils literal notranslate"><span class="pre">decision_plane_runner</span></code>
+(<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">recipe expansion G0</span></a>).</em></p>
 <ul class="simple">
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_model_policy</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code></p></li>
@@ -306,9 +324,11 @@ product verb first, then migrate the batch.</p>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_telemetry</span></code></p></li>
 </ul>
 </section>
-<section id="batch-p4-lifecycle-extensions-done-wave-2">
-<h3>Batch P4 — Lifecycle extensions — <strong>done</strong> (Wave 2)<a class="headerlink" href="#batch-p4-lifecycle-extensions-done-wave-2" title="Link to this heading"></a></h3>
-<p><em><code class="docutils literal notranslate"><span class="pre">lifecycle_case</span></code> product verb (<code class="docutils literal notranslate"><span class="pre">observe</span></code> / <code class="docutils literal notranslate"><span class="pre">rewrite</span></code> / <code class="docutils literal notranslate"><span class="pre">block</span></code> / <code class="docutils literal notranslate"><span class="pre">replace</span></code> / <code class="docutils literal notranslate"><span class="pre">graph_observe</span></code>)</em> · <strong>5</strong> stories</p>
+<section id="batch-p4-lifecycle-extensions-done-wave-2-wave-3-done">
+<h3>Batch P4 — Lifecycle extensions — <strong>done</strong> (Wave 2) · <strong>Wave 3 done</strong><a class="headerlink" href="#batch-p4-lifecycle-extensions-done-wave-2-wave-3-done" title="Link to this heading"></a></h3>
+<p><em><code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> + host-bound extensions — see
+<a class="reference internal" href="user-story-instrumentation-migration.html"><span class="std std-doc">instrumentation migration</span></a></em> ·
+<strong>5</strong> stories</p>
 <ul class="simple">
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_lifecycle_block</span></code></p></li>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_lifecycle_graph_observe</span></code></p></li>
@@ -317,9 +337,10 @@ product verb first, then migrate the batch.</p>
 <li><p>[x] <code class="docutils literal notranslate"><span class="pre">fangore_insp_lifecycle_rewrite</span></code></p></li>
 </ul>
 </section>
-<section id="batch-p5-access-authority">
-<h3>Batch P5 — Access / authority<a class="headerlink" href="#batch-p5-access-authority" title="Link to this heading"></a></h3>
-<p><em>Grants, epochs, envelopes — product verbs TBD</em> · <strong>17</strong> stories</p>
+<section id="batch-p5-access-authority-g3">
+<h3>Batch P5 — Access / authority → <strong>G3</strong><a class="headerlink" href="#batch-p5-access-authority-g3" title="Link to this heading"></a></h3>
+<p><em>Historical list. Work via <a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">G3</span></a>
+(authority gates on product graphs), not probe wrappers.</em> · <strong>17</strong> stories</p>
 <ul class="simple">
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_capability_envelope_narrow</span></code></p></li>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_compound_grants</span></code></p></li>
@@ -340,9 +361,10 @@ product verb first, then migrate the batch.</p>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">nubble_lane_load_hint</span></code></p></li>
 </ul>
 </section>
-<section id="batch-p6-context-management">
-<h3>Batch P6 — Context management<a class="headerlink" href="#batch-p6-context-management" title="Link to this heading"></a></h3>
-<p><em>Context assembly verbs TBD</em> · <strong>11</strong> stories</p>
+<section id="batch-p6-context-management-g2">
+<h3>Batch P6 — Context management → <strong>G2</strong><a class="headerlink" href="#batch-p6-context-management-g2" title="Link to this heading"></a></h3>
+<p><em>Historical list. Extend <code class="docutils literal notranslate"><span class="pre">context_pack</span></code> / <code class="docutils literal notranslate"><span class="pre">ContextProvider</span></code>
+(<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">G2</span></a>).</em> · <strong>11</strong> stories</p>
 <ul class="simple">
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_context_compiler_deficit</span></code></p></li>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_context_observation_chain</span></code></p></li>
@@ -357,9 +379,10 @@ product verb first, then migrate the batch.</p>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code></p></li>
 </ul>
 </section>
-<section id="batch-p7-eval-research">
-<h3>Batch P7 — Eval / research<a class="headerlink" href="#batch-p7-eval-research" title="Link to this heading"></a></h3>
-<p><em>Taloneth eval probes → product verbs TBD</em> · <strong>28</strong> stories</p>
+<section id="batch-p7-eval-research-g5">
+<h3>Batch P7 — Eval / research → <strong>G5</strong><a class="headerlink" href="#batch-p7-eval-research-g5" title="Link to this heading"></a></h3>
+<p><em>Historical list. Prefer eval recipes / export graphs
+(<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">G5</span></a>).</em> · <strong>28</strong> stories</p>
 <ul class="simple">
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_insp_failure_attribution</span></code></p></li>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">nubble_insp_efficiency_scorecard</span></code></p></li>
@@ -391,9 +414,11 @@ product verb first, then migrate the batch.</p>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code></p></li>
 </ul>
 </section>
-<section id="batch-p8-graph-executor-budgets">
-<h3>Batch P8 — Graph executor / budgets<a class="headerlink" href="#batch-p8-graph-executor-budgets" title="Link to this heading"></a></h3>
-<p><em>Executor/budget/resume probes → durable/run_recipe</em> · <strong>18</strong> stories</p>
+<section id="batch-p8-graph-executor-budgets-g4-some-g1">
+<h3>Batch P8 — Graph executor / budgets → <strong>G4</strong> (+ some <strong>G1</strong>)<a class="headerlink" href="#batch-p8-graph-executor-budgets-g4-some-g1" title="Link to this heading"></a></h3>
+<p><em>Historical list. Durable/budget execute
+(<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">G4</span></a>);
+<code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code> → verify_repair in G1.</em> · <strong>18</strong> stories</p>
 <ul class="simple">
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code></p></li>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_convergence_ceiling</span></code></p></li>
@@ -415,9 +440,11 @@ product verb first, then migrate the batch.</p>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">nubble_insp_rollout_graph</span></code></p></li>
 </ul>
 </section>
-<section id="batch-p9-pure-api-policy-helpers">
-<h3>Batch P9 — Pure API / policy helpers<a class="headerlink" href="#batch-p9-pure-api-policy-helpers" title="Link to this heading"></a></h3>
-<p><em>fan_in, wip, sparse advisor — product diagnostic verbs or stay unit</em> · <strong>17</strong> stories</p>
+<section id="batch-p9-pure-api-policy-helpers-g7-selective-recipes">
+<h3>Batch P9 — Pure API / policy helpers → <strong>G7</strong> / selective recipes<a class="headerlink" href="#batch-p9-pure-api-policy-helpers-g7-selective-recipes" title="Link to this heading"></a></h3>
+<p><em>Historical list. Thin diagnostic verbs ok when not subgraph control
+(<a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">G7</span></a>);
+otherwise invent a recipe. Do not demote valid persona claims to unit-only.</em> · <strong>17</strong> stories</p>
 <ul class="simple">
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_completer_flavors</span></code></p></li>
 <li><p>[ ] <code class="docutils literal notranslate"><span class="pre">fangore_insp_exit_clean_state</span></code></p></li>
@@ -442,6 +469,8 @@ product verb first, then migrate the batch.</p>
 <section id="related">
 <h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>
 <ul class="simple">
+<li><p><a class="reference internal" href="user-story-recipe-expansion.html"><span class="std std-doc">User-story recipe expansion</span></a> — Wave 4+ working groups</p></li>
+<li><p><a class="reference internal" href="user-story-instrumentation-migration.html"><span class="std std-doc">User-story instrumentation migration</span></a></p></li>
 <li><p><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">.cursor/skills/user-stories/SKILL.md</span></code></span></p></li>
 <li><p><a class="reference internal" href="../reference/cli-universe.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">docs/reference/cli-universe.md</span></code></span></a></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tests/stories/scenarios/user_story_scenario.py</span></code></p></li>

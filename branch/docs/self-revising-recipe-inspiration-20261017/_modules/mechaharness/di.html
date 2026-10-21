@@ -223,6 +223,7 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.linkage_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultLinkageResolver</span><span class="p">,</span> <span class="n">LinkageResolver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.operation_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">OperationRegistry</span><span class="p">,</span> <span class="n">default_operations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">RagRetriever</span><span class="p">,</span> <span class="n">UnboundRagRetriever</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.recipe_lifecycle.evolution_campaign_hooks</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">EvolutionCampaignHooks</span><span class="p">,</span>
     <span class="n">NoopEvolutionCampaignHooks</span><span class="p">,</span>
@@ -529,6 +530,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
             <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lifecycle_extension_registry</span><span class="p">()</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">RagRetriever</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_rag_retriever</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span><span class="n">CrashProbe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_crash_probe</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
             <span class="n">RecipePromotionPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_recipe_promotion_policy</span><span class="p">()</span>
@@ -1192,6 +1194,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_lifecycle_extension_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifecycleExtensionRegistry</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Ordered lifecycle extensions (default: empty)."""</span>
         <span class="k">return</span> <span class="n">empty_lifecycle_extension_registry</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_rag_retriever">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_rag_retriever">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_rag_retriever</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">RagRetriever</span><span class="p">]</span> <span class="o">|</span> <span class="n">RagRetriever</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Host RAG retrieve seam (default: unbound — must override for context_pack)."""</span>
+        <span class="k">return</span> <span class="n">UnboundRagRetriever</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.inference_classes">
