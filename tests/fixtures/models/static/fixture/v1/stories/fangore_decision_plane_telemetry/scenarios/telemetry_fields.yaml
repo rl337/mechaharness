@@ -1,21 +1,30 @@
-# Plan document: ../plans/telemetry_fields.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/telemetry_fields.yaml
-expect:
-- kind: 'true'
-  key: has_question_schema_ids
-- kind: 'true'
-  key: has_projection_fingerprint
-- kind: equals
-  key: final_action
-  value: billing
-- kind: equals
-  key: model_ref
-  value: flavor:local_decision
-- kind: equals
-  key: latency_ms
-  value: 42
-- kind: 'false'
-  key: includes_raw_body
+# user story: fangore_decision_plane_telemetry
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/telemetry_fields.yaml` (telemetry), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/telemetry_fields.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: has_question_schema_ids
+  - kind: 'true'
+    key: has_projection_fingerprint
+  - kind: equals
+    key: final_action
+    value: billing
+  - kind: equals
+    key: model_ref
+    value: flavor:local_decision
+  - kind: equals
+    key: latency_ms
+    value: 42
+  - kind: 'false'
+    key: includes_raw_body
+cleanup: []

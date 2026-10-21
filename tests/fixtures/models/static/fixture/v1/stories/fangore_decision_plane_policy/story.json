@@ -2,10 +2,10 @@
   "id": "fangore_decision_plane_policy",
   "persona": "fangore",
   "title": "Let code own the final decision-plane action with escalation",
-  "kind": "cli",
-  "narrative": "A small decision model answers several triage questions in one call \u2014 which team, how risky \u2014 but only allowed teams are exposed, and product policy chooses route or escalate when confidence is low or an answer is off-list. Exact duplicate-charge math stays in facts, not in the model. Related: `fangore_decision_surface_reject`, `fangore_refund_verdict`.[^rvania-policy][^rc-dp-policy] Native model-proposes/code-decides path for personal-agent MH-PA-06; alert escalation catalog is `fangore_insp_alert_escalation_rules`[^insp-pa-06-dp]. Decision-plane resolve is not the self-revising neighbor CR loop (`fangore_insp_decision_conflict_checkpoint`)[^insp-sr-08-dp].",
-  "implementation": "Agentic Recipe `decision_plane` runtime: `evaluate_decision_batch` answers typed questions in one invocation (DP-02); `reject_invalid_choice` / envelopes enforce valid actions (DP-05); `apply_decision_plane_policy` owns the final action or routable escalation from confidence/validity (DP-04, DP-06). Model signals are evidence only.",
-  "validation": "Harness `cli` `probe` loads `plans/low_confidence.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`policy`) for: Let code own the final decision-plane action with escalation. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rvania-policy] [^rc-dp-policy] [^insp-pa-06-dp] [^insp-sr-08-dp]",
+  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: policy` plans.",
+  "validation": "Harness `user_story` scenario(s) `accept_billing.yaml`, `invalid_team.yaml`, `low_confidence.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rvania-policy",

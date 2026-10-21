@@ -214,3 +214,9 @@ one verb, document-selected behavior via ``case:``:
 | `requirements_gap` | independent_review + coverage outcome |
 | `task_route` | lane route + quality override |
 | `action_safety` | hard grants vs semantic risk |
+| `plane_recipe` | `decision_plane` template shape |
+| `projection` | state projection without model call |
+| `policy` | final action + escalation |
+| `shadow` | shadow compare without control |
+| `telemetry` | evaluation-ready telemetry fields |
+| `model_policy` | `decision_model` soft point binding |

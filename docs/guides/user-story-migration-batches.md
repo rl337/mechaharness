@@ -17,9 +17,9 @@ exists for that claim.
 
 ## Counts
 
-- Done (`user_story`): **66** (3 pilots + Wave 1 A–F + Wave 2 P1–P2)
+- Done (`user_story`): **72** (3 pilots + Wave 1 A–F + Wave 2 P1–P3)
 - Ready (product CLI verbs, no probe): **0**
-- Blocked on probe → product verb: **107**
+- Blocked on probe → product verb: **101**
 
 ## Wave order
 
@@ -156,16 +156,16 @@ _`decision_case` product verb (`case:` plans)_ · **17** stories
 - [x] `fangore_jev_task_route_low_confidence`
 - [x] `fangore_jev_task_route_simple_local`
 
-### Batch P3 — Decision plane core
+### Batch P3 — Decision plane core — **done** (Wave 2)
 
-_run_recipe decision_plane / policy expects_ · **6** stories
+_`decision_case` (`plane_recipe` / `projection` / `policy` / `shadow` / `telemetry` / `model_policy`)_ · **6** stories
 
-- [ ] `fangore_decision_plane_model_policy`
-- [ ] `fangore_decision_plane_policy`
-- [ ] `fangore_decision_plane_projection`
-- [ ] `fangore_decision_plane_recipe`
-- [ ] `fangore_decision_plane_shadow`
-- [ ] `fangore_decision_plane_telemetry`
+- [x] `fangore_decision_plane_model_policy`
+- [x] `fangore_decision_plane_policy`
+- [x] `fangore_decision_plane_projection`
+- [x] `fangore_decision_plane_recipe`
+- [x] `fangore_decision_plane_shadow`
+- [x] `fangore_decision_plane_telemetry`
 
 ### Batch P4 — Lifecycle extensions
 

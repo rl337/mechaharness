@@ -1,25 +1,34 @@
-# Plan document: ../plans/template_shape.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/template_shape.yaml
-expect:
-- kind: equals
-  key: template_name
-  value: decision_plane
-- kind: exactly
-  key: nodes
-  value:
-  - apply_policy
-  - ask_batch
-  - escalate
-  - project_state
-  - shadow_ask
-- kind: equals
-  key: ask_batch_question_count
-  value: 2
-- kind: 'true'
-  key: facts_on_project_not_ask
-- kind: equals
-  key: confidence_floor
-  value: 0.7
+# user story: fangore_decision_plane_recipe
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/template_shape.yaml` (plane_recipe), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/template_shape.yaml
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: decision_plane
+  - kind: exactly
+    key: nodes
+    value:
+    - apply_policy
+    - ask_batch
+    - escalate
+    - project_state
+    - shadow_ask
+  - kind: equals
+    key: ask_batch_question_count
+    value: 2
+  - kind: 'true'
+    key: facts_on_project_not_ask
+  - kind: equals
+    key: confidence_floor
+    value: 0.7
+cleanup: []

@@ -1,11 +1,20 @@
-# Plan document: ../plans/invalid_team.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/invalid_team.yaml
-expect:
-- kind: 'true'
-  key: escalate
-- kind: equals
-  key: escalation_reason
-  value: choice_not_allowed
+# user story: fangore_decision_plane_policy
+# Fangore starts the CLI host, runs decision_case for plan
+# `plans/invalid_team.yaml` (policy), and verifies completion.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    decision_case:
+      path: plans/invalid_team.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: escalate
+  - kind: equals
+    key: escalation_reason
+    value: choice_not_allowed
+cleanup: []

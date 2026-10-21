@@ -2,10 +2,10 @@
   "id": "fangore_decision_plane_projection",
   "persona": "fangore",
   "title": "Project decision state and facts without calling a model",
-  "kind": "cli",
-  "narrative": "Fangore prepares a refund-routing decision by sending only structured ticket state into the decision plane and computing exact amounts in code. He must be able to unit-test that projection and those facts with no model call. Complements `fangore_decision_plane_recipe` and `fangore_refund_verdict`.[^rvania-decision][^rc-dp-proj]",
-  "implementation": "Agentic Recipe `decision_plane` uses `project_decision_state` in `mechaharness.decision_plane_runtime` to build a serializable state projection and attach deterministic facts outside inference (DP-01, DP-03).",
-  "validation": "Harness `cli` `probe` loads `plans/project_state.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a decision_case plan (`projection`) for: Project decision state and facts without calling a model. He performs product step `decision_case` and verifies completion from the structured observation expects on each scenario. [^rvania-decision] [^rc-dp-proj]",
+  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` / `run_decision_plane_policy` / `project_decision_state` / `compare_shadow_decision` / `build_decision_plane_telemetry` as needed. Product CLI verb `decision_case` with `case: projection` plans.",
+  "validation": "Harness `user_story` scenario(s) `project_state.yaml` drive product verb `decision_case` with plan path(s); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "rvania-decision",
