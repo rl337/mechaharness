@@ -2,10 +2,10 @@
   "id": "fangore_insp_durable_resume",
   "persona": "fangore",
   "title": "Refuse resume when the harness fingerprint changed",
-  "kind": "cli",
-  "narrative": "Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_tdr_crash_after_accept_before_record`[^insp-pa-05-fingerprint].",
-  "implementation": "`GraphExecutor` fingerprint check on resume. `CliInstrumentor` verb `checkpoint_fingerprint_refuse`.",
-  "validation": "Harness `cli` `probe` loads `plans/fingerprint_refuse.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_tdr_crash_after_accept_before_record`[^insp-pa-05-fingerprint].",
+  "implementation": "`GraphExecutor` fingerprint check on resume. `CliInstrumentor` verb `checkpoint_fingerprint_refuse`.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r12",

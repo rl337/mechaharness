@@ -1,23 +1,40 @@
-# Plan document: ../plans/resume_uncertain_with_handle.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/resume_uncertain_with_handle.yaml
-expect:
-- kind: equals
-  key: status
-  value: ok
-- kind: equals
-  key: dispatch_count
-  value: 0
-- kind: equals
-  key: external_handle
-  value: job-seeded-1
-- kind: equals
-  key: durability
-  value: durable
-- kind: 'true'
-  key: reconciliation_invoked
-- kind: lte
-  key: cost_units
-  value: 1
+# user story: fangore_host_kit_submit_once
+# Migrated from probe plan `resume_uncertain_with_handle.yaml` → product/test verb `host_kit_submit_once`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    host_kit_submit_once:
+      id: resume_uncertain_with_handle
+      mode: resume_seeded
+      durable: true
+      run_id: hk-uncertain-ok
+      task_id: t1
+      seed:
+        effect_state: uncertain
+        external_handle: job-seeded-1
+        node_attempt: 1
+        node_status: running
+  expect: &id001
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: dispatch_count
+    value: 0
+  - kind: equals
+    key: external_handle
+    value: job-seeded-1
+  - kind: equals
+    key: durability
+    value: durable
+  - kind: 'true'
+    key: reconciliation_invoked
+  - kind: lte
+    key: cost_units
+    value: 1
+complete:
+  expect: *id001
+cleanup: []

@@ -1,31 +1,83 @@
-# Plan document: ../plans/recipe_audit_dimensions.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/recipe_audit_dimensions.yaml
-expect:
-- kind: equals
-  key: rows
-  value:
-  - - independent_review
+# user story: nubble_insp_recipe_audit_dimensions
+# Migrated from probe plan `recipe_audit_dimensions.yaml` → product/test verb `recipe_audit_dimensions`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    recipe_audit_dimensions:
+      now: '2026-10-18T12:00:00Z'
+      decisions:
+      - eventId: d1
+        stateHash: h
+        policyVersion: p1
+        verdict: ALLOW
+        recipeId: independent_review
+        recipeVersion: '1'
+        tool_results:
+        - tool_call_id: a
+          content: x
+          expires_at: '2026-10-18T13:00:00Z'
+        - tool_call_id: b
+          content: x
+          expires_at: '2026-10-18T11:00:00Z'
+      - eventId: d2
+        stateHash: h
+        policyVersion: p1
+        verdict: DENY
+        recipeId: independent_review
+        recipeVersion: '1'
+      - eventId: d3
+        stateHash: h
+        policyVersion: p1
+        verdict: ALLOW
+        recipeId: verify_repair
+        recipeVersion: '2'
+        tool_results:
+        - tool_call_id: c
+          content: x
+          expires_at: '2026-10-19T00:00:00Z'
+      - eventId: d4
+        stateHash: h
+        policyVersion: p1
+        verdict: ALLOW
+      envelope:
+        config_fingerprint: cfg:1
+        graph_version: '1'
+        node_id: n
+        routing_decision: reason
+        context_provenance:
+        - ctx:goal
+        capability_envelope_ref: env:1
+        recipe_id: independent_review
+        recipe_version: '1'
+  expect: &id001
+  - kind: equals
+    key: rows
+    value:
+    - - independent_review
+      - '1'
+      - 2
+      - ALLOW: 1
+        DENY: 1
+      - 1
+      - 1
+    - - verify_repair
+      - '2'
+      - 1
+      - ALLOW: 1
+      - 1
+      - 0
+  - kind: 'true'
+    key: unattributed_skipped
+  - kind: equals
+    key: envelope_recipe
+    value:
+    - independent_review
     - '1'
-    - 2
-    - ALLOW: 1
-      DENY: 1
-    - 1
-    - 1
-  - - verify_repair
-    - '2'
-    - 1
-    - ALLOW: 1
-    - 1
-    - 0
-- kind: 'true'
-  key: unattributed_skipped
-- kind: equals
-  key: envelope_recipe
-  value:
-  - independent_review
-  - '1'
-- kind: 'true'
-  key: envelope_still_complete
+  - kind: 'true'
+    key: envelope_still_complete
+complete:
+  expect: *id001
+cleanup: []

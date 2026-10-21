@@ -1,16 +1,24 @@
-# Plan document: ../plans/wake_resume.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/wake_resume.yaml
-expect:
-- kind: 'true'
-  key: resolve_ok
-- kind: equals
-  key: resume_status
-  value: ok
-- kind: 'true'
-  key: fingerprint_nonempty
-- kind: lte
-  key: cost_units
-  value: 1
+# user story: fangore_insp_wake_reresolve
+# Migrated from probe plan `wake_resume.yaml` → product/test verb `wake_reresolve_resume`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    wake_reresolve_resume:
+      goal: wake
+  expect: &id001
+  - kind: 'true'
+    key: resolve_ok
+  - kind: equals
+    key: resume_status
+    value: ok
+  - kind: 'true'
+    key: fingerprint_nonempty
+  - kind: lte
+    key: cost_units
+    value: 1
+complete:
+  expect: *id001
+cleanup: []

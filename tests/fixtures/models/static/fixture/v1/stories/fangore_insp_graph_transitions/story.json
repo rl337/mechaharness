@@ -2,10 +2,10 @@
   "id": "fangore_insp_graph_transitions",
   "persona": "fangore",
   "title": "Declare graph transitions separately from dependencies",
-  "kind": "cli",
-  "narrative": "Fangore needs success, rollback, and end paths declared as transitions \u2014 not inferred from dependency edges alone \u2014 so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-transitions][^wl-p08-transitions].",
-  "implementation": "`TransitionContract` / `inspect_transitions`; `CliInstrumentor` verb `graph_transition_inspect`.",
-  "validation": "Harness `cli` `probe` loads `plans/verify_rollback_end.yaml` (human-readable probe plan); hard expects on declared observation keys.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs success, rollback, and end paths declared as transitions \u2014 not inferred from dependency edges alone \u2014 so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-transitions][^wl-p08-transitions].",
+  "implementation": "`TransitionContract` / `inspect_transitions`; `CliInstrumentor` verb `graph_transition_inspect`.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l14-transitions",

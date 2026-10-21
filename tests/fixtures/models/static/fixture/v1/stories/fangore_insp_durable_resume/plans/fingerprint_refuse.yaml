@@ -1,6 +1,0 @@
-# Probe plan for scenario `fingerprint_refuse.yaml`.
-# Story: Refuse resume when the harness fingerprint changed
-
-summary: Refuse resume when the harness fingerprint changed
-name: checkpoint_fingerprint_refuse
-goal: fp

@@ -1,14 +1,31 @@
-# Plan document: ../plans/stagnation.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/stagnation.yaml
-expect:
-- kind: equals
-  key: terminal
-  value: no_progress
-- kind: equals
-  key: reason
-  value: stagnation
-- kind: 'false'
-  key: success
+# user story: fangore_convergence_ceiling
+# Migrated from probe plan `stagnation.yaml` → product/test verb `convergence_ceiling`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    convergence_ceiling:
+      contract:
+        version: story-conv-v1
+        max_iterations: 10
+        stagnation_window: 2
+        max_elapsed_ms: 60000
+      fingerprints:
+      - same
+      - same
+      - same
+      elapsed_ms_per_tick: 5
+  expect: &id001
+  - kind: equals
+    key: terminal
+    value: no_progress
+  - kind: equals
+    key: reason
+    value: stagnation
+  - kind: 'false'
+    key: success
+complete:
+  expect: *id001
+cleanup: []

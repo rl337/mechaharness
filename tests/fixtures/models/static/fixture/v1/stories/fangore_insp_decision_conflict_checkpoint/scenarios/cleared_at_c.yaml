@@ -1,19 +1,38 @@
-# Plan document: ../plans/cleared_at_c.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/cleared_at_c.yaml
-expect:
-- kind: equals
-  key: order
-  value:
-  - a
-  - b
-  - c
-- kind: equals
-  key: checkpoints
-  value:
-  - c
-- kind: equals
-  key: cycle_blocked
-  value: []
+# user story: fangore_insp_decision_conflict_checkpoint
+# Migrated from probe plan `cleared_at_c.yaml` → product/test verb `decision_conflict_neighbor_revisit`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    decision_conflict_neighbor_revisit:
+      id: cleared_at_c
+      start: a
+      write_scopes:
+        a:
+        - repo:x
+        b:
+        - repo:x
+        - repo:y
+        c:
+        - repo:y
+      clears:
+      - c
+  expect: &id001
+  - kind: equals
+    key: order
+    value:
+    - a
+    - b
+    - c
+  - kind: equals
+    key: checkpoints
+    value:
+    - c
+  - kind: equals
+    key: cycle_blocked
+    value: []
+complete:
+  expect: *id001
+cleanup: []

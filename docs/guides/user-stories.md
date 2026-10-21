@@ -94,15 +94,17 @@ Harness `cli` scenario `cassette_smoke.yaml`: nonempty assistant text, positive 
 
 ### `nubble_graph_event_correlators` — Join every graph event to its graph, recipe, and authority
 
-Nubble loads graph events into a warehouse and cannot afford to open checkpoints to learn which graph, recipe, or authorization epoch produced a row. A multi-node run with a nested subgraph must stamp every event with the same graph id, recipe stamp, and epoch, and nested runs must point at their parent run so a flat table can rebuild per-node attempts[^obs-analytics].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble loads graph events into a warehouse and cannot afford to open checkpoints to learn which graph, recipe, or authorization epoch produced a row. A multi-node run with a nested subgraph must stamp every event with the same graph id, recipe stamp, and epoch, and nested runs must point at their parent run so a flat table can rebuild per-node attempts[^obs-analytics].
 
 #### Implementation
 
 Graph lifecycle emits carry warehouse correlators (`graph_id`, `recipe_id`, `authorization_epoch`, nest `parent_run_id` / `nest_depth`). `project_node_attempt_rows` projects attempt rows. `CliInstrumentor` verb `graph_event_correlators`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/warehouse_correlators.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -159,15 +161,17 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `nubble_insp_environment_linkage` — Surface environment incompatibility as linkage failure
 
-Missing environment capability must become a structured pre-exec failure, not a mysterious mid-run error. Accepts inspiration requirement 16[^insp-r16].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Missing environment capability must become a structured pre-exec failure, not a mysterious mid-run error. Accepts inspiration requirement 16[^insp-r16].
 
 #### Implementation
 
 `DefaultLinkageResolver` environment grant check. `CliInstrumentor` verb `environment_linkage_fail`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/grant_mismatch.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -224,15 +228,17 @@ Harness `user_story` scenario `capability_route.yaml`: environment + graph + ste
 
 ### `nubble_insp_recipe_audit_dimensions` — Audit recipe selection and freshness without reading full transcripts
 
-A quarterly audit can see which recipe and version made each decision, how the verdicts split, and how much of the evidence was fresh or stale, without reading whole transcripts. Decisions that do not name a recipe are left out of the per-recipe rollup instead of being guessed. Cost and decision telemetry already ship via `fangore_decision_plane_telemetry` and `nubble_insp_trace_envelope`. Tracks MH-PA-08[^insp-pa-08].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. A quarterly audit can see which recipe and version made each decision, how the verdicts split, and how much of the evidence was fresh or stale, without reading whole transcripts. Decisions that do not name a recipe are left out of the per-recipe rollup instead of being guessed. Cost and decision telemetry already ship via `fangore_decision_plane_telemetry` and `nubble_insp_trace_envelope`. Tracks MH-PA-08[^insp-pa-08].
 
 #### Implementation
 
 Optional `recipe_id`, `recipe_version`, and `freshness_summary` (plus approval, denial, and effect ids) on `DecisionRecord` and `TraceEnvelope`; `summarize_freshness()` in `tool_result_freshness.py` counts fresh versus stale tool results; `summarize_recipe_audit()` and `RecipeAuditRow` in `review_audit.py` roll decisions up per recipe selection. The new envelope fields are optional and do not change `envelope_complete`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/recipe_audit_dimensions.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -257,15 +263,17 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `nubble_insp_review_audit_reconstruct` — Reconstruct why a consequential action was allowed without model recollection
 
-An auditor can rebuild a review from the saved decision log and trace alone: which recipe ran, what the policy decided and under which revision, how trusted the source was, what scope was delegated, why something was denied, who approved it, and which side effects actually happened. When any of that is missing the record says exactly which part, instead of relying on what the model remembers. Related: `taloneth_policy_replay`, `nubble_insp_trace_reconciliation`. Tracks MH-DOTS-09[^insp-dots-09].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. An auditor can rebuild a review from the saved decision log and trace alone: which recipe ran, what the policy decided and under which revision, how trusted the source was, what scope was delegated, why something was denied, who approved it, and which side effects actually happened. When any of that is missing the record says exactly which part, instead of relying on what the model remembers. Related: `taloneth_policy_replay`, `nubble_insp_trace_reconciliation`. Tracks MH-DOTS-09[^insp-dots-09].
 
 #### Implementation
 
 `ReviewAuditRecord` in `review_audit.py` composes `DecisionRecord` and `TraceEnvelope` (recipe id and version, `policy_version` / `policy_revision`, approval, denial, and effect ids, freshness summary) with caller-attested source trust, delegated scope, and denial reasons. `from_records()` prefers the decision over the envelope on overlap; `missing_dimensions()` and `reconstructable()` name gaps (denials need reasons and ids, human-approved verdicts need approval ids, executed actions need effect ids).
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/review_audit_reconstruct.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -273,15 +281,17 @@ Harness `cli` `probe` loads `plans/review_audit_reconstruct.yaml` (human-readabl
 
 ### `nubble_insp_rollout_graph` — Reconstruct retries and delegated agents as observed rollout branches
 
-Nubble needs the observed run topology — retries, spawned reviewers, and terminals — as a first-class graph linked back to the intended plan, not only the planned node list. Accepts FineEnvs training-sequence reconstruction[^fineenvs-rollout].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble needs the observed run topology — retries, spawned reviewers, and terminals — as a first-class graph linked back to the intended plan, not only the planned node list. Accepts FineEnvs training-sequence reconstruction[^fineenvs-rollout].
 
 #### Implementation
 
 `build_rollout_graph`; `CliInstrumentor` verb `rollout_graph_build`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/roots_and_retry.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -324,15 +334,17 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `nubble_insp_workspace_isolation` — Acquire workspace isolation through a host provider seam
 
-Nubble asks branches for isolation without hard-coding worktrees or containers — the host provider supplies the mechanism. Accepts WalkingLabs L13 and Codex guidance[^wl-l13-workspace][^wl-codex-workspace].
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble asks branches for isolation without hard-coding worktrees or containers — the host provider supplies the mechanism. Accepts WalkingLabs L13 and Codex guidance[^wl-l13-workspace][^wl-codex-workspace].
 
 #### Implementation
 
 `WorkspaceIsolationProvider` and `InMemoryWorkspaceIsolationProvider` in `mechaharness.isolation.workspace_isolation` define the acquire/release capability seam.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/workspace_isolation_acquire.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -341,7 +353,7 @@ Harness `cli` `probe` loads `plans/workspace_isolation_acquire.yaml` (human-read
 
 ### `nubble_lane_load_hint` — Refuse work when the wrong inference profile is loaded
 
-Nubble is on call when a refund-routing job fails on the local inference host. The job needs the judge profile, but an earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error. It must tell him, in plain operator language, that this work needs the judge lane and which load command to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile mismatch wastes incident time.
+Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble is on call when a refund-routing job fails on the local inference host. The job needs the judge profile, but an earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error. It must tell him, in plain operator language, that this work needs the judge lane and which load command to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile mismatch wastes incident time.
 
 #### Implementation
 
@@ -349,9 +361,11 @@ Exclusive lanes (reason / decide-judge / media) on `InferenceEnvironment` refuse
 
 Covers: INF-02.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/wrong_lane_deny.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 ### `nubble_model_affinity` — Keep model affinity inside a coherent work loop
 
@@ -539,15 +553,17 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `fangore_convergence_ceiling` — Stop agent loops that make no progress
 
-Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget. Graph repeating nodes additionally require an explicit stop contract at linkage (`fangore_graph_linkage_preflight`). See inspiration requirements for stop contracts[^insp-stop].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget. Graph repeating nodes additionally require an explicit stop contract at linkage (`fangore_graph_linkage_preflight`). See inspiration requirements for stop contracts[^insp-stop].
 
 #### Implementation
 
 `ConvergenceGuard` / `ConvergenceContract`; `CliInstrumentor` verb `convergence_ceiling`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/stagnation.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -672,7 +688,7 @@ Harness `user_story` scenario `telemetry_fields.yaml` drives `run_recipe`; hard 
 
 ### `fangore_decision_surface_reject` — Reject model choices that are not on the allowed list
 
-A triage model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal. Only product judgement policy may unlock the next action — same split as `fangore_refund_verdict`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. A triage model returns a team name that was never on the allowed set. The product must treat that as a rejected proposal. Only product judgement policy may unlock the next action — same split as `fangore_refund_verdict`.
 
 #### Implementation
 
@@ -680,9 +696,11 @@ A triage model returns a team name that was never on the allowed set. The produc
 
 Covers: POL-01.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/reject_invalid.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 
@@ -716,15 +734,17 @@ Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recip
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 
-Fangore ships a host app with a produce → repair → consume plan. After linkage succeeds, the library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; preflight failures are covered by `fangore_graph_linkage_preflight`. See inspiration requirements for authorized graph execution[^insp-executor].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore ships a host app with a produce → repair → consume plan. After linkage succeeds, the library must walk ready steps, refuse execution without an execute grant, retry transient failures, escalate when retries are exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream success. Checkpointed plans from `fangore_local_plan_resume` stay durable; preflight failures are covered by `fangore_graph_linkage_preflight`. See inspiration requirements for authorized graph execution[^insp-executor].
 
 #### Implementation
 
 `GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`, override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The executor emits `core:graph_start` / `core:graph_end` plus per-node events. `CliInstrumentor` verb `graph_executor_run` exercises the path.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/authorized_local_pipe.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -733,15 +753,17 @@ Harness `cli` `probe` loads `plans/authorized_local_pipe.yaml` (human-readable p
 
 ### `fangore_graph_linkage_preflight` — Fail closed on missing graph linkage before work starts
 
-Fangore composes a plan that still names a step the host has not wired, and another repeating step without a stop rule. The library must refuse those plans before any runner work starts, naming the missing edge so operators can fix wiring instead of debugging a mid-run crash. Complements `fangore_graph_executor` (authorized run once linkage is sound) and `fangore_convergence_ceiling` (budgets once a loop is allowed). See the inspiration requirements for linkage versus dependency injection and stop contracts[^insp-linkage].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore composes a plan that still names a step the host has not wired, and another repeating step without a stop rule. The library must refuse those plans before any runner work starts, naming the missing edge so operators can fix wiring instead of debugging a mid-run crash. Complements `fangore_graph_executor` (authorized run once linkage is sound) and `fangore_convergence_ceiling` (budgets once a loop is allowed). See the inspiration requirements for linkage versus dependency injection and stop contracts[^insp-linkage].
 
 #### Implementation
 
 `DefaultLinkageResolver` preflight; `CliInstrumentor` verb `graph_linkage_preflight`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/runner_stop_and_ok.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -822,15 +844,17 @@ Harness `user_story` scenario `tapped_node_lifecycle.yaml`: environment + graph 
 
 ### `fangore_host_kit_submit_once` — Wire a host graph executor and submit an external job once
 
-Fangore builds a host that dispatches a remote coding job from a durable plan. They need a short, readable way to register that job step, choose durable storage, and submit exactly once — including after a crash where the remote system may already have accepted the job. Complements `fangore_graph_executor` (authorized plan walk) and `fangore_tdr_crash_after_accept_before_record` (crash-window reconciliation). Host wiring lives in the dependency-injection guide[^host-kit-di].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore builds a host that dispatches a remote coding job from a durable plan. They need a short, readable way to register that job step, choose durable storage, and submit exactly once — including after a crash where the remote system may already have accepted the job. Complements `fangore_graph_executor` (authorized plan walk) and `fangore_tdr_crash_after_accept_before_record` (crash-window reconciliation). Host wiring lives in the dependency-injection guide[^host-kit-di].
 
 #### Implementation
 
 `mechaharness.host_kit.host_graph_executor` subclasses `MechaHarnessConfig` and injects a `GraphExecutor` with host runners, default graph grants, optional `SqliteCheckpointStore` via `checkpoint_path` / `checkpoint_store`, and an injectable `CrashProbe`. `SubmitOnceEffectfulRunner` implements submit-once / complete-on-accept. `CliInstrumentor` verb `host_kit_submit_once` runs the acceptance matrix. Module doctests document the blessed host path.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/resume_uncertain_with_handle.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1016,15 +1040,17 @@ Harness `cli` `probe` loads `plans/cross_task_isolation_bleed.yaml` (human-reada
 
 ### `fangore_insp_decision_conflict_checkpoint` — Checkpoint after conflict-free decisions without revisiting cleared cycles
 
-After a decision is settled, the nodes it still conflicts with are revisited, and nodes already visited are not revisited so a circular conflict cannot loop forever. A checkpoint is taken only when the decision has no remaining conflicts; a conflict blocked only by the visited set is reported instead of silently saved. The conflicts themselves are still the write-scope conflicts the product already detects (`fangore_tdr_crash_after_accept_before_record`, `fangore_decision_plane_policy`); this adds the revisit-and-checkpoint rule on top. Tracks MH-SR-08[^insp-sr-08].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. After a decision is settled, the nodes it still conflicts with are revisited, and nodes already visited are not revisited so a circular conflict cannot loop forever. A checkpoint is taken only when the decision has no remaining conflicts; a conflict blocked only by the visited set is reported instead of silently saved. The conflicts themselves are still the write-scope conflicts the product already detects (`fangore_tdr_crash_after_accept_before_record`, `fangore_decision_plane_policy`); this adds the revisit-and-checkpoint rule on top. Tracks MH-SR-08[^insp-sr-08].
 
 #### Implementation
 
 `neighbor_revisit` / `neighbors_from_write_conflicts`. `CliInstrumentor` verb `decision_conflict_neighbor_revisit`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/no_conflicts.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1080,15 +1106,17 @@ Harness `user_story` scenario `session.yaml`: environment + graph + steps + comp
 
 ### `fangore_insp_durable_resume` — Refuse resume when the harness fingerprint changed
 
-Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_tdr_crash_after_accept_before_record`[^insp-pa-05-fingerprint].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Long-running work checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes to personal-agent MH-PA-05 alongside `fangore_tdr_crash_after_accept_before_record`[^insp-pa-05-fingerprint].
 
 #### Implementation
 
 `GraphExecutor` fingerprint check on resume. `CliInstrumentor` verb `checkpoint_fingerprint_refuse`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/fingerprint_refuse.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1097,15 +1125,17 @@ Harness `cli` `probe` loads `plans/fingerprint_refuse.yaml` (human-readable prob
 
 ### `fangore_insp_dynamic_subgraph` — Nest a child graph as an observable subgraph
 
-Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`. Hosts use the same nest path when tiling Agentic Recipes into a parent graph. Accepts inspiration requirement 3[^insp-r03].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore embeds a child plan under a parent step. The child must run as its own graph execution with telemetry, not as an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`. Hosts use the same nest path when tiling Agentic Recipes into a parent graph. Accepts inspiration requirement 3[^insp-r03].
 
 #### Implementation
 
 `SubgraphNodeRunner.embed` + `GraphExecutor`. `CliInstrumentor` verb `dynamic_subgraph_nest`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/nested_child.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1241,15 +1271,17 @@ Harness `user_story` scenario `session.yaml`: environment + graph + steps + comp
 
 ### `fangore_insp_graph_transitions` — Declare graph transitions separately from dependencies
 
-Fangore needs success, rollback, and end paths declared as transitions — not inferred from dependency edges alone — so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-transitions][^wl-p08-transitions].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs success, rollback, and end paths declared as transitions — not inferred from dependency edges alone — so graphs can be inspected before they run. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-transitions][^wl-p08-transitions].
 
 #### Implementation
 
 `TransitionContract` / `inspect_transitions`; `CliInstrumentor` verb `graph_transition_inspect`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/verify_rollback_end.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1405,15 +1437,17 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `fangore_insp_isolation_io` — Validate isolation and template I/O contracts
 
-Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation]. Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso] and Dots MH-DOTS-07 isolation substrate (`fangore_insp_cross_task_isolation`)[^insp-dots-07-iso].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation]. Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso] and Dots MH-DOTS-07 isolation substrate (`fangore_insp_cross_task_isolation`)[^insp-dots-07-iso].
 
 #### Implementation
 
 `IsolationContract` and `TemplateIOContract` in `mechaharness.isolation.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for Agentic Recipe / `GraphTemplate` subgraph boundaries.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/isolation_io_contract.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1504,15 +1538,17 @@ user_story `lifecycle_extension_rewrite.yaml` tool_lifecycle; hard expects on ex
 
 ### `fangore_insp_linkage_preflight` — Resolve graph linkage before any node runs
 
-Fangore's injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2[^insp-r02]. Related: `fangore_insp_stop_contract`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore's injector can build services while a plan still names an unwired step. Linkage must fail closed before runners start, naming the missing edge. Accepts inspiration requirement 2[^insp-r02]. Related: `fangore_insp_stop_contract`.
 
 #### Implementation
 
 `DefaultLinkageResolver` runner preflight; `CliInstrumentor` verb `graph_linkage_preflight`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/missing_runner_and_ok.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1665,7 +1701,7 @@ Harness `user_story` scenario `soft_point_evolution_allowlist.yaml`: environment
 
 ### `fangore_insp_soft_vs_hard` — Enforce grants mechanically instead of by prompt alone
 
-Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`. Soft-vs-hard split for self-revising MH-SR-03[^insp-sr-03-hard].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`. Soft-vs-hard split for self-revising MH-SR-03[^insp-sr-03-hard].
 
 #### Implementation
 
@@ -1673,9 +1709,11 @@ Harness tool loops consult `AccessControl` before execution — including fused 
 
 Covers: GAT-01, GAT-02, GAT-03.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/tool_gating.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1732,15 +1770,17 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `fangore_insp_targeted_rollback` — Roll back to the node that caused a verification defect
 
-When verification fails, Fangore wants structured attribution naming the repair target so the graph rolls back to that layer instead of restarting from scratch. Accepts WalkingLabs P08 guidance[^wl-p08-rollback].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. When verification fails, Fangore wants structured attribution naming the repair target so the graph rolls back to that layer instead of restarting from scratch. Accepts WalkingLabs P08 guidance[^wl-p08-rollback].
 
 #### Implementation
 
 `attribute_with_repair_target` / `select_rollback_target`; `CliInstrumentor` verb `targeted_rollback_select`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/select_produce.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -1813,15 +1853,17 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `fangore_insp_wake_reresolve` — Re-resolve linkage when resuming a woken run
 
-Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17]. Wake re-resolve for Dots MH-DOTS-02; effect-dispatch revalidation: `fangore_insp_effect_revalidation`[^insp-dots-02-wake].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Persistent goals live in the client orchestrator. When a goal wakes, MechaHarness must re-resolve linkage and resume only if the checkpoint fingerprint still matches. Accepts the library half of inspiration requirement 17[^insp-r17]. Wake re-resolve for Dots MH-DOTS-02; effect-dispatch revalidation: `fangore_insp_effect_revalidation`[^insp-dots-02-wake].
 
 #### Implementation
 
 `GraphExecutor` wake resolve + resume. `CliInstrumentor` verb `wake_reresolve_resume`.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/wake_resume.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 
@@ -2353,15 +2395,17 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `taloneth_insp_correction_spec_debt` — Capture corrections as reviewed specification debt before policy change
 
-When a person corrects the agent, the correction is recorded as outstanding specification debt: the correction text, the scenarios that failed, and a link to the rule-promotion record it may harden into. The record stays flagged for human review until someone accepts it, and the host (not the library) generates the regression test and attaches it. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].
+Taloneth starts the CLI host with family `pass_through` and backend `mock`. When a person corrects the agent, the correction is recorded as outstanding specification debt: the correction text, the scenarios that failed, and a link to the rule-promotion record it may harden into. The record stays flagged for human review until someone accepts it, and the host (not the library) generates the regression test and attaches it. Soft-to-hard promotion with provenance exists in `taloneth_insp_rule_promotion`. Tracks MH-PA-07[^insp-pa-07].
 
 #### Implementation
 
 `SpecificationDebtRecord`, `SpecificationDebtLedger`, and `capture_correction()` in `specification_debt.py` hold the correction, `failing_scenario_refs`, `promotion_record_id` (from `PromotionRecord.record_id`), `review_required`, and a host-filled `generated_test_ref`; `link_test()` and `approve()` move status `open` → `test_linked` → `closed`. The library owns only the ledger schema; test generation stays with the host.
 
+Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).
+
 #### Validation
 
-Harness `cli` `probe` loads `plans/specification_debt.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
 
 #### Footnotes
 

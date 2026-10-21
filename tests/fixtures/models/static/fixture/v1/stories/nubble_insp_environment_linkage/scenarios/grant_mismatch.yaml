@@ -1,12 +1,20 @@
-# Plan document: ../plans/grant_mismatch.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/grant_mismatch.yaml
-expect:
-- kind: 'false'
-  key: ok
-- kind: equals
-  key: codes_exactly
-  value:
-  - environment_incompatible
+# user story: nubble_insp_environment_linkage
+# Migrated from probe plan `grant_mismatch.yaml` → product/test verb `environment_linkage_fail`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    environment_linkage_fail:
+      required_grant: core:media.image
+  expect: &id001
+  - kind: 'false'
+    key: ok
+  - kind: equals
+    key: codes_exactly
+    value:
+    - environment_incompatible
+complete:
+  expect: *id001
+cleanup: []
