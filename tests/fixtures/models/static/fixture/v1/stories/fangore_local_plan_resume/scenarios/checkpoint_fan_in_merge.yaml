@@ -1,27 +1,50 @@
-# Plan document: ../plans/checkpoint_fan_in_merge.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/checkpoint_fan_in_merge.yaml
-expect:
-- kind: equals
-  key: stale_preconditions_exactly
-  value:
-  - approved
-- kind: equals
-  key: ready_exactly
-  value:
-  - consume
-- kind: 'true'
-  key: dependency_justified
-- kind: equals
-  key: fan_in_failures_exactly
-  value:
-  - bad
-- kind: equals
-  key: merge_conflicts_exactly
-  value:
-  - app.py
-- kind: equals
-  key: recovery_boundary
-  value: dispatch
+# user story: fangore_local_plan_resume
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# He runs `local_plan_resume`: a require_file node fails when the VFS path is
+# missing; the verb seeds MemoryFilesystem, keeps `run_id` on walk-bag `ctx`,
+# re-arms the failed node, and resumes the same checkpointed plan successfully.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    local_plan_resume:
+      run_id: story-local-plan
+      required_path: /work/input.txt
+      seed_content: plan-payload
+      goal: consume required input file
+  expect:
+  - kind: equals
+    key: first_status
+    value: failed
+  - kind: equals
+    key: first_error
+    value: 'missing_file:/work/input.txt'
+  - kind: equals
+    key: resume_status
+    value: ok
+  - kind: equals
+    key: file_content
+    value: plan-payload
+  - kind: equals
+    key: run_id
+    value: story-local-plan
+  - kind: equals
+    key: recovery_boundary
+    value: commit
+complete:
+  expect:
+  - kind: equals
+    key: first_status
+    value: failed
+  - kind: equals
+    key: resume_status
+    value: ok
+  - kind: equals
+    key: file_content
+    value: plan-payload
+  - kind: equals
+    key: run_id
+    value: story-local-plan
+cleanup: []

@@ -291,7 +291,7 @@ _Historical list. Durable/budget execute
 - [x] `fangore_insp_soft_vs_hard`
 - [x] `fangore_insp_targeted_rollback`
 - [x] `fangore_insp_wake_reresolve`
-- [ ] `fangore_local_plan_resume`
+- [x] `fangore_local_plan_resume`
 - [x] `nubble_graph_event_correlators`
 - [x] `nubble_insp_environment_linkage`
 - [x] `nubble_insp_rollout_graph`

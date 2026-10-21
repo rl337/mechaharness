@@ -768,6 +768,174 @@ class ToolPhaseGuardVerb(CliVerb):
         return {**out, "bag": bag.snapshot()}
 
 
+class LocalPlanResumeCommand(BaseModel):
+    """Crash-resume a local plan that requires a VFS file.
+
+    First walk fails when ``required_path`` is missing. The verb seeds the
+    shared :class:`~pyiv.files.Filesystem`, re-arms the failed node, and
+    resumes the same ``run_id`` (stashed on walk-bag ``ctx``).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: str = "cli:local-plan"
+    required_path: str = "/work/input.txt"
+    seed_content: str = "plan-payload"
+    goal: str = "consume required input file"
+
+
+class LocalPlanResumeVerb(CliVerb):
+    name = "local_plan_resume"
+    params_model = LocalPlanResumeCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        del runtime
+        from pyiv.files import Filesystem, MemoryFilesystem
+
+        from mechaharness.budget import BudgetPolicy
+        from mechaharness.di import MechaHarnessConfig, get_injector
+        from mechaharness.graph import ExecutionGraph, GraphNode, NodeStatus
+        from mechaharness.graph_executor import (
+            CallableGraphNodeRunner,
+            GraphExecutor,
+            GraphFailureAction,
+            GraphFailurePolicy,
+            GraphNodeRunnerRegistry,
+            NodeOutcome,
+        )
+        from mechaharness.harness.pass_through import PassThroughHarness
+        from mechaharness.inference.mock import MockInferenceStrategy
+        from mechaharness.walk_bag import WalkBag, WalkBagRegister
+
+        body = LocalPlanResumeCommand.model_validate(params.model_dump())
+        bag = WalkBag()
+        bag.put(
+            WalkBagRegister.IN,
+            {
+                "required_path": body.required_path,
+                "seed_content": body.seed_content,
+            },
+        )
+        bag.put(WalkBagRegister.CTX, {"run_id": body.run_id})
+        fs = MemoryFilesystem()  # type: ignore[no-untyped-call]
+
+        class _FailClosedPolicy(GraphFailurePolicy):
+            """Retry while attempts remain; then fail (no escalate)."""
+
+            def decide(
+                self, node: GraphNode, *, error: str | None
+            ) -> GraphFailureAction:
+                del error
+                if node.attempt < node.max_attempts:
+                    return GraphFailureAction.RETRY
+                return GraphFailureAction.FAIL
+
+        async def require_file(
+            node: GraphNode, context: GraphRunContext
+        ) -> NodeOutcome:
+            path = str(node.payload.get("path") or body.required_path)
+            if not fs.exists(path):
+                return NodeOutcome(
+                    status=NodeStatus.FAILED,
+                    error=f"missing_file:{path}",
+                )
+            content = fs.read_text(path)
+            context.bag.put(
+                WalkBagRegister.OUT, {"path": path, "content": content}
+            )
+            return NodeOutcome(
+                status=NodeStatus.SUCCEEDED,
+                payload={"path": path, "content": content},
+            )
+
+        registry = GraphNodeRunnerRegistry(
+            [CallableGraphNodeRunner(["require_file"], require_file)]
+        )
+
+        class Cfg(MechaHarnessConfig):
+            def get_inference_class(self) -> type[InferenceStrategy]:
+                return MockInferenceStrategy
+
+            def get_harness_class(self) -> type[AbstractHarness]:
+                return PassThroughHarness
+
+            def get_grants(self) -> list[object]:
+                return [GraphExecute]
+
+            def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+                return registry
+
+            def get_filesystem(self) -> Filesystem:
+                return fs
+
+            def get_graph_failure_policy(self) -> GraphFailurePolicy:
+                return _FailClosedPolicy()
+
+        executor = get_injector(Cfg()).inject(GraphExecutor)
+        graph = ExecutionGraph(goal=body.goal, version="1")
+        graph.add_node(
+            GraphNode(
+                id="require_input",
+                kind="require_file",
+                payload={"path": body.required_path},
+                max_attempts=1,
+            )
+        )
+
+        first = await executor.run(
+            graph,
+            budget_policy=BudgetPolicy.unlimited(),
+            run_id=body.run_id,
+            skip_linkage=True,
+        )
+        first_error = first.error or ""
+        require = first.graph.nodes.get("require_input")
+        if require is not None and require.error:
+            first_error = require.error
+        bag.put(
+            WalkBagRegister.ERR,
+            {"first_status": first.status, "error": first_error},
+        )
+
+        fs.write_text(body.required_path, body.seed_content)
+        bag.put(
+            WalkBagRegister.ANS,
+            {"seeded_path": body.required_path, "content": body.seed_content},
+        )
+
+        # Re-arm the failed require node so resume can consume the seeded file.
+        restored = executor.store.latest(run_id=body.run_id)
+        assert restored is not None
+        node = restored.nodes["require_input"]
+        node.status = NodeStatus.PENDING
+        node.error = None
+        node.max_attempts = max(node.attempt + 1, 2)
+        executor.store.save(restored, run_id=body.run_id, boundary="dispatch")
+
+        resumed = await executor.run(
+            restored,
+            budget_policy=BudgetPolicy.unlimited(),
+            run_id=body.run_id,
+            resume=True,
+            skip_linkage=True,
+        )
+        out_payload = resumed.graph.nodes["require_input"].payload
+        bag.put(WalkBagRegister.OUT, dict(out_payload))
+        bag.put(WalkBagRegister.ACC, {"resume_status": resumed.status})
+        return {
+            "run_id": body.run_id,
+            "first_status": first.status,
+            "first_error": first_error,
+            "resume_status": resumed.status,
+            "file_content": out_payload.get("content"),
+            "required_path": body.required_path,
+            "recovery_boundary": executor.store.latest_boundary(run_id=body.run_id),
+            "bag": bag.snapshot(),
+            "status": resumed.status,
+            "error": resumed.error,
+        }
+
+
 def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
     return {
         AccessCheckVerb.name: AccessCheckVerb,
@@ -782,6 +950,7 @@ def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
         AlertEscalationVerb.name: AlertEscalationVerb,
         ToolResultFreshnessVerb.name: ToolResultFreshnessVerb,
         ToolPhaseGuardVerb.name: ToolPhaseGuardVerb,
+        LocalPlanResumeVerb.name: LocalPlanResumeVerb,
     }
 
 
@@ -804,6 +973,8 @@ __all__ = [
     "ExecutionTokenVerb",
     "HumanReviewGateCommand",
     "HumanReviewGateVerb",
+    "LocalPlanResumeCommand",
+    "LocalPlanResumeVerb",
     "RunBudgetedGraphCommand",
     "RunBudgetedGraphVerb",
     "ToolPhaseGuardCommand",
