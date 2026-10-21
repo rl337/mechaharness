@@ -1346,15 +1346,15 @@ Harness `cli` `probe` loads `plans/handoff_record.yaml` (human-readable probe pl
 
 ### `fangore_insp_independent_review` — Review artifacts in isolated reviewer context
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `independent_review` recipe. Independent review must not reuse the producer's accumulated reasoning by default. Reviewers see the artifact and acceptance contract; disagreement is retained. Accepts inspiration requirement 10. He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario. [^insp-r10][^insp-pa-03-review] Related: `fangore_insp_produce_critique_refine`.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs Agentic Recipe `independent_review` with two isolated reviewers that omit producer reasoning, aggregate findings, and retain disagreement. Accepts inspiration requirement 10. Related: `fangore_insp_produce_critique_refine`. [^insp-r10][^insp-pa-03-review]
 
 #### Implementation
 
-Agentic Recipe `independent_review` (`IndependentReviewTemplate`) builds produce → isolated review_* → aggregate_reviews with omit_producer_reasoning and retain_disagreement.
+Agentic Recipe `independent_review` via `IndependentReviewTemplate` / `independent_review_runner` and product verb `run_recipe` (`IndependentReviewRecipeAdapter`).
 
 #### Validation
 
-Harness `user_story` scenario `independent_review_template.yaml`: environment + graph + steps + complete expects.
+Harness `user_story` scenario `independent_review_template.yaml` drives `run_recipe`; expects review_count, omit_producer_reasoning, disagreement_retained.
 
 #### Footnotes
 
@@ -2029,19 +2029,19 @@ user_story `gap_found.yaml` judge + cassette; expect outcome=request_tests.
 
 ### `fangore_jev_req_review_template_shape` — Shape a requirements-aware review with isolated checkers
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He instantiates `independent_review` with two reviewers and omitted producer reasoning. He verifies completion from structured observation expects.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `independent_review` with two reviewers and omitted producer reasoning, then verifies the isolated review shape from the run observation. [^jev-us06]
 
 #### Implementation
 
-Agentic Recipe `independent_review` via `instantiate_recipe`.
+Agentic Recipe `independent_review` via `run_recipe` / `IndependentReviewRecipeAdapter`.
 
 #### Validation
 
-user_story instantiate_recipe; expects template_name / omit_producer_reasoning.
+user_story run_recipe; expects template_name / omit_producer_reasoning / review_count.
 
 #### Footnotes
 
-1. [Jev typed-judgment inspiration (MH-JEV-US06)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Requirements-aware semantic review
+[^jev-us06]: [Jev typed-judgment inspiration (MH-JEV-US06)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — Requirements-aware semantic review
 
 ### `fangore_jev_task_route_complex_frontier` — Force frontier when quality policy rejects the cheap lane
 
