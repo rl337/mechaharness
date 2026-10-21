@@ -206,17 +206,17 @@ _Historical list. Work via [G3](./user-story-recipe-expansion.md)
 - [x] `fangore_compound_grants`
 - [x] `fangore_config_access_policy`
 - [x] `fangore_human_review_pending`
-- [ ] `fangore_insp_alert_escalation_rules`
+- [x] `fangore_insp_alert_escalation_rules`
 - [x] `fangore_insp_approval_interrupt`
 - [x] `fangore_insp_auth_epoch_resume`
 - [x] `fangore_insp_authority_gate`
 - [ ] `fangore_insp_cross_task_isolation`
-- [ ] `fangore_insp_denial_equivalence`
+- [x] `fangore_insp_denial_equivalence`
 - [ ] `fangore_insp_effect_revalidation`
-- [ ] `fangore_insp_execution_token`
+- [x] `fangore_insp_execution_token`
 - [ ] `fangore_insp_isolation_io`
-- [ ] `fangore_insp_tool_effect_classes`
-- [ ] `fangore_insp_tool_result_freshness`
+- [x] `fangore_insp_tool_effect_classes`
+- [x] `fangore_insp_tool_result_freshness`
 - [ ] `nubble_insp_workspace_isolation`
 - [ ] `nubble_lane_load_hint`
 

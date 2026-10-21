@@ -1,20 +1,54 @@
-# Plan document: ../plans/denial_store_equivalence.yaml
-kind: cli
-commands:
-- probe:
-    path: plans/denial_store_equivalence.yaml
-expect:
-- kind: equals
-  key: first
-  value: deny:verdict_deny
-- kind: equals
-  key: retries
-  value:
-    second_provider: deny:prior_denial
-    graph_tool: deny:prior_denial
-    other_recipient: allow
-- kind: 'true'
-  key: lifted
-- kind: equals
-  key: after_lift
-  value: allow
+# user story: fangore_insp_denial_equivalence
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# He runs `denial_equivalence`: a DENY for email.send→bob stays denied across
+# provider/tool retries until `lift()`, while a different recipient is allowed.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    denial_equivalence:
+      denied:
+        effect_class: email.send
+        target: bob@example.com
+        tool_name: smtp.send
+      retries:
+      - id: second_provider
+        effect_class: email.send
+        target: bob@example.com
+        tool_name: sendgrid.send
+      - id: graph_tool
+        effect_class: email.send
+        target: bob@example.com
+        tool_name: graph.send
+      - id: other_recipient
+        effect_class: email.send
+        target: amy@example.com
+        tool_name: smtp.send
+  expect:
+  - kind: equals
+    key: first
+    value: deny:verdict_deny
+  - kind: equals
+    key: retries
+    value:
+      second_provider: deny:prior_denial
+      graph_tool: deny:prior_denial
+      other_recipient: allow
+  - kind: 'true'
+    key: lifted
+  - kind: equals
+    key: after_lift
+    value: allow
+complete:
+  expect:
+  - kind: equals
+    key: first
+    value: deny:verdict_deny
+  - kind: 'true'
+    key: lifted
+  - kind: equals
+    key: after_lift
+    value: allow
+cleanup: []

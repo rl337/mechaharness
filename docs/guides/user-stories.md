@@ -857,15 +857,15 @@ Harness `user_story` walks `human_review_gate` with `expect: human_review` + inj
 
 ### `fangore_insp_alert_escalation_rules` — Escalate alerts by deterministic once, repeated, and persistent rules
 
-Models may suggest what to do about an alert, but fixed rules decide how far it escalates. A one-off alert is only logged, an alert that keeps coming back is shown to the operator, and one that persists proposes a repair. Thresholds can be tuned per alert, the same count always gives the same answer, and nonsensical thresholds are refused. Decision-plane policy already separates model proposal from code decision (`fangore_decision_plane_policy`). Tracks MH-PA-06[^insp-pa-06].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `alert_escalation`: occurrence counts map to log → surface → propose with per-alert overrides; unordered thresholds are refused. No model participates. Decision-plane policy already separates model proposal from code decision (`fangore_decision_plane_policy`). Tracks MH-PA-06[^insp-pa-06].
 
 #### Implementation
 
-`AlertEscalationPolicy.evaluate(alert_id, occurrence_count)` in `alert_escalation.py` maps counts to the `AlertStage` literal (`log` → `surface` → `propose`) from default thresholds and optional per-alert overrides; thresholds must be ordered. `AlertOccurrenceCounter` is an in-memory reference counter that feeds the policy. No model participates. Complements `JudgementPolicy` / decision-plane verdicts; hosts own durable alert counts.
+`AlertEscalationPolicy` / `AlertOccurrenceCounter` via product verb `alert_escalation` (`cli_policy_verbs`). Walk-bag `in`/`out` carry policy inputs and ladder outcomes.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/alert_escalation_stages.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks `alert_escalation`; expects ladder / override_ladder / counter_walk and unordered_refused.
 
 #### Footnotes
 
@@ -1032,15 +1032,15 @@ Harness `cli` `probe` loads `plans/no_conflicts.yaml` (human-readable probe plan
 
 ### `fangore_insp_denial_equivalence` — Persist denials and block equivalent actions across retries
 
-Denied intents and side-effect classes survive graph retries and delegated paths. A denied send cannot be retried through a second provider or tool without new explicit authorization. Native deny/allow paths: `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `denial_equivalence`: a denied email.send to bob stays denied across provider/tool retries until `lift()`, while a different recipient is allowed. Native deny/allow paths: `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].
 
 #### Implementation
 
-`DenialStore` (ABC) with `InMemoryDenialStore` keys denials by `equivalent_action_digest(effect_class, target, ...)`, which ignores tool/provider names. `AuthorityGate` consults the store first (`prior_denial`) and records policy `DENY` verdicts. `lift()` is the explicit new-authorization path. Hosts bind a durable store; the in-memory store is not restart-durable.
+`DenialStore` / `InMemoryDenialStore` + `equivalent_action_digest` via product verb `denial_equivalence` (`cli_policy_verbs`); `AuthorityGate` records DENY and consults prior denials. Walk-bag `in`/`out` carry the denied intent and outcomes.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/denial_store_equivalence.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks `denial_equivalence`; expects prior_denial on equivalent retries and allow after lift.
 
 #### Footnotes
 
@@ -1145,15 +1145,15 @@ Harness `user_story` scenario `evolution_ownership_split.yaml`: environment + gr
 
 ### `fangore_insp_execution_token` — Carry principal, expiry, and trust origin on every graph invocation
 
-Every graph run needs a capability-scoped execution token: principal, expiry, trust origin, and authorization epoch alongside grants and tools. Child graphs receive attenuated authority only (`fangore_capability_envelope_narrow`, `fangore_capability_envelope_narrow`): a child cannot raise the authorization epoch, swap principal or trust origin, or outlive the parent's expiry. Tracks MH-DOTS-01[^insp-dots-01].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `execution_token` so a parent CapabilityEnvelope (principal, expiry, trust origin, authorization epoch) can only attenuate into children: a child cannot raise the epoch, swap principal or trust origin, or outlive the parent's expiry. Tracks MH-DOTS-01[^insp-dots-01].
 
 #### Implementation
 
-`CapabilityEnvelope` carries `principal`, `expires_at`, `trust_origin`, and `authorization_epoch`; `narrow()` refuses a higher epoch, a different non-None principal or trust origin, and a later (or unorderable opaque) `expires_at`, and inherits omitted fields. `is_expired()` checks ISO expiry. Run identity stays on `GraphRunContext`; allowed operations are the envelope's grants and tools.
+`CapabilityEnvelope.narrow()` via product verb `execution_token` (`cli_policy_verbs`); walk-bag registers `in`/`out` carry parent and outcomes. Related: `fangore_capability_envelope_narrow`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/execution_token_narrow.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks `execution_token`; expects attenuate ok and refuse raise/swap/outlive attempts.
 
 #### Footnotes
 
@@ -1765,15 +1765,15 @@ Harness `user_story` scenario `graph_template_soft_points.yaml`: environment + g
 
 ### `fangore_insp_tool_effect_classes` — Separate observe, prepare, and execute tool classes
 
-Read-only observers must not invoke mutating tools; preparation returns typed proposals; execution alone gates mutating calls. An operation registered under a different name must not smuggle write or external effects into an observe or prepare phase. Lifecycle observe hooks exist (`fangore_insp_lifecycle_observe`) but are not a tool-class taxonomy. Tracks MH-DOTS-03[^insp-dots-03].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `tool_phase_guard`: observe/prepare contracts cannot register write or external effects; execute may. An alias cannot smuggle a weaker phase. Lifecycle observe hooks exist (`fangore_insp_lifecycle_observe`) but are not a tool-class taxonomy. Tracks MH-DOTS-03[^insp-dots-03].
 
 #### Implementation
 
-`ToolPhase` (`observe` / `prepare` / `execute`) lives on `Tool` and `OperationContract` (default `execute`). `assert_tool_phase_allows_effects` refuses write, external, and unknown effects outside `execute`; `OperationRegistry.register` and `register_contract` call it, so a contract cannot be registered under an alias with a weaker phase.
+`OperationRegistry.register` + `OperationContract` / `ToolPhase` via product verb `tool_phase_guard` (`cli_policy_verbs`). Walk-bag `in`/`out` carry contracts and register/refuse lists.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/tool_phase_effect_guard.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks `tool_phase_guard`; expects registered / refused / alias_supported.
 
 #### Footnotes
 
@@ -1781,15 +1781,15 @@ Harness `cli` `probe` loads `plans/tool_phase_effect_guard.yaml` (human-readable
 
 ### `fangore_insp_tool_result_freshness` — Reject stale tool evidence before external decisions
 
-Tool results that drive external decisions carry source and freshness metadata. An eight-day-old CRM cache must not be silently treated as current: expired or too-old results are rejected as errors before the decision. Context freshness scoring in `fangore_jev_context_budget_pack` and `fangore_insp_context_provider` covers retrieved context; this story covers typed tool-result TTL. Tracks personal-agent inspiration MH-PA-01[^insp-pa-01].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `tool_result_freshness`: an eight-day-old CRM cache and an expired quote are rejected as errors; a live CRM result within TTL passes. Context freshness scoring in `fangore_jev_context_budget_pack` and `fangore_insp_context_provider` covers retrieved context; this story covers typed tool-result TTL. Tracks MH-PA-01[^insp-pa-01].
 
 #### Implementation
 
-`ToolResult` gains optional `source`, `observed_at`, `fetched_at`, and `expires_at`. `ToolResultFreshnessPolicy` (and module helpers `is_stale` / `reject_if_stale`) returns an error copy `stale_tool_result:<reason>:source=<source>` for expired results, results older than `max_age_seconds`, or (optionally) results without a `source`. Wiring the reject into a graph decision node is a host choice of where to call the policy.
+`ToolResultFreshnessPolicy.reject_if_stale` via product verb `tool_result_freshness` (`cli_policy_verbs`). Walk-bag `in`/`out` carry policy inputs and rejected/passed ids.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/tool_result_freshness_reject.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks `tool_result_freshness`; expects rejected_ids and passed_ids.
 
 #### Footnotes
 
