@@ -51,7 +51,6 @@ from tests.stories.cli_probes.graph_verbs import (
     GraphExecutorRunCommand,
     GraphLinkagePreflightCommand,
     GraphTransitionInspectCommand,
-    LocalPlanResumeCommand,
     RolloutGraphBuildCommand,
     TargetedRollbackSelectCommand,
     TopologyEfficiencyCommand,
@@ -69,7 +68,6 @@ from tests.stories.cli_probes.graph_verbs import (
     run_graph_executor_run,
     run_graph_linkage_preflight,
     run_graph_transition_inspect,
-    run_local_plan_resume,
     run_rollout_graph_build,
     run_targeted_rollback_select,
     run_topology_efficiency,
@@ -171,11 +169,6 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
             "convergence_ceiling",
             ConvergenceCeilingCommand,
             run_convergence_ceiling,
-        ),
-        "local_plan_resume": _probe(
-            "local_plan_resume",
-            LocalPlanResumeCommand,
-            run_local_plan_resume,
         ),
         "dynamic_subgraph_nest": _probe(
             "dynamic_subgraph_nest",

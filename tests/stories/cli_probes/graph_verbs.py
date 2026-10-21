@@ -31,14 +31,10 @@ from mechaharness.failure_attribution import (
 from mechaharness.graph import (
     DependencyEdge,
     ExecutionGraph,
-    FanInItem,
     GraphNode,
-    GraphStore,
     NodeStatus,
     VerifierResult,
     bounded_repair,
-    hierarchical_fan_in,
-    merge_branch_artifacts,
     qualify_validator,
     validator_qualified,
 )
@@ -61,12 +57,6 @@ from mechaharness.harness.pass_through import PassThroughHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.linkage_resolver import DefaultLinkageResolver
-from mechaharness.operation_registry import (
-    NodeContractBind,
-    OperationContract,
-    ResourceScope,
-    default_operations,
-)
 from mechaharness.rollout_graph import build_rollout_graph
 from mechaharness.tools.base import ToolRegistry
 from tests.stories.cli_probes.graph_cost import with_graph_cost
@@ -561,17 +551,6 @@ def run_convergence_ceiling(body: ConvergenceCeilingCommand) -> dict[str, Any]:
     }
 
 
-class LocalPlanResumeCommand(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    goal: str = "ship patch"
-    state_revision: str = "r1"
-    evidence_refs: list[str] = Field(default_factory=list)
-    satisfied: list[str] = Field(default_factory=list)
-    fan_in_budget: int = 4
-    branches: list[dict[str, Any]] = Field(default_factory=list)
-
-
 class DynamicSubgraphNestCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -637,78 +616,6 @@ def _compute_executor(registry: GraphNodeRunnerRegistry) -> GraphExecutor:
             return registry
 
     return cast(GraphExecutor, get_injector(Cfg()).inject(GraphExecutor))
-
-
-def run_local_plan_resume(body: LocalPlanResumeCommand) -> dict[str, Any]:
-    ops = default_operations()
-    ops.register(
-        "write_file",
-        lambda **_: None,
-        contract=OperationContract(
-            name="write_file",
-            version="1",
-            write_scopes=[ResourceScope(name="app.py", mode="write")],
-            preconditions=["approved"],
-            external_effects="write",
-        ),
-    )
-    ops.bind_node(
-        NodeContractBind(
-            operation="write_file",
-            contract_version="1",
-            state_revision=body.state_revision,
-            planned_effects="write",
-            evidence_refs=list(body.evidence_refs),
-        )
-    )
-    stale = ops.recheck_preconditions("write_file", satisfied=list(body.satisfied))
-    graph = ExecutionGraph(goal=body.goal)
-    graph.add_node(
-        GraphNode(
-            id="produce",
-            status=NodeStatus.SUCCEEDED,
-            write_scopes=["app.py"],
-            payload={"path": "app.py", "content": "v1"},
-        )
-    )
-    graph.add_node(
-        GraphNode(id="consume", write_scopes=["app.py"], status=NodeStatus.PENDING)
-    )
-    graph.add_dependency(
-        DependencyEdge(
-            from_node="produce",
-            to_node="consume",
-            types=["data", "resource"],
-            reason="consume needs produce output; exclusive write",
-            evidence_ref="edge:1",
-        )
-    )
-    store = GraphStore(InMemoryEventLog())
-    store.save(graph, run_id="story-graph", boundary="dispatch")
-    restored = store.latest(run_id="story-graph")
-    assert restored is not None
-    ready = [n.id for n in restored.ready_nodes()]
-    fan = hierarchical_fan_in(
-        [
-            FanInItem(id="ok", source_ref="b1", payload={"id": "x"}),
-            FanInItem(id="dup", source_ref="b2", payload={"id": "x"}),
-            FanInItem(id="bad", source_ref="b3", payload={"id": "y"}, failed=True),
-        ],
-        budget=body.fan_in_budget,
-    )
-    branches = body.branches or [
-        {"path": "app.py", "content": "a", "status": "ok"},
-        {"path": "app.py", "content": "b", "status": "ok"},
-    ]
-    merged = merge_branch_artifacts(base_revision="r0", branches=branches)
-    return {
-        "stale_preconditions_exactly": sorted(stale),
-        "ready_exactly": sorted(ready),
-        "dependency_justified": all(e.reason and e.types for e in restored.edges),
-        "fan_in_failures_exactly": sorted(fan.failures),
-        "merge_conflicts_exactly": sorted(merged["conflicts"]),
-        "recovery_boundary": store.latest_boundary(run_id="story-graph"),
-    }
 
 
 async def run_dynamic_subgraph_nest(
@@ -1011,7 +918,6 @@ __all__ = [
     "GraphExecutorRunCommand",
     "GraphLinkagePreflightCommand",
     "GraphTransitionInspectCommand",
-    "LocalPlanResumeCommand",
     "RolloutGraphBuildCommand",
     "TargetedRollbackSelectCommand",
     "TopologyEfficiencyCommand",
@@ -1029,7 +935,6 @@ __all__ = [
     "run_graph_executor_run",
     "run_graph_linkage_preflight",
     "run_graph_transition_inspect",
-    "run_local_plan_resume",
     "run_rollout_graph_build",
     "run_targeted_rollback_select",
     "run_topology_efficiency",

@@ -2117,15 +2117,15 @@ user_story judge; expect final_action=local_small.
 
 ### `fangore_local_plan_resume` — Resume a durable local plan after a crash
 
-A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints — not chat — must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes. Incompatible harness or graph fingerprints must refuse silent continue. See inspiration requirements for durable long-running work[^insp-resume].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. A local plan's require_file node fails when `/work/input.txt` is missing on the virtual filesystem. He observes that failure, seeds the file into MemoryFilesystem, and resumes the same checkpointed `run_id` (held on walk-bag `ctx`) so the node succeeds. Checkpoints — not chat — carry the plan across the gap. Incompatible harness fingerprints remain covered by `fangore_insp_durable_resume`. See inspiration requirements for durable long-running work[^insp-resume].
 
 #### Implementation
 
-`GraphStore` checkpoint + `hierarchical_fan_in` / `merge_branch_artifacts` / operation preconditions. `CliInstrumentor` verb `local_plan_resume`.
+`LocalPlanResumeVerb` (`local_plan_resume`) in `cli_policy_verbs`: shared `MemoryFilesystem` + `GraphExecutor` checkpoint store; fail on missing path; seed; re-arm failed node; `resume=True` with the same `run_id` on walk-bag `ctx`. Fan-in / merge / precondition helpers stay available as library units; fingerprint refuse is `fangore_insp_durable_resume`.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/checkpoint_fan_in_merge.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` walks `local_plan_resume`; expects first_status=failed (missing_file), resume_status=ok, file_content, and stable run_id.
 
 #### Footnotes
 
