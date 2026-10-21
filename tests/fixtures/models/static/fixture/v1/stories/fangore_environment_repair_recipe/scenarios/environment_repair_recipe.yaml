@@ -1,18 +1,15 @@
 # user story: fangore_environment_repair_recipe
-# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
-# with the `environment_repair` recipe.
-# Before dependent work continues, Fangore runs the environment-repair Agentic Recipe:
-# diagnose missing substrate, attempt a bounded repair, then recheck.
-# The recipe must expand to a concrete plan without calling a model.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
 graph:
   recipe: environment_repair
+  bind: binds/environment_repair.yaml
 steps:
 - do:
-    instantiate_recipe:
+    run_recipe:
+      name: environment_repair
       path: binds/environment_repair.yaml
 complete:
   expect:
@@ -33,4 +30,17 @@ complete:
   - kind: equals
     key: recipe_category
     value: agentic_recipe
+  - kind: 'true'
+    key: environment_ok
+  - kind: 'true'
+    key: recheck_ok
+  - kind: equals
+    key: repair_attempts
+    value: 1
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []

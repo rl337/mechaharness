@@ -1,15 +1,17 @@
 # Environment-repair Agentic Recipe: diagnose → repair env → recheck.
-# Soft points not listed here keep the catalog defaults.
-
 name: environment_repair
 summary: Expand environment_repair before dependent work continues.
 goal: repair missing secrets route
-
 soft_bindings:
-  # Which node implementation runs each step
   diagnose_kind: env_diagnose
   repair_kind: env_repair
   recheck_kind: env_recheck
-  # Recheck succeeds when the environment reports ready
   acceptance:
   - environment_ok
+stop_contract:
+  version: "1"
+  max_iterations: 2
+inputs:
+  missing_capabilities:
+  - secrets.route
+  repairs_needed: 1

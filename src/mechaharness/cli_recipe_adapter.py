@@ -749,6 +749,149 @@ class IndependentReviewRecipeAdapter(CliRecipeAdapter):
         )
 
 
+class EnvironmentRepairRecipeAdapter(CliRecipeAdapter):
+    """Execute ``environment_repair``: diagnose → repair → recheck."""
+
+    name = "environment_repair"
+
+    async def run(self, body: RunRecipeCommand, runtime: Any) -> Any:
+        from pathlib import Path
+
+        from mechaharness.cli_instrumentor import CliStepResult
+        from mechaharness.environment_repair_runner import environment_repair_runners
+        from mechaharness.graph_templates import GraphTemplateParams
+        from mechaharness.recipe_bind import RecipeBind, observe_instantiated_recipe
+        from mechaharness.recipe_runner import get_recipe, list_recipes, run_recipe
+
+        catalog = {row["name"] for row in list_recipes()}
+        soft: dict[str, Any] = dict(body.soft_bindings or {})
+        inputs: dict[str, Any] = {}
+        acceptance: list[Any] = []
+        goal = "environment_repair"
+        bind: RecipeBind | None = None
+        if body.path:
+            base = getattr(runtime, "bind_base_dir", None)
+            path = Path(body.path)
+            if not path.is_absolute() and base is not None:
+                path = Path(base) / path
+            bind = RecipeBind.from_path(path)
+            soft = {**bind.soft_bindings, **soft}
+            inputs = dict(bind.inputs)
+            acceptance = list(bind.acceptance)
+            goal = bind.goal or bind.name or goal
+        params = GraphTemplateParams(
+            goal=goal,
+            soft_bindings=soft,
+            inputs=inputs,
+            acceptance=acceptance,
+            stop_contract=bind.stop_contract if bind is not None else None,
+        )
+        before = len(runtime.event_log.query())
+        result = await run_recipe(
+            "environment_repair",
+            params=params,
+            runners=environment_repair_runners(),
+            event_log=runtime.event_log,
+            run_id="cli:environment_repair",
+        )
+        after_events = runtime.event_log.query()[before:]
+        recheck = result.graph.nodes.get("recheck")
+        recheck_payload = dict(recheck.payload) if recheck else {}
+        shape_fields: dict[str, Any] = {}
+        if bind is not None:
+            template = get_recipe("environment_repair")
+            observed = observe_instantiated_recipe(bind, result.graph, template)
+            shape_fields = dict(observed["fields"])
+        fields = {
+            **shape_fields,
+            "template_name": "environment_repair",
+            "environment_ok": bool(recheck_payload.get("environment_ok")),
+            "recheck_ok": bool(recheck_payload.get("recheck_ok")),
+            "repair_attempts": int(recheck_payload.get("repair_attempts") or 0),
+            "budget_spent": float(result.budget_spent),
+        }
+        return CliStepResult(
+            verb="run_recipe",
+            text=None,
+            status=result.status,
+            event_types=[e.type for e in after_events],
+            clock_iso=runtime.datetime_service.now_utc_iso(),
+            recipe_in_catalog="environment_repair" in catalog,
+            subgraph_node_ids=list(result.graph.nodes),
+            cost_units=float(result.budget_spent),
+            fields=fields,
+        )
+
+
+class InitializePreflightRecipeAdapter(CliRecipeAdapter):
+    """Execute ``initialize_preflight``: linkage → capability → checkpoint → ready."""
+
+    name = "initialize_preflight"
+
+    async def run(self, body: RunRecipeCommand, runtime: Any) -> Any:
+        from pathlib import Path
+
+        from mechaharness.cli_instrumentor import CliStepResult
+        from mechaharness.graph_templates import GraphTemplateParams
+        from mechaharness.initialize_preflight_runner import initialize_preflight_runners
+        from mechaharness.recipe_bind import RecipeBind, observe_instantiated_recipe
+        from mechaharness.recipe_runner import get_recipe, list_recipes, run_recipe
+
+        catalog = {row["name"] for row in list_recipes()}
+        soft: dict[str, Any] = dict(body.soft_bindings or {})
+        inputs: dict[str, Any] = {}
+        goal = "initialize_preflight"
+        bind: RecipeBind | None = None
+        if body.path:
+            base = getattr(runtime, "bind_base_dir", None)
+            path = Path(body.path)
+            if not path.is_absolute() and base is not None:
+                path = Path(base) / path
+            bind = RecipeBind.from_path(path)
+            soft = {**bind.soft_bindings, **soft}
+            inputs = dict(bind.inputs)
+            goal = bind.goal or bind.name or goal
+        params = GraphTemplateParams(
+            goal=goal,
+            soft_bindings=soft,
+            inputs=inputs,
+        )
+        before = len(runtime.event_log.query())
+        result = await run_recipe(
+            "initialize_preflight",
+            params=params,
+            runners=initialize_preflight_runners(),
+            event_log=runtime.event_log,
+            run_id="cli:initialize_preflight",
+        )
+        after_events = runtime.event_log.query()[before:]
+        ready = result.graph.nodes.get("ready")
+        ready_payload = dict(ready.payload) if ready else {}
+        shape_fields: dict[str, Any] = {}
+        if bind is not None:
+            template = get_recipe("initialize_preflight")
+            observed = observe_instantiated_recipe(bind, result.graph, template)
+            shape_fields = dict(observed["fields"])
+        fields = {
+            **shape_fields,
+            "template_name": "initialize_preflight",
+            "preflight_ok": bool(ready_payload.get("preflight_ok")),
+            "ready": bool(ready_payload.get("ready")),
+            "budget_spent": float(result.budget_spent),
+        }
+        return CliStepResult(
+            verb="run_recipe",
+            text=None,
+            status=result.status,
+            event_types=[e.type for e in after_events],
+            clock_iso=runtime.datetime_service.now_utc_iso(),
+            recipe_in_catalog="initialize_preflight" in catalog,
+            subgraph_node_ids=list(result.graph.nodes),
+            cost_units=float(result.budget_spent),
+            fields=fields,
+        )
+
+
 def default_cli_recipe_adapter_classes() -> dict[str, type[CliRecipeAdapter]]:
     return {
         HarnessRunRecipeAdapter.name: HarnessRunRecipeAdapter,
@@ -759,6 +902,8 @@ def default_cli_recipe_adapter_classes() -> dict[str, type[CliRecipeAdapter]]:
         VerifyRepairRecipeAdapter.name: VerifyRepairRecipeAdapter,
         BoundedRetryRecipeAdapter.name: BoundedRetryRecipeAdapter,
         IndependentReviewRecipeAdapter.name: IndependentReviewRecipeAdapter,
+        EnvironmentRepairRecipeAdapter.name: EnvironmentRepairRecipeAdapter,
+        InitializePreflightRecipeAdapter.name: InitializePreflightRecipeAdapter,
     }
 
 
@@ -784,8 +929,10 @@ __all__ = [
     "ContextPackRecipeAdapter",
     "ConversationalToolLoopRecipeAdapter",
     "DecisionPlaneRecipeAdapter",
+    "EnvironmentRepairRecipeAdapter",
     "HarnessRunRecipeAdapter",
     "IndependentReviewRecipeAdapter",
+    "InitializePreflightRecipeAdapter",
     "VerifyRepairRecipeAdapter",
     "default_cli_recipe_adapter_classes",
     "resolve_cli_recipe_adapters",

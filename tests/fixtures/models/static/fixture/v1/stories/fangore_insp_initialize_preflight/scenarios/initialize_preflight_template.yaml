@@ -1,18 +1,15 @@
 # user story: fangore_insp_initialize_preflight
-# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
-# with the `initialize_preflight` recipe.
-# Fangore starts substantive graphs only after the initialize/preflight Agentic Recipe
-# completes linkage, capability, and checkpoint checks.
-# Accepts WalkingLabs L06 guidance.
 kind: user_story
 environment:
   family: pass_through
   backend: mock
 graph:
   recipe: initialize_preflight
+  bind: binds/initialize_preflight.yaml
 steps:
 - do:
-    instantiate_recipe:
+    run_recipe:
+      name: initialize_preflight
       path: binds/initialize_preflight.yaml
 complete:
   expect:
@@ -28,4 +25,15 @@ complete:
     - capability_check
     - checkpoint_compat
     - ready
+  - kind: 'true'
+    key: preflight_ok
+  - kind: equals
+    key: template_name
+    value: initialize_preflight
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
 cleanup: []
