@@ -107,6 +107,7 @@ from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
 from mechaharness.inference_capture import InferenceCapture, empty_inference_capture
+from mechaharness.job_lane_broker import JobLaneBroker
 from mechaharness.lifecycle_extension import (
     LifecycleExtensionRegistry,
     empty_lifecycle_extension_registry,
@@ -443,6 +444,14 @@ class MechaHarnessConfig(Config):
             AccessControl, self.get_access_control(), make_access_control
         )
 
+        def make_job_lane_broker(injector: Injector) -> JobLaneBroker:
+            del injector
+            return JobLaneBroker()
+
+        self._register_override_or_factory(
+            JobLaneBroker, self.get_job_lane_broker(), make_job_lane_broker
+        )
+
         def make_cost_accountant(injector: Injector) -> CostAccountant:
             return InMemoryCostAccountant(event_log=injector.inject(EventLog))
 
@@ -638,6 +647,10 @@ class MechaHarnessConfig(Config):
 
     def get_access_control(self) -> AccessControl | type[AccessControl] | None:
         """Optional ``AccessControl`` override. ``None`` → inject ``EventLog``."""
+        return None
+
+    def get_job_lane_broker(self) -> JobLaneBroker | type[JobLaneBroker] | None:
+        """Optional ``JobLaneBroker`` override. ``None`` → empty catalog factory."""
         return None
 
     def get_access_policy(self) -> GrantPolicyLike:

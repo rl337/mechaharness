@@ -19,6 +19,7 @@ from pyiv.time import DateTimeService, MockDateTimeService
 
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
+from mechaharness.job_lane_broker import JobLaneBroker
 from mechaharness.cli_commands import (
     AdvanceClockCommand,
     InferCommand,
@@ -302,6 +303,7 @@ class CliInstrumentor:
         budget_policy: BudgetPolicy | None = None,
         grants: Sequence[object] | None = None,
         access_policy: GrantPolicyLike | None = None,
+        job_lane_broker: JobLaneBroker | None = None,
     ) -> None:
         self._completer = completer
         self._model = model
@@ -319,6 +321,7 @@ class CliInstrumentor:
         self._budget_policy = budget_policy
         self._grants = list(grants) if grants is not None else None
         self._access_policy = access_policy
+        self._job_lane_broker = job_lane_broker
         store = event_log or InMemoryEventLog()
         stamped = StampingEventLog(store, self._datetime)
         self._log: EventLog = tapping_event_log(
@@ -390,6 +393,10 @@ class CliInstrumentor:
     @property
     def access_policy(self) -> GrantPolicyLike | None:
         return self._access_policy
+
+    @property
+    def job_lane_broker(self) -> JobLaneBroker | None:
+        return self._job_lane_broker
 
     def resolve_budget_policy(
         self,

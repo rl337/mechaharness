@@ -144,6 +144,7 @@ class UserStoryHarness:
             budget_policy_from_mapping,
             capability_envelope_from_mapping,
         )
+        from mechaharness.job_lane_broker import job_lane_broker_from_mapping
 
         kwargs: dict = {}
         if env.access_policy is not None:
@@ -160,6 +161,11 @@ class UserStoryHarness:
         budget = budget_policy_from_mapping(env.budget)
         if budget is not None:
             kwargs["budget_policy"] = budget
+        if env.job_lanes is not None or env.lane_grants is not None:
+            kwargs["job_lane_broker"] = job_lane_broker_from_mapping(
+                env.job_lanes,
+                env.lane_grants,
+            )
         return kwargs
 
     def _build_judge_provider(

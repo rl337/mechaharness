@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **JobLaneBroker (JL-01..10):** lane-scoped run sequences, WalkBags, exposure /
+  grants / handoff, and authorized `observe` (`mechaharness.job_lane_broker`).
+  Config bind via `get_job_lane_broker()`; CLI verbs `lane_publish` /
+  `lane_observe` / `lane_grant` / `lane_handoff`; story YAML
+  `environment.job_lanes` + step `lane` / `run_id`. Matrix stories
+  `fangore_job_lane_*`; `fangore_insp_cross_task_isolation` retargeted.
+  `CrossTaskIsolationGuard` remains as a deprecated shim.
 - **Product CLI verb `transactional_resume`:** crash-window durable coding-job
   resume via `host_graph_executor` + `ArmedCrashProbe` (DR-10). Wave 2 P1
   stories (`fangore_tdr_crash_*`) migrate onto `kind: user_story`.

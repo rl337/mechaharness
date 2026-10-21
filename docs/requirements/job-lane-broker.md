@@ -5,8 +5,8 @@ cross-lane authorization. Replaces the interim “cross-task isolation guard”
 framing (MH-DOTS-07) with an intrinsic broker: isolation is not a special
 CLI verb — every cross-run / cross-lane read goes through the broker.
 
-**Status:** design accepted for implementation; types/shim land with owning
-user stories. Inspiration map MH-DOTS-07 remains the provenance link.
+**Status:** implemented (types, Config DI, CLI verbs, JL story matrix). Inspiration
+map MH-DOTS-07 remains the provenance link.
 
 ## Vocabulary
 
@@ -92,15 +92,15 @@ Notes:
 Retire the single intervening-task bleed probe as the sole MH-DOTS-07 proof.
 Prefer focused stories (ids provisional):
 
-| Planned id | Claim |
-|------------|--------|
+| Id | Claim |
+|----|--------|
 | `fangore_job_lane_same_lane_lineage` | Later run in lane A observes earlier run’s exposed key |
 | `fangore_job_lane_cross_deny` | Lane B observe of A’s key denies without grant |
 | `fangore_job_lane_meta_allowlist` | Meta open only to listed lanes |
 | `fangore_job_lane_key_expose_artifacts` | `FileArtifact` / URL key observe after exposure + grant |
 | `fangore_job_lane_observe_before` | `before(t)` selector returns last eligible run |
 | `fangore_job_lane_handoff_oneshot` | `HandoffRecord` unlocks named refs once |
-| `fangore_insp_cross_task_isolation` | Superseded / retargeted narrative → points at matrix above |
+| `fangore_insp_cross_task_isolation` | Retargeted narrative → JobLaneBroker + matrix above |
 
 Keep related stories distinct:
 

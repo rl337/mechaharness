@@ -1,45 +1,27 @@
-"""Hard task-scoped visibility with explicit typed handoffs (MH-DOTS-07).
+"""Deprecated task-scoped visibility shim (MH-DOTS-07).
 
-Task-local evidence, memory references, and approvals must not bleed into
-intervening tasks. :class:`CrossTaskIsolationGuard` enforces
-:class:`~mechaharness.isolation.isolation_contract.IsolationContract` input refs
-per task; the only way to share a task-local ref is a
-:class:`~mechaharness.handoff_record.HandoffRecord` that names it in
-``evidence_refs``::
-
-    >>> from mechaharness.isolation.cross_task_isolation import (
-    ...     CrossTaskIsolationGuard, IsolationViolation,
-    ... )
-    >>> from mechaharness.handoff_record import HandoffRecord
-    >>> from mechaharness.isolation.isolation_contract import IsolationContract
-    >>> guard = CrossTaskIsolationGuard()
-    >>> guard.open_task("a", IsolationContract(input_context_refs=["goal"]))
-    >>> guard.open_task("b", IsolationContract(input_context_refs=["goal"]))
-    >>> guard.publish("a", "memo:secret")
-    >>> guard.can_read("b", "memo:secret")
-    False
-    >>> guard.share("a", "b", HandoffRecord(evidence_refs=["memo:secret"]))
-    >>> guard.can_read("b", "memo:secret")
-    True
-    >>> guard.assert_readable("b", "memo:other")  # doctest: +IGNORE_EXCEPTION_DETAIL
-    Traceback (most recent call last):
-        ...
-    IsolationViolation: task 'b' cannot read 'memo:other'
+Prefer :class:`~mechaharness.job_lane_broker.JobLaneBroker` for product
+lane sequences, exposure, and ``observe``. This guard remains for interim
+call sites and unit tests; new work should not extend it.
 """
 
 from __future__ import annotations
 
-from mechaharness.core.exceptions import MechaHarnessError
 from mechaharness.handoff_record import HandoffRecord
 from mechaharness.isolation.isolation_contract import IsolationContract
+from mechaharness.job_lane_broker import IsolationViolation
 
-
-class IsolationViolation(MechaHarnessError):
-    """A task touched a reference outside its isolation scope."""
+__all__ = [
+    "CrossTaskIsolationGuard",
+    "IsolationViolation",
+]
 
 
 class CrossTaskIsolationGuard:
-    """Per-task visible refs: contract inputs, own publications, shared handoffs."""
+    """Per-task visible refs: contract inputs, own publications, shared handoffs.
+
+    Deprecated — use :class:`~mechaharness.job_lane_broker.JobLaneBroker`.
+    """
 
     def __init__(self) -> None:
         self._visible: dict[str, set[str]] = {}
