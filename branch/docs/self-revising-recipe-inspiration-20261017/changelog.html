@@ -135,6 +135,9 @@ candidate lists.</p></li>
 <code class="docutils literal notranslate"><span class="pre">DecisionPlaneRecipeAdapter</span></code> (<code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>). Restores
 <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_{projection,policy,shadow,telemetry}</span></code> and promotes
 recipe / model_policy stories off instantiate-only (G0).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code> / <code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code> execute:</strong> fixture runners +
+<code class="docutils literal notranslate"><span class="pre">VerifyRepairRecipeAdapter</span></code> / <code class="docutils literal notranslate"><span class="pre">BoundedRetryRecipeAdapter</span></code> promote those
+stories to <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> outcome walks (G1 batch 1).</p></li>
 </ul>
 </section>
 <section id="removed">

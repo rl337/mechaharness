@@ -65,15 +65,16 @@ recipe, model_policy.
 Catalog already has templates; stories only instantiate. Add runners +
 `run_recipe` / durable walks:
 
-| Recipe | Shape-only stories to promote |
-|--------|-------------------------------|
-| `verify_repair` | `fangore_verify_repair_recipe`, `fangore_bounded_repair_loop` (probe) |
-| `bounded_retry` | `fangore_bounded_retry_recipe` |
-| `independent_review` | `fangore_insp_independent_review`, req-review shape |
-| `environment_repair` | `fangore_environment_repair_recipe` |
-| `initialize_preflight` | `fangore_insp_initialize_preflight` |
-| `produce_critique_refine` | `fangore_insp_produce_critique_refine` |
-| `safety_eval` | `taloneth_insp_safety_eval_recipes` |
+| Recipe | Stories | Status |
+|--------|---------|--------|
+| `verify_repair` | `fangore_verify_repair_recipe` | **done** (batch 1) |
+| `bounded_retry` | `fangore_bounded_retry_recipe` | **done** (batch 1) |
+| `verify_repair` | `fangore_bounded_repair_loop` (probe) | next |
+| `independent_review` | `fangore_insp_independent_review`, req-review shape | pending |
+| `environment_repair` | `fangore_environment_repair_recipe` | pending |
+| `initialize_preflight` | `fangore_insp_initialize_preflight` | pending |
+| `produce_critique_refine` | `fangore_insp_produce_critique_refine` | pending |
+| `safety_eval` | `taloneth_insp_safety_eval_recipes` | pending |
 
 ### G2 — Context / RAG lane (extend G0 pattern)
 

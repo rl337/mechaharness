@@ -239,30 +239,42 @@ recipe, model_policy.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Recipe</p></th>
-<th class="head"><p>Shape-only stories to promote</p></th>
+<th class="head"><p>Stories</p></th>
+<th class="head"><p>Status</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_verify_repair_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code> (probe)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_verify_repair_recipe</span></code></p></td>
+<td><p><strong>done</strong> (batch 1)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code></p></td>
+<td><p><strong>done</strong> (batch 1)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code> (probe)</p></td>
+<td><p>next</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_independent_review</span></code>, req-review shape</p></td>
+<td><p>pending</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">environment_repair</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">environment_repair</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_environment_repair_recipe</span></code></p></td>
+<td><p>pending</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">initialize_preflight</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">initialize_preflight</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_initialize_preflight</span></code></p></td>
+<td><p>pending</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_produce_critique_refine</span></code></p></td>
+<td><p>pending</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">safety_eval</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">safety_eval</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_safety_eval_recipes</span></code></p></td>
+<td><p>pending</p></td>
 </tr>
 </tbody>
 </table>
