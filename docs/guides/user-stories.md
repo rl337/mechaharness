@@ -421,15 +421,15 @@ Harness `user_story` scenario `describe_mock.yaml`: environment + graph + steps 
 
 ### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 
-After a failed verification, Fangore allows a limited repair-and-retry cycle. When attempts are exhausted, the node stays failed — it does not loop forever. Complements `fangore_convergence_ceiling` for judge loops and `fangore_insp_verification_gate` for completion versus answer-generated. See inspiration requirements for verification loops[^insp-repair].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. After a failed verification he runs Agentic Recipe `verify_repair` with a stop contract of three repair attempts. One repair makes verification succeed — the loop does not run forever. Complements `fangore_verify_repair_recipe` for the recipe tile and `fangore_convergence_ceiling` for judge loops. [^insp-repair]
 
 #### Implementation
 
-`bounded_repair` in `mechaharness.graph` (VER-03). `CliInstrumentor` verb `bounded_repair_loop`.
+Agentic Recipe `verify_repair` via `VerifyRepairTemplate` / `verify_repair_runner` and product verb `run_recipe` (`VerifyRepairRecipeAdapter`). Library helper `bounded_repair` remains unit-covered for VER-03.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/verify_repair_succeeds.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `verify_repair_succeeds.yaml` drives `run_recipe`; hard expects on final_status / repair_attempts.
 
 #### Footnotes
 

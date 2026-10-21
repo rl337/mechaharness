@@ -277,7 +277,7 @@ _Historical list. Durable/budget execute
 ([G4](./user-story-recipe-expansion.md));
 `fangore_bounded_repair_loop` → verify_repair in G1._ · **18** stories
 
-- [ ] `fangore_bounded_repair_loop`
+- [x] `fangore_bounded_repair_loop`
 - [ ] `fangore_convergence_ceiling`
 - [ ] `fangore_graph_executor`
 - [ ] `fangore_graph_linkage_preflight`
