@@ -7,6 +7,7 @@ case bags. See ``docs/reference/access.md`` and ``docs/reference/budget.md``.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -1121,6 +1122,15 @@ class LaneHandoffVerb(CliVerb):
         }
 
 
+def _live_authorization_epoch_fn(epoch: int) -> Callable[[], int]:
+    """Typed zero-arg epoch source for ``GraphExecutor.live_authorization_epoch``."""
+
+    def _live() -> int:
+        return epoch
+
+    return _live
+
+
 class GraphWalkCommand(BaseModel):
     """Stepped graph control: start / step / until / continue / set_live_epoch (SG-09)."""
 
@@ -1172,7 +1182,7 @@ class GraphWalkVerb(CliVerb):
             executor = session["executor"]
             assert isinstance(executor, GraphExecutor)
             epoch = int(session["live_epoch"])
-            executor.live_authorization_epoch = lambda e=epoch: e
+            executor.live_authorization_epoch = _live_authorization_epoch_fn(epoch)
             return {
                 "status": "ok",
                 "action": "set_live_epoch",
@@ -1229,7 +1239,9 @@ class GraphWalkVerb(CliVerb):
             if live is None and runtime.capability_envelope is not None:
                 live = runtime.capability_envelope.authorization_epoch
             if live is not None:
-                executor.live_authorization_epoch = lambda e=int(live): e
+                executor.live_authorization_epoch = _live_authorization_epoch_fn(
+                    int(live)
+                )
 
             graph = ExecutionGraph(goal=body.goal)
             for raw in nodes_spec:
@@ -1319,7 +1331,7 @@ class GraphWalkVerb(CliVerb):
         if body.live_authorization_epoch is not None:
             session["live_epoch"] = int(body.live_authorization_epoch)
             epoch = int(session["live_epoch"])
-            executor.live_authorization_epoch = lambda e=epoch: e
+            executor.live_authorization_epoch = _live_authorization_epoch_fn(epoch)
 
         if body.action == "step":
             control = RunControl(mode="one_step")
