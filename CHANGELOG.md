@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **MCP progress paths:** ``tools/call`` with ``_meta.progressToken`` emits
+  ``notifications/progress`` messages such as
+  ``guided_coding › plan_tile › work_item 1 › tool_round 2 › write_file``
+  during generator local work (keeps Cursor stdio idle timeout alive).
 - **Instruction todo plan (`instruction_todo_plan`):** classify oneshot vs
   ordered list, refine conflicts, pre / per-item / post-list acceptance.
   Optional `scope_refinement` / `list_refinement` guidance is requested by

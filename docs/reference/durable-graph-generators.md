@@ -158,6 +158,17 @@ burst (oneshot or todo list with acceptance) + audited gate payload on
 answers. See [guided coding](./graph-templates/guided-coding.md) and
 [instruction todo plan](./graph-templates/instruction-todo-plan.md).
 
+### MCP progress (stdio keep-alive)
+
+When the client sends ``_meta.progressToken`` on ``tools/call``, the driver
+emits MCP ``notifications/progress`` while work runs. Messages use a recipe
+chain path, for example::
+
+    guided_coding › plan_tile › work_item 1 › tool_round 2 › write_file
+
+Cursor's IDE idle timeout resets on these notifications. Progress is optional
+when the token is absent (offline / ScriptedDriver).
+
 ## Related
 
 - [Architecture](../architecture.md) — structural map

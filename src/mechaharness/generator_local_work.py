@@ -30,6 +30,11 @@ from mechaharness.instruction_plan import (
     guidance_asks_to_payloads,
     verify_acceptance,
 )
+from mechaharness.mcp_progress import (
+    coding_progress_prefix,
+    get_mcp_progress,
+    report_mcp_progress,
+)
 from mechaharness.tools.base import ToolRegistry
 
 _PLAN_RECIPES = frozenset(
@@ -113,8 +118,16 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             }
 
         item_results: list[dict[str, Any]] = []
-        for item in plan.items:
-            item_out = await self._run_item(record, plan, item)
+        prefix = coding_progress_prefix(record.recipe_id)
+        progress = get_mcp_progress()
+        if progress is not None:
+            progress.base_segments = list(prefix)
+            progress.report("plan")
+        for item_index, item in enumerate(plan.items, start=1):
+            report_mcp_progress(f"work_item {item_index}")
+            item_out = await self._run_item(
+                record, plan, item, work_item_index=item_index, path_prefix=prefix
+            )
             if item_out.get("result") == "failed":
                 return {
                     **item_out,
@@ -170,6 +183,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         record: GeneratorRunRecord,
         plan: InstructionPlan,
         item: TodoItem,
+        *,
+        work_item_index: int = 1,
+        path_prefix: list[str] | None = None,
     ) -> dict[str, Any]:
         guidance_text = _latest_guidance_text(record)
         goal = item.instruction
@@ -211,9 +227,30 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             result = tool.handler(**arguments)
             return str(result)
 
+        root = list(path_prefix or coding_progress_prefix(record.recipe_id))
+        work_seg = f"work_item {work_item_index}"
+
+        def on_progress(
+            *,
+            tool_round: int,
+            phase: str | None = None,
+            tool: str | None = None,
+        ) -> None:
+            round_seg = f"tool_round {tool_round}"
+            if tool is not None:
+                report_mcp_progress(work_seg, round_seg, str(tool))
+            else:
+                report_mcp_progress(work_seg, round_seg, str(phase or "inference"))
+
+        # Keep sticky base as recipe (+ plan_tile); work_item is per report.
+        progress = get_mcp_progress()
+        if progress is not None:
+            progress.base_segments = list(root)
+
         loop_runner = ConversationalToolLoopRunner(
             complete=self._complete,
             dispatch_tool=dispatch_tool,
+            on_progress=on_progress,
         )
         max_iterations = int(
             (record.inputs or {}).get("max_iterations", self._max_iterations)
@@ -226,6 +263,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             )
         )
         tools_node = graph.nodes["tools"]
+        # Looping is owned by ConversationalToolLoopRunner; outer repeating
+        # would leave the graph incomplete after an interior success.
+        tools_node.repeating = False
         tools_node.payload = {
             **dict(tools_node.payload or {}),
             "messages": messages,

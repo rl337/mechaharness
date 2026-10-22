@@ -11,6 +11,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -97,9 +98,10 @@ def build_coding_tool_registry(
         return json.dumps(hits[:max_matches])
 
     def run_tests(args: str = "-q") -> str:
+        # Use the active interpreter (MCP/venv), not a bare `python` on PATH.
         return _run_process(
             paths,
-            ["python", "-m", "pytest", *args.split()],
+            [sys.executable, "-m", "pytest", *args.split()],
             grant_label="run_tests",
         )
 
