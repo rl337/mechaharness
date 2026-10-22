@@ -139,11 +139,15 @@ pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories
 <span class="c1"># Full suite (unit + stories)</span>
 pytest<span class="w"> </span>-q
 
-<span class="c1"># Live OpenAI-compat — same tests, real HTTP</span>
+<span class="c1"># Live — every model-using story against real reason + judge hosts</span>
+<span class="c1"># (HTTP twins + static infer/judge walks; softens cassette-exact token counts)</span>
+<span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w">   </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w">   </span><span class="nv">MECHA_MODEL</span><span class="o">=</span>qwen3-30b-thinking<span class="w">   </span><span class="nv">MECHA_JUDGE_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8009<span class="w">   </span><span class="nv">MECHA_JUDGE_MODEL</span><span class="o">=</span>laya<span class="w">   </span><span class="nv">MECHA_MAX_TOKENS</span><span class="o">=</span><span class="m">1024</span><span class="w">   </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories
+
+<span class="c1"># Live OpenAI-compat only</span>
 <span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_STORY_MODEL</span><span class="o">=</span>openai_compat/qwen3-30b-thinking<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8000/v1<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
 
-<span class="c1"># Live System One</span>
+<span class="c1"># Live System One only</span>
 <span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_STORY_MODEL</span><span class="o">=</span>systemone/laya<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="nv">MECHA_JUDGE_BASE_URL</span><span class="o">=</span>http://127.0.0.1:8009<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>refund_verdict
 
@@ -164,11 +168,11 @@ pytest<span class="w"> </span>-q
 <td><p>In-process fixture + HTTP cassettes</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">live</span></code></p></td>
-<td><p>Real servers; soft expects only</p></td>
+<td><p>Real servers; behavioral expects hard, cassette-exact token counts soft</p></td>
 </tr>
 </tbody>
 </table>
-<p>Live parity is a <strong>mode</strong> of cassette-backed stories (for example <code class="docutils literal notranslate"><span class="pre">nubble_run_cost_events</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_systemone_cassette</span></code>), not a separate empty fixture. Flip <code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> to run the same request and expect files against a real endpoint.</p>
+<p>Live collects HTTP cassette twins <strong>and</strong> static stories that call <code class="docutils literal notranslate"><span class="pre">infer</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">judge_route</span></code> (not pure policy, recipe-shape, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, or Anthropic-only walks). Flip <code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> with reason + judge URLs to prove cassettes are not fantasy.</p>
 </section>
 <section id="models">
 <h2>Models<a class="headerlink" href="#models" title="Link to this heading"></a></h2>
