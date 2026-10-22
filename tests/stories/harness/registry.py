@@ -36,9 +36,13 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
     meta = case.load_json("story.json")
     kind = meta["kind"]
     if backend.mode == "live" and case.adapter == "in_process":
-        raise AssertionError(
-            f"{case.label}: in_process stories must not be collected in live mode"
-        )
+        from tests.stories.live_capability import live_eligible
+
+        if not live_eligible(case):
+            raise AssertionError(
+                f"{case.label}: in_process story is not live-eligible "
+                "(no infer/judge verbs, or tool_loop/anthropic-only)"
+            )
     try:
         harness = HARNESSES[kind]
     except KeyError as exc:

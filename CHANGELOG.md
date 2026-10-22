@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Floor **pyiv ≥ 1.1.1**.
+- Live story mode collects HTTP twins **and** static `infer` / `judge` /
+  `judge_route` walks against real reason + judge hosts; cassette-exact token
+  counts are soft while behavioral expects stay hard. Aligns two JEV fixtures
+  with live Laya classifications.
+
 ### Added
 
 - **Stepped graph execution (SG-01..10):** `RunControl` on `GraphExecutor.run`

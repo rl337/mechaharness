@@ -320,6 +320,12 @@ docs/guides/user-stories.md   # GENERATED
 | `static` (default) | Cassettes / in-process — CI |
 | `live` | Real HTTP (`MECHA_BASE_URL`, `MECHA_MODEL`, `MECHA_JUDGE_*`, …) |
 
+Live collects HTTP twins **and** static stories that call `infer` / `judge` /
+`judge_route` (see `tests/stories/live_capability.py`). Behavioral expects stay
+**hard**; cassette-exact `prompt_tokens` / `completion_tokens` / `total_tokens`
+equals/bounds are relaxed. Pure policy, recipe-shape, `tool_loop`, and
+Anthropic-only walks stay offline.
+
 New scenarios use **hard** expects. Wire payloads stay in `response.json` for
 replay; live uses the served model id via `MECHA_MODEL`.
 
