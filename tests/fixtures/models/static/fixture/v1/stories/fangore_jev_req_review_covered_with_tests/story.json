@@ -5,6 +5,6 @@
   "kind": "user_story",
   "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He judges requirements coverage over a PR diff and story facts, then applies crash-test policy. He verifies completion from structured observation expects.",
   "implementation": "Product verb `judge` over PR/story state; code-owned outcome from coverage + crash_tests_present.",
-  "validation": "user_story `covered_with_tests.yaml` judge + cassette; expect outcome=continue_review.",
+  "validation": "user_story `covered_with_tests.yaml` judge + cassette; expect outcome=continue_review. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).",
   "footnotes": []
 }

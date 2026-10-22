@@ -5,7 +5,7 @@
   "kind": "user_story",
   "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He judges semantic risk of a proposed action and applies hard AccessPolicy grants so hard grants always win. He verifies decision / hard_won / grants_unchanged.",
   "implementation": "Product verb `judge` with risk_question_id + required_abilities/grants; hard AccessPolicy gates over semantic risk.",
-  "validation": "user_story scenarios with per-scenario cassettes; hard expects on decision keys.",
+  "validation": "user_story scenarios with per-scenario cassettes; hard expects on decision keys. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).",
   "footnotes": [
     {
       "id": "jev-us08",
