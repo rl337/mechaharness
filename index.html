@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MechaHarness documentation &mdash; MechaHarness 0.5.0 documentation</title>
+  <title>MechaHarness documentation &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -117,7 +118,7 @@ models and policies without rewriting the run path, and so agents cannot
 quietly burn unbounded spend.</p>
 <div class="hero-meta docutils container">
 <div class="version-badge docutils container">
-<p>0.5.0</p>
+<p>0.6.0</p>
 </div>
 <p>pyiv Config · multi-lane inference · cost + EventLog on every run · Python 3.9+</p>
 </div>
@@ -170,6 +171,7 @@ reusable control subgraphs on a <code class="docutils literal notranslate"><span
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#dependency-injection">Dependency injection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#durable-graph-generator-driven-execution">Durable graph generator (driven execution)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#execution-graph">Execution graph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#host-extension">Host extension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#inference-strategy">Inference Strategy</a></li>
@@ -209,6 +211,15 @@ reusable control subgraphs on a <code class="docutils literal notranslate"><span
 <li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#taloneth-s-stories">Taloneth’s stories</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#goal">Goal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#counts">Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#wave-order">Wave order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#product-batches-af-done-wave-1">Product batches (A–F) — <strong>done</strong> (Wave 1)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#probe-batches-p1p10-historical-inventory">Probe batches (P1–P10) — historical inventory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#related">Related</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#motivation">Motivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#definition">Definition</a></li>
@@ -228,6 +239,7 @@ reusable control subgraphs on a <code class="docutils literal notranslate"><span
 <li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#ownership-boundary">Ownership boundary</a></li>
 <li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#requirements">Requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#compatibility-and-migration">Compatibility and migration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#composition-with-durable-graph-generators">Composition with durable graph generators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#definition-of-done">Definition of done</a></li>
 </ul>
 </li>
@@ -255,6 +267,7 @@ reusable control subgraphs on a <code class="docutils literal notranslate"><span
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#surface">Surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#envelope">Envelope</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#event-types">Event types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/events.html#required-correlators">Required correlators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#eventlog"><code class="docutils literal notranslate"><span class="pre">EventLog</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#implementations">Implementations</a></li>
 </ul>
@@ -270,6 +283,7 @@ reusable control subgraphs on a <code class="docutils literal notranslate"><span
 <li class="toctree-l2"><a class="reference internal" href="reference/access.html#surface">Surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/access.html#grants">Grants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/access.html#policy-and-checks">Policy and checks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/access.html#host-recipe-run-pattern">Host recipe-run pattern</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/access.html#tools">Tools</a></li>
 </ul>
 </li>
@@ -285,6 +299,9 @@ reusable control subgraphs on a <code class="docutils literal notranslate"><span
 <li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#catalog">Catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#soft-points">Soft points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#versions-promotion-and-evolution-allowlist">Versions, promotion, and evolution allowlist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#recipe-comparison-do-not-merge">Recipe comparison (do not merge)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#typed-ports-and-candidate-search">Typed ports and candidate search</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#usage-sketch">Usage sketch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#ownership-incubation">Ownership / incubation</a></li>
 </ul>
@@ -439,6 +456,7 @@ reusable control subgraphs on a <code class="docutils literal notranslate"><span
 <li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext"><code class="docutils literal notranslate"><span class="pre">GraphRunContext</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome"><code class="docutils literal notranslate"><span class="pre">NodeOutcome</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.RejectGraphEscalation"><code class="docutils literal notranslate"><span class="pre">RejectGraphEscalation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.RunControl"><code class="docutils literal notranslate"><span class="pre">RunControl</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.registry_from_mapping"><code class="docutils literal notranslate"><span class="pre">registry_from_mapping()</span></code></a></li>
 </ul>
 </li>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Graph templates and Agentic Recipes &mdash; MechaHarness 0.5.0 documentation</title>
+  <title>Graph templates and Agentic Recipes &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -194,6 +195,16 @@ owning user stories):</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code></p></td>
 <td><p>Visible classify → permit → backoff → escalate</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/produce-critique-refine.html"><span class="std std-doc">produce_critique_refine</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_produce_critique_refine</span></code></p></td>
+<td><p>Produce → isolated critique → bounded refine</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/safety-eval.html"><span class="std std-doc">safety_eval</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">safety_eval</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_safety_eval_recipes</span></code></p></td>
+<td><p>Scenario → isolated review → deterministic safety score</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/conversational-tool-loop.html"><span class="std std-doc">conversational_tool_loop</span></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_conversational_tool_loop</span></code></p></td>
@@ -218,6 +229,88 @@ product policy or durable application state.</p>
 <p>Instantiated graphs are stamped with <code class="docutils literal notranslate"><span class="pre">template_name</span></code>, <code class="docutils literal notranslate"><span class="pre">template_version</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">template_status</span></code> for provenance and deprecation detection. Optimize tiling
 code for human readability of how recipes compose into the final graph.</p>
+</section>
+<section id="versions-promotion-and-evolution-allowlist">
+<h2>Versions, promotion, and evolution allowlist<a class="headerlink" href="#versions-promotion-and-evolution-allowlist" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code> stores every registered version of a catalog id.
+<code class="docutils literal notranslate"><span class="pre">register</span></code> activates a template (legacy replace-by-name); <code class="docutils literal notranslate"><span class="pre">add_version</span></code> stores
+an immutable candidate that stays inactive until <code class="docutils literal notranslate"><span class="pre">promote(name,</span> <span class="pre">version)</span></code>
+moves the active pointer. <code class="docutils literal notranslate"><span class="pre">rollback(name)</span></code> restores the previous target, and
+<code class="docutils literal notranslate"><span class="pre">get(name,</span> <span class="pre">version=...)</span></code> reads any stored version. Hosts own eval results and
+promotion policy; the registry owns only the reversible pointer.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SoftPoint.evolvable</span></code> (default <code class="docutils literal notranslate"><span class="pre">False</span></code>) is the declared evolution allowlist:
+an optimizer may rewrite only evolvable soft points, enforced by
+<code class="docutils literal notranslate"><span class="pre">GraphTemplate.assert_evolution_allowed</span></code>. Graph topology, grants, and stop
+contracts are hard structure.</p>
+<section id="promotion-surfaces-host-orientation">
+<h3>Promotion surfaces (host orientation)<a class="headerlink" href="#promotion-surfaces-host-orientation" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Intent</p></th>
+<th class="head"><p>API</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Catalog pointer + held-out gate + host opinion</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">promote_recipe(registry,</span> <span class="pre">policy,</span> <span class="pre">request,</span> <span class="pre">hooks)</span></code> in <code class="docutils literal notranslate"><span class="pre">recipe_lifecycle.recipe_promotion_policy</span></code> (re-exported by <code class="docutils literal notranslate"><span class="pre">host_apis</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Catalog pointer + held-out gate only</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">registry.promote_with_final_test(name,</span> <span class="pre">version,</span> <span class="pre">final_test=...)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Ungated pointer move (advanced / migration)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">registry.promote(name,</span> <span class="pre">version)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Offline research candidate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ResearchLab.promote</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Soft instruction → hard rule</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rule_promotion.promote_soft_to_hard</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Prefer <code class="docutils literal notranslate"><span class="pre">promote_recipe</span></code> for product hosts: it applies
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_recipe_promotion_policy()</span></code> then the held-out gate.
+<code class="docutils literal notranslate"><span class="pre">promote</span></code> remains an ungated pointer move for hosts that run their own gate.
+Campaigns use <code class="docutils literal notranslate"><span class="pre">get_evolution_campaign_hooks()</span></code> (no-op defaults); pass them as <code class="docutils literal notranslate"><span class="pre">hooks</span></code> and <code class="docutils literal notranslate"><span class="pre">promote_recipe</span></code> calls <code class="docutils literal notranslate"><span class="pre">on_promotion</span></code> after a successful move. Typed-port search is <code class="docutils literal notranslate"><span class="pre">registry.search_compatible(...)</span></code>. The same
+held-out gate guards <code class="docutils literal notranslate"><span class="pre">ResearchLab.promote</span></code>.</p>
+</section>
+</section>
+<section id="recipe-comparison-do-not-merge">
+<h2>Recipe comparison (do not merge)<a class="headerlink" href="#recipe-comparison-do-not-merge" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Catalog id</p></th>
+<th class="head"><p>Control story</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code></p></td>
+<td><p>Produce → critique → refine loop with evolvable soft points</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
+<td><p>Isolated multi-reviewer context (adversarial optional)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
+<td><p>Oracle / verify then repair until stop</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">safety_eval</span></code></p></td>
+<td><p>Produce → isolated review → deterministic score (measure-only)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code></p></td>
+<td><p>Bounded decision surfaces with policy / shadow / telemetry</p></td>
+</tr>
+</tbody>
+</table>
+<p>These are distinct Agentic Recipes on the same <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> substrate.</p>
+</section>
+<section id="typed-ports-and-candidate-search">
+<h2>Typed ports and candidate search<a class="headerlink" href="#typed-ports-and-candidate-search" title="Link to this heading"></a></h2>
+<p>A template may declare <code class="docutils literal notranslate"><span class="pre">io_contract</span></code> (a <code class="docutils literal notranslate"><span class="pre">TemplateIOContract</span></code> of typed input and
+output ports). <code class="docutils literal notranslate"><span class="pre">search_compatible_recipes(registry,</span> <span class="pre">required_inputs,</span> <span class="pre">required_outputs)</span></code> returns the catalog ids whose ports fit; it never builds a
+graph, and recipes without an <code class="docutils literal notranslate"><span class="pre">io_contract</span></code> are not candidates. Hosts
+can bound optimizer candidates with <code class="docutils literal notranslate"><span class="pre">recipe_evolution.propose_candidates</span></code>, which
+emits soft-binding dicts only and validates them against the registry and the
+evolvable allowlist.</p>
 </section>
 <section id="usage-sketch">
 <h2>Usage sketch<a class="headerlink" href="#usage-sketch" title="Link to this heading"></a></h2>

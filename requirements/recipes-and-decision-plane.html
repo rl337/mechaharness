@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reusable graph recipes and typed decision-plane requirements &mdash; MechaHarness 0.5.0 documentation</title>
+  <title>Reusable graph recipes and typed decision-plane requirements &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,14 +14,14 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Transactional durable graph resume requirements" href="transactional-durable-resume.html" />
-    <link rel="prev" title="User stories" href="../guides/user-stories.html" /> 
+    <link rel="prev" title="User-story → CLI / user_story migration batches" href="../guides/user-story-migration-batches.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -239,6 +240,9 @@ model.</p>
 <li><p>cancellation;</p></li>
 <li><p>failure handling;</p></li>
 <li><p>model routing;</p></li>
+<li><p>durable generator guidance yields (<code class="docutils literal notranslate"><span class="pre">SoftPoint</span></code> kind <code class="docutils literal notranslate"><span class="pre">guidance</span></code> /
+node component <code class="docutils literal notranslate"><span class="pre">guidance_request</span></code>; see
+<a class="reference internal" href="durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a>);</p></li>
 <li><p>tool/capability restrictions.</p></li>
 </ul>
 <p>The parent graph MUST be able to treat the recipe as a logical unit without hiding the internal execution trace.</p>
@@ -333,7 +337,7 @@ promotion and documentation as Agentic Recipes (names are catalog ids):</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">DecisionPlaneTemplate</span></code> + <code class="docutils literal notranslate"><span class="pre">decision_plane_runtime</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_projection</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_telemetry</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_model_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_projection</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_telemetry</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_model_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_matching_claim</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_context_budget_pack</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_req_review_template_shape</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_task_route_simple_local</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">BoundedRetryTemplate</span></code></p></td>
@@ -546,7 +550,7 @@ code that tiles recipes together.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../guides/user-stories.html" class="btn btn-neutral float-left" title="User stories" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../guides/user-story-migration-batches.html" class="btn btn-neutral float-left" title="User-story → CLI / user_story migration batches" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="transactional-durable-resume.html" class="btn btn-neutral float-right" title="Transactional durable graph resume requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

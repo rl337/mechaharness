@@ -53,6 +53,12 @@ assert graph.nodes["review_0"].payload["isolated_context"] is True
 assert graph.nodes["aggregate_reviews"].payload["retain_disagreement"] is True
 ```
 
+## Execute
+
+Fixture runners in `mechaharness.independent_review_runner` + CLI
+`IndependentReviewRecipeAdapter` (`run_recipe name=independent_review`).
+
 ## Tests
 
-See `tests/fixtures/graph_templates/independent_review_*.json`.
+See `tests/fixtures/graph_templates/independent_review_*.json` and
+`fangore_insp_independent_review`.

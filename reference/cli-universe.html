@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLI universe &mdash; MechaHarness 0.6.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">CLI universe</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/reference/cli-universe.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cli-universe">
+<h1>CLI universe<a class="headerlink" href="#cli-universe" title="Link to this heading"></a></h1>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Surface</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Package</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.cli_universe</span></code>, <code class="docutils literal notranslate"><span class="pre">cli_infer_runner</span></code>, <code class="docutils literal notranslate"><span class="pre">cli_instrumentor</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Story harness</p></td>
+<td><p>Canonical: <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code> (persona-task YAML wrapping verbs). Legacy: <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> script YAML.</p></td>
+</tr>
+<tr class="row-even"><td><p>Stability</p></td>
+<td><p>evolving (Wave 1+: grow verbs as stories migrate)</p></td>
+</tr>
+</tbody>
+</table>
+<section id="role">
+<h2>Role<a class="headerlink" href="#role" title="Link to this heading"></a></h2>
+<p>Hand-built <strong>concrete</strong> capability graph for the host CLI/TUI — not a
+<code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> / Agentic Recipe. Commands are verb-led with optional params and
+product defaults. Soft points stay the UI answer seam elsewhere; this graph
+grows by adding hard nodes and instrumentor verbs as user stories migrate.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Concept</p></th>
+<th class="head"><p>Module</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Graph factory</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">build_cli_universe_graph</span></code> (<code class="docutils literal notranslate"><span class="pre">cli:infer</span></code> node)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Infer runner</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CliInferRunner</span></code> (reason-lane <code class="docutils literal notranslate"><span class="pre">Completer</span></code>, <code class="docutils literal notranslate"><span class="pre">core:inference</span></code> + <code class="docutils literal notranslate"><span class="pre">core:cost</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Instrumentor</p></td>
+<td><p>Config-injected <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code>; verbs via <code class="docutils literal notranslate"><span class="pre">cli_verb_classes</span></code> map multibind</p></td>
+</tr>
+<tr class="row-odd"><td><p>Recipe adapters</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cli_recipe_adapter_classes</span></code> → <code class="docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">CliRecipeAdapter]</span></code> for <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Assertions</p></td>
+<td><p>Open <code class="docutils literal notranslate"><span class="pre">cli_assertion_classes</span></code> list (<code class="docutils literal notranslate"><span class="pre">kind</span></code> / <code class="docutils literal notranslate"><span class="pre">key</span></code> / <code class="docutils literal notranslate"><span class="pre">op</span></code>-like fields)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Event stamps</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">StampingEventLog</span></code> over injectable <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Event tap</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tapping_event_log</span></code> on the blessed executor path (HF-05)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Production verbs stay lean (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">judge_route</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>,
+<code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> (incl. <code class="docutils literal notranslate"><span class="pre">context_pack</span></code>), <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code>,
+<code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code>, <code class="docutils literal notranslate"><span class="pre">assemble_context</span></code>, diagnostics,
+durable IoC <code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">answer</span></code>/<code class="docutils literal notranslate"><span class="pre">inspect</span></code>/<code class="docutils literal notranslate"><span class="pre">rebuild</span></code>/<code class="docutils literal notranslate"><span class="pre">list_recipes</span></code>,
+<code class="docutils literal notranslate"><span class="pre">transactional_resume</span></code> for DR-10 crash-window durable coding-job resume).
+Test-only clocks and the <code class="docutils literal notranslate"><span class="pre">probe</span></code> verb join via <code class="docutils literal notranslate"><span class="pre">TestHarnessCliConfig</span></code>
+(<code class="docutils literal notranslate"><span class="pre">tests/stories/cli_probes</span></code>). Story probes register on <code class="docutils literal notranslate"><span class="pre">cli_probe_classes</span></code>.
+Probe stories load a human-readable plan under <code class="docutils literal notranslate"><span class="pre">plans/</span></code>
+(<code class="docutils literal notranslate"><span class="pre">probe:</span> <span class="pre">{path:</span> <span class="pre">plans/….yaml}</span></code> with <code class="docutils literal notranslate"><span class="pre">name</span></code> + params + optional <code class="docutils literal notranslate"><span class="pre">summary</span></code>);
+inline <code class="docutils literal notranslate"><span class="pre">probe:</span> <span class="pre">{name:</span> <span class="pre">…}</span></code> remains valid for tiny cases.</p>
+<p><strong>Recipe parameterization</strong> uses a human-readable
+:class:<code class="docutils literal notranslate"><span class="pre">~mechaharness.recipe_bind.RecipeBind</span></code> document (story <code class="docutils literal notranslate"><span class="pre">binds/</span></code> or
+CLI <code class="docutils literal notranslate"><span class="pre">path:</span></code>) via <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> — not a new verb per catalog id.
+Authors list the soft decisions that matter; omitted soft points take catalog
+defaults; unknown keys fail. <code class="docutils literal notranslate"><span class="pre">cli_universe</span></code> remains the host shell for infer /
+durable IoC; recipe shape stories bind and expand a catalog recipe instead.</p>
+<p>Grow <code class="docutils literal notranslate"><span class="pre">cli_universe</span></code> nodes when stories need product surface that isn’t there
+yet — not one node per verb. If the graph never grows, stories aren’t covering
+real host interaction.</p>
+<p>Distinct from:</p>
+<ul class="simple">
+<li><p><strong>Agentic Recipes</strong> — <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> soft-point catalogs (<code class="docutils literal notranslate"><span class="pre">verify_repair</span></code>, …)</p></li>
+<li><p><strong>Durable generator product API</strong> — <code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code> / host kit; CLI
+verbs drive the same session through the instrumentor</p></li>
+</ul>
+</section>
+<section id="story-layout-canonical-acceptance">
+<h2>Story layout (canonical acceptance)<a class="headerlink" href="#story-layout-canonical-acceptance" title="Link to this heading"></a></h2>
+<p>Product CLI scripts stay verb-led (<code class="docutils literal notranslate"><span class="pre">commands:</span></code> / instrumentor). <strong>Story
+acceptance</strong> is a separate harness wrapper: <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code> YAML with
+<code class="docutils literal notranslate"><span class="pre">environment</span></code> → <code class="docutils literal notranslate"><span class="pre">graph</span></code> → <code class="docutils literal notranslate"><span class="pre">steps</span></code> → <code class="docutils literal notranslate"><span class="pre">complete</span></code> → <code class="docutils literal notranslate"><span class="pre">cleanup</span></code> that <em>drives</em>
+those verbs (see <code class="docutils literal notranslate"><span class="pre">tests/stories/scenarios/user_story_scenario.py</span></code>). Legacy
+<code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> script scenarios remain until migrated.</p>
+<p>One story may own many concise scenarios (one claim each):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>stories/&lt;id&gt;/
+  story.json
+  scenarios/
+    event_types.yaml
+    event_timestamps.yaml
+  response.json          # cassette when needed
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user_story</span>
+<span class="nt">environment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">family</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pass_through</span>
+<span class="w">  </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mock</span>
+<span class="nt">graph</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="nt">steps</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">do</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">infer</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Say hello.</span>
+<span class="nt">complete</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">expect</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exactly</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">event_types</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">access_check</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">graph_start</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">…</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">positive</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cost_units</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">equals</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">total_tokens</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="nt">cleanup</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</pre></div>
+</div>
+<p>Inference-running verbs (<code class="docutils literal notranslate"><span class="pre">infer</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> that completes)
+expose <code class="docutils literal notranslate"><span class="pre">prompt_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">completion_tokens</span></code> / <code class="docutils literal notranslate"><span class="pre">total_tokens</span></code> summed from
+<code class="docutils literal notranslate"><span class="pre">core:inference</span></code> <code class="docutils literal notranslate"><span class="pre">usage</span></code> payloads so stories can set token ceilings with
+<code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">lte</span></code>.</p>
+<p>Graph executions expose <code class="docutils literal notranslate"><span class="pre">budget_spent</span></code> (node <code class="docutils literal notranslate"><span class="pre">cost_units</span></code> charges) and fold it
+into observation <code class="docutils literal notranslate"><span class="pre">cost_units</span></code> (max of priced inference units and graph spend).
+Scenarios that surface <code class="docutils literal notranslate"><span class="pre">budget_spent</span></code> must declare an <code class="docutils literal notranslate"><span class="pre">lte</span></code> / <code class="docutils literal notranslate"><span class="pre">equals</span></code> /
+<code class="docutils literal notranslate"><span class="pre">gte</span></code> / <code class="docutils literal notranslate"><span class="pre">positive</span></code> expect on <code class="docutils literal notranslate"><span class="pre">cost_units</span></code> or <code class="docutils literal notranslate"><span class="pre">budget_spent</span></code>.</p>
+<p>Durable IoC sessions use a scenario-level <code class="docutils literal notranslate"><span class="pre">durable:</span></code> block and per-command
+<code class="docutils literal notranslate"><span class="pre">expect</span></code> / <code class="docutils literal notranslate"><span class="pre">expect_error</span></code>. Cassette vs live is harness/Config
+(<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND</span></code>, <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>, <code class="docutils literal notranslate"><span class="pre">MECHA_MODEL</span></code>), not YAML.</p>
+<p>Discovery = add a YAML under <code class="docutils literal notranslate"><span class="pre">scenarios/</span></code>. Prefer few reusable verbs + many
+scenario files over bag-ops and per-test Python.</p>
+</section>
+<section id="intent-check">
+<h2>Intent check<a class="headerlink" href="#intent-check" title="Link to this heading"></a></h2>
+<p>Before migrating a story, re-read <code class="docutils literal notranslate"><span class="pre">story.json</span></code> footnotes, <code class="docutils literal notranslate"><span class="pre">docs/inspiration/</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code>. Map normative claims → scenario files; do not copy
+legacy soft expects blindly. See <code class="docutils literal notranslate"><span class="pre">.cursor/skills/user-stories/SKILL.md</span></code>.</p>
+</section>
+<section id="migration-program">
+<h2>Migration program<a class="headerlink" href="#migration-program" title="Link to this heading"></a></h2>
+<p>Convert every legacy <code class="docutils literal notranslate"><span class="pre">request.json</span></code> / <code class="docutils literal notranslate"><span class="pre">op</span></code> story onto <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> YAML. Each
+wave adds only the CLI verb, probe, or universe node needed:</p>
+<ol class="arabic simple">
+<li><p>Observability / one-shot infer (OBS-*) — done</p></li>
+<li><p>Former harness_runs / pass-through / tool-loop / cassettes / host DI /
+judge route — done</p></li>
+<li><p>Graph execution — done (test probes + <code class="docutils literal notranslate"><span class="pre">probe</span></code> verb)</p></li>
+<li><p>Durable IoC — done (CLI verbs; parallel harness removed)</p></li>
+<li><p>Decision plane / remaining judge ops — done (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> runner removed)</p></li>
+<li><p>pure_api — done (library probes; runner removed)</p></li>
+<li><p>context_management — done (library probes; <code class="docutils literal notranslate"><span class="pre">includes</span></code>/<code class="docutils literal notranslate"><span class="pre">gte</span></code> asserts)</p></li>
+<li><p>evaluation_research — done (library probes; runner removed)</p></li>
+<li><p>lifecycle_extensions — done (tool/graph lifecycle probes; runner removed)</p></li>
+<li><p>access_authority — done (grant/authority probes; <code class="docutils literal notranslate"><span class="pre">contains</span></code> asserts)</p></li>
+<li><p>graph_recipes — done (recipe/template probes; runner removed)</p></li>
+</ol>
+<p>Migration complete: story acceptance is <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> only.</p>
+<p>When a legacy family has zero stories left, delete its op-dispatch runner.</p>
+</section>
+<section id="recipebind-instantiate-recipe-documentation-surface">
+<h2><code class="docutils literal notranslate"><span class="pre">RecipeBind</span></code> / <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> (documentation surface)<a class="headerlink" href="#recipebind-instantiate-recipe-documentation-surface" title="Link to this heading"></a></h2>
+<p>Shape stories keep a human-readable bind file under <code class="docutils literal notranslate"><span class="pre">binds/</span></code> and a thin
+scenario that loads it. The bind is part of the user-story documentation: a
+reader should see the recipe id, goal, acceptance, and the soft decisions that
+matter. Omitted soft points take catalog defaults; unknown soft point keys fail.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>stories/&lt;id&gt;/
+  story.json
+  binds/
+    verify_repair.yaml      # prose comments + RecipeBind fields
+  scenarios/
+    verify_repair_recipe.yaml   # path: binds/… + expect
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># binds/verify_repair.yaml</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">verify_repair</span>
+<span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tile verify-repair into a concrete plan with default runner kinds.</span>
+<span class="nt">goal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ship artifact with verify gate</span>
+<span class="nt">soft_bindings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">produce_kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">produce</span>
+<span class="w">  </span><span class="nt">verify_kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">verify</span>
+<span class="w">  </span><span class="nt">repair_kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">repair</span>
+<span class="w">  </span><span class="nt">complete_kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">complete</span>
+</pre></div>
+</div>
+<p>CLI hosts use the same file: <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> with <code class="docutils literal notranslate"><span class="pre">path:</span></code>. One verb
+covers all catalog ids.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Catalog id</p></th>
+<th class="head"><p>Story coverage</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_verify_repair_recipe</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">environment_repair</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_environment_repair_recipe</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_independent_review</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">initialize_preflight</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_initialize_preflight</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_produce_critique_refine</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">safety_eval</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_safety_eval_recipes</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code> (shape)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_node_components</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fan_out_aggregate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_graph_template_soft_points</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">tile_recipe</span></code> loads a :class:<code class="docutils literal notranslate"><span class="pre">~mechaharness.recipe_bind.RecipeTileBind</span></code>
+(<code class="docutils literal notranslate"><span class="pre">binds/*_tile.yaml</span></code>) for namespaced multi-instance composition
+(<code class="docutils literal notranslate"><span class="pre">fangore_recipe_namespace_tile</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code> loads a lifecycle plan under <code class="docutils literal notranslate"><span class="pre">plans/</span></code> — one verb,
+document-selected behavior via <code class="docutils literal notranslate"><span class="pre">plan:</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">plan:</span></code></p></th>
+<th class="head"><p>Coverage</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">soft_evolution</span></code></p></td>
+<td><p>evolvable allowlist</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">port_search</span></code></p></td>
+<td><p>typed IO search</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">registry_compose</span></code></p></td>
+<td><p>registry-only compose</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">registry_versions</span></code></p></td>
+<td><p>versions / lineage / pointer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">final_test_gate</span></code></p></td>
+<td><p>held-out promotion gate</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">evolution_candidates</span></code></p></td>
+<td><p>trace → candidate → objective</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">evolution_ownership</span></code></p></td>
+<td><p>host policy vs library gates</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">recipe_as_tool</span></code></p></td>
+<td><p>embed child graph as tool</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">traversal_contract</span></code></p></td>
+<td><p>events → traversal records</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">demoted_refuse</span></code></p></td>
+<td><p>demoted template refuses expand</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> remains for <strong>execute</strong> adapters (<code class="docutils literal notranslate"><span class="pre">harness_run</span></code>,
+<code class="docutils literal notranslate"><span class="pre">backend_describe</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">judge</span></code> is the judge-lane twin of <code class="docutils literal notranslate"><span class="pre">infer</span></code> (typed questions over state via
+<code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code> + cassette/live). <code class="docutils literal notranslate"><span class="pre">judge_route</span></code> adds <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">context_pack</span></code> Agentic Recipe (<code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>) binds host <code class="docutils literal notranslate"><span class="pre">RagRetriever</span></code> then
+packs with <code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code>. <code class="docutils literal notranslate"><span class="pre">assemble_context</span></code> remains a
+thin leaf verb for already-scored candidate lists.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> runs a tool-loop or tiny graph with Config-bound
+<code class="docutils literal notranslate"><span class="pre">LifecycleExtension</span></code> instances (no <code class="docutils literal notranslate"><span class="pre">case:</span></code> bag).</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jev typed-judgment inspiration for MechaHarness &mdash; MechaHarness 0.5.0 documentation</title>
+  <title>Jev typed-judgment inspiration for MechaHarness &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -271,25 +272,25 @@ stories that exercise existing <code class="docutils literal notranslate"><span 
 <td><p>Claim/citation support check</p></td>
 <td><p>extract claim/source → entailment → verify</p></td>
 <td><p><strong>High</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_matching_claim</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-US05</p></td>
 <td><p>RAG context selection</p></td>
 <td><p>retrieve → relevance/trust/freshness → budget assembly</p></td>
 <td><p><strong>High</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_context_budget_pack</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-US06</p></td>
 <td><p>Semantic PR review against requirements</p></td>
 <td><p>diff/requirements → atomic checks → escalate</p></td>
 <td><p><strong>High</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_req_review_template_shape</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-US07</p></td>
 <td><p>Task-specific model/workflow router</p></td>
 <td><p>inspect request → choose model/tool/graph/human</p></td>
 <td><p><strong>High</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_task_route_simple_local</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-US08</p></td>
 <td><p>Agent action safety firewall</p></td>
@@ -317,31 +318,31 @@ recovered.</p>
 </section>
 <section id="high-priority-acceptance-story-sketches">
 <h2>High-priority acceptance-story sketches<a class="headerlink" href="#high-priority-acceptance-story-sketches" title="Link to this heading"></a></h2>
-<section id="mh-jev-us04-citation-oracle-fangore-jev-citation-check">
-<h3>MH-JEV-US04: Citation oracle (<code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code>)<a class="headerlink" href="#mh-jev-us04-citation-oracle-fangore-jev-citation-check" title="Link to this heading"></a></h3>
+<section id="mh-jev-us04-citation-oracle-fangore-jev-citation-matching-claim">
+<h3>MH-JEV-US04: Citation oracle (<code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_matching_claim</span></code>)<a class="headerlink" href="#mh-jev-us04-citation-oracle-fangore-jev-citation-matching-claim" title="Link to this heading"></a></h3>
 <p>Given a source snapshot and an atomic claim, when the judge returns
 supported/contradicted/insufficient/unavailable, then the harness preserves
 evidence spans and provenance, flags mismatches, and never upgrades unsupported
 claims to verified. Tests include 12% vs 40% revenue growth, missing source,
 misleading excerpt, and multi-claim sentences.</p>
 </section>
-<section id="mh-jev-us05-context-picker-fangore-jev-context-picker">
-<h3>MH-JEV-US05: Context picker (<code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code>)<a class="headerlink" href="#mh-jev-us05-context-picker-fangore-jev-context-picker" title="Link to this heading"></a></h3>
+<section id="mh-jev-us05-context-picker-fangore-jev-context-budget-pack">
+<h3>MH-JEV-US05: Context picker (<code class="docutils literal notranslate"><span class="pre">fangore_jev_context_budget_pack</span></code>)<a class="headerlink" href="#mh-jev-us05-context-picker-fangore-jev-context-budget-pack" title="Link to this heading"></a></h3>
 <p>Given retrieved candidates and a strict token budget, when
 relevance/trust/freshness judgments are returned, then deterministic code
 assembles a traceable context within budget. Tests include duplicates, stale
 docs, contradictory docs, malicious prompt injections, and fallback when the
 judge fails.</p>
 </section>
-<section id="mh-jev-us06-requirements-aware-code-review-fangore-jev-requirements-review">
-<h3>MH-JEV-US06: Requirements-aware code review (<code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code>)<a class="headerlink" href="#mh-jev-us06-requirements-aware-code-review-fangore-jev-requirements-review" title="Link to this heading"></a></h3>
+<section id="mh-jev-us06-requirements-aware-code-review-fangore-jev-req-review-template-shape">
+<h3>MH-JEV-US06: Requirements-aware code review (<code class="docutils literal notranslate"><span class="pre">fangore_jev_req_review_template_shape</span></code>)<a class="headerlink" href="#mh-jev-us06-requirements-aware-code-review-fangore-jev-req-review-template-shape" title="Link to this heading"></a></h3>
 <p>Given a PR diff and applicable user stories, when atomic checks identify
 possible requirement/test gaps, then the harness requests focused static tests
 or deeper review; it does not mark the PR correct merely because a judge
 approves.</p>
 </section>
-<section id="mh-jev-us07-model-router-fangore-jev-task-router">
-<h3>MH-JEV-US07: Model router (<code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code>)<a class="headerlink" href="#mh-jev-us07-model-router-fangore-jev-task-router" title="Link to this heading"></a></h3>
+<section id="mh-jev-us07-model-router-fangore-jev-task-route-simple-local">
+<h3>MH-JEV-US07: Model router (<code class="docutils literal notranslate"><span class="pre">fangore_jev_task_route_simple_local</span></code>)<a class="headerlink" href="#mh-jev-us07-model-router-fangore-jev-task-route-simple-local" title="Link to this heading"></a></h3>
 <p>Given a mixed workload, when the router chooses local small model, frontier
 model, deterministic tool, or human, then quality and budget policies are
 respected. Test misroutes, provider unavailability, and escalation.</p>

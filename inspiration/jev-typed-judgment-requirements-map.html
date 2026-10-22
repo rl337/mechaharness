@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jev typed-judgment requirements map &mdash; MechaHarness 0.5.0 documentation</title>
+  <title>Jev typed-judgment requirements map &mdash; MechaHarness 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
@@ -129,39 +130,39 @@ infrastructure.</p>
 <tbody>
 <tr class="row-even"><td><p>MH-JEV-01</p></td>
 <td><p>Typed judgment contract</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">inference/judge.py</span></code>, <code class="docutils literal notranslate"><span class="pre">decision_surfaces.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">inference/judge.py</span></code>, <code class="docutils literal notranslate"><span class="pre">cli_host_verbs.JudgeVerb</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_recipe</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_*</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_recipe</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-02</p></td>
 <td><p>Batch judgments</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">decision_plane_runtime.py</span></code>, <code class="docutils literal notranslate"><span class="pre">JudgeRequest</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">JudgeRequest</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_fixture_judge_batch</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_fixture_judge_batch</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">taloneth_fixture_judge_batch</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-03</p></td>
 <td><p>Calibration / abstention</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">judgement_policy.py</span></code>, DP confidence floor</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">judgement_policy.py</span></code>, judge confidence floor</p></td>
 <td><p>partial</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code> (thresholds); deeper calibration corpus still open</p></td>
+<td><p>citation uncertain + task_route low_confidence; deeper calibration corpus still open</p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-04</p></td>
 <td><p>Provenance / replay</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">decision_log.py</span></code>, DP telemetry</p></td>
-<td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">taloneth_policy_replay</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_telemetry</span></code></p></td>
+<td><p>unit/story</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">taloneth_policy_replay</span></code>; DP telemetry unit in <code class="docutils literal notranslate"><span class="pre">test_decision_plane_runtime</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-05</p></td>
 <td><p>Hard execution boundary</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">core/access.py</span></code>, <code class="docutils literal notranslate"><span class="pre">consequence.py</span></code>, DP envelopes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core/access.py</span></code>, <code class="docutils literal notranslate"><span class="pre">JudgeVerb</span></code> grants</p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_tool_gating</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_soft_vs_hard</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-06</p></td>
 <td><p>Escalation / bounded loops</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>, <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code>, <code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
+<td><p>judge escalate + <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_verify_repair_recipe</span></code></p></td>
+<td><p>JEV escalate stories, <code class="docutils literal notranslate"><span class="pre">fangore_verify_repair_recipe</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-07</p></td>
 <td><p>Static-data tests</p></td>
@@ -172,36 +173,36 @@ infrastructure.</p>
 <tr class="row-odd"><td><p>MH-JEV-08</p></td>
 <td><p>Comparative evaluation</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">compare_shadow_decision</span></code>, eval matrix</p></td>
-<td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare</span></code></p></td>
+<td><p>unit/story</p></td>
+<td><p>unit + <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-US04</p></td>
 <td><p>Citation support check</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">decision_plane_runtime.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">judge</span></code> verb + cassette</p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_check</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_matching_claim</span></code> (+ uncertain / missing / growth siblings)</p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-US05</p></td>
 <td><p>RAG context picker</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code>, DP batch</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">context_pack</span></code> recipe + <code class="docutils literal notranslate"><span class="pre">RagRetriever</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_context_picker</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_context_budget_pack</span></code> (+ filter / injection / missing-scores siblings)</p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-US06</p></td>
 <td><p>Requirements-aware review</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>, <code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">independent_review</span></code> + <code class="docutils literal notranslate"><span class="pre">judge</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_requirements_review</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_req_review_template_shape</span></code> (+ covered / gap / approve-missing-crash siblings)</p></td>
 </tr>
 <tr class="row-odd"><td><p>MH-JEV-US07</p></td>
 <td><p>Task-specific router</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>, <code class="docutils literal notranslate"><span class="pre">routing.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">judge</span></code> + quality facts</p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_task_router</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_task_route_simple_local</span></code> (+ frontier / low-confidence / invalid siblings)</p></td>
 </tr>
 <tr class="row-even"><td><p>MH-JEV-US08</p></td>
 <td><p>Action safety firewall</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> + DP semantic risk</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">judge</span></code> + hard <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code></p></td>
 <td><p>story</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code></p></td>
 </tr>
