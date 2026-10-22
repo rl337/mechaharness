@@ -1,0 +1,23 @@
+# Fan-out-aggregate Agentic Recipe: plan → branch_* → reduce.
+# Soft points bind runner kinds; branch_payloads size the fan-out.
+
+name: fan_out_aggregate
+summary: Expand fan_out_aggregate with two branches and a host workflow ref.
+goal: compare drafts
+
+acceptance:
+- merged
+
+source_workflow_ref: host:workflows/compare_v1
+
+branch_payloads:
+- index: 0
+- index: 1
+
+soft_bindings:
+  plan_kind: plan
+  branch_kind: branch
+  reduce_kind: reduce
+  fan_in_budget: 8
+  acceptance:
+  - merged

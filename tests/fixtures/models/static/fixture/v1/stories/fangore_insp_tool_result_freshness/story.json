@@ -2,10 +2,10 @@
   "id": "fangore_insp_tool_result_freshness",
   "persona": "fangore",
   "title": "Reject stale tool evidence before external decisions",
-  "kind": "access_authority",
-  "narrative": "Tool results that drive external decisions carry source and freshness metadata. An eight-day-old CRM cache must not be silently treated as current: expired or too-old results are rejected as errors before the decision. Context freshness scoring in `fangore_jev_context_picker` and `fangore_insp_context_provider` covers retrieved context; this story covers typed tool-result TTL. Tracks personal-agent inspiration MH-PA-01[^insp-pa-01].",
-  "implementation": "`ToolResult` gains optional `source`, `observed_at`, `fetched_at`, and `expires_at`. `ToolResultFreshnessPolicy` (and module helpers `is_stale` / `reject_if_stale`) returns an error copy `stale_tool_result:<reason>:source=<source>` for expired results, results older than `max_age_seconds`, or (optionally) results without a `source`. Wiring the reject into a graph decision node is a host choice of where to call the policy.",
-  "validation": "Harness `access_authority` op `tool_result_freshness_reject`. Hard expects the eight-day-old cache and the expired result rejected, and the fresh result passed through.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `tool_result_freshness`: an eight-day-old CRM cache and an expired quote are rejected as errors; a live CRM result within TTL passes. Context freshness scoring in `fangore_jev_context_budget_pack` and `fangore_insp_context_provider` covers retrieved context; this story covers typed tool-result TTL. Tracks MH-PA-01[^insp-pa-01].",
+  "implementation": "`ToolResultFreshnessPolicy.reject_if_stale` via product verb `tool_result_freshness` (`cli_policy_verbs`). Walk-bag `in`/`out` carry policy inputs and rejected/passed ids.",
+  "validation": "Harness `user_story` walks `tool_result_freshness`; expects rejected_ids and passed_ids.",
   "footnotes": [
     {
       "id": "insp-pa-01",

@@ -1,0 +1,35 @@
+# user story: fangore_host_kit_submit_once
+# Migrated from probe plan `dispatch_durable_ok.yaml` → product/test verb `host_kit_submit_once`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    host_kit_submit_once:
+      id: dispatch_durable_ok
+      mode: dispatch
+      durable: true
+      run_id: hk-dispatch-ok
+      task_id: t1
+  expect: &id001
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: dispatch_count
+    value: 1
+  - kind: equals
+    key: external_handle
+    value: job-t1-1
+  - kind: equals
+    key: durability
+    value: durable
+  - kind: 'false'
+    key: reconciliation_invoked
+  - kind: lte
+    key: cost_units
+    value: 1
+complete:
+  expect: *id001
+cleanup: []

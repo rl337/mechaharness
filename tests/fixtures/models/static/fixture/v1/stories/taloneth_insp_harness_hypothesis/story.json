@@ -2,10 +2,10 @@
   "id": "taloneth_insp_harness_hypothesis",
   "persona": "taloneth",
   "title": "Express a harness change as a testable hypothesis",
-  "kind": "evaluation_research",
-  "narrative": "Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14[^insp-r14].",
   "implementation": "`HarnessExperiment` carries hypothesis, intervention, failure_mode, evidence, and `to_trace_fields` for version/assignment on traces.",
-  "validation": "Harness `evaluation_research` op `harness_experiment_retire`. Soft expects retired when treatment loses (evidence-driven retain/retire).",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r14",

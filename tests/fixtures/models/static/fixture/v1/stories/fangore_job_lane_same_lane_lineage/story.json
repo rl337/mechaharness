@@ -1,0 +1,17 @@
+{
+  "id": "fangore_job_lane_same_lane_lineage",
+  "persona": "fangore",
+  "title": "Later run in a job lane observes an earlier run's key",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He configures JobLane `assets.generate`, publishes `asset_urls` on an early run, then from a later run in the same lane observes `latest` and reads the published artifact URL. Same-lane lineage is allowed by default (JL-07).",
+  "implementation": "`JobLaneBroker` in `mechaharness.job_lane_broker`; product verbs `lane_publish` / `lane_observe` in `cli_policy_verbs`; story Config binds via `environment.job_lanes` and step `lane` / `run_id` (JL-01..10).",
+  "validation": "Harness `user_story` scenario `same_lane_lineage.yaml`.",
+  "footnotes": [
+    {
+      "id": "jl-broker-same",
+      "label": "Job lane broker requirements",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md",
+      "note": "JL-07 same-lane observe"
+    }
+  ]
+}

@@ -1,8 +1,0 @@
-{
-  "op": "recipe_namespace_tile",
-  "recipe": "verify_repair",
-  "instance_keys": [
-    "left",
-    "right"
-  ]
-}

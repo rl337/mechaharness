@@ -1,0 +1,17 @@
+{
+  "id": "nubble_insp_guidance_cost_budget",
+  "persona": "nubble",
+  "title": "Count local steps and guidance frequency on generator runs",
+  "kind": "user_story",
+  "narrative": "Nubble starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `ops`, store `memory`). Operators need to see how often a frontier driver was asked for advice versus how much local work ran, so they can optimize verified useful work per intervention. Tracks R-IOC-BUDGET. He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-08]",
+  "implementation": "`GeneratorCostCounters` on `GeneratorRunRecord` exposed via `inspect().cost` (local_steps, guidance_yields, resumes, rejected_resumes).",
+  "validation": "Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.",
+  "footnotes": [
+    {
+      "id": "insp-ioc-08",
+      "label": "Durable graph generators (R-IOC-BUDGET)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md",
+      "note": "R-IOC-BUDGET local work versus guidance frequency"
+    }
+  ]
+}

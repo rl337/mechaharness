@@ -90,7 +90,7 @@ from __future__ import annotations
 import inspect
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import Any, Union, cast
+from typing import TYPE_CHECKING, Any, Union, cast
 
 from pyiv.injector import Injector
 from pyiv.time import DateTimeService
@@ -98,6 +98,9 @@ from pyiv.time import DateTimeService
 from mechaharness.authority_gate import AuthorityGate
 from mechaharness.checkpoint_store import CheckpointStore
 from mechaharness.consequence import ConsequencePolicy
+
+if TYPE_CHECKING:
+    from mechaharness.durable_graph_generator import DurableGraphGenerator
 from mechaharness.core.access import AccessControl, GraphEscalate, GraphExecute
 from mechaharness.core.events import EventLog, InMemoryEventLog
 from mechaharness.denial_store import DenialStore
@@ -125,7 +128,7 @@ from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
 
 
-class TappingEventLog:
+class TappingEventLog(EventLog):
     """Forward EventLog emits to an optional host callback (HF-05)."""
 
     def __init__(
@@ -476,6 +479,75 @@ def host_graph_executor(
     executor = cast(GraphExecutor, get_injector(_HostKitConfig).inject(GraphExecutor))
     executor.agent_id = aid
     return executor
+
+
+def host_durable_graph_generator(
+    *,
+    run_store: Any | None = None,
+    checkpoint_store: CheckpointStore | None = None,
+    checkpoint_path: str | Path | None = None,
+    event_log: EventLog | None = None,
+    controller_id_default: str = "host",
+) -> DurableGraphGenerator:
+    """Build a :class:`~mechaharness.durable_graph_generator.DurableGraphGenerator`.
+
+    Blessed host path for the long-run driven-execution façade (default recipe
+    catalog via Config). For soft-point guidance sessions see
+    :mod:`mechaharness.durable_generator_host`. Pass a shared ``run_store`` so
+    process-restart hosts rehydrate pending guidance. Optional
+    ``checkpoint_path`` / ``checkpoint_store`` bind the same durability seam
+    used by :func:`host_graph_executor`.
+
+    ``controller_id_default`` is documentation-only; callers still pass
+    ``controller_id`` on ``start`` / ``resume`` / ``cancel``.
+    """
+    del controller_id_default  # documented for hosts; not a silent default bind
+    if checkpoint_store is not None and checkpoint_path is not None:
+        raise ValueError("pass checkpoint_store or checkpoint_path, not both")
+
+    from mechaharness.durable_graph_generator import (
+        DurableGraphGenerator,
+        GeneratorRunStore,
+        InMemoryGeneratorRunStore,
+    )
+
+    prebuilt_store = checkpoint_store
+    sqlite_path = checkpoint_path
+    elog = event_log
+    bound_runs = run_store if run_store is not None else InMemoryGeneratorRunStore()
+
+    class _HostGeneratorConfig(MechaHarnessConfig):
+        def get_inference_class(self) -> type:
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type:
+            return PassThroughHarness
+
+        def get_checkpoint_store(self) -> CheckpointStore | None:
+            return prebuilt_store
+
+        def get_event_log(self) -> EventLog | None:
+            return elog
+
+        def get_generator_run_store(self) -> GeneratorRunStore:
+            return bound_runs
+
+        def configure(self) -> None:
+            super().configure()
+            if prebuilt_store is None and sqlite_path is not None:
+
+                def make_sqlite(injector: Injector) -> CheckpointStore:
+                    return SqliteCheckpointStore(
+                        str(sqlite_path),
+                        datetime_service=injector.inject(DateTimeService),
+                    )
+
+                self.register(CheckpointStore, make_sqlite, singleton=True)
+
+    return cast(
+        DurableGraphGenerator,
+        get_injector(_HostGeneratorConfig).inject(DurableGraphGenerator),
+    )
 
 
 def host_denial_store(*, denial_store: DenialStore | None = None) -> DenialStore:

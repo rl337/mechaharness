@@ -1,0 +1,14 @@
+# user story: taloneth_policy_replay
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    policy_replay: {}
+complete:
+  expect:
+  - kind: equals
+    key: verdict_kind
+    value: ALLOW
+cleanup: []

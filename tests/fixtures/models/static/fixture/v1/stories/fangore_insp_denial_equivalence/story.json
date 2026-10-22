@@ -2,10 +2,10 @@
   "id": "fangore_insp_denial_equivalence",
   "persona": "fangore",
   "title": "Persist denials and block equivalent actions across retries",
-  "kind": "access_authority",
-  "narrative": "Denied intents and side-effect classes survive graph retries and delegated paths. A denied send cannot be retried through a second provider or tool without new explicit authorization. Native deny/allow paths: `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].",
-  "implementation": "`DenialStore` (ABC) with `InMemoryDenialStore` keys denials by `equivalent_action_digest(effect_class, target, ...)`, which ignores tool/provider names. `AuthorityGate` consults the store first (`prior_denial`) and records policy `DENY` verdicts. `lift()` is the explicit new-authorization path. Hosts bind a durable store; the in-memory store is not restart-durable.",
-  "validation": "Harness `access_authority` op `denial_store_equivalence`. Hard expects a DENY verdict recorded, retries through other tools to the same target refused even when approved, a different target unaffected, and the action allowed again only after `lift`.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `denial_equivalence`: a denied email.send to bob stays denied across provider/tool retries until `lift()`, while a different recipient is allowed. Native deny/allow paths: `fangore_insp_soft_vs_hard`, `fangore_jev_action_safety`. Tracks MH-DOTS-05[^insp-dots-05].",
+  "implementation": "`DenialStore` / `InMemoryDenialStore` + `equivalent_action_digest` via product verb `denial_equivalence` (`cli_policy_verbs`); `AuthorityGate` records DENY and consults prior denials. Walk-bag `in`/`out` carry the denied intent and outcomes.",
+  "validation": "Harness `user_story` walks `denial_equivalence`; expects prior_denial on equivalent retries and allow after lift.",
   "footnotes": [
     {
       "id": "insp-dots-05",

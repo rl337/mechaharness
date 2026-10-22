@@ -133,6 +133,9 @@ Instantiation MUST produce or compose ordinary MechaHarness graph nodes/edges so
 - cancellation;
 - failure handling;
 - model routing;
+- durable generator guidance yields (`SoftPoint` kind `guidance` /
+  node component `guidance_request`; see
+  [Durable graph generators](./durable-graph-generators.md));
 - tool/capability restrictions.
 
 The parent graph MUST be able to treat the recipe as a logical unit without hiding the internal execution trace.
@@ -206,7 +209,7 @@ promotion and documentation as Agentic Recipes (names are catalog ids):
 | `independent_review` | `IndependentReviewTemplate` | `fangore_insp_independent_review` |
 | `environment_repair` | `EnvironmentRepairTemplate` | `fangore_environment_repair_recipe` |
 | `initialize_preflight` | `InitializePreflightTemplate` | `fangore_insp_initialize_preflight` |
-| `decision_plane` | `DecisionPlaneTemplate` + `decision_plane_runtime` | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_check`, `fangore_jev_context_picker`, `fangore_jev_requirements_review`, `fangore_jev_task_router`, `fangore_jev_action_safety` |
+| `decision_plane` | `DecisionPlaneTemplate` + `decision_plane_runtime` | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_matching_claim`, `fangore_jev_context_budget_pack`, `fangore_jev_req_review_template_shape`, `fangore_jev_task_route_simple_local`, `fangore_jev_action_safety` |
 | `bounded_retry` | `BoundedRetryTemplate` | `fangore_bounded_retry_recipe` (+ durable resume composition) |
 
 Composition kernel story: `fangore_recipe_namespace_tile` (`instance_key`, `tile`).

@@ -1,0 +1,23 @@
+# user story: fangore_insp_context_compaction
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    context_compaction_staged:
+      messages:
+      - role: user
+        content: a
+      - role: user
+        content: a
+      - role: assistant
+        content: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+complete:
+  expect:
+  - kind: includes
+    key: discarded_classes
+    value:
+    - deduplicated
+    - truncated_content
+cleanup: []

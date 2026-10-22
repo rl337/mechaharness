@@ -1,0 +1,33 @@
+# user story: fangore_bounded_repair_loop
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: verify_repair
+  bind: binds/verify_repair_succeeds.yaml
+steps:
+- do:
+    run_recipe:
+      name: verify_repair
+      path: binds/verify_repair_succeeds.yaml
+complete:
+  expect:
+  - kind: equals
+    key: final_status
+    value: succeeded
+  - kind: 'true'
+    key: verification_passed
+  - kind: lte
+    key: repair_attempts
+    value: 3
+  - kind: equals
+    key: template_name
+    value: verify_repair
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

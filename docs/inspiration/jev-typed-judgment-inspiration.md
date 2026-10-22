@@ -113,10 +113,10 @@ stories that exercise existing `decision_plane` / access infrastructure.
 | MH-JEV-US01 | Support-ticket team, urgency and escalation routing | classify → score → route | Example | Covered by `fangore_decision_plane_policy` / `fangore_refund_verdict` |
 | MH-JEV-US02 | Inbound lead fit and priority | evaluate criteria → score → dispatch | Example | Same triage pattern as US01 |
 | MH-JEV-US03 | Comment spam/abuse moderation | multi-label judge → policy → review | Medium | Future host pack |
-| MH-JEV-US04 | Claim/citation support check | extract claim/source → entailment → verify | **High** | `fangore_jev_citation_check` |
-| MH-JEV-US05 | RAG context selection | retrieve → relevance/trust/freshness → budget assembly | **High** | `fangore_jev_context_picker` |
-| MH-JEV-US06 | Semantic PR review against requirements | diff/requirements → atomic checks → escalate | **High** | `fangore_jev_requirements_review` |
-| MH-JEV-US07 | Task-specific model/workflow router | inspect request → choose model/tool/graph/human | **High** | `fangore_jev_task_router` |
+| MH-JEV-US04 | Claim/citation support check | extract claim/source → entailment → verify | **High** | `fangore_jev_citation_matching_claim` |
+| MH-JEV-US05 | RAG context selection | retrieve → relevance/trust/freshness → budget assembly | **High** | `fangore_jev_context_budget_pack` |
+| MH-JEV-US06 | Semantic PR review against requirements | diff/requirements → atomic checks → escalate | **High** | `fangore_jev_req_review_template_shape` |
+| MH-JEV-US07 | Task-specific model/workflow router | inspect request → choose model/tool/graph/human | **High** | `fangore_jev_task_route_simple_local` |
 | MH-JEV-US08 | Agent action safety firewall | propose action → semantic risk → hard policy | **High** | `fangore_jev_action_safety` |
 | MH-JEV-US09 | Browser agent reflex controller | observe → bounded action → execute | Experimental | Future |
 | MH-JEV-US10 | Game-state action selection | observe → bounded choice → simulate | Benchmark | Future |
@@ -127,7 +127,7 @@ recovered.
 
 ## High-priority acceptance-story sketches
 
-### MH-JEV-US04: Citation oracle (`fangore_jev_citation_check`)
+### MH-JEV-US04: Citation oracle (`fangore_jev_citation_matching_claim`)
 
 Given a source snapshot and an atomic claim, when the judge returns
 supported/contradicted/insufficient/unavailable, then the harness preserves
@@ -135,7 +135,7 @@ evidence spans and provenance, flags mismatches, and never upgrades unsupported
 claims to verified. Tests include 12% vs 40% revenue growth, missing source,
 misleading excerpt, and multi-claim sentences.
 
-### MH-JEV-US05: Context picker (`fangore_jev_context_picker`)
+### MH-JEV-US05: Context picker (`fangore_jev_context_budget_pack`)
 
 Given retrieved candidates and a strict token budget, when
 relevance/trust/freshness judgments are returned, then deterministic code
@@ -143,14 +143,14 @@ assembles a traceable context within budget. Tests include duplicates, stale
 docs, contradictory docs, malicious prompt injections, and fallback when the
 judge fails.
 
-### MH-JEV-US06: Requirements-aware code review (`fangore_jev_requirements_review`)
+### MH-JEV-US06: Requirements-aware code review (`fangore_jev_req_review_template_shape`)
 
 Given a PR diff and applicable user stories, when atomic checks identify
 possible requirement/test gaps, then the harness requests focused static tests
 or deeper review; it does not mark the PR correct merely because a judge
 approves.
 
-### MH-JEV-US07: Model router (`fangore_jev_task_router`)
+### MH-JEV-US07: Model router (`fangore_jev_task_route_simple_local`)
 
 Given a mixed workload, when the router chooses local small model, frontier
 model, deterministic tool, or human, then quality and budget policies are

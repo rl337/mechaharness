@@ -1,0 +1,12 @@
+{
+  "answers": {
+    "coverage": {
+      "selected": "gap",
+      "probabilities": {
+        "covered": 0.04999999999999999,
+        "gap": 0.9,
+        "unclear": 0.04999999999999999
+      }
+    }
+  }
+}

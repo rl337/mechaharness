@@ -49,6 +49,7 @@ from mechaharness.core.types import (
     Role,
     ToolCall,
     ToolResult,
+    Usage,
 )
 from mechaharness.lifecycle_extension import (
     AfterInference,
@@ -305,8 +306,7 @@ class AbstractHarness(Completer):
             }
             if assistant.reasoning_content:
                 inference_payload["reasoning_content"] = assistant.reasoning_content
-            if response.usage is not None:
-                inference_payload["usage"] = response.usage.model_dump()
+            inference_payload["usage"] = Usage.for_event(response.usage)
             self._emit(Inference, inference_payload, run_id)
             self._dispatch_lifecycle(
                 AfterInference,

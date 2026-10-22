@@ -1,0 +1,17 @@
+# Environment-repair Agentic Recipe: diagnose → repair env → recheck.
+name: environment_repair
+summary: Expand environment_repair before dependent work continues.
+goal: repair missing secrets route
+soft_bindings:
+  diagnose_kind: env_diagnose
+  repair_kind: env_repair
+  recheck_kind: env_recheck
+  acceptance:
+  - environment_ok
+stop_contract:
+  version: "1"
+  max_iterations: 2
+inputs:
+  missing_capabilities:
+  - secrets.route
+  repairs_needed: 1

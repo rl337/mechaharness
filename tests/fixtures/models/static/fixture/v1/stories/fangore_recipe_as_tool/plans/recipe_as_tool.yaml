@@ -1,0 +1,7 @@
+# Recipe-as-tool: embed a child graph under a parent tool node and execute it.
+
+plan: recipe_as_tool
+summary: Child oneshot runs under generate_image; child_graph component is present.
+parent_node_id: generate_image
+tool_name: generate_image
+child_goal: oneshot

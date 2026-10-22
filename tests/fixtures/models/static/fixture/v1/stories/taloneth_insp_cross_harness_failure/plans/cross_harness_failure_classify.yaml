@@ -1,0 +1,6 @@
+# Probe plan for scenario `cross_harness_failure_classify.yaml`.
+# Story: Separate semantic task failure from invalid tool protocol
+
+summary: Separate semantic task failure from invalid tool protocol
+name: cross_harness_failure_classify
+message: unknown tool foobar

@@ -1,0 +1,16 @@
+# Probe plan for scenario `trace_reconciliation_check.yaml`.
+# Story: Reject rollouts when independent traces disagree
+
+summary: Reject rollouts when independent traces disagree
+name: trace_reconciliation_check
+surfaces:
+- name: executor
+  event_ids:
+  - a
+  digests:
+    a: '1'
+- name: gateway
+  event_ids:
+  - a
+  digests:
+    a: '2'

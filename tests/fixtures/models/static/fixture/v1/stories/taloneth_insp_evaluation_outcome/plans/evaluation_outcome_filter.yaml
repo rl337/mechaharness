@@ -1,0 +1,16 @@
+# Probe plan for scenario `evaluation_outcome_filter.yaml`.
+# Story: Keep infrastructure failures out of task-success scores
+
+summary: Keep infrastructure failures out of task-success scores
+name: evaluation_outcome_filter
+trials:
+- trial_id: '1'
+  success: true
+- trial_id: '2'
+  success: true
+- trial_id: '3'
+  success: false
+  outcome:
+    kind: execution_failure
+    reason: environment:sandbox_dead
+k: 1

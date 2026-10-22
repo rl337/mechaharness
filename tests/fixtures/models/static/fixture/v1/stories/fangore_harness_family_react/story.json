@@ -1,0 +1,10 @@
+{
+  "id": "fangore_harness_family_react",
+  "persona": "fangore",
+  "title": "Run the react harness family through CLI tool_loop init",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `react` and backend `mock`. Fangore switches the host to the classic ReAct family so models without reliable native tool calls still loop Thought/Action/Observation. He starts from the same CLI tool-loop verb, with family=react bound at harness initialization, and expects a final answer after one scripted tool round. He walks product steps (tool_loop) and verifies completion from the structured observation expects on this scenario.",
+  "implementation": "`UserStoryScenario.environment.family` / `tool_loop.family=react` select `ReactHarness` via `_CliToolLoopConfig.get_harness_class` (Config DI). Story harness scripts Action/Final Answer turns on `ScriptedInference`. Emits the same EventLog inference/tool stream as other families.",
+  "validation": "Harness `user_story` scenario `react_tool_round.yaml`: environment + graph + steps + complete expects.",
+  "footnotes": []
+}

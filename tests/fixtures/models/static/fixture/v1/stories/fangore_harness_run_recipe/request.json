@@ -1,6 +1,0 @@
-{
-  "op": "harness_run_recipe",
-  "prompt": "say hello",
-  "backend": "mock",
-  "family": "pass_through"
-}

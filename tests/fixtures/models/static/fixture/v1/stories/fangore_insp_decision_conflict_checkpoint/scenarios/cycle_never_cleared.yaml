@@ -1,0 +1,37 @@
+# user story: fangore_insp_decision_conflict_checkpoint
+# Migrated from probe plan `cycle_never_cleared.yaml` → product/test verb `decision_conflict_neighbor_revisit`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    decision_conflict_neighbor_revisit:
+      id: cycle_never_cleared
+      start: a
+      write_scopes:
+        a:
+        - repo:x
+        b:
+        - repo:x
+        - repo:y
+        c:
+        - repo:y
+      clears: []
+  expect: &id001
+  - kind: equals
+    key: order
+    value:
+    - a
+    - b
+    - c
+  - kind: equals
+    key: checkpoints
+    value: []
+  - kind: equals
+    key: cycle_blocked
+    value:
+    - c
+complete:
+  expect: *id001
+cleanup: []

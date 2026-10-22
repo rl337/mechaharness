@@ -77,6 +77,7 @@ Guides
    guides/dependency-injection
    guides/openai-local
    guides/user-stories
+   guides/user-story-migration-batches
    requirements/recipes-and-decision-plane
    requirements/transactional-durable-resume
 

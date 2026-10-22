@@ -1,0 +1,17 @@
+{
+  "id": "fangore_job_lane_observe_before",
+  "persona": "fangore",
+  "title": "before(t) selector returns the last eligible lane run",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He publishes two runs on `assets.generate` with distinct `started_at` stamps, then observes with `before` a midpoint timestamp and gets the earlier run (JL-04).",
+  "implementation": "`ObserveSelector.before` / `at_or_before` on `JobLaneBroker.observe`; `lane_publish.started_at`.",
+  "validation": "Harness `user_story` scenario `observe_before.yaml`.",
+  "footnotes": [
+    {
+      "id": "jl-broker-before",
+      "label": "Job lane broker requirements",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md",
+      "note": "JL-04 run sequence selectors"
+    }
+  ]
+}

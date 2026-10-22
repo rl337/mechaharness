@@ -1,0 +1,18 @@
+# Probe plan for scenario `gated_objective_evaluate.yaml`.
+# Story: Apply efficiency only after correctness gates pass
+
+summary: Apply efficiency only after correctness gates pass
+name: gated_objective_evaluate
+policy:
+  policy_id: lexi
+  gates:
+  - correct
+  lexicographic:
+  - correct
+  - efficiency
+treatment:
+  correct: 0.0
+  efficiency: 0.9
+control:
+  correct: 1.0
+  efficiency: 0.5

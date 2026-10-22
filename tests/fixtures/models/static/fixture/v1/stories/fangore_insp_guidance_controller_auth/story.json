@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_guidance_controller_auth",
+  "persona": "fangore",
+  "title": "Enforce controller ownership and keep advice distinct from approval",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `owner`, store `memory`). Possession of a run id alone must not confer control. An intruder controller cannot resume; ordinary guidance cannot satisfy final-approval authority — that remains `fangore_insp_approval_interrupt`. Tracks R-IOC-AUTH. He walks product steps (start, answer, inspect, start, answer) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-07]",
+  "implementation": "`LeaseControllerAuth` / `GeneratorControllerAuth` on resume/cancel; `requested_authority=final_approval` raises PermissionError pointing hosts at ApprovalInterrupt.",
+  "validation": "Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.",
+  "footnotes": [
+    {
+      "id": "insp-ioc-07",
+      "label": "Durable graph generators (R-IOC-AUTH)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md",
+      "note": "R-IOC-AUTH controller lease; advice versus approval"
+    }
+  ]
+}

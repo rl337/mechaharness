@@ -1,0 +1,43 @@
+# user story: fangore_jev_action_safety
+# Hard grants win over semantic risk (delete_low_risk_no_grant).
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    judge:
+      state: 'Proposed action: delete /tmp/secret.txt'
+      questions:
+      - id: semantic_risk
+        kind: choice
+        instructions: Classify semantic risk of the proposed action.
+        options:
+        - id: low
+          description: low
+        - id: medium
+          description: medium
+        - id: high
+          description: high
+        allowed_actions:
+        - low
+        - medium
+        - high
+      action_question_id: semantic_risk
+      risk_question_id: semantic_risk
+      confidence_floor: 0.7
+      grants: []
+      required_abilities:
+      - core:fs.write
+complete:
+  expect:
+  - kind: equals
+    key: decision
+    value: deny
+  - kind: equals
+    key: hard_won
+    value: true
+  - kind: 'true'
+    key: grants_unchanged
+cleanup: []

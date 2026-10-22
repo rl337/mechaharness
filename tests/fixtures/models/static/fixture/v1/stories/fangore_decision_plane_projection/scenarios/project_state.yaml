@@ -1,0 +1,38 @@
+# user story: fangore_decision_plane_projection
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: decision_plane
+  bind: binds/project_state.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/project_state.yaml
+complete:
+  expect:
+  - kind: equals
+    key: projection
+    value:
+      ticket_id: T-9
+      channel: email
+  - kind: exactly
+    key: facts
+    value:
+    - duplicate_charge
+    - amount_cents
+  - kind: 'false'
+    key: projection_has_secret
+  - kind: 'true'
+    key: no_model_invocation
+  - kind: 'true'
+    key: facts_fingerprint_nonempty
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

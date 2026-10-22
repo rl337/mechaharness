@@ -48,6 +48,13 @@ graph = BoundedRetryTemplate().instantiate(
 assert graph.nodes["attempt"].payload["requires_effect_reconciliation"] is True
 ```
 
+## Execute
+
+Fixture runners in `mechaharness.bounded_retry_runner` + CLI
+`BoundedRetryRecipeAdapter` (`run_recipe name=bounded_retry`). Attempt budget
+is embedded in the attempt runner; classify / permit / backoff / escalate stamp
+visible outcomes.
+
 ## Node components
 
 | Parent graph node | Components |

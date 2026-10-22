@@ -1,0 +1,12 @@
+# Probe plan for scenario `named_matched_flavors.yaml`.
+# Story: Wire same-lane Completer flavors without forking the library
+
+summary: Wire same-lane Completer flavors without forking the library
+name: check_completer_flavors
+flavor_tags:
+- reason
+- code
+- deep
+matched_required:
+- reason
+- code

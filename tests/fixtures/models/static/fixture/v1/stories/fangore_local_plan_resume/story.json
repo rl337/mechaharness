@@ -2,10 +2,10 @@
   "id": "fangore_local_plan_resume",
   "persona": "fangore",
   "title": "Resume a durable local plan after a crash",
-  "kind": "graph_execution",
-  "narrative": "A local plan fans out produce-then-consume work. The process dies mid-dispatch. On restart, checkpoints \u2014 not chat \u2014 must resume at the recorded boundary, keep justified edges, refuse stale preconditions, surface failed fan-in, and refuse silent overwrite on conflicting writes. Incompatible harness or graph fingerprints must refuse silent continue. See inspiration requirements for durable long-running work[^insp-resume].",
-  "implementation": "`OperationContract` / `OperationRegistry` register shared computation contracts with scopes, preconditions, and effect classes, plus a capability registry of revisions. `ExecutionGraph` / `GraphStore` persist goal, nodes, and justified dependency edges on `EventLog` with recovery boundaries and optional `config_fingerprint`; effect isolation, hierarchical fan-in, and merge conflict policy cover parallel writes. Global loop stays under convergence; the DAG is local.\n\nCovers: INF-01, INF-03, GRF-01, GRF-02, GRF-03, GRF-04, GRF-05, GRF-06.",
-  "validation": "Harness `graph_execution` op `local_plan_resume` \u2192 `_run_local_plan_resume`. Unit: `tests/test_graph.py`, `tests/test_operation_registry.py`. Fingerprint refuse covered in `tests/test_inspiration_primitives.py`.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. A local plan's require_file node fails when `/work/input.txt` is missing on the virtual filesystem. He observes that failure, seeds the file into MemoryFilesystem, and resumes the same checkpointed `run_id` (held on walk-bag `ctx`) so the node succeeds. Checkpoints — not chat — carry the plan across the gap. Incompatible harness fingerprints remain covered by `fangore_insp_durable_resume`. See inspiration requirements for durable long-running work[^insp-resume].",
+  "implementation": "`LocalPlanResumeVerb` (`local_plan_resume`) in `cli_policy_verbs`: shared `MemoryFilesystem` + `GraphExecutor` checkpoint store; fail on missing path; seed; re-arm failed node; `resume=True` with the same `run_id` on walk-bag `ctx`. Fan-in / merge / precondition helpers stay available as library units; fingerprint refuse is `fangore_insp_durable_resume`.",
+  "validation": "Harness `user_story` walks `local_plan_resume`; expects first_status=failed (missing_file), resume_status=ok, file_content, and stable run_id.",
   "footnotes": [
     {
       "id": "loop-vs-graph",
@@ -17,7 +17,7 @@
       "id": "insp-resume",
       "label": "Inspiration requirements (durable resume)",
       "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
-      "note": "Req 12 \u2014 resumable external state; incompatible fingerprint refuse"
+      "note": "Req 12 — resumable external state; incompatible fingerprint refuse"
     }
   ]
 }

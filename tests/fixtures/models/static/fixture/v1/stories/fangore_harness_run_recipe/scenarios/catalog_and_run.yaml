@@ -1,0 +1,53 @@
+# user story: fangore_harness_run_recipe
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `harness_run` recipe.
+# Fangore wants the classic one-shot harness path to be a named control pattern he can
+# discover beside other recipes, not a special-case CLI only.
+# He lists the catalog, opens harness_run, binds a prompt and mock backend, and gets
+# final text from the same graph executor used for other recipes.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: harness_run
+steps:
+- do:
+    run_recipe:
+      name: harness_run
+      prompt: say hello
+      backend: mock
+      family: pass_through
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: nonempty
+    key: text
+  - kind: equals
+    key: turns
+    value: 1
+  - kind: includes
+    key: event_types
+    value:
+    - core:inference
+    - core:cost
+  - kind: equals
+    key: total_tokens
+    value: 2
+  - kind: lte
+    key: total_tokens
+    value: 2
+  - kind: exactly
+    key: subgraph_node_ids
+    value:
+    - prepare
+    - harness_loop
+    - render
+  - kind: lte
+    key: cost_units
+    value: 1
+cleanup: []

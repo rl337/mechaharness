@@ -1,0 +1,19 @@
+kind: cli
+commands:
+- infer:
+    prompt: Say hello.
+expect:
+- kind: nonempty
+  key: text
+- kind: positive
+  key: cost_units
+- kind: exactly
+  key: event_types
+  value:
+  - core:access_check
+  - core:graph_start
+  - core:graph_node_start
+  - core:cost
+  - core:inference
+  - core:graph_node_end
+  - core:graph_end

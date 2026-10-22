@@ -1,0 +1,30 @@
+# user story: fangore_capability_envelope_narrow
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  capability_envelope:
+    grants:
+    - core:graph.execute
+    - core:fs.read
+steps:
+- do:
+    capability_envelope:
+      child_grants:
+      - core:graph.execute
+      widen_grants:
+      - core:graph.execute
+      - core:fs.write
+complete:
+  expect:
+  - kind: 'true'
+    key: narrow_ok
+  - kind: equals
+    key: child_grant_count
+    value: 1
+  - kind: 'true'
+    key: widen_raises
+  - kind: equals
+    key: delegation_choice
+    value: child
+cleanup: []

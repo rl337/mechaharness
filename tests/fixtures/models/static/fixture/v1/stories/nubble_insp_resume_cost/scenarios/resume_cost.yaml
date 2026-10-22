@@ -1,0 +1,20 @@
+# user story: nubble_insp_resume_cost
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    resume_cost:
+      wake_to_first_productive_ms: 1000
+      rebuild_tokens: 400
+      rebuild_tool_calls: 2
+      provider_loads: 1
+      revalidation_work: 1
+      replayed_events: 5
+complete:
+  expect:
+  - kind: equals
+    key: rebuild_tokens
+    value: 400
+cleanup: []

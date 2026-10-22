@@ -1,0 +1,9 @@
+# Probe plan for scenario `failure_attribution_trace.yaml`.
+# Story: Attribute repeated failures to linkage or tools
+
+summary: Attribute repeated failures to linkage or tools
+name: failure_attribution_trace
+errors:
+- no_runner:x
+- no_runner:y
+- permission_denied

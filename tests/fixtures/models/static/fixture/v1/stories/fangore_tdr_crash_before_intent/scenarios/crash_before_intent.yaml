@@ -1,0 +1,45 @@
+# user story: fangore_tdr_crash_before_intent
+# Fangore starts the CLI host, runs transactional_resume for crash window
+# `before_intent`, resumes the durable coding job, and verifies single dispatch.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    transactional_resume:
+      crash_location: before_intent
+      goal: downstream-coding-job
+      run_id_prefix: story-tdr
+complete:
+  expect:
+  - kind: 'true'
+    key: crashed
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: node_status
+    value: succeeded
+  - kind: equals
+    key: dispatch_count
+    value: 1
+  - kind: equals
+    key: dispatch_count_after_crash
+    value: 0
+  - kind: equals
+    key: effect_state_before
+    value: null
+  - kind: equals
+    key: effect_state_after
+    value: completed
+  - kind: 'false'
+    key: reconciliation_invoked
+  - kind: equals
+    key: boundary_before
+    value: dispatch
+  - kind: lte
+    key: cost_units
+    value: 1
+cleanup: []

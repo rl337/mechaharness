@@ -1,0 +1,59 @@
+# user story: fangore_insp_graph_guidance_yield
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the
+# `verify_repair` durable graph (controller `story`, store `memory`).
+# When a run needs higher-level judgment, start returns an advice yield with a typed
+# question and choices.
+# The driver answers in a later call; the run completes.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: verify_repair
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: folk-guidance
+      inputs:
+        guidance:
+        - question: How should exhaustion affect the sword maneuver?
+          choices:
+          - id: slow
+            label: Slower
+          - id: precise
+            label: Precise
+          recommendation: precise
+          requested_authority: artistic_direction
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: equals
+    key: question
+    value: How should exhaustion affect the sword maneuver?
+- do:
+    answer:
+      choose: precise
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+  - kind: equals
+    key: resumes
+    value: 1
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+  - kind: equals
+    key: resumes
+    value: 1
+cleanup: []

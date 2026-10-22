@@ -102,8 +102,9 @@ and [`node-components`](../node-components/SKILL.md).
 
 When the change is **user-facing acceptance behavior** (harness runs, grants,
 lanes, judge/verdicts, adapters, recipes), defer entirely to the
-[`user-stories`](../user-stories/SKILL.md) skill: edit `story.json` (and
-`personas.json` if needed), keep twin copies identical, regenerate
+[`user-stories`](../user-stories/SKILL.md) skill: edit `story.json` +
+`scenarios/*.yaml` (`kind: cli`; all stories are migrating off legacy `op`
+fixtures), keep twin copies identical, regenerate
 `docs/guides/user-stories.md` with `scripts/generate_user_stories_md.py`, and
 run `--check`. Do **not** hand-edit the user-stories guide as ordinary markdown.
 

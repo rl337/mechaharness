@@ -1,9 +1,0 @@
-{
-  "in_catalog": true,
-  "status": "ok",
-  "final_text_nonempty": true,
-  "turns_min": 1,
-  "has_prepare": true,
-  "has_harness_loop": true,
-  "has_render": true
-}

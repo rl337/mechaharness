@@ -1,0 +1,11 @@
+# Probe plan for scenario `anchor_evidence_require.yaml`.
+# Story: Require external anchor evidence on high-autonomy work
+
+summary: Require external anchor evidence on high-autonomy work
+name: anchor_evidence_require
+kinds:
+- external_observation
+min_count: 1
+anchors:
+- kind: external_observation
+  ref: obs:1

@@ -1,0 +1,51 @@
+# user story: nubble_run_cost_events (openai_compat twin)
+# Same persona walk as static; environment.backend is openai_compat cassette.
+kind: user_story
+
+environment:
+  family: pass_through
+  backend: openai_compat
+
+graph: null
+
+steps:
+  - do:
+      infer:
+        prompt: Say hello.
+    expect:
+      - kind: nonempty
+        key: text
+
+complete:
+  expect:
+    - kind: exactly
+      key: event_types
+      value:
+        - core:access_check
+        - core:graph_start
+        - core:graph_node_start
+        - core:cost
+        - core:inference
+        - core:graph_node_end
+        - core:graph_end
+    - kind: positive
+      key: cost_units
+    - kind: lte
+      key: cost_units
+      value: 1
+    - kind: equals
+      key: prompt_tokens
+      value: 8
+    - kind: equals
+      key: completion_tokens
+      value: 1
+    - kind: equals
+      key: total_tokens
+      value: 9
+    - kind: lte
+      key: total_tokens
+      value: 9
+    - kind: nonempty
+      key: text
+
+cleanup: []

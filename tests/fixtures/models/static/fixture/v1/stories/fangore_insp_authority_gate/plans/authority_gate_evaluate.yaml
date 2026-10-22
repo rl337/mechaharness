@@ -1,0 +1,50 @@
+# Probe plan for scenario `authority_gate_evaluate.yaml`.
+# Story: Compose capability, impact, trust, and approval into one authority gate
+
+summary: Compose capability, impact, trust, and approval into one authority gate
+name: authority_gate_evaluate
+now: '2026-10-18T12:00:00Z'
+access_grants:
+- core:graph.execute
+- core:fs.read
+actions:
+- action: email.send
+  consequence: high
+- action: fs.read
+  consequence: low
+scenarios:
+- id: read_low
+  evaluate:
+    action: fs.read
+    required_grants:
+    - core:fs.read
+- id: send_asks
+  evaluate:
+    action: email.send
+- id: send_approved
+  evaluate:
+    action: email.send
+    approved: true
+- id: forwarded_send
+  evaluate:
+    action: email.send
+    approved: true
+    source_trust: untrusted
+- id: no_grant
+  evaluate:
+    action: fs.read
+    required_grants:
+    - core:net.http
+- id: expired_envelope
+  evaluate:
+    action: fs.read
+    envelope:
+      expires_at: '2026-10-18T11:00:00Z'
+- id: policy_deny
+  evaluate:
+    action: fs.read
+    verdict:
+      kind: DENY
+      reasonCodes:
+      - r
+      policyVersion: '1'

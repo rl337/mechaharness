@@ -1,8 +1,0 @@
-{
-  "op": "failure_attribution_trace",
-  "errors": [
-    "no_runner:x",
-    "no_runner:y",
-    "permission_denied"
-  ]
-}

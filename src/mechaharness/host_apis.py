@@ -80,14 +80,22 @@ from mechaharness.host_kit import (
     host_graph_executor,
 )
 
-# Isolation and handoff (MH-DOTS-07)
+# Isolation and handoff (MH-DOTS-07 → JobLaneBroker)
 from mechaharness.isolation import (
     CrossTaskIsolationGuard,
     InMemoryWorkspaceIsolationProvider,
     IsolationContract,
     IsolationViolation,
+    JobLane,
+    JobLaneBroker,
     TemplateIOContract,
     WorkspaceIsolationProvider,
+)
+from mechaharness.job_lane_broker import (
+    ExposureRule,
+    LaneGrant,
+    ObserveResult,
+    ObserveSelector,
 )
 from mechaharness.operation_registry import (
     ToolPhase,
@@ -135,13 +143,19 @@ __all__ = [
     "DenialStore",
     "EffectRevalidation",
     "EvolutionCampaignHooks",
+    "ExposureRule",
     "GRAPH_CORRELATOR_KEYS",
     "HandoffRecord",
     "InMemoryDenialStore",
     "InMemoryWorkspaceIsolationProvider",
     "IsolationContract",
     "IsolationViolation",
+    "JobLane",
+    "JobLaneBroker",
+    "LaneGrant",
     "NodeAttemptRow",
+    "ObserveResult",
+    "ObserveSelector",
     "NoopEvolutionCampaignHooks",
     "NoopRecipePromotionPolicy",
     "PromotionRecord",

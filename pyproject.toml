@@ -43,6 +43,9 @@ dependencies = [
 dev = [
   "pytest>=8.2",
   "pytest-asyncio>=0.23",
+  "pytest-cov>=5.0",
+  "PyYAML>=6.0",
+  "types-PyYAML>=6.0",
   "ruff>=0.5",
   # Exact pin: mypy 2.x requires Python >=3.10, and floating majors caused
   # CI (3.12) vs local (3.9) to disagree on what passes. Bump deliberately.
@@ -60,6 +63,7 @@ docs = [
 
 [project.scripts]
 mechaharness = "mechaharness.cli.main:app"
+mechaharness-generator = "mechaharness.mcp_graph_driver:main"
 
 [project.urls]
 Homepage = "https://rl337.org/mechaharness/"
@@ -105,3 +109,46 @@ plugins = ["pydantic.mypy"]
 [[tool.mypy.overrides]]
 module = "pyiv.*"
 ignore_missing_imports = true
+
+# User-story coverage gate (see scripts/story_coverage.py + run_checks.sh).
+# Floor is branch-aware percent_covered; bump when the story suite improves.
+[tool.coverage.run]
+branch = true
+source = ["mechaharness"]
+omit = [
+  # Entrypoints / hosts not driven by kind:cli stories
+  "*/cli/main.py",
+  "*/mcp_graph_driver.py",
+  "*/api/app.py",
+  "*/host_apis.py",
+  # Viz / render tooling (unit-tested separately when present)
+  "*/recipe_diagram.py",
+  "*/recipe_render.py",
+  # Thin re-export shims (deprecated public import paths)
+  "*/connection.py",
+  "*/cross_task_isolation.py",
+  "*/decisions.py",
+  "*/evolution_campaign_hooks.py",
+  "*/graph_template.py",
+  "*/isolation_contract.py",
+  "*/operations.py",
+  "*/policy.py",
+  "*/recipe_evolution.py",
+  "*/recipe_port_search.py",
+  "*/recipe_promotion_policy.py",
+  "*/review_audit.py",
+  "*/specification_debt.py",
+  "*/tool_phase.py",
+  "*/workspace_isolation.py",
+  "*/api/__init__.py",
+]
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
+# Story-suite floor (branch coverage). Raise when stories cover more; never lower
+# without an explicit decision — CI fails if coverage drops below this.
+fail_under = 78
+
+[tool.coverage.json]
+output = "coverage-stories.json"

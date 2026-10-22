@@ -1,0 +1,7 @@
+# Probe plan for scenario `sparse_advisor.yaml`.
+# Story: Consult an advisor without transferring task ownership
+
+summary: Consult an advisor without transferring task ownership
+name: sparse_advisor
+max_consultations: 1
+trigger: consequential_planning

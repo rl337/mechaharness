@@ -1,0 +1,41 @@
+# user story: fangore_jev_task_route_complex_frontier
+# He judges a cheap lane but quality policy forces frontier on high complexity.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    judge:
+      state: 'WORKLOAD: redesign auth across services with ambiguous requirements.'
+      questions:
+      - id: route
+        kind: choice
+        instructions: Choose the execution lane for this workload.
+        options:
+        - id: local_small
+          description: local_small
+        - id: frontier
+          description: frontier
+        - id: tool
+          description: tool
+        - id: human
+          description: human
+        allowed_actions:
+        - local_small
+        - frontier
+        - tool
+        - human
+      action_question_id: route
+      confidence_floor: 0.7
+      facts:
+        complexity: 0.85
+      quality_complexity_floor: 0.7
+      quality_override_action: frontier
+complete:
+  expect:
+  - kind: equals
+    key: final_action
+    value: frontier
+cleanup: []

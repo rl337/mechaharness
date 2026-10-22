@@ -1,0 +1,68 @@
+# user story: fangore_insp_produce_critique_refine
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: produce_critique_refine
+  bind: binds/produce_critique_refine.yaml
+steps:
+- do:
+    run_recipe:
+      name: produce_critique_refine
+      path: binds/produce_critique_refine.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: produce_critique_refine
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - produce
+    - critique
+    - refine
+    - complete
+  - kind: 'true'
+    key: critic_isolated
+  - kind: equals
+    key: refine_max_iterations
+    value: 3
+  - kind: equals
+    key: component_parents
+    value:
+      complete:
+      - complete_kind
+      critique:
+      - acceptance
+      - critique_kind
+      - critique_prompt
+      - omit_producer_reasoning
+      produce:
+      - produce_kind
+      refine:
+      - max_rounds
+      - refine_kind
+      - stop_contract
+  - kind: equals
+    key: evolvable
+    value:
+    - critique_prompt
+    - max_rounds
+  - kind: equals
+    key: rounds_used
+    value: 2
+  - kind: 'true'
+    key: findings_cleared
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

@@ -1,0 +1,57 @@
+# user story: nubble_run_cost_events
+# Finance asks whether a harness run burned billable units.
+# Nubble starts the CLI host (mock reason backend, pass-through family),
+# runs one-shot infer on the default CLI universe graph, then verifies
+# completion via inference + cost events and token/cost ceilings.
+kind: user_story
+
+environment:
+  family: pass_through
+  backend: mock
+
+# Default cli:infer universe — no recipe bind / durable session.
+graph: null
+
+steps:
+  - # S1 — run the one-shot job
+    do:
+      infer:
+        prompt: Say hello.
+    expect:
+      - kind: nonempty
+        key: text
+
+complete:
+  # Story done: billing-visible inference + cost on the event stream.
+  expect:
+    - kind: exactly
+      key: event_types
+      value:
+        - core:access_check
+        - core:graph_start
+        - core:graph_node_start
+        - core:cost
+        - core:inference
+        - core:graph_node_end
+        - core:graph_end
+    - kind: positive
+      key: cost_units
+    - kind: equals
+      key: prompt_tokens
+      value: 4
+    - kind: equals
+      key: completion_tokens
+      value: 1
+    - kind: equals
+      key: total_tokens
+      value: 5
+    - kind: lte
+      key: total_tokens
+      value: 5
+    - kind: nonempty
+      key: text
+    - kind: lte
+      key: cost_units
+      value: 1
+
+cleanup: []

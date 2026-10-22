@@ -1,0 +1,24 @@
+# Probe plan for scenario `export_train.yaml`.
+# Story: Export decision data without leaking future outcomes
+
+summary: Export decision data without leaking future outcomes
+name: offline_decision_export
+records:
+- eventId: d1
+  stateHash: h1
+  policyVersion: p1
+  verdict: ALLOW
+  outcomeId: late-success
+  allowedCandidates:
+  - a
+  - b
+  excludedCandidates:
+    c: unauthorized
+- eventId: d2
+  stateHash: h2
+  policyVersion: p1
+  verdict: ASK_HUMAN
+  terminationReason: interrupted
+  outcomeId: null
+split: train
+include_outcomes: false

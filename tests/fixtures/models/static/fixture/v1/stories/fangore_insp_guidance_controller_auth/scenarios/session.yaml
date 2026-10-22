@@ -1,0 +1,63 @@
+# user story: fangore_insp_guidance_controller_auth
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the
+# `verify_repair` durable graph (controller `owner`, store `memory`).
+# Possession of a run id alone must not confer control.
+# An intruder controller cannot resume; ordinary guidance cannot satisfy final-approval
+# authority — that remains `fangore_insp_approval_interrupt`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: verify_repair
+  durable:
+    controller: owner
+    store: memory
+steps:
+- do:
+    start:
+      run_id: auth-1
+      inputs:
+        guidance:
+        - question: Owned?
+          choices:
+          - id: a
+            label: A
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: a
+      controller: intruder
+  expect_error: permission
+- do:
+    inspect: {}
+  expect:
+  - kind: 'true'
+    key: controller_ok
+- do:
+    start:
+      run_id: auth-2
+      inputs:
+        guidance:
+        - question: Ship?
+          requested_authority: final_approval
+          choices:
+          - id: 'yes'
+            label: 'Yes'
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: 'yes'
+  expect_error: permission
+complete:
+  expect:
+  - kind: equals
+    key: error
+    value: permission
+cleanup: []

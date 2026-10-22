@@ -1,0 +1,6 @@
+# Probe plan for scenario `verification_outcome.yaml`.
+# Story: Keep answer-generated distinct from task-complete
+
+summary: Keep answer-generated distinct from task-complete
+name: verification_outcome
+require_verification: true

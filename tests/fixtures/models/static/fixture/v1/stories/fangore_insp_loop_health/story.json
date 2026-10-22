@@ -2,10 +2,10 @@
   "id": "fangore_insp_loop_health",
   "persona": "fangore",
   "title": "Wind down loops when verification debt grows",
-  "kind": "pure_api",
-  "narrative": "Long loops accumulate verification debt; Fangore winds them down when independent verification age or repeated failures exceed host thresholds. Accepts WalkingLabs L13 guidance[^wl-l13-loop].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Long loops accumulate verification debt; Fangore winds them down when independent verification age or repeated failures exceed host thresholds. Accepts WalkingLabs L13 guidance[^wl-l13-loop].",
   "implementation": "`LoopHealthSignals` and `should_wind_down` in `mechaharness.loop_health` expose verification-debt and failure signals.",
-  "validation": "Harness `pure_api` op `loop_health`. Soft expects wind_down true.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l13-loop",

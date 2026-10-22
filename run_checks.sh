@@ -62,6 +62,10 @@ run_check "User stories guide" "$PYTHON" scripts/generate_user_stories_md.py --c
 
 run_check "Pytest" "$PYTEST" -q
 
+# Story-suite branch coverage + gap report; fails if below fail_under in
+# pyproject.toml [tool.coverage.report] (coverage must not drop).
+run_check "User story coverage" "$PYTHON" scripts/story_coverage.py
+
 if "$PYTHON" -c "import sphinx" 2>/dev/null; then
   run_check "Sphinx docs" "$PYTHON" -m sphinx -b html -q docs docs/_build/html
 else

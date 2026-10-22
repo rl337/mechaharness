@@ -1,0 +1,29 @@
+name: decision_plane
+summary: Reject choice outside allowed envelope
+goal: triage
+soft_bindings:
+  confidence_floor: 0.7
+  shadow_mode: false
+  questions:
+  - id: team
+    kind: choice
+    options:
+    - id: billing
+      label: Billing
+    - id: technical
+      label: Technical
+    allowed_actions:
+    - billing
+    - technical
+  - id: risk
+    kind: score
+    min: 0
+    max: 1
+  state_projection:
+    ticket_id: T-1
+inputs:
+  escalation_route: host_policy
+  fixture_answers:
+    team: legal
+    risk: 0.1
+  confidence: 0.99

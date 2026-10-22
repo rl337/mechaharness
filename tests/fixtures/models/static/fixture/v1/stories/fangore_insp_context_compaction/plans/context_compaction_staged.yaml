@@ -1,0 +1,12 @@
+# Probe plan for scenario `context_compaction_staged.yaml`.
+# Story: Compact context in staged lossless then lossy steps
+
+summary: Compact context in staged lossless then lossy steps
+name: context_compaction_staged
+messages:
+- role: user
+  content: a
+- role: user
+  content: a
+- role: assistant
+  content: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

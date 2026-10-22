@@ -1,0 +1,38 @@
+# user story: taloneth_insp_objective_policy
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    objective_policy_aggregate:
+      policy:
+        policy_id: demo:lexi
+        version: '1'
+        component_signals:
+        - correct
+        - tokens
+        formula: lexicographic
+        gates:
+        - correct
+        lexicographic:
+        - correct
+        - tokens
+      claims:
+      - id: correct
+        statement: ok
+        status: pass
+      - id: tokens
+        statement: budget
+        status: pass
+complete:
+  expect:
+  - kind: 'true'
+    key: scored
+  - kind: equals
+    key: scalar
+    value: 1.0
+  - kind: equals
+    key: policy_id
+    value: demo:lexi
+cleanup: []

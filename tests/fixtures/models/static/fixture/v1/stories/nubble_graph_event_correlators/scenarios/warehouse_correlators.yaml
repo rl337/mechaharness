@@ -1,0 +1,60 @@
+# user story: nubble_graph_event_correlators
+# Migrated from probe plan `warehouse_correlators.yaml` → product/test verb `graph_event_correlators`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    graph_event_correlators:
+      graph_id: corr-graph
+      goal: ship the report
+      recipe_id: verify_repair
+      recipe_version: '1'
+      authorization_epoch: 3
+      nodes:
+      - a
+      - b
+  expect: &id001
+  - kind: equals
+    key: status
+    value: ok
+  - kind: 'true'
+    key: graph_events_have_graph_id
+  - kind: 'true'
+    key: node_events_have_node_id
+  - kind: equals
+    key: recipe
+    value:
+    - - verify_repair
+      - '1'
+  - kind: equals
+    key: epochs
+    value:
+    - 3
+  - kind: equals
+    key: child_parent_run_ids
+    value:
+    - corr-run
+  - kind: equals
+    key: child_nest_depths
+    value:
+    - 1
+  - kind: equals
+    key: node_attempt_rows
+    value:
+    - - a
+      - 1
+      - succeeded
+    - - b
+      - 1
+      - succeeded
+    - - nest
+      - 1
+      - succeeded
+  - kind: lte
+    key: cost_units
+    value: 3
+complete:
+  expect: *id001
+cleanup: []

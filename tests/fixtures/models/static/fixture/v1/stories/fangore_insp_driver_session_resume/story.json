@@ -1,0 +1,17 @@
+{
+  "id": "fangore_insp_driver_session_resume",
+  "persona": "fangore",
+  "title": "Resume guidance in a later driver call without recursive callbacks",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair` durable graph (controller `session`, store `memory`). Frontier and other MCP-capable clients cannot reenter a model session during a pending tool call. Guidance therefore returns as an ordinary tool result; the same driving session calls resume later with the answer. Tracks R-IOC-SESSION. He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario. [^insp-ioc-03]",
+  "implementation": "`DurableGraphGenerator.start` returns a committed `GraphYield`; `resume` is a separate operation with `expected_sequence`. No recursive callback into an outstanding tool call is required. MCP adapter: `mechaharness.mcp_graph_driver` (unit/doctest).",
+  "validation": "Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.",
+  "footnotes": [
+    {
+      "id": "insp-ioc-03",
+      "label": "Durable graph generators (R-IOC-SESSION)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md",
+      "note": "R-IOC-SESSION caller-session resume"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+# user story: nubble_insp_trace_reconciliation
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    trace_reconciliation_check:
+      surfaces:
+      - name: executor
+        event_ids:
+        - a
+        digests:
+          a: '1'
+      - name: gateway
+        event_ids:
+        - a
+        digests:
+          a: '2'
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: conflict
+  - kind: 'false'
+    key: ok
+cleanup: []

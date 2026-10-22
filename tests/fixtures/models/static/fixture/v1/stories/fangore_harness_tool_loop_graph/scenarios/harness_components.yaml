@@ -1,0 +1,63 @@
+# user story: fangore_harness_tool_loop_graph
+# Fangore starts the CLI host with family `tool_loop` and backend `mock`.
+# Fangore runs a tool-loop harness with one tool then a final answer.
+# The console must treat inference and each tool call as node components under a harness
+# parent — not an opaque blob — using the same kinds as recipe interiors.
+kind: user_story
+environment:
+  family: tool_loop
+  backend: mock
+graph: null
+steps:
+- do:
+    tool_loop:
+      prompt: find it
+      tool_name: lookup
+      family: tool_loop
+      max_turns: 4
+complete:
+  expect:
+  - kind: equals
+    key: text
+    value: done
+  - kind: equals
+    key: status
+    value: ok
+  - kind: includes
+    key: event_types
+    value:
+    - core:inference
+    - core:cost
+    - core:tool_call
+  - kind: equals
+    key: total_tokens
+    value: 4
+  - kind: lte
+    key: total_tokens
+    value: 4
+  - kind: exactly
+    key: traversal_kinds
+    value:
+    - turn_start
+    - cost
+    - inference
+    - tool_call
+    - access_check
+    - cost
+    - tool_result
+    - turn_start
+    - cost
+    - inference
+  - kind: exactly
+    key: component_parent_ids
+    value:
+    - harness
+    - harness
+    - harness
+    - harness
+    - harness
+    - harness
+  - kind: lte
+    key: cost_units
+    value: 3
+cleanup: []

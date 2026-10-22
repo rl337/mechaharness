@@ -1,0 +1,21 @@
+name: produce_critique_refine
+summary: Isolated critic, three refine rounds, evolvable critique_prompt/max_rounds.
+goal: draft release notes
+acceptance:
+- no_unverified_claims
+soft_bindings:
+  produce_kind: produce
+  critique_kind: critique
+  refine_kind: refine
+  complete_kind: complete
+  critique_prompt: List concrete defects against the acceptance criteria.
+  max_rounds: 3
+  omit_producer_reasoning: true
+  acceptance:
+  - no_unverified_claims
+inputs:
+  text: draft release notes
+  producer_reasoning: should stay on produce
+  critique_findings:
+  - unverified claim
+  - missing citation

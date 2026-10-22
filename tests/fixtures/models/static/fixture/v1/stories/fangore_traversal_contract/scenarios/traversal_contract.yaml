@@ -1,0 +1,26 @@
+# user story: fangore_traversal_contract
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# As a run proceeds, Fangore’s console lights interiors that were laid out ahead of time.
+# Inference and tool events must map to the same node-component identities under a parent
+# graph node so the path lights up without a second observability graph.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    recipe_plan:
+      path: plans/traversal_contract.yaml
+complete:
+  expect:
+  - kind: gte
+    key: record_count_min
+    value: 3
+  - kind: 'true'
+    key: has_inference
+  - kind: 'true'
+    key: has_tool_call
+  - kind: 'true'
+    key: all_have_parent
+cleanup: []
