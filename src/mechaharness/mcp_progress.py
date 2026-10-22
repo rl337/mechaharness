@@ -18,7 +18,7 @@ from typing import Any
 
 ProgressWriter = Callable[[dict[str, Any]], None]
 
-_active: ContextVar["McpProgressReporter | None"] = ContextVar(
+_active: ContextVar[McpProgressReporter | None] = ContextVar(
     "mechaharness_mcp_progress", default=None
 )
 

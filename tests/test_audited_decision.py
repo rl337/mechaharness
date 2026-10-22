@@ -12,13 +12,13 @@ from mechaharness.audited_decision import (
     criteria_hash,
     repair_target,
 )
+from mechaharness.graph import GraphNode
 from mechaharness.graph_templates import (
     AuditedInferAcceptTemplate,
     GraphTemplateParams,
     default_graph_templates,
 )
 from mechaharness.graph_templates.audited_infer_accept import append_audited_infer_accept
-from mechaharness.graph import GraphNode
 
 
 def test_stages_order() -> None:

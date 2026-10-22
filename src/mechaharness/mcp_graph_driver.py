@@ -129,7 +129,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, BinaryIO, Callable, Literal
+from typing import Any, BinaryIO, Callable, Literal, cast
 
 from pyiv.time import PythonDateTimeService
 
@@ -192,7 +192,10 @@ def build_generator(
             def get_generator_run_store(self) -> FileGeneratorRunStore:
                 return store
 
-        return get_injector(_McpHostConfig).inject(DurableGraphGenerator)
+        return cast(
+            DurableGraphGenerator,
+            get_injector(_McpHostConfig).inject(DurableGraphGenerator),
+        )
 
     templates = {name: cls() for name, cls in default_graph_template_classes().items()}
     registry = GraphTemplateRegistry(templates)

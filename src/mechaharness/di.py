@@ -81,11 +81,11 @@ from mechaharness.durable_graph_generator import (
     InMemoryGeneratorRunStore,
     LeaseControllerAuth,
 )
+from mechaharness.external_effect import CrashProbe, NoopCrashProbe
 from mechaharness.generator_local_work import (
     GeneratorLocalWork,
     NoOpGeneratorLocalWork,
 )
-from mechaharness.external_effect import CrashProbe, NoopCrashProbe
 from mechaharness.graph import GraphStore
 from mechaharness.graph_executor import (
     DefaultGraphFailurePolicy,

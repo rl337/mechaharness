@@ -27,6 +27,7 @@ from mechaharness.core.access import (
     GraphExecute,
     ProcessExec,
 )
+from mechaharness.core.completer import Completer
 from mechaharness.core.types import (
     ChatMessage,
     CompletionRequest,
@@ -43,7 +44,7 @@ from mechaharness.graph_templates.catalog import default_graph_template_classes
 from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
-from mechaharness.inference.base import Completer, InferenceStrategy
+from mechaharness.inference.base import InferenceStrategy
 from mechaharness.project_coding_tools import (
     WorkspacePaths,
     build_coding_tool_registry,

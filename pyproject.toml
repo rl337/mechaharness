@@ -117,9 +117,10 @@ ignore_missing_imports = true
 branch = true
 source = ["mechaharness"]
 omit = [
-  # Entrypoints / hosts not driven by kind:cli stories
+  # Entrypoints / hosts not driven by kind:cli / user_story walks
   "*/cli/main.py",
   "*/mcp_graph_driver.py",
+  "*/project_coding.py",  # MCP ProjectCodingConfig host; unit-tested
   "*/api/app.py",
   "*/host_apis.py",
   # Viz / render tooling (unit-tested separately when present)

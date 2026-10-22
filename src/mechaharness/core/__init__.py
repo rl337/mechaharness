@@ -20,13 +20,13 @@ from mechaharness.core.access import (
     Grant,
     GraphEscalate,
     GraphExecute,
-    ProcessExec,
     InMemoryAccessControl,
     InMemoryCostAccountant,
     MediaAudio,
     MediaImage,
     MediaVideo,
     NetHttp,
+    ProcessExec,
 )
 from mechaharness.core.completer import Completer
 from mechaharness.core.contract import RunRequest, RunResponse

@@ -161,8 +161,10 @@ def guidance_answers(record_history: list[dict[str, Any]]) -> list[dict[str, Any
     for entry in record_history:
         if not isinstance(entry, dict):
             continue
-        req = entry.get("request") if isinstance(entry.get("request"), dict) else {}
-        resp = entry.get("response") if isinstance(entry.get("response"), dict) else {}
+        raw_req = entry.get("request")
+        raw_resp = entry.get("response")
+        req: dict[str, Any] = raw_req if isinstance(raw_req, dict) else {}
+        resp: dict[str, Any] = raw_resp if isinstance(raw_resp, dict) else {}
         out.append(
             {
                 "context_version": str(req.get("context_version") or ""),

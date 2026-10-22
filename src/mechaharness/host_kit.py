@@ -541,7 +541,10 @@ def host_durable_graph_generator(
 
         def get_generator_local_work(self) -> GeneratorLocalWork | type[GeneratorLocalWork]:
             if bound_local_work is not None:
-                return bound_local_work
+                return cast(
+                    Union[GeneratorLocalWork, type[GeneratorLocalWork]],
+                    bound_local_work,
+                )
             return super().get_generator_local_work()
 
         def configure(self) -> None:
