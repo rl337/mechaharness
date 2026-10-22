@@ -45,13 +45,17 @@ mechaharness run "Reply with the single word ok." \
 
 Default live story model for LM Studio-style Qwen is
 ``openai_compat/qwen-qwen3.6-35b-a3b``. Offline CI uses the same story via
-cassette (no skip). Live:
+cassette (no skip). Live reason filter:
 
 ```bash
 MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen-qwen3.6-35b-a3b \
   MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
   pytest -q tests/stories -k nubble_run_cost
 ```
+
+For the full model-using live suite (reason + judge), set both
+`MECHA_BASE_URL` / `MECHA_MODEL` and `MECHA_JUDGE_*` — see
+[User stories](./user-stories.md) and [Local OpenAI-compat](./openai-local.md).
 
 List what is registered:
 

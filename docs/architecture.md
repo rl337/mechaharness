@@ -75,9 +75,9 @@ registers `Settings`, `HarnessConfig`, `ToolRegistry`, `EventLog`,
 `LinkageResolver`, `VerificationPolicy`, `DelegationPolicy`, `Advisor`,
 `AdvisorPolicy`, `GraphTemplateRegistry`, `ContextProviderRegistry`,
 `CapabilityEnvelope`, `LifecycleExtensionRegistry`, `GraphExecutor`,
-`DurableGraphGenerator`, `GeneratorRunStore`, and `GeneratorControllerAuth`.
-(`JobLaneBroker` is the planned Config-bound owner of per-lane run sequences
-and authorized observe — see [Job lanes](./reference/job-lanes.md).)
+`JobLaneBroker`, `DurableGraphGenerator`, `GeneratorRunStore`, and
+`GeneratorControllerAuth`. (`JobLaneBroker` owns per-lane run sequences and
+authorized observe — see [Job lanes](./reference/job-lanes.md).)
 Subclasses override `get_inference_class()` and `get_harness_class()` (called
 from the Config constructor). Override `get_access_policy()` (or
 `get_grants()`) for deny-by-default tool grants; compose reusable sets with
@@ -85,7 +85,8 @@ from the Config constructor). Override `get_access_policy()` (or
 `HarnessConfig.subagent_tools` (parent EventLog query tools). Override
 `get_inference_environment()` for host profile probes.
 Override `get_judge_connection()` / `get_judge_provider()` for judge wiring and
-wire adapters. Override `get_node_runner_registry()` /
+wire adapters. Override `get_job_lane_broker()` for lane catalogs. Override
+`get_node_runner_registry()` /
 `get_graph_failure_policy()` / `get_graph_escalation()` /
 `get_linkage_resolver()` / `get_graph_template_registry()` /
 `get_lifecycle_extension_registry()` /
@@ -148,8 +149,11 @@ dispatches open `kind` strings through a host-populated
 fail; nested subgraphs aggregate), applies `GraphFailurePolicy`
 (retry / escalate / fail), optional `GraphEscalation` (needs
 `core:graph.escalate`), and emits `core:graph_start` / `core:graph_end` plus
-per-node events. Effectful nodes opt into `EffectfulGraphNodeRunner` for
-durable intent/acceptance and resume reconciliation. Bind via Config hooks
+per-node events. Optional `RunControl` pauses between nodes (`one_step` /
+`until` / soft subgraph enter) for product verb `graph_walk` — see
+[Stepped graph execution](./reference/stepped-graph-execution.md). Effectful
+nodes opt into `EffectfulGraphNodeRunner` for durable intent/acceptance and
+resume reconciliation. Bind via Config hooks
 `get_node_runner_registry()`, `get_graph_failure_policy()`,
 `get_graph_escalation()`, `get_checkpoint_store()`, and
 `get_graph_executor_class()` — not Settings.

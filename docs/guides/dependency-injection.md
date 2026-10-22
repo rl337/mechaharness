@@ -221,16 +221,19 @@ For durable plans, override `get_node_runner_registry()`,
 `SqliteCheckpointStore` for process-restart durability), and optionally
 `get_linkage_resolver()` / `get_capability_envelope()` /
 `get_lifecycle_extension_registry()`, then `injector.inject(GraphExecutor)`.
-Agentic Recipe membership is a pyiv map multibind: override
-`graph_template_classes()` (merge via `super()`), discover with
-`catalog_keys(GraphTemplate)`, and inject `GraphTemplateRegistry`. Backend and
-harness family names use the same pattern (`inference_classes` /
-`harness_classes` → `catalog_keys`). Include `core:graph.execute` (and
-`core:graph.escalate` when using escalation) in grants. Ordered lifecycle
-extensions (inspiration req 20) bind via `get_lifecycle_extension_registry()`
-and are distinct from EventLog telemetry. Library templates are owned by
-MechaHarness; clients instantiate them via Config and may retain the resulting
-concrete graphs. See [Architecture](../architecture.md) and
+Override `get_job_lane_broker()` to bind a non-empty `JobLaneBroker` catalog
+(default is an empty broker); inject `JobLaneBroker` for publish/observe —
+see [Job lanes](../reference/job-lanes.md). Agentic Recipe membership is a
+pyiv map multibind: override `graph_template_classes()` (merge via `super()`),
+discover with `catalog_keys(GraphTemplate)`, and inject
+`GraphTemplateRegistry`. Backend and harness family names use the same pattern
+(`inference_classes` / `harness_classes` → `catalog_keys`). Include
+`core:graph.execute` (and `core:graph.escalate` when using escalation) in
+grants. Ordered lifecycle extensions (inspiration req 20) bind via
+`get_lifecycle_extension_registry()` and are distinct from EventLog telemetry.
+Library templates are owned by MechaHarness; clients instantiate them via
+Config and may retain the resulting concrete graphs. See
+[Architecture](../architecture.md) and
 [Graph templates](../reference/graph-templates.md).
 
 ### Host APIs and promotion

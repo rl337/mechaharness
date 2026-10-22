@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-10-22
+
+Job lanes, stepped graph execution, user-story migration / recipe execute,
+live model verification against reason + judge hosts, and pyiv ≥ 1.1.1 (#32,
+#33).
+
 ### Changed
 
 - Floor **pyiv ≥ 1.1.1**.
@@ -14,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `judge_route` walks against real reason + judge hosts; cassette-exact token
   counts are soft while behavioral expects stay hard. Aligns two JEV fixtures
   with live Laya classifications.
+- Docs: mark `JobLaneBroker` / stepped `RunControl` as shipped in architecture
+  and DI guides; align judge / openai-local / CLI-universe live-suite notes
+  with expanded live story collection (#32 / #33).
 
 ### Added
 

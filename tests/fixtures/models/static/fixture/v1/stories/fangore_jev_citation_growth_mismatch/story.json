@@ -3,8 +3,8 @@
   "persona": "fangore",
   "title": "Refuse to verify when the source contradicts the claim",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (FixtureJudgeProvider cassette) for: Refuse to verify when the source contradicts the claim. He verifies claim_verified / escalate from the typed support answer and confidence floor.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (fixture cassette offline; live System One when enabled) for: Refuse to verify when the source contradicts the claim. He verifies claim_verified / escalate from the typed support answer and confidence floor.",
   "implementation": "Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via injected JudgeProvider. Code-owned claim_verified = selected==supported \u2227 conf\u2265floor.",
-  "validation": "Harness `user_story` scenario `growth_mismatch.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate.",
+  "validation": "Harness `user_story` scenario `growth_mismatch.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).",
   "footnotes": []
 }

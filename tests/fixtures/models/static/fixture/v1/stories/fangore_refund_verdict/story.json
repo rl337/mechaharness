@@ -3,9 +3,9 @@
   "persona": "fangore",
   "title": "Keep billing authority in product rules, not the model",
   "kind": "user_story",
-  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing — and a high quality score alone must not override missing completion evidence. He walks product steps (judge_route) and verifies completion from the structured observation expects on this scenario. Related: `fangore_decision_surface_reject`.",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing \u2014 and a high quality score alone must not override missing completion evidence. He walks product steps (judge_route) and verifies completion from the structured observation expects on this scenario. Related: `fangore_decision_surface_reject`.",
   "implementation": "Provider-neutral judge types (`Choice`/`Score`/`Noul` questions and signals) plus `JudgementPolicy` / `decide()` apply configured thresholds. `CliInstrumentor` verb `judge_route` runs judge+decide. System One maps vendor wire via `SystemOneJudgeProvider`.\n\nCovers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.",
-  "validation": "Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps + complete expects.",
+  "validation": "Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps + complete expects. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).",
   "footnotes": [
     {
       "id": "jev-decisions",

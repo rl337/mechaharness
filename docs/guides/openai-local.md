@@ -24,10 +24,22 @@ Use the **served model id** your server advertises on `/v1/models`, not a
 Hugging Face repo id.
 
 Live and offline pytest use the dual-mode **user story** suite (see
-[User stories](./user-stories.md)). Offline CI always runs cassettes; live is
-the same tests with real HTTP:
+[User stories](./user-stories.md)). Offline CI always runs cassettes; live hits
+real HTTP for cassette twins **and** static `infer` / `judge` /
+`judge_route` walks (`tests/stories/live_capability.py`). Behavioral expects
+stay hard; cassette-exact token counts are soft.
 
 ```bash
+# Full model-using live suite (reason + judge)
+MECHA_STORY_BACKEND=live \
+  MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
+  MECHA_MODEL=qwen3-30b-thinking \
+  MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 \
+  MECHA_JUDGE_MODEL=laya \
+  MECHA_MAX_TOKENS=1024 \
+  pytest -q tests/stories
+
+# Reason-lane filter only
 MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen3-30b-thinking \
   MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
   pytest -q tests/stories -k nubble_run_cost
@@ -54,7 +66,9 @@ export MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009
 export MECHA_JUDGE_PATH=/v1/systemone   # default; override if needed
 export MECHA_JUDGE_MODEL=laya
 
+# Judge filter (System One twins) or omit MECHA_STORY_MODEL for all live-eligible
 MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
+  MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 \
   pytest -q tests/stories -k 'refund_verdict or systemone_cassette'
 ```
 
