@@ -335,6 +335,7 @@ class DurableGraphGenerator:
         datetime_service: DateTimeService,
         controller_auth: GeneratorControllerAuth | None = None,
         checkpoint_store: CheckpointStore | None = None,
+        local_work: Any | None = None,
     ) -> None:
         self._registry = registry
         self._runs = run_store
@@ -342,6 +343,8 @@ class DurableGraphGenerator:
         self._datetime = datetime_service
         self._auth = controller_auth or LeaseControllerAuth()
         self._checkpoints = checkpoint_store
+        # Optional GeneratorLocalWork (duck-typed) for post-guidance bursts.
+        self._local_work = local_work
 
     def list_recipes(self) -> list[RecipeDescriptor]:
         out: list[RecipeDescriptor] = []
@@ -587,13 +590,32 @@ class DurableGraphGenerator:
                 summary=req.question,
                 request_id=req.request_id,
             )
+        work_payload: dict[str, Any] = {}
+        if self._local_work is not None:
+            run_fn = getattr(self._local_work, "run", self._local_work)
+            raw = run_fn(record)
+            if isinstance(raw, dict):
+                work_payload = raw
+            if work_payload.get("result") == "failed":
+                record.phase = "failed"
+                record.error = str(work_payload.get("error") or "local_work_failed")
+                return self._publish(
+                    record,
+                    kind="failed",
+                    payload={
+                        **work_payload,
+                        "guidance_history": list(record.guidance_history),
+                    },
+                    summary=record.error,
+                )
         record.phase = "completed"
         return self._publish(
             record,
             kind="completed",
             payload={
-                "result": record.inputs.get("result", "ok"),
+                "result": work_payload.get("result", record.inputs.get("result", "ok")),
                 "guidance_history": list(record.guidance_history),
+                **{k: v for k, v in work_payload.items() if k != "result"},
             },
             summary="completed",
         )

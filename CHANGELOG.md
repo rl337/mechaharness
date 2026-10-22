@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Guided coding Agentic Recipe (`guided_coding`):** frontier MCP guidance soft
+  point tiles `conversational_tool_loop` + `audited_infer_accept` (`audit_tile`).
+  Host Config `ProjectCodingConfig` registers workspace coding tools and a
+  `GeneratorLocalWork` burst after guidance. MCP `MECHA_MCP_HOST=project_coding`
+  binds that Config; inference endpoints belong on the Cursor MCP `env` block.
+  Story: `fangore_guided_coding_recipe`.
+- **Audited infer-accept (`audited_infer_accept`):** RDG-aligned spine
+  collect → freeze → decide → independent QA → deterministic → gate, lifted
+  from FOLK `ideation.infer.accept` for library reuse. Domain module
+  `mechaharness.audited_decision`. Migration notes:
+  `docs/inspiration/folk-audited-infer-migration.md`. Story:
+  `fangore_audited_infer_accept`.
+
 ## [0.7.0] — 2026-10-22
 
 Job lanes, stepped graph execution, user-story migration / recipe execute,

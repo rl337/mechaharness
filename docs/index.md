@@ -95,6 +95,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Self-revising recipe requirements map](./inspiration/self-revising-recipe-requirements-map.md) | MH-SR IDs → modules → user stories |
 | [Durable graph generators inspiration](./inspiration/durable-graph-generators-inversion-of-control.md) | Frontier/human/scripted drivers, ordered yields, MCP as adapter |
 | [Durable graph generators requirements map](./inspiration/durable-graph-generators-requirements-map.md) | R-IOC / DG IDs → modules → user stories |
+| [FOLK audited-infer migration](./inspiration/folk-audited-infer-migration.md) | Host alias `ideation.infer.accept` → `audited_infer_accept` |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |

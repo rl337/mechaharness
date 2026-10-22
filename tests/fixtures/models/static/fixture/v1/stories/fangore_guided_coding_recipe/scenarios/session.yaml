@@ -1,0 +1,41 @@
+# user story: fangore_guided_coding_recipe
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the
+# `guided_coding` durable graph (controller `story`, store `memory`).
+# Start yields advice_requested from soft point external_guidance; he answers minimal;
+# the run completes.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: guided-coding-1
+      inputs:
+        goal: add a small helper
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+cleanup: []

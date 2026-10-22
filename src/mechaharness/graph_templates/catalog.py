@@ -7,6 +7,7 @@ Membership is a class map consumed by pyiv ``contribute_map`` /
 
 from __future__ import annotations
 
+from mechaharness.graph_templates.audited_infer_accept import AuditedInferAcceptTemplate
 from mechaharness.graph_templates.backend_describe import BackendDescribeTemplate
 from mechaharness.graph_templates.base import GraphTemplate, GraphTemplateRegistry
 from mechaharness.graph_templates.bounded_retry import BoundedRetryTemplate
@@ -18,6 +19,7 @@ from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
 from mechaharness.graph_templates.demo_guidance import DemoGuidanceTemplate
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
+from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
 from mechaharness.graph_templates.initialize_preflight import InitializePreflightTemplate
@@ -41,6 +43,8 @@ def default_graph_template_classes() -> dict[str, type[GraphTemplate]]:
         ContextPackTemplate.name: ContextPackTemplate,
         BoundedRetryTemplate.name: BoundedRetryTemplate,
         ConversationalToolLoopTemplate.name: ConversationalToolLoopTemplate,
+        AuditedInferAcceptTemplate.name: AuditedInferAcceptTemplate,
+        GuidedCodingTemplate.name: GuidedCodingTemplate,
         HarnessRunTemplate.name: HarnessRunTemplate,
         BackendDescribeTemplate.name: BackendDescribeTemplate,
         ProduceCritiqueRefineTemplate.name: ProduceCritiqueRefineTemplate,

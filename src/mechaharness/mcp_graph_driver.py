@@ -20,6 +20,12 @@ Environment:
   ``.mechaharness/generator-runs.json`` under cwd)
 - ``MECHA_GENERATOR_CONTROLLER`` — default controller id (default
   ``mcp-driver``)
+- ``MECHA_MCP_HOST`` — ``project_coding`` binds
+  :class:`~mechaharness.project_coding.ProjectCodingConfig` (workspace tools +
+  Settings / ``MECHA_BASE_URL``). Unset → bare registry generator.
+- ``MECHA_WORKSPACE`` — project root for coding tools (default: cwd)
+- ``MECHA_BASE_URL`` / ``MECHA_MODEL`` / ``MECHA_API_KEY`` /
+  ``MECHA_INFERENCE_BACKEND`` — local inference (blessed on MCP ``env``)
 
 Run::
 
@@ -161,13 +167,33 @@ def build_generator(
     store_path: str | Path | None = None,
     controller_default: str | None = None,
 ) -> DurableGraphGenerator:
-    """Construct a generator with a file-backed run store (MCP-process safe)."""
+    """Construct a generator with a file-backed run store (MCP-process safe).
+
+    When ``MECHA_MCP_HOST`` is ``project_coding`` (default), builds via
+    :class:`~mechaharness.project_coding.ProjectCodingConfig` so Settings /
+    MCP ``env`` bind ``openai_local`` and coding tools. Set
+    ``MECHA_MCP_HOST=none`` for a bare registry-only generator (doctests).
+    """
     del controller_default  # callers pass controller_id per op
     path = Path(
         store_path
         or os.environ.get("MECHA_GENERATOR_STORE")
         or Path.cwd() / ".mechaharness" / "generator-runs.json"
     )
+    from mechaharness.project_coding import mcp_host_config_class
+
+    host_cls = mcp_host_config_class()
+    if host_cls is not None:
+        from mechaharness.di import get_injector
+
+        store = FileGeneratorRunStore(path)
+
+        class _McpHostConfig(host_cls):  # type: ignore[misc,valid-type]
+            def get_generator_run_store(self) -> FileGeneratorRunStore:
+                return store
+
+        return get_injector(_McpHostConfig).inject(DurableGraphGenerator)
+
     templates = {name: cls() for name, cls in default_graph_template_classes().items()}
     registry = GraphTemplateRegistry(templates)
     return DurableGraphGenerator(

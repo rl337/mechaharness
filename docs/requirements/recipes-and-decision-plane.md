@@ -211,6 +211,8 @@ promotion and documentation as Agentic Recipes (names are catalog ids):
 | `initialize_preflight` | `InitializePreflightTemplate` | `fangore_insp_initialize_preflight` |
 | `decision_plane` | `DecisionPlaneTemplate` + `decision_plane_runtime` | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_matching_claim`, `fangore_jev_context_budget_pack`, `fangore_jev_req_review_template_shape`, `fangore_jev_task_route_simple_local`, `fangore_jev_action_safety` |
 | `bounded_retry` | `BoundedRetryTemplate` | `fangore_bounded_retry_recipe` (+ durable resume composition) |
+| `audited_infer_accept` | `AuditedInferAcceptTemplate` + `audited_decision` | `fangore_audited_infer_accept` (FOLK `ideation.infer.accept` migrate) |
+| `guided_coding` | `GuidedCodingTemplate` (tiles tool loop + audited gate) | `fangore_guided_coding_recipe` |
 
 Composition kernel story: `fangore_recipe_namespace_tile` (`instance_key`, `tile`).
 

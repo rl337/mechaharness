@@ -114,6 +114,13 @@ plus a Cursor-style NDJSON handshake). Run it with::
 
 ### Local Cursor wiring
 
+Point MCP at the **project interpreter** (editable `pip install -e .` in this
+repo, or the host env where `mechaharness` is installed). Do **not** create a
+separate MCP-only virtualenv.
+
+Inference endpoints and model id belong on the MCP server ``env`` block
+(primary). An optional project ``.env`` is only a convenience for CLI/pytest.
+
 Project-local `.cursor/mcp.json` (gitignored; absolute paths are machine-local)::
 
     {
@@ -121,16 +128,31 @@ Project-local `.cursor/mcp.json` (gitignored; absolute paths are machine-local):
         "mechaharness-generator": {
           "command": "/ABS/PATH/to/.venv/bin/python",
           "args": ["-m", "mechaharness.mcp_graph_driver"],
-          "cwd": "/ABS/PATH/to/mechaharness",
+          "cwd": "/ABS/PATH/to/project",
           "env": {
-            "MECHA_GENERATOR_STORE": "/ABS/PATH/to/.mechaharness/generator-runs.json",
+            "MECHA_MCP_HOST": "project_coding",
+            "MECHA_WORKSPACE": "/ABS/PATH/to/project",
+            "MECHA_GENERATOR_STORE": "/ABS/PATH/to/project/.mechaharness/generator-runs.json",
             "MECHA_GENERATOR_CONTROLLER": "cursor-agent",
-            "PYTHONPATH": "/ABS/PATH/to/src",
+            "MECHA_INFERENCE_BACKEND": "openai_local",
+            "MECHA_BASE_URL": "http://127.0.0.1:8000/v1",
+            "MECHA_MODEL": "<served-model-id>",
+            "MECHA_API_KEY": "local",
             "PYTHONUNBUFFERED": "1"
           }
         }
       }
     }
+
+``MECHA_MCP_HOST=project_coding`` loads
+:class:`~mechaharness.project_coding.ProjectCodingConfig` (workspace coding
+tools + ``guided_coding`` local-work burst after guidance). Restart the MCP
+server after changing ``env`` or editing library modules (stdio processes do
+not hot-reload).
+
+Recipe ``guided_coding``: start → ``advice_requested`` (engineering direction)
+→ ``generator_resume`` with a short answer → local tool loop + verify payload
+on ``completed``. See [guided coding](./graph-templates/guided-coding.md).
 
 ## Related
 

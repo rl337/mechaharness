@@ -1,0 +1,41 @@
+# user story: fangore_audited_infer_accept
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `audited_infer_accept` recipe.
+# Soft modality selects text decide/QA kinds; principals for decide and QA differ.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: audited_infer_accept
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/audited_infer_accept.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: audited_infer_accept
+  - kind: equals
+    key: template_status
+    value: active
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - collect
+    - freeze
+    - decide
+    - qa
+    - deterministic
+    - gate
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: audited_infer_accept
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - collect
+    - gate
+cleanup: []

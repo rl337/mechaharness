@@ -425,6 +425,18 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ## Fangore's stories
 
+### `fangore_audited_infer_accept` — Expand an audited infer-accept generate and gate spine
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `audited_infer_accept` recipe. He wants a generate → freeze criteria → decide → independent QA → deterministic → gate control pattern that FOLK can migrate onto, without shipping Comfy in the library. Soft modality selects text decide/QA kinds; principals for decide and QA differ. Complements `fangore_verify_repair_recipe` (oracle loop) and `fangore_guided_coding_recipe` (which tiles this spine). He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.
+
+#### Implementation
+
+Agentic Recipe catalog id `audited_infer_accept` (`AuditedInferAcceptTemplate` + `append_audited_infer_accept`). Domain `mechaharness.audited_decision` (`STAGES`, `criteria_hash`, `assert_principals_distinct`, `repair_target`). Default node kinds `audited.*`; hosts soft-bind runners (FOLK: `folk.infer.*`). Migration notes: `docs/inspiration/folk-audited-infer-migration.md`.
+
+#### Validation
+
+Harness `user_story` scenario `spine.yaml`: environment + instantiate_recipe expects. Unit tests `tests/test_audited_decision.py`.
+
 ### `fangore_backend_describe_recipe` — Describe an inference backend through the backend_describe recipe
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `backend_describe` recipe. Before Fangore wires a host, he wants a machine-readable description of a configured backend — name, network behavior, auth — without leaving the recipe catalog. He runs backend_describe with the mock backend and gets the same metadata the classic describe command used to print. Complements `fangore_harness_run_recipe`. He walks product steps (run_recipe) and verifies completion from the structured observation expects on this scenario.
@@ -837,6 +849,18 @@ Harness `user_story` scenario `until_before.yaml`.
 #### Footnotes
 
 [^sg-until]: [Stepped graph execution requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md) — SG-02 until before
+
+### `fangore_guided_coding_recipe` — Guide local coding via the guided_coding Agentic Recipe
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph (controller `story`, store `memory`). He wants Cursor to answer only short engineering direction while a project-local MechaHarness process (ProjectCodingConfig + openai_local) does the token-heavy file edits. Start yields `advice_requested` from soft point `external_guidance`; he answers `minimal` in a later call and the run completes. Complements `fangore_insp_graph_guidance_yield`, `fangore_conversational_tool_loop`, and `fangore_verify_repair_recipe`. He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` (`GuidedCodingTemplate`) tiles `conversational_tool_loop` and `audited_infer_accept` under `code_loop` / `audit_tile` with soft point `external_guidance` (`kind=guidance`). MCP `MECHA_MCP_HOST=project_coding` binds `ProjectCodingConfig` (workspace coding tools + `GeneratorLocalWork` / `ProjectCodingLocalWork` burst after guidance). `DurableGraphGenerator._advance` invokes the injectable local-work hook when the guidance queue is empty.
+
+#### Validation
+
+Harness `user_story` scenario `session.yaml`: environment + durable guided_coding + start/answer expects. Unit tests `tests/test_project_coding.py` and `tests/test_guided_coding_recipe.py` cover tools confinement, audit tile topology, and offline local-work file write.
 
 ### `fangore_harness_family_react` — Run the react harness family through CLI tool_loop init
 
