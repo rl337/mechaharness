@@ -60,6 +60,16 @@ class DurableGraphBlock(BaseModel):
     store: Literal["memory", "shared"] = "memory"
 
 
+class InlineGraphBlock(BaseModel):
+    """Inline ExecutionGraph spec for stepped ``graph_walk`` stories (SG-09)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    goal: str = ""
+    nodes: list[dict[str, Any]] = Field(min_length=1)
+    edges: list[dict[str, Any]] = Field(default_factory=list)
+
+
 class GraphBlock(BaseModel):
     """What plan/session the persona loads before walking steps."""
 
@@ -68,6 +78,8 @@ class GraphBlock(BaseModel):
     recipe: str | None = None
     bind: str | None = None
     durable: DurableGraphBlock | None = None
+    # Product graph for graph_walk (stepped control); not a recipe expand.
+    inline: InlineGraphBlock | None = None
 
     @model_validator(mode="after")
     def _durable_needs_recipe(self) -> GraphBlock:
@@ -273,6 +285,12 @@ async def run_user_story_scenario(
             ]
         )
         await instrumentor.run(setup)
+    if graph is not None and graph.inline is not None:
+        instrumentor.inline_graph = {
+            "goal": graph.inline.goal,
+            "nodes": list(graph.inline.nodes),
+            "edges": list(graph.inline.edges),
+        }
     return await instrumentor.run(scenario.to_script())
 
 
@@ -281,6 +299,7 @@ __all__ = [
     "DurableGraphBlock",
     "EnvironmentBlock",
     "GraphBlock",
+    "InlineGraphBlock",
     "StoryStep",
     "UserStoryScenario",
     "load_user_story_scenario",

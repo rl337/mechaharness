@@ -344,6 +344,9 @@ class CliInstrumentor:
         self._durable: DurableInstrumentor | None = None
         self._durable_script: DurableScript | None = None
         self._bind_base_dir: Path | None = None
+        # Stepped graph_walk session (SG-09): executor + checkpointed graph.
+        self._graph_walk: dict[str, Any] | None = None
+        self._inline_graph: dict[str, Any] | None = None
 
     @property
     def completer(self) -> Completer:
@@ -397,6 +400,22 @@ class CliInstrumentor:
     @property
     def job_lane_broker(self) -> JobLaneBroker | None:
         return self._job_lane_broker
+
+    @property
+    def graph_walk_session(self) -> dict[str, Any] | None:
+        return self._graph_walk
+
+    @graph_walk_session.setter
+    def graph_walk_session(self, value: dict[str, Any] | None) -> None:
+        self._graph_walk = value
+
+    @property
+    def inline_graph(self) -> dict[str, Any] | None:
+        return self._inline_graph
+
+    @inline_graph.setter
+    def inline_graph(self, value: dict[str, Any] | None) -> None:
+        self._inline_graph = value
 
     def resolve_budget_policy(
         self,

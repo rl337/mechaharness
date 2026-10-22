@@ -7,7 +7,7 @@ case bags. See ``docs/reference/access.md`` and ``docs/reference/budget.md``.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -1121,6 +1121,251 @@ class LaneHandoffVerb(CliVerb):
         }
 
 
+class GraphWalkCommand(BaseModel):
+    """Stepped graph control: start / step / until / continue / set_live_epoch (SG-09)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    action: Literal["start", "step", "until", "continue", "set_live_epoch"] = "start"
+    goal: str = "walk"
+    run_id: str = "cli:graph-walk"
+    nodes: list[dict[str, Any]] = Field(default_factory=list)
+    edges: list[dict[str, Any]] = Field(default_factory=list)
+    until: str | None = None
+    stop: Literal["before", "after"] = "before"
+    live_authorization_epoch: int | None = None
+    envelope_epoch: int | None = None
+    grants: list[str] = Field(
+        default_factory=lambda: ["core:graph.execute"]
+    )
+
+
+class GraphWalkVerb(CliVerb):
+    name = "graph_walk"
+    params_model = GraphWalkCommand
+
+    async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
+        from mechaharness.budget import BudgetPolicy
+        from mechaharness.capability_envelope import CapabilityEnvelope
+        from mechaharness.core.access import GraphExecute
+        from mechaharness.di import MechaHarnessConfig, get_injector
+        from mechaharness.graph import DependencyEdge, ExecutionGraph, GraphNode, NodeStatus
+        from mechaharness.graph_executor import (
+            CallableGraphNodeRunner,
+            GraphExecutor,
+            GraphNodeRunnerRegistry,
+            NodeOutcome,
+            RunControl,
+        )
+        from mechaharness.harness.pass_through import PassThroughHarness
+        from mechaharness.inference.mock import MockInferenceStrategy
+
+        body = GraphWalkCommand.model_validate(params.model_dump())
+        session = getattr(runtime, "graph_walk_session", None)
+
+        if body.action == "set_live_epoch":
+            if session is None:
+                raise RuntimeError("graph_walk set_live_epoch needs an active session")
+            if body.live_authorization_epoch is None:
+                raise ValueError("set_live_epoch requires live_authorization_epoch")
+            session["live_epoch"] = int(body.live_authorization_epoch)
+            executor = session["executor"]
+            assert isinstance(executor, GraphExecutor)
+            epoch = int(session["live_epoch"])
+            executor.live_authorization_epoch = lambda e=epoch: e
+            return {
+                "status": "ok",
+                "action": "set_live_epoch",
+                "live_authorization_epoch": epoch,
+            }
+
+        def _node_statuses(graph: ExecutionGraph) -> dict[str, str]:
+            return {nid: n.status.value for nid, n in graph.nodes.items()}
+
+        if body.action == "start":
+            nodes_spec = list(body.nodes)
+            inline = getattr(runtime, "inline_graph", None)
+            if not nodes_spec and isinstance(inline, dict):
+                nodes_spec = list(inline.get("nodes") or [])
+                if not body.goal or body.goal == "walk":
+                    body = body.model_copy(
+                        update={"goal": str(inline.get("goal") or body.goal)}
+                    )
+                if not body.edges:
+                    body = body.model_copy(
+                        update={"edges": list(inline.get("edges") or [])}
+                    )
+            if not nodes_spec:
+                raise ValueError("graph_walk start requires nodes or graph.inline")
+
+            calls: list[str] = []
+
+            async def run_node(node: GraphNode, context: Any) -> NodeOutcome:
+                del context
+                calls.append(node.id)
+                return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+            kinds = sorted({str(n.get("kind") or "compute") for n in nodes_spec})
+            # Subgraph kind is handled by the executor; still register leaf kinds.
+            leaf_kinds = [k for k in kinds if k != "subgraph"]
+
+            class Cfg(MechaHarnessConfig):
+                def get_inference_class(self) -> type[InferenceStrategy]:
+                    return MockInferenceStrategy
+
+                def get_harness_class(self) -> type[AbstractHarness]:
+                    return PassThroughHarness
+
+                def get_grants(self) -> list[object]:
+                    return [GraphExecute, *list(body.grants)]
+
+                def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+                    return GraphNodeRunnerRegistry(
+                        [CallableGraphNodeRunner(leaf_kinds or ["compute"], run_node)]
+                    )
+
+            executor = get_injector(Cfg()).inject(GraphExecutor)
+            live = body.live_authorization_epoch
+            if live is None and runtime.capability_envelope is not None:
+                live = runtime.capability_envelope.authorization_epoch
+            if live is not None:
+                executor.live_authorization_epoch = lambda e=int(live): e
+
+            graph = ExecutionGraph(goal=body.goal)
+            for raw in nodes_spec:
+                node = GraphNode(
+                    id=str(raw["id"]),
+                    kind=str(raw.get("kind") or "compute"),
+                    depends_on=list(raw.get("depends_on") or []),
+                    payload=dict(raw.get("payload") or {}),
+                    subgraph=raw.get("subgraph"),
+                )
+                graph.add_node(node)
+            for raw in body.edges:
+                graph.add_dependency(
+                    DependencyEdge(
+                        from_node=str(raw["from"]),
+                        to_node=str(raw["to"]),
+                        types=list(raw.get("types") or ["control"]),
+                        reason=str(raw.get("reason") or "graph_walk"),
+                    )
+                )
+
+            env_epoch = body.envelope_epoch
+            if env_epoch is None:
+                env_epoch = live if live is not None else 0
+            envelope = CapabilityEnvelope(
+                grants=list(body.grants),
+                authorization_epoch=int(env_epoch),
+            )
+
+            if body.until:
+                control = RunControl(
+                    mode="until", until=body.until, stop=body.stop
+                )
+            else:
+                # Bare start binds the session and advances one frontier step
+                # (stories that need to_completion use action=continue next).
+                control = RunControl(mode="one_step")
+
+            session = {
+                "executor": executor,
+                "graph": graph,
+                "run_id": body.run_id,
+                "envelope": envelope,
+                "calls": calls,
+                "live_epoch": live,
+            }
+            runtime.graph_walk_session = session
+            result = await executor.run(
+                graph,
+                budget_policy=BudgetPolicy.unlimited(),
+                run_id=body.run_id,
+                envelope=envelope,
+                skip_linkage=True,
+                control=control,
+            )
+            session["graph"] = result.graph
+            session["effect_calls"] = len(calls)
+            node_error = ""
+            for node in result.graph.nodes.values():
+                if node.error:
+                    node_error = node.error
+                    break
+            return {
+                "status": result.status,
+                "action": "start",
+                "run_id": result.run_id,
+                "stopped_before": result.stopped_before,
+                "entered_node_id": result.entered_node_id,
+                "active_run_id": result.active_run_id,
+                "node_statuses": _node_statuses(result.graph),
+                "effect_calls": len(calls),
+                "node_error": node_error,
+                "error": result.error,
+            }
+
+        if session is None:
+            raise RuntimeError(f"graph_walk {body.action} needs an active session")
+
+        executor = session["executor"]
+        assert isinstance(executor, GraphExecutor)
+        graph = session["graph"]
+        envelope = session["envelope"]
+        calls = session["calls"]
+        assert isinstance(graph, ExecutionGraph)
+        assert isinstance(envelope, CapabilityEnvelope)
+
+        if body.live_authorization_epoch is not None:
+            session["live_epoch"] = int(body.live_authorization_epoch)
+            epoch = int(session["live_epoch"])
+            executor.live_authorization_epoch = lambda e=epoch: e
+
+        if body.action == "step":
+            control = RunControl(mode="one_step")
+        elif body.action == "until":
+            if not body.until:
+                raise ValueError("graph_walk until requires until=node_id")
+            control = RunControl(mode="until", until=body.until, stop=body.stop)
+        else:  # continue
+            control = RunControl()
+            if body.until:
+                control = RunControl(
+                    mode="until", until=body.until, stop=body.stop
+                )
+
+        before_calls = len(calls)
+        result = await executor.run(
+            graph,
+            budget_policy=BudgetPolicy.unlimited(),
+            run_id=session["run_id"],
+            resume=True,
+            envelope=envelope,
+            skip_linkage=True,
+            control=control,
+        )
+        session["graph"] = result.graph
+        session["effect_calls"] = len(calls)
+        node_error = ""
+        for node in result.graph.nodes.values():
+            if node.error:
+                node_error = node.error
+                break
+        return {
+            "status": result.status,
+            "action": body.action,
+            "run_id": result.run_id,
+            "stopped_before": result.stopped_before,
+            "entered_node_id": result.entered_node_id,
+            "active_run_id": result.active_run_id,
+            "node_statuses": _node_statuses(result.graph),
+            "effect_calls": len(calls),
+            "step_effect_calls": len(calls) - before_calls,
+            "node_error": node_error,
+            "error": result.error,
+        }
+
+
 def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
     return {
         AccessCheckVerb.name: AccessCheckVerb,
@@ -1140,6 +1385,7 @@ def policy_cli_verb_classes() -> dict[str, type[CliVerb]]:
         LaneObserveVerb.name: LaneObserveVerb,
         LaneGrantVerb.name: LaneGrantVerb,
         LaneHandoffVerb.name: LaneHandoffVerb,
+        GraphWalkVerb.name: GraphWalkVerb,
     }
 
 
@@ -1168,6 +1414,8 @@ __all__ = [
     "LaneHandoffVerb",
     "LaneObserveCommand",
     "LaneObserveVerb",
+    "GraphWalkCommand",
+    "GraphWalkVerb",
     "LanePublishCommand",
     "LanePublishVerb",
     "LocalPlanResumeCommand",

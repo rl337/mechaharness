@@ -73,6 +73,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Dynamic tool graph and node components](./requirements/dynamic-tool-graph.md) | Graph node vs node component; HF-05/07/08; kinds ⊆ existing surfaces |
 | [Durable graph generators](./requirements/durable-graph-generators.md) | Driven yields / guidance IoC (DG-01..13); primary long-run façade |
 | [Transactional durable resume](./requirements/transactional-durable-resume.md) | CheckpointStore, SQLite, effect reconciliation (DR-01..12) |
+| [Stepped graph execution](./requirements/stepped-graph-execution.md) | Pause/continue between nodes; until/before; soft enter (SG-01..10) |
 | [Event analytics schema](./requirements/event-analytics-schema.md) | Near-3NF fact/dim contract for warehouse reconstruction of graph decisions |
 | [Host integration](./requirements/host-integration.md) | Normative contract for apps that consume MechaHarness (HOST-01..07) |
 | [Agent skills (downstream)](./guides/agent-skills.md) | Customer-facing Cursor skills for host repos |
@@ -108,6 +109,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, host recipe-run kwargs |
 | [Job lanes](./reference/job-lanes.md) | `JobLane` / `JobLaneBroker`: run sequences, observe, exposure |
 | [Job lane broker requirements](./requirements/job-lane-broker.md) | JL-01..10: lane bags, selectors, grants, story YAML |
+| [Stepped graph execution](./reference/stepped-graph-execution.md) | `RunControl` / `graph_walk`: until, one_step, soft enter |
 | [Budget](./reference/budget.md) | Soft/hard spend, `BudgetPolicy`, recipe-run ceilings |
 | [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
 | [Graph templates and Agentic Recipes](./reference/graph-templates.md) | Recipe catalog + `GraphTemplate` substrate + soft points |
