@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Install &amp; quick start &mdash; MechaHarness 0.6.0 documentation</title>
+  <title>Install &amp; quick start &mdash; MechaHarness 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
+      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -151,12 +151,15 @@ cost without a GPU.</p>
 </div>
 <p>Default live story model for LM Studio-style Qwen is
 <code class="docutils literal notranslate"><span class="pre">openai_compat/qwen-qwen3.6-35b-a3b</span></code>. Offline CI uses the same story via
-cassette (no skip). Live:</p>
+cassette (no skip). Live reason filter:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_STORY_MODEL</span><span class="o">=</span>openai_compat/qwen-qwen3.6-35b-a3b<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://127.0.0.1:1234/v1<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
 </pre></div>
 </div>
+<p>For the full model-using live suite (reason + judge), set both
+<code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code> / <code class="docutils literal notranslate"><span class="pre">MECHA_MODEL</span></code> and <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code> — see
+<a class="reference internal" href="user-stories.html"><span class="std std-doc">User stories</span></a> and <a class="reference internal" href="openai-local.html"><span class="std std-doc">Local OpenAI-compat</span></a>.</p>
 <p>List what is registered:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mechaharness<span class="w"> </span>backends
 mechaharness<span class="w"> </span>families

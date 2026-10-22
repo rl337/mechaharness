@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Architecture &mdash; MechaHarness 0.6.0 documentation</title>
+  <title>Architecture &mdash; MechaHarness 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -183,9 +183,9 @@ registers <code class="docutils literal notranslate"><span class="pre">Settings<
 <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code>, <code class="docutils literal notranslate"><span class="pre">VerificationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">DelegationPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">Advisor</span></code>,
 <code class="docutils literal notranslate"><span class="pre">AdvisorPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">ContextProviderRegistry</span></code>,
 <code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>, <code class="docutils literal notranslate"><span class="pre">LifecycleExtensionRegistry</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code>,
-<code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code>, <code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code>, and <code class="docutils literal notranslate"><span class="pre">GeneratorControllerAuth</span></code>.
-(<code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code> is the planned Config-bound owner of per-lane run sequences
-and authorized observe — see <a class="reference internal" href="reference/job-lanes.html"><span class="std std-doc">Job lanes</span></a>.)
+<code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code>, <code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code>, <code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">GeneratorControllerAuth</span></code>. (<code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code> owns per-lane run sequences and
+authorized observe — see <a class="reference internal" href="reference/job-lanes.html"><span class="std std-doc">Job lanes</span></a>.)
 Subclasses override <code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code> (called
 from the Config constructor). Override <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (or
 <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>) for deny-by-default tool grants; compose reusable sets with
@@ -193,7 +193,8 @@ from the Config constructor). Override <code class="docutils literal notranslate
 <code class="docutils literal notranslate"><span class="pre">HarnessConfig.subagent_tools</span></code> (parent EventLog query tools). Override
 <code class="docutils literal notranslate"><span class="pre">get_inference_environment()</span></code> for host profile probes.
 Override <code class="docutils literal notranslate"><span class="pre">get_judge_connection()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_judge_provider()</span></code> for judge wiring and
-wire adapters. Override <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code> /
+wire adapters. Override <code class="docutils literal notranslate"><span class="pre">get_job_lane_broker()</span></code> for lane catalogs. Override
+<code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_graph_template_registry()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code> /
@@ -249,8 +250,11 @@ dispatches open <code class="docutils literal notranslate"><span class="pre">kin
 fail; nested subgraphs aggregate), applies <code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code>
 (retry / escalate / fail), optional <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code> (needs
 <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code>), and emits <code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code> plus
-per-node events. Effectful nodes opt into <code class="docutils literal notranslate"><span class="pre">EffectfulGraphNodeRunner</span></code> for
-durable intent/acceptance and resume reconciliation. Bind via Config hooks
+per-node events. Optional <code class="docutils literal notranslate"><span class="pre">RunControl</span></code> pauses between nodes (<code class="docutils literal notranslate"><span class="pre">one_step</span></code> /
+<code class="docutils literal notranslate"><span class="pre">until</span></code> / soft subgraph enter) for product verb <code class="docutils literal notranslate"><span class="pre">graph_walk</span></code> — see
+<a class="reference internal" href="reference/stepped-graph-execution.html"><span class="std std-doc">Stepped graph execution</span></a>. Effectful
+nodes opt into <code class="docutils literal notranslate"><span class="pre">EffectfulGraphNodeRunner</span></code> for durable intent/acceptance and
+resume reconciliation. Bind via Config hooks
 <code class="docutils literal notranslate"><span class="pre">get_node_runner_registry()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_graph_failure_policy()</span></code>,
 <code class="docutils literal notranslate"><span class="pre">get_graph_escalation()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_checkpoint_store()</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">get_graph_executor_class()</span></code> — not Settings.</p>

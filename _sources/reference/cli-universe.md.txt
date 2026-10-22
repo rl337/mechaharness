@@ -105,7 +105,10 @@ Scenarios that surface `budget_spent` must declare an `lte` / `equals` /
 
 Durable IoC sessions use a scenario-level `durable:` block and per-command
 `expect` / `expect_error`. Cassette vs live is harness/Config
-(`MECHA_STORY_BACKEND`, `MECHA_BASE_URL`, `MECHA_MODEL`), not YAML.
+(`MECHA_STORY_BACKEND`, `MECHA_BASE_URL`, `MECHA_MODEL`, `MECHA_JUDGE_*`),
+not YAML. Live collects HTTP twins plus static `infer` / `judge` /
+`judge_route` walks; cassette-exact token counts soften while behavioral
+expects stay hard (`tests/stories/live_capability.py`).
 
 Discovery = add a YAML under `scenarios/`. Prefer few reusable verbs + many
 scenario files over bag-ops and per-test Python.
@@ -118,8 +121,9 @@ legacy soft expects blindly. See `.cursor/skills/user-stories/SKILL.md`.
 
 ## Migration program
 
-Convert every legacy `request.json` / `op` story onto `kind: cli` YAML. Each
-wave adds only the CLI verb, probe, or universe node needed:
+Convert every legacy `request.json` / `op` story onto `kind: user_story`
+YAML (persona walk wrapping product CLI verbs; legacy `kind: cli` only while
+migrating). Each wave adds only the CLI verb, probe, or universe node needed:
 
 1. Observability / one-shot infer (OBS-*) — done
 2. Former harness_runs / pass-through / tool-loop / cassettes / host DI /

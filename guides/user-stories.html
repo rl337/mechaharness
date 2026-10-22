@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User stories &mdash; MechaHarness 0.6.0 documentation</title>
+  <title>User stories &mdash; MechaHarness 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
+      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -1946,7 +1946,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id449">
 <h4>Validation<a class="headerlink" href="#id449" title="Link to this heading"></a></h4>
-<p>user_story scenarios with per-scenario cassettes; hard expects on decision keys.</p>
+<p>user_story scenarios with per-scenario cassettes; hard expects on decision keys. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 <section id="id450">
 <h4>Footnotes<a class="headerlink" href="#id450" title="Link to this heading"></a></h4>
@@ -1959,26 +1959,26 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="fangore-jev-citation-growth-mismatch-refuse-to-verify-when-the-source-contradicts-the-claim">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_growth_mismatch</span></code> — Refuse to verify when the source contradicts the claim<a class="headerlink" href="#fangore-jev-citation-growth-mismatch-refuse-to-verify-when-the-source-contradicts-the-claim" title="Link to this heading"></a></h3>
-<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads a source document and claim, runs product step <code class="docutils literal notranslate"><span class="pre">judge</span></code> (FixtureJudgeProvider cassette) for: Refuse to verify when the source contradicts the claim. He verifies claim_verified / escalate from the typed support answer and confidence floor.</p>
+<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads a source document and claim, runs product step <code class="docutils literal notranslate"><span class="pre">judge</span></code> (fixture cassette offline; live System One when enabled) for: Refuse to verify when the source contradicts the claim. He verifies claim_verified / escalate from the typed support answer and confidence floor.</p>
 <section id="id451">
 <h4>Implementation<a class="headerlink" href="#id451" title="Link to this heading"></a></h4>
 <p>Product CLI verb <code class="docutils literal notranslate"><span class="pre">judge</span></code> (<code class="docutils literal notranslate"><span class="pre">JudgeVerb</span></code>): JudgeRequest over source+claim state via injected JudgeProvider. Code-owned claim_verified = selected==supported ∧ conf≥floor.</p>
 </section>
 <section id="id452">
 <h4>Validation<a class="headerlink" href="#id452" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">growth_mismatch.yaml</span></code>: judge step + response.json cassette; hard expects on claim_verified / escalate.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">growth_mismatch.yaml</span></code>: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-citation-matching-claim-mark-a-claim-verified-only-when-the-source-supports-it">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_matching_claim</span></code> — Mark a claim verified only when the source supports it<a class="headerlink" href="#fangore-jev-citation-matching-claim-mark-a-claim-verified-only-when-the-source-supports-it" title="Link to this heading"></a></h3>
-<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads a source document and claim, runs product step <code class="docutils literal notranslate"><span class="pre">judge</span></code> (FixtureJudgeProvider cassette) for: Mark a claim verified only when the source supports it. He verifies claim_verified / escalate from the typed support answer and confidence floor.</p>
+<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads a source document and claim, runs product step <code class="docutils literal notranslate"><span class="pre">judge</span></code> (fixture cassette offline; live System One when enabled) for: Mark a claim verified only when the source supports it. He verifies claim_verified / escalate from the typed support answer and confidence floor.</p>
 <section id="id453">
 <h4>Implementation<a class="headerlink" href="#id453" title="Link to this heading"></a></h4>
 <p>Product CLI verb <code class="docutils literal notranslate"><span class="pre">judge</span></code> (<code class="docutils literal notranslate"><span class="pre">JudgeVerb</span></code>): JudgeRequest over source+claim state via injected JudgeProvider. Code-owned claim_verified = selected==supported ∧ conf≥floor.</p>
 </section>
 <section id="id454">
 <h4>Validation<a class="headerlink" href="#id454" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">matching_claim.yaml</span></code>: judge step + response.json cassette; hard expects on claim_verified / escalate.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">matching_claim.yaml</span></code>: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 <section id="id455">
 <h4>Footnotes<a class="headerlink" href="#id455" title="Link to this heading"></a></h4>
@@ -1990,26 +1990,26 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="fangore-jev-citation-missing-source-refuse-to-verify-a-claim-with-no-source">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_missing_source</span></code> — Refuse to verify a claim with no source<a class="headerlink" href="#fangore-jev-citation-missing-source-refuse-to-verify-a-claim-with-no-source" title="Link to this heading"></a></h3>
-<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads a source document and claim, runs product step <code class="docutils literal notranslate"><span class="pre">judge</span></code> (FixtureJudgeProvider cassette) for: Refuse to verify a claim with no source. He verifies claim_verified / escalate from the typed support answer and confidence floor.</p>
+<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads a source document and claim, runs product step <code class="docutils literal notranslate"><span class="pre">judge</span></code> (fixture cassette offline; live System One when enabled) for: Refuse to verify a claim with no source. He verifies claim_verified / escalate from the typed support answer and confidence floor.</p>
 <section id="id456">
 <h4>Implementation<a class="headerlink" href="#id456" title="Link to this heading"></a></h4>
 <p>Product CLI verb <code class="docutils literal notranslate"><span class="pre">judge</span></code> (<code class="docutils literal notranslate"><span class="pre">JudgeVerb</span></code>): JudgeRequest over source+claim state via injected JudgeProvider. Code-owned claim_verified = selected==supported ∧ conf≥floor.</p>
 </section>
 <section id="id457">
 <h4>Validation<a class="headerlink" href="#id457" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">missing_source.yaml</span></code>: judge step + response.json cassette; hard expects on claim_verified / escalate.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">missing_source.yaml</span></code>: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-citation-uncertain-support-leave-a-low-confidence-citation-unverified">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_uncertain_support</span></code> — Leave a low-confidence citation unverified<a class="headerlink" href="#fangore-jev-citation-uncertain-support-leave-a-low-confidence-citation-unverified" title="Link to this heading"></a></h3>
-<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads a source document and claim, runs product step <code class="docutils literal notranslate"><span class="pre">judge</span></code> (FixtureJudgeProvider cassette) for: Leave a low-confidence citation unverified. He verifies claim_verified / escalate from the typed support answer and confidence floor.</p>
+<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads a source document and claim, runs product step <code class="docutils literal notranslate"><span class="pre">judge</span></code> (fixture cassette offline; live System One when enabled) for: Leave a low-confidence citation unverified. He verifies claim_verified / escalate from the typed support answer and confidence floor.</p>
 <section id="id458">
 <h4>Implementation<a class="headerlink" href="#id458" title="Link to this heading"></a></h4>
 <p>Product CLI verb <code class="docutils literal notranslate"><span class="pre">judge</span></code> (<code class="docutils literal notranslate"><span class="pre">JudgeVerb</span></code>): JudgeRequest over source+claim state via injected JudgeProvider. Code-owned claim_verified = selected==supported ∧ conf≥floor.</p>
 </section>
 <section id="id459">
 <h4>Validation<a class="headerlink" href="#id459" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">uncertain_support.yaml</span></code>: judge step + response.json cassette; hard expects on claim_verified / escalate.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">uncertain_support.yaml</span></code>: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-context-budget-pack-pack-scored-rag-candidates-into-a-fixed-token-budget">
@@ -2072,7 +2072,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id471">
 <h4>Validation<a class="headerlink" href="#id471" title="Link to this heading"></a></h4>
-<p>user_story <code class="docutils literal notranslate"><span class="pre">approve_but_missing_crash_tests.yaml</span></code> judge + cassette; expect outcome=request_tests.</p>
+<p>user_story <code class="docutils literal notranslate"><span class="pre">approve_but_missing_crash_tests.yaml</span></code> judge + cassette; expect outcome=request_tests. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-req-review-covered-with-tests-accept-a-change-when-requirements-and-crash-tests-are-covered">
@@ -2084,7 +2084,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id473">
 <h4>Validation<a class="headerlink" href="#id473" title="Link to this heading"></a></h4>
-<p>user_story <code class="docutils literal notranslate"><span class="pre">covered_with_tests.yaml</span></code> judge + cassette; expect outcome=continue_review.</p>
+<p>user_story <code class="docutils literal notranslate"><span class="pre">covered_with_tests.yaml</span></code> judge + cassette; expect outcome=continue_review. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-req-review-gap-found-escalate-when-a-requirement-gap-appears-in-the-facts">
@@ -2096,7 +2096,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id475">
 <h4>Validation<a class="headerlink" href="#id475" title="Link to this heading"></a></h4>
-<p>user_story <code class="docutils literal notranslate"><span class="pre">gap_found.yaml</span></code> judge + cassette; expect outcome=request_tests.</p>
+<p>user_story <code class="docutils literal notranslate"><span class="pre">gap_found.yaml</span></code> judge + cassette; expect outcome=request_tests. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-req-review-template-shape-shape-a-requirements-aware-review-with-isolated-checkers">
@@ -2123,7 +2123,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id481">
 <h4>Validation<a class="headerlink" href="#id481" title="Link to this heading"></a></h4>
-<p>user_story judge; expect final_action=frontier.</p>
+<p>user_story judge; expect final_action=frontier. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-task-route-invalid-escalate-when-the-model-invents-a-disallowed-lane">
@@ -2135,7 +2135,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id483">
 <h4>Validation<a class="headerlink" href="#id483" title="Link to this heading"></a></h4>
-<p>user_story judge; expect escalate.</p>
+<p>user_story judge; expect escalate. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-task-route-low-confidence-escalate-when-the-router-is-not-confident">
@@ -2147,7 +2147,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id485">
 <h4>Validation<a class="headerlink" href="#id485" title="Link to this heading"></a></h4>
-<p>user_story judge; expect escalate.</p>
+<p>user_story judge; expect escalate. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="fangore-jev-task-route-simple-local-route-simple-work-to-the-local-small-model">
@@ -2159,7 +2159,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id487">
 <h4>Validation<a class="headerlink" href="#id487" title="Link to this heading"></a></h4>
-<p>user_story judge; expect final_action=local_small.</p>
+<p>user_story judge; expect final_action=local_small. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 <section id="id488">
 <h4>Footnotes<a class="headerlink" href="#id488" title="Link to this heading"></a></h4>
@@ -2346,7 +2346,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id525">
 <h4>Validation<a class="headerlink" href="#id525" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">billing_allow.yaml</span></code>: environment + graph + steps + complete expects.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">billing_allow.yaml</span></code>: environment + graph + steps + complete expects. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 <section id="id526">
 <h4>Footnotes<a class="headerlink" href="#id526" title="Link to this heading"></a></h4>
@@ -2932,7 +2932,7 @@ pytest<span class="w"> </span>-q
 </section>
 <section id="id687">
 <h4>Validation<a class="headerlink" href="#id687" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">billing_allow.yaml</span></code> on <code class="docutils literal notranslate"><span class="pre">systemone/laya</span></code> cassette: hard <code class="docutils literal notranslate"><span class="pre">route_selected</span></code>, <code class="docutils literal notranslate"><span class="pre">verdict</span></code>, <code class="docutils literal notranslate"><span class="pre">answer_count</span></code>.</p>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">billing_allow.yaml</span></code> on <code class="docutils literal notranslate"><span class="pre">systemone/laya</span></code> cassette: hard <code class="docutils literal notranslate"><span class="pre">route_selected</span></code>, <code class="docutils literal notranslate"><span class="pre">verdict</span></code>, <code class="docutils literal notranslate"><span class="pre">answer_count</span></code>. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="taloneth-validator-qualification-qualify-validators-before-they-gate-completion">

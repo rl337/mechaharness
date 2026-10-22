@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dependency injection &mdash; MechaHarness 0.6.0 documentation</title>
+  <title>Dependency injection &mdash; MechaHarness 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
+      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -339,16 +339,19 @@ inject deny-by-default tool grants; use <code class="docutils literal notranslat
 <code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> for process-restart durability), and optionally
 <code class="docutils literal notranslate"><span class="pre">get_linkage_resolver()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code> /
 <code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>, then <code class="docutils literal notranslate"><span class="pre">injector.inject(GraphExecutor)</span></code>.
-Agentic Recipe membership is a pyiv map multibind: override
-<code class="docutils literal notranslate"><span class="pre">graph_template_classes()</span></code> (merge via <code class="docutils literal notranslate"><span class="pre">super()</span></code>), discover with
-<code class="docutils literal notranslate"><span class="pre">catalog_keys(GraphTemplate)</span></code>, and inject <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>. Backend and
-harness family names use the same pattern (<code class="docutils literal notranslate"><span class="pre">inference_classes</span></code> /
-<code class="docutils literal notranslate"><span class="pre">harness_classes</span></code> → <code class="docutils literal notranslate"><span class="pre">catalog_keys</span></code>). Include <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and
-<code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> when using escalation) in grants. Ordered lifecycle
-extensions (inspiration req 20) bind via <code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code>
-and are distinct from EventLog telemetry. Library templates are owned by
-MechaHarness; clients instantiate them via Config and may retain the resulting
-concrete graphs. See <a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a> and
+Override <code class="docutils literal notranslate"><span class="pre">get_job_lane_broker()</span></code> to bind a non-empty <code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code> catalog
+(default is an empty broker); inject <code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code> for publish/observe —
+see <a class="reference internal" href="../reference/job-lanes.html"><span class="std std-doc">Job lanes</span></a>. Agentic Recipe membership is a
+pyiv map multibind: override <code class="docutils literal notranslate"><span class="pre">graph_template_classes()</span></code> (merge via <code class="docutils literal notranslate"><span class="pre">super()</span></code>),
+discover with <code class="docutils literal notranslate"><span class="pre">catalog_keys(GraphTemplate)</span></code>, and inject
+<code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code>. Backend and harness family names use the same pattern
+(<code class="docutils literal notranslate"><span class="pre">inference_classes</span></code> / <code class="docutils literal notranslate"><span class="pre">harness_classes</span></code> → <code class="docutils literal notranslate"><span class="pre">catalog_keys</span></code>). Include
+<code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> (and <code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> when using escalation) in
+grants. Ordered lifecycle extensions (inspiration req 20) bind via
+<code class="docutils literal notranslate"><span class="pre">get_lifecycle_extension_registry()</span></code> and are distinct from EventLog telemetry.
+Library templates are owned by MechaHarness; clients instantiate them via
+Config and may retain the resulting concrete graphs. See
+<a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture</span></a> and
 <a class="reference internal" href="../reference/graph-templates.html"><span class="std std-doc">Graph templates</span></a>.</p>
 </section>
 <section id="host-apis-and-promotion">

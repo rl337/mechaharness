@@ -93,12 +93,22 @@ verdict = decide(
 ```bash
 export MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009
 export MECHA_JUDGE_MODEL=laya
+
+# Full live suite (also needs MECHA_BASE_URL / MECHA_MODEL for reason walks)
+MECHA_STORY_BACKEND=live \
+  MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 \
+  MECHA_JUDGE_MODEL=laya \
+  pytest -q tests/stories -k 'judge or refund_verdict or systemone'
+
+# System One twins only
 MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
   pytest -q tests/stories -k 'refund_verdict or systemone_cassette'
 ```
 
-Offline CI replays the System One cassette for the same stories (no skip).
-See [User stories](../guides/user-stories.md).
+Offline CI uses `FixtureJudgeProvider` / System One cassettes (no skip). Live
+rewires the same `judge` / `judge_route` stories onto `SystemOneJudgeProvider`
+when `MECHA_JUDGE_*` is set — see [User stories](../guides/user-stories.md) and
+`tests/stories/live_capability.py`.
 
 ## JudgementPolicy
 

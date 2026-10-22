@@ -1951,7 +1951,7 @@ Product verb `judge` with risk_question_id + required_abilities/grants; hard Acc
 
 #### Validation
 
-user_story scenarios with per-scenario cassettes; hard expects on decision keys.
+user_story scenarios with per-scenario cassettes; hard expects on decision keys. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 #### Footnotes
 
@@ -1961,7 +1961,7 @@ user_story scenarios with per-scenario cassettes; hard expects on decision keys.
 
 ### `fangore_jev_citation_growth_mismatch` — Refuse to verify when the source contradicts the claim
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (FixtureJudgeProvider cassette) for: Refuse to verify when the source contradicts the claim. He verifies claim_verified / escalate from the typed support answer and confidence floor.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (fixture cassette offline; live System One when enabled) for: Refuse to verify when the source contradicts the claim. He verifies claim_verified / escalate from the typed support answer and confidence floor.
 
 #### Implementation
 
@@ -1969,11 +1969,11 @@ Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via
 
 #### Validation
 
-Harness `user_story` scenario `growth_mismatch.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate.
+Harness `user_story` scenario `growth_mismatch.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_citation_matching_claim` — Mark a claim verified only when the source supports it
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (FixtureJudgeProvider cassette) for: Mark a claim verified only when the source supports it. He verifies claim_verified / escalate from the typed support answer and confidence floor.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (fixture cassette offline; live System One when enabled) for: Mark a claim verified only when the source supports it. He verifies claim_verified / escalate from the typed support answer and confidence floor.
 
 #### Implementation
 
@@ -1981,7 +1981,7 @@ Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via
 
 #### Validation
 
-Harness `user_story` scenario `matching_claim.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate.
+Harness `user_story` scenario `matching_claim.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 #### Footnotes
 
@@ -1990,7 +1990,7 @@ Harness `user_story` scenario `matching_claim.yaml`: judge step + response.json 
 
 ### `fangore_jev_citation_missing_source` — Refuse to verify a claim with no source
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (FixtureJudgeProvider cassette) for: Refuse to verify a claim with no source. He verifies claim_verified / escalate from the typed support answer and confidence floor.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (fixture cassette offline; live System One when enabled) for: Refuse to verify a claim with no source. He verifies claim_verified / escalate from the typed support answer and confidence floor.
 
 #### Implementation
 
@@ -1998,11 +1998,11 @@ Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via
 
 #### Validation
 
-Harness `user_story` scenario `missing_source.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate.
+Harness `user_story` scenario `missing_source.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_citation_uncertain_support` — Leave a low-confidence citation unverified
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (FixtureJudgeProvider cassette) for: Leave a low-confidence citation unverified. He verifies claim_verified / escalate from the typed support answer and confidence floor.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (fixture cassette offline; live System One when enabled) for: Leave a low-confidence citation unverified. He verifies claim_verified / escalate from the typed support answer and confidence floor.
 
 #### Implementation
 
@@ -2010,7 +2010,7 @@ Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via
 
 #### Validation
 
-Harness `user_story` scenario `uncertain_support.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate.
+Harness `user_story` scenario `uncertain_support.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_context_budget_pack` — Pack scored RAG candidates into a fixed token budget
 
@@ -2075,7 +2075,7 @@ Product verb `judge` over PR/story state; code-owned outcome from coverage + cra
 
 #### Validation
 
-user_story `approve_but_missing_crash_tests.yaml` judge + cassette; expect outcome=request_tests.
+user_story `approve_but_missing_crash_tests.yaml` judge + cassette; expect outcome=request_tests. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_req_review_covered_with_tests` — Accept a change when requirements and crash tests are covered
 
@@ -2087,7 +2087,7 @@ Product verb `judge` over PR/story state; code-owned outcome from coverage + cra
 
 #### Validation
 
-user_story `covered_with_tests.yaml` judge + cassette; expect outcome=continue_review.
+user_story `covered_with_tests.yaml` judge + cassette; expect outcome=continue_review. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_req_review_gap_found` — Escalate when a requirement gap appears in the facts
 
@@ -2099,7 +2099,7 @@ Product verb `judge` over PR/story state; code-owned outcome from coverage + cra
 
 #### Validation
 
-user_story `gap_found.yaml` judge + cassette; expect outcome=request_tests.
+user_story `gap_found.yaml` judge + cassette; expect outcome=request_tests. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_req_review_template_shape` — Shape a requirements-aware review with isolated checkers
 
@@ -2127,7 +2127,7 @@ Product verb `judge` + code-owned quality override on complexity facts.
 
 #### Validation
 
-user_story judge; expect final_action=frontier.
+user_story judge; expect final_action=frontier. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_task_route_invalid` — Escalate when the model invents a disallowed lane
 
@@ -2139,7 +2139,7 @@ Product verb `judge`; disallowed selected lane forces escalate.
 
 #### Validation
 
-user_story judge; expect escalate.
+user_story judge; expect escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_task_route_low_confidence` — Escalate when the router is not confident
 
@@ -2151,7 +2151,7 @@ Product verb `judge` with confidence_floor escalation.
 
 #### Validation
 
-user_story judge; expect escalate.
+user_story judge; expect escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `fangore_jev_task_route_simple_local` — Route simple work to the local small model
 
@@ -2163,7 +2163,7 @@ Product verb `judge` + code-owned quality override on complexity facts.
 
 #### Validation
 
-user_story judge; expect final_action=local_small.
+user_story judge; expect final_action=local_small. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 #### Footnotes
 
@@ -2344,7 +2344,7 @@ Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.
 
 #### Validation
 
-Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps + complete expects.
+Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps + complete expects. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 #### Footnotes
 
@@ -2978,7 +2978,7 @@ Covers: JDG wire map (System One).
 
 #### Validation
 
-Harness `cli` scenario `billing_allow.yaml` on `systemone/laya` cassette: hard `route_selected`, `verdict`, `answer_count`.
+Harness `cli` scenario `billing_allow.yaml` on `systemone/laya` cassette: hard `route_selected`, `verdict`, `answer_count`. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 
 ### `taloneth_validator_qualification` — Qualify validators before they gate completion
 
