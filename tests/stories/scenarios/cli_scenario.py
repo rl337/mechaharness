@@ -91,6 +91,7 @@ class CliScenario(BaseModel):
         assertions: dict[str, CliAssertion],
         *,
         label: str,
+        relax_cassette_exact: bool = False,
     ) -> None:
         if len(result.steps) != len(self.commands):
             raise AssertionError(
@@ -108,13 +109,20 @@ class CliScenario(BaseModel):
                     )
             elif cmd.expect is not None:
                 specs = parse_expect_list(cmd.expect)
-                check_assertions(obs, specs, assertions, label=step_label)
+                check_assertions(
+                    obs,
+                    specs,
+                    assertions,
+                    label=step_label,
+                    relax_cassette_exact=relax_cassette_exact,
+                )
         if self.expect:
             check_assertions(
                 result.observation(),
                 self.expect,
                 assertions,
                 label=label,
+                relax_cassette_exact=relax_cassette_exact,
             )
             _require_cost_ceiling(
                 result.observation(), self.expect, label=label

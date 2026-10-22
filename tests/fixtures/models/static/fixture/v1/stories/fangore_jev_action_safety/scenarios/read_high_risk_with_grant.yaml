@@ -8,7 +8,7 @@ graph: null
 steps:
 - do:
     judge:
-      state: 'Proposed action: read customer PII export'
+      state: 'HIGH RISK: bulk download of all customer PII including SSN, DOB, and full medical history for offsite use'
       questions:
       - id: semantic_risk
         kind: choice

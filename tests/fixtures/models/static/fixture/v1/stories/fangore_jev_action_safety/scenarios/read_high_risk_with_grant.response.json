@@ -3,9 +3,9 @@
     "semantic_risk": {
       "selected": "high",
       "probabilities": {
-        "low": 0.04999999999999999,
-        "medium": 0.04999999999999999,
-        "high": 0.9
+        "low": 0.03,
+        "medium": 0.03,
+        "high": 0.94
       }
     }
   }
