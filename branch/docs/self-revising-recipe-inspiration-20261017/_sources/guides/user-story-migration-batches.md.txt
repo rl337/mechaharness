@@ -218,7 +218,7 @@ exposure, artifacts, handoff).
 - [x] `fangore_insp_authority_gate`
 - [x] `fangore_insp_cross_task_isolation` — retargeted to [JobLaneBroker](../requirements/job-lane-broker.md) + `fangore_job_lane_*` matrix
 - [x] `fangore_insp_denial_equivalence`
-- [ ] `fangore_insp_effect_revalidation`
+- [x] `fangore_insp_effect_revalidation` — stepped `graph_walk` until-before + live epoch revoke
 - [x] `fangore_insp_execution_token`
 - [x] `fangore_insp_isolation_io`
 - [x] `fangore_insp_tool_effect_classes`

@@ -141,9 +141,9 @@ user-facing policy configuration.</p>
 </tr>
 <tr class="row-odd"><td><p>MH-DOTS-02</p></td>
 <td><p>Revalidate before consequential side effects</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">effect_revalidation.py</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_executor.py</span></code>, <code class="docutils literal notranslate"><span class="pre">linkage_resolver.py</span></code>, <code class="docutils literal notranslate"><span class="pre">approval_interrupt.py</span></code>, <code class="docutils literal notranslate"><span class="pre">judgement_policy.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">effect_revalidation.py</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_executor.py</span></code> (<code class="docutils literal notranslate"><span class="pre">RunControl</span></code> / stepped pause), <code class="docutils literal notranslate"><span class="pre">linkage_resolver.py</span></code>, <code class="docutils literal notranslate"><span class="pre">approval_interrupt.py</span></code>, <code class="docutils literal notranslate"><span class="pre">judgement_policy.py</span></code></p></td>
 <td><p>story</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_wake_reresolve</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_human_review_pending</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_effect_revalidation</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_wake_reresolve</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_human_review_pending</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_effect_revalidation</span></code> (via <code class="docutils literal notranslate"><span class="pre">graph_walk</span></code> until-before + live epoch)</p></td>
 <td><p>—</p></td>
 </tr>
 <tr class="row-even"><td><p>MH-DOTS-03</p></td>

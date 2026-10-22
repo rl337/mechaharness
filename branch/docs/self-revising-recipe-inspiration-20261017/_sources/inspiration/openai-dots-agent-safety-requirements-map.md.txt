@@ -18,7 +18,7 @@ user-facing policy configuration.
 | ID | Topic | Modules | Library | Story | Gaps |
 |----|-------|---------|---------|-------|------|
 | MH-DOTS-01 | Capability-scoped execution token | `capability_envelope.py`, `core/access.py`, `delegation_policy.py` | story | `fangore_capability_envelope_narrow`, `fangore_insp_execution_token` | — |
-| MH-DOTS-02 | Revalidate before consequential side effects | `effect_revalidation.py`, `graph_executor.py`, `linkage_resolver.py`, `approval_interrupt.py`, `judgement_policy.py` | story | `fangore_insp_wake_reresolve`, `fangore_human_review_pending`, `fangore_insp_effect_revalidation` | — |
+| MH-DOTS-02 | Revalidate before consequential side effects | `effect_revalidation.py`, `graph_executor.py` (`RunControl` / stepped pause), `linkage_resolver.py`, `approval_interrupt.py`, `judgement_policy.py` | story | `fangore_insp_wake_reresolve`, `fangore_human_review_pending`, `fangore_insp_effect_revalidation` (via `graph_walk` until-before + live epoch) | — |
 | MH-DOTS-03 | Observe / Prepare / Execute tool classes | `operation_registry.py` (`ToolPhase`; `tool_phase.py` is a shim), `tools/base.py`, `external_effect.py` | story | `fangore_insp_tool_effect_classes` | — |
 | MH-DOTS-04 | Independent action review | `judgement_policy.py`, `decision_plane_runtime.py`, `approval_interrupt.py` | story | `fangore_jev_action_safety`, `fangore_human_review_pending` | — |
 | MH-DOTS-05 | Denial persistence / equivalent-action detection | `denial_store.py`, `authority_gate.py` | partial | `fangore_insp_denial_equivalence` | Restart-durable `DenialStore` is host-bound (in-memory reference ships) |

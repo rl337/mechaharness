@@ -119,6 +119,11 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <section id="added">
 <h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
 <ul class="simple">
+<li><p><strong>Stepped graph execution (SG-01..10):</strong> <code class="docutils literal notranslate"><span class="pre">RunControl</span></code> on <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run</span></code>
+(<code class="docutils literal notranslate"><span class="pre">one_step</span></code> / <code class="docutils literal notranslate"><span class="pre">until</span></code> / <code class="docutils literal notranslate"><span class="pre">paused</span></code>); soft subgraph enter-before-first-child;
+product verb <code class="docutils literal notranslate"><span class="pre">graph_walk</span></code>; <code class="docutils literal notranslate"><span class="pre">graph.inline</span></code> on user_story YAML. Owns
+<code class="docutils literal notranslate"><span class="pre">fangore_graph_until_before</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_graph_one_step</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_graph_soft_enter</span></code>; migrates <code class="docutils literal notranslate"><span class="pre">fangore_insp_effect_revalidation</span></code>.</p></li>
 <li><p><strong>JobLaneBroker (JL-01..10):</strong> lane-scoped run sequences, WalkBags, exposure /
 grants / handoff, and authorized <code class="docutils literal notranslate"><span class="pre">observe</span></code> (<code class="docutils literal notranslate"><span class="pre">mechaharness.job_lane_broker</span></code>).
 Config bind via <code class="docutils literal notranslate"><span class="pre">get_job_lane_broker()</span></code>; CLI verbs <code class="docutils literal notranslate"><span class="pre">lane_publish</span></code> /
