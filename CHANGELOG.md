@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.0] — 2026-10-22
+## [0.7.0] — 2026-10-22
 
 Job lanes, stepped graph execution, user-story migration / recipe execute,
 live model verification against reason + judge hosts, and pyiv ≥ 1.1.1 (#32,
-#33).
+#33). Tip auto-bumped past unreleased `0.6.0` after the #33 merge.
 
 ### Changed
 
