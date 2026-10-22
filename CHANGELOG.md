@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Stepped graph execution (SG-01..10):** `RunControl` on `GraphExecutor.run`
+  (`one_step` / `until` / `paused`); soft subgraph enter-before-first-child;
+  product verb `graph_walk`; `graph.inline` on user_story YAML. Owns
+  `fangore_graph_until_before`, `fangore_graph_one_step`,
+  `fangore_graph_soft_enter`; migrates `fangore_insp_effect_revalidation`.
 - **JobLaneBroker (JL-01..10):** lane-scoped run sequences, WalkBags, exposure /
   grants / handoff, and authorized `observe` (`mechaharness.job_lane_broker`).
   Config bind via `get_job_lane_broker()`; CLI verbs `lane_publish` /

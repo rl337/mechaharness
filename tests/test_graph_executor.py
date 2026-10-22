@@ -22,6 +22,7 @@ from mechaharness.graph_executor import (
     GraphNodeRunnerRegistry,
     GraphRunContext,
     NodeOutcome,
+    RunControl,
     registry_from_mapping,
 )
 from tests.support.graph_executor_cases import (
@@ -83,11 +84,18 @@ async def test_graph_executor_case(case: GraphExecutorCase) -> None:
             hard_limit=budget_raw.get("hard_limit"),
             unit=budget_raw.get("unit", "units"),
         )
+        control_raw = run_spec.get("control")
+        control = (
+            RunControl.model_validate(control_raw)
+            if isinstance(control_raw, dict)
+            else None
+        )
         result = await executor.run(
             graph,
             budget_policy=budget_policy,
             run_id=run_spec.get("run_id"),
             resume=bool(run_spec.get("resume")),
+            control=control,
         )
         graph = result.graph
 

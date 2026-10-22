@@ -1,0 +1,17 @@
+{
+  "id": "fangore_graph_one_step",
+  "persona": "fangore",
+  "title": "Advance a graph one frontier node per step",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a linear three-node inline graph and uses `graph_walk` start/step so each step executes exactly one leaf. Tracks SG-04/09[^sg-step].",
+  "implementation": "`RunControl(mode=one_step)` on `GraphExecutor.run`; CLI `graph_walk` actions `start` / `step` / `continue`.",
+  "validation": "Harness `user_story` scenario `one_step.yaml`.",
+  "footnotes": [
+    {
+      "id": "sg-step",
+      "label": "Stepped graph execution requirements",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md",
+      "note": "SG-04 one_step"
+    }
+  ]
+}

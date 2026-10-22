@@ -1,0 +1,43 @@
+{
+  "id": "step_until_before",
+  "grants": ["core:graph.execute"],
+  "runners": {
+    "compute": {"mode": "succeed"},
+    "publish": {"mode": "succeed"}
+  },
+  "graph": {
+    "goal": "until-before",
+    "nodes": [
+      {"id": "a", "kind": "compute"},
+      {"id": "b", "kind": "publish", "depends_on": ["a"]}
+    ]
+  },
+  "phases": [
+    {
+      "run": {
+        "run_id": "until-1",
+        "control": {"mode": "until", "until": "b", "stop": "before"}
+      },
+      "expect": {
+        "status": "paused",
+        "stopped_before": "b",
+        "nodes": {
+          "a": {"status": "succeeded"},
+          "b": {"status": "ready"}
+        },
+        "calls": {"order": ["a"]}
+      }
+    },
+    {
+      "run": {"run_id": "until-1", "resume": true},
+      "expect": {
+        "status": "ok",
+        "nodes": {
+          "a": {"status": "succeeded"},
+          "b": {"status": "succeeded"}
+        },
+        "calls": {"order": ["b"]}
+      }
+    }
+  ]
+}

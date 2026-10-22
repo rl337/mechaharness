@@ -94,7 +94,7 @@ from enum import Enum
 from typing import Any, Literal, Union
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from mechaharness.budget import Budget, BudgetLevel, BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
@@ -168,6 +168,15 @@ class NodeOutcome(BaseModel):
     cost_units: float | None = None
 
 
+@dataclass
+class _PauseMarkers:
+    """Mutable pause bookkeeping nested under frozen :class:`GraphRunContext`."""
+
+    stopped_before: str | None = None
+    entered_node_id: str | None = None
+    active_run_id: str | None = None
+
+
 @dataclass(frozen=True)
 class GraphRunContext:
     """Per-run identity passed to node runners and escalation.
@@ -184,6 +193,28 @@ class GraphRunContext:
     envelope: CapabilityEnvelope | None = None
     config_fingerprint: str | None = None
     bag: WalkBag = field(default_factory=WalkBag)
+    pause: _PauseMarkers = field(default_factory=_PauseMarkers)
+
+
+class RunControl(BaseModel):
+    """Stepped / until control for :meth:`GraphExecutor.run` (SG-01..07).
+
+    Default ``to_completion`` preserves historical behavior. ``one_step`` and
+    ``until`` return ``GraphResult.status=paused`` with a checkpoint so the
+    host can mutate live authority (or answer soft points) before continuing.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    mode: Literal["to_completion", "one_step", "until"] = "to_completion"
+    until: str | None = None
+    stop: Literal["before", "after"] = "before"
+
+    @model_validator(mode="after")
+    def _until_needs_id(self) -> RunControl:
+        if self.mode == "until" and not self.until:
+            raise ValueError("RunControl.mode=until requires until=node_id")
+        return self
 
 
 class GraphResult(BaseModel):
@@ -191,7 +222,9 @@ class GraphResult(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    status: Literal["ok", "failed", "denied", "stalled", "soft_exhausted"]
+    status: Literal[
+        "ok", "failed", "denied", "stalled", "soft_exhausted", "paused"
+    ]
     graph: ExecutionGraph
     run_id: str
     events: list[Event] = Field(default_factory=list)
@@ -199,6 +232,10 @@ class GraphResult(BaseModel):
     budget_spent: float = 0.0
     budget_level: str = BudgetLevel.OK.value
     diagnostics: dict[str, Any] = Field(default_factory=dict)
+    # Stepped control (SG-07): set when status is paused.
+    stopped_before: str | None = None
+    entered_node_id: str | None = None
+    active_run_id: str | None = None
 
 
 NodeHandler = Callable[
@@ -535,11 +572,16 @@ class GraphExecutor:
     def _result(
         self,
         *,
-        status: Literal["ok", "failed", "denied", "stalled", "soft_exhausted"],
+        status: Literal[
+            "ok", "failed", "denied", "stalled", "soft_exhausted", "paused"
+        ],
         graph: ExecutionGraph,
         run_id: str,
         budget: Budget,
         error: str | None = None,
+        stopped_before: str | None = None,
+        entered_node_id: str | None = None,
+        active_run_id: str | None = None,
     ) -> GraphResult:
         return GraphResult(
             status=status,
@@ -550,6 +592,9 @@ class GraphExecutor:
             budget_spent=budget.spent,
             budget_level=budget.status().value,
             diagnostics=dict(self._diagnostics),
+            stopped_before=stopped_before,
+            entered_node_id=entered_node_id,
+            active_run_id=active_run_id or run_id,
         )
 
     async def run(
@@ -563,8 +608,9 @@ class GraphExecutor:
         envelope: CapabilityEnvelope | None = None,
         skip_linkage: bool = False,
         parent_run_id: str | None = None,
+        control: RunControl | None = None,
     ) -> GraphResult:
-        """Execute ``graph`` until completion, denial, stall, or budget failure.
+        """Execute ``graph`` until completion, denial, stall, budget failure, or pause.
 
         Every event emitted for the run carries ``graph_id``, ``graph_goal``,
         recipe stamp, ``authorization_epoch``, and (for nested runs)
@@ -578,6 +624,9 @@ class GraphExecutor:
         Soft limit: cancel remaining open work and return ``soft_exhausted``.
         Hard limit: fail open nodes and return ``failed`` with prejudice.
         ``BudgetPolicy.hard_limit=None`` means unlimited hard ceiling.
+
+        ``control`` (SG-01): default ``to_completion``. ``one_step`` / ``until``
+        return ``status=paused`` without a terminal ``GraphEnd``.
         """
         rid = run_id or graph.id
         parent_context = self._trace_contexts.get(parent_run_id) if parent_run_id else None
@@ -601,6 +650,7 @@ class GraphExecutor:
                 resume=resume,
                 envelope=envelope,
                 skip_linkage=skip_linkage,
+                control=control or RunControl(),
             )
         finally:
             self._trace_contexts.pop(rid, None)
@@ -615,6 +665,7 @@ class GraphExecutor:
         resume: bool,
         envelope: CapabilityEnvelope | None,
         skip_linkage: bool,
+        control: RunControl,
     ) -> GraphResult:
         ledger = budget if budget is not None else Budget(budget_policy)
         self._diagnostics = {
@@ -631,8 +682,12 @@ class GraphExecutor:
                 graph = restored
             # Interrupted mid-node work is re-queued; effect reconciliation
             # prevents duplicate external dispatch (DR-06 / DR-07).
+            # Soft/subgraph call frames that are entered-but-paused stay RUNNING
+            # so stepped resume continues the child (SG-05/06).
             for node in graph.nodes.values():
                 if node.status is NodeStatus.RUNNING:
+                    if node.payload.get("entered"):
+                        continue
                     node.status = NodeStatus.READY
 
         if not self._allows([GraphExecute], tool_name="graph_executor", run_id=rid):
@@ -733,8 +788,92 @@ class GraphExecutor:
         )
         self.store.save(graph, run_id=rid, boundary="dispatch", fingerprint=fingerprint)
 
+        # Soft-enter resume: parent already RUNNING with an entered child frame —
+        # step/continue the child run_id instead of re-entering the call site.
+        if resume and control.mode in {"one_step", "until", "to_completion"}:
+            child = self._entered_child_target(graph)
+            if child is not None:
+                child_graph, child_run_id = child
+                child_control = (
+                    RunControl(mode="one_step")
+                    if control.mode == "one_step"
+                    else control
+                    if control.mode == "until"
+                    else RunControl()
+                )
+                child_result = await self.run(
+                    child_graph,
+                    budget_policy=budget_policy,
+                    budget=ledger,
+                    run_id=child_run_id,
+                    resume=True,
+                    envelope=envelope,
+                    skip_linkage=True,
+                    parent_run_id=rid,
+                    control=child_control,
+                )
+                if child_result.status == "paused":
+                    self.store.save(
+                        graph, run_id=rid, boundary="reduce", fingerprint=fingerprint
+                    )
+                    return self._result(
+                        status="paused",
+                        graph=graph,
+                        run_id=rid,
+                        budget=ledger,
+                        stopped_before=child_result.stopped_before,
+                        entered_node_id=child_result.entered_node_id
+                        or self._entered_parent_id(graph),
+                        active_run_id=child_result.active_run_id or child_run_id,
+                    )
+                # Child terminal: close the soft call site on the parent.
+                parent_id = self._entered_parent_id(graph)
+                if parent_id is not None:
+                    parent = graph.nodes[parent_id]
+                    if child_result.status == "ok":
+                        parent.status = NodeStatus.SUCCEEDED
+                        parent.error = None
+                    elif child_result.status == "soft_exhausted":
+                        parent.status = NodeStatus.SUCCEEDED
+                        parent.error = None
+                    else:
+                        parent.status = NodeStatus.FAILED
+                        parent.error = (
+                            child_result.error or f"subgraph_{child_result.status}"
+                        )
+                    parent.payload = {
+                        **parent.payload,
+                        "child_status": child_result.status,
+                        "entered": False,
+                    }
+                    self._emit(
+                        GraphNodeEnd,
+                        {
+                            "node_id": parent.id,
+                            "kind": parent.kind,
+                            "status": parent.status.value,
+                            "child_run_id": child_run_id,
+                        },
+                        rid,
+                    )
+                if control.mode == "one_step":
+                    self.store.save(
+                        graph, run_id=rid, boundary="reduce", fingerprint=fingerprint
+                    )
+                    return self._result(
+                        status="paused",
+                        graph=graph,
+                        run_id=rid,
+                        budget=ledger,
+                        stopped_before=None,
+                        entered_node_id=None,
+                        active_run_id=rid,
+                    )
+                # Fall through: continue parent after soft child completed.
+                control = RunControl() if control.mode == "to_completion" else control
+
         try:
-            await self._run_loop(graph, context)
+            paused = await self._run_loop(graph, context, control=control)
         except InjectedProcessCrash:
             raise
         except GraphExecutorError as exc:
@@ -774,6 +913,18 @@ class GraphExecutor:
                 status="failed", graph=graph, run_id=rid, budget=ledger, error=str(exc)
             )
 
+        if paused:
+            self.store.save(graph, run_id=rid, boundary="reduce", fingerprint=fingerprint)
+            return self._result(
+                status="paused",
+                graph=graph,
+                run_id=rid,
+                budget=ledger,
+                stopped_before=context.pause.stopped_before,
+                entered_node_id=context.pause.entered_node_id,
+                active_run_id=context.pause.active_run_id or rid,
+            )
+
         self.store.save(graph, run_id=rid, boundary="commit", fingerprint=fingerprint)
         self.crash_probe.maybe_crash(
             "after_final_commit",
@@ -799,7 +950,39 @@ class GraphExecutor:
             status=status, graph=graph, run_id=rid, budget=ledger, error=error
         )
 
-    async def _run_loop(self, graph: ExecutionGraph, context: GraphRunContext) -> None:
+    def _entered_parent_id(self, graph: ExecutionGraph) -> str | None:
+        for node in graph.nodes.values():
+            if (
+                node.status is NodeStatus.RUNNING
+                and (node.kind == "subgraph" or node.subgraph)
+                and node.payload.get("entered")
+            ):
+                return node.id
+        return None
+
+    def _entered_child_target(
+        self, graph: ExecutionGraph
+    ) -> tuple[ExecutionGraph, str] | None:
+        parent_id = self._entered_parent_id(graph)
+        if parent_id is None:
+            return None
+        parent = graph.nodes[parent_id]
+        child_run_id = str(parent.payload.get("child_run_id") or "")
+        if not child_run_id:
+            return None
+        child = self.store.latest(run_id=child_run_id)
+        if child is None:
+            return None
+        return child, child_run_id
+
+    async def _run_loop(
+        self,
+        graph: ExecutionGraph,
+        context: GraphRunContext,
+        *,
+        control: RunControl,
+    ) -> bool:
+        """Walk ready nodes. Returns True when paused under stepped control."""
         # Bound iterations: each node may attempt up to max_attempts (+ escalation).
         loop_budget = (
             sum(max(1, n.max_attempts) for n in graph.nodes.values()) + len(graph.nodes) + 1
@@ -810,20 +993,114 @@ class GraphExecutor:
                 raise GraphExecutorError("hard_budget_exceeded")
             if level is BudgetLevel.SOFT:
                 self._cancel_open_nodes(graph, reason="soft_budget_exceeded")
-                return
+                return False
             ready = graph.ready_nodes()
             if not ready:
-                return
+                return False
             conflicts = graph.concurrent_write_conflicts([n.id for n in ready])
             if conflicts and len(ready) > 1:
                 # Sequential safety: pick one non-conflicting node; if all conflict, run first.
                 ready = [ready[0]]
             node = ready[0]
+
+            is_soft = node.kind == "subgraph" or bool(node.subgraph)
+
+            if (
+                control.mode == "until"
+                and control.until == node.id
+                and control.stop == "before"
+            ):
+                context.pause.stopped_before = node.id
+                context.pause.active_run_id = context.run_id
+                return True
+
+            if control.mode == "one_step" and is_soft:
+                await self._enter_subgraph_node(graph, node, context)
+                context.pause.entered_node_id = node.id
+                child_run_id = str(node.payload.get("child_run_id") or "")
+                context.pause.active_run_id = child_run_id or context.run_id
+                child = self.store.latest(run_id=child_run_id) if child_run_id else None
+                if child is not None:
+                    child_ready = child.ready_nodes()
+                    context.pause.stopped_before = (
+                        child_ready[0].id if child_ready else None
+                    )
+                self.store.save(graph, run_id=context.run_id, boundary="reduce")
+                return True
+
             await self._run_node(graph, node, context)
             if context.budget.status() is BudgetLevel.HARD:
                 raise GraphExecutorError("hard_budget_exceeded")
             self.store.save(graph, run_id=context.run_id, boundary="reduce")
+
+            if (
+                control.mode == "until"
+                and control.until == node.id
+                and control.stop == "after"
+            ):
+                context.pause.stopped_before = None
+                context.pause.active_run_id = context.run_id
+                return True
+
+            if control.mode == "one_step":
+                # Last frontier node finished the graph — do not report paused.
+                if not graph.ready_nodes() and self._terminal_status(graph) == "ok":
+                    return False
+                context.pause.active_run_id = context.run_id
+                return True
         raise GraphExecutorError("exceeded graph execution budget")
+
+    async def _enter_subgraph_node(
+        self,
+        graph: ExecutionGraph,
+        node: GraphNode,
+        context: GraphRunContext,
+    ) -> None:
+        """Open a soft/subgraph call frame without running the first child (SG-05)."""
+        del graph
+        node.attempt += 1
+        node.status = NodeStatus.RUNNING
+        self._emit(
+            GraphNodeStart,
+            {
+                "node_id": node.id,
+                "kind": node.kind,
+                "attempt": node.attempt,
+                "subgraph": True,
+                "entered": True,
+            },
+            context.run_id,
+        )
+        raw = node.subgraph or node.payload.get("subgraph")
+        if not isinstance(raw, dict):
+            node.status = NodeStatus.FAILED
+            node.error = "missing_subgraph"
+            self._charge_node(node, None, context.budget, subgraph=True)
+            self._emit(
+                GraphNodeEnd,
+                {
+                    "node_id": node.id,
+                    "kind": node.kind,
+                    "status": node.status.value,
+                    "error": node.error,
+                },
+                context.run_id,
+            )
+            return
+        child = ExecutionGraph.resume(raw)
+        child_run_id = f"{context.run_id}:{node.id}"
+        self.store.save(
+            child,
+            run_id=child_run_id,
+            boundary="dispatch",
+            fingerprint=child.config_fingerprint,
+        )
+        node.payload = {
+            **node.payload,
+            "child_run_id": child_run_id,
+            "child_graph_id": child.id,
+            "entered": True,
+        }
 
     async def _run_subgraph_node(
         self,

@@ -769,6 +769,38 @@ Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper);
 
 [^insp-linkage]: [Inspiration requirements (linkage & stop contracts)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 2 and 4 — primitive DI vs runtime graph resolution; explicit stop contracts
 
+### `fangore_graph_one_step` — Advance a graph one frontier node per step
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a linear three-node inline graph and uses `graph_walk` start/step so each step executes exactly one leaf. Tracks SG-04/09[^sg-step].
+
+#### Implementation
+
+`RunControl(mode=one_step)` on `GraphExecutor.run`; CLI `graph_walk` actions `start` / `step` / `continue`.
+
+#### Validation
+
+Harness `user_story` scenario `one_step.yaml`.
+
+#### Footnotes
+
+[^sg-step]: [Stepped graph execution requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md) — SG-04 one_step
+
+### `fangore_graph_soft_enter` — Entering a soft subgraph node pauses before the first child
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline graph whose only root is a subgraph (soft call site). One `graph_walk` step enters the call frame and stops before the child's first node — no child runner has executed yet. A following step runs the first child. Tracks SG-05[^sg-soft].
+
+#### Implementation
+
+`GraphExecutor._enter_subgraph_node` on `one_step` when the frontier is a subgraph; parent stays `RUNNING` with `entered`; child checkpointed under `run_id:node_id`.
+
+#### Validation
+
+Harness `user_story` scenario `soft_enter.yaml`.
+
+#### Footnotes
+
+[^sg-soft]: [Stepped graph execution requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md) — SG-05 soft enter
+
 ### `fangore_graph_template_soft_points` — Instantiate a reusable graph template with soft points
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `fan_out_aggregate` recipe. Fangore picks the library fan-out Agentic Recipe, fills only the soft points the host owns (branch payloads, runner kind names, acceptance), and keeps the resulting concrete plan in the host app. The skeleton must stamp which recipe produced it so later upgrades can detect drift. Independent-review and verify-repair recipes follow the same GraphTemplate pattern. He walks product steps (instantiate_recipe, recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-templates][^insp-sr-03-soft] Related: `fangore_insp_soft_evolution_allowlist`.
@@ -785,6 +817,22 @@ Harness `user_story` scenario `graph_template_soft_points.yaml`: environment + g
 
 [^insp-templates]: [Inspiration requirements (subgraphs & templates)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 3, 10, and 19 — dynamic subgraphs, independent review, evidence-driven template incubation
 [^insp-sr-03-soft]: [Self-revising recipe map (MH-SR-03 soft points)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Soft points; evolution allowlist is fangore_insp_soft_evolution_allowlist
+
+### `fangore_graph_until_before` — Pause a graph walk before a named node
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline two-node graph and runs `graph_walk` with `until` the second node and `stop: before`. The first node has succeeded; the second is ready but not executed. He continues and the second node completes. Tracks stepped graph control SG-02/06/09[^sg-until].
+
+#### Implementation
+
+`RunControl(mode=until, stop=before)` on `GraphExecutor.run`; product verb `graph_walk`; optional `graph.inline` on user_story YAML.
+
+#### Validation
+
+Harness `user_story` scenario `until_before.yaml`.
+
+#### Footnotes
+
+[^sg-until]: [Stepped graph execution requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md) — SG-02 until before
 
 ### `fangore_harness_family_react` — Run the react harness family through CLI tool_loop init
 
@@ -1144,19 +1192,20 @@ Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper);
 
 ### `fangore_insp_effect_revalidation` — Revalidate authority at side-effect dispatch after pause or revocation
 
-Authority is rechecked when a consequential action actually runs — not only at graph start, approval capture, or checkpoint creation. A paused graph resumed after revocation must not publish. Related: `fangore_insp_wake_reresolve`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`. Tracks MH-DOTS-02[^insp-dots-02].
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline graph that plans then publishes. He walks with `graph_walk` until *before* the publish execute node, advances the live authorization epoch (revocation), then continues. Publish fails closed with `revalidation_failed` and the effect runner never runs. Related: `fangore_insp_wake_reresolve`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`. Tracks MH-DOTS-02[^insp-dots-02] via stepped control SG-08[^sg-reval].
 
 #### Implementation
 
-`revalidate_before_effect` rechecks envelope expiry, the live authorization epoch, envelope grants, and access control. `GraphExecutor` calls it before every node whose `tool_phase` payload is `execute` (the default); observe/prepare nodes skip it. Hosts feed the live epoch through `executor.live_authorization_epoch`. A failed recheck fails the node as `revalidation_failed:<reason>` without invoking the runner.
+`revalidate_before_effect` on `execute`-phase nodes; `GraphExecutor.live_authorization_epoch`; `graph_walk` start/until/set_live_epoch/continue. Observe/prepare phases skip revalidation.
 
 #### Validation
 
-Harness `cli` `probe` loads `plans/effect_revalidation_check.yaml` (human-readable probe plan); hard expects on declared observation keys.
+Harness `user_story` scenario `effect_revalidation_check.yaml`.
 
 #### Footnotes
 
 [^insp-dots-02]: [OpenAI Dots agent safety (MH-DOTS-02)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md) — Revalidate before consequential side effects
+[^sg-reval]: [Stepped graph execution requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md) — SG-08 live epoch between pauses
 
 ### `fangore_insp_evolution_ownership_split` — Keep recipe validation in the library and evolution campaigns in the host
 
