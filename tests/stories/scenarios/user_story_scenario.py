@@ -221,6 +221,7 @@ class UserStoryScenario(BaseModel):
         assertions: dict[str, CliAssertion],
         *,
         label: str,
+        relax_cassette_exact: bool = False,
     ) -> None:
         commands = [s.to_command() for s in self.steps]
         if len(result.steps) != len(commands):
@@ -239,13 +240,20 @@ class UserStoryScenario(BaseModel):
                     )
             elif cmd.expect is not None:
                 specs = parse_expect_list(cmd.expect)
-                check_assertions(obs, specs, assertions, label=step_label)
+                check_assertions(
+                    obs,
+                    specs,
+                    assertions,
+                    label=step_label,
+                    relax_cassette_exact=relax_cassette_exact,
+                )
         complete_label = f"{label}:complete"
         check_assertions(
             result.observation(),
             self.complete.expect,
             assertions,
             label=complete_label,
+            relax_cassette_exact=relax_cassette_exact,
         )
         _require_cost_ceiling(
             result.observation(), self.complete.expect, label=complete_label

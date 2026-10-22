@@ -330,14 +330,34 @@ def parse_expect_list(raw: Any) -> list[CliAssertionSpec]:
     return out
 
 
+# Cassette replay pins exact usage; live models vary. Soften only these keys.
+_CASSETTE_EXACT_KEYS = frozenset(
+    {"prompt_tokens", "completion_tokens", "total_tokens"}
+)
+_CASSETTE_EXACT_KINDS = frozenset({"equals", "exactly", "lte", "gte"})
+
+
+def is_cassette_exact_assertion(spec: CliAssertionSpec) -> bool:
+    """True when the spec pins replay-exact token counts from a cassette."""
+    key = spec.params().get("key")
+    return (
+        isinstance(key, str)
+        and key in _CASSETTE_EXACT_KEYS
+        and spec.kind in _CASSETTE_EXACT_KINDS
+    )
+
+
 def check_assertions(
     observation: Mapping[str, Any],
     specs: list[CliAssertionSpec],
     assertions: Mapping[str, CliAssertion],
     *,
     label: str,
+    relax_cassette_exact: bool = False,
 ) -> None:
     for index, spec in enumerate(specs):
+        if relax_cassette_exact and is_cassette_exact_assertion(spec):
+            continue
         checker = assertions.get(spec.kind)
         if checker is None:
             known = ", ".join(sorted(assertions))
@@ -372,6 +392,7 @@ __all__ = [
     "ExpectBlock",
     "check_assertions",
     "default_cli_assertion_classes",
+    "is_cassette_exact_assertion",
     "parse_expect_list",
     "resolve_cli_assertions",
 ]

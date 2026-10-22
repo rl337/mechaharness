@@ -31,11 +31,15 @@ pytest -q tests/stories
 # Full suite (unit + stories)
 pytest -q
 
-# Live OpenAI-compat — same tests, real HTTP
+# Live — every model-using story against real reason + judge hosts
+# (HTTP twins + static infer/judge walks; softens cassette-exact token counts)
+MECHA_STORY_BACKEND=live   MECHA_BASE_URL=http://127.0.0.1:8000/v1   MECHA_MODEL=qwen3-30b-thinking   MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009   MECHA_JUDGE_MODEL=laya   MECHA_MAX_TOKENS=1024   pytest -q tests/stories
+
+# Live OpenAI-compat only
 MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen3-30b-thinking \
   MECHA_BASE_URL=http://127.0.0.1:8000/v1 pytest -q tests/stories -k nubble_run_cost
 
-# Live System One
+# Live System One only
 MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
   MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 pytest -q tests/stories -k refund_verdict
 
@@ -48,9 +52,9 @@ MECHA_LIVE_JUDGE=1 pytest -q tests/stories -k 'refund_verdict or systemone_casse
 | `MECHA_STORY_BACKEND` | Behavior |
 |-----------------------|----------|
 | `static` (default) | In-process fixture + HTTP cassettes |
-| `live` | Real servers; soft expects only |
+| `live` | Real servers; behavioral expects hard, cassette-exact token counts soft |
 
-Live parity is a **mode** of cassette-backed stories (for example `nubble_run_cost_events`, `fangore_refund_verdict`, `taloneth_systemone_cassette`), not a separate empty fixture. Flip `MECHA_STORY_BACKEND=live` to run the same request and expect files against a real endpoint.
+Live collects HTTP cassette twins **and** static stories that call `infer` / `judge` / `judge_route` (not pure policy, recipe-shape, `tool_loop`, or Anthropic-only walks). Flip `MECHA_STORY_BACKEND=live` with reason + judge URLs to prove cassettes are not fantasy.
 
 ## Models
 
