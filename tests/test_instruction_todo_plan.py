@@ -133,6 +133,34 @@ class _RefinementLocalWork(GeneratorLocalWork):
         return {"result": "ok", "restarted": True}
 
 
+def test_plan_classify_local_work_oneshot_and_conflict() -> None:
+    from mechaharness.generator_local_work import PlanClassifyLocalWork
+
+    work = PlanClassifyLocalWork()
+    record = GeneratorRunRecord(
+        run_id="pc-1",
+        recipe_id="instruction_todo_plan",
+        graph_id="g",
+        controller_id="unit",
+        inputs={"goal": "do thing"},
+    )
+    ok = work.run(record)
+    assert ok["result"] == "ok"
+    assert ok["mode"] == "oneshot"
+    assert ok["plan"]["items"][0]["instruction"] == "do thing"
+
+    conflict = GeneratorRunRecord(
+        run_id="pc-2",
+        recipe_id="instruction_todo_plan",
+        graph_id="g",
+        controller_id="unit",
+        inputs={"instructions": ["delete foo", "keep foo"]},
+    )
+    ask = work.run(conflict)
+    assert ask["result"] == "needs_guidance"
+    assert ask["request_guidance"][0]["context_version"] == "list_refinement"
+
+
 def test_generator_request_guidance_then_restart() -> None:
     store = InMemoryGeneratorRunStore()
     gen = DurableGraphGenerator(

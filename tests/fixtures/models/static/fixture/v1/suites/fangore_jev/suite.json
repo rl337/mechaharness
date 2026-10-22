@@ -1,0 +1,90 @@
+{
+  "id": "fangore_jev",
+  "title": "Judge evaluation vocabulary scenarios",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_jev_action_safety",
+      "scenario": "delete_low_risk_no_grant"
+    },
+    {
+      "story": "fangore_jev_action_safety",
+      "scenario": "read_high_risk_with_grant"
+    },
+    {
+      "story": "fangore_jev_action_safety",
+      "scenario": "read_low_risk_with_grant"
+    },
+    {
+      "story": "fangore_jev_citation_growth_mismatch",
+      "scenario": "growth_mismatch"
+    },
+    {
+      "story": "fangore_jev_citation_matching_claim",
+      "scenario": "matching_claim"
+    },
+    {
+      "story": "fangore_jev_citation_missing_source",
+      "scenario": "missing_source"
+    },
+    {
+      "story": "fangore_jev_citation_uncertain_support",
+      "scenario": "uncertain_support"
+    },
+    {
+      "story": "fangore_jev_context_budget_pack",
+      "scenario": "budget_pack"
+    },
+    {
+      "story": "fangore_jev_context_exclude_injection",
+      "scenario": "exclude_injection"
+    },
+    {
+      "story": "fangore_jev_context_filter_stale_untrusted",
+      "scenario": "filter_stale_and_untrusted"
+    },
+    {
+      "story": "fangore_jev_context_missing_scores_fallback",
+      "scenario": "missing_scores_fallback"
+    },
+    {
+      "story": "fangore_jev_req_review_approve_missing_crash_tests",
+      "scenario": "approve_but_missing_crash_tests"
+    },
+    {
+      "story": "fangore_jev_req_review_covered_with_tests",
+      "scenario": "covered_with_tests"
+    },
+    {
+      "story": "fangore_jev_req_review_gap_found",
+      "scenario": "gap_found"
+    },
+    {
+      "story": "fangore_jev_req_review_template_shape",
+      "scenario": "template_shape"
+    },
+    {
+      "story": "fangore_jev_task_route_complex_frontier",
+      "scenario": "complex_forces_frontier"
+    },
+    {
+      "story": "fangore_jev_task_route_invalid",
+      "scenario": "invalid_route"
+    },
+    {
+      "story": "fangore_jev_task_route_low_confidence",
+      "scenario": "low_confidence"
+    },
+    {
+      "story": "fangore_jev_task_route_simple_local",
+      "scenario": "simple_local"
+    }
+  ]
+}

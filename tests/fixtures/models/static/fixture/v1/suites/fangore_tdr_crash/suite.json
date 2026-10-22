@@ -1,0 +1,38 @@
+{
+  "id": "fangore_tdr_crash",
+  "title": "Transactionally durable crash recovery",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_tdr_crash_after_accept_before_record",
+      "scenario": "crash_after_accept_before_record"
+    },
+    {
+      "story": "fangore_tdr_crash_after_accept_recorded",
+      "scenario": "crash_after_accept_recorded"
+    },
+    {
+      "story": "fangore_tdr_crash_after_final_commit",
+      "scenario": "crash_after_final_commit"
+    },
+    {
+      "story": "fangore_tdr_crash_after_intent_before_call",
+      "scenario": "crash_after_intent_before_call"
+    },
+    {
+      "story": "fangore_tdr_crash_after_reduce_before_checkpoint",
+      "scenario": "crash_after_reduce_before_checkpoint"
+    },
+    {
+      "story": "fangore_tdr_crash_before_intent",
+      "scenario": "crash_before_intent"
+    }
+  ]
+}

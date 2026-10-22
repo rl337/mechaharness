@@ -1,0 +1,50 @@
+{
+  "id": "nubble_routing_topology",
+  "title": "Model routing, lanes, and environment topology",
+  "persona": "nubble",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "nubble_insp_environment_delta",
+      "scenario": "environment_delta"
+    },
+    {
+      "story": "nubble_insp_environment_linkage",
+      "scenario": "grant_mismatch"
+    },
+    {
+      "story": "nubble_insp_model_routing",
+      "scenario": "capability_route"
+    },
+    {
+      "story": "nubble_insp_rollout_graph",
+      "scenario": "roots_and_retry"
+    },
+    {
+      "story": "nubble_insp_workspace_isolation",
+      "scenario": "workspace_isolation_acquire"
+    },
+    {
+      "story": "nubble_lane_load_hint",
+      "scenario": "wrong_lane_deny"
+    },
+    {
+      "story": "nubble_model_affinity",
+      "scenario": "affinity_lane"
+    },
+    {
+      "story": "nubble_repo_topology",
+      "scenario": "repo_topology"
+    },
+    {
+      "story": "nubble_topology_efficiency",
+      "scenario": "parallel_spans"
+    }
+  ]
+}

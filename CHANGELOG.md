@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **User-story suites:** thematic ``suite.json`` catalogs under
+  ``static/fixture/v1/suites/`` with ``execution.mode`` ``parallel`` |
+  ``sequential``, ``vars`` / ``setup`` / ``cleanup``, and explicit
+  ``stages`` (``story`` + ``scenario``). Every static scenario is in exactly
+  one primary suite. Pytest ``test_user_story_suite``; static suite members
+  leave ``test_user_story`` (HTTP twins remain there). Schema:
+  ``tests/stories/suite_spec.py``; membership helper
+  ``scripts/generate_user_story_suites.py``. Guide Suites section regenerated
+  from fixtures.
+- **Workspace verify verbs:** ``run_python`` and ``workspace_read`` put
+  ``stdout`` / ``stderr`` / ``exit_code`` or ``exists`` / ``text`` into the
+  step observation bag for ordinary expects. ``ProjectCodingLocalWork``
+  records ``written_files`` / ``workspace_root`` on completed yields. Story
+  ``environment.workspace`` / ``local_work: project_coding`` / ``coding_write``
+  bind a temp coding host. Durable + coding local work share the CLI
+  ``EventLog`` so stories can pin ``core:graph_yield`` /
+  ``core:guidance_resume`` / graph lifecycle via ``tapped_event_types``.
+  Scenario: ``fangore_guided_coding_recipe`` ``helper_run_python.yaml``.
+- **Story observation paths + plan classify:** CLI expect ``key`` resolves
+  dotted / indexed paths (``plan.items[0].instruction``). Durable step
+  observations lift allowlisted yield payload fields (``context_version``,
+  ``mode``, ``plan``, ``result``, ``error``). ``PlanClassifyLocalWork`` and
+  ``environment.local_work: plan_classify`` run classify/refine offline without
+  a coding tool loop. Story scenarios: ``oneshot_from_goal``,
+  ``numbered_list``, ``conflict_list_refinement``, ``explicit_list_mode``.
 - **MCP progress paths:** ``tools/call`` with ``_meta.progressToken`` emits
   ``notifications/progress`` messages such as
   ``guided_coding › plan_tile › work_item 1 › tool_round 2 › write_file``

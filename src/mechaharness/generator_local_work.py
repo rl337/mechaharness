@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import json
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any
 
 from mechaharness.budget import BudgetPolicy
@@ -58,6 +59,41 @@ class NoOpGeneratorLocalWork(GeneratorLocalWork):
         return {"result": "ok"}
 
 
+class PlanClassifyLocalWork(GeneratorLocalWork):
+    """Classify / refine instruction plans without a coding tool loop.
+
+    Offline story path: runs ``build_instruction_plan``, returns
+    ``request_guidance`` when refinement is needed, otherwise completes with
+    ``mode`` / ``plan`` payload. No Completer or workspace tools.
+    """
+
+    def run(self, record: GeneratorRunRecord) -> dict[str, Any]:
+        if record.recipe_id not in _PLAN_RECIPES:
+            return {"result": "ok", "skipped": True, "recipe_id": record.recipe_id}
+        try:
+            built = build_instruction_plan(
+                dict(record.inputs or {}),
+                guidance_history=list(record.guidance_history),
+            )
+        except Exception as exc:  # noqa: BLE001 - surface into failed payload
+            return {"result": "failed", "error": str(exc)}
+        if built.guidance:
+            return {
+                "result": "needs_guidance",
+                "request_guidance": guidance_asks_to_payloads(built.guidance),
+                "plan_phase": "refine",
+            }
+        plan = built.plan
+        if plan is None:
+            return {"result": "failed", "error": "instruction_plan_empty"}
+        return {
+            "result": "ok",
+            "mode": plan.mode,
+            "plan": _plan_payload(plan),
+            "guidance": _latest_guidance_text(record),
+        }
+
+
 class ProjectCodingLocalWork(GeneratorLocalWork):
     """Run instruction-plan stages then conversational tool-loop bursts.
 
@@ -74,20 +110,60 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         tools: ToolRegistry,
         complete: Any,
         max_iterations: int = 8,
+        workspace_root: str | Path | None = None,
+        event_log: Any | None = None,
     ) -> None:
         self._tools = tools
         self._complete = complete
         self._max_iterations = max_iterations
+        self._workspace_root = (
+            str(Path(workspace_root).expanduser().resolve())
+            if workspace_root is not None
+            else None
+        )
+        self._event_log = event_log
+        self._written_files: list[str] = []
+
+    def bind_event_log(self, event_log: Any) -> None:
+        """Share the host/CLI EventLog so coding graph emits are observable."""
+        self._event_log = event_log
 
     def run(self, record: GeneratorRunRecord) -> dict[str, Any]:
         if record.recipe_id not in _PLAN_RECIPES:
             return {"result": "ok", "skipped": True, "recipe_id": record.recipe_id}
         try:
-            return asyncio.run(self._run_async(record))
+            return self._run_sync(record)
         except Exception as exc:  # noqa: BLE001 - surface into completed/failed payload
             return {"result": "failed", "error": str(exc)}
 
+    def _run_sync(self, record: GeneratorRunRecord) -> dict[str, Any]:
+        """Drive ``_run_async`` from sync callers (CLI / durable / stories).
+
+        ``asyncio.run`` cannot nest inside a running loop (async story harness,
+        MCP). Fall back to a worker thread in that case.
+        """
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self._run_async(record))
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(lambda: asyncio.run(self._run_async(record))).result()
+
+    def _artifact_fields(self) -> dict[str, Any]:
+        out: dict[str, Any] = {"written_files": list(self._written_files)}
+        if self._workspace_root is not None:
+            out["workspace_root"] = self._workspace_root
+        return out
+
+    def _note_write(self, path: str) -> None:
+        rel = str(path).strip().replace("\\", "/")
+        if rel and rel not in self._written_files:
+            self._written_files.append(rel)
+
     async def _run_async(self, record: GeneratorRunRecord) -> dict[str, Any]:
+        self._written_files = []
         inputs = dict(record.inputs or {})
         built = build_instruction_plan(
             inputs, guidance_history=list(record.guidance_history)
@@ -115,6 +191,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 "error": "pre_acceptance_failed",
                 "failures": pre_fail,
                 "plan": _plan_payload(plan),
+                **self._artifact_fields(),
             }
 
         item_results: list[dict[str, Any]] = []
@@ -133,6 +210,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                     **item_out,
                     "plan": _plan_payload(plan),
                     "item_results": item_results,
+                    **self._artifact_fields(),
                 }
             item_checks = _acceptance_checks(
                 inputs, "item_acceptance_checks", item_id=item.id
@@ -151,6 +229,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                     "failures": failures,
                     "plan": _plan_payload(plan),
                     "item_results": item_results + [item_out],
+                    **self._artifact_fields(),
                 }
             item_results.append({**item_out, "item_id": item.id, "accepted": True})
 
@@ -168,6 +247,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 "failures": post_fail,
                 "plan": _plan_payload(plan),
                 "item_results": item_results,
+                **self._artifact_fields(),
             }
 
         return {
@@ -176,6 +256,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             "plan": _plan_payload(plan),
             "item_results": item_results,
             "guidance": _latest_guidance_text(record),
+            **self._artifact_fields(),
         }
 
     async def _run_item(
@@ -224,6 +305,10 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                     arguments = json.loads(arguments)
                 except json.JSONDecodeError:
                     arguments = {"raw": arguments}
+            if name == "write_file" and isinstance(arguments, dict):
+                path = arguments.get("path")
+                if path is not None:
+                    self._note_write(str(path))
             result = tool.handler(**arguments)
             return str(result)
 
@@ -276,7 +361,11 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         from mechaharness.host_kit import host_graph_executor
 
         grants = [FsRead, FsWrite, ProcessExec, GraphExecute]
-        executor = host_graph_executor(runners=[loop_runner], grants=grants)
+        executor = host_graph_executor(
+            runners=[loop_runner],
+            grants=grants,
+            event_log=self._event_log,
+        )
         result = await executor.run(
             graph,
             budget_policy=BudgetPolicy.unlimited(),
@@ -347,5 +436,6 @@ def _latest_guidance_text(record: GeneratorRunRecord) -> str:
 __all__ = [
     "GeneratorLocalWork",
     "NoOpGeneratorLocalWork",
+    "PlanClassifyLocalWork",
     "ProjectCodingLocalWork",
 ]

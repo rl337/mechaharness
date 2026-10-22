@@ -2,7 +2,7 @@
 
 # User stories
 
-MechaHarness acceptance paths are told as **user stories**: short scenes about what a product needs to do, written for readers who understand features but not code. Each story has a human **narrative**, an **implementation** section that traces library code fulfilling the feature, and a **validation** section that describes how the story is tested. Story text lives only in fixture `story.json` files. This guide is **generated** from those fixtures.
+MechaHarness acceptance paths are told as **user stories**: short scenes about what a product needs to do, written for readers who understand features but not code. Each story has a human **narrative**, an **implementation** section that traces library code fulfilling the feature, and a **validation** section that describes how the story is tested. Related stories are grouped into **suites** (`suite.json`) with shared vars/setup and `parallel` or `sequential` execution. Story and suite text live only in fixtures under `tests/fixtures/models/`. This guide is **generated** from those fixtures.
 
 See the Cursor skill `.cursor/skills/user-stories/SKILL.md` when adding features: edit fixtures, regenerate this page, and keep twin copies of the same story id identical.
 
@@ -63,6 +63,119 @@ Live collects HTTP cassette twins **and** static stories that call `infer` / `ju
 | `static/fixture/v1` | Generic in-process model; model-agnostic paths |
 | `openai_compat/<served-id>/v1` | Captured OpenAI-compat chat |
 | `systemone/<served-id>/v1` | Captured System One judge wire |
+
+## Suites
+
+Suites live under `static/fixture/v1/suites/<suite_id>/suite.json`. Each static story scenario belongs to exactly one primary suite. **Parallel** suites run stages as isolated story cases (order does not matter). **Sequential** suites share a workspace and stop on the first failure. Pytest: `test_user_story_suite`; HTTP twins still run via `test_user_story`.
+
+After editing membership, regenerate suites if you use the membership helper:
+
+```bash
+python scripts/generate_user_story_suites.py
+python scripts/generate_user_story_suites.py --check
+```
+
+### `fangore_access_authority` — Grants, capability envelopes, and authority gates
+
+Persona **fangore**; execution `parallel`; 14 stage(s).
+
+Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`, `fangore_insp_authority_gate`, `fangore_insp_cross_task_isolation`, `fangore_insp_denial_equivalence`, `fangore_insp_evolution_ownership_split`, `fangore_insp_execution_token`, `fangore_insp_isolation_io`, `fangore_insp_risk_autonomy`, `fangore_insp_soft_vs_hard`, `fangore_insp_state_governance`
+
+### `fangore_context_memory` — Context layers, compaction, and derived memory
+
+Persona **fangore**; execution `parallel`; 6 stage(s).
+
+Stories: `fangore_context_compiler_deficit`, `fangore_context_observation_chain`, `fangore_derived_memory`, `fangore_insp_context_compaction`, `fangore_insp_context_layers`, `fangore_insp_context_provider`
+
+### `fangore_decision_plane` — Decision plane policy, projection, and audited infer
+
+Persona **fangore**; execution `parallel`; 15 stage(s).
+
+Stories: `fangore_audited_infer_accept`, `fangore_decision_plane_model_policy`, `fangore_decision_plane_policy`, `fangore_decision_plane_projection`, `fangore_decision_plane_recipe`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_surface_reject`, `fangore_insp_anchor_evidence`, `fangore_insp_decision_conflict_checkpoint`, `fangore_refund_verdict`
+
+### `fangore_durable_ioc` — Durable IoC, guidance yield, and local plan resume
+
+Persona **fangore**; execution `parallel`; 10 stage(s).
+
+Stories: `fangore_insp_approval_interrupt`, `fangore_insp_driver_session_resume`, `fangore_insp_durable_graph_generator`, `fangore_insp_durable_resume`, `fangore_insp_graph_guidance_yield`, `fangore_insp_guidance_controller_auth`, `fangore_insp_guidance_resume_idempotent`, `fangore_insp_guidance_survive_restart`, `fangore_insp_sparse_advisor`, `fangore_local_plan_resume`
+
+### `fangore_graph_executor` — Graph executor, soft points, traversal, and budgets
+
+Persona **fangore**; execution `parallel`; 20 stage(s).
+
+Stories: `fangore_convergence_ceiling`, `fangore_graph_executor`, `fangore_graph_linkage_preflight`, `fangore_graph_one_step`, `fangore_graph_soft_enter`, `fangore_graph_template_soft_points`, `fangore_graph_until_before`, `fangore_insp_budget_subgraph_rollup`, `fangore_insp_dynamic_subgraph`, `fangore_insp_exit_clean_state`, `fangore_insp_failure_attribution`, `fangore_insp_graph_budget`, `fangore_insp_graph_transitions`, `fangore_insp_inference_capture_preflight`, `fangore_insp_linkage_preflight`, `fangore_insp_loop_health`, `fangore_insp_targeted_rollback`, `fangore_insp_verification_gate`, `fangore_node_components`, `fangore_traversal_contract`
+
+### `fangore_guided_coding` — Guided coding recipe and instruction todo plan
+
+Persona **fangore**; execution `parallel`; 9 stage(s).
+
+Stories: `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
+
+### `fangore_host_kit` — Host kit, completer flavors, and harness families
+
+Persona **fangore**; execution `parallel`; 9 stage(s).
+
+Stories: `fangore_backend_describe_recipe`, `fangore_completer_flavors`, `fangore_config_access_policy`, `fangore_harness_family_react`, `fangore_harness_run_recipe`, `fangore_harness_tool_loop_graph`, `fangore_host_kit_event_tap`, `fangore_host_kit_submit_once`
+
+### `fangore_jev` — Judge evaluation vocabulary scenarios
+
+Persona **fangore**; execution `parallel`; 19 stage(s).
+
+Stories: `fangore_jev_action_safety`, `fangore_jev_citation_growth_mismatch`, `fangore_jev_citation_matching_claim`, `fangore_jev_citation_missing_source`, `fangore_jev_citation_uncertain_support`, `fangore_jev_context_budget_pack`, `fangore_jev_context_exclude_injection`, `fangore_jev_context_filter_stale_untrusted`, `fangore_jev_context_missing_scores_fallback`, `fangore_jev_req_review_approve_missing_crash_tests`, `fangore_jev_req_review_covered_with_tests`, `fangore_jev_req_review_gap_found`, `fangore_jev_req_review_template_shape`, `fangore_jev_task_route_complex_frontier`, `fangore_jev_task_route_invalid`, `fangore_jev_task_route_low_confidence`, `fangore_jev_task_route_simple_local`
+
+### `fangore_job_lanes` — Job lane exposure, handoff, and deny rules
+
+Persona **fangore**; execution `parallel`; 6 stage(s).
+
+Stories: `fangore_job_lane_cross_deny`, `fangore_job_lane_handoff_oneshot`, `fangore_job_lane_key_expose_artifacts`, `fangore_job_lane_meta_allowlist`, `fangore_job_lane_observe_before`, `fangore_job_lane_same_lane_lineage`
+
+### `fangore_lifecycle_ops` — Lifecycle extensions, wake, WIP, and tool effects
+
+Persona **fangore**; execution `parallel`; 13 stage(s).
+
+Stories: `fangore_insp_alert_escalation_rules`, `fangore_insp_effect_revalidation`, `fangore_insp_handoff_record`, `fangore_insp_lifecycle_block`, `fangore_insp_lifecycle_graph_observe`, `fangore_insp_lifecycle_observe`, `fangore_insp_lifecycle_replace`, `fangore_insp_lifecycle_rewrite`, `fangore_insp_operation_compensation`, `fangore_insp_tool_effect_classes`, `fangore_insp_tool_result_freshness`, `fangore_insp_wake_reresolve`, `fangore_insp_wip_backpressure`
+
+### `fangore_recipe_registry` — Recipe registry lineage, ports, and soft evolution
+
+Persona **fangore**; execution `parallel`; 6 stage(s).
+
+Stories: `fangore_insp_recipe_lineage_promote`, `fangore_insp_recipe_port_search`, `fangore_insp_recipe_version_pointer`, `fangore_insp_registry_only_compose`, `fangore_insp_soft_evolution_allowlist`, `fangore_insp_template_incubation`
+
+### `fangore_recipes_tiling` — Agentic Recipe tiling and repair loops
+
+Persona **fangore**; execution `parallel`; 12 stage(s).
+
+Stories: `fangore_bounded_repair_loop`, `fangore_bounded_retry_recipe`, `fangore_conversational_tool_loop`, `fangore_environment_repair_recipe`, `fangore_insp_fan_in_policy`, `fangore_insp_independent_review`, `fangore_insp_initialize_preflight`, `fangore_insp_produce_critique_refine`, `fangore_insp_stop_contract`, `fangore_recipe_as_tool`, `fangore_recipe_namespace_tile`, `fangore_verify_repair_recipe`
+
+### `fangore_tdr_crash` — Transactionally durable crash recovery
+
+Persona **fangore**; execution `parallel`; 6 stage(s).
+
+Stories: `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_final_commit`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_reduce_before_checkpoint`, `fangore_tdr_crash_before_intent`
+
+### `nubble_observability` — Cost, trace, and audit observability
+
+Persona **nubble**; execution `parallel`; 13 stage(s).
+
+Stories: `nubble_anthropic_cassette_infer`, `nubble_graph_event_correlators`, `nubble_insp_coordination_cost`, `nubble_insp_efficiency_scorecard`, `nubble_insp_guidance_cost_budget`, `nubble_insp_model_input_replay`, `nubble_insp_recipe_audit_dimensions`, `nubble_insp_resume_cost`, `nubble_insp_review_audit_reconstruct`, `nubble_insp_trace_envelope`, `nubble_insp_trace_reconciliation`, `nubble_run_cost_events`
+
+### `nubble_routing_topology` — Model routing, lanes, and environment topology
+
+Persona **nubble**; execution `parallel`; 9 stage(s).
+
+Stories: `nubble_insp_environment_delta`, `nubble_insp_environment_linkage`, `nubble_insp_model_routing`, `nubble_insp_rollout_graph`, `nubble_insp_workspace_isolation`, `nubble_lane_load_hint`, `nubble_model_affinity`, `nubble_repo_topology`, `nubble_topology_efficiency`
+
+### `taloneth_decision_eval` — Offline decision eval, shadow, and exports
+
+Persona **taloneth**; execution `parallel`; 7 stage(s).
+
+Stories: `taloneth_decision_plane_shadow_compare`, `taloneth_fixture_judge_batch`, `taloneth_offline_decision_export`, `taloneth_policy_replay`, `taloneth_shadow_decision_backends`, `taloneth_validator_qualification`
+
+### `taloneth_harness_research` — Harness research, ablation, and promotion gates
+
+Persona **taloneth**; execution `parallel`; 26 stage(s).
+
+Stories: `taloneth_atk_research_reject`, `taloneth_cache_layout_experiment`, `taloneth_insp_component_ablation`, `taloneth_insp_correction_spec_debt`, `taloneth_insp_cross_harness_failure`, `taloneth_insp_eval_claims`, `taloneth_insp_eval_matrix`, `taloneth_insp_evaluation_outcome`, `taloneth_insp_evaluator_compose`, `taloneth_insp_experiment_dimensions`, `taloneth_insp_experiment_lineage`, `taloneth_insp_exposure_discriminative`, `taloneth_insp_gated_objective`, `taloneth_insp_harness_fingerprint`, `taloneth_insp_harness_health`, `taloneth_insp_harness_hypothesis`, `taloneth_insp_learning_export`, `taloneth_insp_objective_policy`, `taloneth_insp_recipe_evolution_loop`, `taloneth_insp_recipe_final_test_gate`, `taloneth_insp_rule_promotion`, `taloneth_insp_run_parity`, `taloneth_insp_safety_eval_recipes`, `taloneth_insp_scaffolding_retire`, `taloneth_insp_scripted_driver_replay`, `taloneth_insp_trial_reliability`
 
 ## Nubble's stories
 
@@ -852,15 +965,15 @@ Harness `user_story` scenario `until_before.yaml`.
 
 ### `fangore_guided_coding_recipe` — Guide local coding via the guided_coding Agentic Recipe
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph (controller `story`, store `memory`). He wants Cursor to answer only short engineering direction while a project-local MechaHarness process (ProjectCodingConfig + openai_local) classifies oneshot vs todo list and does the token-heavy file edits under pre/item/post acceptance. Start yields `advice_requested` from soft point `external_guidance`; he answers `minimal` in a later call and the run completes. Complements `fangore_instruction_todo_plan`, `fangore_insp_graph_guidance_yield`, and `fangore_conversational_tool_loop`. He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph (controller `story`, store `memory`). He wants Cursor to answer only short engineering direction while a project-local MechaHarness process classifies oneshot vs todo list and does the token-heavy file edits under pre/item/post acceptance. Start yields `advice_requested` from soft point `external_guidance`; he answers `minimal` in a later call and the run completes. In a workspace-backed walk he has the agent write a small helper module, confirms the file on disk, and runs Python against it to check stdout. Complements `fangore_instruction_todo_plan`, `fangore_insp_graph_guidance_yield`, and `fangore_conversational_tool_loop`. He walks product steps (start, answer, workspace_read, run_python) and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe catalog id `guided_coding` (`GuidedCodingTemplate`) tiles `instruction_todo_plan` and `audited_infer_accept` under `plan_tile` / `audit_tile` with soft point `external_guidance` (`kind=guidance`). MCP `MECHA_MCP_HOST=project_coding` binds `ProjectCodingConfig` (workspace coding tools + `GeneratorLocalWork` / `ProjectCodingLocalWork` burst after guidance, including `request_guidance` restart for plan refinement). `DurableGraphGenerator._advance` invokes the injectable local-work hook when the guidance queue is empty.
+Agentic Recipe catalog id `guided_coding` (`GuidedCodingTemplate`) tiles `instruction_todo_plan` and `audited_infer_accept` under `plan_tile` / `audit_tile` with soft point `external_guidance` (`kind=guidance`). MCP `MECHA_MCP_HOST=project_coding` binds `ProjectCodingConfig` (workspace coding tools + `GeneratorLocalWork` / `ProjectCodingLocalWork` burst after guidance, including `request_guidance` restart for plan refinement). Story hosts bind `environment.local_work: project_coding` with a temp workspace and optional `coding_write` stub. `ProjectCodingLocalWork` records `written_files` / `workspace_root` on the completed yield. Product verbs `workspace_read` and `run_python` put file text and stdout/stderr/exit_code into the step observation bag. `DurableGraphGenerator._advance` invokes the injectable local-work hook when the guidance queue is empty.
 
 #### Validation
 
-Harness `user_story` scenario `session.yaml`: environment + durable guided_coding + start/answer expects. Unit tests `tests/test_project_coding.py` and `tests/test_guided_coding_recipe.py` cover tools confinement, plan/audit tile topology, and offline local-work file write.
+Harness `user_story` scenarios `session.yaml` (NoOp guidance smoke) and `helper_run_python.yaml` (project_coding workspace write + workspace_read + run_python expects). Both scenarios pin generator counters (`guidance_yields` / `resumes` / `local_steps`) and `tapped_event_types` / `event_types` so unexpected durable or coding-graph executions fail hard. Unit tests `tests/test_project_coding.py`, `tests/test_guided_coding_recipe.py`, and `tests/test_cli_workspace_verbs.py` cover tools confinement, plan/audit tile topology, offline local-work file write, and workspace verbs.
 
 ### `fangore_harness_family_react` — Run the react harness family through CLI tool_loop init
 
@@ -1967,15 +2080,15 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `fangore_instruction_todo_plan` — Execute oneshot or todo-list instructions via instruction_todo_plan
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `instruction_todo_plan` durable graph (controller `story`, store `memory`). He wants the local agent to judge whether a task is a oneshot or an ordered list, refine conflicts before work, verify pre-list and per-item acceptance, then check post-list acceptance so later todos have not undone earlier ones. Start yields `advice_requested` for scope refinement (`context_version=scope_refinement`); he answers `oneshot` and the run completes. Complements `fangore_guided_coding_recipe` (which tiles this recipe as `plan_tile`). He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `instruction_todo_plan` durable graph (controller `story`, store `memory`). He wants the local agent to judge whether a task is a oneshot or an ordered list, refine conflicts before work, verify pre-list and per-item acceptance, then check post-list acceptance so later todos have not undone earlier ones. With plan_classify local work he can ask for a oneshot helper from a goal, follow a numbered instruction list, resolve conflicting todos via list refinement, or force list mode explicitly. A separate session schedules scope refinement guidance when he answers oneshot without classify. Complements `fangore_guided_coding_recipe` (which tiles this recipe as `plan_tile`). He walks product steps (start, answer) and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe catalog id `instruction_todo_plan` (`InstructionTodoPlanTemplate`) with stages classify → refine_plan → pre_accept → work_item* → item_accept → post_accept → complete. Domain `mechaharness.instruction_plan` builds the plan; optional soft points `scope_refinement` / `list_refinement` (`kind=guidance`, not required) are requested via local-work `request_guidance` (or scheduled in inputs.guidance for offline stories). `DurableGraphGenerator._advance` enqueues those asks, yields `advice_requested`, and restarts local work after resume with `guidance_history`.
+Agentic Recipe catalog id `instruction_todo_plan` (`InstructionTodoPlanTemplate`) with stages classify → refine_plan → pre_accept → work_item* → item_accept → post_accept → complete. Domain `mechaharness.instruction_plan` builds the plan; `PlanClassifyLocalWork` runs classify/refine without a coding tool loop for offline stories (`environment.local_work: plan_classify`). Optional soft points `scope_refinement` / `list_refinement` (`kind=guidance`, not required) are requested via local-work `request_guidance` (or scheduled in inputs.guidance for offline smoke). `DurableGraphGenerator._advance` enqueues those asks, yields `advice_requested`, and restarts local work after resume with `guidance_history`. Step observations lift allowlisted yield payload fields (`context_version`, `mode`, `plan`) for path expects.
 
 #### Validation
 
-Harness `user_story` scenario `session.yaml`: environment + durable instruction_todo_plan + start/answer expects. Unit tests `tests/test_instruction_todo_plan.py` cover topology, classify/conflict refine, and generator request_guidance restart.
+Harness `user_story` scenarios `session.yaml` (scheduled scope_refinement), `oneshot_from_goal.yaml`, `numbered_list.yaml`, `conflict_list_refinement.yaml`, `explicit_list_mode.yaml`. Unit tests `tests/test_instruction_todo_plan.py` and `tests/test_instruction_plan_integration.py` (`classify_mode`) cover topology and pure classifier edges.
 
 ### `fangore_jev_action_safety` — Let hard grants win over semantic risk classification
 

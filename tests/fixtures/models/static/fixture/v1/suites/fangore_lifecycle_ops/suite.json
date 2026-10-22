@@ -1,0 +1,66 @@
+{
+  "id": "fangore_lifecycle_ops",
+  "title": "Lifecycle extensions, wake, WIP, and tool effects",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_insp_alert_escalation_rules",
+      "scenario": "alert_escalation_stages"
+    },
+    {
+      "story": "fangore_insp_effect_revalidation",
+      "scenario": "effect_revalidation_check"
+    },
+    {
+      "story": "fangore_insp_handoff_record",
+      "scenario": "handoff_record"
+    },
+    {
+      "story": "fangore_insp_lifecycle_block",
+      "scenario": "lifecycle_extension_block"
+    },
+    {
+      "story": "fangore_insp_lifecycle_graph_observe",
+      "scenario": "lifecycle_extension_graph_observe"
+    },
+    {
+      "story": "fangore_insp_lifecycle_observe",
+      "scenario": "lifecycle_extension_observe"
+    },
+    {
+      "story": "fangore_insp_lifecycle_replace",
+      "scenario": "lifecycle_extension_replace"
+    },
+    {
+      "story": "fangore_insp_lifecycle_rewrite",
+      "scenario": "lifecycle_extension_rewrite"
+    },
+    {
+      "story": "fangore_insp_operation_compensation",
+      "scenario": "operation_compensation"
+    },
+    {
+      "story": "fangore_insp_tool_effect_classes",
+      "scenario": "tool_phase_effect_guard"
+    },
+    {
+      "story": "fangore_insp_tool_result_freshness",
+      "scenario": "tool_result_freshness_reject"
+    },
+    {
+      "story": "fangore_insp_wake_reresolve",
+      "scenario": "wake_resume"
+    },
+    {
+      "story": "fangore_insp_wip_backpressure",
+      "scenario": "wip_policy"
+    }
+  ]
+}

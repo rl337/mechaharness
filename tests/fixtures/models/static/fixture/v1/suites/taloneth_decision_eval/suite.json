@@ -1,0 +1,42 @@
+{
+  "id": "taloneth_decision_eval",
+  "title": "Offline decision eval, shadow, and exports",
+  "persona": "taloneth",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "taloneth_decision_plane_shadow_compare",
+      "scenario": "candidate_unavailable"
+    },
+    {
+      "story": "taloneth_decision_plane_shadow_compare",
+      "scenario": "disagree"
+    },
+    {
+      "story": "taloneth_fixture_judge_batch",
+      "scenario": "batch_answers"
+    },
+    {
+      "story": "taloneth_offline_decision_export",
+      "scenario": "export_train"
+    },
+    {
+      "story": "taloneth_policy_replay",
+      "scenario": "replay_allow"
+    },
+    {
+      "story": "taloneth_shadow_decision_backends",
+      "scenario": "shadow_backends"
+    },
+    {
+      "story": "taloneth_validator_qualification",
+      "scenario": "honest_vs_weak"
+    }
+  ]
+}

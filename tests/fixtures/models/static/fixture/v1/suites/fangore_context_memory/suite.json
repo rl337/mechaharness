@@ -1,0 +1,38 @@
+{
+  "id": "fangore_context_memory",
+  "title": "Context layers, compaction, and derived memory",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_context_compiler_deficit",
+      "scenario": "context_compiler_deficit"
+    },
+    {
+      "story": "fangore_context_observation_chain",
+      "scenario": "context_observation_chain"
+    },
+    {
+      "story": "fangore_derived_memory",
+      "scenario": "derived_memory"
+    },
+    {
+      "story": "fangore_insp_context_compaction",
+      "scenario": "context_compaction_staged"
+    },
+    {
+      "story": "fangore_insp_context_layers",
+      "scenario": "context_layers_project"
+    },
+    {
+      "story": "fangore_insp_context_provider",
+      "scenario": "context_provider_discovery"
+    }
+  ]
+}

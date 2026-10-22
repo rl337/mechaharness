@@ -26,6 +26,10 @@ from tests.stories.catalog import (  # noqa: E402
     collect_canonical_stories,
     validate_story_fixtures,
 )
+from tests.stories.suite_catalog import (  # noqa: E402
+    suite_meta_for_guide,
+    validate_suite_fixtures,
+)
 
 FIXTURES = ROOT / "tests" / "fixtures" / "models"
 PERSONAS_PATH = FIXTURES / "personas.json"
@@ -89,6 +93,28 @@ def render_guide(stories: dict[str, dict[str, Any]], personas: dict[str, Any]) -
     lines.append(str(personas["models"]).rstrip())
     lines.append("")
 
+    lines.append("## Suites")
+    lines.append("")
+    suites_blurb = personas.get("suites")
+    if isinstance(suites_blurb, str) and suites_blurb.strip():
+        lines.append(suites_blurb.rstrip())
+        lines.append("")
+    for suite in suite_meta_for_guide():
+        mode = suite["mode"]
+        ordered = " (ordered)" if suite.get("ordered") else ""
+        lines.append(
+            f"### `{suite['id']}` — {suite['title']}"
+        )
+        lines.append("")
+        lines.append(
+            f"Persona **{suite['persona']}**; execution `{mode}`{ordered}; "
+            f"{suite['stage_count']} stage(s)."
+        )
+        lines.append("")
+        story_list = ", ".join(f"`{s}`" for s in suite["stories"])
+        lines.append(f"Stories: {story_list}")
+        lines.append("")
+
     by_persona: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for story in stories.values():
         by_persona[str(story["persona"])].append(story)
@@ -128,6 +154,12 @@ def main(argv: list[str] | None = None) -> int:
     if errors:
         print("story.json validation failed:", file=sys.stderr)
         for err in errors:
+            print(f"  {err}", file=sys.stderr)
+        return 1
+    suite_errors = validate_suite_fixtures(require_full_static_coverage=True)
+    if suite_errors:
+        print("suite.json validation failed:", file=sys.stderr)
+        for err in suite_errors:
             print(f"  {err}", file=sys.stderr)
         return 1
 

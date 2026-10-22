@@ -1,0 +1,47 @@
+# user story: fangore_instruction_todo_plan
+# Fangore follows a numbered instruction list. plan_classify strips numbering
+# into three ordered todo items.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: plan_classify
+graph:
+  recipe: instruction_todo_plan
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: numbered-list-1
+      inputs:
+        instructions: |
+          1. add helper
+          2. add test
+          3. update docs
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: plan.mode
+    value: list
+  - kind: equals
+    key: plan.items[0].instruction
+    value: add helper
+  - kind: equals
+    key: plan.items[1].instruction
+    value: add test
+  - kind: equals
+    key: plan.items[2].instruction
+    value: update docs
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: plan.mode
+    value: list
+cleanup: []

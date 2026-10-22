@@ -1,0 +1,39 @@
+# user story: fangore_instruction_todo_plan
+# Fangore asks the local agent to write a small helper (oneshot goal). With
+# plan_classify local work, start builds the instruction plan and completes
+# without scheduled guidance.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: plan_classify
+graph:
+  recipe: instruction_todo_plan
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: oneshot-goal-1
+      inputs:
+        goal: write a small helper that adds two numbers
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: plan.mode
+    value: oneshot
+  - kind: equals
+    key: plan.items[0].instruction
+    value: write a small helper that adds two numbers
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: plan.mode
+    value: oneshot
+cleanup: []

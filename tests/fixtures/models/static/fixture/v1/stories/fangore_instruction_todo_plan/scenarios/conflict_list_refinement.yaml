@@ -1,0 +1,56 @@
+# user story: fangore_instruction_todo_plan
+# Fangore's todo list conflicts (delete vs keep). plan_classify yields
+# list_refinement; he revises with a conflict-free ordered list and completes.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: plan_classify
+graph:
+  recipe: instruction_todo_plan
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: conflict-refine-1
+      inputs:
+        instructions:
+        - delete foo
+        - keep foo
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: equals
+    key: context_version
+    value: list_refinement
+- do:
+    answer:
+      choose: revise
+      text: |
+        1. remove foo
+        2. add bar
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: plan.mode
+    value: list
+  - kind: equals
+    key: plan.items[0].instruction
+    value: remove foo
+  - kind: equals
+    key: plan.items[1].instruction
+    value: add bar
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: plan.mode
+    value: list
+cleanup: []

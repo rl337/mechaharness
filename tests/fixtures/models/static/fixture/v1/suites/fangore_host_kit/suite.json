@@ -1,0 +1,50 @@
+{
+  "id": "fangore_host_kit",
+  "title": "Host kit, completer flavors, and harness families",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_backend_describe_recipe",
+      "scenario": "describe_mock"
+    },
+    {
+      "story": "fangore_completer_flavors",
+      "scenario": "named_matched_flavors"
+    },
+    {
+      "story": "fangore_config_access_policy",
+      "scenario": "config_access_policy"
+    },
+    {
+      "story": "fangore_harness_family_react",
+      "scenario": "react_tool_round"
+    },
+    {
+      "story": "fangore_harness_run_recipe",
+      "scenario": "catalog_and_run"
+    },
+    {
+      "story": "fangore_harness_tool_loop_graph",
+      "scenario": "harness_components"
+    },
+    {
+      "story": "fangore_host_kit_event_tap",
+      "scenario": "tapped_node_lifecycle"
+    },
+    {
+      "story": "fangore_host_kit_submit_once",
+      "scenario": "dispatch_durable_ok"
+    },
+    {
+      "story": "fangore_host_kit_submit_once",
+      "scenario": "resume_uncertain_with_handle"
+    }
+  ]
+}

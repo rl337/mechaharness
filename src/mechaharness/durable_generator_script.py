@@ -165,24 +165,60 @@ class StepObservation(BaseModel):
     yield_obj: GraphYield | None = Field(default=None, exclude=True)
     inspect_obj: RunInspection | None = Field(default=None, exclude=True)
 
+    # Yield payload keys surfaced for story YAML expects (path-resolvable).
+    _PAYLOAD_EXPECT_KEYS = frozenset(
+        {
+            "context_version",
+            "mode",
+            "plan",
+            "result",
+            "error",
+            "written_files",
+            "workspace_root",
+        }
+    )
+
     def as_expect_dict(self) -> dict[str, Any]:
         """Flat dict for hard ``expect`` / ``expect_error`` comparison."""
         data = self.model_dump(exclude={"yield_obj", "inspect_obj"})
         # Alias question onto pending_question when useful for YAML scans.
         if data.get("question") is None and data.get("pending_question"):
             data["question"] = data["pending_question"]
+        payload = (
+            self.yield_obj.payload
+            if self.yield_obj is not None and isinstance(self.yield_obj.payload, dict)
+            else {}
+        )
+        for key in self._PAYLOAD_EXPECT_KEYS:
+            if key in payload and payload[key] is not None:
+                # Prefer payload over empty script-level error when present.
+                if key == "error" and data.get("error") is not None:
+                    continue
+                data[key] = payload[key]
         return data
 
 
 class DurableInstrumentor:
     """Run a :class:`DurableScript` against a host durable generator."""
 
-    def __init__(self, script: DurableScript) -> None:
+    def __init__(
+        self,
+        script: DurableScript,
+        *,
+        local_work: Any | None = None,
+        event_log: Any | None = None,
+    ) -> None:
         self.script = script
+        self._local_work = local_work
+        self._event_log = event_log
         self._store: InMemoryGeneratorRunStore | None = (
             InMemoryGeneratorRunStore() if script.store == "shared" else None
         )
-        self._gen = build_host_generator(run_store=self._store)
+        self._gen = build_host_generator(
+            run_store=self._store,
+            local_work=self._local_work,
+            event_log=self._event_log,
+        )
         self._last_yield: GraphYield | None = None
         self._last_advice: GraphYield | None = None
         self._start_yield: GraphYield | None = None
@@ -331,7 +367,11 @@ class DurableInstrumentor:
     def _do_rebuild(self) -> StepObservation:
         if self._store is None:
             raise ValueError("rebuild requires store: shared")
-        self._gen = build_host_generator(run_store=self._store)
+        self._gen = build_host_generator(
+            run_store=self._store,
+            local_work=self._local_work,
+            event_log=self._event_log,
+        )
         return StepObservation(verb="rebuild")
 
     def _do_list_recipes(self) -> StepObservation:

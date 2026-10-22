@@ -1,0 +1,118 @@
+{
+  "id": "taloneth_harness_research",
+  "title": "Harness research, ablation, and promotion gates",
+  "persona": "taloneth",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "taloneth_atk_research_reject",
+      "scenario": "atk_research_reject"
+    },
+    {
+      "story": "taloneth_cache_layout_experiment",
+      "scenario": "cache_layout_experiment"
+    },
+    {
+      "story": "taloneth_insp_component_ablation",
+      "scenario": "component_ablation_delta"
+    },
+    {
+      "story": "taloneth_insp_correction_spec_debt",
+      "scenario": "specification_debt"
+    },
+    {
+      "story": "taloneth_insp_cross_harness_failure",
+      "scenario": "cross_harness_failure_classify"
+    },
+    {
+      "story": "taloneth_insp_eval_claims",
+      "scenario": "eval_claims_compose"
+    },
+    {
+      "story": "taloneth_insp_eval_matrix",
+      "scenario": "eval_matrix_aggregate"
+    },
+    {
+      "story": "taloneth_insp_evaluation_outcome",
+      "scenario": "evaluation_outcome_filter"
+    },
+    {
+      "story": "taloneth_insp_evaluator_compose",
+      "scenario": "evaluator_compose_run"
+    },
+    {
+      "story": "taloneth_insp_experiment_dimensions",
+      "scenario": "experiment_dimensions_digest"
+    },
+    {
+      "story": "taloneth_insp_experiment_lineage",
+      "scenario": "experiment_lineage_resume"
+    },
+    {
+      "story": "taloneth_insp_exposure_discriminative",
+      "scenario": "exposure_discriminative_report"
+    },
+    {
+      "story": "taloneth_insp_gated_objective",
+      "scenario": "gated_objective_evaluate"
+    },
+    {
+      "story": "taloneth_insp_harness_fingerprint",
+      "scenario": "harness_fingerprint_digest"
+    },
+    {
+      "story": "taloneth_insp_harness_health",
+      "scenario": "harness_health"
+    },
+    {
+      "story": "taloneth_insp_harness_hypothesis",
+      "scenario": "harness_experiment_retire"
+    },
+    {
+      "story": "taloneth_insp_learning_export",
+      "scenario": "learning_export_pack"
+    },
+    {
+      "story": "taloneth_insp_objective_policy",
+      "scenario": "objective_policy_aggregate"
+    },
+    {
+      "story": "taloneth_insp_recipe_evolution_loop",
+      "scenario": "recipe_evolution_candidates"
+    },
+    {
+      "story": "taloneth_insp_recipe_final_test_gate",
+      "scenario": "recipe_final_test_gate"
+    },
+    {
+      "story": "taloneth_insp_rule_promotion",
+      "scenario": "rule_promotion"
+    },
+    {
+      "story": "taloneth_insp_run_parity",
+      "scenario": "parity_mismatch"
+    },
+    {
+      "story": "taloneth_insp_safety_eval_recipes",
+      "scenario": "safety_eval_recipe"
+    },
+    {
+      "story": "taloneth_insp_scaffolding_retire",
+      "scenario": "harness_experiment_retire"
+    },
+    {
+      "story": "taloneth_insp_scripted_driver_replay",
+      "scenario": "session"
+    },
+    {
+      "story": "taloneth_insp_trial_reliability",
+      "scenario": "trial_reliability_metrics"
+    }
+  ]
+}

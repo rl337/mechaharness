@@ -80,6 +80,9 @@ def test_guided_coding_local_work_writes_file(tmp_path: Path) -> None:
     )
     assert y2.kind == "completed"
     assert y2.payload.get("result") == "ok"
+    assert ".mechaharness/guided_coding_stub.txt" in (
+        y2.payload.get("written_files") or []
+    )
     stub = tmp_path / ".mechaharness" / "guided_coding_stub.txt"
     assert stub.is_file()
     assert "guided_coding ok" in stub.read_text()

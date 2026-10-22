@@ -1,0 +1,74 @@
+{
+  "id": "fangore_decision_plane",
+  "title": "Decision plane policy, projection, and audited infer",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_audited_infer_accept",
+      "scenario": "spine"
+    },
+    {
+      "story": "fangore_decision_plane_model_policy",
+      "scenario": "model_soft_point"
+    },
+    {
+      "story": "fangore_decision_plane_policy",
+      "scenario": "accept_billing"
+    },
+    {
+      "story": "fangore_decision_plane_policy",
+      "scenario": "invalid_team"
+    },
+    {
+      "story": "fangore_decision_plane_policy",
+      "scenario": "low_confidence"
+    },
+    {
+      "story": "fangore_decision_plane_projection",
+      "scenario": "project_state"
+    },
+    {
+      "story": "fangore_decision_plane_recipe",
+      "scenario": "template_shape"
+    },
+    {
+      "story": "fangore_decision_plane_shadow",
+      "scenario": "shadow_compare"
+    },
+    {
+      "story": "fangore_decision_plane_telemetry",
+      "scenario": "telemetry_fields"
+    },
+    {
+      "story": "fangore_decision_surface_reject",
+      "scenario": "reject_invalid"
+    },
+    {
+      "story": "fangore_insp_anchor_evidence",
+      "scenario": "anchor_evidence_require"
+    },
+    {
+      "story": "fangore_insp_decision_conflict_checkpoint",
+      "scenario": "cleared_at_c"
+    },
+    {
+      "story": "fangore_insp_decision_conflict_checkpoint",
+      "scenario": "cycle_never_cleared"
+    },
+    {
+      "story": "fangore_insp_decision_conflict_checkpoint",
+      "scenario": "no_conflicts"
+    },
+    {
+      "story": "fangore_refund_verdict",
+      "scenario": "billing_allow"
+    }
+  ]
+}

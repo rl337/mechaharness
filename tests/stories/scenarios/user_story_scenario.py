@@ -23,6 +23,15 @@ from mechaharness.cli_verb import CliParsedCommand, CliScript, parse_cli_command
 from tests.stories.scenarios.cli_scenario import _require_cost_ceiling
 
 
+class CodingWriteBlock(BaseModel):
+    """Offline stub ``write_file`` target when ``local_work: project_coding``."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    path: str
+    content: str
+
+
 class EnvironmentBlock(BaseModel):
     """Host Config surface for this story (family, backend, optional clock)."""
 
@@ -30,6 +39,13 @@ class EnvironmentBlock(BaseModel):
 
     family: str = "pass_through"
     backend: str = "mock"
+    # Durable local-work hook: noop / plan_classify / project_coding.
+    local_work: Literal["noop", "plan_classify", "project_coding"] = "noop"
+    # Workspace root for coding tools + run_python / workspace_read.
+    # Absolute path, path relative to the scenario file, or ``temp``.
+    workspace: str | None = None
+    # Offline Completer stub write when ``local_work: project_coding``.
+    coding_write: CodingWriteBlock | None = None
     # ISO-8601 instant for MockDateTimeService; omit for harness default.
     clock: str | None = None
     # Optional FixtureRagRetriever corpus (YAML path under the story dir).
@@ -303,6 +319,7 @@ async def run_user_story_scenario(
 
 
 __all__ = [
+    "CodingWriteBlock",
     "CompleteBlock",
     "DurableGraphBlock",
     "EnvironmentBlock",

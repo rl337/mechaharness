@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
+from pyiv.files import RealFilesystem
 from pyiv.http import AsyncUrllibHttpClient, MemoryAsyncHttpClient
 from pyiv.process import OsEnvironment
 from pyiv.time import MockDateTimeService
@@ -16,15 +20,23 @@ from mechaharness.cli_instrumentor import CliInstrumentor
 from mechaharness.config import Settings
 from mechaharness.core.types import ChatMessage, Role, ToolCall, Usage
 from mechaharness.di import get_injector
+from mechaharness.generator_local_work import (
+    GeneratorLocalWork,
+    PlanClassifyLocalWork,
+    ProjectCodingLocalWork,
+)
 from mechaharness.inference.anthropic import AnthropicStrategy
 from mechaharness.inference.judge import FixtureJudgeProvider, JudgeProvider
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.project_coding_tools import WorkspacePaths, build_coding_tool_registry
+from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
 from tests.stories.cli_probes.config import TestHarnessCliConfig
 from tests.stories.scenarios.user_story_scenario import (
+    CodingWriteBlock,
     EnvironmentBlock,
     UserStoryScenario,
     load_user_story_scenario,
@@ -100,6 +112,8 @@ class UserStoryHarness:
         lifecycle_extensions = self._build_lifecycle_extensions(scenario)
 
         access_kw = self._access_budget_kwargs(env)
+        workspace_root = self._resolve_workspace(env, scenario_path)
+        access_kw.update(self._local_work_kwargs(env, workspace_root))
         if env.backend == "anthropic":
             return self._anthropic_config(
                 backend,
@@ -148,6 +162,63 @@ class UserStoryHarness:
             rag_retriever=rag_retriever,
             lifecycle_extensions=lifecycle_extensions,
             **access_kw,
+        )
+
+    def _resolve_workspace(
+        self,
+        env: EnvironmentBlock,
+        scenario_path: Path | None,
+    ) -> Path | None:
+        raw = env.workspace
+        if raw is None:
+            return None
+        if raw == "temp":
+            return Path(tempfile.mkdtemp(prefix="mecha-story-ws-"))
+        path = Path(raw).expanduser()
+        if path.is_absolute():
+            return path.resolve()
+        base = scenario_path.parent if scenario_path is not None else Path.cwd()
+        return (base / path).resolve()
+
+    def _local_work_kwargs(
+        self,
+        env: EnvironmentBlock,
+        workspace_root: Path | None,
+    ) -> dict[str, Any]:
+        kwargs: dict[str, Any] = {}
+        if workspace_root is not None:
+            kwargs["workspace_root"] = workspace_root
+        if env.local_work == "plan_classify":
+            kwargs["generator_local_work"] = PlanClassifyLocalWork
+        elif env.local_work == "project_coding":
+            if workspace_root is None:
+                raise AssertionError(
+                    "environment.local_work=project_coding requires environment.workspace"
+                )
+            kwargs["generator_local_work"] = self._project_coding_local_work(
+                workspace_root, env.coding_write
+            )
+        return kwargs
+
+    def _project_coding_local_work(
+        self,
+        workspace_root: Path,
+        coding_write: CodingWriteBlock | None,
+    ) -> GeneratorLocalWork:
+        tools = build_coding_tool_registry(
+            workspace=WorkspacePaths(workspace_root),
+            filesystem=RealFilesystem(),
+        )
+        if coding_write is not None:
+            complete = _coding_write_stub(tools, coding_write)
+        else:
+            from mechaharness.project_coding import _offline_stub_complete
+
+            complete = _offline_stub_complete(tools)
+        return ProjectCodingLocalWork(
+            tools=tools,
+            complete=complete,
+            workspace_root=workspace_root,
         )
 
     def _access_budget_kwargs(self, env: EnvironmentBlock) -> dict:
@@ -415,3 +486,42 @@ class UserStoryHarness:
             rag_retriever=rag_retriever if isinstance(rag_retriever, RagRetriever) else None,
             **(access_kw or {}),
         )
+
+
+def _coding_write_stub(
+    tools: ToolRegistry,
+    coding_write: CodingWriteBlock,
+) -> Any:
+    """Deterministic Completer that writes one workspace file then finishes."""
+
+    state = {"wrote": False}
+    path = coding_write.path
+    content = coding_write.content
+
+    def complete(messages: object, meta: object = None) -> dict[str, Any]:
+        del messages, meta
+        if not state["wrote"] and "write_file" in tools:
+            state["wrote"] = True
+            # Ensure package imports work for helpers/foo.py style paths.
+            parts = Path(path).parts
+            if len(parts) > 1:
+                pkg = Path(parts[0])
+                init_rel = str(pkg / "__init__.py")
+                if "write_file" in tools:
+                    tools.get("write_file").handler(path=init_rel, content="")
+            return {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": "call_write",
+                        "function": {
+                            "name": "write_file",
+                            "arguments": {"path": path, "content": content},
+                        },
+                    }
+                ],
+            }
+        return {"role": "assistant", "content": "done", "tool_calls": []}
+
+    return complete

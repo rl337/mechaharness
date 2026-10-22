@@ -1,0 +1,62 @@
+{
+  "id": "fangore_recipes_tiling",
+  "title": "Agentic Recipe tiling and repair loops",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_bounded_repair_loop",
+      "scenario": "verify_repair_succeeds"
+    },
+    {
+      "story": "fangore_bounded_retry_recipe",
+      "scenario": "bounded_retry_recipe"
+    },
+    {
+      "story": "fangore_conversational_tool_loop",
+      "scenario": "expanded_rounds"
+    },
+    {
+      "story": "fangore_environment_repair_recipe",
+      "scenario": "environment_repair_recipe"
+    },
+    {
+      "story": "fangore_insp_fan_in_policy",
+      "scenario": "fan_in_policy"
+    },
+    {
+      "story": "fangore_insp_independent_review",
+      "scenario": "independent_review_template"
+    },
+    {
+      "story": "fangore_insp_initialize_preflight",
+      "scenario": "initialize_preflight_template"
+    },
+    {
+      "story": "fangore_insp_produce_critique_refine",
+      "scenario": "produce_critique_refine_recipe"
+    },
+    {
+      "story": "fangore_insp_stop_contract",
+      "scenario": "missing_stop"
+    },
+    {
+      "story": "fangore_recipe_as_tool",
+      "scenario": "recipe_as_tool"
+    },
+    {
+      "story": "fangore_recipe_namespace_tile",
+      "scenario": "recipe_namespace_tile"
+    },
+    {
+      "story": "fangore_verify_repair_recipe",
+      "scenario": "verify_repair_recipe"
+    }
+  ]
+}

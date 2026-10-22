@@ -27,9 +27,11 @@ that story is proven.
 | Guide body | `docs/guides/user-stories.md` | **Generator only** — never hand-edit story sections |
 
 ```bash
-# After any story.json or personas.json change:
+# After any story.json, suite.json, or personas.json change:
 python scripts/generate_user_stories_md.py
 python scripts/generate_user_stories_md.py --check
+# Optional: bulk-regenerate suite membership from the helper map
+python scripts/generate_user_story_suites.py --check
 ```
 
 `run_checks.sh` / CI run `--check` and fail if the guide is stale.
@@ -296,6 +298,42 @@ When you **touch** functionality in this repo:
 Do **not** add skipif live modules. Offline CI must run the story suite with
 **zero skips**; live is the same parametrized tests with `MECHA_STORY_BACKEND=live`.
 
+## Suites
+
+Suites group related story scenarios with shared `vars` / `setup` / `cleanup`
+and `execution.mode` (`parallel` | `sequential`).
+
+| Field | Purpose |
+|-------|---------|
+| `id`, `title`, `persona` | Catalog / guide |
+| `execution.mode` | `parallel` (default) or `sequential` |
+| `execution.ordered` | Only with `sequential` (shared-workspace arcs) |
+| `vars` | Suite-level bindings |
+| `setup` / `cleanup` | Hook names (`ensure_workspace`, …) |
+| `workspace` | Optional shared root (`temp` or path); omit for parallel library suites |
+| `stages[]` | `{ "story": "<id>", "scenario": "<stem>" }` |
+
+Location:
+
+```text
+tests/fixtures/models/static/fixture/v1/suites/<suite_id>/suite.json
+```
+
+Rules:
+
+1. Every static story scenario is in **exactly one** primary suite (coverage
+   ratchet in `tests/stories/test_story_schema.py`).
+2. Prefer **parallel** for independent mocks/cassettes. Use **sequential** +
+   `ordered` only when stages share an arc workspace.
+3. Pytest: `test_user_story_suite` runs suites; HTTP twins and any orphan
+   static cases remain on `test_user_story`.
+4. Membership helper (optional bulk authoring):
+   `python scripts/generate_user_story_suites.py` / `--check`.
+5. New stories: add scenarios, then add stages to the owning `suite.json` (or
+   regenerate membership) in the same change.
+
+See `docs/plans/user-story-suites.md`.
+
 ## Layout
 
 ```text
@@ -304,12 +342,15 @@ tests/fixtures/models/
   <family>/<model>/<version>/
     manifest.json
     stories/<story_id>/
-      story.json           # kind = cli | (legacy during migration)
-      scenarios/*.yaml     # cli: CLI commands + hard expect (preferred)
+      story.json           # kind = cli | user_story | (legacy)
+      scenarios/*.yaml
       response.json        # cassette when needed
-tests/stories/harness/     # cli (+ legacy until empty)
-tests/stories/runners/     # deprecated op-dispatch; delete per migrated family
+    suites/<suite_id>/
+      suite.json           # stages → story + scenario
+tests/stories/harness/     # cli + user_story
+tests/stories/suite_*.py   # suite schema / catalog / harness
 scripts/generate_user_stories_md.py
+scripts/generate_user_story_suites.py
 docs/guides/user-stories.md   # GENERATED
 ```
 
@@ -337,10 +378,13 @@ replay; live uses the served model id via `MECHA_MODEL`.
 3. Intent-check inspiration/REQUIREMENTS; add `scenarios/*.yaml` (one claim each).
 4. Grow `CliInstrumentor` / `cli_universe` only if the wave needs a new verb/node.
 5. Fixture under `static/fixture/v1` first; twin for HTTP paths; twin text parity.
-6. Run `python scripts/generate_user_stories_md.py` and `--check`.
-7. Confirm `tests/stories/test_story_schema.py` / twin parity will pass.
-8. Unit-test edge cases separately; list them under `validation`.
-9. PR summary lists story id(s); no hand edits to the guide.
+6. Add the new scenario as a stage on the owning `suite.json` (or regenerate
+   membership via `scripts/generate_user_story_suites.py`).
+7. Run `python scripts/generate_user_stories_md.py` and `--check`.
+8. Confirm `tests/stories/test_story_schema.py` / twin parity / suite coverage
+   will pass.
+9. Unit-test edge cases separately; list them under `validation`.
+10. PR summary lists story id(s) and suite id(s); no hand edits to the guide.
 
 ## Anti-patterns
 
@@ -359,10 +403,11 @@ replay; live uses the served model id via `MECHA_MODEL`.
 # BAD — touch a legacy story without migrating it toward YAML when practical
 # BAD — soft _include expects on new CLI scenarios
 # BAD — commit story.json without regenerating the guide
+# BAD — static scenario with no suite stage (coverage ratchet)
 # BAD — As-a bullet as the only story body
 # BAD — new skipif live module for one model
 
-# GOOD — kind: cli + scenarios/*.yaml → generate guide → --check green
+# GOOD — kind: cli + scenarios/*.yaml → suite stage → generate guide → --check green
 # GOOD — implementation names verify_repair (recipe) and GraphTemplate (substrate)
 # GOOD — one claim per YAML; grow CLI verbs only when a story needs them
 ```

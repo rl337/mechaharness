@@ -1,0 +1,94 @@
+{
+  "id": "fangore_graph_executor",
+  "title": "Graph executor, soft points, traversal, and budgets",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_convergence_ceiling",
+      "scenario": "stagnation"
+    },
+    {
+      "story": "fangore_graph_executor",
+      "scenario": "authorized_local_pipe"
+    },
+    {
+      "story": "fangore_graph_linkage_preflight",
+      "scenario": "runner_stop_and_ok"
+    },
+    {
+      "story": "fangore_graph_one_step",
+      "scenario": "one_step"
+    },
+    {
+      "story": "fangore_graph_soft_enter",
+      "scenario": "soft_enter"
+    },
+    {
+      "story": "fangore_graph_template_soft_points",
+      "scenario": "graph_template_soft_points"
+    },
+    {
+      "story": "fangore_graph_until_before",
+      "scenario": "until_before"
+    },
+    {
+      "story": "fangore_insp_budget_subgraph_rollup",
+      "scenario": "child_rollup"
+    },
+    {
+      "story": "fangore_insp_dynamic_subgraph",
+      "scenario": "nested_child"
+    },
+    {
+      "story": "fangore_insp_exit_clean_state",
+      "scenario": "exit_clean_state"
+    },
+    {
+      "story": "fangore_insp_failure_attribution",
+      "scenario": "failure_attribution_trace"
+    },
+    {
+      "story": "fangore_insp_graph_budget",
+      "scenario": "soft_and_hard"
+    },
+    {
+      "story": "fangore_insp_graph_transitions",
+      "scenario": "verify_rollback_end"
+    },
+    {
+      "story": "fangore_insp_inference_capture_preflight",
+      "scenario": "training_grade_required"
+    },
+    {
+      "story": "fangore_insp_linkage_preflight",
+      "scenario": "missing_runner_and_ok"
+    },
+    {
+      "story": "fangore_insp_loop_health",
+      "scenario": "loop_health"
+    },
+    {
+      "story": "fangore_insp_targeted_rollback",
+      "scenario": "select_produce"
+    },
+    {
+      "story": "fangore_insp_verification_gate",
+      "scenario": "verification_outcome"
+    },
+    {
+      "story": "fangore_node_components",
+      "scenario": "node_components"
+    },
+    {
+      "story": "fangore_traversal_contract",
+      "scenario": "traversal_contract"
+    }
+  ]
+}

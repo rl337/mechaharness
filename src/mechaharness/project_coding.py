@@ -140,6 +140,7 @@ class ProjectCodingConfig(SettingsConfig):
                 tools=tools,
                 complete=fn,
                 max_iterations=max_turns,
+                workspace_root=self._workspace_root,
             )
 
         # Replace default NoOp with coding burst (last register wins).

@@ -1,0 +1,50 @@
+{
+  "id": "fangore_guided_coding",
+  "title": "Guided coding recipe and instruction todo plan",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_guided_coding_recipe",
+      "scenario": "helper_run_python"
+    },
+    {
+      "story": "fangore_guided_coding_recipe",
+      "scenario": "session"
+    },
+    {
+      "story": "fangore_insp_instruction_gotchas",
+      "scenario": "instruction_gotcha_metrics"
+    },
+    {
+      "story": "fangore_insp_instruction_scope",
+      "scenario": "instruction_scope_metadata"
+    },
+    {
+      "story": "fangore_instruction_todo_plan",
+      "scenario": "conflict_list_refinement"
+    },
+    {
+      "story": "fangore_instruction_todo_plan",
+      "scenario": "explicit_list_mode"
+    },
+    {
+      "story": "fangore_instruction_todo_plan",
+      "scenario": "numbered_list"
+    },
+    {
+      "story": "fangore_instruction_todo_plan",
+      "scenario": "oneshot_from_goal"
+    },
+    {
+      "story": "fangore_instruction_todo_plan",
+      "scenario": "session"
+    }
+  ]
+}

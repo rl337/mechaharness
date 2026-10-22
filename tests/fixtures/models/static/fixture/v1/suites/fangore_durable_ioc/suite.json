@@ -1,0 +1,54 @@
+{
+  "id": "fangore_durable_ioc",
+  "title": "Durable IoC, guidance yield, and local plan resume",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "stages": [
+    {
+      "story": "fangore_insp_approval_interrupt",
+      "scenario": "approval_interrupt_cycle"
+    },
+    {
+      "story": "fangore_insp_driver_session_resume",
+      "scenario": "session"
+    },
+    {
+      "story": "fangore_insp_durable_graph_generator",
+      "scenario": "session"
+    },
+    {
+      "story": "fangore_insp_durable_resume",
+      "scenario": "fingerprint_refuse"
+    },
+    {
+      "story": "fangore_insp_graph_guidance_yield",
+      "scenario": "session"
+    },
+    {
+      "story": "fangore_insp_guidance_controller_auth",
+      "scenario": "session"
+    },
+    {
+      "story": "fangore_insp_guidance_resume_idempotent",
+      "scenario": "session"
+    },
+    {
+      "story": "fangore_insp_guidance_survive_restart",
+      "scenario": "session"
+    },
+    {
+      "story": "fangore_insp_sparse_advisor",
+      "scenario": "sparse_advisor"
+    },
+    {
+      "story": "fangore_local_plan_resume",
+      "scenario": "checkpoint_fan_in_merge"
+    }
+  ]
+}
