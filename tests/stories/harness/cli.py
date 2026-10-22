@@ -51,7 +51,12 @@ class CliHarness:
         instrumentor.bind_base_dir = path.parent.parent
         assertions = resolve_cli_assertions(config)
         result = await run_cli_scenario(scenario, instrumentor)
-        scenario.assert_expect(result, assertions, label=case.label)
+        scenario.assert_expect(
+            result,
+            assertions,
+            label=case.label,
+            relax_cassette_exact=backend.mode == "live",
+        )
 
     def _build_config(
         self,
@@ -291,22 +296,29 @@ class CliHarness:
         backend: StoryBackend,
         response: dict,
     ) -> JudgeProvider:
+        if backend.mode == "live":
+            if not os.environ.get("MECHA_JUDGE_BASE_URL") and not os.environ.get(
+                "MECHA_JUDGE_URL"
+            ):
+                raise AssertionError(
+                    "MECHA_JUDGE_BASE_URL (or MECHA_JUDGE_URL) is required "
+                    "for live judge stories"
+                )
+            return SystemOneJudgeProvider(
+                connection=SimpleHttpConnectionConfig.for_judge(env=OsEnvironment()),
+                client=AsyncUrllibHttpClient(timeout=180.0),
+            )
         if case.adapter == "in_process":
             return FixtureJudgeProvider(response.get("answers") or {})
         if case.adapter == "systemone":
-            if backend.mode == "static":
-                connection = SimpleHttpConnectionConfig(
-                    base_url="http://story.invalid",
-                    path="/v1/systemone",
-                    model="laya",
-                )
-                client = MemoryAsyncHttpClient()
-                client.add("POST", connection.endpoint_url(), json=response)
-                return SystemOneJudgeProvider(connection=connection, client=client)
-            return SystemOneJudgeProvider(
-                connection=SimpleHttpConnectionConfig.for_judge(env=OsEnvironment()),
-                client=AsyncUrllibHttpClient(),
+            connection = SimpleHttpConnectionConfig(
+                base_url="http://story.invalid",
+                path="/v1/systemone",
+                model="laya",
             )
+            client = MemoryAsyncHttpClient()
+            client.add("POST", connection.endpoint_url(), json=response)
+            return SystemOneJudgeProvider(connection=connection, client=client)
         raise AssertionError(
             f"{case.label}: judge_route unsupported adapter {case.adapter!r}"
         )

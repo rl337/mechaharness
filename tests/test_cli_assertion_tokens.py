@@ -5,9 +5,14 @@ from __future__ import annotations
 import pytest
 
 from mechaharness.cli_assertion import (
+    CliAssertionSpec,
+    EqualsAssertion,
     GteAssertion,
     LteAssertion,
+    NonemptyAssertion,
+    check_assertions,
     default_cli_assertion_classes,
+    is_cassette_exact_assertion,
 )
 from mechaharness.cli_instrumentor import CliStepResult, _token_totals
 from mechaharness.core.types import Usage
@@ -75,3 +80,28 @@ def test_usage_for_event_defaults_zeros() -> None:
         "completion_tokens": 0,
         "total_tokens": 0,
     }
+
+
+def test_cassette_exact_token_asserts_relax_in_live() -> None:
+    assert is_cassette_exact_assertion(
+        CliAssertionSpec(kind="equals", key="prompt_tokens", value=8)
+    )
+    assert not is_cassette_exact_assertion(
+        CliAssertionSpec(kind="nonempty", key="text")
+    )
+    assertions = {
+        "equals": EqualsAssertion(),
+        "nonempty": NonemptyAssertion(),
+    }
+    obs = {"prompt_tokens": 13, "text": "hello"}
+    specs = [
+        CliAssertionSpec(kind="equals", key="prompt_tokens", value=8),
+        CliAssertionSpec(kind="nonempty", key="text"),
+    ]
+    check_assertions(
+        obs, specs, assertions, label="live", relax_cassette_exact=True
+    )
+    with pytest.raises(AssertionError, match="prompt_tokens"):
+        check_assertions(
+            obs, specs, assertions, label="static", relax_cassette_exact=False
+        )

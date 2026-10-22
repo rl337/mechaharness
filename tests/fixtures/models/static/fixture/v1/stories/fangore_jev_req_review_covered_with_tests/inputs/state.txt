@@ -4,3 +4,6 @@ PR DIFF:
 
 USER STORIES:
 - Crash on double charge must be covered by tests.
+
+EVIDENCE:
+All listed user stories are implemented. Crash tests for double charge are present and passing. Coverage is complete.
