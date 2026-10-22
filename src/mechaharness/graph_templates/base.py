@@ -34,6 +34,7 @@ SoftPointKind = Literal[
     "policy",
     "task_state",
     "runner_kind",
+    "guidance",
     "other",
 ]
 TemplateStatus = Literal["active", "deprecated", "demoted"]

@@ -1,0 +1,32 @@
+# user story: fangore_decision_plane_shadow
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: decision_plane
+  bind: binds/shadow_compare.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/shadow_compare.yaml
+complete:
+  expect:
+  - kind: equals
+    key: production_action
+    value: billing
+  - kind: 'false'
+    key: shadow_controls_execution
+  - kind: 'true'
+    key: both_outcomes_recorded
+  - kind: equals
+    key: agreement
+    value: false
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

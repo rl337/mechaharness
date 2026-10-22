@@ -2,10 +2,10 @@
   "id": "fangore_insp_recipe_port_search",
   "persona": "fangore",
   "title": "Search compatible recipe compositions by typed ports",
-  "kind": "graph_recipes",
-  "narrative": "Candidate compositions are found by searching only the registered recipes for ones whose declared inputs and outputs fit what is needed. The answer is a list of recipe names; nothing is generated, so no new executable code can enter the production path. A recipe that declares no ports is never suggested, and a type mismatch rules a recipe out. Isolation contracts already exist (`fangore_insp_isolation_io`). Tracks MH-SR-04[^insp-sr-04].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Candidate compositions are found by searching only the registered recipes for ones whose declared inputs and outputs fit what is needed. The answer is a list of recipe names; nothing is generated, so no new executable code can enter the production path. A recipe that declares no ports is never suggested, and a type mismatch rules a recipe out. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-04] Related: `fangore_insp_isolation_io`.",
   "implementation": "`search_compatible_recipes(registry, required_inputs, required_outputs)` in `recipe_port_search.py` compares each active recipe's `GraphTemplate.io_contract` (`TemplateIOContract` from `isolation_contract.py`) with the requested ports (type equality, `any` as a wildcard) and returns sorted catalog ids only. `io_contract` is declared on `safety_eval`, `independent_review`, `produce_critique_refine`, `verify_repair`, and `fan_out_aggregate`; other recipes are skipped until they declare ports.",
-  "validation": "Harness `graph_recipes` op `recipe_port_search`. Hard expects the catalog ids returned for output-only, input-only, combined, wildcard, wrong-type, and unknown-port queries, that every result is a registered catalog id, and that recipes without ports are never returned. Unit tests: `tests/test_recipe_port_search.py`.",
+  "validation": "Harness `user_story` scenario `recipe_port_search.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-sr-04",

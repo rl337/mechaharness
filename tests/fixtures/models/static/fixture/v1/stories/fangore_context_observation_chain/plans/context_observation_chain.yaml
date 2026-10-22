@@ -1,0 +1,5 @@
+# Probe plan for scenario `context_observation_chain.yaml`.
+# Story: Keep original observations and refuse fabricated reductions
+
+summary: Keep original observations and refuse fabricated reductions
+name: context_observation_chain

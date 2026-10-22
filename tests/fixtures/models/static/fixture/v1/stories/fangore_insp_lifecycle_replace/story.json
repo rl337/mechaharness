@@ -2,10 +2,10 @@
   "id": "fangore_insp_lifecycle_replace",
   "persona": "fangore",
   "title": "Hand off one tool step without a dotted-line graph node",
-  "kind": "lifecycle_extensions",
-  "narrative": "For one tool boundary, Fangore may substitute a different single-step outcome instead of running the original tool. That substitution is not a hidden extra node in the execution graph; multi-step repair or fan-out still uses an explicit plan. Complements `fangore_insp_lifecycle_rewrite`. Accepts inspiration requirement 20.",
-  "implementation": "`LifecycleExtension` with replace mode returns `replace_content` at `BeforeTool`; the harness emits that content as the tool result without executing the tool and without adding graph nodes.",
-  "validation": "Harness `lifecycle_extensions` op `lifecycle_extension_replace`. Soft expects replaced content, applied_replace true, and default_ran false.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds host lifecycle extensions ['acme:replace_write'] and runs product step `tool_lifecycle` (mode=tool). He verifies extension effects on the tool/graph path.",
+  "implementation": "Product verb `tool_lifecycle` (`ToolLifecycleVerb`) with Config/host-bound `LifecycleExtension` instances (story fixtures under tests.stories.hosts).",
+  "validation": "user_story `lifecycle_extension_replace.yaml` tool_lifecycle; hard expects on extension observations.",
   "footnotes": [
     {
       "id": "insp-r20-replace",

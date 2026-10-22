@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_citation_uncertain_support",
+  "persona": "fangore",
+  "title": "Leave a low-confidence citation unverified",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source document and claim, runs product step `judge` (FixtureJudgeProvider cassette) for: Leave a low-confidence citation unverified. He verifies claim_verified / escalate from the typed support answer and confidence floor.",
+  "implementation": "Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via injected JudgeProvider. Code-owned claim_verified = selected==supported \u2227 conf\u2265floor.",
+  "validation": "Harness `user_story` scenario `uncertain_support.yaml`: judge step + response.json cassette; hard expects on claim_verified / escalate.",
+  "footnotes": []
+}

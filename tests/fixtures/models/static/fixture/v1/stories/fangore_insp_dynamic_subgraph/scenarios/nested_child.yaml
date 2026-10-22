@@ -1,0 +1,26 @@
+# user story: fangore_insp_dynamic_subgraph
+# Migrated from probe plan `nested_child.yaml` → product/test verb `dynamic_subgraph_nest`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    dynamic_subgraph_nest:
+      parent_goal: parent
+      child_goal: child
+  expect: &id001
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: child_status
+    value: ok
+  - kind: 'true'
+    key: child_run_id_nonempty
+  - kind: lte
+    key: cost_units
+    value: 1
+complete:
+  expect: *id001
+cleanup: []

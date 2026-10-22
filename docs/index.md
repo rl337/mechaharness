@@ -37,10 +37,15 @@ Published site: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness
    [Event log](./reference/events.md).
 
 Also in the core model: deny-by-default grants and `CompoundPolicy`
-([Access control](./reference/access.md)), host-extendable open identity
-for events and grants ([Architecture](./architecture.md)), and **Agentic
+([Access control](./reference/access.md)), **job lanes** — pipeline
+identities with brokered run sequences and authorized observe
+([Job lanes](./reference/job-lanes.md)), host-extendable open identity
+for events and grants ([Architecture](./architecture.md)), **Agentic
 Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
-([Graph templates and Agentic Recipes](./reference/graph-templates.md)).
+([Graph templates and Agentic Recipes](./reference/graph-templates.md)),
+and **durable graph generators** — the primary host-facing driven-execution
+façade for long-running, judgment-bearing graphs
+([Durable graph generators](./reference/durable-graph-generators.md)).
 
 ## Downstream consumers
 
@@ -66,7 +71,9 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Recipes and decision plane](./requirements/recipes-and-decision-plane.md) | Agentic Recipes (`GraphTemplate` substrate), DP/RT reference recipes |
 | [Dependency injection](./requirements/dependency-injection.md) | Config bind + inject; no getattr caches or `get_*` composition (DI-01..08) |
 | [Dynamic tool graph and node components](./requirements/dynamic-tool-graph.md) | Graph node vs node component; HF-05/07/08; kinds ⊆ existing surfaces |
+| [Durable graph generators](./requirements/durable-graph-generators.md) | Driven yields / guidance IoC (DG-01..13); primary long-run façade |
 | [Transactional durable resume](./requirements/transactional-durable-resume.md) | CheckpointStore, SQLite, effect reconciliation (DR-01..12) |
+| [Stepped graph execution](./requirements/stepped-graph-execution.md) | Pause/continue between nodes; until/before; soft enter (SG-01..10) |
 | [Event analytics schema](./requirements/event-analytics-schema.md) | Near-3NF fact/dim contract for warehouse reconstruction of graph decisions |
 | [Host integration](./requirements/host-integration.md) | Normative contract for apps that consume MechaHarness (HOST-01..07) |
 | [Agent skills (downstream)](./guides/agent-skills.md) | Customer-facing Cursor skills for host repos |
@@ -86,26 +93,38 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [OpenAI Dots agent safety requirements map](./inspiration/openai-dots-agent-safety-requirements-map.md) | MH-DOTS IDs → modules → user stories |
 | [Self-revising recipe evolution inspiration](./inspiration/self-revising-recipe-evolution.md) | Evaluation-driven recipe evolution (proposal; unverified source) |
 | [Self-revising recipe requirements map](./inspiration/self-revising-recipe-requirements-map.md) | MH-SR IDs → modules → user stories |
+| [Durable graph generators inspiration](./inspiration/durable-graph-generators-inversion-of-control.md) | Frontier/human/scripted drivers, ordered yields, MCP as adapter |
+| [Durable graph generators requirements map](./inspiration/durable-graph-generators-requirements-map.md) | R-IOC / DG IDs → modules → user stories |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
+| [User-story migration batches](./guides/user-story-migration-batches.md) | Convert remaining `cli` / probe stories to `user_story` YAML |
+| [User-story instrumentation migration](./guides/user-story-instrumentation-migration.md) | Wave 3: replace case-bag verbs with soft-bind + cassette/live stories |
+| [User-story recipe expansion](./guides/user-story-recipe-expansion.md) | Wave 4+: recipe-first groups G0–G7; re-eval of prior waves |
 | [Dependency injection](./guides/dependency-injection.md) | Config hooks vs OpenAPI `run()` |
 | [CLI reference](./reference/cli.md) | `mechaharness` commands |
 | [HTTP API reference](./reference/api.md) | FastAPI routes |
 | [Event log](./reference/events.md) | Structured `EventLog` emit / query |
 | [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
-| [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, `core:access_check` |
+| [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, host recipe-run kwargs |
+| [Job lanes](./reference/job-lanes.md) | `JobLane` / `JobLaneBroker`: run sequences, observe, exposure |
+| [Job lane broker requirements](./requirements/job-lane-broker.md) | JL-01..10: lane bags, selectors, grants, story YAML |
+| [Stepped graph execution](./reference/stepped-graph-execution.md) | `RunControl` / `graph_walk`: until, one_step, soft enter |
+| [Budget](./reference/budget.md) | Soft/hard spend, `BudgetPolicy`, recipe-run ceilings |
 | [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
 | [Graph templates and Agentic Recipes](./reference/graph-templates.md) | Recipe catalog + `GraphTemplate` substrate + soft points |
+| [Durable graph generators](./reference/durable-graph-generators.md) | `DurableGraphGenerator` start/resume/inspect; ScriptedDriver |
+| [CLI universe](./reference/cli-universe.md) | Concrete host CLI graph + `CliInstrumentor`; story `kind: cli` |
 | [Node components](./reference/node-components.md) | Sub-node kinds (events/soft points/nest); query + traversal |
 
 ## Mental model
 
 1. **Inference Strategy** — pluggable backends (`openai`, `anthropic`, `lmstudio`, `vllm`, `ollama`, …)
 2. **Harness family** — agent-loop policy (`pass_through`, `tool_loop`, `react`, `openai_tools`, `anthropic_tools`)
-3. **Execution graph** — durable plans via `GraphExecutor` + host node runners (see [Architecture](./architecture.md))
-4. **Agentic Recipes** — reusable control subgraphs (`GraphTemplate` substrate); tile into graphs
-5. **Frontends** — Typer CLI and FastAPI share `RunRequest` / `mechaharness.factory.run`
-6. **DI** — `MechaHarnessConfig` binds interfaces; see [Dependency injection](./guides/dependency-injection.md)
+3. **Durable graph generator** — primary long-run façade: drivers advance ordered yields over registered recipes
+4. **Execution graph** — `GraphExecutor` walks nodes; generator drives it to the next committed yield
+5. **Agentic Recipes** — reusable control subgraphs (`GraphTemplate` substrate); tile into graphs
+6. **Frontends** — Typer CLI and FastAPI share `RunRequest` / `mechaharness.factory.run`; generator maps to HTTP/CLI/MCP
+7. **DI** — `MechaHarnessConfig` binds interfaces; see [Dependency injection](./guides/dependency-injection.md)
 
 Normalized types in `mechaharness.core.types` are the portable contract for future language bindings.

@@ -1,0 +1,31 @@
+# user story: nubble_insp_model_input_replay
+# Nubble starts the CLI host with family `pass_through` and backend `mock`.
+# Nubble needs every model call to leave a reconstructible record of what the model saw —
+# messages, tools, and instructions — so offline replay does not depend on hidden memory.
+# Accepts WalkingLabs DeepSeek and P06 observability guidance.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    replay_model_input:
+      messages:
+      - role: system
+        content: Prefer repository state.
+      - role: user
+        content: Summarize the diff.
+      tool_definitions:
+      - name: read_file
+      instructions:
+      - Do not invent file contents.
+complete:
+  expect:
+  - kind: 'true'
+    key: hashes_ok
+  - kind: 'true'
+    key: reconstructed_equals
+  - kind: 'true'
+    key: manifest_ref_nonempty
+cleanup: []

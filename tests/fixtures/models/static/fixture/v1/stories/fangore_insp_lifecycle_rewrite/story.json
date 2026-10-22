@@ -2,10 +2,10 @@
   "id": "fangore_insp_lifecycle_rewrite",
   "persona": "fangore",
   "title": "Change tool arguments without changing the workflow",
-  "kind": "lifecycle_extensions",
-  "narrative": "Before a write tool runs, Fangore's extension rewrites the path argument into a sandbox directory. The same write tool still runs \u2014 only the arguments change. Hard grants still apply to the rewritten call; the extension cannot widen permission by rewriting to a more privileged tool. The log shows that a rewrite ran and that the default tool still ran. Accepts inspiration requirement 20. Complements `fangore_insp_lifecycle_observe`.",
-  "implementation": "`LifecycleExtension` with rewrite mode returns modified arguments at `BeforeTool`; `AbstractHarness.execute_tools` runs the same tool with rewritten args, then AccessControl still gates the call.",
-  "validation": "Harness `lifecycle_extensions` op `lifecycle_extension_rewrite`. Soft expects sandbox path in the tool result, applied_rewrite true, and default_ran true.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds host lifecycle extensions ['acme:sandbox_rewrite'] and runs product step `tool_lifecycle` (mode=tool). He verifies extension effects on the tool/graph path.",
+  "implementation": "Product verb `tool_lifecycle` (`ToolLifecycleVerb`) with Config/host-bound `LifecycleExtension` instances (story fixtures under tests.stories.hosts).",
+  "validation": "user_story `lifecycle_extension_rewrite.yaml` tool_lifecycle; hard expects on extension observations.",
   "footnotes": [
     {
       "id": "insp-r20-rewrite",

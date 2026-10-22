@@ -2,10 +2,10 @@
   "id": "fangore_insp_soft_vs_hard",
   "persona": "fangore",
   "title": "Enforce grants mechanically instead of by prompt alone",
-  "kind": "access_authority",
-  "narrative": "Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`. Soft-vs-hard split for self-revising MH-SR-03[^insp-sr-03-hard].",
-  "implementation": "Harness tool loops consult `AccessControl` before execution \u2014 including fused or loop-proposed calls \u2014 and denied calls emit access-check events and never run side effects. Failure defaults are deny for mutations / external / privileged / uncertain scope; composed packs from `fangore_compound_grants` still apply. Prompts never grant permission.\n\nCovers: GAT-01, GAT-02, GAT-03.",
-  "validation": "Harness `access_authority` op `tool_gating`. Soft expects deny without grant and allow with grant. Unit: `tests/test_access.py`. Related: `fangore_insp_risk_autonomy`.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Soft guidance may ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement 9[^insp-r09]. Complements `fangore_insp_risk_autonomy`. Soft-vs-hard split for self-revising MH-SR-03[^insp-sr-03-hard].",
+  "implementation": "Harness tool loops consult `AccessControl` before execution \u2014 including fused or loop-proposed calls \u2014 and denied calls emit access-check events and never run side effects. Failure defaults are deny for mutations / external / privileged / uncertain scope; composed packs from `fangore_compound_grants` still apply. Prompts never grant permission.\n\nCovers: GAT-01, GAT-02, GAT-03.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r09",

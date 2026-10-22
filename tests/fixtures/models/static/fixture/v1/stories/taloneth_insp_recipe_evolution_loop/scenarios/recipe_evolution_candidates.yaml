@@ -1,0 +1,44 @@
+# user story: taloneth_insp_recipe_evolution_loop
+# Taloneth starts the CLI host with family `pass_through` and backend `mock`.
+# A host can summarize past traces into suggestions, and the library turns them into a
+# short list of candidate recipe settings that stay inside the catalog and inside the
+# settings marked safe to tune.
+# Anything that names an unknown recipe, an unknown or fixed setting, or a setting the
+# host did not allow is reported as rejected rather than quietly dropped.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    recipe_plan:
+      path: plans/evolution_candidates.yaml
+complete:
+  expect:
+  - kind: equals
+    key: candidate_bindings
+    value:
+    - max_rounds: 3
+    - critique_prompt: be strict about unsupported claims
+  - kind: equals
+    key: rejected
+    value:
+    - - refine_kind
+      - soft_point_not_evolvable:refine_kind
+    - - reviewer_count
+      - soft_point_not_allowlisted:reviewer_count
+    - - x
+      - unknown_recipe:ghost_recipe
+  - kind: 'true'
+    key: deterministic
+  - kind: 'false'
+    key: graphs_synthesized
+  - kind: equals
+    key: selected_bindings
+    value:
+      critique_prompt: be strict about unsupported claims
+  - kind: equals
+    key: selected_over_baseline
+    value: null
+cleanup: []

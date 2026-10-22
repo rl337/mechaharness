@@ -2,10 +2,10 @@
   "id": "nubble_insp_workspace_isolation",
   "persona": "nubble",
   "title": "Acquire workspace isolation through a host provider seam",
-  "kind": "access_authority",
-  "narrative": "Nubble asks branches for isolation without hard-coding worktrees or containers \u2014 the host provider supplies the mechanism. Accepts WalkingLabs L13 and Codex guidance[^wl-l13-workspace][^wl-codex-workspace].",
-  "implementation": "`WorkspaceIsolationProvider` and `InMemoryWorkspaceIsolationProvider` in `mechaharness.isolation.workspace_isolation` define the acquire/release capability seam.",
-  "validation": "Harness `access_authority` op `workspace_isolation_acquire`. Soft expects memory provider_kind.",
+  "kind": "user_story",
+  "narrative": "Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble asks branches for isolation without hard-coding worktrees or containers \u2014 the host provider supplies the mechanism. Accepts WalkingLabs L13 and Codex guidance[^wl-l13-workspace][^wl-codex-workspace].",
+  "implementation": "`WorkspaceIsolationProvider` and `InMemoryWorkspaceIsolationProvider` in `mechaharness.isolation.workspace_isolation` define the acquire/release capability seam.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l13-workspace",

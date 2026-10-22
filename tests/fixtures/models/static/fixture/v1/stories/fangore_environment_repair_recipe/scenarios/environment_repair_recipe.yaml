@@ -1,0 +1,46 @@
+# user story: fangore_environment_repair_recipe
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: environment_repair
+  bind: binds/environment_repair.yaml
+steps:
+- do:
+    run_recipe:
+      name: environment_repair
+      path: binds/environment_repair.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: environment_repair
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - diagnose
+    - repair_env
+    - recheck
+  - kind: equals
+    key: recipe_category
+    value: agentic_recipe
+  - kind: 'true'
+    key: environment_ok
+  - kind: 'true'
+    key: recheck_ok
+  - kind: equals
+    key: repair_attempts
+    value: 1
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

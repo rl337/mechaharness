@@ -1,0 +1,47 @@
+# user story: fangore_conversational_tool_loop
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, and works
+# with the `conversational_tool_loop` recipe.
+# Fangore binds the library conversational tool-loop recipe so a chat tools step grows
+# nested rounds — model complete then per-tool calls — inside the tools node’s checkpoint
+# without pre-creating empty max-turn slots.
+# A stop contract bounds the loop.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: conversational_tool_loop
+steps:
+- do:
+    run_recipe:
+      name: conversational_tool_loop
+      max_iterations: 4
+      tool_name: lookup
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: rounds
+    value: 2
+  - kind: includes
+    key: event_types
+    value:
+    - core:inference
+  - kind: equals
+    key: total_tokens
+    value: 4
+  - kind: lte
+    key: total_tokens
+    value: 4
+  - kind: exactly
+    key: subgraph_node_ids
+    value:
+    - round_0/inference
+    - round_0/tool_call:lookup:0
+    - round_1/inference
+  - kind: lte
+    key: cost_units
+    value: 2
+cleanup: []

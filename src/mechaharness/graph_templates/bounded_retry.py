@@ -7,6 +7,8 @@ rather than blindly redispatches uncertain external effects.
 
 from __future__ import annotations
 
+from typing import Any
+
 from mechaharness.graph import DependencyEdge, ExecutionGraph
 from mechaharness.graph_templates.base import (
     GraphTemplate,
@@ -102,22 +104,27 @@ class BoundedRetryTemplate(GraphTemplate):
             version="1", max_iterations=max_attempts
         )
         graph = ExecutionGraph(goal=params.goal or self.name, version=self.version)
+        attempt_payload: dict[str, Any] = {
+            "phase": "attempt",
+            "attempt_context_keys": [
+                "prior_failure_classification",
+                "attempt_number",
+                "selected_remediation",
+                "prior_evidence",
+            ],
+            "requires_effect_reconciliation": True,
+            "max_attempts": max_attempts,
+        }
+        for key in ("succeed_on_attempt", "failure_class"):
+            if key in inputs:
+                attempt_payload[key] = inputs[key]
         attempt = make_node(
             id="attempt",
             kind=str(bindings.get("attempt_kind", "attempt")),
             goal="perform attempt",
             repeating=True,
             stop_contract=stop,
-            payload={
-                "phase": "attempt",
-                "attempt_context_keys": [
-                    "prior_failure_classification",
-                    "attempt_number",
-                    "selected_remediation",
-                    "prior_evidence",
-                ],
-                "requires_effect_reconciliation": True,
-            },
+            payload=attempt_payload,
         )
         classify = make_node(
             id="classify",

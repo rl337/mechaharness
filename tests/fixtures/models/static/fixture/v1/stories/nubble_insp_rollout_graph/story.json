@@ -2,10 +2,10 @@
   "id": "nubble_insp_rollout_graph",
   "persona": "nubble",
   "title": "Reconstruct retries and delegated agents as observed rollout branches",
-  "kind": "graph_execution",
-  "narrative": "Nubble needs the observed run topology \u2014 retries, spawned reviewers, and terminals \u2014 as a first-class graph linked back to the intended plan, not only the planned node list. Accepts FineEnvs training-sequence reconstruction[^fineenvs-rollout].",
-  "implementation": "`RolloutGraph`, `RolloutNode`, and `build_rollout_graph` in `mechaharness.rollout_graph` project observed records into roots/parent-child topology with optional `execution_node_id` links.",
-  "validation": "Harness `graph_execution` op `rollout_graph_build`. Soft expects roots and linked retry. Unit tests in `tests/test_rollout_graph.py`.",
+  "kind": "user_story",
+  "narrative": "Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble needs the observed run topology \u2014 retries, spawned reviewers, and terminals \u2014 as a first-class graph linked back to the intended plan, not only the planned node list. Accepts FineEnvs training-sequence reconstruction[^fineenvs-rollout].",
+  "implementation": "`build_rollout_graph`; `CliInstrumentor` verb `rollout_graph_build`.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-rollout",

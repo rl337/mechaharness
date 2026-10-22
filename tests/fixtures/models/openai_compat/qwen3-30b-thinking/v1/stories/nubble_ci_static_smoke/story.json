@@ -2,10 +2,10 @@
   "id": "nubble_ci_static_smoke",
   "persona": "nubble",
   "title": "Prove the HTTP adapter in CI without a live model host",
-  "kind": "harness_runs",
+  "kind": "cli",
   "narrative": "The local inference host is offline, but a pull request still needs green CI. Nubble wants the OpenAI-compatible path proven from a cassette \u2014 a recorded reply replayed through the real HTTP client \u2014 so merges do not depend on LAN reachability.",
-  "implementation": "`OpenAICompatStrategy` implements Chat Completions HTTP for reason-lane backends. Cassette replay exercises the real client path so adapter wire shape stays honest in CI.\n\nCovers: offline CI / OpenAI-compat smoke.",
-  "validation": "Harness `harness_runs` op `pass_through` on `openai_compat` trees with mock transport. Soft expects: non-empty assistant text. Live: `MECHA_STORY_BACKEND=live`.",
+  "implementation": "`OpenAICompatStrategy` implements Chat Completions HTTP for reason-lane backends. CLI universe `cli:infer` via `CliInstrumentor` / `CliInferRunner` runs that strategy so cassette replay exercises the real client path and the same EventLog baseline as other one-shot runs.\n\nCovers: offline CI / OpenAI-compat smoke.",
+  "validation": "Harness `cli` scenario `cassette_smoke.yaml`: nonempty assistant text, positive cost units, exact baseline EventLog types. Cassette `response.json`. Live: `MECHA_STORY_BACKEND=live`.",
   "footnotes": [
     {
       "id": "openai-chat-completions",

@@ -1,0 +1,20 @@
+# user story: fangore_insp_stop_contract
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    graph_linkage_preflight:
+      check_missing_runner: false
+      check_missing_stop: true
+      check_ok_linear: false
+complete:
+  expect:
+  - kind: 'false'
+    key: missing_stop_ok
+  - kind: equals
+    key: missing_stop_codes_exactly
+    value:
+    - missing_stop_contract
+cleanup: []

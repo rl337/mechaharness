@@ -1,0 +1,21 @@
+# user story: taloneth_validator_qualification
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    validator_qualification:
+      good_fixtures:
+      - ok1
+      bad_fixtures:
+      - bad1
+      missing_fixtures:
+      - missing
+complete:
+  expect:
+  - kind: 'true'
+    key: honest_qualified
+  - kind: 'false'
+    key: weak_qualified
+cleanup: []

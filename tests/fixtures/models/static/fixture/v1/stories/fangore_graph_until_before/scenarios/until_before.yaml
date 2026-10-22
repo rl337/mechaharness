@@ -1,0 +1,50 @@
+# user story: fangore_graph_until_before
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  inline:
+    goal: pipe
+    nodes:
+    - id: plan
+      kind: compute
+    - id: publish
+      kind: publish
+      depends_on: [plan]
+steps:
+- do:
+    graph_walk:
+      action: start
+      until: publish
+      stop: before
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: stopped_before
+    value: publish
+  - kind: equals
+    key: node_statuses
+    value:
+      plan: succeeded
+      publish: ready
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: node_statuses
+    value:
+      plan: succeeded
+      publish: succeeded
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+cleanup: []

@@ -1,0 +1,85 @@
+# user story: fangore_insp_cross_task_isolation (retargeted from CrossTaskIsolationGuard probe)
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  job_lanes:
+    origin:
+      meta: {mode: deny_all}
+      keys:
+        approval:send-42: {mode: deny_all}
+        memo:shared: {mode: deny_all}
+        memo:private: {mode: deny_all}
+    intervening:
+      meta: {mode: open}
+      keys: {}
+    receiver:
+      meta: {mode: open}
+      keys: {}
+steps:
+- do:
+    lane_publish:
+      keys:
+        approval:send-42: true
+        memo:shared: visible
+        memo:private: hidden
+  lane: origin
+  run_id: origin-1
+- do:
+    lane_observe:
+      target_lane: origin
+      selector: {latest: true}
+      key: approval:send-42
+  lane: intervening
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+- do:
+    lane_handoff:
+      from_lane: origin
+      to_lane: receiver
+      evidence_refs:
+      - memo:shared
+- do:
+    lane_observe:
+      target_lane: origin
+      selector: {latest: true}
+      key: memo:shared
+  lane: receiver
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: value
+    value: visible
+- do:
+    lane_observe:
+      target_lane: origin
+      selector: {latest: true}
+      key: memo:private
+  lane: receiver
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+- do:
+    lane_handoff:
+      from_lane: origin
+      to_lane: receiver
+      evidence_refs:
+      - memo:ghost
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+  - kind: equals
+    key: error
+    value: "lane 'origin' cannot hand off unreadable 'memo:ghost'"
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+cleanup: []

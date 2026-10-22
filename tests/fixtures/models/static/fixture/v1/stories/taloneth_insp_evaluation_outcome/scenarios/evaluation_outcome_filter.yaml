@@ -1,0 +1,30 @@
+# user story: taloneth_insp_evaluation_outcome
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    evaluation_outcome_filter:
+      trials:
+      - trial_id: '1'
+        success: true
+      - trial_id: '2'
+        success: true
+      - trial_id: '3'
+        success: false
+        outcome:
+          kind: execution_failure
+          reason: environment:sandbox_dead
+      k: 1
+complete:
+  expect:
+  - kind: equals
+    key: task_trials
+    value: 2
+  - kind: 'true'
+    key: pass_at_k_is_one
+  - kind: equals
+    key: non_task_trials
+    value: 1
+cleanup: []

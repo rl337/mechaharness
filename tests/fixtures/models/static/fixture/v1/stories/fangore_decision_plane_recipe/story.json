@@ -2,10 +2,10 @@
   "id": "fangore_decision_plane_recipe",
   "persona": "fangore",
   "title": "Run a typed decision-plane Agentic Recipe with batched questions",
-  "kind": "decision_plane",
-  "narrative": "Fangore projects only the state a decision needs, asks several bounded questions in one model step, keeps exact facts in code, and lets product policy choose the final action \u2014 escalating when confidence is too low. Builds on `fangore_decision_surface_reject` for allowed-action envelopes.",
-  "implementation": "Agentic Recipe `decision_plane` (`DecisionPlaneTemplate`) builds project_state \u2192 ask_batch \u2192 apply_policy with an escalate exit and optional shadow_ask. Structural coverage for DP-01..03 and graph-shaped DP-05..07; runtime policy/telemetry lives in `mechaharness.decision_plane_runtime` and stories `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`.",
-  "validation": "Harness `decision_plane` op `decision_plane_recipe`. Soft expects batched question count on ask_batch, escalate node present, facts outside ask payload, and template_name `decision_plane`. Runtime DP paths: see sibling decision_plane_* stories.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He soft-binds questions/state/facts on the `decision_plane` Agentic Recipe, runs it via `run_recipe`, and verifies the typed batch path yields a code-owned final action. [^rc-decision-plane]",
+  "implementation": "Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` runners and product verb `run_recipe` (`DecisionPlaneRecipeAdapter`).",
+  "validation": "user_story template_shape.yaml run_recipe; template_name/has_soft_point/final_action.",
   "footnotes": [
     {
       "id": "rc-decision-plane",

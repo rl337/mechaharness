@@ -1,0 +1,20 @@
+# user story: taloneth_insp_scaffolding_retire
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    harness_experiment_retire:
+      hypothesis: drop redundant scaffold
+      intervention: remove_scaffold_x
+      treatment_success: 0.7
+      control_success: 0.9
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: retired
+  - kind: 'true'
+    key: retirement_candidates_nonempty
+cleanup: []

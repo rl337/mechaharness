@@ -1,0 +1,27 @@
+# Registry-only composition (MH-SR-02).
+# Production parents may tile registered recipes; free-form or forged versions fail.
+
+plan: registry_compose
+summary: Pure tiling is clean; free-form nodes and forged versions violate.
+
+scenarios:
+# Two catalog tiles under one parent
+- id: pure_tiling
+  tiles:
+  - recipe: verify_repair
+    key: a
+  - recipe: independent_review
+    key: b
+# Ad-hoc shell node is not a registered recipe embed
+- id: free_form
+  tiles:
+  - recipe: verify_repair
+    key: a
+  free_form_nodes:
+  - adhoc_shell
+# Forged template_version is not in the registry
+- id: forged_version
+  tiles:
+  - recipe: verify_repair
+    key: a
+    forge_version: '99'

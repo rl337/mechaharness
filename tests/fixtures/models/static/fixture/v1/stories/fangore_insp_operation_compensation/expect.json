@@ -1,4 +1,0 @@
-{
-  "idempotent": true,
-  "compensation_strategy": "noop_if_clean"
-}

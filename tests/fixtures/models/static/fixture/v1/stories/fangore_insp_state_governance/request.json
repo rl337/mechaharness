@@ -1,9 +1,0 @@
-{
-  "op": "state_governance_write",
-  "owner": "ops",
-  "writers": [
-    "ops"
-  ],
-  "mutable": false,
-  "actor": "agent"
-}

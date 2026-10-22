@@ -1,0 +1,17 @@
+{
+  "id": "fangore_jev_req_review_template_shape",
+  "persona": "fangore",
+  "title": "Shape a requirements-aware review with isolated checkers",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `independent_review` with two reviewers and omitted producer reasoning, then verifies the isolated review shape from the run observation. [^jev-us06]",
+  "implementation": "Agentic Recipe `independent_review` via `run_recipe` / `IndependentReviewRecipeAdapter`.",
+  "validation": "user_story run_recipe; expects template_name / omit_producer_reasoning / review_count.",
+  "footnotes": [
+    {
+      "id": "jev-us06",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US06)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "Requirements-aware semantic review"
+    }
+  ]
+}

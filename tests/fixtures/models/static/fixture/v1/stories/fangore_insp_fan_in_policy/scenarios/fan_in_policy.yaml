@@ -1,0 +1,19 @@
+# user story: fangore_insp_fan_in_policy
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    fan_in_policy:
+      strategy: quorum
+      quorum: 2
+      results:
+      - true
+      - true
+      - false
+complete:
+  expect:
+  - kind: 'true'
+    key: accepted
+cleanup: []

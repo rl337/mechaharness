@@ -2,10 +2,10 @@
   "id": "fangore_insp_lifecycle_graph_observe",
   "persona": "fangore",
   "title": "Watch graph node attempts without replacing failure policy",
-  "kind": "lifecycle_extensions",
-  "narrative": "Fangore binds an observe-only extension around each graph node attempt. The node still runs through the normal runner and failure policy. The log records the extension at the graph-node boundary. This does not invent a second plan graph. Complements `fangore_insp_lifecycle_observe`. Accepts inspiration requirement 20.",
-  "implementation": "`GraphExecutor._run_node` dispatches observe-only lifecycle extensions at `BeforeGraphNode` / `AfterGraphNode` while `GraphFailurePolicy` remains the sole executor-level retry brain (distinct from the planned `bounded_retry` Agentic Recipe, which makes retry a visible subgraph).",
-  "validation": "Harness `lifecycle_extensions` op `lifecycle_extension_graph_observe`. Soft expects a before_graph_node extension event and a successful graph run.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds host lifecycle extensions ['acme:graph_watch'] and runs product step `tool_lifecycle` (mode=graph). He verifies extension effects on the tool/graph path.",
+  "implementation": "Product verb `tool_lifecycle` (`ToolLifecycleVerb`) with Config/host-bound `LifecycleExtension` instances (story fixtures under tests.stories.hosts).",
+  "validation": "user_story `lifecycle_extension_graph_observe.yaml` tool_lifecycle; hard expects on extension observations.",
   "footnotes": [
     {
       "id": "insp-r20-graph",

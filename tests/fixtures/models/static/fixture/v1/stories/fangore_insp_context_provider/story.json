@@ -2,10 +2,10 @@
   "id": "fangore_insp_context_provider",
   "persona": "fangore",
   "title": "Discover context indices before loading large payloads",
-  "kind": "context_management",
-  "narrative": "Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06]. Related personal-agent freshness/provenance story: `fangore_insp_tool_result_freshness`[^insp-pa-01-provider].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore's host memory source must advertise what it can supply before dumping large payloads into a turn. Accepts inspiration requirement 6[^insp-r06]. Related personal-agent freshness/provenance story: `fangore_insp_tool_result_freshness`[^insp-pa-01-provider].",
   "implementation": "`ContextProvider` / `StaticContextProvider` expose `index` then `load` with provenance and token estimates.",
-  "validation": "Harness `context_management` op `context_provider_discovery`. Soft expects index before load and provider attribution.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "insp-r06",

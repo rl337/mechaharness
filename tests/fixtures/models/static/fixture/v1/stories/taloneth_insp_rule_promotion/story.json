@@ -2,10 +2,10 @@
   "id": "taloneth_insp_rule_promotion",
   "persona": "taloneth",
   "title": "Promote review feedback into a hard invariant with provenance",
-  "kind": "pure_api",
-  "narrative": "Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant \u2014 always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo]. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (`taloneth_insp_correction_spec_debt`)[^insp-pa-07-promo] and self-revising MH-SR-05 (`fangore_insp_recipe_lineage_promote`)[^insp-sr-05-promo].",
+  "kind": "user_story",
+  "narrative": "Taloneth starts the CLI host with family `pass_through` and backend `mock`. Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant \u2014 always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance[^wl-l10-promo][^wl-l12-promo]. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (`taloneth_insp_correction_spec_debt`)[^insp-pa-07-promo] and self-revising MH-SR-05 (`fangore_insp_recipe_lineage_promote`)[^insp-sr-05-promo].",
   "implementation": "`PromotionRecord`, `promote_soft_to_hard`, and `rollback_promotion` in `mechaharness.rule_promotion` model the promotion chain.",
-  "validation": "Harness `pure_api` op `rule_promotion`. Soft expects stage hard.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l10-promo",

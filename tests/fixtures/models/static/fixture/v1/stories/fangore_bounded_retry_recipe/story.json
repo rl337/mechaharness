@@ -1,11 +1,11 @@
 {
   "id": "fangore_bounded_retry_recipe",
   "persona": "fangore",
-  "title": "Expand a bounded-retry Agentic Recipe with explicit escalation",
-  "kind": "graph_recipes",
-  "narrative": "Fangore needs retries that are visible: classify the failure, decide whether another attempt is allowed, apply backoff, and escalate when attempts are exhausted \u2014 not an invisible executor loop. Must compose with durable external-effect recovery from `fangore_transactional_durable_resume`.",
-  "implementation": "Agentic Recipe `bounded_retry` (`BoundedRetryTemplate`) builds attempt \u2192 classify \u2192 permit_retry \u2192 backoff with a terminal escalate node and a StopContract on the repeating attempt. Attempt payloads carry deliberate attempt context and an effect-reconciliation flag (RT-01..05).",
-  "validation": "Harness `graph_recipes` op `bounded_retry_recipe`. Soft expects node ids, bounded stop on attempt, escalate terminal present, and requires_effect_reconciliation on attempt payload.",
+  "title": "Run a bounded-retry Agentic Recipe with visible escalation",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `bounded_retry` with three fixture attempts that succeed on the last try, runs `run_recipe`, and verifies attempt_count, success without escalation, and the repeating attempt stop contract. Must compose with durable external-effect recovery from TDR crash-window stories. [^rc-bounded-retry]",
+  "implementation": "Agentic Recipe `bounded_retry` via `BoundedRetryTemplate` / `bounded_retry_runner` and product verb `run_recipe` (`BoundedRetryRecipeAdapter`).",
+  "validation": "Harness `user_story` scenario `bounded_retry_recipe.yaml` drives `run_recipe`; expects attempt_count / attempt_succeeded / escalated plus shape keys.",
   "footnotes": [
     {
       "id": "rc-bounded-retry",

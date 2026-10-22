@@ -1,7 +1,0 @@
-{
-  "op": "lifecycle_extension_observe",
-  "prompt": "Write a.txt",
-  "grants": [
-    "core:fs.write"
-  ]
-}

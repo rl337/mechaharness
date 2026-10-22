@@ -2,10 +2,10 @@
   "id": "nubble_insp_environment_delta",
   "persona": "nubble",
   "title": "Project environment context as versioned deltas",
-  "kind": "pure_api",
-  "narrative": "Nubble sends environment deltas instead of repeating full snapshots while still reconstructing deterministic state. Accepts WalkingLabs Codex guidance[^wl-codex-delta].",
+  "kind": "user_story",
+  "narrative": "Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble sends environment deltas instead of repeating full snapshots while still reconstructing deterministic state. Accepts WalkingLabs Codex guidance[^wl-codex-delta].",
   "implementation": "`EnvironmentSnapshot`, `EnvironmentDelta`, `emit_delta`, and `apply_deltas` in `mechaharness.environment_delta`.",
-  "validation": "Harness `pure_api` op `environment_delta`. Soft expects reconstructed cwd.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-codex-delta",

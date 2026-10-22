@@ -1,0 +1,17 @@
+{
+  "id": "fangore_job_lane_key_expose_artifacts",
+  "persona": "fangore",
+  "title": "FileArtifact URLs observe after key exposure allowlist",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets publishes a `FileArtifact` under `asset_urls` with `allow_lanes` for billing. Billing observes `latest` and receives the URL payload (JL-08).",
+  "implementation": "`FileArtifact` on the run WalkBag; `JobLane.keys.asset_urls` exposure; `lane_publish` / `lane_observe`.",
+  "validation": "Harness `user_story` scenario `key_expose_artifacts.yaml`.",
+  "footnotes": [
+    {
+      "id": "jl-broker-artifacts",
+      "label": "Job lane broker requirements",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md",
+      "note": "JL-08 FileArtifact under exposed keys"
+    }
+  ]
+}

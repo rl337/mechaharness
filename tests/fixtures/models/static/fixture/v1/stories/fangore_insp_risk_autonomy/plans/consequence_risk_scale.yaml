@@ -1,0 +1,7 @@
+# Probe plan for scenario `consequence_risk_scale.yaml`.
+# Story: Scale controls by action consequence class
+
+summary: Scale controls by action consequence class
+name: consequence_risk_scale
+action: fs.write
+consequence: high

@@ -1,5 +1,0 @@
-{
-  "before_verify_completion": "answer_generated",
-  "after_verify_completion": "complete",
-  "verification_passed": true
-}

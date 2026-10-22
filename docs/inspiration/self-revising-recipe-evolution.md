@@ -69,3 +69,7 @@ The dramatic assertion that framework engineering is obsolete is **not** adopted
 ## Suggested experiments
 
 Start with a fixed suite of known MechaHarness recipes. Compare a hand-selected baseline against automatically chosen **compositions of existing recipes**, under equal inference budgets and untouched evaluation data. Track correctness, costs, latency, tool policy violations, and checkpoint recovery. Only then consider optimizing individual recipe parameters or recursively registering winning compositions.
+
+## Related inspirations
+
+- [Durable graph generators (IoC)](./durable-graph-generators-inversion-of-control.md) — host-facing driven runs with ordered guidance yields; recipe evolution selects *which* registered recipe is active, while the generator drives *how* that run advances across drivers and process boundaries.

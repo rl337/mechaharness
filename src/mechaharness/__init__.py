@@ -353,6 +353,13 @@ from mechaharness.core.types import (
     ToolResult,
 )
 from mechaharness.di import MechaHarnessConfig, SettingsConfig, list_inference_backends
+from mechaharness.durable_graph_generator import (
+    DurableGraphGenerator,
+    GraphYield,
+    GuidanceRequest,
+    GuidanceResponse,
+    ScriptedDriver,
+)
 from mechaharness.factory import run
 from mechaharness.graph_executor import GraphExecutor
 from mechaharness.harness.base import AbstractHarness, HarnessConfig, HarnessResult
@@ -373,10 +380,14 @@ __all__ = [
     "CompletionRequest",
     "CompletionResponse",
     "CostAccountant",
+    "DurableGraphGenerator",
     "Event",
     "EventLog",
     "EventType",
     "GraphExecutor",
+    "GraphYield",
+    "GuidanceRequest",
+    "GuidanceResponse",
     "HarnessConfig",
     "HarnessResult",
     "InferenceEnvironment",
@@ -386,6 +397,7 @@ __all__ = [
     "Role",
     "RunRequest",
     "RunResponse",
+    "ScriptedDriver",
     "Settings",
     "SettingsConfig",
     "StopContract",

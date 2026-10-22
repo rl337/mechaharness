@@ -1,0 +1,24 @@
+# user story: fangore_insp_failure_attribution
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    failure_attribution_trace:
+      errors:
+      - no_runner:x
+      - no_runner:y
+      - permission_denied
+complete:
+  expect:
+  - kind: includes
+    key: categories
+    value:
+    - linkage
+    - tools
+  - kind: includes
+    key: repeated_classes
+    value:
+    - no_runner
+cleanup: []

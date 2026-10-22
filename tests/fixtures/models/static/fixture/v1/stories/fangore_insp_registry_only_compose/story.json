@@ -2,10 +2,10 @@
   "id": "fangore_insp_registry_only_compose",
   "persona": "fangore",
   "title": "Require production graphs to compose registered recipes only",
-  "kind": "graph_recipes",
-  "narrative": "Production graphs are composed from registered recipes (including nested recipes), not free-form node synthesis. Tiling and recipe-as-tool already help (`fangore_recipe_namespace_tile`, `fangore_recipe_as_tool`). Tracks MH-SR-02[^insp-sr-02].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Production graphs are composed from registered recipes (including nested recipes), not free-form node synthesis. Tiling and recipe-as-tool already help (`fangore_recipe_namespace_tile`, `fangore_recipe_as_tool`). Tracks MH-SR-02. He walks product steps (recipe_plan) and verifies completion from the structured observation expects on this scenario. [^insp-sr-02]",
   "implementation": "`GraphTemplateRegistry.composition_violations(graph)` / `assert_registry_composed(graph)` check that a recipe-stamped graph names a stored `name@version` and that an unstamped container graph holds only embedded recipe subgraphs, recursively. Free-form nodes and forged versions are reported. Hosts call it as a production gate; the executor does not force it.",
-  "validation": "Harness `graph_recipes` op `registry_only_compose`. Hard expects pure tiling of registered recipes to pass, a free-form shell node and a forged recipe version to be reported.",
+  "validation": "Harness `user_story` scenario `registry_only_compose.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "insp-sr-02",

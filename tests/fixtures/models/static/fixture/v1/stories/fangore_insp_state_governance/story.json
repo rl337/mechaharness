@@ -2,10 +2,10 @@
   "id": "fangore_insp_state_governance",
   "persona": "fangore",
   "title": "Freeze graph metric ownership against agent writes",
-  "kind": "access_authority",
-  "narrative": "Graph quality targets have owners and can be frozen so agents cannot silently mutate success criteria. Accepts WalkingLabs L14 guidance[^wl-l14-gov].",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Graph quality targets have owners and can be frozen so agents cannot silently mutate success criteria. Accepts WalkingLabs L14 guidance[^wl-l14-gov].",
   "implementation": "`GraphStateGovernance`, `FieldGovernance`, and `authorize_write` in `mechaharness.graph_state_governance` enforce owner/writer/mutability rules.",
-  "validation": "Harness `access_authority` op `state_governance_write`. Soft expects frozen field denies writes.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l14-gov",

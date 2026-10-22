@@ -2,10 +2,10 @@
   "id": "fangore_insp_lifecycle_block",
   "persona": "fangore",
   "title": "Skip one tool call without inventing a new plan",
-  "kind": "lifecycle_extensions",
-  "narrative": "Before a dangerous tool runs, Fangore's extension blocks that single call. The default tool does not run; the agent receives a structured skip for that step. Blocking one call does not insert a new step in a durable plan graph and does not bypass host hard-deny rules for other calls. Complements `fangore_insp_lifecycle_observe` and `fangore_insp_soft_vs_hard`. Accepts inspiration requirement 20.",
-  "implementation": "`LifecycleExtension` with block mode returns block at `BeforeTool`; `AbstractHarness.execute_tools` skips tool execution and emits an error tool result plus `core:extension_applied` with default_ran false.",
-  "validation": "Harness `lifecycle_extensions` op `lifecycle_extension_block`. Soft expects blocked tool content, applied_block true, and default_ran false.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds host lifecycle extensions ['acme:block_write'] and runs product step `tool_lifecycle` (mode=tool). He verifies extension effects on the tool/graph path.",
+  "implementation": "Product verb `tool_lifecycle` (`ToolLifecycleVerb`) with Config/host-bound `LifecycleExtension` instances (story fixtures under tests.stories.hosts).",
+  "validation": "user_story `lifecycle_extension_block.yaml` tool_lifecycle; hard expects on extension observations.",
   "footnotes": [
     {
       "id": "insp-r20-block",

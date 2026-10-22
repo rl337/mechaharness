@@ -1,0 +1,50 @@
+# user story: taloneth_insp_correction_spec_debt
+# Migrated from probe plan `specification_debt.yaml` → product/test verb `specification_debt`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    specification_debt:
+      correction: Reply on the original thread, never a new one.
+      failing_scenarios:
+      - scenario:reply-thread
+      - scenario:cc-list
+      promotion:
+        record_id: promo:42
+        observed_pattern: reply sent as a new thread
+      host_test_ref: tests/test_reply.py::test_same_thread
+  expect: &id001
+  - kind: equals
+    key: captured
+    value:
+      status: open
+      review_required: true
+      promotion_record_id: promo:42
+      failing_scenario_refs:
+      - scenario:reply-thread
+      - scenario:cc-list
+      generated_test_ref: null
+  - kind: equals
+    key: pending_at_capture
+    value: 1
+  - kind: equals
+    key: status_after_test
+    value: test_linked
+  - kind: equals
+    key: pending_after_test
+    value: 1
+  - kind: equals
+    key: status_after_review
+    value: closed
+  - kind: equals
+    key: pending_after_review
+    value: 0
+  - kind: 'true'
+    key: linked_to_promotion
+  - kind: 'true'
+    key: blank_refused
+complete:
+  expect: *id001
+cleanup: []

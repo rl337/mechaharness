@@ -1,0 +1,14 @@
+# Bounded-retry Agentic Recipe: attempt → classify → permit → backoff → escalate.
+name: bounded_retry
+summary: Expand bounded_retry with three attempts and effect reconciliation.
+goal: dispatch remote job with safe retry
+soft_bindings:
+  attempt_kind: attempt
+  classify_kind: classify
+  permit_kind: permit_retry
+  backoff_kind: backoff
+  escalate_kind: escalate
+  max_attempts: 3
+inputs:
+  succeed_on_attempt: 3
+  failure_class: transient

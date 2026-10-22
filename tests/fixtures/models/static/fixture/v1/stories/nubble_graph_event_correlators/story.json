@@ -2,10 +2,10 @@
   "id": "nubble_graph_event_correlators",
   "persona": "nubble",
   "title": "Join every graph event to its graph, recipe, and authority",
-  "kind": "graph_execution",
-  "narrative": "Nubble loads graph events into a warehouse and cannot afford to open checkpoints to learn which graph, recipe, or authorization epoch produced a row. A multi-node run with a nested subgraph must stamp every event with the same graph id, recipe stamp, and epoch, and nested runs must point at their parent run so a flat table can rebuild per-node attempts[^obs-analytics].",
-  "implementation": "`GraphExecutor._emit` merges `graph_trace_context` (`graph_id`, `graph_goal`, `recipe_id`/`recipe_version` from the template stamp, `authorization_epoch` from the envelope, `parent_run_id` and `nest_depth` for nested runs) under each payload; explicit payload keys win. `project_node_attempt_rows` projects one fact row per run/node/attempt from node start/end events. `DecisionRecord` and `TraceEnvelope` use the same field names. Contract: `docs/requirements/event-analytics-schema.md`.\n\nCovers: OBS-A01, OBS-A02, OBS-A03.",
-  "validation": "Harness `graph_execution` op `graph_event_correlators`. Hard expects every parent-run event to carry the graph id, recipe stamp, and epoch; node events to carry `node_id`; nested-run events to carry `parent_run_id` and `nest_depth`; and node-attempt rows to project one per node.",
+  "kind": "user_story",
+  "narrative": "Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble loads graph events into a warehouse and cannot afford to open checkpoints to learn which graph, recipe, or authorization epoch produced a row. A multi-node run with a nested subgraph must stamp every event with the same graph id, recipe stamp, and epoch, and nested runs must point at their parent run so a flat table can rebuild per-node attempts[^obs-analytics].",
+  "implementation": "Graph lifecycle emits carry warehouse correlators (`graph_id`, `recipe_id`, `authorization_epoch`, nest `parent_run_id` / `nest_depth`). `project_node_attempt_rows` projects attempt rows. `CliInstrumentor` verb `graph_event_correlators`.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "obs-analytics",

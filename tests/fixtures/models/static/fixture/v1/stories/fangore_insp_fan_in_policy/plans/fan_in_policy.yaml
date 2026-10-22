@@ -1,0 +1,11 @@
+# Probe plan for scenario `fan_in_policy.yaml`.
+# Story: Accept fan-in with a named quorum policy
+
+summary: Accept fan-in with a named quorum policy
+name: fan_in_policy
+strategy: quorum
+quorum: 2
+results:
+- true
+- true
+- false

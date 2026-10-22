@@ -12,7 +12,9 @@ from collections.abc import Mapping, Sequence
 from typing import Any, cast
 
 from mechaharness.budget import BudgetPolicy
+from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.config import Settings
+from mechaharness.core.access import GrantPolicyLike
 from mechaharness.core.contract import RunRequest, RunResponse
 from mechaharness.core.events import EventLog
 from mechaharness.di import build_injector
@@ -33,6 +35,7 @@ from mechaharness.harness_run_runner import (
     HarnessRenderRunner,
 )
 from mechaharness.host_kit import host_graph_executor
+from mechaharness.host_run_policies import grants_list
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.tools.base import ToolRegistry
 
@@ -137,20 +140,33 @@ async def run_recipe(
     runners: Sequence[GraphNodeRunner] | None = None,
     registry: GraphTemplateRegistry | None = None,
     budget_policy: BudgetPolicy | None = None,
+    grants: Sequence[object] | None = None,
+    access_policy: GrantPolicyLike | None = None,
+    envelope: CapabilityEnvelope | None = None,
     event_log: EventLog | None = None,
     run_id: str | None = None,
     skip_linkage: bool = True,
     executor: GraphExecutor | None = None,
 ) -> GraphResult:
-    """Instantiate ``name`` and execute with GraphExecutor (composition helper)."""
+    """Instantiate ``name`` and execute with GraphExecutor (composition helper).
+
+    Hosts may pass ``grants`` / ``access_policy`` and ``budget_policy`` /
+    ``envelope`` per run. Omit grants → host-kit defaults
+    (``GraphExecute`` + ``GraphEscalate``). Omit budget → unlimited.
+    """
     graph = instantiate_recipe(name, params, registry=registry)
     if executor is None:
         if runners is None:
             raise ValueError("run_recipe requires runners= or executor=")
-        executor = host_graph_executor(runners=runners, event_log=event_log)
+        executor = host_graph_executor(
+            runners=runners,
+            event_log=event_log,
+            grants=grants_list(access_policy, grants),
+        )
     return await executor.run(
         graph,
         budget_policy=budget_policy or BudgetPolicy.unlimited(),
+        envelope=envelope,
         run_id=run_id or f"recipe:{name}",
         skip_linkage=skip_linkage,
     )

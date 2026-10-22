@@ -7,7 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Stepped graph execution (SG-01..10):** `RunControl` on `GraphExecutor.run`
+  (`one_step` / `until` / `paused`); soft subgraph enter-before-first-child;
+  product verb `graph_walk`; `graph.inline` on user_story YAML. Owns
+  `fangore_graph_until_before`, `fangore_graph_one_step`,
+  `fangore_graph_soft_enter`; migrates `fangore_insp_effect_revalidation`.
+- **JobLaneBroker (JL-01..10):** lane-scoped run sequences, WalkBags, exposure /
+  grants / handoff, and authorized `observe` (`mechaharness.job_lane_broker`).
+  Config bind via `get_job_lane_broker()`; CLI verbs `lane_publish` /
+  `lane_observe` / `lane_grant` / `lane_handoff`; story YAML
+  `environment.job_lanes` + step `lane` / `run_id`. Matrix stories
+  `fangore_job_lane_*`; `fangore_insp_cross_task_isolation` retargeted.
+  `CrossTaskIsolationGuard` remains as a deprecated shim.
+- **Product CLI verb `transactional_resume`:** crash-window durable coding-job
+  resume via `host_graph_executor` + `ArmedCrashProbe` (DR-10). Wave 2 P1
+  stories (`fangore_tdr_crash_*`) migrate onto `kind: user_story`.
+- **Product CLI verb `judge`:** judge-lane twin of `infer` (typed questions over
+  state via `JudgeProvider` + cassette/live). JEV citation / route / safety /
+  requirements stories walk this verb with real inputs.
+- **Agentic Recipe `context_pack`:** host `RagRetriever` →
+  `assemble_context_within_budget` (fixture retriever for stories).
+- **Product CLI verb `tool_lifecycle`:** Config-bound lifecycle extensions on
+  tool-loop or tiny graph (replaces `lifecycle_case`).
+- **Product CLI verb `assemble_context`:** thin pack leaf for already-scored
+  candidate lists.
+- **`decision_plane` execute:** `decision_plane_runner` +
+  `DecisionPlaneRecipeAdapter` (`run_recipe`). Restores
+  `fangore_decision_plane_{projection,policy,shadow,telemetry}` and promotes
+  recipe / model_policy stories off instantiate-only (G0).
+- **`verify_repair` / `bounded_retry` execute:** fixture runners +
+  `VerifyRepairRecipeAdapter` / `BoundedRetryRecipeAdapter` promote those
+  stories to `run_recipe` outcome walks (G1 batch 1).
+- **`fangore_bounded_repair_loop`:** migrated from `bounded_repair_loop` probe
+  onto `verify_repair` `run_recipe` (G1 batch 2).
+- **`independent_review` execute:** `independent_review_runner` +
+  `IndependentReviewRecipeAdapter` promote inspiration + JEV shape stories
+  (G1 batch 3).
+- **`environment_repair` / `initialize_preflight` execute:** fixture runners +
+  adapters promote those stories to `run_recipe` (G1 batch 4).
+- **`produce_critique_refine` / `safety_eval` execute:** fixture runners +
+  adapters complete G1 control-recipe promotion (G1 batch 5).
+
+### Removed
+
+- **Case-bag verbs `decision_case` and `lifecycle_case`:** replaced by
+  instrumented `judge` / `context_pack` / `tool_lifecycle` / `instantiate_recipe`
+  walks (Wave 3).
+
 ### Changed
+
+- **User-story litmus (recipe expansion):** missing graph path ⇒ add Agentic
+  Recipe / runners, do not demote valid persona claims. Wave 3 demotion of
+  `fangore_decision_plane_{projection,policy,shadow,telemetry}` retracted —
+  restore under G0
+  (recipe expansion guide). Remaining
+  probe batches regrouped as G0–G7 (recipe-first), not thin-verb then YAML.
 
 - **Story harness redesign:** `story.json` `kind` is now a reusable harness
   family (`pure_api`, `access_authority`, `graph_execution`, …) under
@@ -209,8 +265,8 @@ PyPI publish.
   code-owned policy with escalation, shadow compare, evaluation telemetry,
   `assemble_context_within_budget`, and `action_question_id` routing.
 - Jev typed-judgment inspiration + requirements map, with Fangore domain
-  stories: `fangore_jev_citation_check`, `fangore_jev_context_picker`,
-  `fangore_jev_requirements_review`, `fangore_jev_task_router`,
+  stories: `fangore_jev_citation_matching_claim`, `fangore_jev_context_budget_pack`,
+  `fangore_jev_req_review_template_shape`, `fangore_jev_task_route_simple_local`,
   `fangore_jev_action_safety`.
 
 ## [0.3.1] — 2026-10-06
@@ -234,7 +290,7 @@ plus transactional durable resume and WalkingLabs eval substrate.
 - Transactional durable graph resume: injectable `CheckpointStore` seam,
   `SqliteCheckpointStore` reference backend, opt-in `EffectfulGraphNodeRunner`
   with effect intent/acceptance/reconciliation, and crash-injection probes.
-  Story: `fangore_transactional_durable_resume`. Requirements:
+  Story: `fangore_tdr_crash_after_accept_before_record`. Requirements:
   `docs/requirements/transactional-durable-resume.md`. Module doctests (and
   Sphinx API pages) document Config wiring and SQLite restart usage;
   pytest runs `--doctest-modules` over `src/mechaharness`.

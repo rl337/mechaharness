@@ -1,0 +1,18 @@
+# Probe plan for scenario `handoff_record.yaml`.
+# Story: Capture why across session handoffs
+
+summary: Capture why across session handoffs
+name: handoff_record
+goals:
+- ship report
+exclusions:
+- do not email the customer
+completed:
+- a
+pending:
+- b
+rationale: because
+next_action: verify
+verdict:
+  kind: ASK_HUMAN
+  policyVersion: '1'

@@ -2,16 +2,9 @@
   "id": "fangore_config_access_policy",
   "persona": "fangore",
   "title": "Let the host app supply its own permission policy",
-  "kind": "access_authority",
-  "narrative": "Fangore\u2019s product needs permission rules defined by the application. He configures the harness once so composed packs from `fangore_compound_grants` are what the harness enforces.",
-  "implementation": "`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection \u2014 not Settings bags or hand-wired harness constructors. Fangore subclasses Config once; the injector builds `AccessControl` and the harness with those grants.\n\nCovers: host DI access policy.",
-  "validation": "Harness `access_authority` op `config_access_policy` \u2192 `_run_config_access_policy`. Unit: `tests/test_di.py`.",
-  "footnotes": [
-    {
-      "id": "pyiv",
-      "label": "pyiv",
-      "url": "https://rl337.org/pyiv/",
-      "note": "Config-hook dependency injection"
-    }
-  ]
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. His product needs permission rules defined by the application. He declares a compound access policy in the story environment, runs `access_check`, and verifies composed packs allow read/write while denying media \u2014 bound through Config DI, not Settings bags.",
+  "implementation": "`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_control`, `get_grants`) bind host permission packs through pyiv injection. Story `environment.access_policy` / `grants` override those hooks; product verb `access_check` observes Config-injected `AccessControl`. Hosts also pass grants on `run_recipe(...)`.",
+  "validation": "Harness `user_story` scenario `config_access_policy.yaml` drives `access_check` with environment compound policy; expects allows_compound / denies_missing.",
+  "footnotes": []
 }

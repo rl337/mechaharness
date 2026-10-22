@@ -1,0 +1,11 @@
+candidates:
+- id: safe
+  tokens: 60
+  relevance: 0.7
+  trust: 0.9
+  freshness: 0.8
+- id: inject
+  tokens: 40
+  relevance: 0.99
+  trust: 0.1
+  freshness: 0.9

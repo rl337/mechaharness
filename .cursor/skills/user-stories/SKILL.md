@@ -44,43 +44,151 @@ python scripts/generate_user_stories_md.py --check
 
 Bios live in `personas.json` and are rendered into the guide.
 
-## Story shape (`story.json`)
+## Destination: persona-task YAML (`user_story`)
+
+**Decision:** new and migrated acceptance uses `kind: user_story` —
+environment → graph → steps → complete → cleanup — wrapping **product** CLI
+verbs. Production CLI scripts stay verb-led; the story harness is the wrapper
+that acts out the persona task. Do not add new `request.json` / `op` stories.
+
+| Target harness | Use when |
+|----------------|----------|
+| **`user_story`** | Canonical acceptance. Persona walkthrough YAML; Config from `environment` only; drives `CliInstrumentor` verbs. |
+| **`cli`** | Legacy script-shaped scenarios (still registered). Migrate to `user_story` when touching. Probes remain `cli` until a product verb exists. |
+
+### Narrative litmus
+
+`narrative` must read as an operational walk, not a capability blurb:
+
+1. Who / goal
+2. Starts the CLI host (family + backend / cassette)
+3. Loads graph G (or default infer universe)
+4. Performs steps S1…Sn
+5. Verifies completion via events / artifacts X
+
+If that cannot be said honestly, split the story.
+
+### Story shape (`story.json`)
 
 ```json
 {
-  "id": "fangore_insp_wip_backpressure",
-  "persona": "fangore",
-  "title": "Apply WIP back-pressure without hard-coding WIP=1",
-  "kind": "pure_api",
-  "narrative": "PM-facing prose; may cite `other_story_id` or [^footnote-id]…",
+  "id": "nubble_run_cost_events",
+  "persona": "nubble",
+  "title": "Record cost and inference events for every harness run",
+  "kind": "user_story",
+  "narrative": "He starts the CLI host… loads … performs … verifies …",
   "implementation": "Library modules/classes that fulfill the feature…",
-  "validation": "Harness `pure_api` op `wip_policy`; expect keys…",
+  "validation": "Harness `user_story` scenarios `event_types.yaml` / …",
   "footnotes": []
 }
 ```
 
-`request.json` must include `"op"` (surface within that harness); remaining keys
-are inputs. Example: `{ "op": "wip_policy", "max_active_nodes": 2, … }`.
+### Fixture files
 
-`footnotes` is **required** (use `[]` when none). Each entry needs `id`, `label`, and
-`url`; `note` is optional.
+| Harness | Files |
+|---------|--------|
+| **`user_story` (canonical)** | `story.json` + `scenarios/*.yaml` (+ `response.json` when needed) |
+| **`cli` (legacy)** | same layout; script `commands:` shape |
+| **Legacy op** | `request.json` + `expect.json` — **do not create new** |
 
-### `kind` = harness family (not a per-story runner)
+`footnotes` is **required** (use `[]` when none). Each entry needs `id`, `label`,
+and `url`; `note` is optional.
 
-`kind` names a **reusable story harness** under `tests/stories/harness/`
-(`pure_api`, `access_authority`, `graph_execution`, `graph_recipes`,
-`harness_runs`, `decision_plane`, `context_management`, `evaluation_research`,
-`lifecycle_extensions`). Catalog validation rejects unknown kinds/ops.
+### Intent check (every scenario)
 
-| Want to cover… | Do this |
-|----------------|---------|
-| Same API, new inputs/expects | New story dir + `request`/`expect` only; **reuse** `kind` + `op` |
-| New public helper, same build/call/assert shape | Register one `op` on the harness; then fixtures |
-| New execution substrate (graph, recipe, HTTP, lifecycle) | Add/extend a **harness family** — never invent a per-story kind |
-| Unique structural unit check | Focused `tests/test_*.py`; do not force a story |
+Before writing or migrating YAML:
 
-**Litmus:** if you are about to add a new `kind` string or a new `_run_*` for one
-story, stop — you need an `op` or a harness, not a story-specific entry point.
+1. Read `story.json` (`narrative`, `implementation`, `validation`, `footnotes`).
+2. Follow footnotes into `docs/inspiration/` and the map in `REQUIREMENTS.md`.
+3. List normative claims → **one claim (or tight cluster) per** `scenarios/*.yaml`.
+4. Assert that claim with hard expects — not a copy of weak legacy soft keys.
+5. Grow `CliInstrumentor` / `cli_universe` only as needed for that wave.
+
+### App harness principles
+
+1. Story harness wraps a **real MechaHarness host** (DI Config + product verbs).
+2. Scenario YAML declares the **persona task phases**; comments cite the story id
+   and mirror the narrative. Product CLI scripts remain verb lists without
+   `environment` / `complete`.
+3. Soft points remain the UI answer seam where advice applies.
+4. Hard expects only. No soft `_include` suffixes for new scenarios.
+5. One story → many concise YAML files when claims diverge.
+6. Gap/import probes are unit/doctest, not stories.
+7. **Litmus:** about to add `_run_*` or a new `op`? Stop — add a CLI verb or
+   `user_story` scenario instead.
+8. **No `probe`** under `user_story` steps. Clocks belong in `environment.clock`.
+
+### Positive-path coverage (mock / cassette)
+
+From story harness **initialization**, instrument mock or cassette inference
+so every **product positive path** is hit by ≥1 story. Refusal / deny stories
+still count.
+
+1. Set `environment.family` / `environment.backend` so Config binds the real
+   harness family and Completer (ScriptedInference, cassette HTTP strategy).
+2. Drive claims through product verbs in `steps[].do` — not probe-local DI.
+3. Probes remain only on legacy `kind: cli` until a product verb exists.
+4. `scripts/story_coverage.py` / `fail_under` gate the suite; ratchet up, never down.
+
+### `user_story` scenario shape
+
+```yaml
+# user story: <id>
+# Comment: persona starts CLI, loads graph, walks steps, verifies completion.
+kind: user_story
+
+environment:
+  family: pass_through
+  backend: mock          # mock | anthropic | openai_compat | …
+  # clock: '2026-01-15T12:00:00Z'
+
+graph: null              # or { recipe, bind?, durable? }
+
+steps:
+  - do:
+      infer:
+        prompt: Say hello.
+    expect:
+      - kind: nonempty
+        key: text
+
+complete:
+  expect:
+    - kind: includes
+      key: event_types
+      value: [core:inference, core:cost]
+
+cleanup: []
+```
+
+Models: `tests/stories/scenarios/user_story_scenario.py`. Harness:
+`tests/stories/harness/user_story.py`. Product verbs remain on
+`MechaHarnessConfig.cli_verb_classes()`. See
+[`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md).
+
+Live: `MECHA_STORY_BACKEND=live`, `MECHA_BASE_URL`, `MECHA_MODEL` (served id).
+
+### Migration batches
+
+Remaining `kind: cli` stories convert in waves — product verbs first (A–F), then
+probe families after a product verb exists (P1–P10). Checklist and story ids:
+[`docs/guides/user-story-migration-batches.md`](../../../docs/guides/user-story-migration-batches.md).
+
+### Full migration program
+
+Migrate in waves; each wave adds the smallest CLI/harness surface required:
+
+1. Observability / one-shot infer (OBS-*) — **done**
+2. Former `harness_runs` / pass-through / tool-loop / cassettes / host DI /
+   judge route — **done**
+3. Graph execution — **done** (`probe` + `cli_probe_classes`)
+4. Durable IoC — **done** (CLI verbs; parallel harness removed)
+5. Decision plane / remaining judge ops — **done** (`decision_plane` runner removed)
+6. `pure_api` + context/eval library surface
+
+When a family has zero stories left, delete its op-dispatch runner module.
+When an individual `op` has zero remaining `request.json` stories, delete that
+op’s `_run_*` function and `RUNNERS` entry in the same change as the migration.
 
 ### `narrative` (required)
 
@@ -133,11 +241,19 @@ footnote defs when the narrative contains matching `[^id]` markers).
 
 **How the story is proven** — technical, like `implementation`, but about tests.
 
-- Cite harness family + `op` (e.g. `Harness \`pure_api\` op \`wip_policy\``), plus
-  `expect.json` asserts.
+- Cite `Harness \`cli\` scenarios \`…yaml\`` and the hard
+  expect keys / scenario stems.
 - Cassette / live dual-mode notes when relevant.
 - Related unit test modules under `tests/`.
-- Execution: `tests/stories/harness/` (see also [`data-driven-tests`](../data-driven-tests/SKILL.md)).
+- Do **not** cite new legacy `op` names for newly migrated stories.
+- Inference-running scenarios (`infer`, `tool_loop`, completing `run_recipe`)
+  MUST assert event observations: `event_types` / `includes` for
+  `core:inference`, and token bounds via `prompt_tokens` /
+  `completion_tokens` / `total_tokens` (`equals` / `gte` / `lte`).
+- Graph-execution scenarios that expose `budget_spent` MUST declare a cost
+  ceiling (`lte` / `equals` / `gte` / `positive` on `cost_units` or
+  `budget_spent`). The harness fails the story when that expect is missing.
+
 
 ### `title`
 
@@ -150,10 +266,9 @@ Literal feature outcome (not metaphor). Must match what `narrative` claims.
    `systemone/…` must share identical `title`, `narrative`, `implementation`,
    `validation`, `persona`, `kind`, and `footnotes`. Catalog validation fails
    the PR on drift.
-3. **Sibling coherence.** If harness/`op` or acceptance intent changes, update
-   `request.json` / `expect.json` / the owning harness op registry in the same
-   change. Narrative must not claim an outcome expects do not cover;
-   `validation` must describe the updated proof.
+3. **Sibling coherence.** If acceptance intent changes, update `scenarios/*.yaml`
+   (or migrate off `request`/`expect`) in the same change. Narrative must not
+   claim an outcome expects do not cover; `validation` must describe the proof.
 4. **Regenerate every time.** After fixture edits: generate + `--check`; commit
    the regenerated guide in the same PR.
 5. **Stable ids.** Renaming an `id` requires updating citations in other
@@ -169,13 +284,14 @@ Literal feature outcome (not metaphor). Must match what `narrative` claims.
 When you **touch** functionality in this repo:
 
 1. Name which story id(s) exercise the change.
-2. If none fit — add or extend a story under Nubble / Fangore / Taloneth (update
-   `personas.json` only if a new persona is truly required).
-3. Update `implementation` and/or `validation` as appropriate; sync twins.
-   If the change promotes or ships an Agentic Recipe, ensure an owning story
-   names that recipe’s catalog id in `implementation`.
-4. Regenerate the guide; mention story id(s) (and recipe catalog ids when
-   relevant) in the PR summary.
+2. If none fit — add a **`kind: cli`** story under
+   Nubble / Fangore / Taloneth — never a new legacy `op`.
+3. If the owning story is still legacy op-dispatch, **migrate it to YAML** in
+   the same change when practical (intent check → scenarios → delete
+   request/expect).
+4. Update `implementation` / `validation`; sync twins. Agentic Recipe stories
+   name the catalog id in `implementation`.
+5. Regenerate the guide; mention story id(s) in the PR summary.
 
 Do **not** add skipif live modules. Offline CI must run the story suite with
 **zero skips**; live is the same parametrized tests with `MECHA_STORY_BACKEND=live`.
@@ -188,12 +304,11 @@ tests/fixtures/models/
   <family>/<model>/<version>/
     manifest.json
     stories/<story_id>/
-      story.json      # kind = harness family; narrative fields
-      request.json    # required "op" + inputs
-      response.json
-      expect.json
-tests/stories/harness/  # reusable interpreters (kind → harness)
-tests/stories/runners/  # interim domain ops for OpDispatchHarness
+      story.json           # kind = cli | (legacy during migration)
+      scenarios/*.yaml     # cli: CLI commands + hard expect (preferred)
+      response.json        # cassette when needed
+tests/stories/harness/     # cli (+ legacy until empty)
+tests/stories/runners/     # deprecated op-dispatch; delete per migrated family
 scripts/generate_user_stories_md.py
 docs/guides/user-stories.md   # GENERATED
 ```
@@ -203,28 +318,29 @@ docs/guides/user-stories.md   # GENERATED
 | `MECHA_STORY_BACKEND` | Behavior |
 |-----------------------|----------|
 | `static` (default) | Cassettes / in-process — CI |
-| `live` | Real HTTP (`MECHA_BASE_URL`, `MECHA_JUDGE_*`, …) |
+| `live` | Real HTTP (`MECHA_BASE_URL`, `MECHA_MODEL`, `MECHA_JUDGE_*`, …) |
 
-Soft expects only. Exact wire text belongs in `response.json` for replay.
+New scenarios use **hard** expects. Wire payloads stay in `response.json` for
+replay; live uses the served model id via `MECHA_MODEL`.
 
 ## Checklist (new or changed functionality)
 
 1. Read generated `docs/guides/user-stories.md` (or regenerate first).
 2. Attach to an existing story **or** draft `narrative` + `implementation` +
-   `validation` under the right persona.
-3. Add/update fixture under `static/fixture/v1` first; add captured-model twin
-   only if the path needs HTTP — keep twin text identical.
-4. Extend `tests/stories/runners.py` if a new `kind` is required (unambiguous
-   name); reflect it in `validation`.
-5. Run `python scripts/generate_user_stories_md.py` and `--check`.
-6. Confirm `tests/stories/test_story_schema.py` / twin parity will pass.
-7. Unit-test edge cases separately; list them under `validation`.
-8. PR summary lists story id(s); no hand edits to the guide.
+   `validation` under the right persona with `kind: cli`.
+3. Intent-check inspiration/REQUIREMENTS; add `scenarios/*.yaml` (one claim each).
+4. Grow `CliInstrumentor` / `cli_universe` only if the wave needs a new verb/node.
+5. Fixture under `static/fixture/v1` first; twin for HTTP paths; twin text parity.
+6. Run `python scripts/generate_user_stories_md.py` and `--check`.
+7. Confirm `tests/stories/test_story_schema.py` / twin parity will pass.
+8. Unit-test edge cases separately; list them under `validation`.
+9. PR summary lists story id(s); no hand edits to the guide.
 
 ## Anti-patterns
 
 ```text
 # BAD — hand-edit docs/guides/user-stories.md
+# BAD — new request.json / op for a story (use kind: cli scenarios instead)
 # BAD — twin drift (same id, different narrative/implementation/validation/footnotes)
 # BAD — narrative with MechaHarnessConfig / JudgementPolicy / core:cost
 # BAD — raw article URLs in narrative (use footnotes + optional [^id])
@@ -234,19 +350,23 @@ Soft expects only. Exact wire text belongs in `response.json` for replay.
 # BAD — cite a capability with no story id / mint new INF-POL codes as primary
 # BAD — pattern story that omits the Agentic Recipe catalog id in implementation
 # BAD — ship a recipe with no owning user story
-# BAD — change kind without runners/expects + validation update
+# BAD — touch a legacy story without migrating it toward YAML when practical
+# BAD — soft _include expects on new CLI scenarios
 # BAD — commit story.json without regenerating the guide
 # BAD — As-a bullet as the only story body
 # BAD — new skipif live module for one model
 
-# GOOD — edit story.json (+ twins) → generate guide → --check green
+# GOOD — kind: cli + scenarios/*.yaml → generate guide → --check green
 # GOOD — implementation names verify_repair (recipe) and GraphTemplate (substrate)
+# GOOD — one claim per YAML; grow CLI verbs only when a story needs them
 ```
 
 ## Related
 
+- [`docs/reference/cli-universe.md`](../../../docs/reference/cli-universe.md) — CLI product surface
 - [`agentic-recipes`](../agentic-recipes/SKILL.md) — recipes as top-level concept
 - [`project-docs`](../project-docs/SKILL.md) — defer user-story guide edits to this skill
 - [`event-observability`](../event-observability/SKILL.md) — stories that assert event correlators (OBS-A*)
+- [`data-driven-tests`](../data-driven-tests/SKILL.md) — case matrices (unit tests; stories use YAML)
 - `.cursor/rules/unambiguous-names.mdc`, `.cursor/rules/agentic-recipes.mdc`
 - `tests/stories/`

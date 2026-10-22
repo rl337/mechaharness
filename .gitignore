@@ -45,6 +45,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+coverage-stories.json
 *.cover
 *.py.cover
 .hypothesis/
@@ -228,3 +229,7 @@ docs/adr/
 
 # Local docs tooling install (sandbox-friendly target dir)
 .docs-venv/
+.mechaharness/
+
+# Local Cursor MCP overrides (absolute paths)
+.cursor/mcp.json

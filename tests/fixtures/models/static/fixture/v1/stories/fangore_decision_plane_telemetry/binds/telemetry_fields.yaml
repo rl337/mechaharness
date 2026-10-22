@@ -1,0 +1,29 @@
+name: decision_plane
+summary: Export evaluation-ready decision-plane telemetry without raw context
+goal: triage
+soft_bindings:
+  confidence_floor: 0.7
+  shadow_mode: false
+  questions:
+  - id: team
+    kind: choice
+    options:
+    - id: billing
+    allowed_actions:
+    - billing
+  - id: risk
+    kind: score
+    min: 0
+    max: 1
+  state_projection:
+    ticket_id: T-1
+    channel: email
+inputs:
+  fixture_answers:
+    team: billing
+    risk: 0.2
+  confidence: 0.91
+  final_action: billing
+  model_ref: flavor:local_decision
+  latency_ms: 42
+  raw_body: customer wrote a long complaint with PII

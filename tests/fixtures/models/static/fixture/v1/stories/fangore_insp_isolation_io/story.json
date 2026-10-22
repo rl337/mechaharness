@@ -2,10 +2,10 @@
   "id": "fangore_insp_isolation_io",
   "persona": "fangore",
   "title": "Validate isolation and template I/O contracts",
-  "kind": "access_authority",
-  "narrative": "Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation]. Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso] and Dots MH-DOTS-07 isolation substrate (`fangore_insp_cross_task_isolation`)[^insp-dots-07-iso].",
-  "implementation": "`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for Agentic Recipe / `GraphTemplate` subgraph boundaries.",
-  "validation": "Harness `access_authority` op `isolation_io_contract`. Soft expects empty validation issues and budget_share.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs nested subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation]. Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso]. This is nest I/O — not JobLaneBroker lane isolation (see MH-DOTS-07 / JL stories)[^insp-dots-07-iso].",
+  "implementation": "`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation.isolation_contract` capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for Agentic Recipe / `GraphTemplate` subgraph boundaries.\n\nAcceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).",
+  "validation": "Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l14-isolation",

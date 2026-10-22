@@ -1,0 +1,55 @@
+# user story: fangore_insp_evolution_ownership_split
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# MechaHarness validates, executes, versions, and safety-gates recipes; the host (for
+# example June) owns which workloads to run, how much to spend, and whether a candidate
+# should be promoted.
+# Two named hooks carry that split: one for evolution campaigns and one for promotion
+# policy.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph: null
+steps:
+- do:
+    recipe_plan:
+      path: plans/evolution_ownership.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: default_policy_is_noop
+  - kind: equals
+    key: default_hooks
+    value:
+    - []
+    - null
+  - kind: equals
+    key: host_hooks
+    value:
+    - - verify_repair:nightly
+      - verify_repair:regression
+    - 25.0
+  - kind: equals
+    key: host_policy_blocks
+    value:
+    - false
+    - - release_freeze
+  - kind: equals
+    key: host_block_keeps_pointer
+    value: '1'
+  - kind: equals
+    key: library_gate_without_final_test
+    value:
+    - false
+    - '1'
+  - kind: equals
+    key: promoted_with_gates_passed
+    value:
+    - true
+    - '2'
+  - kind: equals
+    key: host_hooks_saw_promotions
+    value:
+    - - verify_repair
+      - '2'
+cleanup: []

@@ -2,10 +2,10 @@
   "id": "nubble_insp_trace_envelope",
   "persona": "nubble",
   "title": "Require provenance on every trace envelope",
-  "kind": "evaluation_research",
-  "narrative": "Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace]. Trace audit substrate for personal-agent MH-PA-08[^insp-pa-08-trace].",
+  "kind": "user_story",
+  "narrative": "Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble rejects incomplete traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace]. Trace audit substrate for personal-agent MH-PA-08[^insp-pa-08-trace].",
   "implementation": "`TraceEnvelope`, `envelope_complete`, and `require_trace_envelope` in `mechaharness.trace_envelope` define required provenance fields for run/node events.",
-  "validation": "Harness `evaluation_research` op `trace_envelope_complete`. Soft expects complete true and no missing fields.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "wl-l11-trace",

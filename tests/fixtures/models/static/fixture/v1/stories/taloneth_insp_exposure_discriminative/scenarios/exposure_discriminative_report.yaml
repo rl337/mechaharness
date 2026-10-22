@@ -1,0 +1,30 @@
+# user story: taloneth_insp_exposure_discriminative
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    exposure_discriminative_report:
+      exposure:
+      - arm: treatment
+        rollouts: 1
+        model_calls: 4
+        tokens_out: 800
+      - arm: control
+        rollouts: 1
+        model_calls: 1
+        tokens_out: 100
+      trials:
+      - trial_id: '1'
+        success: true
+      - trial_id: '2'
+        success: true
+complete:
+  expect:
+  - kind: equals
+    key: treatment_model_calls
+    value: 4
+  - kind: 'true'
+    key: all_success_tie
+cleanup: []

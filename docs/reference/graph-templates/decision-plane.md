@@ -9,7 +9,7 @@ code, and escalate when confidence is too low.
 | Catalog id | `decision_plane` |
 | Module | `mechaharness.graph_templates.decision_plane` |
 | Substrate | `GraphTemplate` |
-| Owning stories | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_check`, `fangore_jev_context_picker`, `fangore_jev_requirements_review`, `fangore_jev_task_router`, `fangore_jev_action_safety` |
+| Owning stories | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_matching_claim`, `fangore_jev_context_budget_pack`, `fangore_jev_req_review_template_shape`, `fangore_jev_task_route_simple_local`, `fangore_jev_action_safety` |
 | Runtime | `mechaharness.decision_plane_runtime` |
 
 ## When to use
@@ -73,6 +73,21 @@ assert graph.template_name == "decision_plane"
 | `assemble_context_within_budget` | Deterministic RAG packing from scored candidates |
 | `compare_shadow_decision` | Candidate vs production; production controls |
 | `build_decision_plane_telemetry` | Evaluation-ready metrics without raw context |
+
+Execute walk: `mechaharness.decision_plane_runner` + CLI
+`DecisionPlaneRecipeAdapter` (`run_recipe name=decision_plane`).
+
+## Node components
+
+| Graph node | Components |
+|------------|------------|
+| `project_state` | `soft_point` (`project_kind`, `state_projection`, `facts`) |
+| `ask_batch` | `soft_point` (`ask_kind`, `questions`, `confidence_floor`, `decision_model`); `inference` when a live judge is bound |
+| `apply_policy` | `soft_point` (`policy_kind`, `confidence_floor`) |
+| `escalate` | `soft_point` (`escalate_kind`) |
+| `shadow_ask` | `soft_point` (`shadow_ask_kind`, `shadow_mode`) |
+
+See [Node components](../node-components.md).
 
 ## Related
 

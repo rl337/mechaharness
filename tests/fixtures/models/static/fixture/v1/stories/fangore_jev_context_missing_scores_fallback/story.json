@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_context_missing_scores_fallback",
+  "persona": "fangore",
+  "title": "Fill the budget with deterministic ranking when scores are missing",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds a FixtureRagRetriever corpus and loads the `context_pack` Agentic Recipe for: Fill the budget with deterministic ranking when scores are missing. He runs `run_recipe` context_pack (retrieve \u2192 pack) and verifies selected_ids / within_budget.",
+  "implementation": "Agentic Recipe `context_pack` (`ContextPackTemplate`): `rag_retrieve` \u2192 `rag_pack`. Host binds `RagRetriever` (story: `FixtureRagRetriever` via `environment.rag_corpus`). Pack calls `assemble_context_within_budget`. Product verb `run_recipe`.",
+  "validation": "Harness `user_story` scenario `missing_scores_fallback.yaml`: environment.rag_corpus + graph.recipe context_pack + run_recipe; hard expects on selected_ids / within_budget.",
+  "footnotes": []
+}

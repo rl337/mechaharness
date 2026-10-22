@@ -1,11 +1,11 @@
 {
   "id": "fangore_insp_produce_critique_refine",
   "persona": "fangore",
-  "title": "Register produce-critique-refine as a reusable recipe contract",
-  "kind": "graph_recipes",
-  "narrative": "Reusable subgraphs need typed inputs/outputs, applicability predicates, budgets, and traceable outcomes. Independent review and verify-repair already ship (`fangore_insp_independent_review`, `fangore_verify_repair_recipe`). Produce-critique-refine now ships as its own recipe; an optional three-round council with recorded dissent remains unshipped and non-default. Tracks MH-PA-03[^insp-pa-03].",
-  "implementation": "Agentic Recipe `produce_critique_refine` (`ProduceCritiqueRefineTemplate`) builds produce \u2192 isolated critique \u2192 bounded refine (repeating + StopContract) \u2192 complete. Soft points bind runner kinds, `critique_prompt`, `max_rounds`, critic isolation, and acceptance; `critique_prompt` and `max_rounds` are evolvable. Node components: `soft_point` per declared slot on the node that exposes it, plus `stop_contract` on `refine`. Registered in the default catalog.",
-  "validation": "Harness `graph_recipes` op `produce_critique_refine_recipe`. Hard expects template stamp, node ids, an isolated critic, refine bounded by `max_rounds`, node components attached to the right parents, and the evolvable allowlist.",
+  "title": "Run produce-critique-refine as a reusable recipe contract",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs Agentic Recipe `produce_critique_refine` with an isolated critic and bounded refine rounds that clear fixture findings under the stop contract. Independent review and verify-repair already ship. [^insp-pa-03]",
+  "implementation": "Agentic Recipe `produce_critique_refine` via `ProduceCritiqueRefineTemplate` / `produce_critique_refine_runner` and product verb `run_recipe` (`ProduceCritiqueRefineRecipeAdapter`).",
+  "validation": "Harness `user_story` scenario `produce_critique_refine_recipe.yaml` drives `run_recipe`; expects shape keys plus rounds_used / findings_cleared.",
   "footnotes": [
     {
       "id": "insp-pa-03",

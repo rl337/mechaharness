@@ -1,5 +1,0 @@
-{
-  "op": "consequence_risk_scale",
-  "action": "fs.write",
-  "consequence": "high"
-}

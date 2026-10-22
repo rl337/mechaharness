@@ -1,0 +1,22 @@
+# Fan-out-aggregate with provenance stamps (incubation story).
+
+name: fan_out_aggregate
+summary: Stamp fan_out_aggregate provenance and expand two branches.
+goal: incubate
+
+acceptance:
+- merged
+
+source_workflow_ref: host:workflows/compare_v1
+
+branch_payloads:
+- index: 0
+- index: 1
+
+soft_bindings:
+  plan_kind: plan
+  branch_kind: branch
+  reduce_kind: reduce
+  fan_in_budget: 8
+  acceptance:
+  - merged

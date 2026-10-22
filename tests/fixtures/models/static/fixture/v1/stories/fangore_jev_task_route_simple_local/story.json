@@ -1,0 +1,17 @@
+{
+  "id": "fangore_jev_task_route_simple_local",
+  "persona": "fangore",
+  "title": "Route simple work to the local small model",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He judges a simple workload to the local_small lane. He verifies completion from structured observation expects.",
+  "implementation": "Product verb `judge` + code-owned quality override on complexity facts.",
+  "validation": "user_story judge; expect final_action=local_small.",
+  "footnotes": [
+    {
+      "id": "jev-us07",
+      "label": "Jev typed-judgment inspiration (MH-JEV-US07)",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md",
+      "note": "Task-specific model/workflow router"
+    }
+  ]
+}

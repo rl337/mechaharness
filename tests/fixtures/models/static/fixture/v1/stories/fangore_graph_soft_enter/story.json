@@ -1,0 +1,17 @@
+{
+  "id": "fangore_graph_soft_enter",
+  "persona": "fangore",
+  "title": "Entering a soft subgraph node pauses before the first child",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline graph whose only root is a subgraph (soft call site). One `graph_walk` step enters the call frame and stops before the child's first node — no child runner has executed yet. A following step runs the first child. Tracks SG-05[^sg-soft].",
+  "implementation": "`GraphExecutor._enter_subgraph_node` on `one_step` when the frontier is a subgraph; parent stays `RUNNING` with `entered`; child checkpointed under `run_id:node_id`.",
+  "validation": "Harness `user_story` scenario `soft_enter.yaml`.",
+  "footnotes": [
+    {
+      "id": "sg-soft",
+      "label": "Stepped graph execution requirements",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md",
+      "note": "SG-05 soft enter"
+    }
+  ]
+}

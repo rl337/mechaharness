@@ -2,22 +2,9 @@
   "id": "fangore_capability_envelope_narrow",
   "persona": "fangore",
   "title": "Narrow child capability envelopes without silent inheritance",
-  "kind": "access_authority",
-  "narrative": "Fangore delegates a child plan with fewer tools and grants than the parent. The child must not quietly inherit the parent's full capability set, and attempts to widen grants beyond the parent must fail closed. See inspiration requirements for delegation envelopes[^insp-envelope]. Child attenuation for Dots MH-DOTS-01[^insp-dots-01-narrow]; execution token fields: `fangore_insp_execution_token`.",
-  "implementation": "`CapabilityEnvelope` in `mechaharness.capability_envelope` carries grants, tools, context provider ids, model class, budgets, and escalation policy. `narrow()` produces a child envelope that cannot widen parent grants or tools. Attached on `GraphRunContext.envelope` during graph runs. `DefaultDelegationPolicy` chooses inline versus child/subgraph using independence and pollution signals.",
-  "validation": "Harness `access_authority` op `capability_envelope_narrow` \u2192 `_run_capability_envelope_narrow`. Soft expects: narrowed grants subset; widen raises; delegation chooses child when independence is required. Unit: `tests/test_inspiration_primitives.py`.",
-  "footnotes": [
-    {
-      "id": "insp-envelope",
-      "label": "Inspiration requirements (delegation envelopes)",
-      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md",
-      "note": "Req 7 \u2014 CapabilityEnvelope; children must not inherit parent capabilities implicitly"
-    },
-    {
-      "id": "insp-dots-01-narrow",
-      "label": "OpenAI Dots map (MH-DOTS-01 narrow)",
-      "url": "https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md",
-      "note": "Child attenuation; token fields in fangore_insp_execution_token"
-    }
-  ]
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds a parent capability envelope in the environment, runs `capability_envelope` to narrow a child and attempt a widen, and verifies the child stays a subset while widen raises and delegation prefers child.",
+  "implementation": "`CapabilityEnvelope.narrow` plus `DefaultDelegationPolicy`. Story `environment.capability_envelope` binds Config `get_capability_envelope`; product verb `capability_envelope` exercises narrow/widen.",
+  "validation": "Harness `user_story` scenario `capability_envelope_narrow.yaml` drives `capability_envelope`; expects narrow_ok / child_grant_count / widen_raises / delegation_choice.",
+  "footnotes": []
 }

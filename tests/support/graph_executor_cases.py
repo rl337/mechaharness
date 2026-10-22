@@ -341,6 +341,10 @@ def assert_expect(
     prefix = f"case {case_id}"
     if "status" in expect:
         assert result.status == expect["status"], f"{prefix}: status"
+    if "stopped_before" in expect:
+        assert result.stopped_before == expect["stopped_before"], (
+            f"{prefix}: stopped_before"
+        )
     if "error" in expect:
         assert result.error == expect["error"], f"{prefix}: error"
     if "error_is_none" in expect:

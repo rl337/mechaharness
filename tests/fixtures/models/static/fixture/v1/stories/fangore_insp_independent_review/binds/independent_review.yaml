@@ -1,0 +1,24 @@
+# Independent-review Agentic Recipe: produce → isolated review_* → aggregate.
+name: independent_review
+summary: Two isolated reviewers retain disagreement against acceptance.
+goal: review
+acceptance:
+- lgtm
+soft_bindings:
+  produce_kind: produce
+  review_kind: review
+  aggregate_kind: aggregate_reviews
+  reviewer_count: 2
+  omit_producer_reasoning: true
+  acceptance:
+  - lgtm
+inputs:
+  text: draft for review
+  producer_reasoning: chain-of-thought that reviewers must not see
+  review_findings:
+  - id: r0
+    severity: warn
+    note: missing tests
+  - id: r1
+    severity: block
+    note: acceptance gap

@@ -1,0 +1,78 @@
+# user story: fangore_insp_execution_token
+# Fangore starts the CLI host with family `pass_through` and backend `mock`.
+# He runs `execution_token` to attenuate a parent CapabilityEnvelope: a child
+# may shorten expiry but cannot raise epoch, swap principal/trust origin, or
+# outlive the parent. Walk-bag `in`/`out` carry the parent and outcomes.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    execution_token:
+      parent:
+        grants:
+        - core:graph.execute
+        - core:fs.read
+        tool_names:
+        - Read
+        principal: user:fangore
+        expires_at: '2026-10-18T12:00:00Z'
+        trust_origin: host:console
+        authorization_epoch: 3
+      attempts:
+      - id: attenuate
+        narrow:
+          expires_at: '2026-10-18T11:00:00Z'
+      - id: raise_epoch
+        narrow:
+          authorization_epoch: 4
+      - id: swap_principal
+        narrow:
+          principal: user:other
+      - id: swap_origin
+        narrow:
+          trust_origin: host:webhook
+      - id: outlive_parent
+        narrow:
+          expires_at: '2026-10-18T13:00:00Z'
+      inherit_attempt: attenuate
+  expect:
+  - kind: equals
+    key: outcomes
+    value:
+      attenuate: ok
+      raise_epoch: refused:widens authorization_epoch
+      swap_principal: refused:changes principal
+      swap_origin: refused:changes trust_origin
+      outlive_parent: refused:widens expires_at
+  - kind: equals
+    key: refused_ids
+    value:
+    - outlive_parent
+    - raise_epoch
+    - swap_origin
+    - swap_principal
+  - kind: equals
+    key: accepted_ids
+    value:
+    - attenuate
+  - kind: equals
+    key: inherited_principal
+    value: user:fangore
+  - kind: equals
+    key: inherited_epoch
+    value: 3
+complete:
+  expect:
+  - kind: equals
+    key: accepted_ids
+    value:
+    - attenuate
+  - kind: equals
+    key: inherited_principal
+    value: user:fangore
+  - kind: equals
+    key: inherited_epoch
+    value: 3
+cleanup: []

@@ -1,0 +1,26 @@
+# user story: fangore_insp_linkage_preflight
+# Migrated from probe plan `missing_runner_and_ok.yaml` → product/test verb `graph_linkage_preflight`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    graph_linkage_preflight:
+      check_missing_runner: true
+      check_missing_stop: false
+      check_ok_linear: true
+  expect: &id001
+  - kind: 'false'
+    key: missing_runner_ok
+  - kind: equals
+    key: missing_runner_codes_exactly
+    value:
+    - no_runner
+  - kind: 'true'
+    key: ok_linear_ok
+  - kind: 'true'
+    key: ok_linear_fingerprint_nonempty
+complete:
+  expect: *id001
+cleanup: []

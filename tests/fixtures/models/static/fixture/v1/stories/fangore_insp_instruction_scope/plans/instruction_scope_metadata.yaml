@@ -1,0 +1,10 @@
+# Probe plan for scenario `instruction_scope_metadata.yaml`.
+# Story: Scope instruction components with authority and cost
+
+summary: Scope instruction components with authority and cost
+name: instruction_scope_metadata
+title: Router
+body: See details on demand
+scope: entry
+authority: ops
+estimated_context_cost: 120

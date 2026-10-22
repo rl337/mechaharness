@@ -1,0 +1,37 @@
+# user story: taloneth_insp_scripted_driver_replay
+# Taloneth starts the CLI host with family `pass_through` and backend `mock`, loads the
+# `verify_repair` durable graph (controller `scripted`, store `memory`).
+# Evaluation and CI need a first-class scripted driver that asserts expected yield kinds
+# and fails when unexpected advice appears.
+# Tracks R-IOC-REPLAY and R-IOC-OFFLINE.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: verify_repair
+  durable:
+    controller: scripted
+    store: memory
+steps:
+- do:
+    start:
+      inputs:
+        guidance:
+        - question: Unexpected?
+          choices:
+          - id: x
+            label: X
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer: {}
+  expect_error: unexpected_advice
+complete:
+  expect:
+  - kind: equals
+    key: error
+    value: unexpected_advice
+cleanup: []

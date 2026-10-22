@@ -1,0 +1,17 @@
+{
+  "id": "fangore_graph_until_before",
+  "persona": "fangore",
+  "title": "Pause a graph walk before a named node",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline two-node graph and runs `graph_walk` with `until` the second node and `stop: before`. The first node has succeeded; the second is ready but not executed. He continues and the second node completes. Tracks stepped graph control SG-02/06/09[^sg-until].",
+  "implementation": "`RunControl(mode=until, stop=before)` on `GraphExecutor.run`; product verb `graph_walk`; optional `graph.inline` on user_story YAML.",
+  "validation": "Harness `user_story` scenario `until_before.yaml`.",
+  "footnotes": [
+    {
+      "id": "sg-until",
+      "label": "Stepped graph execution requirements",
+      "url": "https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md",
+      "note": "SG-02 until before"
+    }
+  ]
+}

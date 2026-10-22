@@ -1,0 +1,13 @@
+# Probe plan for scenario `capability_envelope_narrow.yaml`.
+# Story: Narrow child capability envelopes without silent inheritance
+
+summary: Narrow child capability envelopes without silent inheritance
+name: capability_envelope_narrow
+parent_grants:
+- core:graph.execute
+- core:fs.read
+child_grants:
+- core:graph.execute
+widen_grants:
+- core:graph.execute
+- core:fs.write

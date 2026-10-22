@@ -1,14 +1,17 @@
-"""Isolation seams: IO/isolation contracts, workspace providers, cross-task guard.
+"""Isolation seams: IO/isolation contracts, workspace providers, cross-task shim.
 
 Canonical home for the isolation leaves; the old top-level modules
 (``mechaharness.isolation_contract`` etc.) are thin re-export shims.
+
+Product lane sequences and authorized observe live on
+:class:`~mechaharness.job_lane_broker.JobLaneBroker` (re-exported here for
+discoverability next to the deprecated cross-task guard).
 """
 
 from __future__ import annotations
 
 from mechaharness.isolation.cross_task_isolation import (
     CrossTaskIsolationGuard,
-    IsolationViolation,
 )
 from mechaharness.isolation.isolation_contract import (
     IsolationContract,
@@ -20,6 +23,11 @@ from mechaharness.isolation.workspace_isolation import (
     WorkspaceIsolationProvider,
     WorkspaceIsolationRequest,
 )
+from mechaharness.job_lane_broker import (
+    IsolationViolation,
+    JobLane,
+    JobLaneBroker,
+)
 
 __all__ = [
     "IsolationContract",
@@ -30,4 +38,6 @@ __all__ = [
     "InMemoryWorkspaceIsolationProvider",
     "IsolationViolation",
     "CrossTaskIsolationGuard",
+    "JobLane",
+    "JobLaneBroker",
 ]

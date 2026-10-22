@@ -51,6 +51,24 @@ assert graph.nodes["repair"].repeating is True
 assert graph.nodes["repair"].stop_contract is not None
 ```
 
+## Execute
+
+Fixture runners in `mechaharness.verify_repair_runner` + CLI
+`VerifyRepairRecipeAdapter` (`run_recipe name=verify_repair`). Repair loop is
+embedded in the repair runner (executor does not walk `StopContract`).
+
+## Node components
+
+| Graph node | Components |
+|------------|------------|
+| `produce` | `soft_point` (`produce_kind`, `produce_inputs`) |
+| `verify` | `soft_point` (`verify_kind`, `acceptance`) |
+| `repair` | `stop_contract`; `soft_point` (`repair_kind`) |
+| `complete` | `soft_point` (`complete_kind`, `acceptance`) |
+
+See [Node components](../node-components.md).
+
 ## Tests
 
-See `tests/fixtures/graph_templates/verify_repair_*.json`.
+See `tests/fixtures/graph_templates/verify_repair_*.json` and
+`fangore_verify_repair_recipe`.

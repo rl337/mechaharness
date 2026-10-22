@@ -1,0 +1,10 @@
+{
+  "id": "fangore_jev_task_route_low_confidence",
+  "persona": "fangore",
+  "title": "Escalate when the router is not confident",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`. He escalates when the router confidence is below the floor. He verifies completion from structured observation expects.",
+  "implementation": "Product verb `judge` with confidence_floor escalation.",
+  "validation": "user_story judge; expect escalate.",
+  "footnotes": []
+}

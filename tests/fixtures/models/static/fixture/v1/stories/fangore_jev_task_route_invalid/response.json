@@ -1,0 +1,14 @@
+{
+  "answers": {
+    "route": {
+      "selected": "mystery_gateway",
+      "probabilities": {
+        "local_small": 0.0025000000000000022,
+        "frontier": 0.0025000000000000022,
+        "tool": 0.0025000000000000022,
+        "human": 0.0025000000000000022,
+        "mystery_gateway": 0.99
+      }
+    }
+  }
+}

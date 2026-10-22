@@ -29,9 +29,14 @@ class ScriptedInference(InferenceStrategy):
 
     async def complete(self, request: CompletionRequest) -> CompletionResponse:
         self.requests.append(request)
-        usage: Usage | None = None
+        usage: Usage | None
         if self._usages is not None and self._usages:
             usage = self._usages.pop(0)
+        elif self._usages is not None:
+            usage = Usage(prompt_tokens=0, completion_tokens=0, total_tokens=0)
+        else:
+            # Match MockInferenceStrategy so story expects can bound tokens.
+            usage = Usage(prompt_tokens=1, completion_tokens=1, total_tokens=2)
         if not self._responses:
             return CompletionResponse(
                 message=ChatMessage(role=Role.ASSISTANT, content="(no scripted response left)"),

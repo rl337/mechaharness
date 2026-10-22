@@ -2,10 +2,10 @@
   "id": "nubble_insp_trace_reconciliation",
   "persona": "nubble",
   "title": "Reject rollouts when independent traces disagree",
-  "kind": "evaluation_research",
-  "narrative": "Nubble needs executor events and gateway capture to reconcile before a rollout is accepted for training or self-improvement. Accepts FineEnvs independent trajectory checks[^fineenvs-reconcile]. Trace reconciliation for Dots MH-DOTS-09[^insp-dots-09-recon].",
+  "kind": "user_story",
+  "narrative": "Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble needs executor events and gateway capture to reconcile before a rollout is accepted for training or self-improvement. Accepts FineEnvs independent trajectory checks[^fineenvs-reconcile]. Trace reconciliation for Dots MH-DOTS-09[^insp-dots-09-recon].",
   "implementation": "`ObservationSurface`, `reconcile_traces`, and `require_reconciled` in `mechaharness.trace_reconciliation` compare event ids and digests across surfaces.",
-  "validation": "Harness `evaluation_research` op `trace_reconciliation_check`. Soft expects conflict status. Unit tests in `tests/test_trace_reconciliation.py`.",
+  "validation": "Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.",
   "footnotes": [
     {
       "id": "fineenvs-reconcile",

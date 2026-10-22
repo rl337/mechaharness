@@ -1,7 +1,0 @@
-{
-  "issues": [],
-  "verify_kinds_include": [
-    "rollback",
-    "end"
-  ]
-}

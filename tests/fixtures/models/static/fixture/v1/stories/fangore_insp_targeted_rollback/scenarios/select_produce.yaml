@@ -1,0 +1,27 @@
+# user story: fangore_insp_targeted_rollback
+# Migrated from probe plan `select_produce.yaml` → product/test verb `targeted_rollback_select`.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    targeted_rollback_select:
+      error: verification_failed
+      node_id: verify
+      repair_target: produce
+      transitions:
+      - from_node: verify
+        kind: rollback
+        to_node: produce
+        reason: verification_failed
+  expect: &id001
+  - kind: equals
+    key: rollback_target
+    value: produce
+  - kind: equals
+    key: repair_target
+    value: produce
+complete:
+  expect: *id001
+cleanup: []

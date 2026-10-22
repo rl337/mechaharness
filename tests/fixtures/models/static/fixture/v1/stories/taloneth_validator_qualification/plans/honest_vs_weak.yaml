@@ -1,0 +1,11 @@
+# Probe plan for scenario `honest_vs_weak.yaml`.
+# Story: Qualify validators before they gate completion
+
+summary: Qualify validators before they gate completion
+name: validator_qualification
+good_fixtures:
+- ok1
+bad_fixtures:
+- bad1
+missing_fixtures:
+- missing

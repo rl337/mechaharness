@@ -2,9 +2,9 @@
   "id": "nubble_run_cost_events",
   "persona": "nubble",
   "title": "Record cost and inference events for every harness run",
-  "kind": "harness_runs",
-  "narrative": "Finance asks Nubble whether a harness run actually burned billable units. He runs a short one-shot job and checks the event log. He needs both an inference event and a cost event with non-zero units \u2014 the same signals he would forward to billing or a Grafana panel.",
-  "implementation": "Harness runs emit structured `EventLog` records for inference and cost (`CostAccountant` / `core:cost`, `core:inference`). This is the baseline observability stream for every run \u2014 decisions, routing, and tools extend the same log rather than a separate ledger.\n\nCovers: OBS-01.",
-  "validation": "Harness `harness_runs` op `pass_through` \u2192 `_run_pass_through`. Soft expects: inference and cost events with non-zero units. Related: `tests/test_events.py`, `tests/test_pass_through.py`.",
+  "kind": "user_story",
+  "narrative": "Finance asks Nubble whether a harness run burned billable units. He starts the CLI host with the default pass-through family and a mock reason backend, uses the built-in one-shot infer universe (no custom recipe load), runs infer with a short prompt, and verifies completion by reading the event log: an inference event and a cost event with non-zero units — the same signals he would forward to billing. He also checks that those events carry the host clock timestamps he expects.",
+  "implementation": "CLI universe `cli:infer` via `CliInstrumentor` / `CliInferRunner` emits structured `EventLog` records for inference and cost (`CostAccountant` / `core:cost`, `core:inference`) on the same stream as graph lifecycle events. This is the baseline observability stream for every run — decisions, routing, and tools extend the same log rather than a separate ledger.\n\nCovers: OBS-01.",
+  "validation": "Harness `user_story` scenarios `event_types.yaml` (environment + infer step + complete event/cost/token expects) and `event_timestamps.yaml` (environment.clock + infer + complete timestamp expects). Cassette `response.json`. Related: `tests/test_events.py`. Live: `MECHA_STORY_BACKEND=live`.",
   "footnotes": []
 }

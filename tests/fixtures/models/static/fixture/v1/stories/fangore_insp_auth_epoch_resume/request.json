@@ -1,6 +1,0 @@
-{
-  "op": "auth_epoch_resume_refuse",
-  "goal": "epoch",
-  "first_epoch": 2,
-  "resume_epoch": 3
-}

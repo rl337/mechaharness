@@ -1,5 +1,0 @@
-{
-  "unavailable_include": ["systemone"],
-  "available_include": ["rules", "small_local"],
-  "matched_actions_include": ["allow", "ask_human", "deny"]
-}

@@ -44,10 +44,12 @@ from mechaharness.graph_templates.catalog import (
     default_graph_template_classes,
     default_graph_templates,
 )
+from mechaharness.graph_templates.context_pack import ContextPackTemplate
 from mechaharness.graph_templates.conversational_tool_loop import (
     ConversationalToolLoopTemplate,
 )
 from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
+from mechaharness.graph_templates.demo_guidance import DemoGuidanceTemplate
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
@@ -62,8 +64,10 @@ from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
 __all__ = [
     "BackendDescribeTemplate",
     "BoundedRetryTemplate",
+    "ContextPackTemplate",
     "ConversationalToolLoopTemplate",
     "DecisionPlaneTemplate",
+    "DemoGuidanceTemplate",
     "EnvironmentRepairTemplate",
     "FanOutAggregateTemplate",
     "GraphTemplate",

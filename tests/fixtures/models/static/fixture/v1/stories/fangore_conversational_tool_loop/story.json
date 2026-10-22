@@ -2,10 +2,10 @@
   "id": "fangore_conversational_tool_loop",
   "persona": "fangore",
   "title": "Expand a conversational tool loop under a tools graph node",
-  "kind": "harness_runs",
-  "narrative": "Fangore binds the library conversational tool-loop recipe so a chat tools step grows nested rounds \u2014 model complete then per-tool calls \u2014 inside the tools node\u2019s checkpoint without pre-creating empty max-turn slots. A stop contract bounds the loop. Complements `fangore_insp_stop_contract`, `fangore_node_components`, and `fangore_host_kit_event_tap`.[^june-hf07]",
-  "implementation": "Agentic Recipe catalog id `conversational_tool_loop` (`ConversationalToolLoopTemplate`). `ConversationalToolLoopRunner` expands `tools.subgraph` with nested `inference` and `tool_call` graph nodes per round. Soft points cover runner kinds, stop/max_iterations, message state, inference and tool dispatch. Bounds use existing `StopContract` / repeating fields.",
-  "validation": "Harness `harness_runs` op `conversational_tool_loop` \u2192 `_run_conversational_tool_loop`. Soft expects: status ok; subgraph has inference and tool_call node ids; rounds \u2265 1. Unit: `tests/test_conversational_tool_loop.py`.",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `conversational_tool_loop` recipe. Fangore binds the library conversational tool-loop recipe so a chat tools step grows nested rounds — model complete then per-tool calls — inside the tools node’s checkpoint without pre-creating empty max-turn slots. A stop contract bounds the loop. Complements `fangore_insp_stop_contract`, `fangore_node_components`, and `fangore_host_kit_event_tap`. He walks product steps (run_recipe) and verifies completion from the structured observation expects on this scenario. [^june-hf07]",
+  "implementation": "Agentic Recipe catalog id `conversational_tool_loop` (`ConversationalToolLoopTemplate`). `CliInstrumentor` verb `run_recipe` executes it via `ConversationalToolLoopRunner`, which expands `tools.subgraph` with nested `inference` and `tool_call` graph nodes per round. Soft points cover runner kinds, stop/max_iterations, message state, inference and tool dispatch. Bounds use existing `StopContract` / repeating fields.",
+  "validation": "Harness `user_story` scenario `expanded_rounds.yaml`: environment + graph + steps + complete expects.",
   "footnotes": [
     {
       "id": "june-hf07",

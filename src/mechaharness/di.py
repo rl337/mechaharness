@@ -51,6 +51,9 @@ from mechaharness.api_connection import APIConnectionConfig, SimpleHttpConnectio
 from mechaharness.authority_gate import AuthorityGate
 from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.checkpoint_store import CheckpointStore, EventLogCheckpointStore
+from mechaharness.cli_assertion import CliAssertion
+from mechaharness.cli_recipe_adapter import CliRecipeAdapter
+from mechaharness.cli_verb import CliProbe, CliVerb
 from mechaharness.config import Settings
 from mechaharness.context_provider import ContextProviderRegistry
 from mechaharness.core.access import (
@@ -71,6 +74,13 @@ from mechaharness.core.environment import (
 from mechaharness.core.events import EventLog, FanoutEventLog, InMemoryEventLog, LoggingEventLog
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationPolicy
 from mechaharness.denial_store import DenialStore, InMemoryDenialStore
+from mechaharness.durable_graph_generator import (
+    DurableGraphGenerator,
+    GeneratorControllerAuth,
+    GeneratorRunStore,
+    InMemoryGeneratorRunStore,
+    LeaseControllerAuth,
+)
 from mechaharness.external_effect import CrashProbe, NoopCrashProbe
 from mechaharness.graph import GraphStore
 from mechaharness.graph_executor import (
@@ -97,12 +107,14 @@ from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
 from mechaharness.inference_capture import InferenceCapture, empty_inference_capture
+from mechaharness.job_lane_broker import JobLaneBroker
 from mechaharness.lifecycle_extension import (
     LifecycleExtensionRegistry,
     empty_lifecycle_extension_registry,
 )
 from mechaharness.linkage_resolver import DefaultLinkageResolver, LinkageResolver
 from mechaharness.operation_registry import OperationRegistry, default_operations
+from mechaharness.rag import RagRetriever, UnboundRagRetriever
 from mechaharness.recipe_lifecycle.evolution_campaign_hooks import (
     EvolutionCampaignHooks,
     NoopEvolutionCampaignHooks,
@@ -399,6 +411,7 @@ class MechaHarnessConfig(Config):
         self._register_binding(
             LifecycleExtensionRegistry, self.get_lifecycle_extension_registry()
         )
+        self._register_binding(RagRetriever, self.get_rag_retriever())
         self._register_binding(CrashProbe, self.get_crash_probe())
         self._register_binding(
             RecipePromotionPolicy, self.get_recipe_promotion_policy()
@@ -429,6 +442,14 @@ class MechaHarnessConfig(Config):
 
         self._register_override_or_factory(
             AccessControl, self.get_access_control(), make_access_control
+        )
+
+        def make_job_lane_broker(injector: Injector) -> JobLaneBroker:
+            del injector
+            return JobLaneBroker()
+
+        self._register_override_or_factory(
+            JobLaneBroker, self.get_job_lane_broker(), make_job_lane_broker
         )
 
         def make_cost_accountant(injector: Injector) -> CostAccountant:
@@ -485,8 +506,28 @@ class MechaHarnessConfig(Config):
             AuthorityGate, self.get_authority_gate(), make_authority_gate
         )
 
-        # Recipe / backend / family membership: pyiv map multibinds (catalog_keys).
+        # Recipe / backend / family / CLI verb membership: pyiv map multibinds.
         # Cast: pyiv accepts ABC keys; mypy rejects abstract type[T] args.
+        self.contribute_map_entries(
+            cast(type[Any], CliVerb),
+            cast(dict[Any, type[Any]], self.cli_verb_classes()),
+            on_conflict="replace",
+        )
+        self.contribute_map_entries(
+            cast(type[Any], CliRecipeAdapter),
+            cast(dict[Any, type[Any]], self.cli_recipe_adapter_classes()),
+            on_conflict="replace",
+        )
+        self.contribute_map_entries(
+            cast(type[Any], CliAssertion),
+            cast(dict[Any, type[Any]], self.cli_assertion_classes()),
+            on_conflict="replace",
+        )
+        self.contribute_map_entries(
+            cast(type[Any], CliProbe),
+            cast(dict[Any, type[Any]], self.cli_probe_classes()),
+            on_conflict="replace",
+        )
         self.contribute_map_entries(
             cast(type[Any], GraphTemplate),
             cast(dict[Any, type[Any]], self.graph_template_classes()),
@@ -567,6 +608,35 @@ class MechaHarnessConfig(Config):
         self.register(AbstractHarness, harness_cls, singleton=True)
         self.register(GraphExecutor, graph_executor_cls, singleton=True)
 
+        self._register_binding(
+            GeneratorControllerAuth, self.get_generator_controller_auth()
+        )
+
+        def make_generator_run_store(injector: Injector) -> GeneratorRunStore:
+            return InMemoryGeneratorRunStore()
+
+        self._register_override_or_factory(
+            GeneratorRunStore,
+            self.get_generator_run_store(),
+            make_generator_run_store,
+        )
+
+        def make_durable_graph_generator(injector: Injector) -> DurableGraphGenerator:
+            return DurableGraphGenerator(
+                registry=injector.inject(GraphTemplateRegistry),
+                run_store=injector.inject(GeneratorRunStore),
+                event_log=injector.inject(EventLog),
+                datetime_service=injector.inject(DateTimeService),
+                controller_auth=injector.inject(GeneratorControllerAuth),
+                checkpoint_store=injector.inject(CheckpointStore),
+            )
+
+        self._register_override_or_factory(
+            DurableGraphGenerator,
+            self.get_durable_graph_generator(),
+            make_durable_graph_generator,
+        )
+
     def get_settings(self) -> Settings:
         """Settings instance registered for this config (override to customize)."""
         return Settings()
@@ -577,6 +647,10 @@ class MechaHarnessConfig(Config):
 
     def get_access_control(self) -> AccessControl | type[AccessControl] | None:
         """Optional ``AccessControl`` override. ``None`` → inject ``EventLog``."""
+        return None
+
+    def get_job_lane_broker(self) -> JobLaneBroker | type[JobLaneBroker] | None:
+        """Optional ``JobLaneBroker`` override. ``None`` → empty catalog factory."""
         return None
 
     def get_access_policy(self) -> GrantPolicyLike:
@@ -796,6 +870,28 @@ class MechaHarnessConfig(Config):
         """Staleness rules for tool evidence (default: honor ``expires_at`` only)."""
         return ToolResultFreshnessPolicy()
 
+    def cli_verb_classes(self) -> dict[str, type[CliVerb]]:
+        """CLI verb name → ``CliVerb`` class. Hosts merge via ``super()``."""
+        from mechaharness.cli_host_verbs import default_cli_verb_classes
+
+        return default_cli_verb_classes()
+
+    def cli_recipe_adapter_classes(self) -> dict[str, type[CliRecipeAdapter]]:
+        """Recipe id → CLI adapter. Hosts merge via ``super()``."""
+        from mechaharness.cli_recipe_adapter import default_cli_recipe_adapter_classes
+
+        return default_cli_recipe_adapter_classes()
+
+    def cli_assertion_classes(self) -> dict[str, type[CliAssertion]]:
+        """Assertion kind → checker. Hosts merge via ``super()``."""
+        from mechaharness.cli_assertion import default_cli_assertion_classes
+
+        return default_cli_assertion_classes()
+
+    def cli_probe_classes(self) -> dict[str, type[CliProbe]]:
+        """Story/test probe name → ``CliProbe``. Production default is empty."""
+        return {}
+
     def graph_template_classes(self) -> dict[str, type[GraphTemplate]]:
         """Catalog id → ``GraphTemplate`` class. Hosts merge via ``super()``."""
         return default_graph_template_classes()
@@ -821,9 +917,27 @@ class MechaHarnessConfig(Config):
         """Default run envelope from configured grants."""
         return CapabilityEnvelope.from_grants(self.get_grants())
 
+    def get_generator_controller_auth(self) -> GeneratorControllerAuth:
+        """Controller lease strategy for durable generator ops."""
+        return LeaseControllerAuth()
+
+    def get_generator_run_store(self) -> GeneratorRunStore | type[GeneratorRunStore] | None:
+        """Optional :class:`GeneratorRunStore` override. ``None`` → in-memory."""
+        return None
+
+    def get_durable_graph_generator(
+        self,
+    ) -> DurableGraphGenerator | type[DurableGraphGenerator] | None:
+        """Optional :class:`DurableGraphGenerator` override. ``None`` → factory."""
+        return None
+
     def get_lifecycle_extension_registry(self) -> LifecycleExtensionRegistry:
         """Ordered lifecycle extensions (default: empty)."""
         return empty_lifecycle_extension_registry()
+
+    def get_rag_retriever(self) -> type[RagRetriever] | RagRetriever:
+        """Host RAG retrieve seam (default: unbound — must override for context_pack)."""
+        return UnboundRagRetriever
 
     def inference_classes(self) -> dict[str, type[InferenceStrategy]]:
         """Named backend map. Hosts merge via ``super().inference_classes()``."""

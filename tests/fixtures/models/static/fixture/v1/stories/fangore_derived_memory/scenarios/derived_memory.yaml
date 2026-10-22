@@ -1,0 +1,15 @@
+# user story: fangore_derived_memory
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+steps:
+- do:
+    derived_memory: {}
+complete:
+  expect:
+  - kind: 'true'
+    key: authority_outranks_popularity
+  - kind: 'true'
+    key: idempotent
+cleanup: []
