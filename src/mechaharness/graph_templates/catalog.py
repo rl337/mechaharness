@@ -23,6 +23,7 @@ from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
 from mechaharness.graph_templates.initialize_preflight import InitializePreflightTemplate
+from mechaharness.graph_templates.instruction_todo_plan import InstructionTodoPlanTemplate
 from mechaharness.graph_templates.produce_critique_refine import (
     ProduceCritiqueRefineTemplate,
 )
@@ -44,6 +45,7 @@ def default_graph_template_classes() -> dict[str, type[GraphTemplate]]:
         BoundedRetryTemplate.name: BoundedRetryTemplate,
         ConversationalToolLoopTemplate.name: ConversationalToolLoopTemplate,
         AuditedInferAcceptTemplate.name: AuditedInferAcceptTemplate,
+        InstructionTodoPlanTemplate.name: InstructionTodoPlanTemplate,
         GuidedCodingTemplate.name: GuidedCodingTemplate,
         HarnessRunTemplate.name: HarnessRunTemplate,
         BackendDescribeTemplate.name: BackendDescribeTemplate,

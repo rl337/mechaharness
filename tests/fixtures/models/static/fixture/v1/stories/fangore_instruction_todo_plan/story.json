@@ -1,0 +1,10 @@
+{
+  "id": "fangore_instruction_todo_plan",
+  "persona": "fangore",
+  "title": "Execute oneshot or todo-list instructions via instruction_todo_plan",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `instruction_todo_plan` durable graph (controller `story`, store `memory`). He wants the local agent to judge whether a task is a oneshot or an ordered list, refine conflicts before work, verify pre-list and per-item acceptance, then check post-list acceptance so later todos have not undone earlier ones. Start yields `advice_requested` for scope refinement (`context_version=scope_refinement`); he answers `oneshot` and the run completes. Complements `fangore_guided_coding_recipe` (which tiles this recipe as `plan_tile`). He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario.",
+  "implementation": "Agentic Recipe catalog id `instruction_todo_plan` (`InstructionTodoPlanTemplate`) with stages classify → refine_plan → pre_accept → work_item* → item_accept → post_accept → complete. Domain `mechaharness.instruction_plan` builds the plan; optional soft points `scope_refinement` / `list_refinement` (`kind=guidance`, not required) are requested via local-work `request_guidance` (or scheduled in inputs.guidance for offline stories). `DurableGraphGenerator._advance` enqueues those asks, yields `advice_requested`, and restarts local work after resume with `guidance_history`.",
+  "validation": "Harness `user_story` scenario `session.yaml`: environment + durable instruction_todo_plan + start/answer expects. Unit tests `tests/test_instruction_todo_plan.py` cover topology, classify/conflict refine, and generator request_guidance restart.",
+  "footnotes": []
+}

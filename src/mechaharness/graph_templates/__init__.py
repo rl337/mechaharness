@@ -60,6 +60,7 @@ from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
 from mechaharness.graph_templates.initialize_preflight import InitializePreflightTemplate
+from mechaharness.graph_templates.instruction_todo_plan import InstructionTodoPlanTemplate
 from mechaharness.graph_templates.produce_critique_refine import (
     ProduceCritiqueRefineTemplate,
 )
@@ -83,6 +84,7 @@ __all__ = [
     "HarnessRunTemplate",
     "IndependentReviewTemplate",
     "InitializePreflightTemplate",
+    "InstructionTodoPlanTemplate",
     "ProduceCritiqueRefineTemplate",
     "SafetyEvalTemplate",
     "SoftPoint",

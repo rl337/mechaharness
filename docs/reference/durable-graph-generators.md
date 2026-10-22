@@ -151,8 +151,12 @@ server after changing ``env`` or editing library modules (stdio processes do
 not hot-reload).
 
 Recipe ``guided_coding``: start → ``advice_requested`` (engineering direction)
-→ ``generator_resume`` with a short answer → local tool loop + verify payload
-on ``completed``. See [guided coding](./graph-templates/guided-coding.md).
+→ ``generator_resume`` with a short answer → local ``instruction_todo_plan``
+burst (oneshot or todo list with acceptance) + audited gate payload on
+``completed``. Mid-plan human refinement: local work may return
+``request_guidance``; the generator yields again and restarts the plan after
+answers. See [guided coding](./graph-templates/guided-coding.md) and
+[instruction todo plan](./graph-templates/instruction-todo-plan.md).
 
 ## Related
 

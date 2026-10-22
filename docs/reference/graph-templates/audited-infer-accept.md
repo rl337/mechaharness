@@ -56,6 +56,7 @@ See [FOLK audited-infer migration](../../inspiration/folk-audited-infer-migratio
 
 ## Related
 
-- [Guided coding](./guided-coding.md) — tiles this recipe as `audit_tile`
+- [Guided coding](./guided-coding.md) — tiles this recipe as `audit_tile` (after `plan_tile`)
+- [Instruction todo plan](./instruction-todo-plan.md) — oneshot / list control before audit
 - [Verify repair](./verify-repair.md) — deterministic oracle loop (different pattern; both remain)
 - Domain: `mechaharness.audited_decision`

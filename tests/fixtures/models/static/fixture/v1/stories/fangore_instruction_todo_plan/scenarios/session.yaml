@@ -1,0 +1,51 @@
+# user story: fangore_instruction_todo_plan
+# Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the
+# `instruction_todo_plan` durable graph (controller `story`, store `memory`).
+# Start yields advice_requested from an explicit scope_refinement guidance schedule;
+# he answers oneshot and the run completes.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  recipe: instruction_todo_plan
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: instruction-todo-1
+      inputs:
+        goal: ship a small helper
+        instruction_mode: oneshot
+        guidance:
+        - question: Is this a oneshot or an ordered todo list?
+          context_version: scope_refinement
+          choices:
+          - id: oneshot
+            label: One shot
+          - id: list
+            label: Ordered list
+          recommendation: oneshot
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: oneshot
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+cleanup: []

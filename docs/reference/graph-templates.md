@@ -39,7 +39,8 @@ owning user stories):
 | [produce_critique_refine](./graph-templates/produce-critique-refine.md) | `produce_critique_refine` | `fangore_insp_produce_critique_refine` | Produce → isolated critique → bounded refine |
 | [safety_eval](./graph-templates/safety-eval.md) | `safety_eval` | `taloneth_insp_safety_eval_recipes` | Scenario → isolated review → deterministic safety score |
 | [conversational_tool_loop](./graph-templates/conversational-tool-loop.md) | `conversational_tool_loop` | `fangore_conversational_tool_loop` | Expandable tools → inference / tool_call rounds |
-| [guided_coding](./graph-templates/guided-coding.md) | `guided_coding` | `fangore_guided_coding_recipe` | Frontier guidance → local tool loop → audited gate |
+| [guided_coding](./graph-templates/guided-coding.md) | `guided_coding` | `fangore_guided_coding_recipe` | Frontier guidance → instruction plan → audited gate |
+| [instruction_todo_plan](./graph-templates/instruction-todo-plan.md) | `instruction_todo_plan` | `fangore_instruction_todo_plan` | Oneshot vs list; refine; pre/item/post acceptance |
 | [audited_infer_accept](./graph-templates/audited-infer-accept.md) | `audited_infer_accept` | `fangore_audited_infer_accept` | Collect → freeze → decide → QA → deterministic → gate |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),

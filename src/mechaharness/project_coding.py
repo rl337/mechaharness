@@ -3,7 +3,8 @@
 ``ProjectCodingConfig`` roots tools at ``MECHA_WORKSPACE`` (or cwd), registers
 workspace coding tools, prefers ``openai_local`` from Settings / MCP ``env``,
 and binds :class:`~mechaharness.generator_local_work.ProjectCodingLocalWork`
-so ``guided_coding`` runs perform a real tool-loop burst after guidance.
+so ``guided_coding`` / ``instruction_todo_plan`` runs perform tool-loop bursts
+after guidance (oneshot or todo list with acceptance).
 """
 
 from __future__ import annotations

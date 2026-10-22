@@ -596,6 +596,20 @@ class DurableGraphGenerator:
             raw = run_fn(record)
             if isinstance(raw, dict):
                 work_payload = raw
+            # Local work may request human calling refinement; enqueue and
+            # re-enter so the whole plan restarts after answers (DG guidance).
+            requested = work_payload.get("request_guidance")
+            if isinstance(requested, list) and requested:
+                for item in requested:
+                    if isinstance(item, GuidanceRequest):
+                        record.guidance_queue.append(item)
+                    elif isinstance(item, dict):
+                        record.guidance_queue.append(
+                            GuidanceRequest.model_validate(item)
+                        )
+                record.phase = "running"
+                self._runs.save(record)
+                return self._advance(record)
             if work_payload.get("result") == "failed":
                 record.phase = "failed"
                 record.error = str(work_payload.get("error") or "local_work_failed")
@@ -794,33 +808,41 @@ def _guidance_queue_from(
         return [GuidanceRequest.model_validate(item) for item in raw]
     queue: list[GuidanceRequest] = []
     for point in template.soft_points:
-        if getattr(point, "kind", None) == "guidance" or point.name.startswith(
+        is_guidance = getattr(point, "kind", None) == "guidance" or point.name.startswith(
             "external_guidance"
-        ):
-            # Prefer host/default choices from SoftPoint.default when provided.
-            default = point.default if isinstance(point.default, dict) else {}
-            raw_choices = default.get("choices")
-            if isinstance(raw_choices, list) and raw_choices:
-                choices = [GuidanceChoice.model_validate(c) for c in raw_choices]
-                recommendation = default.get("recommendation")
-            else:
-                choices = [
-                    GuidanceChoice(id="accept", label="Accept recommendation"),
-                    GuidanceChoice(id="revise", label="Request revision"),
-                ]
-                recommendation = "accept"
-            queue.append(
-                GuidanceRequest(
-                    question=point.description
-                    or f"Guidance for soft point {point.name}",
-                    requested_authority=str(default.get("requested_authority") or "advisory"),
-                    context_version=point.name,
-                    parent_node_id=None,
-                    choices=choices,
-                    recommendation=recommendation if isinstance(recommendation, str) else None,
-                    evidence_refs=list(default.get("evidence_refs") or ()),
-                )
+        )
+        if not is_guidance:
+            continue
+        # Optional guidance soft points are requested dynamically by local work
+        # (e.g. instruction_todo_plan scope/list refinement) — do not auto-queue.
+        if not getattr(point, "required", False):
+            continue
+        # Prefer host/default choices from SoftPoint.default when provided.
+        default = point.default if isinstance(point.default, dict) else {}
+        raw_choices = default.get("choices")
+        if isinstance(raw_choices, list) and raw_choices:
+            choices = [GuidanceChoice.model_validate(c) for c in raw_choices]
+            recommendation = default.get("recommendation")
+        else:
+            choices = [
+                GuidanceChoice(id="accept", label="Accept recommendation"),
+                GuidanceChoice(id="revise", label="Request revision"),
+            ]
+            recommendation = "accept"
+        queue.append(
+            GuidanceRequest(
+                question=point.description
+                or f"Guidance for soft point {point.name}",
+                requested_authority=str(
+                    default.get("requested_authority") or "advisory"
+                ),
+                context_version=point.name,
+                parent_node_id=None,
+                choices=choices,
+                recommendation=recommendation if isinstance(recommendation, str) else None,
+                evidence_refs=list(default.get("evidence_refs") or ()),
             )
+        )
     # Soft bindings may inject one-shot guidance without template soft points.
     binding = inputs.get("soft_bindings") or {}
     if isinstance(binding, dict) and "guidance_request" in binding:

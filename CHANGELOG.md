@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Instruction todo plan (`instruction_todo_plan`):** classify oneshot vs
+  ordered list, refine conflicts, pre / per-item / post-list acceptance.
+  Optional `scope_refinement` / `list_refinement` guidance is requested by
+  local work (`request_guidance`); answering restarts the plan. Domain
+  `mechaharness.instruction_plan`. Story: `fangore_instruction_todo_plan`.
 - **Guided coding Agentic Recipe (`guided_coding`):** frontier MCP guidance soft
-  point tiles `conversational_tool_loop` + `audited_infer_accept` (`audit_tile`).
-  Host Config `ProjectCodingConfig` registers workspace coding tools and a
-  `GeneratorLocalWork` burst after guidance. MCP `MECHA_MCP_HOST=project_coding`
-  binds that Config; inference endpoints belong on the Cursor MCP `env` block.
-  Story: `fangore_guided_coding_recipe`.
+  point tiles `instruction_todo_plan` (`plan_tile`) + `audited_infer_accept`
+  (`audit_tile`). Host Config `ProjectCodingConfig` registers workspace coding
+  tools and a `GeneratorLocalWork` burst after guidance. MCP
+  `MECHA_MCP_HOST=project_coding` binds that Config; inference endpoints belong
+  on the Cursor MCP `env` block. Story: `fangore_guided_coding_recipe`.
 - **Audited infer-accept (`audited_infer_accept`):** RDG-aligned spine
   collect → freeze → decide → independent QA → deterministic → gate, lifted
   from FOLK `ideation.infer.accept` for library reuse. Domain module

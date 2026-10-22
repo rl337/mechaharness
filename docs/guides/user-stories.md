@@ -852,15 +852,15 @@ Harness `user_story` scenario `until_before.yaml`.
 
 ### `fangore_guided_coding_recipe` — Guide local coding via the guided_coding Agentic Recipe
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph (controller `story`, store `memory`). He wants Cursor to answer only short engineering direction while a project-local MechaHarness process (ProjectCodingConfig + openai_local) does the token-heavy file edits. Start yields `advice_requested` from soft point `external_guidance`; he answers `minimal` in a later call and the run completes. Complements `fangore_insp_graph_guidance_yield`, `fangore_conversational_tool_loop`, and `fangore_verify_repair_recipe`. He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph (controller `story`, store `memory`). He wants Cursor to answer only short engineering direction while a project-local MechaHarness process (ProjectCodingConfig + openai_local) classifies oneshot vs todo list and does the token-heavy file edits under pre/item/post acceptance. Start yields `advice_requested` from soft point `external_guidance`; he answers `minimal` in a later call and the run completes. Complements `fangore_instruction_todo_plan`, `fangore_insp_graph_guidance_yield`, and `fangore_conversational_tool_loop`. He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario.
 
 #### Implementation
 
-Agentic Recipe catalog id `guided_coding` (`GuidedCodingTemplate`) tiles `conversational_tool_loop` and `audited_infer_accept` under `code_loop` / `audit_tile` with soft point `external_guidance` (`kind=guidance`). MCP `MECHA_MCP_HOST=project_coding` binds `ProjectCodingConfig` (workspace coding tools + `GeneratorLocalWork` / `ProjectCodingLocalWork` burst after guidance). `DurableGraphGenerator._advance` invokes the injectable local-work hook when the guidance queue is empty.
+Agentic Recipe catalog id `guided_coding` (`GuidedCodingTemplate`) tiles `instruction_todo_plan` and `audited_infer_accept` under `plan_tile` / `audit_tile` with soft point `external_guidance` (`kind=guidance`). MCP `MECHA_MCP_HOST=project_coding` binds `ProjectCodingConfig` (workspace coding tools + `GeneratorLocalWork` / `ProjectCodingLocalWork` burst after guidance, including `request_guidance` restart for plan refinement). `DurableGraphGenerator._advance` invokes the injectable local-work hook when the guidance queue is empty.
 
 #### Validation
 
-Harness `user_story` scenario `session.yaml`: environment + durable guided_coding + start/answer expects. Unit tests `tests/test_project_coding.py` and `tests/test_guided_coding_recipe.py` cover tools confinement, audit tile topology, and offline local-work file write.
+Harness `user_story` scenario `session.yaml`: environment + durable guided_coding + start/answer expects. Unit tests `tests/test_project_coding.py` and `tests/test_guided_coding_recipe.py` cover tools confinement, plan/audit tile topology, and offline local-work file write.
 
 ### `fangore_harness_family_react` — Run the react harness family through CLI tool_loop init
 
@@ -1964,6 +1964,18 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 [^wl-l07-wip]: [WalkingLabs L07 Task Boundaries](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-07-why-agents-overreach-and-under-finish/) — Bound WIP
 [^wl-l08-wip]: [WalkingLabs L08 Feature Lists](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/) — Back-pressure
+
+### `fangore_instruction_todo_plan` — Execute oneshot or todo-list instructions via instruction_todo_plan
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `instruction_todo_plan` durable graph (controller `story`, store `memory`). He wants the local agent to judge whether a task is a oneshot or an ordered list, refine conflicts before work, verify pre-list and per-item acceptance, then check post-list acceptance so later todos have not undone earlier ones. Start yields `advice_requested` for scope refinement (`context_version=scope_refinement`); he answers `oneshot` and the run completes. Complements `fangore_guided_coding_recipe` (which tiles this recipe as `plan_tile`). He walks product steps (start, answer) and verifies completion from the structured observation expects on this scenario.
+
+#### Implementation
+
+Agentic Recipe catalog id `instruction_todo_plan` (`InstructionTodoPlanTemplate`) with stages classify → refine_plan → pre_accept → work_item* → item_accept → post_accept → complete. Domain `mechaharness.instruction_plan` builds the plan; optional soft points `scope_refinement` / `list_refinement` (`kind=guidance`, not required) are requested via local-work `request_guidance` (or scheduled in inputs.guidance for offline stories). `DurableGraphGenerator._advance` enqueues those asks, yields `advice_requested`, and restarts local work after resume with `guidance_history`.
+
+#### Validation
+
+Harness `user_story` scenario `session.yaml`: environment + durable instruction_todo_plan + start/answer expects. Unit tests `tests/test_instruction_todo_plan.py` cover topology, classify/conflict refine, and generator request_guidance restart.
 
 ### `fangore_jev_action_safety` — Let hard grants win over semantic risk classification
 

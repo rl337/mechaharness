@@ -1,8 +1,8 @@
 """Guided coding Agentic Recipe — Cursor guides; local tools code; audited gate.
 
 Catalog id: ``guided_coding``. Soft point ``external_guidance`` yields to a
-frontier MCP driver. The graph tiles ``conversational_tool_loop`` (code) and
-``audited_infer_accept`` (quality gate) under readable parent nodes. Drive via
+frontier MCP driver. The graph tiles ``instruction_todo_plan`` (oneshot vs
+todo list + acceptance) and ``audited_infer_accept`` (quality gate). Drive via
 ``DurableGraphGenerator`` / MCP with ``ProjectCodingConfig`` so local
 ``openai_local`` inference and workspace tools perform the token-heavy work.
 """
@@ -16,15 +16,13 @@ from mechaharness.graph_templates.base import (
     GraphTemplateParams,
     SoftPoint,
 )
-from mechaharness.graph_templates.conversational_tool_loop import (
-    ConversationalToolLoopTemplate,
-)
+from mechaharness.graph_templates.instruction_todo_plan import InstructionTodoPlanTemplate
 from mechaharness.isolation.isolation_contract import TemplateIOContract
 from mechaharness.stop_contract import StopContract
 
 
 class GuidedCodingTemplate(GraphTemplate):
-    """Frontier guidance → local tool loop → audited infer-accept gate.
+    """Frontier guidance → instruction todo plan → audited infer-accept gate.
 
     Example::
 
@@ -36,21 +34,23 @@ class GuidedCodingTemplate(GraphTemplate):
         ... )
         >>> graph.template_name
         'guided_coding'
-        >>> "code_loop" in graph.nodes and "audit_tile" in graph.nodes
+        >>> "plan_tile" in graph.nodes and "audit_tile" in graph.nodes
         True
     """
 
     name = "guided_coding"
-    version = "2"
+    version = "3"
     category = "agentic_recipe"
     summary = (
         "Cursor (or other frontier driver) answers engineering guidance; "
-        "local openai_local + workspace tools implement; audited_infer_accept gates."
+        "local openai_local classifies oneshot vs todo list, codes under "
+        "workspace tools, then audited_infer_accept gates."
     )
     description = (
-        "Yields external_guidance for approach/constraints, then tiles a "
-        "conversational_tool_loop (code_loop) and audited_infer_accept (audit_tile) "
-        "so local inference codes under workspace tools and RDG-aligned QA gates."
+        "Yields external_guidance for approach/constraints, then tiles "
+        "instruction_todo_plan (plan_tile) and audited_infer_accept "
+        "(audit_tile) so local inference executes oneshot or ordered todos "
+        "with pre/item/post acceptance and optional human refinement yields."
     )
     soft_points = (
         SoftPoint(
@@ -76,19 +76,25 @@ class GuidedCodingTemplate(GraphTemplate):
         SoftPoint(
             name="max_iterations",
             kind="budget",
-            description="Max tool-loop rounds when stop_contract omitted",
+            description="Max tool-loop rounds per todo item when stop_contract omitted",
+            default=8,
+        ),
+        SoftPoint(
+            name="max_items",
+            kind="budget",
+            description="Max todo items in the instruction plan",
             default=8,
         ),
         SoftPoint(
             name="stop_contract",
             kind="budget",
-            description="StopContract for the code tool loop",
+            description="StopContract for the plan work_item loop",
             required=False,
         ),
         SoftPoint(
             name="acceptance",
             kind="policy",
-            description="Acceptance criteria forwarded to audited_infer_accept",
+            description="Acceptance criteria forwarded to plan + audited_infer_accept",
             required=False,
         ),
         SoftPoint(
@@ -105,8 +111,14 @@ class GuidedCodingTemplate(GraphTemplate):
         ),
     )
     io_contract = TemplateIOContract(
-        inputs={"goal": "string", "task": "string", "messages": "array"},
-        outputs={"result": "object", "final_text": "string"},
+        inputs={
+            "goal": "string",
+            "task": "string",
+            "messages": "array",
+            "instructions": "array|string",
+            "instruction_mode": "string",
+        },
+        outputs={"result": "object", "final_text": "string", "plan": "object"},
     )
 
     def build(self, params: GraphTemplateParams) -> ExecutionGraph:
@@ -115,8 +127,9 @@ class GuidedCodingTemplate(GraphTemplate):
         max_iterations = int(
             bindings.get("max_iterations", inputs.get("max_iterations", 8))
         )
+        max_items = int(bindings.get("max_items", inputs.get("max_items", 8)))
         stop = params.stop_contract or StopContract(
-            version="1", max_iterations=max_iterations
+            version="1", max_iterations=max_items
         )
         goal = params.goal or inputs.get("goal") or inputs.get("task") or self.name
 
@@ -139,28 +152,6 @@ class GuidedCodingTemplate(GraphTemplate):
             )
         )
 
-        loop_child, code_embed = ConversationalToolLoopTemplate().tile(
-            GraphTemplateParams(
-                goal=f"{goal}:code",
-                instance_key="code",
-                inputs={**inputs, "max_iterations": max_iterations},
-                soft_bindings={
-                    "max_iterations": max_iterations,
-                    "tools_kind": bindings.get("tools_kind", "conversational_tool_loop"),
-                },
-                stop_contract=stop,
-            ),
-            parent_node_id="code_loop",
-        )
-        del loop_child
-        code_embed.depends_on = ["brief"]
-        code_embed.payload = {
-            **dict(code_embed.payload or {}),
-            "soft_points": ["external_guidance"],
-            "phase": "code",
-        }
-        graph.add_node(code_embed)
-
         acceptance = params.acceptance or bindings.get("acceptance")
         if isinstance(acceptance, str):
             acceptance_list = [acceptance]
@@ -168,6 +159,43 @@ class GuidedCodingTemplate(GraphTemplate):
             acceptance_list = list(acceptance)
         else:
             acceptance_list = ["tests_ok", "lint_ok", "matches_guidance"]
+
+        plan_child, plan_embed = InstructionTodoPlanTemplate().tile(
+            GraphTemplateParams(
+                goal=f"{goal}:plan",
+                instance_key="plan",
+                inputs={
+                    **inputs,
+                    "max_items": max_items,
+                    "max_iterations": max_iterations,
+                    "pre_acceptance": inputs.get("pre_acceptance") or acceptance_list,
+                    "item_acceptance": inputs.get("item_acceptance")
+                    or acceptance_list,
+                    "post_acceptance": inputs.get("post_acceptance")
+                    or acceptance_list,
+                },
+                soft_bindings={
+                    "max_items": max_items,
+                    "pre_acceptance": inputs.get("pre_acceptance") or acceptance_list,
+                    "item_acceptance": inputs.get("item_acceptance")
+                    or acceptance_list,
+                    "post_acceptance": inputs.get("post_acceptance")
+                    or acceptance_list,
+                },
+                acceptance=acceptance_list,
+                stop_contract=stop,
+            ),
+            parent_node_id="plan_tile",
+        )
+        del plan_child
+        plan_embed.depends_on = ["brief"]
+        plan_embed.payload = {
+            **dict(plan_embed.payload or {}),
+            "soft_points": ["external_guidance"],
+            "phase": "plan",
+            "max_iterations": max_iterations,
+        }
+        graph.add_node(plan_embed)
 
         decide_principal = str(
             bindings.get("decide_principal")
@@ -208,7 +236,7 @@ class GuidedCodingTemplate(GraphTemplate):
             parent_node_id="audit_tile",
         )
         del audit_child
-        audit_embed.depends_on = ["code_loop"]
+        audit_embed.depends_on = ["plan_tile"]
         audit_embed.payload = {
             **dict(audit_embed.payload or {}),
             "phase": "audit",
@@ -219,17 +247,17 @@ class GuidedCodingTemplate(GraphTemplate):
         graph.add_dependency(
             DependencyEdge(
                 from_node="brief",
-                to_node="code_loop",
+                to_node="plan_tile",
                 types=["control"],
                 reason="after_guidance",
             )
         )
         graph.add_dependency(
             DependencyEdge(
-                from_node="code_loop",
+                from_node="plan_tile",
                 to_node="audit_tile",
                 types=["control"],
-                reason="audit_after_code",
+                reason="audit_after_plan",
             )
         )
         return graph
