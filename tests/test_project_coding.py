@@ -117,6 +117,204 @@ def _offline_write_stub() -> object:
     return _Stub()
 
 
+def test_parse_prompt_tool_calls_balanced_json() -> None:
+    from mechaharness.project_coding import _parse_prompt_tool_calls
+
+    content = (
+        '<tool_call>\n'
+        '{"name": "write_file", "arguments": {"path": "a.py", '
+        '"content": "class X:\\n    def f(self):\\n        return {}\\n"}}\n'
+        "</tool_call>"
+    )
+    calls = _parse_prompt_tool_calls(content)
+    assert len(calls) == 1
+    assert calls[0]["function"]["name"] == "write_file"
+    assert "class X" in calls[0]["function"]["arguments"]["content"]
+
+
+def test_project_coding_verify_runs_repair(tmp_path: Path) -> None:
+    """Host verify_runs failure triggers one repair coding burst."""
+    from pyiv.files import RealFilesystem
+
+    from mechaharness.durable_graph_generator import GeneratorRunRecord
+
+    fs = RealFilesystem()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path), filesystem=fs
+    )
+    state = {"n": 0}
+
+    def complete(messages: object, meta: object) -> dict:
+        del meta
+        state["n"] += 1
+        # First item: write broken calc. Repair item: write good calc.
+        content = "print(9)\n" if state["n"] == 1 else "print(0)\n"
+        if state["n"] in {1, 3}:
+            return {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": f"w{state['n']}",
+                        "function": {
+                            "name": "write_file",
+                            "arguments": {"path": "calc.py", "content": content},
+                        },
+                    }
+                ],
+            }
+        return {"role": "assistant", "content": "done", "tool_calls": []}
+
+    work = ProjectCodingLocalWork(
+        tools=tools, complete=complete, workspace_root=tmp_path, max_iterations=4
+    )
+    out = work.run(
+        GeneratorRunRecord(
+            run_id="verify",
+            recipe_id="guided_coding",
+            graph_id="g",
+            controller_id="c",
+            inputs={
+                "goal": "Write calc.py that prints 0",
+                "max_iterations": 4,
+                "verify_runs": [
+                    {
+                        "path": "calc.py",
+                        "args": [],
+                        "stdout_contains": "0",
+                        "exit_code": 0,
+                    }
+                ],
+            },
+            guidance_history=[{"response": {"choice_id": "minimal"}}],
+        )
+    )
+    assert out.get("result") == "ok"
+    assert (tmp_path / "calc.py").read_text() == "print(0)\n"
+    assert any(
+        str(r.get("item_id") or "").startswith("verify_repair")
+        for r in out.get("item_results") or []
+    )
+
+
+def test_project_coding_verify_text_contains_repair(tmp_path: Path) -> None:
+    """Missing required symbols in file text trigger verify_repair."""
+    from pyiv.files import RealFilesystem
+
+    from mechaharness.durable_graph_generator import GeneratorRunRecord
+
+    fs = RealFilesystem()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path), filesystem=fs
+    )
+    state = {"n": 0}
+    bad = "def evaluate(expr):\n    return float(expr)\n"
+    good = (
+        "def evaluate(expr):\n    return float(expr)\n\n"
+        "def main(argv=None):\n    return 0\n"
+    )
+
+    def complete(messages: object, meta: object) -> dict:
+        del meta
+        state["n"] += 1
+        content = bad if state["n"] == 1 else good
+        if state["n"] in {1, 3}:
+            return {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": f"w{state['n']}",
+                        "function": {
+                            "name": "write_file",
+                            "arguments": {"path": "calc.py", "content": content},
+                        },
+                    }
+                ],
+            }
+        return {"role": "assistant", "content": "done", "tool_calls": []}
+
+    work = ProjectCodingLocalWork(
+        tools=tools, complete=complete, workspace_root=tmp_path, max_iterations=4
+    )
+    out = work.run(
+        GeneratorRunRecord(
+            run_id="shape",
+            recipe_id="guided_coding",
+            graph_id="g",
+            controller_id="c",
+            inputs={
+                "goal": "Write calc.py with evaluate and main",
+                "max_iterations": 4,
+                "verify_runs": [
+                    {"path": "calc.py", "text_contains": ["def evaluate", "def main"]}
+                ],
+            },
+            guidance_history=[{"response": {"choice_id": "minimal"}}],
+        )
+    )
+    assert out.get("result") == "ok"
+    assert "def main" in (tmp_path / "calc.py").read_text()
+    assert any(
+        str(r.get("item_id") or "").startswith("verify_repair")
+        for r in out.get("item_results") or []
+    )
+
+
+def test_project_coding_write_recovery_nudge(tmp_path: Path) -> None:
+    """If the model finishes without write_file, one recovery burst forces it."""
+    from pyiv.files import RealFilesystem
+
+    from mechaharness.durable_graph_generator import GeneratorRunRecord
+
+    fs = RealFilesystem()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path), filesystem=fs
+    )
+    state = {"round": 0}
+
+    def complete(messages: object, meta: object) -> dict:
+        del meta
+        state["round"] += 1
+        # First burst: claim done with no tools. Recovery: write.
+        if state["round"] == 1:
+            return {"role": "assistant", "content": "done", "tool_calls": []}
+        return {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": "call_write",
+                    "function": {
+                        "name": "write_file",
+                        "arguments": {
+                            "path": "calc.py",
+                            "content": "print(1)\n",
+                        },
+                    },
+                }
+            ],
+        }
+
+    work = ProjectCodingLocalWork(
+        tools=tools, complete=complete, workspace_root=tmp_path, max_iterations=4
+    )
+    out = work.run(
+        GeneratorRunRecord(
+            run_id="recover",
+            recipe_id="guided_coding",
+            graph_id="g",
+            controller_id="c",
+            inputs={"goal": "Update calc.py with a print", "max_iterations": 4},
+            guidance_history=[{"response": {"choice_id": "minimal"}}],
+        )
+    )
+    assert out.get("result") == "ok"
+    assert "calc.py" in (out.get("written_files") or [])
+    assert (tmp_path / "calc.py").read_text() == "print(1)\n"
+    assert state["round"] >= 2
+
+
 def test_project_coding_local_work_skips_other_recipes() -> None:
     work = ProjectCodingLocalWork(
         tools=build_coding_tool_registry(

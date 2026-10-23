@@ -105,6 +105,31 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
 
             tool_calls = list(assistant.get("tool_calls") or [])
             if not tool_calls:
+                # Prompt-parsed models sometimes emit a truncated / malformed
+                # <tool_call> block; nudge instead of treating that as done.
+                content_text = content if isinstance(content, str) else ""
+                broken = False
+                if content_text and "<tool_call" in content_text.lower():
+                    try:
+                        from mechaharness.project_coding import (
+                            _looks_like_broken_tool_call,
+                        )
+
+                        broken = _looks_like_broken_tool_call(content_text)
+                    except Exception:  # noqa: BLE001
+                        broken = True
+                if broken and round_i + 1 < max_iterations:
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": (
+                                "Your previous tool_call was malformed or truncated. "
+                                "Emit one complete <tool_call>{\"name\":...\"arguments\":{...}}"
+                                "</tool_call> JSON block, then continue."
+                            ),
+                        }
+                    )
+                    continue
                 node.subgraph = child.checkpoint()
                 if self._nested_run is not None:
                     await self._nested_run(

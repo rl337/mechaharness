@@ -1,0 +1,10 @@
+{
+  "id": "fangore_calc_functions",
+  "persona": "fangore",
+  "title": "Add common calculator functions",
+  "kind": "user_story",
+  "narrative": "Fangore finishes the calculator arc by adding common functions (`sqrt`, `abs`, `sin`/`cos`/`tan` in radians, `ln`/`log`, `min`/`max`) composable with prior operators and grouping. The shared workspace now holds a full expression CLI.",
+  "implementation": "Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork` via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.",
+  "validation": "Harness `user_story` scenario `functions.yaml` inside sequential suite `calc_cli` (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when coding stages run under live backend.",
+  "footnotes": []
+}

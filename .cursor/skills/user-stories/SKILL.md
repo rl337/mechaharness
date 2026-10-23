@@ -332,6 +332,10 @@ Rules:
 5. New stories: add scenarios, then add stages to the owning `suite.json` (or
    regenerate membership) in the same change.
 
+Sequential example: suite id `calc_cli` (Fangore calculator arc). Stages set
+`environment.workspace: suite`; the suite harness injects one shared temp root.
+Author/regenerate that arc with `scripts/write_calc_cli_suite.py`.
+
 See `docs/plans/user-story-suites.md`.
 
 ## Layout

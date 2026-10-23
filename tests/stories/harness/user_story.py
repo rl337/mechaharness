@@ -61,12 +61,20 @@ class UserStoryHarness:
     def known_ops(self) -> frozenset[str]:
         return frozenset()
 
-    async def run(self, case: StoryCase, backend: StoryBackend) -> None:
+    async def run(
+        self,
+        case: StoryCase,
+        backend: StoryBackend,
+        *,
+        suite_workspace: Path | None = None,
+    ) -> None:
         path = case.scenario_path()
         if path is None or not path.is_file():
             raise AssertionError(f"{case.label}: missing user_story scenario YAML")
         scenario = load_user_story_scenario(path)
-        config = self._build_config(case, backend, scenario)
+        config = self._build_config(
+            case, backend, scenario, suite_workspace=suite_workspace
+        )
         instrumentor = get_injector(config).inject(CliInstrumentor)
         instrumentor.bind_base_dir = path.parent.parent
         assertions = resolve_cli_assertions(config)
@@ -83,6 +91,8 @@ class UserStoryHarness:
         case: StoryCase,
         backend: StoryBackend,
         scenario: UserStoryScenario,
+        *,
+        suite_workspace: Path | None = None,
     ) -> TestHarnessCliConfig:
         env = scenario.environment
         response: dict = {}
@@ -112,8 +122,21 @@ class UserStoryHarness:
         lifecycle_extensions = self._build_lifecycle_extensions(scenario)
 
         access_kw = self._access_budget_kwargs(env)
-        workspace_root = self._resolve_workspace(env, scenario_path)
-        access_kw.update(self._local_work_kwargs(env, workspace_root))
+        workspace_root = self._resolve_workspace(
+            env, scenario_path, suite_workspace=suite_workspace
+        )
+        live_model = (
+            os.environ.get("MECHA_MODEL", "").strip()
+            or model
+        )
+        access_kw.update(
+            self._local_work_kwargs(
+                env,
+                workspace_root,
+                backend=backend,
+                model=live_model,
+            )
+        )
         if env.backend == "anthropic":
             return self._anthropic_config(
                 backend,
@@ -168,10 +191,19 @@ class UserStoryHarness:
         self,
         env: EnvironmentBlock,
         scenario_path: Path | None,
+        *,
+        suite_workspace: Path | None = None,
     ) -> Path | None:
         raw = env.workspace
         if raw is None:
             return None
+        if raw == "suite":
+            if suite_workspace is None:
+                raise AssertionError(
+                    "environment.workspace=suite requires a sequential suite "
+                    "workspace (run via test_user_story_suite)"
+                )
+            return suite_workspace.resolve()
         if raw == "temp":
             return Path(tempfile.mkdtemp(prefix="mecha-story-ws-"))
         path = Path(raw).expanduser()
@@ -184,6 +216,9 @@ class UserStoryHarness:
         self,
         env: EnvironmentBlock,
         workspace_root: Path | None,
+        *,
+        backend: StoryBackend,
+        model: str,
     ) -> dict[str, Any]:
         kwargs: dict[str, Any] = {}
         if workspace_root is not None:
@@ -196,7 +231,10 @@ class UserStoryHarness:
                     "environment.local_work=project_coding requires environment.workspace"
                 )
             kwargs["generator_local_work"] = self._project_coding_local_work(
-                workspace_root, env.coding_write
+                workspace_root,
+                env.coding_write,
+                backend=backend,
+                model=model,
             )
         return kwargs
 
@@ -204,21 +242,56 @@ class UserStoryHarness:
         self,
         workspace_root: Path,
         coding_write: CodingWriteBlock | None,
+        *,
+        backend: StoryBackend,
+        model: str,
     ) -> GeneratorLocalWork:
         tools = build_coding_tool_registry(
             workspace=WorkspacePaths(workspace_root),
             filesystem=RealFilesystem(),
         )
-        if coding_write is not None:
+        if backend.mode == "live":
+            # Ignore offline coding_write stubs; drive tools with a real Completer.
+            complete = self._live_coding_complete(tools, model=model)
+            max_iterations = int(os.environ.get("MECHA_CODING_MAX_ITERATIONS", "24"))
+        elif coding_write is not None:
             complete = _coding_write_stub(tools, coding_write)
+            max_iterations = 8
         else:
             from mechaharness.project_coding import _offline_stub_complete
 
             complete = _offline_stub_complete(tools)
+            max_iterations = 8
         return ProjectCodingLocalWork(
             tools=tools,
             complete=complete,
             workspace_root=workspace_root,
+            max_iterations=max_iterations,
+        )
+
+    def _live_coding_complete(self, tools: ToolRegistry, *, model: str) -> Any:
+        """OpenAI-compat Completer adapted for ProjectCodingLocalWork tool loops."""
+        from mechaharness.project_coding import completer_as_tool_loop_complete
+
+        if not os.environ.get("MECHA_BASE_URL"):
+            raise AssertionError(
+                "MECHA_BASE_URL is required for live project_coding stories"
+            )
+        settings = Settings(
+            inference_backend="openai_compat",
+            harness_family="pass_through",
+            model=model,
+            base_url=os.environ.get("MECHA_BASE_URL"),
+            api_key=os.environ.get("MECHA_API_KEY", "local"),
+            max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "2048")),
+        )
+        client = CountingLiveHttpClient(timeout=300.0)
+        strategy = OpenAICompatStrategy(settings, client=client, timeout=300.0)
+        return completer_as_tool_loop_complete(
+            strategy,
+            tools=tools,
+            model=str(settings.model or model),
+            max_tokens=int(settings.max_tokens or 2048),
         )
 
     def _access_budget_kwargs(self, env: EnvironmentBlock) -> dict:
@@ -486,6 +559,47 @@ class UserStoryHarness:
             rag_retriever=rag_retriever if isinstance(rag_retriever, RagRetriever) else None,
             **(access_kw or {}),
         )
+
+
+class CountingLiveHttpClient(AsyncUrllibHttpClient):
+    """Async HTTP client that counts POSTs for live-inference proof."""
+
+    post_count: int = 0
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        type(self).post_count = 0
+
+    async def request(
+        self,
+        method: str,
+        url: str,
+        *,
+        headers: Any = None,
+        params: Any = None,
+        data: Any = None,
+        json: Any = None,
+        timeout: float | None = None,
+    ) -> Any:
+        if str(method).upper() == "POST":
+            type(self).post_count += 1
+        return await super().request(
+            method,
+            url,
+            headers=headers,
+            params=params,
+            data=data,
+            json=json,
+            timeout=timeout,
+        )
+
+
+def reset_live_http_post_count() -> None:
+    CountingLiveHttpClient.post_count = 0
+
+
+def live_http_post_count() -> int:
+    return int(CountingLiveHttpClient.post_count)
 
 
 def _coding_write_stub(

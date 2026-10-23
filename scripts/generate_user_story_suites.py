@@ -90,6 +90,25 @@ SUITE_META: dict[str, dict[str, str]] = {
         "title": "Harness research, ablation, and promotion gates",
         "persona": "taloneth",
     },
+    "calc_cli": {
+        "title": "Grow a CLI math expression calculator",
+        "persona": "fangore",
+    },
+}
+
+# Sequential / ordered suites: stages keep authored order; not regenerated as parallel.
+SEQUENTIAL_SUITE_IDS = frozenset({"calc_cli"})
+
+# Explicit ordered stage list for sequential suites (story, scenario).
+SEQUENTIAL_STAGE_ORDER: dict[str, list[tuple[str, str]]] = {
+    "calc_cli": [
+        ("fangore_calc_parse_number", "bootstrap"),
+        ("fangore_calc_add_sub", "add_sub"),
+        ("fangore_calc_mul_div", "mul_div"),
+        ("fangore_calc_exponent", "exponent"),
+        ("fangore_calc_grouping", "grouping"),
+        ("fangore_calc_functions", "functions"),
+    ],
 }
 
 # Exact story id → suite (checked before prefixes).
@@ -199,6 +218,13 @@ EXACT: dict[str, str] = {
     "taloneth_validator_qualification": "taloneth_decision_eval",
     "taloneth_atk_research_reject": "taloneth_harness_research",
     "taloneth_cache_layout_experiment": "taloneth_harness_research",
+    # sequential calc_cli arc
+    "fangore_calc_parse_number": "calc_cli",
+    "fangore_calc_add_sub": "calc_cli",
+    "fangore_calc_mul_div": "calc_cli",
+    "fangore_calc_exponent": "calc_cli",
+    "fangore_calc_grouping": "calc_cli",
+    "fangore_calc_functions": "calc_cli",
 }
 
 PREFIXES: list[tuple[str, str]] = [
@@ -248,8 +274,19 @@ def collect_static_stages() -> dict[str, list[dict[str, str]]]:
         suite_id = assign_suite(case.story_id)
         by_suite[suite_id].append({"story": case.story_id, "scenario": stem})
         seen_stories.add(case.story_id)
-    for _suite_id, stages in by_suite.items():
-        stages.sort(key=lambda s: (s["story"], s["scenario"]))
+    for suite_id, stages in by_suite.items():
+        if suite_id in SEQUENTIAL_SUITE_IDS:
+            order = {
+                (story, scenario): idx
+                for idx, (story, scenario) in enumerate(
+                    SEQUENTIAL_STAGE_ORDER.get(suite_id, [])
+                )
+            }
+            stages.sort(
+                key=lambda s: order.get((s["story"], s["scenario"]), 10_000)
+            )
+        else:
+            stages.sort(key=lambda s: (s["story"], s["scenario"]))
     # Ensure every static story directory was assigned.
     stories_dir = ROOT / "tests/fixtures/models/static/fixture/v1/stories"
     for path in sorted(p for p in stories_dir.iterdir() if p.is_dir()):
@@ -260,6 +297,18 @@ def collect_static_stages() -> dict[str, list[dict[str, str]]]:
 
 def render_suite(suite_id: str, stages: list[dict[str, str]]) -> dict:
     meta = SUITE_META[suite_id]
+    if suite_id in SEQUENTIAL_SUITE_IDS:
+        return {
+            "id": suite_id,
+            "title": meta["title"],
+            "persona": meta["persona"],
+            "execution": {"mode": "sequential", "ordered": True},
+            "vars": {},
+            "setup": ["ensure_workspace"],
+            "cleanup": [],
+            "workspace": "temp",
+            "stages": stages,
+        }
     return {
         "id": suite_id,
         "title": meta["title"],
@@ -279,13 +328,22 @@ def write_suites() -> list[Path]:
     for suite_id, stages in sorted(by_suite.items()):
         if not stages:
             raise SystemExit(f"suite {suite_id!r} has zero stages")
+        if suite_id in SEQUENTIAL_SUITE_IDS:
+            expected_keys = [
+                {"story": s, "scenario": sc}
+                for s, sc in SEQUENTIAL_STAGE_ORDER[suite_id]
+            ]
+            if stages != expected_keys:
+                raise SystemExit(
+                    f"suite {suite_id!r} stages {stages} != ordered {expected_keys}"
+                )
         suite_dir = root / suite_id
         suite_dir.mkdir(parents=True, exist_ok=True)
         path = suite_dir / "suite.json"
         payload = render_suite(suite_id, stages)
         path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
         written.append(path)
-    # Remove stale suite dirs not in catalog.
+    # Remove stale suite dirs not in catalog (keep sequential source trees).
     if root.is_dir():
         for child in list(root.iterdir()):
             if child.is_dir() and child.name not in SUITE_META:

@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Sequential ``calc_cli`` coding suite (live-capable):** ordered Fangore arc
+  that grows a shared-workspace ``calc.py`` CLI through numbers → ``+−`` →
+  ``×÷`` → ``^`` → parentheses → common functions. Suite injects
+  ``environment.workspace: suite``. Static CI uses ``coding_write`` stubs; live
+  (``MECHA_STORY_BACKEND=live``) ignores stubs and drives
+  ``ProjectCodingLocalWork`` with a real Completer via
+  ``completer_as_tool_loop_complete``.   Coding bursts honor ``verify_runs`` (file ``text_contains`` plus
+  ``python calc.py …`` checks, with one repair/refinement nudge), recover when
+  the model finishes without ``write_file``, and pass ``MECHA_MAX_TOKENS`` into
+  completions. Goals require named ``def evaluate`` / ``def main``. ``project_coding`` walks are live-eligible; the suite harness
+  asserts live HTTP POSTs occurred. Authoring:
+  ``scripts/write_calc_cli_suite.py`` + ``suites/calc_cli/sources/``.
+- **Sequential suite run ids:** each sequential suite attempt gets a durable
+  ``run_id`` under ``.mechaharness/suite_runs/`` (workspace + manifest). Banner /
+  warning / ``LATEST`` make the id easy to find; ``MECHA_SUITE_RUN_ID`` +
+  ``MECHA_SUITE_FROM`` resume or rerun from a stage without redoing priors.
 - **User-story suites:** thematic ``suite.json`` catalogs under
   ``static/fixture/v1/suites/`` with ``execution.mode`` ``parallel`` |
   ``sequential``, ``vars`` / ``setup`` / ``cleanup``, and explicit

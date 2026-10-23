@@ -1,0 +1,10 @@
+{
+  "id": "fangore_calc_parse_number",
+  "persona": "fangore",
+  "title": "Bootstrap a CLI that evaluates number literals",
+  "kind": "user_story",
+  "narrative": "Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph, and grows a shared calculator workspace from an empty arc. He asks for a small command-line program that reads one expression and prints a number literal value. He answers the external guidance soft point, confirms `calc.py` on disk, and runs it on `42` and `3.14` so the bootstrap claim is proven before later stages add operators. Live mode uses a real reason model for the coding burst; static mode uses an offline write stub.",
+  "implementation": "Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork` via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.",
+  "validation": "Harness `user_story` scenario `bootstrap.yaml` inside sequential suite `calc_cli` (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when coding stages run under live backend.",
+  "footnotes": []
+}

@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import subprocess
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
@@ -250,14 +252,154 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 **self._artifact_fields(),
             }
 
+        verify_runs = _normalize_verify_runs(inputs.get("verify_runs"))
+        verify_failures = self._execute_verify_runs(verify_runs)
+        repair_rounds = 0
+        max_repair_rounds = 2
+        while (
+            verify_failures
+            and "write_file" in self._tools
+            and repair_rounds < max_repair_rounds
+        ):
+            repair_rounds += 1
+            repair_goal = (
+                "Verify / acceptance checks failed after your edits. Treat this as "
+                "refinement round "
+                f"{repair_rounds}/{max_repair_rounds}: restore the required public "
+                "API (named def evaluate / def main when required), forbid eval/exec "
+                "on user input, and make every listed check pass. Then call "
+                "write_file with the full updated file(s).\n"
+                + "\n".join(verify_failures)
+            )
+            repair_item = TodoItem(
+                id=f"verify_repair_{repair_rounds}",
+                instruction=repair_goal,
+                acceptance=[],
+            )
+            repair_out = await self._run_item(
+                record,
+                plan,
+                repair_item,
+                work_item_index=len(plan.items) + repair_rounds,
+                path_prefix=prefix,
+            )
+            item_results.append({**repair_out, "item_id": repair_item.id})
+            if repair_out.get("result") == "failed":
+                return {
+                    **repair_out,
+                    "plan": _plan_payload(plan),
+                    "item_results": item_results,
+                    "verify_failures": verify_failures,
+                    "error": (
+                        f"{repair_out.get('error') or 'repair_failed'}; "
+                        + "; ".join(verify_failures)
+                    ),
+                    **self._artifact_fields(),
+                }
+            verify_failures = self._execute_verify_runs(verify_runs)
+        if verify_failures:
+            return {
+                "result": "failed",
+                "error": "verify_runs_failed: " + "; ".join(verify_failures),
+                "verify_failures": verify_failures,
+                "plan": _plan_payload(plan),
+                "item_results": item_results,
+                **self._artifact_fields(),
+            }
+
         return {
             "result": "ok",
             "mode": plan.mode,
             "plan": _plan_payload(plan),
             "item_results": item_results,
             "guidance": _latest_guidance_text(record),
+            "verify_runs": len(verify_runs),
             **self._artifact_fields(),
         }
+
+    def _execute_verify_runs(
+        self, verify_runs: list[dict[str, Any]]
+    ) -> list[str]:
+        """Run host-side workspace checks; return human-readable failure lines.
+
+        Spec keys:
+
+        - ``path`` (required): workspace-relative file
+        - ``text_contains``: str or list[str] that must appear in the file
+        - ``args`` / ``stdout_contains`` / ``exit_code``: optional process check
+          (``python path …args``). Omitted when the row is text-only.
+        """
+        if not verify_runs:
+            return []
+        if self._workspace_root is None:
+            return ["verify_runs require workspace_root"]
+        root = Path(self._workspace_root)
+        failures: list[str] = []
+        for index, spec in enumerate(verify_runs):
+            path = str(spec.get("path") or "").strip()
+            if not path:
+                failures.append(f"verify_runs[{index}]: missing path")
+                continue
+            script = root / path
+            if not script.is_file():
+                failures.append(f"verify_runs[{index}]: missing file {path}")
+                continue
+            text_needles = _as_str_list(spec.get("text_contains"))
+            text_forbids = _as_str_list(spec.get("text_forbids"))
+            if text_needles or text_forbids:
+                try:
+                    body = script.read_text(encoding="utf-8")
+                except OSError as exc:
+                    failures.append(f"verify_runs[{index}] {path}: read failed: {exc}")
+                    continue
+                for needle in text_needles:
+                    if needle not in body:
+                        failures.append(
+                            f"verify_runs[{index}] {path}: expected file text to "
+                            f"contain {needle!r}"
+                        )
+                for banned in text_forbids:
+                    if banned in body:
+                        failures.append(
+                            f"verify_runs[{index}] {path}: file text must not "
+                            f"contain {banned!r}"
+                        )
+            # Process check only when the row asks for argv / stdout / exit.
+            run_process = (
+                "args" in spec
+                or spec.get("stdout_contains") is not None
+                or "exit_code" in spec
+            )
+            if not run_process:
+                continue
+            args = [str(a) for a in list(spec.get("args") or [])]
+            expected_exit = int(spec.get("exit_code", 0))
+            needle = spec.get("stdout_contains")
+            try:
+                completed = subprocess.run(
+                    [sys.executable, str(script), *args],
+                    cwd=str(root),
+                    capture_output=True,
+                    text=True,
+                    timeout=float(spec.get("timeout_seconds") or 30),
+                    check=False,
+                )
+            except Exception as exc:  # noqa: BLE001
+                failures.append(f"verify_runs[{index}] {path} {args}: {exc}")
+                continue
+            if int(completed.returncode) != expected_exit:
+                failures.append(
+                    f"verify_runs[{index}] {path} {args}: exit "
+                    f"{completed.returncode} != {expected_exit}; "
+                    f"stderr={completed.stderr.strip()!r}"
+                )
+                continue
+            if needle is not None and str(needle) not in (completed.stdout or ""):
+                failures.append(
+                    f"verify_runs[{index}] {path} {args}: expected stdout to "
+                    f"contain {needle!r}, got {completed.stdout!r}"
+                )
+        return failures
 
     async def _run_item(
         self,
@@ -272,6 +414,34 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         goal = item.instruction
         messages = list((record.inputs or {}).get("messages") or [])
         if not messages:
+            verify_hint = ""
+            verify_runs = _normalize_verify_runs(
+                (record.inputs or {}).get("verify_runs")
+            )
+            if verify_runs and not str(item.id).startswith("verify_repair"):
+                lines = []
+                for spec in verify_runs:
+                    path = spec.get("path")
+                    for needle in _as_str_list(spec.get("text_contains")):
+                        lines.append(f"  - {path} must contain {needle!r}")
+                    for banned in _as_str_list(spec.get("text_forbids")):
+                        lines.append(f"  - {path} must NOT contain {banned!r}")
+                    if (
+                        "args" in spec
+                        or spec.get("stdout_contains") is not None
+                        or "exit_code" in spec
+                    ):
+                        args = " ".join(str(a) for a in list(spec.get("args") or []))
+                        out_n = spec.get("stdout_contains")
+                        lines.append(
+                            f"  - python {path} {args} → stdout contains {out_n!r}"
+                        )
+                if lines:
+                    verify_hint = (
+                        "\nHost will verify after you finish:\n"
+                        + "\n".join(lines)
+                        + "\n"
+                    )
             messages = [
                 {
                     "role": "user",
@@ -280,7 +450,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                         f"Todo {item.id}: {goal}\n"
                         f"Item acceptance: {item.acceptance}\n"
                         f"Driver guidance: {guidance_text}\n"
-                        "Use tools to implement this item under the workspace."
+                        f"{verify_hint}"
+                        "Use tools to implement this item under the workspace. "
+                        "Prefer run_shell to self-check before finishing."
                     ),
                 }
             ]
@@ -366,6 +538,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             grants=grants,
             event_log=self._event_log,
         )
+        writes_before = len(self._written_files)
         result = await executor.run(
             graph,
             budget_policy=BudgetPolicy.unlimited(),
@@ -374,6 +547,60 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             skip_linkage=True,
         )
         tools_out = graph.nodes["tools"].payload or {}
+        # Live models sometimes summarize without write_file; one recovery burst.
+        if (
+            result.status == "ok"
+            and len(self._written_files) == writes_before
+            and _instruction_expects_write(goal)
+            and "write_file" in self._tools
+        ):
+            recovery_messages = list(tools_out.get("messages") or messages)
+            recovery_messages.append(
+                {
+                    "role": "user",
+                    "content": (
+                        "You finished without calling write_file. "
+                        "Call write_file now with the full updated file contents "
+                        "for this todo, then stop with a short summary."
+                    ),
+                }
+            )
+            recover_iters = min(8, max(2, max_iterations // 2))
+            recover_graph = ConversationalToolLoopTemplate().instantiate(
+                GraphTemplateParams(
+                    goal=goal,
+                    inputs={
+                        "max_iterations": recover_iters,
+                        "messages": recovery_messages,
+                    },
+                    soft_bindings={"max_iterations": recover_iters},
+                )
+            )
+            recover_node = recover_graph.nodes["tools"]
+            recover_node.repeating = False
+            recover_node.payload = {
+                **dict(recover_node.payload or {}),
+                "messages": recovery_messages,
+                "max_iterations": recover_iters,
+            }
+            recover_result = await executor.run(
+                recover_graph,
+                budget_policy=BudgetPolicy.unlimited(),
+                envelope=CapabilityEnvelope.from_grants(grants),
+                run_id=f"local:{record.run_id}:{item.id}:write_recover",
+                skip_linkage=True,
+            )
+            recover_out = recover_graph.nodes["tools"].payload or {}
+            tools_out = {
+                **tools_out,
+                "rounds": int(tools_out.get("rounds") or 0)
+                + int(recover_out.get("rounds") or 0),
+                "final_text": recover_out.get("final_text")
+                or tools_out.get("final_text"),
+                "write_recovered": True,
+            }
+            if recover_result.status != "ok":
+                result = recover_result
         return {
             "result": "ok" if result.status == "ok" else "failed",
             "graph_status": result.status,
@@ -381,6 +608,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             "rounds": tools_out.get("rounds"),
             "final_text": tools_out.get("final_text"),
             "error": result.error,
+            "write_recovered": bool(tools_out.get("write_recovered")),
         }
 
 
@@ -416,6 +644,44 @@ def _acceptance_checks(
     if not isinstance(raw, dict):
         return {}
     return {str(k): bool(v) for k, v in raw.items()}
+
+
+def _normalize_verify_runs(raw: Any) -> list[dict[str, Any]]:
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for item in raw:
+        if isinstance(item, dict) and item.get("path"):
+            out.append(dict(item))
+    return out
+
+
+def _as_str_list(raw: Any) -> list[str]:
+    if raw is None:
+        return []
+    if isinstance(raw, str):
+        return [raw]
+    if isinstance(raw, list):
+        return [str(x) for x in raw if str(x)]
+    return [str(raw)]
+
+
+def _instruction_expects_write(instruction: str) -> bool:
+    """Heuristic: coding todos that create/update files should call write_file."""
+    text = instruction.lower()
+    markers = (
+        "write",
+        "update",
+        "create",
+        "edit",
+        "implement",
+        "extend",
+        "add ",
+        "fix",
+        ".py",
+        "calc.py",
+    )
+    return any(marker in text for marker in markers)
 
 
 def _latest_guidance_text(record: GeneratorRunRecord) -> str:

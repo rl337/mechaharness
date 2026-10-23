@@ -2,8 +2,9 @@
 
 ## Status
 
-**Implemented** (schema, harness, pytest, 17 parallel suites, coverage ratchet,
-guide Suites section). **`calc_cli` still deferred.**
+**Implemented** (schema, harness, pytest, parallel thematic suites, coverage
+ratchet, guide Suites section). **`calc_cli` sequential coding suite shipped**
+(ordered stages + shared suite workspace).
 
 ## Goals
 
@@ -94,19 +95,31 @@ HTTP twins stay under model trees; suites **reference story ids** (no fixture du
 4. **Coverage ratchet** — every static story id ∈ ≥1 suite.
 5. **Migrate** — author `suite.json` files per tables above.
 6. **Docs** — user-stories skill + guide Suites section + CHANGELOG.
-7. **Stop** — do **not** add `calc_cli` in this change.
+7. **`calc_cli`** — sequential + ordered + `workspace: temp` +
+   `setup: [ensure_workspace]`; stages use `environment.workspace: suite`.
 
 ## Parallel vs sequential
 
 | Kind | When |
 |------|------|
-| **parallel** (default migrate) | Entire current catalog — independent mocks/cassettes |
-| **sequential + ordered** | Shared workspace arcs — **calc_cli later** |
+| **parallel** (default migrate) | Library catalog — independent mocks/cassettes |
+| **sequential + ordered** | Shared workspace arcs — **`calc_cli`** |
 
 `fangore_guided_coding` stays **parallel**: `session` and `helper_run_python` do not share an arc dir today.
 
+## Sequential suite run ids (resume)
+
+Sequential suites (`calc_cli`) persist each attempt under
+`.mechaharness/suite_runs/<run_id>/` with a shared `workspace/`, `manifest.json`,
+and conspicuous `RUN_ID.txt` / `BANNER.txt`. Pointers: `LATEST`, `<suite>.latest`.
+
+| Env | Purpose |
+|-----|---------|
+| `MECHA_SUITE_RUN_ID` | Resume that run’s workspace + completion marks |
+| `MECHA_SUITE_FROM` | Restart at stage (`story/scenario`, stem, or index); requires run id |
+| `MECHA_SUITE_RUNS_DIR` | Override runs root |
+
 ## Out of scope
 
-- `calc_cli` sequential coding suite
 - Suite-level live backend beyond stage environment
 - Moving story directories on disk

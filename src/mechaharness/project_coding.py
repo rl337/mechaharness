@@ -163,6 +163,7 @@ def _as_complete_fn(
     *,
     tools: ToolRegistry,
     model: str,
+    max_tokens: int | None = None,
 ) -> Any:
     """Adapt Completer / callable into ConversationalToolLoopRunner complete.
 
@@ -177,6 +178,10 @@ def _as_complete_fn(
     tool_defs = tools.definitions()
     use_native = _native_tools_enabled()
     system_prompt = _prompt_tools_system(tool_defs)
+    token_budget = max_tokens
+    if token_budget is None:
+        raw = (os.environ.get("MECHA_MAX_TOKENS") or "").strip()
+        token_budget = int(raw) if raw.isdigit() else None
 
     def complete(messages: list[dict[str, Any]], meta: Any) -> Any:
         del meta
@@ -190,6 +195,7 @@ def _as_complete_fn(
             model=model,
             messages=chat,
             tools=list(tool_defs) if use_native else None,
+            max_tokens=token_budget,
         )
         try:
             result = completer.complete(request)
@@ -237,6 +243,8 @@ def _prompt_tools_system(tool_defs: list[Any]) -> str:
         '{"name": "TOOL_NAME", "arguments": {...}}\n'
         "</tool_call>\n"
         "You may call multiple tools by emitting multiple blocks. "
+        "When creating or updating files you MUST call write_file with the full "
+        "file contents before you finish — do not claim done without write_file. "
         "When finished (no more tools), reply with a short plain summary only.\n"
         f"Available tools:\n{json.dumps(catalog, indent=2)}"
     )
@@ -291,24 +299,68 @@ def _messages_for_prompt_tools(
     return out
 
 
-_TOOL_CALL_BLOCK = re.compile(
-    r"<tool_call>\s*(\{.*?\})\s*</tool_call>",
-    re.DOTALL | re.IGNORECASE,
-)
-_TOOL_CALL_JSON_LINE = re.compile(
-    r"^\s*\{[^\n]*\"name\"\s*:\s*\"[^\"]+\"[^\n]*\"arguments\"\s*:",
-    re.MULTILINE,
-)
+_TOOL_CALL_OPEN = re.compile(r"<tool_call\b[^>]*>", re.IGNORECASE)
+_TOOL_CALL_CLOSE = re.compile(r"</tool_call\s*>", re.IGNORECASE)
+
+
+def _extract_balanced_json_object(text: str, start: int) -> tuple[str | None, int]:
+    """Return JSON object starting at *start* and the index after it."""
+    while start < len(text) and text[start].isspace():
+        start += 1
+    if start >= len(text) or text[start] != "{":
+        return None, start
+    depth = 0
+    in_string = False
+    escape = False
+    for index in range(start, len(text)):
+        ch = text[index]
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : index + 1], index + 1
+    return None, start
 
 
 def _parse_prompt_tool_calls(content: str | None) -> list[dict[str, Any]]:
     if not content:
         return []
     calls: list[dict[str, Any]] = []
-    for match in _TOOL_CALL_BLOCK.finditer(content):
+    search_from = 0
+    while True:
+        open_match = _TOOL_CALL_OPEN.search(content, search_from)
+        if open_match is None:
+            break
+        close_match = _TOOL_CALL_CLOSE.search(content, open_match.end())
+        if close_match is None:
+            # Truncated block — try balanced JSON anyway.
+            payload_text, _ = _extract_balanced_json_object(content, open_match.end())
+            search_from = open_match.end()
+        else:
+            inner = content[open_match.end() : close_match.start()]
+            payload_text, _ = _extract_balanced_json_object(inner, 0)
+            if payload_text is None:
+                payload_text = inner.strip() or None
+            search_from = close_match.end()
+        if not payload_text:
+            continue
         try:
-            payload = json.loads(match.group(1))
+            payload = json.loads(payload_text)
         except json.JSONDecodeError:
+            continue
+        if not isinstance(payload, dict):
             continue
         name = str(payload.get("name") or "").strip()
         args = payload.get("arguments")
@@ -347,6 +399,15 @@ def _parse_prompt_tool_calls(content: str | None) -> list[dict[str, Any]]:
                 }
             ]
     return calls
+
+
+def _looks_like_broken_tool_call(content: str | None) -> bool:
+    """True when the model attempted a prompt tool call that did not parse."""
+    if not content:
+        return False
+    if _TOOL_CALL_OPEN.search(content) is None:
+        return False
+    return not _parse_prompt_tool_calls(content)
 
 
 def _dicts_to_chat_messages(messages: list[dict[str, Any]]) -> list[ChatMessage]:
@@ -535,7 +596,21 @@ def mcp_host_config_class() -> type[ProjectCodingConfig] | None:
     raise KeyError(f"unknown MECHA_MCP_HOST={name!r}")
 
 
+def completer_as_tool_loop_complete(
+    completer: Any,
+    *,
+    tools: ToolRegistry,
+    model: str,
+    max_tokens: int | None = None,
+) -> Any:
+    """Public adapter: Completer → ConversationalToolLoopRunner ``complete`` fn."""
+    return _as_complete_fn(
+        completer, tools=tools, model=model, max_tokens=max_tokens
+    )
+
+
 __all__ = [
     "ProjectCodingConfig",
+    "completer_as_tool_loop_complete",
     "mcp_host_config_class",
 ]

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
 from tests.stories.harness.base import StoryHarness
@@ -32,7 +34,12 @@ def known_ops_for(kind: str) -> frozenset[str] | None:
     return harness.known_ops()
 
 
-async def run_story(case: StoryCase, backend: StoryBackend) -> None:
+async def run_story(
+    case: StoryCase,
+    backend: StoryBackend,
+    *,
+    suite_workspace: Path | None = None,
+) -> None:
     meta = case.load_json("story.json")
     kind = meta["kind"]
     if backend.mode == "live" and case.adapter == "in_process":
@@ -50,4 +57,7 @@ async def run_story(case: StoryCase, backend: StoryBackend) -> None:
         raise ValueError(
             f"unknown story harness kind {kind!r} in {case.label}; known: {known}"
         ) from exc
-    await harness.run(case, backend)
+    if isinstance(harness, UserStoryHarness):
+        await harness.run(case, backend, suite_workspace=suite_workspace)
+    else:
+        await harness.run(case, backend)

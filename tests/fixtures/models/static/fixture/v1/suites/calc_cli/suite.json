@@ -1,0 +1,41 @@
+{
+  "id": "calc_cli",
+  "title": "Grow a CLI math expression calculator",
+  "persona": "fangore",
+  "execution": {
+    "mode": "sequential",
+    "ordered": true
+  },
+  "vars": {},
+  "setup": [
+    "ensure_workspace"
+  ],
+  "cleanup": [],
+  "workspace": "temp",
+  "stages": [
+    {
+      "story": "fangore_calc_parse_number",
+      "scenario": "bootstrap"
+    },
+    {
+      "story": "fangore_calc_add_sub",
+      "scenario": "add_sub"
+    },
+    {
+      "story": "fangore_calc_mul_div",
+      "scenario": "mul_div"
+    },
+    {
+      "story": "fangore_calc_exponent",
+      "scenario": "exponent"
+    },
+    {
+      "story": "fangore_calc_grouping",
+      "scenario": "grouping"
+    },
+    {
+      "story": "fangore_calc_functions",
+      "scenario": "functions"
+    }
+  ]
+}

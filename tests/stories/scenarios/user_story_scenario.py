@@ -42,7 +42,8 @@ class EnvironmentBlock(BaseModel):
     # Durable local-work hook: noop / plan_classify / project_coding.
     local_work: Literal["noop", "plan_classify", "project_coding"] = "noop"
     # Workspace root for coding tools + run_python / workspace_read.
-    # Absolute path, path relative to the scenario file, or ``temp``.
+    # Absolute path, path relative to the scenario file, ``temp``, or ``suite``
+    # (sequential suite injects a shared arc workspace).
     workspace: str | None = None
     # Offline Completer stub write when ``local_work: project_coding``.
     coding_write: CodingWriteBlock | None = None

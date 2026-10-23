@@ -68,12 +68,32 @@ Live collects HTTP cassette twins **and** static stories that call `infer` / `ju
 
 Suites live under `static/fixture/v1/suites/<suite_id>/suite.json`. Each static story scenario belongs to exactly one primary suite. **Parallel** suites run stages as isolated story cases (order does not matter). **Sequential** suites share a workspace and stop on the first failure. Pytest: `test_user_story_suite`; HTTP twins still run via `test_user_story`.
 
+**Sequential run ids:** each sequential suite run creates a durable id under `.mechaharness/suite_runs/<run_id>/` (workspace + `manifest.json` + `RUN_ID.txt`). The id is printed in a banner (`pytest -s`) and as a warning; `LATEST` / `<suite_id>.latest` point at it. Resume or rerun from a stage without redoing priors:
+
+```bash
+# Fresh sequential run (note the printed run_id)
+pytest -s -q tests/stories/test_user_story_suites.py -k calc_cli
+
+# Continue / rerun from mul_div using the shared workspace
+MECHA_SUITE_RUN_ID=$(cat .mechaharness/suite_runs/calc_cli.latest) \
+  MECHA_SUITE_FROM=mul_div \
+  pytest -s -q tests/stories/test_user_story_suites.py -k calc_cli
+```
+
+`MECHA_SUITE_FROM` accepts `story/scenario`, a unique scenario stem, or a 0-based index. `MECHA_SUITE_RUNS_DIR` overrides the runs root.
+
 After editing membership, regenerate suites if you use the membership helper:
 
 ```bash
 python scripts/generate_user_story_suites.py
 python scripts/generate_user_story_suites.py --check
 ```
+
+### `calc_cli` — Grow a CLI math expression calculator
+
+Persona **fangore**; execution `sequential` (ordered); 6 stage(s).
+
+Stories: `fangore_calc_add_sub`, `fangore_calc_exponent`, `fangore_calc_functions`, `fangore_calc_grouping`, `fangore_calc_mul_div`, `fangore_calc_parse_number`
 
 ### `fangore_access_authority` — Grants, capability envelopes, and authority gates
 
@@ -593,6 +613,78 @@ Harness `user_story` scenario `bounded_retry_recipe.yaml` drives `run_recipe`; e
 #### Footnotes
 
 [^rc-bounded-retry]: [Recipes requirements (bounded retry)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — RT-01..05 reference recipe
+
+### `fangore_calc_add_sub` — Extend the calculator with addition and subtraction
+
+Fangore continues the shared calculator arc. He asks guided coding to extend `calc.py` so left-associative addition and subtraction work (`1+2-3`) while number literals from the bootstrap stage still evaluate. He answers guidance, confirms the file, and runs regression expressions for both numbers and additive chains.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork` via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.
+
+#### Validation
+
+Harness `user_story` scenario `add_sub.yaml` inside sequential suite `calc_cli` (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when coding stages run under live backend.
+
+### `fangore_calc_exponent` — Add right-associative exponentiation
+
+Fangore extends the calculator with `^` as right-associative exponentiation (`2^3^2`, `2*3^2`) without breaking earlier precedence.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork` via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.
+
+#### Validation
+
+Harness `user_story` scenario `exponent.yaml` inside sequential suite `calc_cli` (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when coding stages run under live backend.
+
+### `fangore_calc_functions` — Add common calculator functions
+
+Fangore finishes the calculator arc by adding common functions (`sqrt`, `abs`, `sin`/`cos`/`tan` in radians, `ln`/`log`, `min`/`max`) composable with prior operators and grouping. The shared workspace now holds a full expression CLI.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork` via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.
+
+#### Validation
+
+Harness `user_story` scenario `functions.yaml` inside sequential suite `calc_cli` (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when coding stages run under live backend.
+
+### `fangore_calc_grouping` — Add parentheses to override precedence
+
+Fangore adds grouping symbols so parentheses override precedence (`(1+2)*3`, `2^(1+1)`) while earlier operator stages still pass.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork` via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.
+
+#### Validation
+
+Harness `user_story` scenario `grouping.yaml` inside sequential suite `calc_cli` (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when coding stages run under live backend.
+
+### `fangore_calc_mul_div` — Add multiplication and division with tighter precedence
+
+Fangore keeps the same workspace and asks for multiplication and division that bind tighter than addition and subtraction (`2+3*4`, `8/2*2`). Prior additive cases must stay green.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork` via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.
+
+#### Validation
+
+Harness `user_story` scenario `mul_div.yaml` inside sequential suite `calc_cli` (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when coding stages run under live backend.
+
+### `fangore_calc_parse_number` — Bootstrap a CLI that evaluates number literals
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph, and grows a shared calculator workspace from an empty arc. He asks for a small command-line program that reads one expression and prints a number literal value. He answers the external guidance soft point, confirms `calc.py` on disk, and runs it on `42` and `3.14` so the bootstrap claim is proven before later stages add operators. Live mode uses a real reason model for the coding burst; static mode uses an offline write stub.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork` via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.
+
+#### Validation
+
+Harness `user_story` scenario `bootstrap.yaml` inside sequential suite `calc_cli` (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when coding stages run under live backend.
 
 ### `fangore_capability_envelope_narrow` — Narrow child capability envelopes without silent inheritance
 
