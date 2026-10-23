@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -62,6 +63,17 @@ def _validate_ref(value: str, *, label: str = "ref") -> str:
     if not text or not _SAFE_REF.match(text):
         raise ValueError(f"unsafe {label}: {value!r}")
     return text
+
+
+def _resolve_gh() -> str:
+    """Prefer ``PATH``, then ``~/.local/bin/gh`` (common user install)."""
+    found = shutil.which("gh")
+    if found:
+        return found
+    candidate = Path.home() / ".local" / "bin" / "gh"
+    if candidate.is_file() and os.access(candidate, os.X_OK):
+        return str(candidate)
+    return "gh"
 
 
 def build_coding_tool_registry(
@@ -191,7 +203,7 @@ def build_coding_tool_registry(
         body_path.parent.mkdir(parents=True, exist_ok=True)
         fs.write_text(str(body_path), body_text)
         cmd = [
-            "gh",
+            _resolve_gh(),
             "pr",
             "create",
             "--base",
