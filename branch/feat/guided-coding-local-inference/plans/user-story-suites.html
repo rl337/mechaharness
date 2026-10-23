@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User story suites: organize, implement, migrate &mdash; MechaHarness 0.7.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5a057da9"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">User story suites: organize, implement, migrate</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/plans/user-story-suites.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="user-story-suites-organize-implement-migrate">
+<h1>User story suites: organize, implement, migrate<a class="headerlink" href="#user-story-suites-organize-implement-migrate" title="Link to this heading"></a></h1>
+<section id="status">
+<h2>Status<a class="headerlink" href="#status" title="Link to this heading"></a></h2>
+<p><strong>Implemented</strong> (schema, harness, pytest, parallel thematic suites, coverage
+ratchet, guide Suites section). Sequential coding arcs: <strong><code class="docutils literal notranslate"><span class="pre">calc_cli</span></code></strong>,
+<strong><code class="docutils literal notranslate"><span class="pre">counter_pkg</span></code></strong>, and <strong><code class="docutils literal notranslate"><span class="pre">delegate_pkg</span></code></strong>. See also
+<code class="docutils literal notranslate"><span class="pre">docs/plans/coding-delegate-suites.md</span></code>.</p>
+</section>
+<section id="goals">
+<h2>Goals<a class="headerlink" href="#goals" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Add a <strong>suite</strong> level: shared setup/vars, <code class="docutils literal notranslate"><span class="pre">execution.mode</span></code> (<code class="docutils literal notranslate"><span class="pre">parallel</span></code> | <code class="docutils literal notranslate"><span class="pre">sequential</span></code>), optional <code class="docutils literal notranslate"><span class="pre">ordered</span></code>.</p></li>
+<li><p><strong>Organize existing</strong> static-fixture stories into thematic suites (almost all <strong>parallel</strong>).</p></li>
+<li><p><strong>Migrate</strong> discovery/CI so suite membership is first-class; free stories remain allowed during transition then ratchet to “every story in ≥1 suite.”</p></li>
+<li><p><strong>Defer</strong> <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> (sequential + ordered + arc workspace) until migration is green.</p></li>
+</ol>
+</section>
+<section id="what-stays-the-same">
+<h2>What stays the same<a class="headerlink" href="#what-stays-the-same" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">story.json</span></code> + <code class="docutils literal notranslate"><span class="pre">scenarios/*.yaml</span></code> remain the narrative/claim unit.</p></li>
+<li><p>Twin parity, guide generation from stories, personas.</p></li>
+<li><p>Flat <code class="docutils literal notranslate"><span class="pre">test_user_story[case]</span></code> can remain for free stories during migration; suites add <code class="docutils literal notranslate"><span class="pre">test_user_story_suite[id]</span></code>.</p></li>
+</ul>
+</section>
+<section id="suite-model">
+<h2>Suite model<a class="headerlink" href="#suite-model" title="Link to this heading"></a></h2>
+<p>Location (static fixture first):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>tests/fixtures/models/static/fixture/v1/suites/&lt;suite_id&gt;/suite.json
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">suite.json</span></code> (v1 fields):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">persona</span></code></p></td>
+<td><p>Catalog / guide</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">execution.mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">parallel</span></code> (default for migrated suites) or <code class="docutils literal notranslate"><span class="pre">sequential</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">execution.ordered</span></code></p></td>
+<td><p>Only meaningful with <code class="docutils literal notranslate"><span class="pre">sequential</span></code> (calc later)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">vars</span></code></p></td>
+<td><p>Suite-level bindings merged into each stage environment</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">setup</span></code> / <code class="docutils literal notranslate"><span class="pre">cleanup</span></code></p></td>
+<td><p>Declarative hooks (v1: <code class="docutils literal notranslate"><span class="pre">ensure_workspace</span></code>, no-op list OK)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">workspace</span></code></p></td>
+<td><p>Optional; omit for parallel library suites</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">stages[]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;story&quot;:</span> <span class="pre">&quot;&lt;id&gt;&quot;,</span> <span class="pre">&quot;scenario&quot;:</span> <span class="pre">&quot;&lt;stem&gt;&quot;</span> <span class="pre">}</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Harness:</p>
+<ul class="simple">
+<li><p><strong>Parallel suite:</strong> expand stages to today’s independent <code class="docutils literal notranslate"><span class="pre">StoryCase</span></code> runs (same isolation as now); mark suite node parallel-safe.</p></li>
+<li><p><strong>Sequential suite:</strong> one pytest case, shared workspace, stages in order, <code class="docutils literal notranslate"><span class="pre">&#64;pytest.mark.serial</span></code> / xdist group (used later by <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code>).</p></li>
+<li><p>Stage failure policy (v1): fail the suite; sequential arcs skip remaining stages with clear “prerequisite failed.”</p></li>
+</ul>
+<p>Docs: extend <code class="docutils literal notranslate"><span class="pre">.cursor/skills/user-stories/SKILL.md</span></code> + regenerate guide with a Suites section.</p>
+</section>
+<section id="how-to-organize-existing-stories">
+<h2>How to organize <em>existing</em> stories<a class="headerlink" href="#how-to-organize-existing-stories" title="Link to this heading"></a></h2>
+<p>Do <strong>not</strong> force one sequential mega-suite. Cluster by <strong>capability</strong> into <strong>parallel</strong> suites. Multi-scenario stories stay one story; each scenario is an explicit suite stage.</p>
+<section id="fangore-suite-map">
+<h3>Fangore (suite map)<a class="headerlink" href="#fangore-suite-map" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Suite id</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">execution</span></code></p></th>
+<th class="head"><p>Member themes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_durable_ioc</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>durable_<em>, guidance_</em>, graph_guidance_yield, driver_session_resume, local_plan_resume</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_guided_coding</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>guided_coding_recipe (session, helper_run_python), instruction_todo_plan (all scenarios)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_decision_plane</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>decision_plane_*, decision_surface_reject</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_access_authority</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>grants, capability envelope, authority gate, execution token, denial, auth epoch, soft vs hard, risk autonomy, human review</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_job_lanes</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>job_lane_*</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_graph_executor</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>graph_*, linkage/preflight, traversal, node_components, soft enter/until/one_step, budget</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_recipes_tiling</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>verify_repair, bounded_retry/repair, conversational_tool_loop, environment_repair, recipe_as_tool, namespace_tile, produce_critique, independent_review, initialize_preflight, fan_in, stop_contract, …</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_context_memory</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>context_*, derived_memory, compaction/layers/provider, observation chain, deficit</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_host_kit</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>host_kit_<em>, completer_flavors, config_access_policy, backend_describe_recipe, harness_</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_tdr_crash</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>all tdr_crash_*</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_jev</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>action_safety, citation_<em>, context_</em>, req_review_<em>, task_route_</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_lifecycle_ops</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>lifecycle_*, wake, wip, handoff, operation_compensation, effect_revalidation, tool freshness/effects</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_recipe_registry</span></code></p></td>
+<td><p>parallel</p></td>
+<td><p>recipe lineage/version/port/registry compose, soft evolution, template incubation</p></td>
+</tr>
+</tbody>
+</table>
+<p>Exact membership: checklist from <code class="docutils literal notranslate"><span class="pre">static/fixture/v1/stories/*/story.json</span></code> during migration; every story id in <strong>exactly one</strong> primary suite for v1.</p>
+</section>
+<section id="nubble">
+<h3>Nubble<a class="headerlink" href="#nubble" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Suite id</p></th>
+<th class="head"><p>Members</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nubble_observability</span></code></p></td>
+<td><p>run_cost_events, graph_event_correlators, trace_*, resume_cost, guidance_cost_budget, coordination_cost, efficiency_scorecard, recipe_audit_dimensions, review_audit_reconstruct</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nubble_routing_topology</span></code></p></td>
+<td><p>model_affinity, lane_load_hint, model_routing, repo_topology, topology_efficiency, environment_*, workspace_isolation, rollout_graph</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="taloneth">
+<h3>Taloneth<a class="headerlink" href="#taloneth" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Suite id</p></th>
+<th class="head"><p>Members</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">taloneth_decision_eval</span></code></p></td>
+<td><p>fixture_judge_batch, policy_replay, shadow_*, decision_plane_shadow_compare, offline_decision_export, validator_qualification</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">taloneth_harness_research</span></code></p></td>
+<td><p>insp_* experiment/eval/ablation/parity/promotion/safety/…, atk_research, cache_layout</p></td>
+</tr>
+</tbody>
+</table>
+<p>HTTP twins stay under model trees; suites <strong>reference story ids</strong> (no fixture duplication).</p>
+</section>
+</section>
+<section id="implementation-order">
+<h2>Implementation order<a class="headerlink" href="#implementation-order" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Schema + loader</strong> — <code class="docutils literal notranslate"><span class="pre">SuiteSpec</span></code>; load <code class="docutils literal notranslate"><span class="pre">suites/*/suite.json</span></code>; validate refs; execution defaults (<code class="docutils literal notranslate"><span class="pre">parallel</span></code>, <code class="docutils literal notranslate"><span class="pre">ordered:</span> <span class="pre">false</span></code>).</p></li>
+<li><p><strong>Harness</strong> — <code class="docutils literal notranslate"><span class="pre">run_user_story_suite</span></code>; merge <code class="docutils literal notranslate"><span class="pre">vars</span></code>; setup/cleanup; parallel = isolated stage runs; sequential = shared workspace + stop on failure.</p></li>
+<li><p><strong>Pytest</strong> — <code class="docutils literal notranslate"><span class="pre">test_user_story_suite</span></code>; serial mark for sequential. Keep <code class="docutils literal notranslate"><span class="pre">test_user_story</span></code> until orphan ratchet is 100%.</p></li>
+<li><p><strong>Coverage ratchet</strong> — every static story id ∈ ≥1 suite.</p></li>
+<li><p><strong>Migrate</strong> — author <code class="docutils literal notranslate"><span class="pre">suite.json</span></code> files per tables above.</p></li>
+<li><p><strong>Docs</strong> — user-stories skill + guide Suites section + CHANGELOG.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">calc_cli</span></code></strong> — sequential + ordered + <code class="docutils literal notranslate"><span class="pre">workspace:</span> <span class="pre">temp</span></code> +
+<code class="docutils literal notranslate"><span class="pre">setup:</span> <span class="pre">[ensure_workspace]</span></code>; stages use <code class="docutils literal notranslate"><span class="pre">environment.workspace:</span> <span class="pre">suite</span></code>.</p></li>
+</ol>
+</section>
+<section id="parallel-vs-sequential">
+<h2>Parallel vs sequential<a class="headerlink" href="#parallel-vs-sequential" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Kind</p></th>
+<th class="head"><p>When</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>parallel</strong> (default migrate)</p></td>
+<td><p>Library catalog — independent mocks/cassettes</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>sequential + ordered</strong></p></td>
+<td><p>Shared workspace arcs — <strong><code class="docutils literal notranslate"><span class="pre">calc_cli</span></code></strong></p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">fangore_guided_coding</span></code> stays <strong>parallel</strong>: <code class="docutils literal notranslate"><span class="pre">session</span></code> and <code class="docutils literal notranslate"><span class="pre">helper_run_python</span></code> do not share an arc dir today.</p>
+</section>
+<section id="sequential-suite-run-ids-resume">
+<h2>Sequential suite run ids (resume)<a class="headerlink" href="#sequential-suite-run-ids-resume" title="Link to this heading"></a></h2>
+<p>Sequential suites (<code class="docutils literal notranslate"><span class="pre">calc_cli</span></code>) persist each attempt under
+<code class="docutils literal notranslate"><span class="pre">.mechaharness/suite_runs/&lt;run_id&gt;/</span></code> with a shared <code class="docutils literal notranslate"><span class="pre">workspace/</span></code>, <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code>,
+and conspicuous <code class="docutils literal notranslate"><span class="pre">RUN_ID.txt</span></code> / <code class="docutils literal notranslate"><span class="pre">BANNER.txt</span></code>. Pointers: <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;suite&gt;.latest</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Env</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_SUITE_RUN_ID</span></code></p></td>
+<td><p>Resume that run’s workspace + completion marks</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_SUITE_FROM</span></code></p></td>
+<td><p>Restart at stage (<code class="docutils literal notranslate"><span class="pre">story/scenario</span></code>, stem, or index); requires run id</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MECHA_SUITE_RUNS_DIR</span></code></p></td>
+<td><p>Override runs root</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="out-of-scope">
+<h2>Out of scope<a class="headerlink" href="#out-of-scope" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Suite-level live backend beyond stage environment</p></li>
+<li><p>Moving story directories on disk</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

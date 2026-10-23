@@ -1,0 +1,189 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspiration: Reliable Personal Agent Execution Patterns &mdash; MechaHarness 0.7.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5a057da9"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inspiration: Reliable Personal Agent Execution Patterns</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="inspiration-reliable-personal-agent-execution-patterns">
+<h1>Inspiration: Reliable Personal Agent Execution Patterns<a class="headerlink" href="#inspiration-reliable-personal-agent-execution-patterns" title="Link to this heading"></a></h1>
+<p>Status: proposal; not implemented by this document.
+Source: Hamza Khalid (&#64;humzaakhalid), “100 Tips &amp; Tricks for Building Your Personal AI Agent”, X post, July 25 (as presented by the author). https://x.com/humzaakhalid/status/2080954210456334798?s=46
+Source scope: numbered recommendations 1–85 plus the concluding fifteen priority recommendations, as supplied in the source text. These are experience reports, not independently verified benchmarks.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
+<p>An always-on agent must make the <em>execution system</em>, rather than a language-model prompt, responsible for invariants. MechaHarness owns reusable graph primitives and recipes, not June’s personal identity, memory content, or scheduling policy.</p>
+</section>
+<section id="proposed-requirements-and-acceptance-scenarios">
+<h2>Proposed requirements and acceptance scenarios<a class="headerlink" href="#proposed-requirements-and-acceptance-scenarios" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>MH-PA-01: Typed provenance and freshness</strong> (tips 6, 7, 65; priority 7–8). Tool results can carry source, observed_at, fetched_at, expiry/freshness policy, and degraded/stale status. A graph can reject stale evidence before an external decision. Test: eight-day-old CRM cache cannot be silently presented as current.</p></li>
+<li><p><strong>MH-PA-02: Authority policy gate</strong> (tips 39–42, 69–71, 73; priority 1–2, 11–14). Hard rules are enforced outside model text. Gate actions by capability, reversibility, impact, source trust, and explicit approval. Test: untrusted mobile/forwarded content cannot authorize an external send; a reversible but high-impact trade still requires the configured authority.</p></li>
+<li><p><strong>MH-PA-03: Recipe contracts</strong> (tips 17–21, 27–30). Register reusable subgraphs with typed inputs/outputs, applicability and exclusion predicates, budgets, score/plateau termination, and traceable outcomes. Initial recipes: produce-critique-refine; adversarial review; three-round council with recorded dissent. Council is optional, not default.</p></li>
+<li><p><strong>MH-PA-04: Delegation and handoff</strong> (tips 23–26, 31–32). Delegated nodes receive goals, relevant evidence, exclusions, risks, expected verdict schema, and provenance. Catch-all routing is logged for coverage audits. Test: handoff contains sufficient state for independent resumption.</p></li>
+<li><p><strong>MH-PA-05: Checkpoint-compatible execution</strong> (tips 33–34, 76–77). Persist recipe progress at stable checkpoints, including conflict resolution outcomes, idempotency markers, pending approvals, and error counts. Test crash recovery at each transition without replaying irreversible effects.</p></li>
+<li><p><strong>MH-PA-06: Deterministic alert/error rules</strong> (tips 37, 47, 76). Rule evaluation and escalation are deterministic; models may propose actions but do not decide whether a threshold fired. Test once/log, repeated/surface, persistent/propose repair.</p></li>
+<li><p><strong>MH-PA-07: Correction-to-test feedback</strong> (tips 38, 74, 77–79; priority 15). Capture corrections as structured candidate specification debt, link to failing scenarios, and require review before changing policies. Regression tests verify changes.</p></li>
+<li><p><strong>MH-PA-08: Observability and audit</strong> (tips 19, 78–79). Record recipe selection, model/tool usage, latency/cost, freshness, policy decisions, retries, and failure classifications. Make quarterly audit possible without reading entire transcripts.</p></li>
+</ul>
+</section>
+<section id="architecture-boundaries">
+<h2>Architecture boundaries<a class="headerlink" href="#architecture-boundaries" title="Link to this heading"></a></h2>
+<p>June supplies principal preferences, identity, domain memory, scheduling, and proactive prioritization. MechaHarness exposes execution interfaces and generic recipes. home_network hosts supporting state/backup/health infrastructure. Do not make Markdown the only persistence substrate; keep human-readable specifications in git and transactional state in suitable stores. Do not indiscriminately load all memory into model context.</p>
+</section>
+<section id="open-questions-todo">
+<h2>Open questions / TODO<a class="headerlink" href="#open-questions-todo" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>[ ] Align authority gate with current graph hard/soft node resolution and precedence.</p></li>
+<li><p>[ ] Define provenance/freshness schema and per-source policy resolution.</p></li>
+<li><p>[ ] Define graph recipe registry, activation and NOT-FOR predicates, and versioning.</p></li>
+<li><p>[ ] Choose durable checkpoint schema and replay/idempotency guarantees.</p></li>
+<li><p>[ ] Define earned-autonomy evidence contract, keeping promotion approval outside the model.</p></li>
+<li><p>[ ] Map requirements to existing implementations and avoid duplicate primitives.</p></li>
+</ul>
+</section>
+<section id="suggested-order">
+<h2>Suggested order<a class="headerlink" href="#suggested-order" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Inspect current code and tests for overlap.</p></li>
+<li><p>Introduce provenance and policy contracts with negative tests.</p></li>
+<li><p>Implement one refinement recipe and structured handoff.</p></li>
+<li><p>Add checkpoint/recovery tests and deterministic alert evaluation.</p></li>
+<li><p>Add correction capture and audit reporting.</p></li>
+</ol>
+<p>Attribution: Concepts adapted from Hamza Khalid’s post above; architecture choices and acceptance criteria are project-specific interpretations.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
