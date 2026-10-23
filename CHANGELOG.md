@@ -25,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ``run_id`` under ``.mechaharness/suite_runs/`` (workspace + manifest). Banner /
   warning / ``LATEST`` make the id easy to find; ``MECHA_SUITE_RUN_ID`` +
   ``MECHA_SUITE_FROM`` resume or rerun from a stage without redoing priors.
+- **``counter_pkg`` coding-delegate suite:** sequential multi-file arc
+  (package + pytest + CLI) with ``coding_writes`` stubs, ``verify_runs.pytest``,
+  and the same live Completer / repair path as ``calc_cli``. Roadmap:
+  ``docs/plans/coding-delegate-suites.md``.
+- **``delegate_pkg`` coding-delegate suite:** one sequential Widget arc covering
+  list-mode bootstrap, thorough guidance fork (code + README), red-green
+  ``double()``, and ``Widget``→``Gadget`` refactor. Live Completer is the gate;
+  static stubs provisional. MCP reuses the same graph (no fourth suite).
+  Authoring: ``scripts/write_delegate_pkg_suite.py``.
 - **User-story suites:** thematic ``suite.json`` catalogs under
   ``static/fixture/v1/suites/`` with ``execution.mode`` ``parallel`` |
   ``sequential``, ``vars`` / ``setup`` / ``cleanup``, and explicit

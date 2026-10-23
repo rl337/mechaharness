@@ -82,6 +82,8 @@ MECHA_SUITE_RUN_ID=$(cat .mechaharness/suite_runs/calc_cli.latest) \
 
 `MECHA_SUITE_FROM` accepts `story/scenario`, a unique scenario stem, or a 0-based index. `MECHA_SUITE_RUNS_DIR` overrides the runs root.
 
+Sequential **coding-delegate** arcs (shared workspace, live Completer, contract verify): `calc_cli` (single-file expression CLI), `counter_pkg` (package + pytest + CLI), and `delegate_pkg` (list-mode, thorough guidance, red-green, refactor). Live Completer is the gate before trusting static stubs. MCP reuses the same graph — see `docs/plans/coding-delegate-suites.md`.
+
 After editing membership, regenerate suites if you use the membership helper:
 
 ```bash
@@ -94,6 +96,18 @@ python scripts/generate_user_story_suites.py --check
 Persona **fangore**; execution `sequential` (ordered); 6 stage(s).
 
 Stories: `fangore_calc_add_sub`, `fangore_calc_exponent`, `fangore_calc_functions`, `fangore_calc_grouping`, `fangore_calc_mul_div`, `fangore_calc_parse_number`
+
+### `counter_pkg` — Grow a Counter package with tests and CLI
+
+Persona **fangore**; execution `sequential` (ordered); 4 stage(s).
+
+Stories: `fangore_counter_bootstrap`, `fangore_counter_cli`, `fangore_counter_mutate`, `fangore_counter_persist`
+
+### `delegate_pkg` — Delegate coding arcs on a shared Widget package
+
+Persona **fangore**; execution `sequential` (ordered); 4 stage(s).
+
+Stories: `fangore_delegate_guidance_thorough`, `fangore_delegate_list_bootstrap`, `fangore_delegate_red_green`, `fangore_delegate_refactor`
 
 ### `fangore_access_authority` — Grants, capability envelopes, and authority gates
 
@@ -806,6 +820,54 @@ Harness `user_story` scenario `expanded_rounds.yaml`: environment + graph + step
 
 [^june-hf07]: [June host-friction requirements map](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/june-host-friction-requirements-map.md) — HF-07 conversational tool loop
 
+### `fangore_counter_bootstrap` — Bootstrap a Counter package with a failing-then-green test
+
+Fangore hands an expensive bootstrap to guided coding: a tiny library package plus a pytest that pins the public constructor contract. Live mode uses a real Completer; static mode uses multi-file coding_writes stubs. This stage is the multi-file successor to `fangore_calc_parse_number`.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.
+
+#### Validation
+
+Harness `user_story` scenario `bootstrap.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.
+
+### `fangore_counter_cli` — Add a CLI that drives Counter
+
+Fangore finishes the delegate arc with a thin CLI over the library — the expensive work stays in the package; the CLI is the operator face.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.
+
+#### Validation
+
+Harness `user_story` scenario `cli.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.
+
+### `fangore_counter_mutate` — Add increment and decrement while tests stay green
+
+Fangore continues the shared package workspace and asks guided coding to grow mutation methods without breaking the bootstrap test contract.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.
+
+#### Validation
+
+Harness `user_story` scenario `mutate.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.
+
+### `fangore_counter_persist` — Persist Counter state to a JSON file
+
+Fangore asks for durable state on disk so later CLI work can reload counts — still under the same package and pytest gate.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.
+
+#### Validation
+
+Harness `user_story` scenario `persist.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.
+
 ### `fangore_decision_plane_model_policy` — Bind a decision model flavor without baking size into the recipe
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`. He soft-binds `decision_model` on the `decision_plane` recipe without baking a parameter count into the template, runs `run_recipe`, and verifies ask_batch carries the flavor ref. [^rc-dp-size]
@@ -922,6 +984,54 @@ Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remainin
 #### Validation
 
 Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects on declared observation keys.
+
+### `fangore_delegate_guidance_thorough` — Honor thorough guidance by shipping code and README together
+
+Fangore continues the shared Widget workspace and answers the external guidance soft point with thorough so the delegate must ship the code change and a README in the same burst — proving mid-arc human direction changes artifacts, not only labels.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, soft point `external_guidance` (choices minimal/thorough), and budget soft point `max_iterations`. List stages pass `instruction_mode: list` into `ProjectCodingLocalWork` / `build_instruction_plan`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair. Live mode binds `completer_as_tool_loop_complete`; static `coding_writes` are provisional until the live suite passes. MCP `MECHA_MCP_HOST=project_coding` drives the same `DurableGraphGenerator` graph (no separate suite).
+
+#### Validation
+
+Harness `user_story` scenario `guidance_thorough.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.
+
+### `fangore_delegate_list_bootstrap` — Bootstrap a Widget package from a numbered todo list
+
+Fangore hands a multi-step bootstrap as an ordered instruction list so guided coding classifies list mode and runs a coding burst per todo under shared workspace acceptance. Live Completer is the proof gate; static multi-file stubs are only a provisional mirror. Complements `fangore_instruction_todo_plan` (plan-only) and `fangore_counter_bootstrap` (oneshot package bootstrap).
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, soft point `external_guidance` (choices minimal/thorough), and budget soft point `max_iterations`. List stages pass `instruction_mode: list` into `ProjectCodingLocalWork` / `build_instruction_plan`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair. Live mode binds `completer_as_tool_loop_complete`; static `coding_writes` are provisional until the live suite passes. MCP `MECHA_MCP_HOST=project_coding` drives the same `DurableGraphGenerator` graph (no separate suite).
+
+#### Validation
+
+Harness `user_story` scenario `list_bootstrap.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.
+
+### `fangore_delegate_red_green` — Add a failing test then implement until pytest is green
+
+Fangore asks the delegate to fix from a red test: pin `double()` in pytest first, then implement until the suite is green under verify_repair — the classic expensive coding handoff.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, soft point `external_guidance` (choices minimal/thorough), and budget soft point `max_iterations`. List stages pass `instruction_mode: list` into `ProjectCodingLocalWork` / `build_instruction_plan`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair. Live mode binds `completer_as_tool_loop_complete`; static `coding_writes` are provisional until the live suite passes. MCP `MECHA_MCP_HOST=project_coding` drives the same `DurableGraphGenerator` graph (no separate suite).
+
+#### Validation
+
+Harness `user_story` scenario `red_green.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.
+
+### `fangore_delegate_refactor` — Rename Widget to Gadget without breaking tests
+
+Fangore finishes the delegate arc with a rename refactor: the public type moves from Widget to Gadget while pytest and docs stay honest — proving the handoff can reshape APIs without contract drift.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, soft point `external_guidance` (choices minimal/thorough), and budget soft point `max_iterations`. List stages pass `instruction_mode: list` into `ProjectCodingLocalWork` / `build_instruction_plan`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair. Live mode binds `completer_as_tool_loop_complete`; static `coding_writes` are provisional until the live suite passes. MCP `MECHA_MCP_HOST=project_coding` drives the same `DurableGraphGenerator` graph (no separate suite).
+
+#### Validation
+
+Harness `user_story` scenario `refactor.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 

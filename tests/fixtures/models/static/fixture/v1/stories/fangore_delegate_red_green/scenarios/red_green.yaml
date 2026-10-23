@@ -1,0 +1,152 @@
+# user story: fangore_delegate_red_green
+# Sequential delegate_pkg stage — coding-delegate dogfood.
+# Static: coding_writes stubs (provisional). Live Completer is the gate.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  workspace: suite
+  coding_writes:
+  - path: "README.md"
+    content: |
+      # Widget
+
+      Tiny in-workspace library for coding-delegate dogfood.
+
+      ## Usage
+
+      ```python
+      from widget import Widget
+
+      w = Widget()
+      w.inc()
+      w.double()
+      ```
+  - path: "tests/test_widget.py"
+    content: |
+      from widget import Widget
+
+
+      def test_starts_at_zero() -> None:
+          assert Widget().value == 0
+
+
+      def test_inc() -> None:
+          w = Widget()
+          assert w.inc() == 1
+          assert w.inc(2) == 3
+
+
+      def test_double() -> None:
+          w = Widget(3)
+          assert w.double() == 6
+          assert w.value == 6
+  - path: "widget/__init__.py"
+    content: |
+      """Tiny Widget library — red-green double()."""
+
+      from __future__ import annotations
+
+
+      class Widget:
+          def __init__(self, value: int = 0) -> None:
+              self.value = int(value)
+
+          def inc(self, n: int = 1) -> int:
+              self.value += int(n)
+              return self.value
+
+          def double(self) -> int:
+              self.value *= 2
+              return self.value
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: delegate-red_green
+      inputs:
+        goal: "Add `Widget.double()` that doubles `value` and returns the new value. Ensure\
+          \ `tests/test_widget.py` includes `test_double` that would fail before the method\
+          \ exists, then implement so pytest is green. Keep inc and README. Required contracts\
+          \ (non-negotiable): keep package import `from widget import \u2026` working. Do\
+          \ NOT use eval() or exec(). You MUST call write_file for every file you create or\
+          \ change before finishing. Tests under tests/ must stay green (pytest)."
+        max_iterations: 24
+        verify_runs:
+        - path: widget/__init__.py
+          text_contains:
+          - def double
+          text_forbids:
+          - eval(
+          - exec(
+        - path: tests/test_widget.py
+          text_contains:
+          - test_double
+          - double
+          text_forbids:
+          - eval(
+          - exec(
+        - exit_code: 0
+          path: tests/test_widget.py
+          pytest: true
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - key: kind
+    kind: equals
+    value: completed
+  - key: resumes
+    kind: gte
+    value: 1
+  - key: written_files
+    kind: includes
+    value:
+    - widget/__init__.py
+    - tests/test_widget.py
+- do:
+    workspace_read:
+      path: widget/__init__.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: def double
+- do:
+    workspace_read:
+      path: tests/test_widget.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: test_double
+  - key: text
+    kind: contains
+    value: double
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

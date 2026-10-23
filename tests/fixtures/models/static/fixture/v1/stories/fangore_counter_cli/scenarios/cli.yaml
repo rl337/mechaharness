@@ -1,0 +1,250 @@
+# user story: fangore_counter_cli
+# Sequential counter_pkg stage — multi-file package + pytest contracts.
+# Static: coding_writes stubs. Live: Completer ignores stubs.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  workspace: suite
+  coding_writes:
+  - path: "counter/__init__.py"
+    content: |
+      """Tiny Counter library — persist."""
+
+      from __future__ import annotations
+
+      import json
+      from pathlib import Path
+
+
+      class Counter:
+          def __init__(self, value: int = 0) -> None:
+              self.value = int(value)
+
+          def inc(self, n: int = 1) -> int:
+              self.value += int(n)
+              return self.value
+
+          def dec(self, n: int = 1) -> int:
+              self.value -= int(n)
+              return self.value
+
+          def save(self, path: str | Path) -> None:
+              Path(path).write_text(json.dumps({"value": self.value}), encoding="utf-8")
+
+          @classmethod
+          def load(cls, path: str | Path) -> Counter:
+              data = json.loads(Path(path).read_text(encoding="utf-8"))
+              return cls(value=int(data["value"]))
+  - path: "counter_cli.py"
+    content: |
+      """CLI over Counter — show / inc / dec with counter.json."""
+
+      from __future__ import annotations
+
+      import sys
+      from pathlib import Path
+
+      from counter import Counter
+
+      STORE = Path("counter.json")
+
+
+      def _load() -> Counter:
+          if STORE.is_file():
+              return Counter.load(STORE)
+          return Counter()
+
+
+      def main(argv=None) -> int:
+          args = list(sys.argv[1:] if argv is None else argv)
+          if len(args) != 1 or args[0] not in {"inc", "dec", "show"}:
+              print("usage: counter_cli.py <inc|dec|show>", file=sys.stderr)
+              return 2
+          c = _load()
+          cmd = args[0]
+          if cmd == "inc":
+              c.inc()
+          elif cmd == "dec":
+              c.dec()
+          c.save(STORE)
+          print(c.value)
+          return 0
+
+
+      if __name__ == "__main__":
+          raise SystemExit(main())
+  - path: "tests/test_counter.py"
+    content: |
+      from pathlib import Path
+
+      from counter import Counter
+
+
+      def test_starts_at_zero() -> None:
+          assert Counter().value == 0
+
+
+      def test_inc_dec() -> None:
+          c = Counter()
+          assert c.inc() == 1
+          assert c.dec() == 0
+
+
+      def test_save_load(tmp_path: Path) -> None:
+          path = tmp_path / "c.json"
+          c = Counter()
+          c.inc(5)
+          c.save(path)
+          assert Counter.load(path).value == 5
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: counter-cli
+      inputs:
+        goal: "Add `counter_cli.py` with `def main(argv=None) -> int` that supports `inc`, `dec`, and `show` subcommands using a `counter.json` file in the workspace (create on first use). Print the current value on stdout. Keep the library and tests green. Required contracts (non-negotiable): keep package import `from counter import Counter` working; public class must be named `Counter`. Do NOT use eval() or exec(). You MUST call write_file for every file you create or change before finishing. Tests under tests/ must stay green (pytest)."
+        max_iterations: 24
+        verify_runs:
+        - path: counter_cli.py
+          text_contains:
+          - def main
+          - inc
+          - dec
+          - show
+          text_forbids:
+          - eval(
+          - exec(
+        - path: counter/__init__.py
+          text_contains:
+          - class Counter
+          text_forbids:
+          - eval(
+          - exec(
+        - exit_code: 0
+          path: tests/test_counter.py
+          pytest: true
+        - args:
+          - inc
+          exit_code: 0
+          path: counter_cli.py
+          stdout_contains: '1'
+        - args:
+          - inc
+          exit_code: 0
+          path: counter_cli.py
+          stdout_contains: '2'
+        - args:
+          - show
+          exit_code: 0
+          path: counter_cli.py
+          stdout_contains: '2'
+        - args:
+          - dec
+          exit_code: 0
+          path: counter_cli.py
+          stdout_contains: '1'
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+  - kind: includes
+    key: written_files
+    value:
+    - counter_cli.py
+    - counter/__init__.py
+    - tests/test_counter.py
+- do:
+    workspace_read:
+      path: counter_cli.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: def main
+  - key: text
+    kind: contains
+    value: inc
+  - key: text
+    kind: contains
+    value: dec
+  - key: text
+    kind: contains
+    value: show
+- do:
+    workspace_read:
+      path: counter/__init__.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: class Counter
+- do:
+    run_python:
+      args:
+      - show
+      path: counter_cli.py
+  expect:
+  - key: exit_code
+    kind: equals
+    value: 0
+  - key: stdout
+    kind: contains
+    value: '1'
+- do:
+    run_python:
+      args:
+      - inc
+      path: counter_cli.py
+  expect:
+  - key: exit_code
+    kind: equals
+    value: 0
+  - key: stdout
+    kind: contains
+    value: '2'
+- do:
+    run_python:
+      args:
+      - dec
+      path: counter_cli.py
+  expect:
+  - key: exit_code
+    kind: equals
+    value: 0
+  - key: stdout
+    kind: contains
+    value: '1'
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

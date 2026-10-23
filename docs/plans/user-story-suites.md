@@ -3,8 +3,9 @@
 ## Status
 
 **Implemented** (schema, harness, pytest, parallel thematic suites, coverage
-ratchet, guide Suites section). **`calc_cli` sequential coding suite shipped**
-(ordered stages + shared suite workspace).
+ratchet, guide Suites section). Sequential coding arcs: **`calc_cli`**,
+**`counter_pkg`**, and **`delegate_pkg`**. See also
+`docs/plans/coding-delegate-suites.md`.
 
 ## Goals
 

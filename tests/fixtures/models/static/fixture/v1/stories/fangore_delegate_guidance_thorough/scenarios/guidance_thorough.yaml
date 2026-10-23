@@ -1,0 +1,158 @@
+# user story: fangore_delegate_guidance_thorough
+# Sequential delegate_pkg stage — coding-delegate dogfood.
+# Static: coding_writes stubs (provisional). Live Completer is the gate.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  workspace: suite
+  coding_writes:
+  - path: "README.md"
+    content: |
+      # Widget
+
+      Tiny in-workspace library for coding-delegate dogfood.
+
+      ## Usage
+
+      ```python
+      from widget import Widget
+
+      w = Widget()
+      w.inc()
+      ```
+  - path: "tests/test_widget.py"
+    content: |
+      from widget import Widget
+
+
+      def test_starts_at_zero() -> None:
+          assert Widget().value == 0
+
+
+      def test_inc() -> None:
+          w = Widget()
+          assert w.inc() == 1
+          assert w.inc(2) == 3
+  - path: "widget/__init__.py"
+    content: |
+      """Tiny Widget library — after thorough guidance."""
+
+      from __future__ import annotations
+
+
+      class Widget:
+          def __init__(self, value: int = 0) -> None:
+              self.value = int(value)
+
+          def inc(self, n: int = 1) -> int:
+              self.value += int(n)
+              return self.value
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: delegate-guidance_thorough
+      inputs:
+        goal: "Extend `Widget` with `inc(n=1)` that mutates `value` and returns the new value.\
+          \ Extend tests for inc. Honor external guidance: when the driver chooses thorough,\
+          \ also write `README.md` with a `## Usage` section showing `from widget import Widget`.\
+          \ When minimal, skip the README. Required contracts (non-negotiable): keep package\
+          \ import `from widget import \u2026` working. Do NOT use eval() or exec(). You MUST\
+          \ call write_file for every file you create or change before finishing. Tests under\
+          \ tests/ must stay green (pytest)."
+        max_iterations: 24
+        verify_runs:
+        - path: widget/__init__.py
+          text_contains:
+          - def inc
+          text_forbids:
+          - eval(
+          - exec(
+        - path: tests/test_widget.py
+          text_contains:
+          - inc
+          text_forbids:
+          - eval(
+          - exec(
+        - path: README.md
+          text_contains:
+          - '## Usage'
+          - from widget import Widget
+          text_forbids:
+          - eval(
+          - exec(
+        - exit_code: 0
+          path: tests/test_widget.py
+          pytest: true
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: thorough
+  expect:
+  - key: kind
+    kind: equals
+    value: completed
+  - key: resumes
+    kind: gte
+    value: 1
+  - key: written_files
+    kind: includes
+    value:
+    - widget/__init__.py
+    - tests/test_widget.py
+    - README.md
+- do:
+    workspace_read:
+      path: widget/__init__.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: def inc
+- do:
+    workspace_read:
+      path: tests/test_widget.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: inc
+- do:
+    workspace_read:
+      path: README.md
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: '## Usage'
+  - key: text
+    kind: contains
+    value: from widget import Widget
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

@@ -230,9 +230,12 @@ class UserStoryHarness:
                 raise AssertionError(
                     "environment.local_work=project_coding requires environment.workspace"
                 )
+            writes = list(env.coding_writes or [])
+            if not writes and env.coding_write is not None:
+                writes = [env.coding_write]
             kwargs["generator_local_work"] = self._project_coding_local_work(
                 workspace_root,
-                env.coding_write,
+                writes,
                 backend=backend,
                 model=model,
             )
@@ -241,7 +244,7 @@ class UserStoryHarness:
     def _project_coding_local_work(
         self,
         workspace_root: Path,
-        coding_write: CodingWriteBlock | None,
+        coding_writes: list[CodingWriteBlock],
         *,
         backend: StoryBackend,
         model: str,
@@ -254,9 +257,10 @@ class UserStoryHarness:
             # Ignore offline coding_write stubs; drive tools with a real Completer.
             complete = self._live_coding_complete(tools, model=model)
             max_iterations = int(os.environ.get("MECHA_CODING_MAX_ITERATIONS", "24"))
-        elif coding_write is not None:
-            complete = _coding_write_stub(tools, coding_write)
-            max_iterations = 8
+        elif coding_writes:
+            complete = _coding_writes_stub(tools, coding_writes)
+            # One tool round per stub file, plus a finish round.
+            max_iterations = max(8, len(coding_writes) + 2)
         else:
             from mechaharness.project_coding import _offline_stub_complete
 
@@ -602,36 +606,45 @@ def live_http_post_count() -> int:
     return int(CountingLiveHttpClient.post_count)
 
 
-def _coding_write_stub(
+def _coding_writes_stub(
     tools: ToolRegistry,
-    coding_write: CodingWriteBlock,
+    coding_writes: list[CodingWriteBlock],
 ) -> Any:
-    """Deterministic Completer that writes one workspace file then finishes."""
+    """Deterministic Completer that writes one or more workspace files then finishes."""
 
-    state = {"wrote": False}
-    path = coding_write.path
-    content = coding_write.content
+    pending = list(coding_writes)
+    state = {"i": 0}
+
+    planned_paths = {b.path for b in pending}
 
     def complete(messages: object, meta: object = None) -> dict[str, Any]:
         del messages, meta
-        if not state["wrote"] and "write_file" in tools:
-            state["wrote"] = True
-            # Ensure package imports work for helpers/foo.py style paths.
+        if state["i"] < len(pending) and "write_file" in tools:
+            block = pending[state["i"]]
+            state["i"] += 1
+            path = block.path
+            # Seed empty __init__.py for nested packages when the stub tree
+            # did not already include one (single-file helper arcs).
             parts = Path(path).parts
             if len(parts) > 1:
-                pkg = Path(parts[0])
-                init_rel = str(pkg / "__init__.py")
-                if "write_file" in tools:
-                    tools.get("write_file").handler(path=init_rel, content="")
+                init_rel = str(Path(parts[0]) / "__init__.py")
+                if init_rel not in planned_paths and init_rel != path:
+                    try:
+                        tools.get("write_file").handler(path=init_rel, content="")
+                    except Exception:  # noqa: BLE001
+                        pass
             return {
                 "role": "assistant",
                 "content": None,
                 "tool_calls": [
                     {
-                        "id": "call_write",
+                        "id": f"call_write_{state['i']}",
                         "function": {
                             "name": "write_file",
-                            "arguments": {"path": path, "content": content},
+                            "arguments": {
+                                "path": path,
+                                "content": block.content,
+                            },
                         },
                     }
                 ],
@@ -639,3 +652,11 @@ def _coding_write_stub(
         return {"role": "assistant", "content": "done", "tool_calls": []}
 
     return complete
+
+
+def _coding_write_stub(
+    tools: ToolRegistry,
+    coding_write: CodingWriteBlock,
+) -> Any:
+    """Backward-compatible single-file stub."""
+    return _coding_writes_stub(tools, [coding_write])

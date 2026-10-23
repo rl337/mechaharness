@@ -1,0 +1,10 @@
+{
+  "id": "fangore_delegate_refactor",
+  "persona": "fangore",
+  "title": "Rename Widget to Gadget without breaking tests",
+  "kind": "user_story",
+  "narrative": "Fangore finishes the delegate arc with a rename refactor: the public type moves from Widget to Gadget while pytest and docs stay honest \u2014 proving the handoff can reshape APIs without contract drift.",
+  "implementation": "Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, soft point `external_guidance` (choices minimal/thorough), and budget soft point `max_iterations`. List stages pass `instruction_mode: list` into `ProjectCodingLocalWork` / `build_instruction_plan`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair. Live mode binds `completer_as_tool_loop_complete`; static `coding_writes` are provisional until the live suite passes. MCP `MECHA_MCP_HOST=project_coding` drives the same `DurableGraphGenerator` graph (no separate suite).",
+  "validation": "Harness `user_story` scenario `refactor.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.",
+  "footnotes": []
+}

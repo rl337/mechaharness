@@ -1,0 +1,128 @@
+# user story: fangore_delegate_list_bootstrap
+# Sequential delegate_pkg stage — coding-delegate dogfood.
+# Static: coding_writes stubs (provisional). Live Completer is the gate.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  workspace: suite
+  coding_writes:
+  - path: "tests/test_widget.py"
+    content: |
+      from widget import Widget
+
+
+      def test_starts_at_zero() -> None:
+          assert Widget().value == 0
+  - path: "widget/__init__.py"
+    content: |
+      """Tiny Widget library — list-mode bootstrap."""
+
+      from __future__ import annotations
+
+
+      class Widget:
+          def __init__(self, value: int = 0) -> None:
+              self.value = int(value)
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: delegate-list_bootstrap
+      inputs:
+        goal: "Follow the instruction list in order. Required contracts (non-negotiable):\
+          \ keep package import `from widget import \u2026` working. Do NOT use eval() or\
+          \ exec(). You MUST call write_file for every file you create or change before finishing.\
+          \ Tests under tests/ must stay green (pytest). Public class must be named `Widget`."
+        instruction_mode: list
+        instructions:
+        - Create package `widget/` with `__init__.py` exporting class `Widget` (start value
+          0, attribute `value`).
+        - Add `tests/test_widget.py` with a test that constructs Widget and asserts value
+          == 0.
+        max_iterations: 24
+        verify_runs:
+        - path: widget/__init__.py
+          text_contains:
+          - class Widget
+          - value
+          text_forbids:
+          - eval(
+          - exec(
+        - path: tests/test_widget.py
+          text_contains:
+          - Widget
+          - def test_
+          text_forbids:
+          - eval(
+          - exec(
+        - exit_code: 0
+          path: tests/test_widget.py
+          pytest: true
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - key: kind
+    kind: equals
+    value: completed
+  - key: resumes
+    kind: gte
+    value: 1
+  - key: written_files
+    kind: includes
+    value:
+    - widget/__init__.py
+    - tests/test_widget.py
+  - key: mode
+    kind: equals
+    value: list
+- do:
+    workspace_read:
+      path: widget/__init__.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: class Widget
+  - key: text
+    kind: contains
+    value: value
+- do:
+    workspace_read:
+      path: tests/test_widget.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: Widget
+  - key: text
+    kind: contains
+    value: def test_
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

@@ -324,10 +324,11 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
 
         Spec keys:
 
-        - ``path`` (required): workspace-relative file
-        - ``text_contains``: str or list[str] that must appear in the file
-        - ``args`` / ``stdout_contains`` / ``exit_code``: optional process check
-          (``python path …args``). Omitted when the row is text-only.
+        - ``path``: workspace-relative file (required for text / python checks)
+        - ``text_contains`` / ``text_forbids``: str or list[str] file text gates
+        - ``args`` / ``stdout_contains`` / ``exit_code``: ``python path …args``
+        - ``pytest``: truthy → run ``python -m pytest -q <path>`` (path may be
+          a test file or directory). Optional ``args`` append after ``-q``.
         """
         if not verify_runs:
             return []
@@ -337,18 +338,19 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         failures: list[str] = []
         for index, spec in enumerate(verify_runs):
             path = str(spec.get("path") or "").strip()
-            if not path:
+            use_pytest = bool(spec.get("pytest"))
+            if not path and not use_pytest:
                 failures.append(f"verify_runs[{index}]: missing path")
                 continue
-            script = root / path
-            if not script.is_file():
-                failures.append(f"verify_runs[{index}]: missing file {path}")
-                continue
+            target = root / path if path else root
             text_needles = _as_str_list(spec.get("text_contains"))
             text_forbids = _as_str_list(spec.get("text_forbids"))
             if text_needles or text_forbids:
+                if not target.is_file():
+                    failures.append(f"verify_runs[{index}]: missing file {path}")
+                    continue
                 try:
-                    body = script.read_text(encoding="utf-8")
+                    body = target.read_text(encoding="utf-8")
                 except OSError as exc:
                     failures.append(f"verify_runs[{index}] {path}: read failed: {exc}")
                     continue
@@ -364,6 +366,36 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                             f"verify_runs[{index}] {path}: file text must not "
                             f"contain {banned!r}"
                         )
+            if use_pytest:
+                if path and not target.exists():
+                    failures.append(f"verify_runs[{index}]: missing pytest path {path}")
+                    continue
+                extra = [str(a) for a in list(spec.get("args") or [])]
+                cmd = [sys.executable, "-m", "pytest", "-q"]
+                if path:
+                    cmd.append(path)
+                cmd.extend(extra)
+                expected_exit = int(spec.get("exit_code", 0))
+                try:
+                    completed = subprocess.run(
+                        cmd,
+                        cwd=str(root),
+                        capture_output=True,
+                        text=True,
+                        timeout=float(spec.get("timeout_seconds") or 60),
+                        check=False,
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    failures.append(f"verify_runs[{index}] pytest {path}: {exc}")
+                    continue
+                if int(completed.returncode) != expected_exit:
+                    failures.append(
+                        f"verify_runs[{index}] pytest {path}: exit "
+                        f"{completed.returncode} != {expected_exit}; "
+                        f"stdout={completed.stdout.strip()!r}; "
+                        f"stderr={completed.stderr.strip()!r}"
+                    )
+                continue
             # Process check only when the row asks for argv / stdout / exit.
             run_process = (
                 "args" in spec
@@ -372,12 +404,15 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             )
             if not run_process:
                 continue
+            if not target.is_file():
+                failures.append(f"verify_runs[{index}]: missing file {path}")
+                continue
             args = [str(a) for a in list(spec.get("args") or [])]
             expected_exit = int(spec.get("exit_code", 0))
             needle = spec.get("stdout_contains")
             try:
                 completed = subprocess.run(
-                    [sys.executable, str(script), *args],
+                    [sys.executable, str(target), *args],
                     cwd=str(root),
                     capture_output=True,
                     text=True,
@@ -426,7 +461,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                         lines.append(f"  - {path} must contain {needle!r}")
                     for banned in _as_str_list(spec.get("text_forbids")):
                         lines.append(f"  - {path} must NOT contain {banned!r}")
-                    if (
+                    if spec.get("pytest"):
+                        lines.append(f"  - pytest -q {path} must exit 0")
+                    elif (
                         "args" in spec
                         or spec.get("stdout_contains") is not None
                         or "exit_code" in spec

@@ -94,10 +94,18 @@ SUITE_META: dict[str, dict[str, str]] = {
         "title": "Grow a CLI math expression calculator",
         "persona": "fangore",
     },
+    "counter_pkg": {
+        "title": "Grow a Counter package with tests and CLI",
+        "persona": "fangore",
+    },
+    "delegate_pkg": {
+        "title": "Delegate coding arcs on a shared Widget package",
+        "persona": "fangore",
+    },
 }
 
 # Sequential / ordered suites: stages keep authored order; not regenerated as parallel.
-SEQUENTIAL_SUITE_IDS = frozenset({"calc_cli"})
+SEQUENTIAL_SUITE_IDS = frozenset({"calc_cli", "counter_pkg", "delegate_pkg"})
 
 # Explicit ordered stage list for sequential suites (story, scenario).
 SEQUENTIAL_STAGE_ORDER: dict[str, list[tuple[str, str]]] = {
@@ -108,6 +116,18 @@ SEQUENTIAL_STAGE_ORDER: dict[str, list[tuple[str, str]]] = {
         ("fangore_calc_exponent", "exponent"),
         ("fangore_calc_grouping", "grouping"),
         ("fangore_calc_functions", "functions"),
+    ],
+    "counter_pkg": [
+        ("fangore_counter_bootstrap", "bootstrap"),
+        ("fangore_counter_mutate", "mutate"),
+        ("fangore_counter_persist", "persist"),
+        ("fangore_counter_cli", "cli"),
+    ],
+    "delegate_pkg": [
+        ("fangore_delegate_list_bootstrap", "list_bootstrap"),
+        ("fangore_delegate_guidance_thorough", "guidance_thorough"),
+        ("fangore_delegate_red_green", "red_green"),
+        ("fangore_delegate_refactor", "refactor"),
     ],
 }
 
@@ -225,6 +245,16 @@ EXACT: dict[str, str] = {
     "fangore_calc_exponent": "calc_cli",
     "fangore_calc_grouping": "calc_cli",
     "fangore_calc_functions": "calc_cli",
+    # sequential counter_pkg arc (multi-file + pytest)
+    "fangore_counter_bootstrap": "counter_pkg",
+    "fangore_counter_mutate": "counter_pkg",
+    "fangore_counter_persist": "counter_pkg",
+    "fangore_counter_cli": "counter_pkg",
+    # sequential delegate_pkg arc (list / guidance / red-green / refactor)
+    "fangore_delegate_list_bootstrap": "delegate_pkg",
+    "fangore_delegate_guidance_thorough": "delegate_pkg",
+    "fangore_delegate_red_green": "delegate_pkg",
+    "fangore_delegate_refactor": "delegate_pkg",
 }
 
 PREFIXES: list[tuple[str, str]] = [

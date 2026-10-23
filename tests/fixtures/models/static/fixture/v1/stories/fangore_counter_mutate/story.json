@@ -1,0 +1,10 @@
+{
+  "id": "fangore_counter_mutate",
+  "persona": "fangore",
+  "title": "Add increment and decrement while tests stay green",
+  "kind": "user_story",
+  "narrative": "Fangore continues the shared package workspace and asks guided coding to grow mutation methods without breaking the bootstrap test contract.",
+  "implementation": "Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.",
+  "validation": "Harness `user_story` scenario `mutate.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.",
+  "footnotes": []
+}

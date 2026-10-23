@@ -1,0 +1,10 @@
+{
+  "id": "fangore_counter_persist",
+  "persona": "fangore",
+  "title": "Persist Counter state to a JSON file",
+  "kind": "user_story",
+  "narrative": "Fangore asks for durable state on disk so later CLI work can reload counts \u2014 still under the same package and pytest gate.",
+  "implementation": "Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.",
+  "validation": "Harness `user_story` scenario `persist.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.",
+  "footnotes": []
+}

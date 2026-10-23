@@ -1,0 +1,33 @@
+{
+  "id": "delegate_pkg",
+  "title": "Delegate coding arcs on a shared Widget package",
+  "persona": "fangore",
+  "execution": {
+    "mode": "sequential",
+    "ordered": true
+  },
+  "vars": {},
+  "setup": [
+    "ensure_workspace"
+  ],
+  "cleanup": [],
+  "workspace": "temp",
+  "stages": [
+    {
+      "story": "fangore_delegate_list_bootstrap",
+      "scenario": "list_bootstrap"
+    },
+    {
+      "story": "fangore_delegate_guidance_thorough",
+      "scenario": "guidance_thorough"
+    },
+    {
+      "story": "fangore_delegate_red_green",
+      "scenario": "red_green"
+    },
+    {
+      "story": "fangore_delegate_refactor",
+      "scenario": "refactor"
+    }
+  ]
+}

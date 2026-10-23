@@ -1,0 +1,10 @@
+{
+  "id": "fangore_counter_bootstrap",
+  "persona": "fangore",
+  "title": "Bootstrap a Counter package with a failing-then-green test",
+  "kind": "user_story",
+  "narrative": "Fangore hands an expensive bootstrap to guided coding: a tiny library package plus a pytest that pins the public constructor contract. Live mode uses a real Completer; static mode uses multi-file coding_writes stubs. This stage is the multi-file successor to `fangore_calc_parse_number`.",
+  "implementation": "Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.",
+  "validation": "Harness `user_story` scenario `bootstrap.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.",
+  "footnotes": []
+}
