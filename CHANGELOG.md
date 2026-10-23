@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Project-coding git / PR tools:** ``ProjectCodingConfig`` workspace registry
+  now exposes ``git_status``, ``git_log``, ``git_diff`` (``base...HEAD``),
+  ``git_push`` (local ``git`` + operator SSH), and ``create_pull_request``
+  (``gh pr create``) so ``guided_coding`` MCP handoffs can inspect
+  ``main``…branch and open a formatted PR without a second driver.
 - **Sequential ``calc_cli`` coding suite (live-capable):** ordered Fangore arc
   that grows a shared-workspace ``calc.py`` CLI through numbers → ``+−`` →
   ``×÷`` → ``^`` → parentheses → common functions. Suite injects

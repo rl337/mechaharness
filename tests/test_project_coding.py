@@ -27,6 +27,65 @@ def test_workspace_paths_rejects_escape(tmp_path: Path) -> None:
     assert raised
 
 
+def test_coding_git_tools_status_log_diff(tmp_path: Path) -> None:
+    import subprocess
+
+    from pyiv.files import RealFilesystem
+
+    root = tmp_path
+    subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+    )
+    (root / "a.txt").write_text("one\n", encoding="utf-8")
+    subprocess.run(["git", "add", "a.txt"], cwd=root, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "init"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+    )
+    main = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    (root / "a.txt").write_text("two\n", encoding="utf-8")
+    subprocess.run(["git", "add", "a.txt"], cwd=root, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "change"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+    )
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(root), filesystem=RealFilesystem()
+    )
+    status = json.loads(tools.get("git_status").handler())
+    assert status["ok"] is True
+    assert main in status["stdout"]
+    # Empty range vs HEAD itself: use HEAD~1 as base.
+    log = json.loads(tools.get("git_log").handler(base="HEAD~1"))
+    assert log["ok"] is True
+    assert "change" in log["stdout"]
+    diff = json.loads(tools.get("git_diff").handler(base="HEAD~1", stat_only=True))
+    assert diff["ok"] is True
+    assert "a.txt" in diff["stdout"]
+    bad = json.loads(tools.get("git_log").handler(base="origin/main; rm -rf /"))
+    assert bad["ok"] is False
+
+
 def test_coding_tools_read_write_list_grep(tmp_path: Path) -> None:
     fs = MemoryFilesystem()
     # MemoryFilesystem is absolute-key oriented; root tools at tmp_path strings.

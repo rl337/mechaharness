@@ -52,12 +52,24 @@ class WorkspacePaths:
         return target
 
 
+# Allow branch/tag names plus relative history (HEAD~1, main^2); block shell meta.
+_SAFE_REF = re.compile(r"^[A-Za-z0-9._/\-~^]+$")
+_SAFE_REMOTE = re.compile(r"^[A-Za-z0-9._\-]+$")
+
+
+def _validate_ref(value: str, *, label: str = "ref") -> str:
+    text = (value or "").strip()
+    if not text or not _SAFE_REF.match(text):
+        raise ValueError(f"unsafe {label}: {value!r}")
+    return text
+
+
 def build_coding_tool_registry(
     *,
     workspace: WorkspacePaths,
     filesystem: Filesystem,
 ) -> ToolRegistry:
-    """Register read/write/list/grep/run_tests/run_shell under *workspace*."""
+    """Register read/write/list/grep/run_tests/run_shell/git_* under *workspace*."""
     registry = ToolRegistry()
     paths = workspace
     fs = filesystem
@@ -110,6 +122,88 @@ def build_coding_tool_registry(
             # Still allow flags; block obvious absolute/upward tokens as argv[0].
             pass
         return _run_process(paths, command, grant_label="run_shell", shell=True)
+
+    def git_status() -> str:
+        """Short branch status via local ``git`` (SSH agent / config intact)."""
+        return _run_process(paths, ["git", "status", "-sb"], grant_label="git_status")
+
+    def git_log(base: str = "origin/main", max_count: int = 40) -> str:
+        """Oneline commits on HEAD not in *base* (``base..HEAD``)."""
+        try:
+            ref = _validate_ref(base, label="base")
+        except ValueError as exc:
+            return json.dumps({"ok": False, "error": str(exc)})
+        count = max(1, min(int(max_count), 200))
+        return _run_process(
+            paths,
+            ["git", "log", "--oneline", f"{ref}..HEAD", f"-{count}"],
+            grant_label="git_log",
+        )
+
+    def git_diff(
+        base: str = "origin/main",
+        stat_only: bool = True,
+        max_bytes: int = 120_000,
+    ) -> str:
+        """Diff ``base...HEAD`` (triple-dot). Prefer ``stat_only`` for large arcs."""
+        try:
+            ref = _validate_ref(base, label="base")
+        except ValueError as exc:
+            return json.dumps({"ok": False, "error": str(exc)})
+        cmd = ["git", "diff"]
+        if bool(stat_only):
+            cmd.append("--stat")
+        cmd.append(f"{ref}...HEAD")
+        return _run_process(
+            paths,
+            cmd,
+            grant_label="git_diff",
+            max_stdout=max(4_000, int(max_bytes)),
+        )
+
+    def git_push(remote: str = "origin", set_upstream: bool = True) -> str:
+        """Push current HEAD via local ``git`` (uses operator SSH credentials)."""
+        rem = (remote or "origin").strip()
+        if not _SAFE_REMOTE.match(rem):
+            return json.dumps({"ok": False, "error": f"unsafe remote: {remote!r}"})
+        cmd = ["git", "push"]
+        if bool(set_upstream):
+            cmd.append("-u")
+        cmd.extend([rem, "HEAD"])
+        return _run_process(paths, cmd, grant_label="git_push", timeout=120)
+
+    def create_pull_request(
+        title: str,
+        body: str,
+        base: str = "main",
+        draft: bool = False,
+    ) -> str:
+        """Open a GitHub PR with ``gh`` (cwd=workspace). Body may be markdown."""
+        try:
+            base_ref = _validate_ref(base, label="base")
+        except ValueError as exc:
+            return json.dumps({"ok": False, "error": str(exc)})
+        title_text = (title or "").strip()
+        if not title_text:
+            return json.dumps({"ok": False, "error": "title required"})
+        body_text = body if body is not None else ""
+        body_path = paths.root / ".mechaharness" / "pr_body.md"
+        body_path.parent.mkdir(parents=True, exist_ok=True)
+        fs.write_text(str(body_path), body_text)
+        cmd = [
+            "gh",
+            "pr",
+            "create",
+            "--base",
+            base_ref,
+            "--title",
+            title_text,
+            "--body-file",
+            str(body_path),
+        ]
+        if bool(draft):
+            cmd.append("--draft")
+        return _run_process(paths, cmd, grant_label="create_pull_request", timeout=120)
 
     registry.register(
         Tool(
@@ -194,6 +288,79 @@ def build_coding_tool_registry(
             grants=[ProcessExec],
         )
     )
+    registry.register(
+        Tool(
+            "git_status",
+            git_status,
+            description="git status -sb in the workspace (local git / SSH agent)",
+            parameters={"type": "object", "properties": {}},
+            grants=[ProcessExec],
+        )
+    )
+    registry.register(
+        Tool(
+            "git_log",
+            git_log,
+            description="git log --oneline base..HEAD (default base origin/main)",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "base": {"type": "string"},
+                    "max_count": {"type": "integer"},
+                },
+            },
+            grants=[ProcessExec],
+        )
+    )
+    registry.register(
+        Tool(
+            "git_diff",
+            git_diff,
+            description="git diff base...HEAD (default origin/main; stat_only default true)",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "base": {"type": "string"},
+                    "stat_only": {"type": "boolean"},
+                    "max_bytes": {"type": "integer"},
+                },
+            },
+            grants=[ProcessExec],
+        )
+    )
+    registry.register(
+        Tool(
+            "git_push",
+            git_push,
+            description="git push -u <remote> HEAD using local credentials",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "remote": {"type": "string"},
+                    "set_upstream": {"type": "boolean"},
+                },
+            },
+            grants=[ProcessExec],
+        )
+    )
+    registry.register(
+        Tool(
+            "create_pull_request",
+            create_pull_request,
+            description="gh pr create with title/body against base (default main)",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "body": {"type": "string"},
+                    "base": {"type": "string"},
+                    "draft": {"type": "boolean"},
+                },
+                "required": ["title", "body"],
+            },
+            grants=[ProcessExec],
+        )
+    )
     return registry
 
 
@@ -223,6 +390,9 @@ def _run_process(
     *,
     grant_label: str,
     shell: bool = False,
+    timeout: float = 300,
+    max_stdout: int = 8000,
+    max_stderr: int = 4000,
 ) -> str:
     del grant_label
     try:
@@ -232,17 +402,19 @@ def _run_process(
             shell=shell,
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=float(timeout),
             check=False,
         )
     except Exception as exc:  # noqa: BLE001
         return json.dumps({"ok": False, "error": str(exc)})
+    stdout = completed.stdout or ""
+    stderr = completed.stderr or ""
     return json.dumps(
         {
             "ok": completed.returncode == 0,
             "returncode": completed.returncode,
-            "stdout": completed.stdout[-8000:],
-            "stderr": completed.stderr[-4000:],
+            "stdout": stdout[-int(max_stdout) :],
+            "stderr": stderr[-int(max_stderr) :],
         }
     )
 
