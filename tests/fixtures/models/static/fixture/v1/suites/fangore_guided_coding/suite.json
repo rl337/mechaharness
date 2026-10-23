@@ -11,6 +11,14 @@
   "cleanup": [],
   "stages": [
     {
+      "story": "fangore_coding_git_inspect",
+      "scenario": "inspect"
+    },
+    {
+      "story": "fangore_coding_git_open_pr",
+      "scenario": "open_pr"
+    },
+    {
       "story": "fangore_guided_coding_recipe",
       "scenario": "helper_run_python"
     },

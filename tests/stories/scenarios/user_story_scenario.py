@@ -50,6 +50,15 @@ class EnvironmentBlock(BaseModel):
     # Multi-file offline stub (preferred for package arcs); takes precedence
     # over single ``coding_write`` when non-empty.
     coding_writes: list[CodingWriteBlock] | None = None
+    # CodingGit binding for project_coding tools.
+    # ``local_mock_pr`` = local ``git`` process + recorded/mock pull requests
+    # (no forge network). Omit / ``default`` = LocalProcessCodingGit (git+gh).
+    coding_git: Literal["default", "local_mock_pr"] | None = None
+    # Seed a tiny git repo in the workspace before the coding burst.
+    git_seed: Literal["feature_branch"] | None = None
+    # Offline Completer script that issues git/PR tool calls (static CI).
+    # Live Completer ignores this and drives tools itself.
+    coding_tool_script: Literal["git_inspect", "git_open_pr"] | None = None
     # ISO-8601 instant for MockDateTimeService; omit for harness default.
     clock: str | None = None
     # Optional FixtureRagRetriever corpus (YAML path under the story dir).

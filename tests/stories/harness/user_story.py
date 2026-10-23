@@ -233,11 +233,15 @@ class UserStoryHarness:
             writes = list(env.coding_writes or [])
             if not writes and env.coding_write is not None:
                 writes = [env.coding_write]
+            if env.git_seed == "feature_branch":
+                _seed_feature_branch_git_repo(workspace_root)
             kwargs["generator_local_work"] = self._project_coding_local_work(
                 workspace_root,
                 writes,
                 backend=backend,
                 model=model,
+                coding_git=env.coding_git,
+                coding_tool_script=env.coding_tool_script,
             )
         return kwargs
 
@@ -248,15 +252,34 @@ class UserStoryHarness:
         *,
         backend: StoryBackend,
         model: str,
+        coding_git: str | None = None,
+        coding_tool_script: str | None = None,
     ) -> GeneratorLocalWork:
+        from mechaharness.coding_git import (
+            LocalProcessCodingGit,
+            RecordingPullRequestCodingGit,
+        )
+
+        local_git = LocalProcessCodingGit(workspace=workspace_root)
+        if coding_git == "local_mock_pr":
+            bound_git = RecordingPullRequestCodingGit(local_git)
+        else:
+            bound_git = local_git
         tools = build_coding_tool_registry(
             workspace=WorkspacePaths(workspace_root),
             filesystem=RealFilesystem(),
+            coding_git=bound_git,
         )
         if backend.mode == "live":
-            # Ignore offline coding_write stubs; drive tools with a real Completer.
+            # Ignore offline stubs; drive tools with a real Completer.
+            # Pull requests stay on RecordingPullRequestCodingGit when
+            # coding_git=local_mock_pr (no forge).
             complete = self._live_coding_complete(tools, model=model)
             max_iterations = int(os.environ.get("MECHA_CODING_MAX_ITERATIONS", "24"))
+        elif coding_tool_script:
+            steps = _coding_tool_script_steps(coding_tool_script)
+            complete = _coding_tool_script_stub(steps)
+            max_iterations = max(8, len(steps) + 2)
         elif coding_writes:
             complete = _coding_writes_stub(tools, coding_writes)
             # One tool round per stub file, plus a finish round.
@@ -660,3 +683,114 @@ def _coding_write_stub(
 ) -> Any:
     """Backward-compatible single-file stub."""
     return _coding_writes_stub(tools, [coding_write])
+
+
+def _seed_feature_branch_git_repo(root: Path) -> None:
+    """Init main + feature branch with one divergent commit (local git only)."""
+    import subprocess
+
+    def run(args: list[str]) -> None:
+        subprocess.run(args, cwd=str(root), check=True, capture_output=True, text=True)
+
+    run(["git", "init", "-b", "main"])
+    run(["git", "config", "user.email", "story@example.com"])
+    run(["git", "config", "user.name", "Mecha Story"])
+    (root / "README.md").write_text("# demo\n", encoding="utf-8")
+    run(["git", "add", "README.md"])
+    run(["git", "commit", "-m", "init on main"])
+    run(["git", "checkout", "-b", "feature"])
+    (root / "helper.py").write_text(
+        "def answer() -> int:\n    return 42\n", encoding="utf-8"
+    )
+    run(["git", "add", "helper.py"])
+    run(["git", "commit", "-m", "add helper on feature"])
+
+
+def _coding_tool_script_steps(script_id: str) -> list[dict[str, Any]]:
+    """Named offline Completer scripts that exercise CodingGit tools."""
+    if script_id == "git_inspect":
+        return [
+            {"name": "git_status", "arguments": {}},
+            {"name": "git_log", "arguments": {"base": "main", "max_count": 10}},
+            {
+                "name": "git_diff",
+                "arguments": {"base": "main", "stat_only": True},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/git_inspect.md",
+                    "content": (
+                        "# git inspect\n\n"
+                        "branch feature vs main\n"
+                        "helper.py added\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "git_open_pr":
+        return [
+            {"name": "git_log", "arguments": {"base": "main", "max_count": 10}},
+            {
+                "name": "git_diff",
+                "arguments": {"base": "main", "stat_only": True},
+            },
+            {
+                "name": "create_pull_request",
+                "arguments": {
+                    "title": "Add helper on feature",
+                    "body": (
+                        "## Summary\n"
+                        "- Add helper.py on the feature branch.\n\n"
+                        "## Test plan\n"
+                        "- [ ] Local git inspect vs main\n"
+                        "- [ ] Mock PR URL recorded\n"
+                    ),
+                    "base": "main",
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/pr_url.txt",
+                    "content": "https://example.test/pull/1\n",
+                },
+            },
+            {"finish": True},
+        ]
+    raise AssertionError(f"unknown coding_tool_script: {script_id!r}")
+
+
+def _coding_tool_script_stub(steps: list[dict[str, Any]]) -> Any:
+    """Deterministic Completer that emits a fixed sequence of tool calls."""
+
+    state = {"i": 0}
+
+    def complete(messages: object, meta: object = None) -> dict[str, Any]:
+        del messages, meta
+        if state["i"] >= len(steps):
+            return {"role": "assistant", "content": "done", "tool_calls": []}
+        step = steps[state["i"]]
+        state["i"] += 1
+        if step.get("finish"):
+            return {
+                "role": "assistant",
+                "content": str(step.get("content") or "done"),
+                "tool_calls": [],
+            }
+        return {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": f"call_script_{state['i']}",
+                    "function": {
+                        "name": str(step["name"]),
+                        "arguments": dict(step.get("arguments") or {}),
+                    },
+                }
+            ],
+        }
+
+    return complete

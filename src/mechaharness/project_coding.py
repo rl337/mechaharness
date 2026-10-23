@@ -45,6 +45,7 @@ from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.coding_git import CodingGit, LocalProcessCodingGit
 from mechaharness.project_coding_tools import (
     WorkspacePaths,
     build_coding_tool_registry,
@@ -73,10 +74,12 @@ class ProjectCodingConfig(SettingsConfig):
         workspace: Path | str | None = None,
         filesystem: Filesystem | None = None,
         completer: Completer | None = None,
+        coding_git: CodingGit | None = None,
     ) -> None:
         self._workspace_root = resolve_workspace_root(workspace)
         self._filesystem_override = filesystem
         self._completer_override = completer
+        self._coding_git_override = coding_git
         resolved = settings if settings is not None else _settings_for_project_coding()
         if not os.environ.get("MECHA_HARNESS_FAMILY"):
             resolved = resolved.model_copy(update={"harness_family": "tool_loop"})
@@ -87,6 +90,18 @@ class ProjectCodingConfig(SettingsConfig):
             return self._filesystem_override
         return RealFilesystem
 
+    def get_coding_git(self) -> type[CodingGit] | CodingGit:
+        """VCS/PR backend for coding tools (override for HTTPS / forge API)."""
+        if self._coding_git_override is not None:
+            return self._coding_git_override
+        return LocalProcessCodingGit(workspace=self._workspace_root)
+
+    def _resolve_coding_git(self) -> CodingGit:
+        bound = self.get_coding_git()
+        if isinstance(bound, type):
+            return bound(workspace=self._workspace_root)  # type: ignore[call-arg]
+        return bound
+
     def get_tools(self) -> ToolRegistry:
         if self._provided_tools is not None:
             return self._provided_tools
@@ -94,6 +109,7 @@ class ProjectCodingConfig(SettingsConfig):
         return build_coding_tool_registry(
             workspace=WorkspacePaths(self._workspace_root),
             filesystem=fs,
+            coding_git=self._resolve_coding_git(),
         )
 
     def get_grants(self) -> list[object]:
@@ -116,6 +132,8 @@ class ProjectCodingConfig(SettingsConfig):
             self.register_instance(Completer, self._completer_override)
             if isinstance(self._completer_override, InferenceStrategy):
                 self.register_instance(InferenceStrategy, self._completer_override)
+
+        self.register_instance(CodingGit, self._resolve_coding_git())
 
         tools = self.get_tools()
         completer = self._completer_override

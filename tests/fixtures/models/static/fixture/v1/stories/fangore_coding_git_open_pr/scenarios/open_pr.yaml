@@ -1,0 +1,67 @@
+# user story: fangore_coding_git_open_pr
+# Local git vs main; create_pull_request is mocked (no gh/network).
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  workspace: temp
+  coding_git: local_mock_pr
+  git_seed: feature_branch
+  coding_tool_script: git_open_pr
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: coding-git-pr-1
+      inputs:
+        goal: >-
+          Compare this branch to main with git_log and git_diff (base=main).
+          Draft a PR title and markdown body (Summary + Test plan), then call
+          create_pull_request with base=main. Write the returned PR URL to
+          .mechaharness/pr_url.txt. Do not call a real GitHub host.
+        max_iterations: 16
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+- do:
+    answer:
+      choose: thorough
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+  - kind: includes
+    key: written_files
+    value:
+    - .mechaharness/pr_url.txt
+- do:
+    workspace_read:
+      path: .mechaharness/pr_url.txt
+  expect:
+  - kind: 'true'
+    key: exists
+  - kind: contains
+    key: text
+    value: https://example.test/pull/1
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

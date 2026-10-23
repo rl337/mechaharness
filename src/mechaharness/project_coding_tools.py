@@ -1,8 +1,9 @@
 """Workspace-scoped coding tools for :class:`~mechaharness.project_coding.ProjectCodingConfig`.
 
 Tools resolve paths under a workspace root and refuse escapes. They inject
-:class:`~pyiv.files.Filesystem` — not Settings. Registered only by the project
-coding host Config (opt-in pack).
+:class:`~pyiv.files.Filesystem` — not Settings. Git / PR verbs delegate to an
+injectable :class:`~mechaharness.coding_git.CodingGit` (default local process).
+Registered only by the project coding host Config (opt-in pack).
 """
 
 from __future__ import annotations
@@ -10,13 +11,13 @@ from __future__ import annotations
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 from pyiv.files import Filesystem
 
+from mechaharness.coding_git import CodingGit, LocalProcessCodingGit
 from mechaharness.core.access import FsRead, FsWrite, ProcessExec
 from mechaharness.tools.base import Tool, ToolRegistry
 
@@ -53,38 +54,22 @@ class WorkspacePaths:
         return target
 
 
-# Allow branch/tag names plus relative history (HEAD~1, main^2); block shell meta.
-_SAFE_REF = re.compile(r"^[A-Za-z0-9._/\-~^]+$")
-_SAFE_REMOTE = re.compile(r"^[A-Za-z0-9._\-]+$")
-
-
-def _validate_ref(value: str, *, label: str = "ref") -> str:
-    text = (value or "").strip()
-    if not text or not _SAFE_REF.match(text):
-        raise ValueError(f"unsafe {label}: {value!r}")
-    return text
-
-
-def _resolve_gh() -> str:
-    """Prefer ``PATH``, then ``~/.local/bin/gh`` (common user install)."""
-    found = shutil.which("gh")
-    if found:
-        return found
-    candidate = Path.home() / ".local" / "bin" / "gh"
-    if candidate.is_file() and os.access(candidate, os.X_OK):
-        return str(candidate)
-    return "gh"
-
-
 def build_coding_tool_registry(
     *,
     workspace: WorkspacePaths,
     filesystem: Filesystem,
+    coding_git: CodingGit | None = None,
 ) -> ToolRegistry:
-    """Register read/write/list/grep/run_tests/run_shell/git_* under *workspace*."""
+    """Register read/write/list/grep/run_tests/run_shell/git_* under *workspace*.
+
+    When *coding_git* is omitted, binds :class:`LocalProcessCodingGit` on the
+    workspace root (local ``git`` / ``gh``). Hosts pass another ``CodingGit``
+    for HTTPS+token or forge-API backends.
+    """
     registry = ToolRegistry()
     paths = workspace
     fs = filesystem
+    git = coding_git or LocalProcessCodingGit(workspace=paths.root)
 
     def read_file(path: str) -> str:
         target = paths.resolve(path)
@@ -136,53 +121,24 @@ def build_coding_tool_registry(
         return _run_process(paths, command, grant_label="run_shell", shell=True)
 
     def git_status() -> str:
-        """Short branch status via local ``git`` (SSH agent / config intact)."""
-        return _run_process(paths, ["git", "status", "-sb"], grant_label="git_status")
+        return git.status().to_tool_json()
 
     def git_log(base: str = "origin/main", max_count: int = 40) -> str:
-        """Oneline commits on HEAD not in *base* (``base..HEAD``)."""
-        try:
-            ref = _validate_ref(base, label="base")
-        except ValueError as exc:
-            return json.dumps({"ok": False, "error": str(exc)})
-        count = max(1, min(int(max_count), 200))
-        return _run_process(
-            paths,
-            ["git", "log", "--oneline", f"{ref}..HEAD", f"-{count}"],
-            grant_label="git_log",
-        )
+        return git.log(base=base, max_count=int(max_count)).to_tool_json()
 
     def git_diff(
         base: str = "origin/main",
         stat_only: bool = True,
         max_bytes: int = 120_000,
     ) -> str:
-        """Diff ``base...HEAD`` (triple-dot). Prefer ``stat_only`` for large arcs."""
-        try:
-            ref = _validate_ref(base, label="base")
-        except ValueError as exc:
-            return json.dumps({"ok": False, "error": str(exc)})
-        cmd = ["git", "diff"]
-        if bool(stat_only):
-            cmd.append("--stat")
-        cmd.append(f"{ref}...HEAD")
-        return _run_process(
-            paths,
-            cmd,
-            grant_label="git_diff",
-            max_stdout=max(4_000, int(max_bytes)),
-        )
+        return git.diff(
+            base=base, stat_only=bool(stat_only), max_bytes=int(max_bytes)
+        ).to_tool_json()
 
     def git_push(remote: str = "origin", set_upstream: bool = True) -> str:
-        """Push current HEAD via local ``git`` (uses operator SSH credentials)."""
-        rem = (remote or "origin").strip()
-        if not _SAFE_REMOTE.match(rem):
-            return json.dumps({"ok": False, "error": f"unsafe remote: {remote!r}"})
-        cmd = ["git", "push"]
-        if bool(set_upstream):
-            cmd.append("-u")
-        cmd.extend([rem, "HEAD"])
-        return _run_process(paths, cmd, grant_label="git_push", timeout=120)
+        return git.push(
+            remote=remote, set_upstream=bool(set_upstream)
+        ).to_tool_json()
 
     def create_pull_request(
         title: str,
@@ -190,32 +146,9 @@ def build_coding_tool_registry(
         base: str = "main",
         draft: bool = False,
     ) -> str:
-        """Open a GitHub PR with ``gh`` (cwd=workspace). Body may be markdown."""
-        try:
-            base_ref = _validate_ref(base, label="base")
-        except ValueError as exc:
-            return json.dumps({"ok": False, "error": str(exc)})
-        title_text = (title or "").strip()
-        if not title_text:
-            return json.dumps({"ok": False, "error": "title required"})
-        body_text = body if body is not None else ""
-        body_path = paths.root / ".mechaharness" / "pr_body.md"
-        body_path.parent.mkdir(parents=True, exist_ok=True)
-        fs.write_text(str(body_path), body_text)
-        cmd = [
-            _resolve_gh(),
-            "pr",
-            "create",
-            "--base",
-            base_ref,
-            "--title",
-            title_text,
-            "--body-file",
-            str(body_path),
-        ]
-        if bool(draft):
-            cmd.append("--draft")
-        return _run_process(paths, cmd, grant_label="create_pull_request", timeout=120)
+        return git.create_pull_request(
+            title=title, body=body, base=base, draft=bool(draft)
+        ).to_tool_json()
 
     registry.register(
         Tool(
@@ -304,7 +237,7 @@ def build_coding_tool_registry(
         Tool(
             "git_status",
             git_status,
-            description="git status -sb in the workspace (local git / SSH agent)",
+            description="Branch/working-tree status via CodingGit binding",
             parameters={"type": "object", "properties": {}},
             grants=[ProcessExec],
         )
@@ -313,7 +246,7 @@ def build_coding_tool_registry(
         Tool(
             "git_log",
             git_log,
-            description="git log --oneline base..HEAD (default base origin/main)",
+            description="Commits base..HEAD via CodingGit (default base origin/main)",
             parameters={
                 "type": "object",
                 "properties": {
@@ -328,7 +261,7 @@ def build_coding_tool_registry(
         Tool(
             "git_diff",
             git_diff,
-            description="git diff base...HEAD (default origin/main; stat_only default true)",
+            description="Diff base...HEAD via CodingGit (stat_only default true)",
             parameters={
                 "type": "object",
                 "properties": {
@@ -344,7 +277,7 @@ def build_coding_tool_registry(
         Tool(
             "git_push",
             git_push,
-            description="git push -u <remote> HEAD using local credentials",
+            description="Push HEAD via CodingGit (local SSH or host-bound transport)",
             parameters={
                 "type": "object",
                 "properties": {
@@ -359,7 +292,7 @@ def build_coding_tool_registry(
         Tool(
             "create_pull_request",
             create_pull_request,
-            description="gh pr create with title/body against base (default main)",
+            description="Open a PR via CodingGit (gh or host-bound publisher)",
             parameters={
                 "type": "object",
                 "properties": {

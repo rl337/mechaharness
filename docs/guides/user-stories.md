@@ -141,9 +141,9 @@ Stories: `fangore_convergence_ceiling`, `fangore_graph_executor`, `fangore_graph
 
 ### `fangore_guided_coding` — Guided coding recipe and instruction todo plan
 
-Persona **fangore**; execution `parallel`; 9 stage(s).
+Persona **fangore**; execution `parallel`; 11 stage(s).
 
-Stories: `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
+Stories: `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
 
 ### `fangore_host_kit` — Host kit, completer flavors, and harness families
 
@@ -712,6 +712,30 @@ Fangore starts the CLI host with family `pass_through` and backend `mock`. He bi
 
 Harness `user_story` scenario `capability_envelope_narrow.yaml` drives `capability_envelope`; expects narrow_ok / child_grant_count / widen_raises / delegation_choice.
 
+### `fangore_coding_git_inspect` — Inspect a feature branch against main with local git tools
+
+Fangore hands guided coding a workspace that already has a feature branch ahead of main. He wants the local agent to inspect status, commit history, and the diff against main using the machine's git, then leave a short inspect note on disk. Complements `fangore_guided_coding_recipe` and `fangore_coding_git_open_pr`.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`. Story harness seeds a feature-branch git repo and binds `RecordingPullRequestCodingGit` wrapping `LocalProcessCodingGit` (`environment.coding_git: local_mock_pr`) so status/log/diff use real local `git` while forge calls stay mockable. Tools `git_status` / `git_log` / `git_diff` come from `build_coding_tool_registry(..., coding_git=…)`. Hosts override via `ProjectCodingConfig.get_coding_git()`.
+
+#### Validation
+
+Harness `user_story` scenario `inspect.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: git_inspect` (scripted tool calls against local git). Live mode uses a real Completer with the same `local_mock_pr` binding. Unit tests `tests/test_project_coding.py` cover injectable `CodingGit` fakes and local process git.
+
+### `fangore_coding_git_open_pr` — Open a formatted pull request with local git and mocked GitHub
+
+Fangore asks guided coding to compare the feature branch to main with local git, draft a clear pull request summary, and open the PR. GitHub itself stays mocked so CI and live Completer walks do not need forge credentials; only the local git history is real. Complements `fangore_coding_git_inspect` and `fangore_guided_coding_recipe`.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `coding_git: local_mock_pr` (`RecordingPullRequestCodingGit` over `LocalProcessCodingGit`), and `git_seed: feature_branch`. Tools `git_log` / `git_diff` / `create_pull_request` hit the injectable `CodingGit`. The recording wrapper returns a stable example PR URL without calling `gh`. Production hosts keep `LocalProcessCodingGit` (or an HTTPS/token backend) via `ProjectCodingConfig.get_coding_git()`.
+
+#### Validation
+
+Harness `user_story` scenario `open_pr.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: git_open_pr`. Live Completer may draft title/body but still uses the mock PR publisher under `local_mock_pr`. Asserts `.mechaharness/pr_url.txt` contains the mock URL. Unit coverage in `tests/test_project_coding.py` and `tests/test_coding_git.py`.
+
 ### `fangore_completer_flavors` — Wire same-lane Completer flavors without forking the library
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore’s product needs a deep code Completer beside the default reason Completer in one Config. He registers a second Named flavor and a small host harness that selects it with Annotated Matched tags — no marker-lane ABCs and no edits to MechaHarness enums.
@@ -1167,11 +1191,11 @@ Harness `user_story` scenario `until_before.yaml`.
 
 ### `fangore_guided_coding_recipe` — Guide local coding via the guided_coding Agentic Recipe
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph (controller `story`, store `memory`). He wants Cursor to answer only short engineering direction while a project-local MechaHarness process classifies oneshot vs todo list and does the token-heavy file edits under pre/item/post acceptance. The same coding host can inspect the git difference between main and the working branch and open a well-formatted pull request using the machine's local git credentials. Start yields `advice_requested` from soft point `external_guidance`; he answers `minimal` in a later call and the run completes. In a workspace-backed walk he has the agent write a small helper module, confirms the file on disk, and runs Python against it to check stdout. Complements `fangore_instruction_todo_plan`, `fangore_insp_graph_guidance_yield`, and `fangore_conversational_tool_loop`. He walks product steps (start, answer, workspace_read, run_python) and verifies completion from the structured observation expects on each scenario.
+Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding` durable graph (controller `story`, store `memory`). He wants Cursor to answer only short engineering direction while a project-local MechaHarness process classifies oneshot vs todo list and does the token-heavy file edits under pre/item/post acceptance. Start yields `advice_requested` from soft point `external_guidance`; he answers `minimal` in a later call and the run completes. In a workspace-backed walk he has the agent write a small helper module, confirms the file on disk, and runs Python against it to check stdout. Git inspect and mocked pull-request handoffs are owned by `fangore_coding_git_inspect` and `fangore_coding_git_open_pr`. Complements `fangore_instruction_todo_plan`, `fangore_insp_graph_guidance_yield`, and `fangore_conversational_tool_loop`. He walks product steps (start, answer, workspace_read, run_python) and verifies completion from the structured observation expects on each scenario.
 
 #### Implementation
 
-Agentic Recipe catalog id `guided_coding` (`GuidedCodingTemplate`) tiles `instruction_todo_plan` and `audited_infer_accept` under `plan_tile` / `audit_tile` with soft point `external_guidance` (`kind=guidance`). MCP `MECHA_MCP_HOST=project_coding` binds `ProjectCodingConfig` (workspace coding tools + `GeneratorLocalWork` / `ProjectCodingLocalWork` burst after guidance, including `request_guidance` restart for plan refinement). Coding tools include confined `git_status` / `git_log` / `git_diff` / `git_push` (local `git`, operator SSH) and `create_pull_request` (`gh pr create`) so a handoff can inspect `main`…branch and open a PR. Story hosts bind `environment.local_work: project_coding` with a temp workspace and optional `coding_write` stub. `ProjectCodingLocalWork` records `written_files` / `workspace_root` on the completed yield. Product verbs `workspace_read` and `run_python` put file text and stdout/stderr/exit_code into the step observation bag. `DurableGraphGenerator._advance` invokes the injectable local-work hook when the guidance queue is empty.
+Agentic Recipe catalog id `guided_coding` (`GuidedCodingTemplate`) tiles `instruction_todo_plan` and `audited_infer_accept` under `plan_tile` / `audit_tile` with soft point `external_guidance` (`kind=guidance`). MCP `MECHA_MCP_HOST=project_coding` binds `ProjectCodingConfig` (workspace coding tools + `GeneratorLocalWork` / `ProjectCodingLocalWork` burst after guidance, including `request_guidance` restart for plan refinement). Injectable `CodingGit` (default `LocalProcessCodingGit`; story/CI often `RecordingPullRequestCodingGit`) backs optional git/PR tools — see `fangore_coding_git_inspect` / `fangore_coding_git_open_pr`. Story hosts bind `environment.local_work: project_coding` with a temp workspace and optional `coding_write` stub. `ProjectCodingLocalWork` records `written_files` / `workspace_root` on the completed yield. Product verbs `workspace_read` and `run_python` put file text and stdout/stderr/exit_code into the step observation bag. `DurableGraphGenerator._advance` invokes the injectable local-work hook when the guidance queue is empty.
 
 #### Validation
 

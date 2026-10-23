@@ -9,11 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Project-coding git / PR tools:** ``ProjectCodingConfig`` workspace registry
-  now exposes ``git_status``, ``git_log``, ``git_diff`` (``base...HEAD``),
-  ``git_push`` (local ``git`` + operator SSH), and ``create_pull_request``
-  (``gh pr create``) so ``guided_coding`` MCP handoffs can inspect
-  ``main``…branch and open a formatted PR without a second driver.
+- **Injectable ``CodingGit`` for project coding:** ABC
+  ``mechaharness.coding_git.CodingGit`` with default
+  ``LocalProcessCodingGit`` (local ``git`` / ``gh``, SSH agent) and
+  ``RecordingPullRequestCodingGit`` (local git + mock forge) for stories/CI.
+  Hosts override via ``ProjectCodingConfig(coding_git=…)`` /
+  ``get_coding_git()`` for HTTPS+token or forge-API backends. Tool names stay
+  ``git_status`` / ``git_log`` / ``git_diff`` / ``git_push`` /
+  ``create_pull_request``. Stories ``fangore_coding_git_inspect`` /
+  ``fangore_coding_git_open_pr`` seed a feature branch and keep GitHub mocked.
+
 - **Sequential ``calc_cli`` coding suite (live-capable):** ordered Fangore arc
   that grows a shared-workspace ``calc.py`` CLI through numbers → ``+−`` →
   ``×÷`` → ``^`` → parentheses → common functions. Suite injects
