@@ -127,7 +127,9 @@ overwrites of existing files. <code class="docutils literal notranslate"><span c
 <code class="docutils literal notranslate"><span class="pre">GitHubConnectionConfig</span></code> (<code class="docutils literal notranslate"><span class="pre">MECHA_GITHUB_*</span></code> / <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>, not
 Settings) for pull requests, check runs, and job logs. Tools <code class="docutils literal notranslate"><span class="pre">ci_checks</span></code> /
 <code class="docutils literal notranslate"><span class="pre">ci_job_log</span></code>. <code class="docutils literal notranslate"><span class="pre">LocalGitHttpPullRequestCodingGit</span></code> when a token is bound.
-Story <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_repair</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">RecordingGitHubClient</span></code> + story <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_diagnose</span></code>
+(<code class="docutils literal notranslate"><span class="pre">coding_github:</span> <span class="pre">local_mock_ci</span></code>) for forge lookup without network; repair
+remains <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_repair</span></code>.</p></li>
 <li><p><strong>Injectable <code class="docutils literal notranslate"><span class="pre">CodingGit</span></code> for project coding:</strong> ABC
 <code class="docutils literal notranslate"><span class="pre">mechaharness.coding_git.CodingGit</span></code> with default
 <code class="docutils literal notranslate"><span class="pre">LocalProcessCodingGit</span></code> (local <code class="docutils literal notranslate"><span class="pre">git</span></code> / <code class="docutils literal notranslate"><span class="pre">gh</span></code>, SSH agent) and
