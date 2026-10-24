@@ -65,7 +65,13 @@ steps:
     value: Ruff
   - kind: contains
     key: text
+    value: I001
+  - kind: contains
+    key: text
     value: Mypy
+  - kind: contains
+    key: text
+    value: no-untyped-def
 complete:
   expect:
   - kind: includes

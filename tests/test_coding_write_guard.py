@@ -8,9 +8,8 @@ from pathlib import Path
 import pytest
 from pyiv.files import RealFilesystem
 
-from mechaharness.coding_write_guard import CodingWriteGuard, DEFAULT_CODING_WRITE_GUARD
+from mechaharness.coding_write_guard import DEFAULT_CODING_WRITE_GUARD, CodingWriteGuard
 from mechaharness.project_coding_tools import WorkspacePaths, build_coding_tool_registry
-
 
 # Representative "healthy" module (≥512 bytes; mirrors pre-gutting tools modules).
 _HEALTHY_MODULE = (

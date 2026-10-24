@@ -19,8 +19,8 @@ from pyiv.files import Filesystem
 
 from mechaharness.coding_git import CodingGit, LocalProcessCodingGit
 from mechaharness.coding_write_guard import (
-    CodingWriteGuard,
     DEFAULT_CODING_WRITE_GUARD,
+    CodingWriteGuard,
 )
 from mechaharness.core.access import FsRead, FsWrite, ProcessExec
 from mechaharness.github_client import GitHubClient, parse_github_owner_repo

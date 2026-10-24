@@ -331,6 +331,8 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         - ``args`` / ``stdout_contains`` / ``exit_code``: ``python path …args``
         - ``pytest``: truthy → run ``python -m pytest -q <path>`` (path may be
           a test file or directory). Optional ``args`` append after ``-q``.
+        - ``ruff``: truthy → run ``python -m ruff check <path|.>`` (static lint).
+        - ``mypy``: truthy → run ``python -m mypy <path|.>`` (static types).
         """
         if not verify_runs:
             return []
@@ -341,7 +343,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         for index, spec in enumerate(verify_runs):
             path = str(spec.get("path") or "").strip()
             use_pytest = bool(spec.get("pytest"))
-            if not path and not use_pytest:
+            use_ruff = bool(spec.get("ruff"))
+            use_mypy = bool(spec.get("mypy"))
+            if not path and not (use_pytest or use_ruff or use_mypy):
                 failures.append(f"verify_runs[{index}]: missing path")
                 continue
             target = root / path if path else root
@@ -380,11 +384,11 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                             f"verify_runs[{index}] {path}: python_parses "
                             f"failed: {exc}"
                         )
-                for needle in text_needles:
-                    if needle not in body:
+                for text_needle in text_needles:
+                    if text_needle not in body:
                         failures.append(
                             f"verify_runs[{index}] {path}: expected file text to "
-                            f"contain {needle!r}"
+                            f"contain {text_needle!r}"
                         )
                 for banned in text_forbids:
                     if banned in body:
@@ -392,14 +396,42 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                             f"verify_runs[{index}] {path}: file text must not "
                             f"contain {banned!r}"
                         )
-            if use_pytest:
+            if use_pytest or use_ruff or use_mypy:
                 if path and not target.exists():
-                    failures.append(f"verify_runs[{index}]: missing pytest path {path}")
+                    tool = (
+                        "pytest" if use_pytest else ("ruff" if use_ruff else "mypy")
+                    )
+                    failures.append(
+                        f"verify_runs[{index}]: missing {tool} path {path}"
+                    )
                     continue
                 extra = [str(a) for a in list(spec.get("args") or [])]
-                cmd = [sys.executable, "-m", "pytest", "-q"]
-                if path:
-                    cmd.append(path)
+                if use_pytest:
+                    cmd = [sys.executable, "-m", "pytest", "-q"]
+                    if path:
+                        cmd.append(path)
+                    tool_label = "pytest"
+                    timeout_default = 60.0
+                elif use_ruff:
+                    cmd = [sys.executable, "-m", "ruff", "check"]
+                    cmd.append(path if path else ".")
+                    tool_label = "ruff"
+                    timeout_default = 60.0
+                else:
+                    # Match CI-shaped strictness for isolated story workspaces
+                    # that lack a pyproject mypy stanza.
+                    cmd = [sys.executable, "-m", "mypy"]
+                    cmd.append(path if path else ".")
+                    has_flag = any(
+                        str(a).startswith("-") for a in list(spec.get("args") or [])
+                    )
+                    has_config = (root / "mypy.ini").is_file() or (
+                        root / "pyproject.toml"
+                    ).is_file()
+                    if not has_flag and not has_config:
+                        cmd.append("--disallow-untyped-defs")
+                    tool_label = "mypy"
+                    timeout_default = 120.0
                 cmd.extend(extra)
                 expected_exit = int(spec.get("exit_code", 0))
                 try:
@@ -408,15 +440,19 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                         cwd=str(root),
                         capture_output=True,
                         text=True,
-                        timeout=float(spec.get("timeout_seconds") or 60),
+                        timeout=float(
+                            spec.get("timeout_seconds") or timeout_default
+                        ),
                         check=False,
                     )
                 except Exception as exc:  # noqa: BLE001
-                    failures.append(f"verify_runs[{index}] pytest {path}: {exc}")
+                    failures.append(
+                        f"verify_runs[{index}] {tool_label} {path}: {exc}"
+                    )
                     continue
                 if int(completed.returncode) != expected_exit:
                     failures.append(
-                        f"verify_runs[{index}] pytest {path}: exit "
+                        f"verify_runs[{index}] {tool_label} {path}: exit "
                         f"{completed.returncode} != {expected_exit}; "
                         f"stdout={completed.stdout.strip()!r}; "
                         f"stderr={completed.stderr.strip()!r}"
@@ -435,7 +471,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 continue
             args = [str(a) for a in list(spec.get("args") or [])]
             expected_exit = int(spec.get("exit_code", 0))
-            needle = spec.get("stdout_contains")
+            stdout_needle = spec.get("stdout_contains")
             try:
                 completed = subprocess.run(
                     [sys.executable, str(target), *args],
@@ -455,10 +491,13 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                     f"stderr={completed.stderr.strip()!r}"
                 )
                 continue
-            if needle is not None and str(needle) not in (completed.stdout or ""):
+            if (
+                stdout_needle is not None
+                and str(stdout_needle) not in (completed.stdout or "")
+            ):
                 failures.append(
                     f"verify_runs[{index}] {path} {args}: expected stdout to "
-                    f"contain {needle!r}, got {completed.stdout!r}"
+                    f"contain {stdout_needle!r}, got {completed.stdout!r}"
                 )
         return failures
 
@@ -489,6 +528,12 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                         lines.append(f"  - {path} must NOT contain {banned!r}")
                     if spec.get("pytest"):
                         lines.append(f"  - pytest -q {path} must exit 0")
+                    elif spec.get("ruff"):
+                        lines.append(
+                            f"  - ruff check {path or '.'} must exit 0"
+                        )
+                    elif spec.get("mypy"):
+                        lines.append(f"  - mypy {path or '.'} must exit 0")
                     elif (
                         "args" in spec
                         or spec.get("stdout_contains") is not None

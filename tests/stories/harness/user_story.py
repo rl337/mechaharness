@@ -237,6 +237,10 @@ class UserStoryHarness:
                 _seed_feature_branch_git_repo(workspace_root)
             if env.ci_seed == "failing_check":
                 _seed_failing_ci_check(workspace_root)
+            if env.static_seed == "ruff_imports":
+                _seed_static_ruff_imports(workspace_root)
+            if env.static_seed == "mypy_untyped":
+                _seed_static_mypy_untyped(workspace_root)
             if env.write_guard_seed == "healthy_module":
                 _seed_healthy_module_for_write_guard(workspace_root)
             kwargs["generator_local_work"] = self._project_coding_local_work(
@@ -777,6 +781,64 @@ def _seed_failing_ci_check(root: Path) -> None:
     )
 
 
+def _seed_static_ruff_imports(root: Path) -> None:
+    """Plant unsorted imports (ruff I001) plus a CI-shaped failure log."""
+    (root / "messy.py").write_text(
+        "from pathlib import Path\n"
+        "import sys\n"
+        "import os\n"
+        "\n"
+        "def main() -> int:\n"
+        "    return len(sys.argv) + int(bool(Path('.').exists())) + len(os.name)\n",
+        encoding="utf-8",
+    )
+    mech = root / ".mechaharness"
+    mech.mkdir(parents=True, exist_ok=True)
+    (mech / "ci_failure.log").write_text(
+        "\n".join(
+            [
+                "Running: Ruff lint",
+                "Command: ruff check .",
+                "I001 [*] Import block is un-sorted or un-formatted",
+                "  --> messy.py:1:1",
+                "Found 1 error.",
+                "✗ Ruff lint failed (exit code: 1)",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _seed_static_mypy_untyped(root: Path) -> None:
+    """Plant an untyped def (mypy no-untyped-def) plus a CI-shaped failure log."""
+    (root / "mypy.ini").write_text(
+        "[mypy]\npython_version = 3.10\ndisallow_untyped_defs = True\n",
+        encoding="utf-8",
+    )
+    (root / "typed_mod.py").write_text(
+        "def answer(x):\n"
+        "    return x + 1\n",
+        encoding="utf-8",
+    )
+    mech = root / ".mechaharness"
+    mech.mkdir(parents=True, exist_ok=True)
+    (mech / "ci_failure.log").write_text(
+        "\n".join(
+            [
+                "Running: Mypy type checking",
+                "Command: mypy .",
+                "typed_mod.py:1: error: Function is missing a type annotation"
+                "  [no-untyped-def]",
+                "Found 1 error in 1 file",
+                "✗ Mypy type checking failed (exit code: 1)",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
 def _coding_tool_script_steps(script_id: str) -> list[dict[str, Any]]:
     """Named offline Completer scripts that exercise CodingGit tools."""
     if script_id == "git_inspect":
@@ -871,9 +933,88 @@ def _coding_tool_script_steps(script_id: str) -> list[dict[str, Any]]:
                         "# CI diagnosis\n\n"
                         "Check: checks — conclusion failure\n"
                         "Job id: 9001\n"
-                        "Root cause: Ruff lint failed; Mypy type checking "
-                        "failed; Pytest ModuleNotFoundError: No module "
-                        "named 'widget'; coverage 77.55% below 78.0%\n"
+                        "Root causes:\n"
+                        "- Ruff I001 import block unsorted "
+                        "(project_coding.py)\n"
+                        "- Mypy no-untyped-def / assignment "
+                        "(github_client.py, generator_local_work.py)\n"
+                        "- Pytest ModuleNotFoundError: widget\n"
+                        "- Coverage 77.55% below 78.0%\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "static_ruff_repair":
+        return [
+            {
+                "name": "read_file",
+                "arguments": {"path": ".mechaharness/ci_failure.log"},
+            },
+            {
+                "name": "run_shell",
+                "arguments": {"command": "python -m ruff check messy.py"},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": "messy.py",
+                    "content": (
+                        "import os\n"
+                        "import sys\n"
+                        "from pathlib import Path\n"
+                        "\n"
+                        "\n"
+                        "def main() -> int:\n"
+                        "    return (\n"
+                        "        len(sys.argv)\n"
+                        "        + int(bool(Path('.').exists()))\n"
+                        "        + len(os.name)\n"
+                        "    )\n"
+                    ),
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/ci_fix.md",
+                    "content": (
+                        "# CI fix\n\n"
+                        "Failed check: Ruff (I001)\n"
+                        "Changed: messy.py — sorted imports\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "static_mypy_repair":
+        return [
+            {
+                "name": "read_file",
+                "arguments": {"path": ".mechaharness/ci_failure.log"},
+            },
+            {
+                "name": "run_shell",
+                "arguments": {"command": "python -m mypy typed_mod.py"},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": "typed_mod.py",
+                    "content": (
+                        "def answer(x: int) -> int:\n"
+                        "    return x + 1\n"
+                    ),
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/ci_fix.md",
+                    "content": (
+                        "# CI fix\n\n"
+                        "Failed check: Mypy (no-untyped-def)\n"
+                        "Changed: typed_mod.py — annotated answer()\n"
                     ),
                 },
             },

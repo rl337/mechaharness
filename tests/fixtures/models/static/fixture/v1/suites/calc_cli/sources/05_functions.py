@@ -4,7 +4,6 @@ from __future__ import annotations
 import math
 import sys
 
-
 _FUNCS = {
     "sqrt": lambda xs: math.sqrt(xs[0]),
     "abs": lambda xs: abs(xs[0]),

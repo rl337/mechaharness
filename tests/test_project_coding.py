@@ -292,6 +292,56 @@ def test_coding_ci_tools_register_with_recording_github(tmp_path: Path) -> None:
     ]
 
 
+def test_project_coding_verify_runs_ruff_and_mypy(tmp_path: Path) -> None:
+    """verify_runs ruff/mypy rows surface static-check failures."""
+    from pyiv.files import RealFilesystem
+
+    fs = RealFilesystem()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path), filesystem=fs
+    )
+    (tmp_path / "messy.py").write_text(
+        "from pathlib import Path\n"
+        "import sys\n"
+        "\n"
+        "def main() -> int:\n"
+        "    return len(sys.argv) + int(bool(Path('.').exists()))\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "typed_mod.py").write_text(
+        "def answer(x):\n    return x\n",
+        encoding="utf-8",
+    )
+    work = ProjectCodingLocalWork(
+        tools=tools,
+        complete=lambda messages, meta: {
+            "role": "assistant",
+            "content": "done",
+            "tool_calls": [],
+        },
+        workspace_root=tmp_path,
+    )
+    ruff_fail = work._execute_verify_runs([{"path": "messy.py", "ruff": True}])
+    assert ruff_fail and "ruff" in ruff_fail[0]
+    mypy_fail = work._execute_verify_runs([{"path": "typed_mod.py", "mypy": True}])
+    assert mypy_fail and "mypy" in mypy_fail[0]
+    (tmp_path / "messy.py").write_text(
+        "import sys\n"
+        "from pathlib import Path\n"
+        "\n"
+        "\n"
+        "def main() -> int:\n"
+        "    return len(sys.argv) + int(bool(Path('.').exists()))\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "typed_mod.py").write_text(
+        "def answer(x: int) -> int:\n    return x\n",
+        encoding="utf-8",
+    )
+    assert work._execute_verify_runs([{"path": "messy.py", "ruff": True}]) == []
+    assert work._execute_verify_runs([{"path": "typed_mod.py", "mypy": True}]) == []
+
+
 def test_project_coding_verify_runs_repair(tmp_path: Path) -> None:
     """Host verify_runs failure triggers one repair coding burst."""
     from pyiv.files import RealFilesystem

@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (``coding_github: local_mock_ci``) for forge lookup without network; repair
   remains ``fangore_coding_ci_repair``.
 
+- **Static-check repair lane:** ``verify_runs`` accepts ``ruff`` / ``mypy``
+  rows. Story ``fangore_coding_static_checks`` seeds I001 / no-untyped-def and
+  repairs under guided coding. Fixture suite ``sources/`` trees are ignored by
+  root pytest collection.
+
 
 - **Injectable ``CodingGit`` for project coding:** ABC
   ``mechaharness.coding_git.CodingGit`` with default

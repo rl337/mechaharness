@@ -356,10 +356,22 @@ class RecordingGitHubClient(GitHubClient):
         "Step: Run checks\n"
         "Conclusion: failure\n"
         "\n"
+        "Running: Ruff lint\n"
+        "Command: ruff check src tests\n"
+        "I001 [*] Import block is un-sorted or un-formatted\n"
+        "  --> src/mechaharness/project_coding.py:10:1\n"
         "Found 4 errors.\n"
         "✗ Ruff lint failed (exit code: 1)\n"
+        "\n"
+        "Running: Mypy type checking\n"
+        "Command: mypy\n"
+        "src/mechaharness/github_client.py:550: error: Function is missing a "
+        "type annotation  [no-untyped-def]\n"
+        "src/mechaharness/generator_local_work.py:438: error: Incompatible "
+        "types in assignment  [assignment]\n"
         "Found 2 errors in 2 files (checked 207 source files)\n"
         "✗ Mypy type checking failed (exit code: 1)\n"
+        "\n"
         "E   ModuleNotFoundError: No module named 'widget'\n"
         "✗ Pytest failed (exit code: 2)\n"
         "FAIL Required test coverage of 78.0% not reached. Total coverage: 77.55%\n"
@@ -547,8 +559,16 @@ def _http_no_redirect(
     """HTTP request that does not follow redirects (capture ``Location``)."""
 
     class _NoRedirect(urllib.request.HTTPRedirectHandler):
-        def redirect_request(self, req, fp, code, msg, hdrs, newurl):  # noqa: ANN001
-            del req, fp, code, msg, hdrs, newurl
+        def redirect_request(
+            self,
+            req: urllib.request.Request,
+            fp: Any,
+            code: int,
+            msg: str,
+            headers: Any,
+            newurl: str,
+        ) -> urllib.request.Request | None:
+            del req, fp, code, msg, headers, newurl
             return None
 
     request = urllib.request.Request(url, method=method.upper(), headers=dict(headers))

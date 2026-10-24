@@ -27,6 +27,14 @@
       "scenario": "open_pr"
     },
     {
+      "story": "fangore_coding_static_checks",
+      "scenario": "mypy"
+    },
+    {
+      "story": "fangore_coding_static_checks",
+      "scenario": "ruff"
+    },
+    {
       "story": "fangore_coding_write_guard",
       "scenario": "refuse_gutting"
     },

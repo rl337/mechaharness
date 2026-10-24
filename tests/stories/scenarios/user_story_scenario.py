@@ -62,6 +62,8 @@ class EnvironmentBlock(BaseModel):
     git_seed: Literal["feature_branch"] | None = None
     # Seed a fake CI failure log + broken module for repair stories.
     ci_seed: Literal["failing_check"] | None = None
+    # Seed a local static-check failure (ruff I001 / mypy no-untyped-def).
+    static_seed: Literal["ruff_imports", "mypy_untyped"] | None = None
     # Seed a healthy multi-KB module for write-gutting guard stories.
     write_guard_seed: Literal["healthy_module"] | None = None
     # Offline Completer script that issues git/PR/CI tool calls (static CI).
@@ -72,6 +74,8 @@ class EnvironmentBlock(BaseModel):
             "git_open_pr",
             "ci_repair",
             "ci_diagnose",
+            "static_ruff_repair",
+            "static_mypy_repair",
             "write_gutting_attempt",
         ]
         | None

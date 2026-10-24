@@ -19,6 +19,11 @@ from typing import Any
 
 from pyiv.files import Filesystem, RealFilesystem
 
+from mechaharness.coding_git import (
+    CodingGit,
+    LocalGitHttpPullRequestCodingGit,
+    LocalProcessCodingGit,
+)
 from mechaharness.config import Settings
 from mechaharness.core.access import (
     FsRead,
@@ -40,18 +45,13 @@ from mechaharness.generator_local_work import (
     GeneratorLocalWork,
     ProjectCodingLocalWork,
 )
+from mechaharness.github_client import GitHubClient, HttpGitHubClient
+from mechaharness.github_connection import GitHubConnectionConfig
 from mechaharness.graph_templates.catalog import default_graph_template_classes
 from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.base import InferenceStrategy
-from mechaharness.coding_git import (
-    CodingGit,
-    LocalGitHttpPullRequestCodingGit,
-    LocalProcessCodingGit,
-)
-from mechaharness.github_client import GitHubClient, HttpGitHubClient
-from mechaharness.github_connection import GitHubConnectionConfig
 from mechaharness.project_coding_tools import (
     WorkspacePaths,
     build_coding_tool_registry,
