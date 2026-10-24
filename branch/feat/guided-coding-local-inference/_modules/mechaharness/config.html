@@ -129,7 +129,8 @@
 <span class="sd">    onto connection config later. Do not add judge/media/OAuth fields.</span>
 <span class="sd">    """</span>
 
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">SettingsConfigDict</span><span class="p">(</span><span class="n">env_prefix</span><span class="o">=</span><span class="s2">"MECHA_"</span><span class="p">,</span> <span class="n">env_file</span><span class="o">=</span><span class="s2">".env"</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">)</span>
+    <span class="c1"># Process env only (``.env/`` is a local secrets dir with ``env.sh``, not a dotenv file).</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">SettingsConfigDict</span><span class="p">(</span><span class="n">env_prefix</span><span class="o">=</span><span class="s2">"MECHA_"</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">)</span>
 
     <span class="n">inference_backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"openai"</span>
     <span class="n">harness_family</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"tool_loop"</span>

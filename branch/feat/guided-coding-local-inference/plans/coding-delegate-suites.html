@@ -162,10 +162,13 @@ provisional mirrors until the same suite passes under
 <tr class="row-even"><td><p>MCP <code class="docutils literal notranslate"><span class="pre">generator_start</span></code> / <code class="docutils literal notranslate"><span class="pre">resume</span></code></p></td>
 <td><p>Same <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> graph via <code class="docutils literal notranslate"><span class="pre">MECHA_MCP_HOST=project_coding</span></code>; session semantics in <code class="docutils literal notranslate"><span class="pre">fangore_insp_driver_session_resume</span></code>. Dogfood: live MCP against <code class="docutils literal notranslate"><span class="pre">delegate_pkg</span></code> goals — <strong>no fourth suite</strong>.</p></td>
 </tr>
-<tr class="row-odd"><td><p>StopContract / graph budgets</p></td>
+<tr class="row-odd"><td><p>CI diagnose → repair → local verify</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_guided_coding</span></code> → <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_repair</span></code> (seeded failure log; HTTP check/job log fetch follows on <code class="docutils literal notranslate"><span class="pre">GitHubClient</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>StopContract / graph budgets</p></td>
 <td><p>Soft point <code class="docutils literal notranslate"><span class="pre">max_iterations</span></code> on every coding stage; mechanism stories under <code class="docutils literal notranslate"><span class="pre">fangore_graph_executor</span></code> / <code class="docutils literal notranslate"><span class="pre">fangore_recipes_tiling</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>Workspace grants / escape</p></td>
+<tr class="row-odd"><td><p>Workspace grants / escape</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_access_authority</span></code> (+ <code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig</span></code> grants)</p></td>
 </tr>
 </tbody>

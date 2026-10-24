@@ -119,6 +119,15 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <section id="added">
 <h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
 <ul class="simple">
+<li><p><strong>Coding write gutting guard:</strong> <code class="docutils literal notranslate"><span class="pre">CodingWriteGuard</span></code> on project-coding
+<code class="docutils literal notranslate"><span class="pre">write_file</span></code> refuses catastrophic shrink / syntax-breaking / def-dropping
+overwrites of existing files. <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> gains <code class="docutils literal notranslate"><span class="pre">min_bytes</span></code> and
+<code class="docutils literal notranslate"><span class="pre">python_parses</span></code>. Story <code class="docutils literal notranslate"><span class="pre">fangore_coding_write_guard</span></code>.</p></li>
+<li><p><strong>HTTP GitHub client (PR + CI logs):</strong> <code class="docutils literal notranslate"><span class="pre">HttpGitHubClient</span></code> /
+<code class="docutils literal notranslate"><span class="pre">GitHubConnectionConfig</span></code> (<code class="docutils literal notranslate"><span class="pre">MECHA_GITHUB_*</span></code> / <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>, not
+Settings) for pull requests, check runs, and job logs. Tools <code class="docutils literal notranslate"><span class="pre">ci_checks</span></code> /
+<code class="docutils literal notranslate"><span class="pre">ci_job_log</span></code>. <code class="docutils literal notranslate"><span class="pre">LocalGitHttpPullRequestCodingGit</span></code> when a token is bound.
+Story <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_repair</span></code>.</p></li>
 <li><p><strong>Injectable <code class="docutils literal notranslate"><span class="pre">CodingGit</span></code> for project coding:</strong> ABC
 <code class="docutils literal notranslate"><span class="pre">mechaharness.coding_git.CodingGit</span></code> with default
 <code class="docutils literal notranslate"><span class="pre">LocalProcessCodingGit</span></code> (local <code class="docutils literal notranslate"><span class="pre">git</span></code> / <code class="docutils literal notranslate"><span class="pre">gh</span></code>, SSH agent) and

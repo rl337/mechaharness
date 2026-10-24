@@ -141,9 +141,9 @@ Stories: `fangore_convergence_ceiling`, `fangore_graph_executor`, `fangore_graph
 
 ### `fangore_guided_coding` — Guided coding recipe and instruction todo plan
 
-Persona **fangore**; execution `parallel`; 11 stage(s).
+Persona **fangore**; execution `parallel`; 13 stage(s).
 
-Stories: `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
+Stories: `fangore_coding_ci_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
 
 ### `fangore_host_kit` — Host kit, completer flavors, and harness families
 
@@ -712,6 +712,18 @@ Fangore starts the CLI host with family `pass_through` and backend `mock`. He bi
 
 Harness `user_story` scenario `capability_envelope_narrow.yaml` drives `capability_envelope`; expects narrow_ok / child_grant_count / widen_raises / delegation_choice.
 
+### `fangore_coding_ci_repair` — Diagnose a failed CI check and repair the workspace until local verify passes
+
+Fangore's pull request build fails on the checks job. He starts guided coding against the project workspace, reads the failed check log, repairs the broken source, re-runs the same kind of local verify the pipeline used, and writes a short fix note for the next human review. GitHub Actions itself stays mocked in stories so CI and live Completer walks do not need forge credentials; only the local edit and verify are real. Complements `fangore_coding_git_inspect` and `fangore_coding_git_open_pr`. The production path will fetch check and job logs over the injectable GitHub HTTP client when a token is present.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `ci_seed: failing_check`, and coding tools under `build_coding_tool_registry`. Static stories plant a failure log and broken module; the Completer (or `coding_tool_script: ci_repair`) reads that log, edits the module, and records `.mechaharness/ci_fix.md`. Production extends `GitHubClient` / `HttpGitHubClient` with check-run and job-log fetch (bound via `GitHubConnectionConfig` / `ProjectCodingConfig.get_github_client()`), exposing confined tools such as `ci_checks` and `ci_job_log` beside existing git/PR tools. Local re-check uses `ProjectCodingLocalWork` `verify_runs` / `run_python` (and host `run_checks.sh` when bound) so repair stays on the cheap Completer lane. Soft point `external_guidance` remains the human scope gate.
+
+#### Validation
+
+Harness `user_story` scenario `repair.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_repair` against `ci_seed: failing_check`. Asserts `widget.py` contains the repaired function and `.mechaharness/ci_fix.md` cites the failure. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`. Unit coverage for HTTP check/log fetch lands in `tests/test_github_client.py` when those methods ship; until then the story proves the diagnose→edit→note loop on seeded artifacts.
+
 ### `fangore_coding_git_inspect` — Inspect a feature branch against main with local git tools
 
 Fangore hands guided coding a workspace that already has a feature branch ahead of main. He wants the local agent to inspect status, commit history, and the diff against main using the machine's git, then leave a short inspect note on disk. Complements `fangore_guided_coding_recipe` and `fangore_coding_git_open_pr`.
@@ -730,11 +742,23 @@ Fangore asks guided coding to compare the feature branch to main with local git,
 
 #### Implementation
 
-Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `coding_git: local_mock_pr` (`RecordingPullRequestCodingGit` over `LocalProcessCodingGit`), and `git_seed: feature_branch`. Tools `git_log` / `git_diff` / `create_pull_request` hit the injectable `CodingGit`. The recording wrapper returns a stable example PR URL without calling `gh`. Production hosts keep `LocalProcessCodingGit` (or an HTTPS/token backend) via `ProjectCodingConfig.get_coding_git()`.
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `coding_git: local_mock_pr` (`RecordingPullRequestCodingGit` over `LocalProcessCodingGit`), and `git_seed: feature_branch`. Tools `git_log` / `git_diff` / `create_pull_request` hit injectable `CodingGit`. Production PR path is `LocalGitHttpPullRequestCodingGit` + `HttpGitHubClient` / `GitHubConnectionConfig` (HTTP token via `ProjectCodingConfig.get_github_client()` — no `gh` required). Stories keep the forge mocked.
 
 #### Validation
 
-Harness `user_story` scenario `open_pr.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: git_open_pr`. Live Completer may draft title/body but still uses the mock PR publisher under `local_mock_pr`. Asserts `.mechaharness/pr_url.txt` contains the mock URL. Unit coverage in `tests/test_project_coding.py` and `tests/test_coding_git.py`.
+Harness `user_story` scenario `open_pr.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: git_open_pr`. Live Completer may draft title/body but still uses the mock PR publisher under `local_mock_pr`. Asserts `.mechaharness/pr_url.txt` contains the mock URL. Unit coverage in `tests/test_github_client.py` and `tests/test_coding_git.py`.
+
+### `fangore_coding_write_guard` — Refuse catastrophic gutting of an existing workspace module
+
+Fangore starts guided coding on a workspace that already has a substantial module. A careless Completer tries to replace that module with a tiny broken stub. The coding tools refuse the write, the original module stays intact, and he records a short note that the gutting attempt was blocked. Complements `fangore_coding_ci_repair`.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `ci_seed`-style workspace seed `write_guard_seed: healthy_module`. ``write_file`` in `build_coding_tool_registry` applies `CodingWriteGuard` (min retain ratio, Python parse, retain some top-level defs). Static `coding_tool_script: write_gutting_attempt` issues the bad write then notes the refusal. `verify_runs` may also use `min_bytes` / `python_parses`.
+
+#### Validation
+
+Harness `user_story` scenario `refuse_gutting.yaml` in suite `fangore_guided_coding`. Asserts the seeded module still contains its public defs and `.mechaharness/write_guard_note.md` mentions refused/gutting. Unit coverage in `tests/test_coding_write_guard.py`.
 
 ### `fangore_completer_flavors` — Wire same-lane Completer flavors without forking the library
 
