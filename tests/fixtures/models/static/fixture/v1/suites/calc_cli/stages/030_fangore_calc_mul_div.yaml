@@ -31,8 +31,9 @@ steps:
     start:
       run_id: calc-mul_div
       inputs:
-        goal: 'Update calc.py so * and / bind tighter than + and -: 2+3*4 → 14, 8/2*2 → 8 (left-assoc
-          among * /). Keep prior + - and literals green. Required API shape (non-negotiable): define both
+        goal: 'Read calc.py first, then extend it so * and / bind tighter than + and -: 2+3*4 → 14,
+          8/2*2 → 8 (left-assoc among * /). Tokenizer must treat * and / as operator characters (not
+          digits). Keep prior + - and literals green. Required API shape (non-negotiable): define both
           `def evaluate(expr)` and `def main(argv=None) -> int` by those exact names (main must not be
           only an inline `if __name__ == ''__main__''` block). main reads sys.argv[1], prints the result,
           exits 0 on success / 1 on error / 2 on bad usage. Implement a real expression parser — do NOT

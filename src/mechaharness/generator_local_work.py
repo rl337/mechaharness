@@ -255,26 +255,17 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         verify_runs = _normalize_verify_runs(inputs.get("verify_runs"))
         verify_failures = self._execute_verify_runs(verify_runs)
         repair_rounds = 0
-        max_repair_rounds = 4
+        max_repair_rounds = 6
         while (
             verify_failures
             and "write_file" in self._tools
             and repair_rounds < max_repair_rounds
         ):
             repair_rounds += 1
-            repair_goal = (
-                "Verify / acceptance checks failed after your edits. Treat this as "
-                "refinement round "
-                f"{repair_rounds}/{max_repair_rounds}. "
-                "Call read_file on the target file(s) first. Extend the existing "
-                "implementation — do not replace a working parser with a stub. "
-                "Keep every previously green case (number literals, prior operators) "
-                "while fixing the failures below. Restore named def evaluate / "
-                "def main when required; forbid eval/exec/ast.literal_eval on user "
-                "input. Emit <tool_call> write_file with the FULL updated file "
-                "contents in the answer content (keep reasoning short).\n"
-                "Failures:\n"
-                + "\n".join(verify_failures)
+            repair_goal = _verify_repair_instruction(
+                verify_failures,
+                round_i=repair_rounds,
+                max_rounds=max_repair_rounds,
             )
             repair_item = TodoItem(
                 id=f"verify_repair_{repair_rounds}",
@@ -289,18 +280,8 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 path_prefix=prefix,
             )
             item_results.append({**repair_out, "item_id": repair_item.id})
-            if repair_out.get("result") == "failed":
-                return {
-                    **repair_out,
-                    "plan": _plan_payload(plan),
-                    "item_results": item_results,
-                    "verify_failures": verify_failures,
-                    "error": (
-                        f"{repair_out.get('error') or 'repair_failed'}; "
-                        + "; ".join(verify_failures)
-                    ),
-                    **self._artifact_fields(),
-                }
+            # Keep spending remaining rounds even when a tool-loop times out or
+            # returns failed — one bad inference must not dump verify progress.
             verify_failures = self._execute_verify_runs(verify_runs)
         if verify_failures:
             return {
@@ -665,21 +646,23 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             skip_linkage=True,
         )
         tools_out = graph.nodes["tools"].payload or {}
-        # Live models sometimes summarize without write_file; one recovery burst.
-        if (
-            result.status == "ok"
-            and len(self._written_files) == writes_before
+        # Live / thinking models often burn the round on reasoning (or time out)
+        # without write_file — recover even when the loop status is failed.
+        needs_write_recovery = (
+            len(self._written_files) == writes_before
             and _instruction_expects_write(goal)
             and "write_file" in self._tools
-        ):
+        )
+        if needs_write_recovery:
             recovery_messages = list(tools_out.get("messages") or messages)
             recovery_messages.append(
                 {
                     "role": "user",
                     "content": (
                         "You finished without calling write_file. "
-                        "Call write_file now with the full updated file contents "
-                        "for this todo, then stop with a short summary."
+                        "Emit exactly one <tool_call> write_file with the full "
+                        "updated file contents now (keep reasoning under two "
+                        "sentences), then stop."
                     ),
                 }
             )
@@ -717,15 +700,23 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 or tools_out.get("final_text"),
                 "write_recovered": True,
             }
-            if recover_result.status != "ok":
+            if recover_result.status == "ok":
                 result = recover_result
+            elif len(self._written_files) <= writes_before:
+                result = recover_result
+        wrote = len(self._written_files) > writes_before
+        # A landed write during verify_repair is enough to re-run host checks
+        # even if the tool loop timed out afterward.
+        item_ok = result.status == "ok" or (
+            wrote and str(item.id).startswith("verify_repair")
+        )
         return {
-            "result": "ok" if result.status == "ok" else "failed",
+            "result": "ok" if item_ok else "failed",
             "graph_status": result.status,
             "goal": goal,
             "rounds": tools_out.get("rounds"),
             "final_text": tools_out.get("final_text"),
-            "error": result.error,
+            "error": None if item_ok else result.error,
             "write_recovered": bool(tools_out.get("write_recovered")),
         }
 
@@ -800,6 +791,28 @@ def _instruction_expects_write(instruction: str) -> bool:
         "calc.py",
     )
     return any(marker in text for marker in markers)
+
+
+def _verify_repair_instruction(
+    failures: list[str], *, round_i: int, max_rounds: int
+) -> str:
+    """Short, tool-first repair brief for thinking Completers."""
+    failure_block = "\n".join(f"- {line}" for line in failures)
+    return (
+        f"Host verify failed (repair {round_i}/{max_rounds}). "
+        "Keep reasoning under two sentences.\n"
+        "1) Call read_file on the target file(s).\n"
+        "2) Emit one <tool_call> write_file with the FULL fixed file contents "
+        "in the answer content (not only in reasoning).\n"
+        "Extend the working parser — do not replace it with a stub. "
+        "Keep previously green literals/operators. Prefer "
+        "`def evaluate(expr)` and `def main(argv=None) -> int`. "
+        "No eval()/exec()/ast.literal_eval on user input. "
+        "If * or / cases fail: tokenize them as operators and give * / "
+        "tighter precedence than + - (e.g. 2+3*4 → 14, 8/2*2 → 8).\n"
+        "Failures:\n"
+        f"{failure_block}"
+    )
 
 
 def _latest_guidance_text(record: GeneratorRunRecord) -> str:

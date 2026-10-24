@@ -495,6 +495,81 @@ def test_project_coding_verify_text_contains_repair(tmp_path: Path) -> None:
     )
 
 
+def test_project_coding_verify_repair_continues_after_empty_round(
+    tmp_path: Path,
+) -> None:
+    """A no-write repair round must not abort remaining verify_repair attempts."""
+    from pyiv.files import RealFilesystem
+
+    from mechaharness.durable_graph_generator import GeneratorRunRecord
+
+    fs = RealFilesystem()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path), filesystem=fs
+    )
+    state = {"n": 0}
+    bad = "print(9)\n"
+    good = "print(0)\n"
+
+    def complete(messages: object, meta: object) -> dict:
+        del meta
+        state["n"] += 1
+        # 1: write bad. 2: done. Repair1: 3 empty + 4 recovery empty.
+        # Repair2: 5 write good + 6 done.
+        if state["n"] == 1:
+            content = bad
+        elif state["n"] == 5:
+            content = good
+        else:
+            return {"role": "assistant", "content": "done", "tool_calls": []}
+        return {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": f"w{state['n']}",
+                    "function": {
+                        "name": "write_file",
+                        "arguments": {"path": "calc.py", "content": content},
+                    },
+                }
+            ],
+        }
+
+    work = ProjectCodingLocalWork(
+        tools=tools, complete=complete, workspace_root=tmp_path, max_iterations=4
+    )
+    out = work.run(
+        GeneratorRunRecord(
+            run_id="repair-continue",
+            recipe_id="guided_coding",
+            graph_id="g",
+            controller_id="c",
+            inputs={
+                "goal": "Write calc.py that prints 0",
+                "max_iterations": 4,
+                "verify_runs": [
+                    {
+                        "path": "calc.py",
+                        "args": [],
+                        "stdout_contains": "0",
+                        "exit_code": 0,
+                    }
+                ],
+            },
+            guidance_history=[{"response": {"choice_id": "minimal"}}],
+        )
+    )
+    assert out.get("result") == "ok"
+    assert (tmp_path / "calc.py").read_text() == good
+    repair_ids = [
+        str(r.get("item_id") or "")
+        for r in out.get("item_results") or []
+        if str(r.get("item_id") or "").startswith("verify_repair")
+    ]
+    assert len(repair_ids) >= 2
+
+
 def test_project_coding_write_recovery_nudge(tmp_path: Path) -> None:
     """If the model finishes without write_file, one recovery burst forces it."""
     from pyiv.files import RealFilesystem

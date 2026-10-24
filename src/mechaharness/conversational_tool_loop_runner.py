@@ -148,12 +148,20 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
                         broken = True
                 # Thinking models often burn the token budget on reasoning with
                 # empty content and no tool_calls — nudge rather than finish.
+                # Some also dump the plan into content without a tool_call.
                 thinking_only = (
                     not content_text.strip()
                     and bool(reasoning_text.strip())
-                    and round_i + 1 < max_iterations
                 )
-                if (broken or thinking_only) and round_i + 1 < max_iterations:
+                prose_without_tools = (
+                    bool(content_text.strip())
+                    and "<tool_call" not in content_text.lower()
+                    and len(content_text.strip()) > 40
+                )
+                if (
+                    (broken or thinking_only or prose_without_tools)
+                    and round_i + 1 < max_iterations
+                ):
                     nudge = (
                         "Your previous tool_call was malformed or truncated. "
                         "Emit one complete <tool_call>{\"name\":...\"arguments\":{...}}"
@@ -164,7 +172,7 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
                             "answer. Emit one complete "
                             '<tool_call>{"name":"write_file","arguments":{...}}'
                             "</tool_call> block in the answer content now "
-                            "(keep reasoning short)."
+                            "(keep reasoning under two sentences)."
                         )
                     )
                     messages.append({"role": "user", "content": nudge})
