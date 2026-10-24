@@ -1,0 +1,10 @@
+{
+  "id": "fangore_coding_write_guard",
+  "persona": "fangore",
+  "title": "Refuse catastrophic gutting of an existing workspace module",
+  "kind": "user_story",
+  "narrative": "Fangore starts guided coding on a workspace that already has a substantial module. A careless Completer tries to replace that module with a tiny broken stub. The coding tools refuse the write, the original module stays intact, and he records a short note that the gutting attempt was blocked. Complements `fangore_coding_ci_repair`.",
+  "implementation": "Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `ci_seed`-style workspace seed `write_guard_seed: healthy_module`. ``write_file`` in `build_coding_tool_registry` applies `CodingWriteGuard` (min retain ratio, Python parse, retain some top-level defs). Static `coding_tool_script: write_gutting_attempt` issues the bad write then notes the refusal. `verify_runs` may also use `min_bytes` / `python_parses`.",
+  "validation": "Harness `user_story` scenario `refuse_gutting.yaml` in suite `fangore_guided_coding`. Asserts the seeded module still contains its public defs and `.mechaharness/write_guard_note.md` mentions refused/gutting. Unit coverage in `tests/test_coding_write_guard.py`.",
+  "footnotes": []
+}

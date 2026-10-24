@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Coding write gutting guard:** ``CodingWriteGuard`` on project-coding
+  ``write_file`` refuses catastrophic shrink / syntax-breaking / def-dropping
+  overwrites of existing files. ``verify_runs`` gains ``min_bytes`` and
+  ``python_parses``. Story ``fangore_coding_write_guard``.
+
+- **HTTP GitHub client (PR + CI logs):** ``HttpGitHubClient`` /
+  ``GitHubConnectionConfig`` (``MECHA_GITHUB_*`` / ``GITHUB_TOKEN``, not
+  Settings) for pull requests, check runs, and job logs. Tools ``ci_checks`` /
+  ``ci_job_log``. ``LocalGitHttpPullRequestCodingGit`` when a token is bound.
+  Story ``fangore_coding_ci_repair``.
+
+
 - **Injectable ``CodingGit`` for project coding:** ABC
   ``mechaharness.coding_git.CodingGit`` with default
   ``LocalProcessCodingGit`` (local ``git`` / ``gh``, SSH agent) and

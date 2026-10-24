@@ -18,7 +18,13 @@ from pathlib import Path
 from pyiv.files import Filesystem
 
 from mechaharness.coding_git import CodingGit, LocalProcessCodingGit
+from mechaharness.coding_write_guard import (
+    CodingWriteGuard,
+    DEFAULT_CODING_WRITE_GUARD,
+)
 from mechaharness.core.access import FsRead, FsWrite, ProcessExec
+from mechaharness.github_client import GitHubClient, parse_github_owner_repo
+from mechaharness.github_connection import GitHubConnectionConfig
 from mechaharness.tools.base import Tool, ToolRegistry
 
 
@@ -59,17 +65,24 @@ def build_coding_tool_registry(
     workspace: WorkspacePaths,
     filesystem: Filesystem,
     coding_git: CodingGit | None = None,
+    github: GitHubClient | None = None,
+    github_connection: GitHubConnectionConfig | None = None,
+    write_guard: CodingWriteGuard | None = None,
 ) -> ToolRegistry:
-    """Register read/write/list/grep/run_tests/run_shell/git_* under *workspace*.
+    """Register read/write/list/grep/run_tests/run_shell/git_*/ci_* under *workspace*.
 
     When *coding_git* is omitted, binds :class:`LocalProcessCodingGit` on the
     workspace root (local ``git`` / ``gh``). Hosts pass another ``CodingGit``
-    for HTTPS+token or forge-API backends.
+    for HTTPS+token or forge-API backends. ``write_file`` refuses catastrophic
+    gutting of existing files via :class:`CodingWriteGuard`.
     """
     registry = ToolRegistry()
     paths = workspace
     fs = filesystem
     git = coding_git or LocalProcessCodingGit(workspace=paths.root)
+    forge = github
+    forge_conn = github_connection
+    guard = write_guard if write_guard is not None else DEFAULT_CODING_WRITE_GUARD
 
     def read_file(path: str) -> str:
         target = paths.resolve(path)
@@ -77,11 +90,21 @@ def build_coding_tool_registry(
 
     def write_file(path: str, content: str) -> str:
         target = paths.resolve(path)
+        rel = str(target.relative_to(paths.root))
+        existing: str | None = None
+        if fs.exists(str(target)) and fs.is_file(str(target)):
+            try:
+                existing = fs.read_text(str(target))
+            except Exception:  # noqa: BLE001
+                existing = None
+        refused = guard.check(path=rel, existing=existing, new_content=content)
+        if refused:
+            return json.dumps({"ok": False, "error": refused, "path": rel})
         parent = target.parent
         if not fs.exists(str(parent)):
             fs.mkdir(str(parent), parents=True)
         fs.write_text(str(target), content)
-        return f"wrote {target.relative_to(paths.root)}"
+        return f"wrote {rel}"
 
     def list_dir(path: str = ".") -> str:
         target = paths.resolve(path)
@@ -167,7 +190,10 @@ def build_coding_tool_registry(
         Tool(
             "write_file",
             write_file,
-            description="Write a UTF-8 text file under the workspace",
+            description=(
+                "Write a UTF-8 text file under the workspace "
+                "(refuses catastrophic gutting of existing files)"
+            ),
             parameters={
                 "type": "object",
                 "properties": {
@@ -306,6 +332,108 @@ def build_coding_tool_registry(
             grants=[ProcessExec],
         )
     )
+
+    def _resolve_owner_repo() -> tuple[str, str] | None:
+        owner = forge_conn.owner if forge_conn else None
+        repo = forge_conn.repo if forge_conn else None
+        if owner and repo:
+            return owner, repo
+        try:
+            completed = subprocess.run(
+                ["git", "remote", "get-url", "origin"],
+                cwd=str(paths.root),
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except Exception:  # noqa: BLE001
+            return None
+        if completed.returncode != 0:
+            return None
+        return parse_github_owner_repo(completed.stdout.strip())
+
+    def ci_checks(ref: str = "HEAD") -> str:
+        from mechaharness.coding_git import CodingGitResult
+
+        if forge is None:
+            return CodingGitResult(
+                ok=False, error="GitHubClient not bound (set GITHUB_TOKEN)"
+            ).to_tool_json()
+        resolved = _resolve_owner_repo()
+        if resolved is None:
+            return CodingGitResult(
+                ok=False, error="could not resolve owner/repo"
+            ).to_tool_json()
+        owner, repo = resolved
+        ref_text = (ref or "HEAD").strip() or "HEAD"
+        if ref_text.upper() == "HEAD":
+            try:
+                sha = subprocess.run(
+                    ["git", "rev-parse", "HEAD"],
+                    cwd=str(paths.root),
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                if sha.returncode == 0 and sha.stdout.strip():
+                    ref_text = sha.stdout.strip()
+            except Exception:  # noqa: BLE001
+                pass
+        return forge.list_check_runs(
+            owner=owner, repo=repo, ref=ref_text
+        ).to_tool_json()
+
+    def ci_job_log(job_id: str, max_bytes: int = 120_000) -> str:
+        from mechaharness.coding_git import CodingGitResult
+
+        if forge is None:
+            return CodingGitResult(
+                ok=False, error="GitHubClient not bound (set GITHUB_TOKEN)"
+            ).to_tool_json()
+        resolved = _resolve_owner_repo()
+        if resolved is None:
+            return CodingGitResult(
+                ok=False, error="could not resolve owner/repo"
+            ).to_tool_json()
+        owner, repo = resolved
+        return forge.get_workflow_job_logs(
+            owner=owner,
+            repo=repo,
+            job_id=job_id,
+            max_bytes=int(max_bytes),
+        ).to_tool_json()
+
+    if forge is not None:
+        registry.register(
+            Tool(
+                "ci_checks",
+                ci_checks,
+                description=(
+                    "List GitHub check runs for a git ref (default HEAD SHA)"
+                ),
+                parameters={
+                    "type": "object",
+                    "properties": {"ref": {"type": "string"}},
+                },
+                grants=[ProcessExec],
+            )
+        )
+        registry.register(
+            Tool(
+                "ci_job_log",
+                ci_job_log,
+                description="Download a GitHub Actions job log by job_id",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "job_id": {"type": "string"},
+                        "max_bytes": {"type": "integer"},
+                    },
+                    "required": ["job_id"],
+                },
+                grants=[ProcessExec],
+            )
+        )
     return registry
 
 

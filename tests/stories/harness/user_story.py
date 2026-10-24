@@ -235,6 +235,10 @@ class UserStoryHarness:
                 writes = [env.coding_write]
             if env.git_seed == "feature_branch":
                 _seed_feature_branch_git_repo(workspace_root)
+            if env.ci_seed == "failing_check":
+                _seed_failing_ci_check(workspace_root)
+            if env.write_guard_seed == "healthy_module":
+                _seed_healthy_module_for_write_guard(workspace_root)
             kwargs["generator_local_work"] = self._project_coding_local_work(
                 workspace_root,
                 writes,
@@ -706,6 +710,58 @@ def _seed_feature_branch_git_repo(root: Path) -> None:
     run(["git", "commit", "-m", "add helper on feature"])
 
 
+def _seed_healthy_module_for_write_guard(root: Path) -> None:
+    """Plant a substantial module that a careless Completer might try to gut."""
+    body = (
+        '"""Healthy module used to prove CodingWriteGuard refusals."""\n\n'
+        "from __future__ import annotations\n\n"
+        "from dataclasses import dataclass\n\n\n"
+        "@dataclass\n"
+        "class WorkspacePaths:\n"
+        '    """Resolve paths under a workspace root."""\n\n'
+        "    root: str\n\n"
+        "    def resolve(self, relative: str) -> str:\n"
+        '        return f"{self.root}/{relative}"\n\n\n'
+        "def build_coding_tool_registry(*, workspace: WorkspacePaths) -> dict:\n"
+        '    """Register confined tools under *workspace*."""\n\n'
+        "    def read_file(path: str) -> str:\n"
+        '        return f"read:{path}"\n\n'
+        "    return {\"read_file\": read_file, \"paths\": workspace}\n\n\n"
+        "def helper() -> int:\n"
+        "    return 42\n"
+    )
+    body = body + ("\n# padding for CodingWriteGuard.min_existing_bytes\n" * 20)
+    (root / "healthy_module.py").write_text(body, encoding="utf-8")
+
+
+def _seed_failing_ci_check(root: Path) -> None:
+    """Plant a broken module and a fake Actions failure log for CI repair stories."""
+    (root / "widget.py").write_text(
+        "def answer() -> int:\n    return 'not-an-int'\n",
+        encoding="utf-8",
+    )
+    mech = root / ".mechaharness"
+    mech.mkdir(parents=True, exist_ok=True)
+    (mech / "ci_failure.log").write_text(
+        "\n".join(
+            [
+                "Job: checks",
+                "Step: Run checks",
+                "Conclusion: failure",
+                "",
+                "_________________ ERROR collecting tests/test_widget.py _________________",
+                "tests/test_widget.py:3: in <module>",
+                "    from widget import answer",
+                "E   TypeError: answer() must return int, got str",
+                "",
+                "Failed: widget.py: answer() returns str instead of int 42",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
 def _coding_tool_script_steps(script_id: str) -> list[dict[str, Any]]:
     """Named offline Completer scripts that exercise CodingGit tools."""
     if script_id == "git_inspect":
@@ -755,6 +811,60 @@ def _coding_tool_script_steps(script_id: str) -> list[dict[str, Any]]:
                 "arguments": {
                     "path": ".mechaharness/pr_url.txt",
                     "content": "https://example.test/pull/1\n",
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "ci_repair":
+        return [
+            {
+                "name": "read_file",
+                "arguments": {"path": ".mechaharness/ci_failure.log"},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": "widget.py",
+                    "content": "def answer() -> int:\n    return 42\n",
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/ci_fix.md",
+                    "content": (
+                        "# CI fix\n\n"
+                        "Failed step: Run checks\n"
+                        "Changed: widget.py — answer() now returns int 42\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "write_gutting_attempt":
+        gutted = (
+            "from mechaharness.github_client import GitHubClient\n\n"
+            "def ci_checks(github_client, repo, workflow_id):\n"
+            "    return github_client.list_check_runs(repo, workflow_id)\n\n"
+            "def build_coding_tool_registry(github_client=None):\n"
+            "    return {'ci_checks': ci_checks if github_client else None}\n"
+        )
+        return [
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": "healthy_module.py",
+                    "content": gutted,
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/write_guard_note.md",
+                    "content": (
+                        "# write guard\n\n"
+                        "Gutting of healthy_module.py was blocked / refused.\n"
+                    ),
                 },
             },
             {"finish": True},

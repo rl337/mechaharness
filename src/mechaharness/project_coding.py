@@ -45,7 +45,13 @@ from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.harness.base import AbstractHarness
 from mechaharness.harness.tool_loop import ToolLoopHarness
 from mechaharness.inference.base import InferenceStrategy
-from mechaharness.coding_git import CodingGit, LocalProcessCodingGit
+from mechaharness.coding_git import (
+    CodingGit,
+    LocalGitHttpPullRequestCodingGit,
+    LocalProcessCodingGit,
+)
+from mechaharness.github_client import GitHubClient, HttpGitHubClient
+from mechaharness.github_connection import GitHubConnectionConfig
 from mechaharness.project_coding_tools import (
     WorkspacePaths,
     build_coding_tool_registry,
@@ -55,7 +61,7 @@ from mechaharness.tools.base import ToolRegistry
 
 
 def _settings_for_project_coding() -> Settings:
-    """Load Settings from process env (MCP ``env`` primary) + optional cwd ``.env``."""
+    """Load Settings from process env (MCP / ``.env/env.sh`` primary)."""
     raw = Settings()
     if raw.base_url and not os.environ.get("MECHA_INFERENCE_BACKEND"):
         if raw.inference_backend in {"openai"}:
@@ -75,11 +81,15 @@ class ProjectCodingConfig(SettingsConfig):
         filesystem: Filesystem | None = None,
         completer: Completer | None = None,
         coding_git: CodingGit | None = None,
+        github_connection: GitHubConnectionConfig | None = None,
+        github_client: GitHubClient | None = None,
     ) -> None:
         self._workspace_root = resolve_workspace_root(workspace)
         self._filesystem_override = filesystem
         self._completer_override = completer
         self._coding_git_override = coding_git
+        self._github_connection_override = github_connection
+        self._github_client_override = github_client
         resolved = settings if settings is not None else _settings_for_project_coding()
         if not os.environ.get("MECHA_HARNESS_FAMILY"):
             resolved = resolved.model_copy(update={"harness_family": "tool_loop"})
@@ -90,26 +100,54 @@ class ProjectCodingConfig(SettingsConfig):
             return self._filesystem_override
         return RealFilesystem
 
+    def get_github_connection(
+        self,
+    ) -> GitHubConnectionConfig | type[GitHubConnectionConfig]:
+        """GitHub HTTP reachability (token + API base). Not Settings."""
+        if self._github_connection_override is not None:
+            return self._github_connection_override
+        return GitHubConnectionConfig
+
+    def get_github_client(self) -> GitHubClient | type[GitHubClient] | None:
+        """Forge client for HTTP pull requests. ``None`` → no HTTP PR binding."""
+        if self._github_client_override is not None:
+            return self._github_client_override
+        conn = self._resolve_github_connection()
+        if not conn.enabled():
+            return None
+        return HttpGitHubClient
+
     def get_coding_git(self) -> type[CodingGit] | CodingGit:
         """VCS/PR backend for coding tools (override for HTTPS / forge API)."""
         if self._coding_git_override is not None:
             return self._coding_git_override
-        return LocalProcessCodingGit(workspace=self._workspace_root)
+        return LocalProcessCodingGit
 
-    def _resolve_coding_git(self) -> CodingGit:
-        bound = self.get_coding_git()
+    def _resolve_github_connection(self) -> GitHubConnectionConfig:
+        bound = self.get_github_connection()
         if isinstance(bound, type):
-            return bound(workspace=self._workspace_root)  # type: ignore[call-arg]
+            from pyiv.process import OsEnvironment
+
+            return GitHubConnectionConfig.from_env(OsEnvironment())
         return bound
 
     def get_tools(self) -> ToolRegistry:
         if self._provided_tools is not None:
             return self._provided_tools
+        # Early/default: local git (+ optional gh). configure() rebinds ToolRegistry
+        # with LocalGitHttpPullRequestCodingGit when a GitHub token is present.
         fs = self._filesystem_override or RealFilesystem()
+        coding_git = (
+            self._coding_git_override
+            if self._coding_git_override is not None
+            else LocalProcessCodingGit(workspace=self._workspace_root)
+        )
         return build_coding_tool_registry(
             workspace=WorkspacePaths(self._workspace_root),
             filesystem=fs,
-            coding_git=self._resolve_coding_git(),
+            coding_git=coding_git,
+            github=None,
+            github_connection=None,
         )
 
     def get_grants(self) -> list[object]:
@@ -133,9 +171,66 @@ class ProjectCodingConfig(SettingsConfig):
             if isinstance(self._completer_override, InferenceStrategy):
                 self.register_instance(InferenceStrategy, self._completer_override)
 
-        self.register_instance(CodingGit, self._resolve_coding_git())
+        connection = self._resolve_github_connection()
+        self.register_instance(GitHubConnectionConfig, connection)
 
-        tools = self.get_tools()
+        client_binding = self.get_github_client()
+        if isinstance(client_binding, GitHubClient):
+            self.register_instance(GitHubClient, client_binding)
+        elif client_binding is not None:
+
+            def make_github(injector: Any) -> GitHubClient:
+                from pyiv.http import AsyncHttpClient
+
+                return HttpGitHubClient(
+                    connection=injector.inject(GitHubConnectionConfig),
+                    client=injector.inject(AsyncHttpClient),
+                )
+
+            self.register(GitHubClient, make_github, singleton=True)
+
+        workspace = self._workspace_root
+
+        def make_coding_git(injector: Any) -> CodingGit:
+            if self._coding_git_override is not None:
+                return self._coding_git_override
+            conn = injector.inject(GitHubConnectionConfig)
+            if conn.enabled():
+                try:
+                    github = injector.inject(GitHubClient)
+                except Exception:  # noqa: BLE001
+                    github = None
+                if github is not None:
+                    return LocalGitHttpPullRequestCodingGit(
+                        workspace=workspace,
+                        github=github,
+                        connection=conn,
+                    )
+            return LocalProcessCodingGit(workspace=workspace)
+
+        self.register(CodingGit, make_coding_git, singleton=True)
+
+        if self._provided_tools is None:
+            fs = self._filesystem_override or RealFilesystem()
+
+            def make_tools(injector: Any) -> ToolRegistry:
+                github = None
+                conn = injector.inject(GitHubConnectionConfig)
+                if conn.enabled():
+                    try:
+                        github = injector.inject(GitHubClient)
+                    except Exception:  # noqa: BLE001
+                        github = None
+                return build_coding_tool_registry(
+                    workspace=WorkspacePaths(workspace),
+                    filesystem=fs,
+                    coding_git=injector.inject(CodingGit),
+                    github=github,
+                    github_connection=conn,
+                )
+
+            self.register(ToolRegistry, make_tools, singleton=True)
+
         completer = self._completer_override
         max_turns = int(self.get_settings().max_turns or 8)
 
@@ -147,19 +242,20 @@ class ProjectCodingConfig(SettingsConfig):
                     complete = injector.inject(Completer)
                 except Exception:  # noqa: BLE001
                     complete = None
+            tool_reg = injector.inject(ToolRegistry)
             if complete is None:
-                fn: Any = _offline_stub_complete(tools)
+                fn: Any = _offline_stub_complete(tool_reg)
             else:
                 fn = _as_complete_fn(
                     complete,
-                    tools=tools,
+                    tools=tool_reg,
                     model=str(settings.model or "local"),
                 )
             return ProjectCodingLocalWork(
-                tools=tools,
+                tools=tool_reg,
                 complete=fn,
                 max_iterations=max_turns,
-                workspace_root=self._workspace_root,
+                workspace_root=workspace,
             )
 
         # Replace default NoOp with coding burst (last register wins).

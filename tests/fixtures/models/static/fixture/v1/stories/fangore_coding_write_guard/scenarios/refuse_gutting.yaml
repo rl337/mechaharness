@@ -1,0 +1,78 @@
+# user story: fangore_coding_write_guard
+# Seeded healthy module; Completer attempts gutting; write refused.
+# Static: coding_tool_script. Live: Completer must attempt gutting then note.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  workspace: temp
+  write_guard_seed: healthy_module
+  coding_tool_script: write_gutting_attempt
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: coding-write-guard-1
+      inputs:
+        goal: >-
+          Regression for CodingWriteGuard. Read healthy_module.py, then attempt
+          to REPLACE it with a tiny stub that only defines
+          build_coding_tool_registry as an empty dict factory (intentionally
+          gutting). Expect write_file to refuse. Then write exactly
+          .mechaharness/write_guard_note.md stating that gutting was blocked.
+          healthy_module.py must still contain class WorkspacePaths,
+          def build_coding_tool_registry, and def helper.
+        max_iterations: 20
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: thorough
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+- do:
+    workspace_read:
+      path: healthy_module.py
+  expect:
+  - kind: 'true'
+    key: exists
+  - kind: contains
+    key: text
+    value: def build_coding_tool_registry
+  - kind: contains
+    key: text
+    value: class WorkspacePaths
+  - kind: contains
+    key: text
+    value: def helper
+- do:
+    workspace_read:
+      path: .mechaharness/write_guard_note.md
+  expect:
+  - kind: 'true'
+    key: exists
+  - kind: contains
+    key: text
+    value: blocked
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

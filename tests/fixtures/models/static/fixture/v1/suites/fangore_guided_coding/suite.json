@@ -19,6 +19,14 @@
       "scenario": "open_pr"
     },
     {
+      "story": "fangore_coding_ci_repair",
+      "scenario": "repair"
+    },
+    {
+      "story": "fangore_coding_write_guard",
+      "scenario": "refuse_gutting"
+    },
+    {
       "story": "fangore_guided_coding_recipe",
       "scenario": "helper_run_python"
     },

@@ -56,9 +56,16 @@ class EnvironmentBlock(BaseModel):
     coding_git: Literal["default", "local_mock_pr"] | None = None
     # Seed a tiny git repo in the workspace before the coding burst.
     git_seed: Literal["feature_branch"] | None = None
-    # Offline Completer script that issues git/PR tool calls (static CI).
+    # Seed a fake CI failure log + broken module for repair stories.
+    ci_seed: Literal["failing_check"] | None = None
+    # Seed a healthy multi-KB module for write-gutting guard stories.
+    write_guard_seed: Literal["healthy_module"] | None = None
+    # Offline Completer script that issues git/PR/CI tool calls (static CI).
     # Live Completer ignores this and drives tools itself.
-    coding_tool_script: Literal["git_inspect", "git_open_pr"] | None = None
+    coding_tool_script: (
+        Literal["git_inspect", "git_open_pr", "ci_repair", "write_gutting_attempt"]
+        | None
+    ) = None
     # ISO-8601 instant for MockDateTimeService; omit for harness default.
     clock: str | None = None
     # Optional FixtureRagRetriever corpus (YAML path under the story dir).

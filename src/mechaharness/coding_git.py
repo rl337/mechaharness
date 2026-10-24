@@ -16,7 +16,11 @@ import subprocess
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from mechaharness.github_client import GitHubClient
+    from mechaharness.github_connection import GitHubConnectionConfig
 
 # Branch/tag + relative history (HEAD~1); block shell metacharacters.
 _SAFE_REF = re.compile(r"^[A-Za-z0-9._/\-~^]+$")
@@ -305,11 +309,103 @@ def _resolve_gh() -> str:
     return "gh"
 
 
+class LocalGitHttpPullRequestCodingGit(CodingGit):
+    """Local ``git`` for VCS; injectable :class:`GitHubClient` for pull requests.
+
+    Prefer this over ``gh`` when ``GitHubConnectionConfig`` has a token.
+    """
+
+    def __init__(
+        self,
+        *,
+        workspace: Path | str,
+        github: GitHubClient,
+        connection: GitHubConnectionConfig | None = None,
+        git_executable: str | None = None,
+    ) -> None:
+        self._vcs = LocalProcessCodingGit(
+            workspace=workspace, git_executable=git_executable
+        )
+        self._github = github
+        self._connection = connection
+
+    def status(self) -> CodingGitResult:
+        return self._vcs.status()
+
+    def log(self, *, base: str = "origin/main", max_count: int = 40) -> CodingGitResult:
+        return self._vcs.log(base=base, max_count=max_count)
+
+    def diff(
+        self,
+        *,
+        base: str = "origin/main",
+        stat_only: bool = True,
+        max_bytes: int = 120_000,
+    ) -> CodingGitResult:
+        return self._vcs.diff(base=base, stat_only=stat_only, max_bytes=max_bytes)
+
+    def push(
+        self, *, remote: str = "origin", set_upstream: bool = True
+    ) -> CodingGitResult:
+        return self._vcs.push(remote=remote, set_upstream=set_upstream)
+
+    def create_pull_request(
+        self,
+        *,
+        title: str,
+        body: str,
+        base: str = "main",
+        draft: bool = False,
+    ) -> CodingGitResult:
+        head_out = self._vcs._run(  # noqa: SLF001 - shared process helper
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"]
+        )
+        if not head_out.ok:
+            return CodingGitResult(
+                ok=False,
+                error=head_out.error or head_out.stderr or "could not resolve HEAD",
+            )
+        head = head_out.stdout.strip()
+        owner = (self._connection.owner if self._connection else None) or None
+        repo = (self._connection.repo if self._connection else None) or None
+        if not owner or not repo:
+            remote_out = self._vcs._run(  # noqa: SLF001
+                ["git", "remote", "get-url", "origin"]
+            )
+            if not remote_out.ok:
+                return CodingGitResult(
+                    ok=False,
+                    error=(
+                        remote_out.error
+                        or remote_out.stderr
+                        or "could not read origin remote"
+                    ),
+                )
+            from mechaharness.github_client import parse_github_owner_repo
+
+            parsed = parse_github_owner_repo(remote_out.stdout.strip())
+            if parsed is None:
+                return CodingGitResult(
+                    ok=False, error="could not parse owner/repo from origin URL"
+                )
+            owner, repo = parsed
+        return self._github.create_pull_request(
+            owner=owner,
+            repo=repo,
+            title=title,
+            body=body,
+            head=head,
+            base=base,
+            draft=draft,
+        )
+
+
 __all__ = [
     "CodingGit",
     "CodingGitResult",
     "LocalProcessCodingGit",
     "RecordingPullRequestCodingGit",
+    "LocalGitHttpPullRequestCodingGit",
     "validate_git_ref",
     "validate_git_remote",
 ]

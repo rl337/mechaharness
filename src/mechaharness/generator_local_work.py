@@ -326,6 +326,8 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
 
         - ``path``: workspace-relative file (required for text / python checks)
         - ``text_contains`` / ``text_forbids``: str or list[str] file text gates
+        - ``min_bytes``: refuse if file is shorter than this many UTF-8 bytes
+        - ``python_parses``: truthy → ``ast.parse`` must succeed
         - ``args`` / ``stdout_contains`` / ``exit_code``: ``python path …args``
         - ``pytest``: truthy → run ``python -m pytest -q <path>`` (path may be
           a test file or directory). Optional ``args`` append after ``-q``.
@@ -345,7 +347,13 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             target = root / path if path else root
             text_needles = _as_str_list(spec.get("text_contains"))
             text_forbids = _as_str_list(spec.get("text_forbids"))
-            if text_needles or text_forbids:
+            min_bytes = spec.get("min_bytes")
+            python_parses = bool(spec.get("python_parses"))
+            needs_body = bool(
+                text_needles or text_forbids or min_bytes is not None or python_parses
+            )
+            body = ""
+            if needs_body:
                 if not target.is_file():
                     failures.append(f"verify_runs[{index}]: missing file {path}")
                     continue
@@ -354,6 +362,24 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 except OSError as exc:
                     failures.append(f"verify_runs[{index}] {path}: read failed: {exc}")
                     continue
+                if min_bytes is not None:
+                    size = len(body.encode("utf-8"))
+                    floor = int(min_bytes)
+                    if size < floor:
+                        failures.append(
+                            f"verify_runs[{index}] {path}: file too small "
+                            f"({size} < {floor} bytes) — possible gutting"
+                        )
+                if python_parses:
+                    import ast
+
+                    try:
+                        ast.parse(body, filename=path)
+                    except SyntaxError as exc:
+                        failures.append(
+                            f"verify_runs[{index}] {path}: python_parses "
+                            f"failed: {exc}"
+                        )
                 for needle in text_needles:
                     if needle not in body:
                         failures.append(
