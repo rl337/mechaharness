@@ -54,6 +54,10 @@ class EnvironmentBlock(BaseModel):
     # ``local_mock_pr`` = local ``git`` process + recorded/mock pull requests
     # (no forge network). Omit / ``default`` = LocalProcessCodingGit (git+gh).
     coding_git: Literal["default", "local_mock_pr"] | None = None
+    # GitHubClient binding for CI lookup tools (``ci_checks`` / ``ci_job_log``).
+    # ``local_mock_ci`` = ``RecordingGitHubClient`` + connection owner/repo
+    # (no forge network). Omit = no GitHub client (CI tools unregistered).
+    coding_github: Literal["default", "local_mock_ci"] | None = None
     # Seed a tiny git repo in the workspace before the coding burst.
     git_seed: Literal["feature_branch"] | None = None
     # Seed a fake CI failure log + broken module for repair stories.
@@ -63,7 +67,13 @@ class EnvironmentBlock(BaseModel):
     # Offline Completer script that issues git/PR/CI tool calls (static CI).
     # Live Completer ignores this and drives tools itself.
     coding_tool_script: (
-        Literal["git_inspect", "git_open_pr", "ci_repair", "write_gutting_attempt"]
+        Literal[
+            "git_inspect",
+            "git_open_pr",
+            "ci_repair",
+            "ci_diagnose",
+            "write_gutting_attempt",
+        ]
         | None
     ) = None
     # ISO-8601 instant for MockDateTimeService; omit for harness default.

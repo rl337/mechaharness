@@ -256,6 +256,42 @@ def test_parse_prompt_tool_calls_balanced_json() -> None:
     assert "class X" in calls[0]["function"]["arguments"]["content"]
 
 
+def test_coding_ci_tools_register_with_recording_github(tmp_path: Path) -> None:
+    """ci_checks / ci_job_log register when a GitHubClient is bound."""
+    import json
+
+    from pyiv.files import RealFilesystem
+
+    from mechaharness.github_client import RecordingGitHubClient
+    from mechaharness.github_connection import GitHubConnectionConfig
+
+    github = RecordingGitHubClient()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path),
+        filesystem=RealFilesystem(),
+        github=github,
+        github_connection=GitHubConnectionConfig(
+            token="story-mock", owner="acme", repo="demo"
+        ),
+    )
+    assert "ci_checks" in tools
+    assert "ci_job_log" in tools
+    checks = json.loads(tools.get("ci_checks").handler(ref="abc"))
+    assert checks["ok"] is True
+    assert checks["extra"]["failed"][0]["job_id"] == RecordingGitHubClient.DEFAULT_JOB_ID
+    logs = json.loads(
+        tools.get("ci_job_log").handler(
+            job_id=RecordingGitHubClient.DEFAULT_JOB_ID, max_bytes=8_000
+        )
+    )
+    assert logs["ok"] is True
+    assert "Ruff" in logs["stdout"]
+    assert [c["op"] for c in github.calls] == [
+        "list_check_runs",
+        "get_workflow_job_logs",
+    ]
+
+
 def test_project_coding_verify_runs_repair(tmp_path: Path) -> None:
     """Host verify_runs failure triggers one repair coding burst."""
     from pyiv.files import RealFilesystem

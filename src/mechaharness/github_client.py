@@ -27,6 +27,8 @@ _OWNER_REPO_SSH = re.compile(
 _OWNER_REPO_HTTPS = re.compile(
     r"https?://[^/]+/(?P<owner>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?\s*$"
 )
+# Actions UI URLs: .../actions/runs/<run_id>/job/<job_id>
+_JOB_ID_FROM_DETAILS = re.compile(r"/job/(?P<job_id>\d+)(?:\b|/|$)")
 
 
 class GitHubClient(ABC):
@@ -199,18 +201,25 @@ class HttpGitHubClient(GitHubClient):
                 ok=False, returncode=status, error="invalid JSON from check-runs"
             )
         runs = data.get("check_runs") or []
-        summary = [
-            {
+        summary = []
+        for r in runs:
+            if not isinstance(r, dict):
+                continue
+            details = r.get("details_url")
+            entry = {
                 "id": r.get("id"),
                 "name": r.get("name"),
                 "status": r.get("status"),
                 "conclusion": r.get("conclusion"),
                 "html_url": r.get("html_url"),
-                "details_url": r.get("details_url"),
+                "details_url": details,
             }
-            for r in runs
-            if isinstance(r, dict)
-        ]
+            job_id = job_id_from_details_url(
+                details if isinstance(details, str) else None
+            )
+            if job_id is not None:
+                entry["job_id"] = job_id
+            summary.append(entry)
         failed = [
             s
             for s in summary
@@ -314,6 +323,15 @@ class HttpGitHubClient(GitHubClient):
         )
 
 
+def job_id_from_details_url(details_url: str | None) -> str | None:
+    """Extract Actions ``job_id`` from a check-run ``details_url`` when present."""
+    text = (details_url or "").strip()
+    if not text:
+        return None
+    match = _JOB_ID_FROM_DETAILS.search(text)
+    return match.group("job_id") if match else None
+
+
 def parse_github_owner_repo(remote_url: str) -> tuple[str, str] | None:
     """Parse ``owner/repo`` from an SSH or HTTPS GitHub remote URL."""
     text = (remote_url or "").strip()
@@ -322,6 +340,176 @@ def parse_github_owner_repo(remote_url: str) -> tuple[str, str] | None:
         if match:
             return match.group("owner"), match.group("repo")
     return None
+
+
+class RecordingGitHubClient(GitHubClient):
+    """In-memory forge for stories/CI — records calls, returns canned CI data.
+
+    Bind via story ``environment.coding_github: local_mock_ci`` so
+    ``ci_checks`` / ``ci_job_log`` register without network or tokens.
+    """
+
+    DEFAULT_JOB_ID = "9001"
+
+    DEFAULT_FAILING_LOG = (
+        "Job: checks\n"
+        "Step: Run checks\n"
+        "Conclusion: failure\n"
+        "\n"
+        "Found 4 errors.\n"
+        "✗ Ruff lint failed (exit code: 1)\n"
+        "Found 2 errors in 2 files (checked 207 source files)\n"
+        "✗ Mypy type checking failed (exit code: 1)\n"
+        "E   ModuleNotFoundError: No module named 'widget'\n"
+        "✗ Pytest failed (exit code: 2)\n"
+        "FAIL Required test coverage of 78.0% not reached. Total coverage: 77.55%\n"
+        "Some checks failed. Please fix the issues above.\n"
+    )
+
+    def __init__(
+        self,
+        *,
+        check_runs: list[dict[str, Any]] | None = None,
+        job_logs: dict[str, str] | None = None,
+        pr_url: str = "https://example.test/pull/1",
+    ) -> None:
+        self.calls: list[dict[str, Any]] = []
+        self._pr_url = str(pr_url)
+        job_id = self.DEFAULT_JOB_ID
+        if check_runs is None:
+            check_runs = [
+                {
+                    "id": 1,
+                    "name": "checks",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "html_url": "https://example.test/checks/1",
+                    "details_url": (
+                        "https://github.com/acme/demo/actions/runs/1/"
+                        f"job/{job_id}"
+                    ),
+                }
+            ]
+        self._check_runs = list(check_runs)
+        if job_logs is None:
+            job_logs = {job_id: self.DEFAULT_FAILING_LOG}
+        self._job_logs = {str(k): str(v) for k, v in job_logs.items()}
+
+    def create_pull_request(
+        self,
+        *,
+        owner: str,
+        repo: str,
+        title: str,
+        body: str,
+        head: str,
+        base: str = "main",
+        draft: bool = False,
+    ) -> CodingGitResult:
+        title_text = (title or "").strip()
+        if not title_text:
+            return CodingGitResult(ok=False, error="title required")
+        record = {
+            "op": "create_pull_request",
+            "owner": owner,
+            "repo": repo,
+            "title": title_text,
+            "body": body if body is not None else "",
+            "head": head,
+            "base": base,
+            "draft": bool(draft),
+            "url": self._pr_url,
+        }
+        self.calls.append(record)
+        return CodingGitResult(
+            ok=True,
+            stdout=self._pr_url + "\n",
+            extra={"html_url": self._pr_url, "number": 1},
+        )
+
+    def list_check_runs(
+        self,
+        *,
+        owner: str,
+        repo: str,
+        ref: str,
+    ) -> CodingGitResult:
+        self.calls.append(
+            {
+                "op": "list_check_runs",
+                "owner": owner,
+                "repo": repo,
+                "ref": ref,
+            }
+        )
+        summary: list[dict[str, Any]] = []
+        for r in self._check_runs:
+            entry = dict(r)
+            details = entry.get("details_url")
+            if "job_id" not in entry:
+                job_id = job_id_from_details_url(
+                    details if isinstance(details, str) else None
+                )
+                if job_id is not None:
+                    entry["job_id"] = job_id
+            summary.append(entry)
+        failed = [
+            s
+            for s in summary
+            if str(s.get("conclusion") or "").lower()
+            in {"failure", "timed_out", "cancelled", "action_required"}
+        ]
+        payload = {
+            "total": len(summary),
+            "failed": failed,
+            "check_runs": summary,
+            "owner": owner,
+            "repo": repo,
+            "ref": ref,
+        }
+        return CodingGitResult(
+            ok=True,
+            stdout=json.dumps(payload, indent=2) + "\n",
+            extra=payload,
+        )
+
+    def get_workflow_job_logs(
+        self,
+        *,
+        owner: str,
+        repo: str,
+        job_id: int | str,
+        max_bytes: int = 120_000,
+    ) -> CodingGitResult:
+        job = str(job_id or "").strip()
+        self.calls.append(
+            {
+                "op": "get_workflow_job_logs",
+                "owner": owner,
+                "repo": repo,
+                "job_id": job,
+                "max_bytes": int(max_bytes),
+            }
+        )
+        text = self._job_logs.get(job)
+        if text is None:
+            return CodingGitResult(
+                ok=False,
+                error=f"no canned log for job_id={job!r}",
+            )
+        limit = max(4_000, int(max_bytes))
+        truncated = text[-limit:]
+        return CodingGitResult(
+            ok=True,
+            stdout=truncated,
+            extra={
+                "owner": owner,
+                "repo": repo,
+                "job_id": job,
+                "bytes": len(text),
+                "truncated": len(text) > limit,
+            },
+        )
 
 
 def _response_text(response: Any) -> str:
@@ -381,5 +569,7 @@ def _http_no_redirect(
 __all__ = [
     "GitHubClient",
     "HttpGitHubClient",
+    "RecordingGitHubClient",
+    "job_id_from_details_url",
     "parse_github_owner_repo",
 ]

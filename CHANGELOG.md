@@ -18,7 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ``GitHubConnectionConfig`` (``MECHA_GITHUB_*`` / ``GITHUB_TOKEN``, not
   Settings) for pull requests, check runs, and job logs. Tools ``ci_checks`` /
   ``ci_job_log``. ``LocalGitHttpPullRequestCodingGit`` when a token is bound.
-  Story ``fangore_coding_ci_repair``.
+  ``RecordingGitHubClient`` + story ``fangore_coding_ci_diagnose``
+  (``coding_github: local_mock_ci``) for forge lookup without network; repair
+  remains ``fangore_coding_ci_repair``.
 
 
 - **Injectable ``CodingGit`` for project coding:** ABC

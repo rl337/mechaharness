@@ -1,11 +1,16 @@
-"""Unit tests for HttpGitHubClient and remote URL parsing."""
+"""Unit tests for HttpGitHubClient, RecordingGitHubClient, and URL parsing."""
 
 from __future__ import annotations
 
 import pytest
 from pyiv.http import MemoryAsyncHttpClient
 
-from mechaharness.github_client import HttpGitHubClient, parse_github_owner_repo
+from mechaharness.github_client import (
+    HttpGitHubClient,
+    RecordingGitHubClient,
+    job_id_from_details_url,
+    parse_github_owner_repo,
+)
 from mechaharness.github_connection import GitHubConnectionConfig
 
 
@@ -13,6 +18,38 @@ def test_parse_github_owner_repo_ssh_and_https() -> None:
     assert parse_github_owner_repo("git@github.com:acme/demo.git") == ("acme", "demo")
     assert parse_github_owner_repo("https://github.com/acme/demo.git") == ("acme", "demo")
     assert parse_github_owner_repo("not-a-remote") is None
+
+
+def test_job_id_from_details_url() -> None:
+    cases = (
+        (
+            "https://github.com/acme/demo/actions/runs/1/job/9001",
+            "9001",
+        ),
+        ("https://example.test/checks/1", None),
+        (None, None),
+        ("", None),
+    )
+    for url, expected in cases:
+        assert job_id_from_details_url(url) == expected
+
+
+def test_recording_github_client_ci_lookup() -> None:
+    github = RecordingGitHubClient()
+    checks = github.list_check_runs(owner="acme", repo="demo", ref="abc")
+    assert checks.ok
+    assert checks.extra["failed"][0]["job_id"] == RecordingGitHubClient.DEFAULT_JOB_ID
+    logs = github.get_workflow_job_logs(
+        owner="acme",
+        repo="demo",
+        job_id=RecordingGitHubClient.DEFAULT_JOB_ID,
+    )
+    assert logs.ok
+    assert "Ruff" in logs.stdout
+    assert [c["op"] for c in github.calls] == [
+        "list_check_runs",
+        "get_workflow_job_logs",
+    ]
 
 
 def test_http_github_client_create_pull_request() -> None:
@@ -56,6 +93,9 @@ def test_http_github_client_list_check_runs() -> None:
                     "status": "completed",
                     "conclusion": "failure",
                     "html_url": "https://example.test/checks/1",
+                    "details_url": (
+                        "https://github.com/acme/demo/actions/runs/9/job/9001"
+                    ),
                 }
             ],
         },
@@ -68,6 +108,7 @@ def test_http_github_client_list_check_runs() -> None:
     result = github.list_check_runs(owner="acme", repo="demo", ref="abc123")
     assert result.ok
     assert result.extra["failed"][0]["name"] == "checks"
+    assert result.extra["failed"][0]["job_id"] == "9001"
 
 
 def test_http_github_client_get_workflow_job_logs(

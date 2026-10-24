@@ -151,6 +151,9 @@ EXACT: dict[str, str] = {
     "fangore_insp_instruction_scope": "fangore_guided_coding",
     "fangore_coding_git_inspect": "fangore_guided_coding",
     "fangore_coding_git_open_pr": "fangore_guided_coding",
+    "fangore_coding_ci_diagnose": "fangore_guided_coding",
+    "fangore_coding_ci_repair": "fangore_guided_coding",
+    "fangore_coding_write_guard": "fangore_guided_coding",
     # decision plane
     "fangore_audited_infer_accept": "fangore_decision_plane",
     "fangore_refund_verdict": "fangore_decision_plane",

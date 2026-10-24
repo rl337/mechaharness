@@ -1,0 +1,10 @@
+{
+  "id": "fangore_coding_ci_diagnose",
+  "persona": "fangore",
+  "title": "Look up a failed CI check and write a diagnosis note from the job log",
+  "kind": "user_story",
+  "narrative": "Fangore's pull request checks job fails again. He starts guided coding and asks the local Completer to look up check runs for HEAD, download the failing Actions job log, and write a short diagnosis note naming the check, job id, and root-cause signals — without editing product source yet. GitHub stays mocked in static stories via RecordingGitHubClient so CI and Completer walks do not need forge credentials; the production path uses HttpGitHubClient when a token is bound. Complements `fangore_coding_ci_repair` (seeded-log repair) and `fangore_coding_git_open_pr`.",
+  "implementation": "Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `coding_github: local_mock_ci` (`RecordingGitHubClient` + `GitHubConnectionConfig` owner/repo). Tools `ci_checks` / `ci_job_log` come from `build_coding_tool_registry(..., github=…)`. Static `coding_tool_script: ci_diagnose` calls those tools then writes `.mechaharness/ci_diagnosis.md`. Production binds `HttpGitHubClient` via `ProjectCodingConfig.get_github_client()` / `GitHubConnectionConfig` (`MECHA_GITHUB_*` / `GITHUB_TOKEN`). Soft point `external_guidance` remains the human scope gate.",
+  "validation": "Harness `user_story` scenario `diagnose.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_diagnose` against `coding_github: local_mock_ci`. Asserts `.mechaharness/ci_diagnosis.md` cites the failing check, job id, and root-cause markers from the canned log. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`. Unit coverage in `tests/test_github_client.py` for `RecordingGitHubClient` and `job_id_from_details_url`.",
+  "footnotes": []
+}

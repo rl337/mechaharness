@@ -141,9 +141,9 @@ Stories: `fangore_convergence_ceiling`, `fangore_graph_executor`, `fangore_graph
 
 ### `fangore_guided_coding` — Guided coding recipe and instruction todo plan
 
-Persona **fangore**; execution `parallel`; 13 stage(s).
+Persona **fangore**; execution `parallel`; 14 stage(s).
 
-Stories: `fangore_coding_ci_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
+Stories: `fangore_coding_ci_diagnose`, `fangore_coding_ci_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
 
 ### `fangore_host_kit` — Host kit, completer flavors, and harness families
 
@@ -712,17 +712,29 @@ Fangore starts the CLI host with family `pass_through` and backend `mock`. He bi
 
 Harness `user_story` scenario `capability_envelope_narrow.yaml` drives `capability_envelope`; expects narrow_ok / child_grant_count / widen_raises / delegation_choice.
 
-### `fangore_coding_ci_repair` — Diagnose a failed CI check and repair the workspace until local verify passes
+### `fangore_coding_ci_diagnose` — Look up a failed CI check and write a diagnosis note from the job log
 
-Fangore's pull request build fails on the checks job. He starts guided coding against the project workspace, reads the failed check log, repairs the broken source, re-runs the same kind of local verify the pipeline used, and writes a short fix note for the next human review. GitHub Actions itself stays mocked in stories so CI and live Completer walks do not need forge credentials; only the local edit and verify are real. Complements `fangore_coding_git_inspect` and `fangore_coding_git_open_pr`. The production path will fetch check and job logs over the injectable GitHub HTTP client when a token is present.
+Fangore's pull request checks job fails again. He starts guided coding and asks the local Completer to look up check runs for HEAD, download the failing Actions job log, and write a short diagnosis note naming the check, job id, and root-cause signals — without editing product source yet. GitHub stays mocked in static stories via RecordingGitHubClient so CI and Completer walks do not need forge credentials; the production path uses HttpGitHubClient when a token is bound. Complements `fangore_coding_ci_repair` (seeded-log repair) and `fangore_coding_git_open_pr`.
 
 #### Implementation
 
-Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `ci_seed: failing_check`, and coding tools under `build_coding_tool_registry`. Static stories plant a failure log and broken module; the Completer (or `coding_tool_script: ci_repair`) reads that log, edits the module, and records `.mechaharness/ci_fix.md`. Production extends `GitHubClient` / `HttpGitHubClient` with check-run and job-log fetch (bound via `GitHubConnectionConfig` / `ProjectCodingConfig.get_github_client()`), exposing confined tools such as `ci_checks` and `ci_job_log` beside existing git/PR tools. Local re-check uses `ProjectCodingLocalWork` `verify_runs` / `run_python` (and host `run_checks.sh` when bound) so repair stays on the cheap Completer lane. Soft point `external_guidance` remains the human scope gate.
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and `coding_github: local_mock_ci` (`RecordingGitHubClient` + `GitHubConnectionConfig` owner/repo). Tools `ci_checks` / `ci_job_log` come from `build_coding_tool_registry(..., github=…)`. Static `coding_tool_script: ci_diagnose` calls those tools then writes `.mechaharness/ci_diagnosis.md`. Production binds `HttpGitHubClient` via `ProjectCodingConfig.get_github_client()` / `GitHubConnectionConfig` (`MECHA_GITHUB_*` / `GITHUB_TOKEN`). Soft point `external_guidance` remains the human scope gate.
 
 #### Validation
 
-Harness `user_story` scenario `repair.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_repair` against `ci_seed: failing_check`. Asserts `widget.py` contains the repaired function and `.mechaharness/ci_fix.md` cites the failure. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`. Unit coverage for HTTP check/log fetch lands in `tests/test_github_client.py` when those methods ship; until then the story proves the diagnose→edit→note loop on seeded artifacts.
+Harness `user_story` scenario `diagnose.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_diagnose` against `coding_github: local_mock_ci`. Asserts `.mechaharness/ci_diagnosis.md` cites the failing check, job id, and root-cause markers from the canned log. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`. Unit coverage in `tests/test_github_client.py` for `RecordingGitHubClient` and `job_id_from_details_url`.
+
+### `fangore_coding_ci_repair` — Diagnose a failed CI check and repair the workspace until local verify passes
+
+Fangore's pull request build fails on the checks job. After a forge lookup (see `fangore_coding_ci_diagnose`), he starts guided coding against the project workspace, reads a failure log, repairs the broken source, re-runs the same kind of local verify the pipeline used, and writes a short fix note for the next human review. Static stories plant a failure log so repair stays offline; forge HTTP lookup is owned by the diagnose story. Complements `fangore_coding_ci_diagnose`, `fangore_coding_git_inspect`, and `fangore_coding_git_open_pr`.
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `ci_seed: failing_check`, and coding tools under `build_coding_tool_registry`. Static stories plant a failure log and broken module; the Completer (or `coding_tool_script: ci_repair`) reads that log, edits the module, and records `.mechaharness/ci_fix.md`. Forge check/job log tools are proven in `fangore_coding_ci_diagnose`. Local re-check uses `ProjectCodingLocalWork` `verify_runs` / `run_python` (and host `run_checks.sh` when bound) so repair stays on the cheap Completer lane. Soft point `external_guidance` remains the human scope gate.
+
+#### Validation
+
+Harness `user_story` scenario `repair.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_repair` against `ci_seed: failing_check`. Asserts `widget.py` contains the repaired function and `.mechaharness/ci_fix.md` cites the failure. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`.
 
 ### `fangore_coding_git_inspect` — Inspect a feature branch against main with local git tools
 

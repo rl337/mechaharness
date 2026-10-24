@@ -245,6 +245,7 @@ class UserStoryHarness:
                 backend=backend,
                 model=model,
                 coding_git=env.coding_git,
+                coding_github=env.coding_github,
                 coding_tool_script=env.coding_tool_script,
             )
         return kwargs
@@ -257,22 +258,36 @@ class UserStoryHarness:
         backend: StoryBackend,
         model: str,
         coding_git: str | None = None,
+        coding_github: str | None = None,
         coding_tool_script: str | None = None,
     ) -> GeneratorLocalWork:
         from mechaharness.coding_git import (
             LocalProcessCodingGit,
             RecordingPullRequestCodingGit,
         )
+        from mechaharness.github_client import RecordingGitHubClient
+        from mechaharness.github_connection import GitHubConnectionConfig
 
         local_git = LocalProcessCodingGit(workspace=workspace_root)
         if coding_git == "local_mock_pr":
             bound_git = RecordingPullRequestCodingGit(local_git)
         else:
             bound_git = local_git
+        github = None
+        github_connection = None
+        if coding_github == "local_mock_ci":
+            github = RecordingGitHubClient()
+            github_connection = GitHubConnectionConfig(
+                token="story-mock",
+                owner="acme",
+                repo="demo",
+            )
         tools = build_coding_tool_registry(
             workspace=WorkspacePaths(workspace_root),
             filesystem=RealFilesystem(),
             coding_git=bound_git,
+            github=github,
+            github_connection=github_connection,
         )
         if backend.mode == "live":
             # Ignore offline stubs; drive tools with a real Completer.
@@ -836,6 +851,29 @@ def _coding_tool_script_steps(script_id: str) -> list[dict[str, Any]]:
                         "# CI fix\n\n"
                         "Failed step: Run checks\n"
                         "Changed: widget.py — answer() now returns int 42\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "ci_diagnose":
+        return [
+            {"name": "ci_checks", "arguments": {"ref": "HEAD"}},
+            {
+                "name": "ci_job_log",
+                "arguments": {"job_id": "9001", "max_bytes": 20_000},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/ci_diagnosis.md",
+                    "content": (
+                        "# CI diagnosis\n\n"
+                        "Check: checks — conclusion failure\n"
+                        "Job id: 9001\n"
+                        "Root cause: Ruff lint failed; Mypy type checking "
+                        "failed; Pytest ModuleNotFoundError: No module "
+                        "named 'widget'; coverage 77.55% below 78.0%\n"
                     ),
                 },
             },
