@@ -35,12 +35,12 @@ infrastructure.
 code-owned policy helpers, hard access gates, fixture/shadow evaluation,
 provenance fields.
 
-**June (or another client) owns:** domain corpora (citations, RAG indexes, PR
+**The AI assistant host (or another client) owns:** domain corpora (citations, RAG indexes, PR
 requirements), concrete thresholds, permission catalogs, and product-specific
 graph realizations.
 
 ## Attribution
 
 Follow-on work must keep Majumder / TypeSafe / Jev permalinks in story footnotes
-(see each `story.json`), not only a link to this aggregate inspiration document.
+(see each suite stage YAML), not only a link to this aggregate inspiration document.
 Do not treat Jev SaaS availability as an acceptance criterion for library stories.

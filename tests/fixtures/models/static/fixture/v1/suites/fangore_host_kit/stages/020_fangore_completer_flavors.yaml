@@ -1,0 +1,47 @@
+id: fangore_completer_flavors
+suite: fangore_host_kit
+persona: fangore
+title: Wire same-lane Completer flavors without forking the library
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore’s product
+  needs a deep code Completer beside the default reason Completer in one Config. He registers a second
+  Named flavor and a small host harness that selects it with Annotated Matched tags — no marker-lane ABCs
+  and no edits to MechaHarness enums.
+implementation: '`MechaHarnessConfig.completer_bindings()` registers `Named` Completer tag sets (lane
+  + host flavors). Host constructors declare `Annotated[Completer, Named(...)]` / `Matched(...)`. `CliInstrumentor`
+  verb `check_completer_flavors` exercises the blessed DI path. Bare `inject(Completer)` keeps the default
+  aliased to `InferenceStrategy`.
+
+
+  Covers: same-lane Completer flavors via pyiv Named/Matched.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: pyiv-named-matched
+  label: pyiv Named/Matched
+  url: https://rl337.org/pyiv/
+  note: Named / Matched / Annotated constructor injection
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    check_completer_flavors:
+      flavor_tags:
+      - reason
+      - code
+      - deep
+      matched_required:
+      - reason
+      - code
+complete:
+  expect:
+  - kind: 'true'
+    key: default_is_inference
+  - kind: 'true'
+    key: flavor_selected
+  - kind: 'true'
+    key: matched_selects_flavor
+cleanup: []

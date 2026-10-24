@@ -1,0 +1,50 @@
+id: fangore_insp_durable_resume
+suite: fangore_durable_ioc
+persona: fangore
+title: Refuse resume when the harness fingerprint changed
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Long-running work
+  checkpoints outside chat. If the harness or graph configuration changes incompatibly, resume must refuse
+  rather than continue with altered semantics. Accepts inspiration requirement 12[^insp-r12]. Contributes
+  to personal-agent MH-PA-05 alongside `fangore_tdr_crash_after_accept_before_record`[^insp-pa-05-fingerprint].
+implementation: '`GraphExecutor` fingerprint check on resume. `CliInstrumentor` verb `checkpoint_fingerprint_refuse`.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-r12
+  label: 'Inspiration requirements (req 12: durable resume)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 12 — durable resume
+- id: insp-pa-05-fingerprint
+  label: Personal agent reliability map (MH-PA-05 fingerprint)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md
+  note: Fingerprint refuse on resume
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    checkpoint_fingerprint_refuse:
+      goal: fp
+  expect: &id001
+  - kind: equals
+    key: first_status
+    value: ok
+  - kind: equals
+    key: resume_status
+    value: failed
+  - kind: equals
+    key: error_code
+    value: incompatible_checkpoint_fingerprint
+  - kind: lte
+    key: cost_units
+    value: 1
+complete:
+  expect: *id001
+cleanup: []

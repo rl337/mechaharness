@@ -1,0 +1,36 @@
+id: fangore_insp_inference_capture_preflight
+suite: fangore_graph_executor
+persona: fangore
+title: Fail linkage when training-grade capture is unavailable
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs graphs
+  that require exact token capture to fail before expensive work when the active backend is evaluation-only.
+  Accepts FineEnvs capture probing guidance[^fineenvs-capture].
+implementation: '`InferenceCapture`, `EvaluationOnlyCapture`, and `TrainingGradeCapture` in `mechaharness.inference_capture`,
+  wired through `MechaHarnessConfig.get_inference_capture` and checked by `DefaultLinkageResolver` for
+  `required_inference_capture`. `CliInstrumentor` verb `check_inference_capture` runs the preflight.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-capture
+  label: FineEnvs multi-harness RL — what gets recorded
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-gets-recorded
+  note: MH-MHRL-04/05/20
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    check_inference_capture:
+      required_inference_capture: training_grade
+complete:
+  expect:
+  - kind: 'false'
+    key: linkage_ok
+  - kind: equals
+    key: codes_exactly
+    value:
+    - inference_capture_unsupported
+cleanup: []

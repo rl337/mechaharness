@@ -23,6 +23,34 @@ from mechaharness.cli_verb import CliParsedCommand, CliScript, parse_cli_command
 from tests.stories.scenarios.cli_scenario import _require_cost_ceiling
 
 
+class CodingWriteBlock(BaseModel):
+    """Offline stub ``write_file`` target when ``local_work: project_coding``."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    path: str
+    content: str
+
+
+class FilesystemBlock(BaseModel):
+    """Workspace + optional breakout seed files for the story harness.
+
+    ``type``:
+      - ``suite`` — sequential suite injects a shared arc workspace
+      - ``temp`` — fresh scratch directory per stage
+      - other string — absolute path, or path relative to the stage YAML
+    ``path`` — optional root override (rarely needed when type is suite/temp).
+    ``contents`` — path (relative to the stage YAML) to a files.json breakout
+    mapping workspace-relative paths to text (or a list of ``{path, content}``).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    type: str = "temp"
+    path: str | None = None
+    contents: str | None = None
+
+
 class EnvironmentBlock(BaseModel):
     """Host Config surface for this story (family, backend, optional clock)."""
 
@@ -30,6 +58,40 @@ class EnvironmentBlock(BaseModel):
 
     family: str = "pass_through"
     backend: str = "mock"
+    # Durable local-work hook: noop / plan_classify / project_coding.
+    local_work: Literal["noop", "plan_classify", "project_coding"] = "noop"
+    # Workspace + optional files.json seed (replaces workspace / coding_writes).
+    filesystem: FilesystemBlock | None = None
+    # CodingGit binding for project_coding tools.
+    # ``local_mock_pr`` = local ``git`` process + recorded/mock pull requests
+    # (no forge network). Omit / ``default`` = LocalProcessCodingGit (git+gh).
+    coding_git: Literal["default", "local_mock_pr"] | None = None
+    # GitHubClient binding for CI lookup tools (``ci_checks`` / ``ci_job_log``).
+    # ``local_mock_ci`` = ``RecordingGitHubClient`` + connection owner/repo
+    # (no forge network). Omit = no GitHub client (CI tools unregistered).
+    coding_github: Literal["default", "local_mock_ci"] | None = None
+    # Seed a tiny git repo in the workspace before the coding burst.
+    git_seed: Literal["feature_branch"] | None = None
+    # Seed a fake CI failure log + broken module for repair stories.
+    ci_seed: Literal["failing_check"] | None = None
+    # Seed a local static-check failure (ruff I001 / mypy no-untyped-def).
+    static_seed: Literal["ruff_imports", "mypy_untyped"] | None = None
+    # Seed a healthy multi-KB module for write-gutting guard stories.
+    write_guard_seed: Literal["healthy_module"] | None = None
+    # Offline Completer script that issues git/PR/CI tool calls (static CI).
+    # Live Completer ignores this and drives tools itself.
+    coding_tool_script: (
+        Literal[
+            "git_inspect",
+            "git_open_pr",
+            "ci_repair",
+            "ci_diagnose",
+            "static_ruff_repair",
+            "static_mypy_repair",
+            "write_gutting_attempt",
+        ]
+        | None
+    ) = None
     # ISO-8601 instant for MockDateTimeService; omit for harness default.
     clock: str | None = None
     # Optional FixtureRagRetriever corpus (YAML path under the story dir).
@@ -180,10 +242,24 @@ class CompleteBlock(BaseModel):
 
 
 class UserStoryScenario(BaseModel):
-    """Structured persona task: environment, optional graph, steps, complete."""
+    """Structured persona task: prose + environment, graph, steps, complete.
+
+    Suite stages carry guide fields (``id``, ``persona``, ``title``, …) in the
+    same YAML as the runnable walk. Harness ignores prose; the guide generator
+    reads it.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
+    # Guide / catalog prose (required on suite stage YAMLs).
+    id: str
+    suite: str | None = None
+    persona: str
+    title: str
+    narrative: str
+    implementation: str
+    validation: str
+    footnotes: list[Any] = Field(default_factory=list)
     kind: Literal["user_story"]
     environment: EnvironmentBlock
     graph: GraphBlock | None = None
@@ -303,9 +379,11 @@ async def run_user_story_scenario(
 
 
 __all__ = [
+    "CodingWriteBlock",
     "CompleteBlock",
     "DurableGraphBlock",
     "EnvironmentBlock",
+    "FilesystemBlock",
     "GraphBlock",
     "InlineGraphBlock",
     "StoryStep",

@@ -1,0 +1,49 @@
+id: fangore_insp_auth_epoch_resume
+suite: fangore_access_authority
+persona: fangore
+title: Refuse resumed effects when the authorization epoch advanced
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `auth_epoch_resume`
+  so a graph checkpoint stamped at epoch 2 refuses resume under epoch 3 before any runner is invoked.
+  Tracks MH-DOTS-06[^insp-dots-06].
+implementation: '`GraphExecutor.run(resume=True, envelope=...)` returns `failed` with `authorization_epoch_mismatch`.
+  Product verb `auth_epoch_resume`; story `environment.authorization_epoch` can stamp Config envelopes.'
+validation: Harness `user_story` scenario `auth_epoch_resume_refuse.yaml` drives `auth_epoch_resume`;
+  expects resume_status failed and error_contains mismatch.
+footnotes:
+- id: insp-dots-06
+  label: OpenAI Dots agent safety (MH-DOTS-06)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md
+  note: Checkpoint and replay safety with auth epoch
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  authorization_epoch: 2
+  filesystem:
+    type: temp
+steps:
+- do:
+    auth_epoch_resume:
+      first_epoch: 2
+      resume_epoch: 3
+complete:
+  expect:
+  - kind: equals
+    key: first_status
+    value: ok
+  - kind: equals
+    key: checkpoint_epoch
+    value: 2
+  - kind: equals
+    key: resume_status
+    value: failed
+  - kind: contains
+    key: error_contains
+    value: authorization_epoch_mismatch:2!=3
+  - kind: equals
+    key: runner_calls_after_resume
+    value: 0
+  - kind: lte
+    key: cost_units
+    value: 1
+cleanup: []

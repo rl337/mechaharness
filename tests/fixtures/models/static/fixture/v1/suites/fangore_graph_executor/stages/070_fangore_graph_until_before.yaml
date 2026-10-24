@@ -1,0 +1,68 @@
+id: fangore_graph_until_before
+suite: fangore_graph_executor
+persona: fangore
+title: Pause a graph walk before a named node
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline
+  two-node graph and runs `graph_walk` with `until` the second node and `stop: before`. The first node
+  has succeeded; the second is ready but not executed. He continues and the second node completes. Tracks
+  stepped graph control SG-02/06/09[^sg-until].'
+implementation: '`RunControl(mode=until, stop=before)` on `GraphExecutor.run`; product verb `graph_walk`;
+  optional `graph.inline` on user_story YAML.'
+validation: Harness `user_story` scenario `until_before.yaml`.
+footnotes:
+- id: sg-until
+  label: Stepped graph execution requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md
+  note: SG-02 until before
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: pipe
+    nodes:
+    - id: plan
+      kind: compute
+    - id: publish
+      kind: publish
+      depends_on:
+      - plan
+steps:
+- do:
+    graph_walk:
+      action: start
+      until: publish
+      stop: before
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: stopped_before
+    value: publish
+  - kind: equals
+    key: node_statuses
+    value:
+      plan: succeeded
+      publish: ready
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: node_statuses
+    value:
+      plan: succeeded
+      publish: succeeded
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+cleanup: []

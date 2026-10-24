@@ -149,7 +149,7 @@ activemq-data/
 *.sage.py
 
 # Environments
-.env
+.env/
 .envrc
 .venv
 env/
@@ -225,6 +225,7 @@ Thumbs.db
 # Local host contracts / design notes (do not publish)
 REQUIREMENTS.md
 docs/adr/
+docs/plans/
 .agents/
 
 # Local docs tooling install (sandbox-friendly target dir)

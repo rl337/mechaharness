@@ -1,0 +1,4 @@
+{
+  "counter/__init__.py": "\"\"\"Tiny Counter library \u2014 bootstrap.\"\"\"\n\nfrom __future__ import annotations\n\n\nclass Counter:\n    def __init__(self, value: int = 0) -> None:\n        self.value = int(value)\n",
+  "tests/test_counter.py": "from counter import Counter\n\n\ndef test_starts_at_zero() -> None:\n    assert Counter().value == 0\n"
+}

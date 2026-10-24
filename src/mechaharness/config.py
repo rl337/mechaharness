@@ -17,7 +17,8 @@ class Settings(BaseSettings):
     onto connection config later. Do not add judge/media/OAuth fields.
     """
 
-    model_config = SettingsConfigDict(env_prefix="MECHA_", env_file=".env", extra="ignore")
+    # Process env only (``.env/`` is a local secrets dir with ``env.sh``, not a dotenv file).
+    model_config = SettingsConfigDict(env_prefix="MECHA_", extra="ignore")
 
     inference_backend: str = "openai"
     harness_family: str = "tool_loop"

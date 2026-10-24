@@ -12,7 +12,7 @@ status: **proposal**, not an accepted requirement.
 **Principle:** Persistent context must never imply persistent permission.
 
 **Ownership:** MechaHarness owns enforceable graph execution, independent action
-review, and resumable authorization seams. June owns goals, memory, and
+review, and resumable authorization seams. The AI assistant host owns goals, memory, and
 user-facing policy configuration.
 
 | ID | Topic | Modules | Library | Story | Gaps |

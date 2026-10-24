@@ -1,0 +1,40 @@
+id: fangore_insp_wip_backpressure
+suite: fangore_lifecycle_ops
+persona: fangore
+title: Apply WIP back-pressure without hard-coding WIP=1
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore limits concurrent
+  active nodes and per-write-scope work so agents cannot overreach, while hosts still choose thresholds
+  rather than a universal WIP=1. Accepts WalkingLabs L07 and L08 guidance[^wl-l07-wip][^wl-l08-wip].
+implementation: '`WorkInProgressPolicy` in `mechaharness.work_in_progress_policy` gates concurrency by
+  active nodes, write scope, resource class, and consequence.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l07-wip
+  label: WalkingLabs L07 Task Boundaries
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-07-why-agents-overreach-and-under-finish/
+  note: Bound WIP
+- id: wl-l08-wip
+  label: WalkingLabs L08 Feature Lists
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/
+  note: Back-pressure
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    wip_policy:
+      max_active_nodes: 2
+      max_per_write_scope: 1
+      active_nodes: 1
+      active_in_scope: 1
+complete:
+  expect:
+  - kind: 'true'
+    key: allows_new_scope
+  - kind: 'false'
+    key: allows_same_scope
+cleanup: []

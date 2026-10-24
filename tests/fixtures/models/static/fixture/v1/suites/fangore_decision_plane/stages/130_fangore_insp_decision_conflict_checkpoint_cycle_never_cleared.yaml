@@ -1,0 +1,57 @@
+id: fangore_insp_decision_conflict_checkpoint__cycle_never_cleared
+suite: fangore_decision_plane
+persona: fangore
+title: Checkpoint after conflict-free decisions without revisiting cleared cycles (cycle_never_cleared)
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. After a decision
+  is settled, the nodes it still conflicts with are revisited, and nodes already visited are not revisited
+  so a circular conflict cannot loop forever. A checkpoint is taken only when the decision has no remaining
+  conflicts; a conflict blocked only by the visited set is reported instead of silently saved. The conflicts
+  themselves are still the write-scope conflicts the product already detects (`fangore_tdr_crash_after_accept_before_record`,
+  `fangore_decision_plane_policy`); this adds the revisit-and-checkpoint rule on top. Tracks MH-SR-08[^insp-sr-08].
+  This stage covers the `cycle_never_cleared` scenario.
+implementation: '`neighbor_revisit` / `neighbors_from_write_conflicts`. `CliInstrumentor` verb `decision_conflict_neighbor_revisit`.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys. Stage id `fangore_insp_decision_conflict_checkpoint__cycle_never_cleared`
+  (scenario `cycle_never_cleared`).
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    decision_conflict_neighbor_revisit:
+      id: cycle_never_cleared
+      start: a
+      write_scopes:
+        a:
+        - repo:x
+        b:
+        - repo:x
+        - repo:y
+        c:
+        - repo:y
+      clears: []
+  expect: &id001
+  - kind: equals
+    key: order
+    value:
+    - a
+    - b
+    - c
+  - kind: equals
+    key: checkpoints
+    value: []
+  - kind: equals
+    key: cycle_blocked
+    value:
+    - c
+complete:
+  expect: *id001
+cleanup: []

@@ -1,0 +1,85 @@
+id: fangore_insp_produce_critique_refine
+suite: fangore_recipes_tiling
+persona: fangore
+title: Run produce-critique-refine as a reusable recipe contract
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs Agentic
+  Recipe `produce_critique_refine` with an isolated critic and bounded refine rounds that clear fixture
+  findings under the stop contract. Independent review and verify-repair already ship. [^insp-pa-03]
+implementation: Agentic Recipe `produce_critique_refine` via `ProduceCritiqueRefineTemplate` / `produce_critique_refine_runner`
+  and product verb `run_recipe` (`ProduceCritiqueRefineRecipeAdapter`).
+validation: Harness `user_story` scenario `produce_critique_refine_recipe.yaml` drives `run_recipe`; expects
+  shape keys plus rounds_used / findings_cleared.
+footnotes:
+- id: insp-pa-03
+  label: Personal agent reliability (MH-PA-03)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md
+  note: Recipe contracts
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: produce_critique_refine
+  bind: binds/produce_critique_refine.yaml
+steps:
+- do:
+    run_recipe:
+      name: produce_critique_refine
+      path: binds/produce_critique_refine.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: produce_critique_refine
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - produce
+    - critique
+    - refine
+    - complete
+  - kind: 'true'
+    key: critic_isolated
+  - kind: equals
+    key: refine_max_iterations
+    value: 3
+  - kind: equals
+    key: component_parents
+    value:
+      complete:
+      - complete_kind
+      critique:
+      - acceptance
+      - critique_kind
+      - critique_prompt
+      - omit_producer_reasoning
+      produce:
+      - produce_kind
+      refine:
+      - max_rounds
+      - refine_kind
+      - stop_contract
+  - kind: equals
+    key: evolvable
+    value:
+    - critique_prompt
+    - max_rounds
+  - kind: equals
+    key: rounds_used
+    value: 2
+  - kind: 'true'
+    key: findings_cleared
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

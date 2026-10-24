@@ -1,0 +1,47 @@
+id: taloneth_insp_eval_matrix
+suite: taloneth_harness_research
+persona: taloneth
+title: Keep model-harness-task matrix cells for drill-down
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth evaluates
+  the same model under multiple harness configurations and must keep every matrix cell so averages cannot
+  hide a catastrophic compatibility failure. Accepts FineEnvs cross-harness matrix practice[^fineenvs-matrix].
+implementation: '`EvalMatrix` and `EvalMatrixCell` in `mechaharness.eval_matrix` index trials by model,
+  harness fingerprint, and task family, and `aggregate` retains cell drill-down.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-matrix
+  label: FineEnvs multi-harness RL — accuracy matrix
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#accuracy
+  note: MH-MHRL-17
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    eval_matrix_aggregate:
+      trials:
+      - trial_id: '1'
+        success: true
+        model: m1
+        harness_fingerprint: fp:a
+        task_family: math
+      - trial_id: '2'
+        success: false
+        model: m1
+        harness_fingerprint: fp:b
+        task_family: math
+complete:
+  expect:
+  - kind: equals
+    key: cell_count
+    value: 2
+  - kind: includes
+    key: fingerprints
+    value:
+    - fp:a
+    - fp:b
+cleanup: []

@@ -1,0 +1,4 @@
+{
+  "counter/__init__.py": "\"\"\"Tiny Counter library \u2014 mutate.\"\"\"\n\nfrom __future__ import annotations\n\n\nclass Counter:\n    def __init__(self, value: int = 0) -> None:\n        self.value = int(value)\n\n    def inc(self, n: int = 1) -> int:\n        self.value += int(n)\n        return self.value\n\n    def dec(self, n: int = 1) -> int:\n        self.value -= int(n)\n        return self.value\n",
+  "tests/test_counter.py": "from counter import Counter\n\n\ndef test_starts_at_zero() -> None:\n    assert Counter().value == 0\n\n\ndef test_inc_dec() -> None:\n    c = Counter()\n    assert c.inc() == 1\n    assert c.inc(2) == 3\n    assert c.dec() == 2\n"
+}

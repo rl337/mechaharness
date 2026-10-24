@@ -1,0 +1,44 @@
+id: fangore_insp_context_compaction
+suite: fangore_context_memory
+persona: fangore
+title: Compact context in staged lossless then lossy steps
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Long runs compact
+  context through staged strategies that record which information classes were discarded. Accepts WalkingLabs
+  L05 and Claude Code design guidance[^wl-l05-compact][^wl-claude-compact].
+implementation: '`ContextCompactionStrategy` and `DefaultStagedCompaction` in `mechaharness.context_compaction`
+  apply lossless dedupe, distill truncation, and optional lossy drops with provenance.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l05-compact
+  label: WalkingLabs L05 Continuity
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/
+  note: Staged compaction
+- id: wl-claude-compact
+  label: WalkingLabs Claude Code harness design
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/claude-code/
+  note: Pluggable compaction
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    context_compaction_staged:
+      messages:
+      - role: user
+        content: a
+      - role: user
+        content: a
+      - role: assistant
+        content: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+complete:
+  expect:
+  - kind: includes
+    key: discarded_classes
+    value:
+    - deduplicated
+    - truncated_content
+cleanup: []

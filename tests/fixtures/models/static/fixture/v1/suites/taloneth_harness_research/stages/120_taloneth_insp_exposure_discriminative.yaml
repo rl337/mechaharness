@@ -1,0 +1,47 @@
+id: taloneth_insp_exposure_discriminative
+suite: taloneth_harness_research
+persona: taloneth
+title: Report unequal exposure and no-learning-signal ties
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs
+  equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that
+  provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings[^fineenvs-exposure].
+implementation: '`ExposureLedger` in `mechaharness.exposure_accounting` and `discriminative_report` in
+  `mechaharness.discriminative_value` summarize arm exposure and tie telemetry.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-exposure
+  label: FineEnvs multi-harness RL — how much each run saw
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#how-much-each-run-saw
+  note: MH-MHRL-14/15
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    exposure_discriminative_report:
+      exposure:
+      - arm: treatment
+        rollouts: 1
+        model_calls: 4
+        tokens_out: 800
+      - arm: control
+        rollouts: 1
+        model_calls: 1
+        tokens_out: 100
+      trials:
+      - trial_id: '1'
+        success: true
+      - trial_id: '2'
+        success: true
+complete:
+  expect:
+  - kind: equals
+    key: treatment_model_calls
+    value: 4
+  - kind: 'true'
+    key: all_success_tie
+cleanup: []

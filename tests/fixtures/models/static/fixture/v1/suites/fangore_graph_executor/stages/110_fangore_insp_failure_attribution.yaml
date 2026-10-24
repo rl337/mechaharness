@@ -1,0 +1,41 @@
+id: fangore_insp_failure_attribution
+suite: fangore_graph_executor
+persona: fangore
+title: Attribute repeated failures to linkage or tools
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. When the same failure
+  class repeats, Fangore needs structured attribution so the process can improve — not one-off output
+  patches. Accepts inspiration requirement 11[^insp-r11].
+implementation: '`attribute_error` / `detect_repeated_failure_classes` in `mechaharness.failure_attribution`
+  map errors to categories for traces and offline mining.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-r11
+  label: 'Inspiration requirements (req 11: fix the process)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 11 — fix the process
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    failure_attribution_trace:
+      errors:
+      - no_runner:x
+      - no_runner:y
+      - permission_denied
+complete:
+  expect:
+  - kind: includes
+    key: categories
+    value:
+    - linkage
+    - tools
+  - kind: includes
+    key: repeated_classes
+    value:
+    - no_runner
+cleanup: []

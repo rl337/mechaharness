@@ -1,0 +1,51 @@
+id: nubble_topology_efficiency
+suite: nubble_routing_topology
+persona: nubble
+title: Separate wall-clock speedup from total work and queue wait
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble is asked whether
+  parallel agents sped things up. Wall time dropped, but total work grew and queue waits hid under a vanity
+  speedup. He needs metrics that separate critical path, total work, and elapsed time — and that refuse
+  misleading efficiency claims without a serial baseline and worker-count note.
+implementation: '`TopologySpan` and `compute_topology_metrics` in `mechaharness.decision_log`. `CliInstrumentor`
+  verb `topology_efficiency`.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    topology_efficiency:
+      graph_version: story-topo-v1
+      worker_count: 2
+      spans:
+      - name: a
+        start_ms: 0
+        end_ms: 10
+      - name: b
+        start_ms: 0
+        end_ms: 10
+      - name: c
+        start_ms: 10
+        end_ms: 15
+        parent: a
+complete:
+  expect:
+  - kind: equals
+    key: total_node_work_ms
+    value: 25.0
+  - kind: equals
+    key: elapsed_ms
+    value: 15.0
+  - kind: 'true'
+    key: work_exceeds_elapsed
+  - kind: equals
+    key: notes_exactly
+    value:
+    - worker_count=2
+    - parallel_efficiency_not_comparable_without_serial_baseline
+cleanup: []

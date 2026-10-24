@@ -1,0 +1,38 @@
+id: nubble_insp_environment_delta
+suite: nubble_routing_topology
+persona: nubble
+title: Project environment context as versioned deltas
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble sends environment
+  deltas instead of repeating full snapshots while still reconstructing deterministic state. Accepts WalkingLabs
+  Codex guidance[^wl-codex-delta].
+implementation: '`EnvironmentSnapshot`, `EnvironmentDelta`, `emit_delta`, and `apply_deltas` in `mechaharness.environment_delta`.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-codex-delta
+  label: WalkingLabs Codex harness design
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/
+  note: Environment deltas
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    environment_delta:
+      before:
+        version: 1
+        data:
+          cwd: /app
+      after:
+        version: 2
+        data:
+          cwd: /tmp
+complete:
+  expect:
+  - kind: equals
+    key: cwd
+    value: /tmp
+cleanup: []

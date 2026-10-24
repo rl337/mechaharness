@@ -304,6 +304,8 @@ class CliInstrumentor:
         grants: Sequence[object] | None = None,
         access_policy: GrantPolicyLike | None = None,
         job_lane_broker: JobLaneBroker | None = None,
+        generator_local_work: Any | None = None,
+        workspace_root: Any | None = None,
     ) -> None:
         self._completer = completer
         self._model = model
@@ -322,6 +324,8 @@ class CliInstrumentor:
         self._grants = list(grants) if grants is not None else None
         self._access_policy = access_policy
         self._job_lane_broker = job_lane_broker
+        self._generator_local_work = generator_local_work
+        self.workspace_root = workspace_root
         store = event_log or InMemoryEventLog()
         stamped = StampingEventLog(store, self._datetime)
         self._log: EventLog = tapping_event_log(
@@ -466,7 +470,15 @@ class CliInstrumentor:
             store=store,
             steps=[],
         )
-        self._durable = DurableInstrumentor(self._durable_script)
+        local_work = self._generator_local_work
+        bind = getattr(local_work, "bind_event_log", None)
+        if callable(bind):
+            bind(self._log)
+        self._durable = DurableInstrumentor(
+            self._durable_script,
+            local_work=local_work,
+            event_log=self._log,
+        )
 
     def _ensure_durable(self) -> DurableInstrumentor:
         if self._durable is None:

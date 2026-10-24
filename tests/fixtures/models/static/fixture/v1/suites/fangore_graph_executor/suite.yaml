@@ -1,0 +1,9 @@
+id: fangore_graph_executor
+title: Graph executor, soft points, traversal, and budgets
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

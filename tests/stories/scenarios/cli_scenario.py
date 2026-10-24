@@ -44,6 +44,15 @@ class CliScenario(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    # Guide prose (merged from former story.json on twin fixtures).
+    id: str | None = None
+    suite: str | None = None
+    persona: str | None = None
+    title: str | None = None
+    narrative: str | None = None
+    implementation: str | None = None
+    validation: str | None = None
+    footnotes: list[Any] = Field(default_factory=list)
     kind: Literal["cli"]
     commands: list[CliParsedCommand] = Field(min_length=1)
     expect: list[CliAssertionSpec] | None = None

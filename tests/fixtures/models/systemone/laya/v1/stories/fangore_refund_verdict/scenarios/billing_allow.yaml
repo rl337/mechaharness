@@ -1,11 +1,31 @@
-# user story: fangore_refund_verdict
-# Fangore starts the CLI host with family `pass_through` and backend `mock`.
-# A customer was charged twice.
-# Only the billing team may own the ticket.
+id: fangore_refund_verdict
+persona: fangore
+title: Keep billing authority in product rules, not the model
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. A customer was
+  charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy
+  allows only when the route signal is billing — and a high quality score alone must not override missing
+  completion evidence. He walks product steps (judge_route) and verifies completion from the structured
+  observation expects on this scenario. Related: `fangore_decision_surface_reject`.'
+implementation: 'Provider-neutral judge types (`Choice`/`Score`/`Noul` questions and signals) plus `JudgementPolicy`
+  / `decide()` apply configured thresholds. `CliInstrumentor` verb `judge_route` runs judge+decide. System
+  One maps vendor wire via `SystemOneJudgeProvider`.
+
+
+  Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.'
+validation: 'Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps + complete
+  expects. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider`
+  (cassette-exact token softens; behavioral expects hard).'
+footnotes:
+- id: jev-decisions
+  label: Jev decisions in a Pi harness
+  url: https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness
+  note: Routing, gating, batched questions, thresholds
 kind: user_story
 environment:
   family: pass_through
   backend: mock
+  filesystem:
+    type: temp
 graph: null
 steps:
 - do:
