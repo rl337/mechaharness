@@ -28,7 +28,7 @@ Mechanism / transport stay in existing parallel suites (not new coding suites):
 | Plan classify / list mode (no coding) | `fangore_guided_coding` → `fangore_instruction_todo_plan` |
 | Guidance yield smoke (NoOp local work) | `fangore_guided_coding` → `fangore_guided_coding_recipe` |
 | MCP `generator_start` / `resume` | Same `guided_coding` graph via `MECHA_MCP_HOST=project_coding`; session semantics in `fangore_insp_driver_session_resume`. Dogfood: live MCP against `delegate_pkg` goals — **no fourth suite**. |
-| CI diagnose → repair → local verify | `fangore_guided_coding` → `fangore_coding_ci_diagnose` (`ci_checks` / `ci_job_log` via `RecordingGitHubClient` / `HttpGitHubClient`) then `fangore_coding_ci_repair` (seeded-log repair) |
+| CI diagnose → repair → local verify | `fangore_guided_coding` → `fangore_coding_ci_diagnose` (`ci_checks` / `ci_job_log`) → `fangore_coding_static_checks` (ruff/mypy `verify_runs`) → `fangore_coding_ci_repair` |
 | StopContract / graph budgets | Soft point `max_iterations` on every coding stage; mechanism stories under `fangore_graph_executor` / `fangore_recipes_tiling` |
 | Workspace grants / escape | `fangore_access_authority` (+ `ProjectCodingConfig` grants) |
 

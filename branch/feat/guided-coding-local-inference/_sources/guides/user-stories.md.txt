@@ -141,9 +141,9 @@ Stories: `fangore_convergence_ceiling`, `fangore_graph_executor`, `fangore_graph
 
 ### `fangore_guided_coding` — Guided coding recipe and instruction todo plan
 
-Persona **fangore**; execution `parallel`; 14 stage(s).
+Persona **fangore**; execution `parallel`; 16 stage(s).
 
-Stories: `fangore_coding_ci_diagnose`, `fangore_coding_ci_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
+Stories: `fangore_coding_ci_diagnose`, `fangore_coding_ci_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_static_checks`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan`
 
 ### `fangore_host_kit` — Host kit, completer flavors, and harness families
 
@@ -759,6 +759,18 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 #### Validation
 
 Harness `user_story` scenario `open_pr.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: git_open_pr`. Live Completer may draft title/body but still uses the mock PR publisher under `local_mock_pr`. Asserts `.mechaharness/pr_url.txt` contains the mock URL. Unit coverage in `tests/test_github_client.py` and `tests/test_coding_git.py`.
+
+### `fangore_coding_static_checks` — Diagnose and repair local Ruff and Mypy failures the way CI runs them
+
+Fangore's PR checks keep dying on Ruff import order and Mypy untyped defs before pytest even matters. He starts guided coding against a temp workspace that already has a CI-shaped failure log and a broken module, asks the local Completer to read the static-check output (or re-run the same tool), repair the file, and leave a short fix note. Host `verify_runs` re-check with `ruff: true` / `mypy: true` so the story proves the cheap Completer lane can clear the same static gates CI uses. Complements `fangore_coding_ci_diagnose` (forge log lookup) and `fangore_coding_ci_repair` (seeded runtime/pytest repair).
+
+#### Implementation
+
+Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`, `static_seed: ruff_imports|mypy_untyped`, and `coding_tool_script: static_ruff_repair|static_mypy_repair`. Seeds plant `messy.py` / `typed_mod.py` plus `.mechaharness/ci_failure.log`. `ProjectCodingLocalWork` `verify_runs` accepts `ruff` and `mypy` rows (``python -m ruff check`` / ``python -m mypy``). Soft point `external_guidance` remains the human scope gate.
+
+#### Validation
+
+Harness `user_story` scenarios `ruff.yaml` and `mypy.yaml` in suite `fangore_guided_coding`. Static mode uses the named coding_tool_scripts. Asserts the repaired module and `.mechaharness/ci_fix.md` cite Ruff I001 or Mypy no-untyped-def, and start inputs include matching `verify_runs`. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`.
 
 ### `fangore_coding_write_guard` — Refuse catastrophic gutting of an existing workspace module
 
