@@ -15,27 +15,27 @@
   "stages": [
     {
       "story": "fangore_calc_parse_number",
-      "scenario": "bootstrap"
+      "scenario": "010_fangore_calc_parse_number"
     },
     {
       "story": "fangore_calc_add_sub",
-      "scenario": "add_sub"
+      "scenario": "020_fangore_calc_add_sub"
     },
     {
       "story": "fangore_calc_mul_div",
-      "scenario": "mul_div"
+      "scenario": "030_fangore_calc_mul_div"
     },
     {
       "story": "fangore_calc_exponent",
-      "scenario": "exponent"
+      "scenario": "040_fangore_calc_exponent"
     },
     {
       "story": "fangore_calc_grouping",
-      "scenario": "grouping"
+      "scenario": "050_fangore_calc_grouping"
     },
     {
       "story": "fangore_calc_functions",
-      "scenario": "functions"
+      "scenario": "060_fangore_calc_functions"
     }
   ]
 }

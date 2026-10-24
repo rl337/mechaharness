@@ -29,7 +29,7 @@ worker to call a frontier model API.
   suspension/continuation records.
 - Do **not** collapse advisory guidance into human approval
   (`ApprovalInterrupt`) or in-process sparse advisor consults (`Advisor`).
-- FOLK / NeoStudio artistic semantics stay in host apps.
+- Video production / studio host artistic semantics stay in host apps.
 
 ## Requirements
 
@@ -142,7 +142,7 @@ parallel graph engine.
 | M3 | Recording/replay polish and crash-location matrix expansion |
 | M4 | Human plain-text CLI (curses optional) |
 | M5 | Parallel advisory batching, leases, ownership transfer |
-| M6 | Host production pilots (FOLK / NeoStudio) |
+| M6 | Host production pilots (video production / studio apps) |
 
 ## Definition of done (M1)
 

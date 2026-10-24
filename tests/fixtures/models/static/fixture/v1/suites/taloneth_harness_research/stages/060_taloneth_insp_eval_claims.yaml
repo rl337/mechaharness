@@ -1,0 +1,51 @@
+id: taloneth_insp_eval_claims
+suite: taloneth_harness_research
+persona: taloneth
+title: Compose typed evaluation claims without opaque scores
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs
+  evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque
+  score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL[^anth-evals-claims][^arxiv-bineval].
+implementation: '`Evidence`, `Claim`, and `compose_claims` in `mechaharness.eval_evidence` provide typed
+  evidence pointers and binary assertion composition.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: anth-evals-claims
+  label: Anthropic Demystifying evals for AI agents
+  url: https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents
+  note: Graders and assertions
+- id: arxiv-bineval
+  label: BINEVAL binary questions
+  url: https://arxiv.org/abs/2606.27226
+  note: Atomic interpretable claims
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    eval_claims_compose:
+      claims:
+      - id: a
+        statement: a
+        status: pass
+      - id: b
+        statement: b
+        status: fail
+      - id: c
+        statement: c
+        status: unknown
+complete:
+  expect:
+  - kind: equals
+    key: pass
+    value: 1
+  - kind: equals
+    key: fail
+    value: 1
+  - kind: equals
+    key: unknown
+    value: 1
+cleanup: []

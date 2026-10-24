@@ -12,7 +12,7 @@ routing.
 | Domain | `mechaharness.audited_decision` |
 | Substrate | `GraphTemplate` |
 | Owning stories | `fangore_audited_infer_accept` |
-| FOLK prior id | `ideation.infer.accept` (host alias on migrate) |
+| Host prior catalog id | `ideation.infer.accept` (host alias on migrate) |
 
 ## Stages
 
@@ -39,7 +39,7 @@ Repair targets (defect → stage): `collect` | `freeze_criteria` | `decide`
 
 Default kinds: `audited.collect`, `audited.freeze_criteria`,
 `audited.{modality}.decide`, `audited.{modality}.qa`, `audited.deterministic`,
-`audited.gate`. FOLK soft-binds `folk.infer.*`.
+`audited.gate`. Hosts soft-bind e.g. `host.infer.*`.
 
 ## Node components
 
@@ -50,9 +50,9 @@ Default kinds: `audited.collect`, `audited.freeze_criteria`,
 
 See [Node components](../node-components.md).
 
-## FOLK migration
+## Video production host migration
 
-See [FOLK audited-infer migration](../../inspiration/folk-audited-infer-migration.md).
+See [Video production audited-infer migration](../../inspiration/video-production-audited-infer-migration.md).
 
 ## Related
 

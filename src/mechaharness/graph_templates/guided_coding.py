@@ -58,12 +58,19 @@ class GuidedCodingTemplate(GraphTemplate):
             kind="guidance",
             description=(
                 "How should the local coding agent approach this change "
-                "(scope, files, constraints, acceptance)?"
+                "(scope, files, constraints, acceptance)? Prefer extending "
+                "existing files so prior verify_runs stay green."
             ),
             required=True,
             default={
                 "choices": [
-                    {"id": "minimal", "label": "Minimal diff; match nearby style"},
+                    {
+                        "id": "minimal",
+                        "label": (
+                            "Minimal diff; extend existing files; keep prior "
+                            "behavior green"
+                        ),
+                    },
                     {
                         "id": "thorough",
                         "label": "Thorough: tests + docs in the same change",
@@ -143,11 +150,18 @@ class GuidedCodingTemplate(GraphTemplate):
             GraphNode(
                 id="brief",
                 kind="prepare",
-                goal="Capture task brief and pending guidance soft point",
+                goal=(
+                    "Capture task brief and pending guidance soft point; "
+                    "downstream coding must preserve prior workspace behavior"
+                ),
                 payload={
                     "goal": goal,
                     "soft_points": ["external_guidance"],
                     "task": inputs.get("task") or goal,
+                    "coding_contract": (
+                        "extend existing files; keep APIs and prior verify_runs green; "
+                        "emit write_file tool calls in answer content"
+                    ),
                 },
             )
         )
@@ -189,11 +203,19 @@ class GuidedCodingTemplate(GraphTemplate):
         )
         del plan_child
         plan_embed.depends_on = ["brief"]
+        plan_embed.goal = (
+            f"{goal}: plan and code with tools — preserve prior workspace "
+            "behavior; write_file before finish"
+        )
         plan_embed.payload = {
             **dict(plan_embed.payload or {}),
             "soft_points": ["external_guidance"],
             "phase": "plan",
             "max_iterations": max_iterations,
+            "coding_contract": (
+                "read before write; keep prior operators/tests/CLI; "
+                "tool_call blocks in final answer content"
+            ),
         }
         graph.add_node(plan_embed)
 

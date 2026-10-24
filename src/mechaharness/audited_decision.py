@@ -1,7 +1,7 @@
 """Audited-decision contract for generate → QA → gate (RDG-aligned).
 
 Portable spine shared by Agentic Recipe ``audited_infer_accept`` and host
-apps (e.g. FOLK's former ``ideation.infer.accept``). Stages::
+apps (e.g. a video production host's former ``ideation.infer.accept``). Stages::
 
     collect → freeze_criteria → decide → independent_qa → deterministic → gate
                          ↑ repair routes to the narrowest prior stage (bounded)
@@ -10,7 +10,7 @@ Modality (``text`` / ``image``) only replaces soft subgraphs under ``decide``
 and ``independent_qa``. Hosts bind runners; MechaHarness owns the topology
 and principal / criteria / repair rules.
 
-Provenance: lifted from FOLK ``folk.domain.audited_decision`` for library reuse.
+Provenance: lifted from a video production host ``audited_decision`` module for library reuse.
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ STAGES: tuple[str, ...] = (
 
 REPAIR_TARGETS: frozenset[str] = frozenset({"collect", "freeze_criteria", "decide"})
 
-# Library placeholder node kinds (hosts soft-bind overrides, e.g. folk.infer.*).
+# Library placeholder node kinds (hosts soft-bind overrides, e.g. host.infer.*).
 DEFAULT_KIND_PREFIX = "audited"
 
 
@@ -91,7 +91,7 @@ class AuditedDecisionSpec:
     """Image (or custom) produce runner kind soft-bound under decide."""
 
     hop_recipe: str = ""
-    """Optional host leaf id (e.g. FOLK hop_accept catalog)."""
+    """Optional host leaf id (e.g. host hop_accept catalog)."""
 
     seed_evidence: tuple[dict[str, Any], ...] = field(default_factory=tuple)
     require_evidence_anchors: bool = True

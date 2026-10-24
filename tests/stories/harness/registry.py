@@ -1,4 +1,4 @@
-"""Registered story harness families (``story.json`` ``kind`` values)."""
+"""Registered story harness families (stage YAML ``kind`` values)."""
 
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ async def run_story(
     *,
     suite_workspace: Path | None = None,
 ) -> None:
-    meta = case.load_json("story.json")
+    meta = case.load_meta()
     kind = meta["kind"]
     if backend.mode == "live" and case.adapter == "in_process":
         from tests.stories.live_capability import live_eligible

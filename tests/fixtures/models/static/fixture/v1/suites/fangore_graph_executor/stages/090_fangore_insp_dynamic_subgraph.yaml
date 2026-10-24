@@ -1,0 +1,47 @@
+id: fangore_insp_dynamic_subgraph
+suite: fangore_graph_executor
+persona: fangore
+title: Nest a child graph as an observable subgraph
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore embeds a
+  child plan under a parent step. The child must run as its own graph execution with telemetry, not as
+  an opaque nested model call. Nested spend shares the parent budget — see `fangore_insp_budget_subgraph_rollup`.
+  Hosts use the same nest path when tiling Agentic Recipes into a parent graph. Accepts inspiration requirement
+  3[^insp-r03].
+implementation: '`SubgraphNodeRunner.embed` + `GraphExecutor`. `CliInstrumentor` verb `dynamic_subgraph_nest`.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-r03
+  label: 'Inspiration requirements (req 3: dynamic subgraphs)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 3 — dynamic subgraphs
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    dynamic_subgraph_nest:
+      parent_goal: parent
+      child_goal: child
+  expect: &id001
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: child_status
+    value: ok
+  - kind: 'true'
+    key: child_run_id_nonempty
+  - kind: lte
+    key: cost_units
+    value: 1
+complete:
+  expect: *id001
+cleanup: []

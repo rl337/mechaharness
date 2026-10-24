@@ -1,0 +1,46 @@
+id: fangore_node_components
+suite: fangore_graph_executor
+persona: fangore
+title: Query node components inside each graph node for pre-layout
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the
+  `conversational_tool_loop` recipe. Before a run starts, Fangore’s console must place interior pieces
+  inside each plan step — soft bindings, stop bounds, and nested child handles — so the camera can zoom
+  into a node without inventing a parallel structure graph. Those pieces are node components of a parent
+  graph node, not free-floating world nodes. Complements `fangore_insp_dynamic_subgraph` and `fangore_traversal_contract`.
+  He walks product steps (instantiate_recipe) and verifies completion from the structured observation
+  expects on this scenario. [^ai-asst-nc-req]
+implementation: '`mechaharness.node_component.node_components_for` derives `NodeComponent` rows from an
+  `ExecutionGraph` plus optional template soft points and tool names. Kinds are limited to the closed
+  catalog in `docs/reference/node-components.md` (events, soft points, child_graph, stop_contract, effect_state,
+  budget_level). Every component requires `parent_node_id`. Soft points on Agentic Recipes appear as `soft_point`
+  components.'
+validation: 'Harness `user_story` scenario `node_components.yaml`: environment + graph + steps + complete
+  expects.'
+footnotes:
+- id: ai-asst-nc-req
+  label: Dynamic tool graph and node components
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/dynamic-tool-graph.md
+  note: Vocabulary and kind rule
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: conversational_tool_loop
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/conversational_tool_loop.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: all_have_parent
+  - kind: 'true'
+    key: kinds_subset_catalog
+  - kind: 'true'
+    key: has_stop_contract
+  - kind: 'true'
+    key: has_soft_point
+cleanup: []

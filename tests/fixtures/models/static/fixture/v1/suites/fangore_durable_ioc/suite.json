@@ -9,46 +9,47 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_insp_approval_interrupt",
-      "scenario": "approval_interrupt_cycle"
+      "scenario": "010_fangore_insp_approval_interrupt"
     },
     {
       "story": "fangore_insp_driver_session_resume",
-      "scenario": "session"
+      "scenario": "020_fangore_insp_driver_session_resume"
     },
     {
       "story": "fangore_insp_durable_graph_generator",
-      "scenario": "session"
+      "scenario": "030_fangore_insp_durable_graph_generator"
     },
     {
       "story": "fangore_insp_durable_resume",
-      "scenario": "fingerprint_refuse"
+      "scenario": "040_fangore_insp_durable_resume"
     },
     {
       "story": "fangore_insp_graph_guidance_yield",
-      "scenario": "session"
+      "scenario": "050_fangore_insp_graph_guidance_yield"
     },
     {
       "story": "fangore_insp_guidance_controller_auth",
-      "scenario": "session"
+      "scenario": "060_fangore_insp_guidance_controller_auth"
     },
     {
       "story": "fangore_insp_guidance_resume_idempotent",
-      "scenario": "session"
+      "scenario": "070_fangore_insp_guidance_resume_idempotent"
     },
     {
       "story": "fangore_insp_guidance_survive_restart",
-      "scenario": "session"
+      "scenario": "080_fangore_insp_guidance_survive_restart"
     },
     {
       "story": "fangore_insp_sparse_advisor",
-      "scenario": "sparse_advisor"
+      "scenario": "090_fangore_insp_sparse_advisor"
     },
     {
       "story": "fangore_local_plan_resume",
-      "scenario": "checkpoint_fan_in_merge"
+      "scenario": "100_fangore_local_plan_resume"
     }
   ]
 }

@@ -9,30 +9,31 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_context_compiler_deficit",
-      "scenario": "context_compiler_deficit"
+      "scenario": "010_fangore_context_compiler_deficit"
     },
     {
       "story": "fangore_context_observation_chain",
-      "scenario": "context_observation_chain"
+      "scenario": "020_fangore_context_observation_chain"
     },
     {
       "story": "fangore_derived_memory",
-      "scenario": "derived_memory"
+      "scenario": "030_fangore_derived_memory"
     },
     {
       "story": "fangore_insp_context_compaction",
-      "scenario": "context_compaction_staged"
+      "scenario": "040_fangore_insp_context_compaction"
     },
     {
       "story": "fangore_insp_context_layers",
-      "scenario": "context_layers_project"
+      "scenario": "050_fangore_insp_context_layers"
     },
     {
       "story": "fangore_insp_context_provider",
-      "scenario": "context_provider_discovery"
+      "scenario": "060_fangore_insp_context_provider"
     }
   ]
 }

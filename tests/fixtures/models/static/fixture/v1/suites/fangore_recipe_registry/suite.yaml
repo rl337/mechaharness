@@ -1,0 +1,9 @@
+id: fangore_recipe_registry
+title: Recipe registry lineage, ports, and soft evolution
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

@@ -3,7 +3,7 @@
 MechaHarness validates recipes, owns the registry pointer, and enforces the
 held-out final-test gate. *Whether* a candidate should be promoted (campaign
 results, risk appetite, release windows) belongs to the host, for example
-June. :class:`RecipePromotionPolicy` is that seam: bind it with
+the AI assistant host. :class:`RecipePromotionPolicy` is that seam: bind it with
 ``MechaHarnessConfig.get_recipe_promotion_policy()``. The default is a no-op
 that expresses no opinion; the library's final-test gate still applies::
 

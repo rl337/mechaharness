@@ -9,70 +9,71 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_coding_ci_diagnose",
-      "scenario": "diagnose"
+      "scenario": "010_fangore_coding_ci_diagnose"
     },
     {
       "story": "fangore_coding_ci_repair",
-      "scenario": "repair"
+      "scenario": "020_fangore_coding_ci_repair"
     },
     {
       "story": "fangore_coding_git_inspect",
-      "scenario": "inspect"
+      "scenario": "030_fangore_coding_git_inspect"
     },
     {
       "story": "fangore_coding_git_open_pr",
-      "scenario": "open_pr"
+      "scenario": "040_fangore_coding_git_open_pr"
     },
     {
-      "story": "fangore_coding_static_checks",
-      "scenario": "mypy"
+      "story": "fangore_coding_static_checks__mypy",
+      "scenario": "050_fangore_coding_static_checks_mypy"
     },
     {
-      "story": "fangore_coding_static_checks",
-      "scenario": "ruff"
+      "story": "fangore_coding_static_checks__ruff",
+      "scenario": "060_fangore_coding_static_checks_ruff"
     },
     {
       "story": "fangore_coding_write_guard",
-      "scenario": "refuse_gutting"
+      "scenario": "070_fangore_coding_write_guard"
     },
     {
-      "story": "fangore_guided_coding_recipe",
-      "scenario": "helper_run_python"
+      "story": "fangore_guided_coding_recipe__helper_run_python",
+      "scenario": "080_fangore_guided_coding_recipe_helper_run_python"
     },
     {
-      "story": "fangore_guided_coding_recipe",
-      "scenario": "session"
+      "story": "fangore_guided_coding_recipe__session",
+      "scenario": "090_fangore_guided_coding_recipe_session"
     },
     {
       "story": "fangore_insp_instruction_gotchas",
-      "scenario": "instruction_gotcha_metrics"
+      "scenario": "100_fangore_insp_instruction_gotchas"
     },
     {
       "story": "fangore_insp_instruction_scope",
-      "scenario": "instruction_scope_metadata"
+      "scenario": "110_fangore_insp_instruction_scope"
     },
     {
-      "story": "fangore_instruction_todo_plan",
-      "scenario": "conflict_list_refinement"
+      "story": "fangore_instruction_todo_plan__conflict_list_refinement",
+      "scenario": "120_fangore_instruction_todo_plan_conflict_list_refinement"
     },
     {
-      "story": "fangore_instruction_todo_plan",
-      "scenario": "explicit_list_mode"
+      "story": "fangore_instruction_todo_plan__explicit_list_mode",
+      "scenario": "130_fangore_instruction_todo_plan_explicit_list_mode"
     },
     {
-      "story": "fangore_instruction_todo_plan",
-      "scenario": "numbered_list"
+      "story": "fangore_instruction_todo_plan__numbered_list",
+      "scenario": "140_fangore_instruction_todo_plan_numbered_list"
     },
     {
-      "story": "fangore_instruction_todo_plan",
-      "scenario": "oneshot_from_goal"
+      "story": "fangore_instruction_todo_plan__oneshot_from_goal",
+      "scenario": "150_fangore_instruction_todo_plan_oneshot_from_goal"
     },
     {
-      "story": "fangore_instruction_todo_plan",
-      "scenario": "session"
+      "story": "fangore_instruction_todo_plan__session",
+      "scenario": "160_fangore_instruction_todo_plan_session"
     }
   ]
 }

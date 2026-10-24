@@ -15,19 +15,19 @@
   "stages": [
     {
       "story": "fangore_delegate_list_bootstrap",
-      "scenario": "list_bootstrap"
+      "scenario": "010_fangore_delegate_list_bootstrap"
     },
     {
       "story": "fangore_delegate_guidance_thorough",
-      "scenario": "guidance_thorough"
+      "scenario": "020_fangore_delegate_guidance_thorough"
     },
     {
       "story": "fangore_delegate_red_green",
-      "scenario": "red_green"
+      "scenario": "030_fangore_delegate_red_green"
     },
     {
       "story": "fangore_delegate_refactor",
-      "scenario": "refactor"
+      "scenario": "040_fangore_delegate_refactor"
     }
   ]
 }

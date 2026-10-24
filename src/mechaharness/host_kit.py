@@ -1,6 +1,6 @@
 """Host-facing helpers for readable GraphExecutor / effectful wiring.
 
-Orchestrator hosts (June and peers) often need two things that are easy to
+Orchestrator hosts (AI assistant apps and peers) often need two things that are easy to
 get wrong when assembled by hand:
 
 1. A :class:`~mechaharness.graph_executor.GraphExecutor` wired through

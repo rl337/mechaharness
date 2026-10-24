@@ -1,0 +1,67 @@
+id: fangore_harness_run_recipe
+suite: fangore_host_kit
+persona: fangore
+title: Run a single prompt through the harness_run Agentic Recipe
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the
+  `harness_run` recipe. Fangore wants the classic one-shot harness path to be a named control pattern
+  he can discover beside other recipes, not a special-case CLI only. He lists the catalog, opens harness_run,
+  binds a prompt and mock backend, and gets final text from the same graph executor used for other recipes.
+  Complements `fangore_backend_describe_recipe` and `fangore_conversational_tool_loop`. He walks product
+  steps (run_recipe) and verifies completion from the structured observation expects on this scenario.
+implementation: 'Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`): prepare → harness_loop
+  → render. `CliInstrumentor` verb `run_recipe` calls `recipe_runner.run_harness_recipe` / `list_recipes`
+  with `HarnessPrepareRunner`, `HarnessLoopRunner`, and `HarnessRenderRunner`. Soft points cover backend,
+  family, model, system prompt, max turns, and runner kinds. CLI `run` and `recipes run harness_run` share
+  this path. Node components under `harness_loop` reuse harness `inference` / `tool_call` / `turn_start`
+  kinds.'
+validation: 'Harness `user_story` scenario `catalog_and_run.yaml`: environment + graph + steps + complete
+  expects.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: harness_run
+steps:
+- do:
+    run_recipe:
+      name: harness_run
+      prompt: say hello
+      backend: mock
+      family: pass_through
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: nonempty
+    key: text
+  - kind: equals
+    key: turns
+    value: 1
+  - kind: includes
+    key: event_types
+    value:
+    - core:inference
+    - core:cost
+  - kind: equals
+    key: total_tokens
+    value: 2
+  - kind: lte
+    key: total_tokens
+    value: 2
+  - kind: exactly
+    key: subgraph_node_ids
+    value:
+    - prepare
+    - harness_loop
+    - render
+  - kind: lte
+    key: cost_units
+    value: 1
+cleanup: []

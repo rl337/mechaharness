@@ -9,42 +9,43 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "nubble_insp_environment_delta",
-      "scenario": "environment_delta"
+      "scenario": "010_nubble_insp_environment_delta"
     },
     {
       "story": "nubble_insp_environment_linkage",
-      "scenario": "grant_mismatch"
+      "scenario": "020_nubble_insp_environment_linkage"
     },
     {
       "story": "nubble_insp_model_routing",
-      "scenario": "capability_route"
+      "scenario": "030_nubble_insp_model_routing"
     },
     {
       "story": "nubble_insp_rollout_graph",
-      "scenario": "roots_and_retry"
+      "scenario": "040_nubble_insp_rollout_graph"
     },
     {
       "story": "nubble_insp_workspace_isolation",
-      "scenario": "workspace_isolation_acquire"
+      "scenario": "050_nubble_insp_workspace_isolation"
     },
     {
       "story": "nubble_lane_load_hint",
-      "scenario": "wrong_lane_deny"
+      "scenario": "060_nubble_lane_load_hint"
     },
     {
       "story": "nubble_model_affinity",
-      "scenario": "affinity_lane"
+      "scenario": "070_nubble_model_affinity"
     },
     {
       "story": "nubble_repo_topology",
-      "scenario": "repo_topology"
+      "scenario": "080_nubble_repo_topology"
     },
     {
       "story": "nubble_topology_efficiency",
-      "scenario": "parallel_spans"
+      "scenario": "090_nubble_topology_efficiency"
     }
   ]
 }

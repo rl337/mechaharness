@@ -1,0 +1,12 @@
+{
+  "answers": {
+    "semantic_risk": {
+      "selected": "high",
+      "probabilities": {
+        "low": 0.03,
+        "medium": 0.03,
+        "high": 0.94
+      }
+    }
+  }
+}

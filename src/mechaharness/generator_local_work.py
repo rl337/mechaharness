@@ -255,7 +255,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         verify_runs = _normalize_verify_runs(inputs.get("verify_runs"))
         verify_failures = self._execute_verify_runs(verify_runs)
         repair_rounds = 0
-        max_repair_rounds = 2
+        max_repair_rounds = 4
         while (
             verify_failures
             and "write_file" in self._tools
@@ -265,10 +265,15 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             repair_goal = (
                 "Verify / acceptance checks failed after your edits. Treat this as "
                 "refinement round "
-                f"{repair_rounds}/{max_repair_rounds}: restore the required public "
-                "API (named def evaluate / def main when required), forbid eval/exec "
-                "on user input, and make every listed check pass. Then call "
-                "write_file with the full updated file(s).\n"
+                f"{repair_rounds}/{max_repair_rounds}. "
+                "Call read_file on the target file(s) first. Extend the existing "
+                "implementation — do not replace a working parser with a stub. "
+                "Keep every previously green case (number literals, prior operators) "
+                "while fixing the failures below. Restore named def evaluate / "
+                "def main when required; forbid eval/exec/ast.literal_eval on user "
+                "input. Emit <tool_call> write_file with the FULL updated file "
+                "contents in the answer content (keep reasoning short).\n"
+                "Failures:\n"
                 + "\n".join(verify_failures)
             )
             repair_item = TodoItem(
@@ -560,7 +565,12 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                         f"Driver guidance: {guidance_text}\n"
                         f"{verify_hint}"
                         "Use tools to implement this item under the workspace. "
-                        "Prefer run_shell to self-check before finishing."
+                        "Read existing files first; extend them — do not rewrite "
+                        "from scratch in a way that drops working behavior "
+                        "(literals, operators, tests, CLI entry points). "
+                        "Emit <tool_call> blocks in the answer content (not only "
+                        "in reasoning). Prefer run_shell / pytest to self-check "
+                        "before finishing. You MUST write_file before you stop."
                     ),
                 }
             ]

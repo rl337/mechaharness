@@ -1,0 +1,9 @@
+id: fangore_access_authority
+title: Grants, capability envelopes, and authority gates
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

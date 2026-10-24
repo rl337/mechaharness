@@ -360,6 +360,12 @@ def _prompt_tools_system(tool_defs: list[Any]) -> str:
         "When creating or updating files you MUST call write_file with the full "
         "file contents before you finish — do not claim done without write_file. "
         "When finished (no more tools), reply with a short plain summary only.\n"
+        "Thinking / reasoning models: keep internal reasoning short. Put every "
+        "<tool_call>…</tool_call> block in the final answer content (not only in "
+        "reasoning). Prefer one write_file of the full file over many tiny edits. "
+        "Read existing files first; preserve prior behavior and APIs while adding "
+        "the requested change (do not drop floats, operators, tests, or CLI entry "
+        "points that already work).\n"
         f"Available tools:\n{json.dumps(catalog, indent=2)}"
     )
 
@@ -581,6 +587,20 @@ def _wire_tool_calls_to_domain(raw: Any) -> list[ToolCall] | None:
     return calls or None
 
 
+def _text_for_prompt_tool_parse(
+    content: str | None, reasoning: str | None = None
+) -> str | None:
+    """Prefer assistant content; fall back to reasoning for thinking models."""
+    chunks: list[str] = []
+    if isinstance(content, str) and content.strip():
+        chunks.append(content)
+    if isinstance(reasoning, str) and reasoning.strip():
+        chunks.append(reasoning)
+    if not chunks:
+        return content if isinstance(content, str) else None
+    return "\n".join(chunks)
+
+
 def _normalize_assistant(
     result: Any, *, parse_prompt_tools: bool = False
 ) -> dict[str, Any]:
@@ -588,43 +608,87 @@ def _normalize_assistant(
     if isinstance(result, dict):
         calls = result.get("tool_calls")
         content = result.get("content")
+        reasoning = result.get("reasoning_content") or result.get("reasoning")
+        if isinstance(reasoning, dict):
+            reasoning = reasoning.get("content") or reasoning.get("text")
         if calls and isinstance(calls, list):
             wired = _domain_tool_calls_to_wire(calls)
         elif parse_prompt_tools:
             wired = _parse_prompt_tool_calls(
-                content if isinstance(content, str) else None
+                _text_for_prompt_tool_parse(
+                    content if isinstance(content, str) else None,
+                    reasoning if isinstance(reasoning, str) else None,
+                )
             )
         else:
             wired = []
+        # Surface tool_call text into content when the model only reasoned.
+        out_content = content
+        if (
+            parse_prompt_tools
+            and wired
+            and (not isinstance(out_content, str) or not out_content.strip())
+            and isinstance(reasoning, str)
+            and "<tool_call" in reasoning.lower()
+        ):
+            out_content = reasoning
         return {
             **result,
             "role": result.get("role") or "assistant",
+            "content": out_content,
             "tool_calls": wired,
         }
     if isinstance(result, CompletionResponse):
         msg = result.message
         wired = _domain_tool_calls_to_wire(msg.tool_calls or [])
+        reasoning = getattr(msg, "reasoning_content", None)
         if parse_prompt_tools and not wired:
-            wired = _parse_prompt_tool_calls(msg.content)
+            wired = _parse_prompt_tool_calls(
+                _text_for_prompt_tool_parse(msg.content, reasoning)
+            )
+        out_content = msg.content
+        if (
+            parse_prompt_tools
+            and wired
+            and (not isinstance(out_content, str) or not out_content.strip())
+            and isinstance(reasoning, str)
+            and "<tool_call" in reasoning.lower()
+        ):
+            out_content = reasoning
         return {
             "role": "assistant",
-            "content": msg.content,
+            "content": out_content,
             "tool_calls": wired,
         }
     content = getattr(result, "content", None)
     if content is None and hasattr(result, "message"):
         content = getattr(result.message, "content", None)
+    reasoning = getattr(result, "reasoning_content", None)
+    if reasoning is None and hasattr(result, "message"):
+        reasoning = getattr(result.message, "reasoning_content", None)
     tool_calls = getattr(result, "tool_calls", None) or []
     if hasattr(result, "message") and getattr(result.message, "tool_calls", None):
         tool_calls = result.message.tool_calls
     wired = _domain_tool_calls_to_wire(tool_calls)
     if parse_prompt_tools and not wired:
         wired = _parse_prompt_tool_calls(
-            content if isinstance(content, str) else None
+            _text_for_prompt_tool_parse(
+                content if isinstance(content, str) else None,
+                reasoning if isinstance(reasoning, str) else None,
+            )
         )
+    out_content = content if content is not None else str(result)
+    if (
+        parse_prompt_tools
+        and wired
+        and (not isinstance(out_content, str) or not str(out_content).strip())
+        and isinstance(reasoning, str)
+        and "<tool_call" in reasoning.lower()
+    ):
+        out_content = reasoning
     return {
         "role": "assistant",
-        "content": content if content is not None else str(result),
+        "content": out_content,
         "tool_calls": wired,
     }
 

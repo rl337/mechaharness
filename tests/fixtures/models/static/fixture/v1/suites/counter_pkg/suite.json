@@ -15,19 +15,19 @@
   "stages": [
     {
       "story": "fangore_counter_bootstrap",
-      "scenario": "bootstrap"
+      "scenario": "010_fangore_counter_bootstrap"
     },
     {
       "story": "fangore_counter_mutate",
-      "scenario": "mutate"
+      "scenario": "020_fangore_counter_mutate"
     },
     {
       "story": "fangore_counter_persist",
-      "scenario": "persist"
+      "scenario": "030_fangore_counter_persist"
     },
     {
       "story": "fangore_counter_cli",
-      "scenario": "cli"
+      "scenario": "040_fangore_counter_cli"
     }
   ]
 }

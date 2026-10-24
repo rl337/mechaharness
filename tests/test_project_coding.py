@@ -256,6 +256,30 @@ def test_parse_prompt_tool_calls_balanced_json() -> None:
     assert "class X" in calls[0]["function"]["arguments"]["content"]
 
 
+def test_normalize_assistant_parses_tool_calls_from_reasoning() -> None:
+    """Thinking models may put <tool_call> only in reasoning_content."""
+    from mechaharness.core.types import ChatMessage, CompletionResponse, Role
+    from mechaharness.project_coding import _normalize_assistant
+
+    tool_block = (
+        '<tool_call>\n'
+        '{"name": "write_file", "arguments": {"path": "a.py", "content": "x=1\\n"}}\n'
+        "</tool_call>"
+    )
+    response = CompletionResponse(
+        message=ChatMessage(
+            role=Role.ASSISTANT,
+            content=None,
+            reasoning_content=f"plan briefly then:\n{tool_block}",
+        ),
+        model="test",
+    )
+    out = _normalize_assistant(response, parse_prompt_tools=True)
+    assert out["tool_calls"]
+    assert out["tool_calls"][0]["function"]["name"] == "write_file"
+    assert "<tool_call" in str(out.get("content") or "")
+
+
 def test_coding_ci_tools_register_with_recording_github(tmp_path: Path) -> None:
     """ci_checks / ci_job_log register when a GitHubClient is bound."""
     import json

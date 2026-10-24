@@ -1,0 +1,60 @@
+id: fangore_insp_isolation_io
+suite: fangore_access_authority
+persona: fangore
+title: Validate isolation and template I/O contracts
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore needs nested
+  subgraphs to declare typed inputs/outputs and isolation (effects, context refs, budget share) so linkage
+  can reject incomplete nests. Accepts WalkingLabs L14 and Codex guidance[^wl-l14-isolation][^wl-codex-isolation].
+  Supports personal-agent MH-PA-03 typed I/O[^insp-pa-03-iso]. This is nest I/O — not JobLaneBroker lane
+  isolation (see MH-DOTS-07 / JL stories)[^insp-dots-07-iso].
+implementation: '`IsolationContract` and `TemplateIOContract` in `mechaharness.isolation.isolation_contract`
+  capture effect scope, context refs, export schema, budget share, cancel/supersede, and typed I/O for
+  Agentic Recipe / `GraphTemplate` subgraph boundaries.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l14-isolation
+  label: WalkingLabs L14 Graph Engineering
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/
+  note: Typed I/O and isolation
+- id: wl-codex-isolation
+  label: WalkingLabs Codex harness design
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/
+  note: Child isolation
+- id: insp-pa-03-iso
+  label: Personal agent reliability map (MH-PA-03 isolation I/O)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md
+  note: Typed recipe I/O
+- id: insp-dots-07-iso
+  label: OpenAI Dots map (MH-DOTS-07 isolation)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md
+  note: Isolation substrate for cross-task boundary
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    isolation_io_contract:
+      effect_scope: workspace:branch
+      budget_share: 0.25
+      inputs:
+        goal: string
+      outputs:
+        summary: string
+  expect: &id001
+  - kind: equals
+    key: issues
+    value: []
+  - kind: equals
+    key: budget_share
+    value: 0.25
+complete:
+  expect: *id001
+cleanup: []

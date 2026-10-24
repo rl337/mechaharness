@@ -9,62 +9,63 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_capability_envelope_narrow",
-      "scenario": "capability_envelope_narrow"
+      "scenario": "010_fangore_capability_envelope_narrow"
     },
     {
-      "story": "fangore_compound_grants",
-      "scenario": "grant_gate_allowed"
+      "story": "fangore_compound_grants__grant_gate_allowed",
+      "scenario": "020_fangore_compound_grants_grant_gate_allowed"
     },
     {
-      "story": "fangore_compound_grants",
-      "scenario": "grant_gate_denied"
+      "story": "fangore_compound_grants__grant_gate_denied",
+      "scenario": "030_fangore_compound_grants_grant_gate_denied"
     },
     {
       "story": "fangore_human_review_pending",
-      "scenario": "human_review_pending"
+      "scenario": "040_fangore_human_review_pending"
     },
     {
       "story": "fangore_insp_auth_epoch_resume",
-      "scenario": "auth_epoch_resume_refuse"
+      "scenario": "050_fangore_insp_auth_epoch_resume"
     },
     {
       "story": "fangore_insp_authority_gate",
-      "scenario": "authority_gate_evaluate"
+      "scenario": "060_fangore_insp_authority_gate"
     },
     {
       "story": "fangore_insp_cross_task_isolation",
-      "scenario": "cross_task_isolation_bleed"
+      "scenario": "070_fangore_insp_cross_task_isolation"
     },
     {
       "story": "fangore_insp_denial_equivalence",
-      "scenario": "denial_store_equivalence"
+      "scenario": "080_fangore_insp_denial_equivalence"
     },
     {
       "story": "fangore_insp_evolution_ownership_split",
-      "scenario": "evolution_ownership_split"
+      "scenario": "090_fangore_insp_evolution_ownership_split"
     },
     {
       "story": "fangore_insp_execution_token",
-      "scenario": "execution_token_narrow"
+      "scenario": "100_fangore_insp_execution_token"
     },
     {
       "story": "fangore_insp_isolation_io",
-      "scenario": "isolation_io_contract"
+      "scenario": "110_fangore_insp_isolation_io"
     },
     {
       "story": "fangore_insp_risk_autonomy",
-      "scenario": "consequence_risk_scale"
+      "scenario": "120_fangore_insp_risk_autonomy"
     },
     {
       "story": "fangore_insp_soft_vs_hard",
-      "scenario": "tool_gating"
+      "scenario": "130_fangore_insp_soft_vs_hard"
     },
     {
       "story": "fangore_insp_state_governance",
-      "scenario": "state_governance_write"
+      "scenario": "140_fangore_insp_state_governance"
     }
   ]
 }

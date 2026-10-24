@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **``counter_pkg`` coding-delegate suite:** sequential multi-file arc
   (package + pytest + CLI) with ``coding_writes`` stubs, ``verify_runs.pytest``,
   and the same live Completer / repair path as ``calc_cli``. Roadmap:
-  ``docs/plans/coding-delegate-suites.md``.
+  ``docs/guides/coding-delegate-suites.md``.
 - **``delegate_pkg`` coding-delegate suite:** one sequential Widget arc covering
   list-mode bootstrap, thorough guidance fork (code + README), red-green
   ``double()``, and ``Widget``→``Gadget`` refactor. Live Completer is the gate;
@@ -92,6 +92,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ``notifications/progress`` messages such as
   ``guided_coding › plan_tile › work_item 1 › tool_round 2 › write_file``
   during generator local work (keeps Cursor stdio idle timeout alive).
+
+- **Inference progress watchdog:** ``await_while_running`` ticks MCP progress
+  only while a Completer awaitable is still pending, then fails with
+  ``InferenceTimeoutError`` after ``MECHA_INFERENCE_TIMEOUT_SECONDS`` (fallback
+  ``MECHA_HTTP_TIMEOUT_SECONDS``). Wired through
+  ``ConversationalToolLoopRunner``.
 - **Instruction todo plan (`instruction_todo_plan`):** classify oneshot vs
   ordered list, refine conflicts, pre / per-item / post-list acceptance.
   Optional `scope_refinement` / `list_refinement` guidance is requested by
@@ -105,9 +111,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   on the Cursor MCP `env` block. Story: `fangore_guided_coding_recipe`.
 - **Audited infer-accept (`audited_infer_accept`):** RDG-aligned spine
   collect → freeze → decide → independent QA → deterministic → gate, lifted
-  from FOLK `ideation.infer.accept` for library reuse. Domain module
+  from the video production host `ideation.infer.accept` for library reuse. Domain module
   `mechaharness.audited_decision`. Migration notes:
-  `docs/inspiration/folk-audited-infer-migration.md`. Story:
+  `docs/inspiration/video-production-audited-infer-migration.md`. Story:
   `fangore_audited_infer_accept`.
 
 ## [0.7.0] — 2026-10-22
@@ -326,7 +332,7 @@ Patch tip auto-bumped to `0.4.1` before this PyPI publish.
   events / soft points / nest / stop / budget / effects. Traversal projector
   and `embed_recipe_as_tool` (HF-08). Docs:
   `docs/reference/node-components.md`,
-  `docs/requirements/dynamic-tool-graph.md`; June HF inspiration + map.
+  `docs/requirements/dynamic-tool-graph.md`; the AI assistant host HF inspiration + map.
 - **HF-05:** `host_graph_executor(event_log=)` and `tapping_event_log` /
   `TappingEventLog` for blessed-path event taps.
 - **HF-07:** Agentic Recipe `conversational_tool_loop` +

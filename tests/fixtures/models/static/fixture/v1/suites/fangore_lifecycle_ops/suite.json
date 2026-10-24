@@ -9,58 +9,59 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_insp_alert_escalation_rules",
-      "scenario": "alert_escalation_stages"
+      "scenario": "010_fangore_insp_alert_escalation_rules"
     },
     {
       "story": "fangore_insp_effect_revalidation",
-      "scenario": "effect_revalidation_check"
+      "scenario": "020_fangore_insp_effect_revalidation"
     },
     {
       "story": "fangore_insp_handoff_record",
-      "scenario": "handoff_record"
+      "scenario": "030_fangore_insp_handoff_record"
     },
     {
       "story": "fangore_insp_lifecycle_block",
-      "scenario": "lifecycle_extension_block"
+      "scenario": "040_fangore_insp_lifecycle_block"
     },
     {
       "story": "fangore_insp_lifecycle_graph_observe",
-      "scenario": "lifecycle_extension_graph_observe"
+      "scenario": "050_fangore_insp_lifecycle_graph_observe"
     },
     {
       "story": "fangore_insp_lifecycle_observe",
-      "scenario": "lifecycle_extension_observe"
+      "scenario": "060_fangore_insp_lifecycle_observe"
     },
     {
       "story": "fangore_insp_lifecycle_replace",
-      "scenario": "lifecycle_extension_replace"
+      "scenario": "070_fangore_insp_lifecycle_replace"
     },
     {
       "story": "fangore_insp_lifecycle_rewrite",
-      "scenario": "lifecycle_extension_rewrite"
+      "scenario": "080_fangore_insp_lifecycle_rewrite"
     },
     {
       "story": "fangore_insp_operation_compensation",
-      "scenario": "operation_compensation"
+      "scenario": "090_fangore_insp_operation_compensation"
     },
     {
       "story": "fangore_insp_tool_effect_classes",
-      "scenario": "tool_phase_effect_guard"
+      "scenario": "100_fangore_insp_tool_effect_classes"
     },
     {
       "story": "fangore_insp_tool_result_freshness",
-      "scenario": "tool_result_freshness_reject"
+      "scenario": "110_fangore_insp_tool_result_freshness"
     },
     {
       "story": "fangore_insp_wake_reresolve",
-      "scenario": "wake_resume"
+      "scenario": "120_fangore_insp_wake_reresolve"
     },
     {
       "story": "fangore_insp_wip_backpressure",
-      "scenario": "wip_policy"
+      "scenario": "130_fangore_insp_wip_backpressure"
     }
   ]
 }

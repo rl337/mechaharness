@@ -1,0 +1,56 @@
+id: fangore_jev_action_safety__read_high_risk_with_grant
+suite: fangore_jev
+persona: fangore
+title: Let hard grants win over semantic risk classification (read_high_risk_with_grant)
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He judges semantic
+  risk of a proposed action and applies hard AccessPolicy grants so hard grants always win. He verifies
+  decision / hard_won / grants_unchanged. This stage covers the `read_high_risk_with_grant` scenario.
+implementation: Product verb `judge` with risk_question_id + required_abilities/grants; hard AccessPolicy
+  gates over semantic risk.
+validation: 'user_story scenarios with per-scenario cassettes; hard expects on decision keys. Live (`MECHA_STORY_BACKEND=live`
+  + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral
+  expects hard). Stage id `fangore_jev_action_safety__read_high_risk_with_grant` (scenario `read_high_risk_with_grant`).'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    judge:
+      state: 'HIGH RISK: bulk download of all customer PII including SSN, DOB, and full medical history
+        for offsite use'
+      questions:
+      - id: semantic_risk
+        kind: choice
+        instructions: Classify semantic risk of the proposed action.
+        options:
+        - id: low
+          description: low
+        - id: medium
+          description: medium
+        - id: high
+          description: high
+        allowed_actions:
+        - low
+        - medium
+        - high
+      action_question_id: semantic_risk
+      risk_question_id: semantic_risk
+      confidence_floor: 0.7
+      grants:
+      - core:fs.read
+      required_abilities: []
+complete:
+  expect:
+  - kind: equals
+    key: decision
+    value: escalate_review
+  - kind: 'false'
+    key: hard_won
+  - kind: 'true'
+    key: grants_unchanged
+cleanup: []

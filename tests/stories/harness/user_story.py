@@ -76,7 +76,8 @@ class UserStoryHarness:
             case, backend, scenario, suite_workspace=suite_workspace
         )
         instrumentor = get_injector(config).inject(CliInstrumentor)
-        instrumentor.bind_base_dir = path.parent.parent
+        # binds/plans/response live under suite assets/<story_id>/ (or twin root).
+        instrumentor.bind_base_dir = case.asset_root()
         assertions = resolve_cli_assertions(config)
         result = await run_user_story_scenario(scenario, instrumentor)
         scenario.assert_expect(
@@ -135,6 +136,7 @@ class UserStoryHarness:
                 workspace_root,
                 backend=backend,
                 model=live_model,
+                scenario_path=scenario_path,
             )
         )
         if env.backend == "anthropic":
@@ -194,14 +196,15 @@ class UserStoryHarness:
         *,
         suite_workspace: Path | None = None,
     ) -> Path | None:
-        raw = env.workspace
-        if raw is None:
+        fs = env.filesystem
+        if fs is None:
             return None
+        raw = fs.path if fs.path else fs.type
         if raw == "suite":
             if suite_workspace is None:
                 raise AssertionError(
-                    "environment.workspace=suite requires a sequential suite "
-                    "workspace (run via test_user_story_suite)"
+                    "environment.filesystem.type=suite requires a sequential "
+                    "suite workspace (run via test_user_story_suite)"
                 )
             return suite_workspace.resolve()
         if raw == "temp":
@@ -212,6 +215,38 @@ class UserStoryHarness:
         base = scenario_path.parent if scenario_path is not None else Path.cwd()
         return (base / path).resolve()
 
+    def _load_coding_writes(
+        self,
+        env: EnvironmentBlock,
+        scenario_path: Path | None,
+    ) -> list[CodingWriteBlock]:
+        fs = env.filesystem
+        if fs is None or not fs.contents:
+            return []
+        if scenario_path is None:
+            raise AssertionError(
+                "environment.filesystem.contents requires a scenario path"
+            )
+        path = (scenario_path.parent / fs.contents).resolve()
+        if not path.is_file():
+            raise AssertionError(f"filesystem.contents missing: {path}")
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            return [
+                CodingWriteBlock(path=str(k), content=str(v))
+                for k, v in raw.items()
+            ]
+        if isinstance(raw, list):
+            return [
+                CodingWriteBlock(path=str(item["path"]), content=str(item["content"]))
+                for item in raw
+                if isinstance(item, dict)
+            ]
+        raise AssertionError(
+            f"{path}: files.json must be an object or list of "
+            "{path, content} entries"
+        )
+
     def _local_work_kwargs(
         self,
         env: EnvironmentBlock,
@@ -219,6 +254,7 @@ class UserStoryHarness:
         *,
         backend: StoryBackend,
         model: str,
+        scenario_path: Path | None = None,
     ) -> dict[str, Any]:
         kwargs: dict[str, Any] = {}
         if workspace_root is not None:
@@ -228,11 +264,10 @@ class UserStoryHarness:
         elif env.local_work == "project_coding":
             if workspace_root is None:
                 raise AssertionError(
-                    "environment.local_work=project_coding requires environment.workspace"
+                    "environment.local_work=project_coding requires "
+                    "environment.filesystem"
                 )
-            writes = list(env.coding_writes or [])
-            if not writes and env.coding_write is not None:
-                writes = [env.coding_write]
+            writes = self._load_coding_writes(env, scenario_path)
             if env.git_seed == "feature_branch":
                 _seed_feature_branch_git_repo(workspace_root)
             if env.ci_seed == "failing_check":
@@ -335,8 +370,14 @@ class UserStoryHarness:
             api_key=os.environ.get("MECHA_API_KEY", "local"),
             max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "2048")),
         )
-        client = CountingLiveHttpClient(timeout=300.0)
-        strategy = OpenAICompatStrategy(settings, client=client, timeout=300.0)
+        # Keep HTTP ceiling aligned with MECHA_INFERENCE_TIMEOUT_SECONDS so a
+        # stuck thinking-model Completer fails the node instead of hanging the
+        # suite (cancel alone may not interrupt urllib promptly).
+        from mechaharness.inference_progress import inference_timeout_seconds
+
+        http_timeout = float(inference_timeout_seconds())
+        client = CountingLiveHttpClient(timeout=http_timeout)
+        strategy = OpenAICompatStrategy(settings, client=client, timeout=http_timeout)
         return completer_as_tool_loop_complete(
             strategy,
             tools=tools,

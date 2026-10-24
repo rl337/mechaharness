@@ -9,30 +9,31 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_insp_recipe_lineage_promote",
-      "scenario": "recipe_registry_versions"
+      "scenario": "010_fangore_insp_recipe_lineage_promote"
     },
     {
       "story": "fangore_insp_recipe_port_search",
-      "scenario": "recipe_port_search"
+      "scenario": "020_fangore_insp_recipe_port_search"
     },
     {
       "story": "fangore_insp_recipe_version_pointer",
-      "scenario": "recipe_registry_versions"
+      "scenario": "030_fangore_insp_recipe_version_pointer"
     },
     {
       "story": "fangore_insp_registry_only_compose",
-      "scenario": "registry_only_compose"
+      "scenario": "040_fangore_insp_registry_only_compose"
     },
     {
       "story": "fangore_insp_soft_evolution_allowlist",
-      "scenario": "soft_point_evolution_allowlist"
+      "scenario": "050_fangore_insp_soft_evolution_allowlist"
     },
     {
       "story": "fangore_insp_template_incubation",
-      "scenario": "graph_template_soft_points"
+      "scenario": "060_fangore_insp_template_incubation"
     }
   ]
 }

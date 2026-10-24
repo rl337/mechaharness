@@ -1,0 +1,105 @@
+id: fangore_coding_static_checks__mypy
+suite: fangore_guided_coding
+persona: fangore
+title: Diagnose and repair local Ruff and Mypy failures the way CI runs them (mypy)
+narrative: 'Fangore''s PR checks keep dying on Ruff import order and Mypy untyped defs before pytest even
+  matters. He starts guided coding against a temp workspace that already has a CI-shaped failure log and
+  a broken module, asks the local Completer to read the static-check output (or re-run the same tool),
+  repair the file, and leave a short fix note. Host `verify_runs` re-check with `ruff: true` / `mypy:
+  true` so the story proves the cheap Completer lane can clear the same static gates CI uses. Complements
+  `fangore_coding_ci_diagnose` (forge log lookup) and `fangore_coding_ci_repair` (seeded runtime/pytest
+  repair). This stage covers the `mypy` scenario.'
+implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
+  `static_seed: ruff_imports|mypy_untyped`, and `coding_tool_script: static_ruff_repair|static_mypy_repair`.
+  Seeds plant `messy.py` / `typed_mod.py` plus `.mechaharness/ci_failure.log`. `ProjectCodingLocalWork`
+  `verify_runs` accepts `ruff` and `mypy` rows (``python -m ruff check`` / ``python -m mypy``). Soft point
+  `external_guidance` remains the human scope gate.'
+validation: Harness `user_story` scenarios `ruff.yaml` and `mypy.yaml` in suite `fangore_guided_coding`.
+  Static mode uses the named coding_tool_scripts. Asserts the repaired module and `.mechaharness/ci_fix.md`
+  cite Ruff I001 or Mypy no-untyped-def, and start inputs include matching `verify_runs`. Live Completer
+  may drive the same tools with `MECHA_STORY_BACKEND=live`. Stage id `fangore_coding_static_checks__mypy`
+  (scenario `mypy`).
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  static_seed: mypy_untyped
+  coding_tool_script: static_mypy_repair
+  filesystem:
+    type: temp
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: coding-static-mypy-1
+      inputs:
+        goal: Mypy failed on no-untyped-def for typed_mod.py. Read .mechaharness/ci_failure.log and/or
+          run `python -m mypy typed_mod.py`, add type annotations, and write .mechaharness/ci_fix.md naming
+          Mypy no-untyped-def and the file you changed. Do not open a pull request.
+        max_iterations: 16
+        verify_runs:
+        - path: typed_mod.py
+          mypy: true
+        - path: .mechaharness/ci_fix.md
+          text_contains:
+          - Mypy
+          - no-untyped-def
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+- do:
+    answer:
+      choose: thorough
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+  - kind: includes
+    key: written_files
+    value:
+    - .mechaharness/ci_fix.md
+    - typed_mod.py
+- do:
+    workspace_read:
+      path: typed_mod.py
+  expect:
+  - kind: 'true'
+    key: exists
+  - kind: contains
+    key: text
+    value: 'def answer(x: int) -> int'
+- do:
+    workspace_read:
+      path: .mechaharness/ci_fix.md
+  expect:
+  - kind: 'true'
+    key: exists
+  - kind: contains
+    key: text
+    value: Mypy
+  - kind: contains
+    key: text
+    value: no-untyped-def
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

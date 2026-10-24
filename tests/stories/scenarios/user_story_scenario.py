@@ -32,6 +32,25 @@ class CodingWriteBlock(BaseModel):
     content: str
 
 
+class FilesystemBlock(BaseModel):
+    """Workspace + optional breakout seed files for the story harness.
+
+    ``type``:
+      - ``suite`` — sequential suite injects a shared arc workspace
+      - ``temp`` — fresh scratch directory per stage
+      - other string — absolute path, or path relative to the stage YAML
+    ``path`` — optional root override (rarely needed when type is suite/temp).
+    ``contents`` — path (relative to the stage YAML) to a files.json breakout
+    mapping workspace-relative paths to text (or a list of ``{path, content}``).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    type: str = "temp"
+    path: str | None = None
+    contents: str | None = None
+
+
 class EnvironmentBlock(BaseModel):
     """Host Config surface for this story (family, backend, optional clock)."""
 
@@ -41,15 +60,8 @@ class EnvironmentBlock(BaseModel):
     backend: str = "mock"
     # Durable local-work hook: noop / plan_classify / project_coding.
     local_work: Literal["noop", "plan_classify", "project_coding"] = "noop"
-    # Workspace root for coding tools + run_python / workspace_read.
-    # Absolute path, path relative to the scenario file, ``temp``, or ``suite``
-    # (sequential suite injects a shared arc workspace).
-    workspace: str | None = None
-    # Offline Completer stub write when ``local_work: project_coding``.
-    coding_write: CodingWriteBlock | None = None
-    # Multi-file offline stub (preferred for package arcs); takes precedence
-    # over single ``coding_write`` when non-empty.
-    coding_writes: list[CodingWriteBlock] | None = None
+    # Workspace + optional files.json seed (replaces workspace / coding_writes).
+    filesystem: FilesystemBlock | None = None
     # CodingGit binding for project_coding tools.
     # ``local_mock_pr`` = local ``git`` process + recorded/mock pull requests
     # (no forge network). Omit / ``default`` = LocalProcessCodingGit (git+gh).
@@ -230,10 +242,24 @@ class CompleteBlock(BaseModel):
 
 
 class UserStoryScenario(BaseModel):
-    """Structured persona task: environment, optional graph, steps, complete."""
+    """Structured persona task: prose + environment, graph, steps, complete.
+
+    Suite stages carry guide fields (``id``, ``persona``, ``title``, …) in the
+    same YAML as the runnable walk. Harness ignores prose; the guide generator
+    reads it.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
+    # Guide / catalog prose (required on suite stage YAMLs).
+    id: str
+    suite: str | None = None
+    persona: str
+    title: str
+    narrative: str
+    implementation: str
+    validation: str
+    footnotes: list[Any] = Field(default_factory=list)
     kind: Literal["user_story"]
     environment: EnvironmentBlock
     graph: GraphBlock | None = None
@@ -357,6 +383,7 @@ __all__ = [
     "CompleteBlock",
     "DurableGraphBlock",
     "EnvironmentBlock",
+    "FilesystemBlock",
     "GraphBlock",
     "InlineGraphBlock",
     "StoryStep",

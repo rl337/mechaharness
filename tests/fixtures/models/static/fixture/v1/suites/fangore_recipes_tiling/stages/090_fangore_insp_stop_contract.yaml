@@ -1,0 +1,36 @@
+id: fangore_insp_stop_contract
+suite: fangore_recipes_tiling
+persona: fangore
+title: Require a stop contract on repeating graph steps
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. A repeating repair
+  step without an explicit stop rule must fail validation before it can loop unbounded. Accepts inspiration
+  requirement 4[^insp-r04]. Complements `fangore_insp_linkage_preflight` and `fangore_convergence_ceiling`.
+implementation: '`DefaultLinkageResolver` stop-contract edge; `CliInstrumentor` verb `graph_linkage_preflight`.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-r04
+  label: 'Inspiration requirements (req 4: stop contracts)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 4 — stop contracts
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    graph_linkage_preflight:
+      check_missing_runner: false
+      check_missing_stop: true
+      check_ok_linear: false
+complete:
+  expect:
+  - kind: 'false'
+    key: missing_stop_ok
+  - kind: equals
+    key: missing_stop_codes_exactly
+    value:
+    - missing_stop_contract
+cleanup: []

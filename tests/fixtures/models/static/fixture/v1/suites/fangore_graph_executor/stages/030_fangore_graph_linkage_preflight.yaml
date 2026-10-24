@@ -1,0 +1,54 @@
+id: fangore_graph_linkage_preflight
+suite: fangore_graph_executor
+persona: fangore
+title: Fail closed on missing graph linkage before work starts
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore composes
+  a plan that still names a step the host has not wired, and another repeating step without a stop rule.
+  The library must refuse those plans before any runner work starts, naming the missing edge so operators
+  can fix wiring instead of debugging a mid-run crash. Complements `fangore_graph_executor` (authorized
+  run once linkage is sound) and `fangore_convergence_ceiling` (budgets once a loop is allowed). See the
+  inspiration requirements for linkage versus dependency injection and stop contracts[^insp-linkage].
+implementation: '`DefaultLinkageResolver` preflight; `CliInstrumentor` verb `graph_linkage_preflight`.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-linkage
+  label: Inspiration requirements (linkage & stop contracts)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Reqs 2 and 4 — primitive DI vs runtime graph resolution; explicit stop contracts
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    graph_linkage_preflight:
+      check_missing_runner: true
+      check_missing_stop: true
+      check_ok_linear: true
+  expect: &id001
+  - kind: 'false'
+    key: missing_runner_ok
+  - kind: equals
+    key: missing_runner_codes_exactly
+    value:
+    - no_runner
+  - kind: 'false'
+    key: missing_stop_ok
+  - kind: equals
+    key: missing_stop_codes_exactly
+    value:
+    - missing_stop_contract
+  - kind: 'true'
+    key: ok_linear_ok
+  - kind: 'true'
+    key: ok_linear_fingerprint_nonempty
+complete:
+  expect: *id001
+cleanup: []

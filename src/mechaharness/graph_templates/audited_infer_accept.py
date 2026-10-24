@@ -6,9 +6,9 @@ Catalog id: ``audited_infer_accept``. Expands::
       → deterministic → gate
 
 Modality (``text`` | ``image``) only swaps decide/QA kinds. Hosts bind runners
-(FOLK: ``folk.infer.*``). Library defaults use ``audited.*`` placeholder kinds.
+(e.g. ``host.infer.*``). Library defaults use ``audited.*`` placeholder kinds.
 
-Provenance: FOLK ``ideation.infer.accept`` / ``append_infer_accept`` lifted for
+Provenance: video production host ``ideation.infer.accept`` / ``append_infer_accept`` lifted for
 library reuse so hosts can migrate catalog ids while keeping produce/QA tools.
 """
 
@@ -83,7 +83,7 @@ def append_audited_infer_accept(
       modality=text  → audited.text.decide / audited.text.qa  (or host overrides)
       modality=image → audited.image.decide / audited.image.qa
 
-    ``stage_id`` aliases ``task_id`` for hosts migrating from FOLK stage.verify.
+    ``stage_id`` aliases ``task_id`` for hosts migrating from stage.verify.
     """
     modality_norm = str(modality or "text").strip().lower()
     if modality_norm not in ("text", "image"):
@@ -228,7 +228,7 @@ class AuditedInferAcceptTemplate(GraphTemplate):
     )
     description = (
         "RDG-aligned generate/verify spine. Hosts bind runners for each stage; "
-        "modality only swaps decide/QA. FOLK migrates from ideation.infer.accept."
+        "modality only swaps decide/QA. Video production hosts migrate from ideation.infer.accept."
     )
     soft_points = (
         SoftPoint(
@@ -304,7 +304,7 @@ class AuditedInferAcceptTemplate(GraphTemplate):
         SoftPoint(
             name="hop_recipe",
             kind="policy",
-            description="Host leaf recipe id (e.g. FOLK hop_accept)",
+            description="Host leaf recipe id (e.g. host hop_accept)",
             required=False,
         ),
         SoftPoint(

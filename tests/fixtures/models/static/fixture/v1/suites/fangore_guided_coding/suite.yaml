@@ -1,0 +1,9 @@
+id: fangore_guided_coding
+title: Guided coding recipe and instruction todo plan
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

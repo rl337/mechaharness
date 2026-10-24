@@ -39,6 +39,14 @@ agent-skills/           # Customer-facing skills for *apps using* MechaHarness
   mechaharness.mdc
 ```
 
+`docs/plans/` is for **local** planning only — gitignored, never commit.
+Promote durable notes into guides, requirements, or ADRs. Suite maps for
+coding-delegate arcs live under `docs/guides/` (e.g. `coding-delegate-suites.md`).
+
+**Private host projects:** inspiration and guides MUST NOT name private repos or
+link into them. Describe hosts by role — e.g. “video production project”,
+“AI assistant project” — not by internal codenames.
+
 Keep `README.md` short: logo, one-line pitch, install/quick start, and links
 into `docs/`. Do not duplicate long reference material in the README.
 
@@ -103,10 +111,10 @@ and [`node-components`](../node-components/SKILL.md).
 When the change is **user-facing acceptance behavior** (harness runs, grants,
 lanes, judge/verdicts, adapters, recipes), defer entirely to the
 [`user-stories`](../user-stories/SKILL.md) skill: edit `story.json` +
-`scenarios/*.yaml` (`kind: cli`; all stories are migrating off legacy `op`
-fixtures), keep twin copies identical, regenerate
-`docs/guides/user-stories.md` with `scripts/generate_user_stories_md.py`, and
-run `--check`. Do **not** hand-edit the user-stories guide as ordinary markdown.
+suite stage YAML (`kind: user_story` / `cli`), keep twin copies identical,
+regenerate `docs/guides/user-stories.md` with
+`python -m tests.stories.commands sync-guide`, and run `--check`. Do **not**
+hand-edit the user-stories guide as ordinary markdown.
 
 ## Writing rules
 
@@ -139,8 +147,9 @@ run `--check`. Do **not** hand-edit the user-stories guide as ordinary markdown.
 | Reference | `docs/reference/*.md` | Exact CLI/API/types/recipe contracts |
 | Requirements | `docs/requirements/*.md` | Normative library + host-integration requirements |
 | Downstream skills | `agent-skills/` | Customer Cursor skills / `mechaharness.mdc` for host apps |
-| Inspiration | `docs/inspiration/*.md` | Attribution / gaps (not specification) |
+| Inspiration | `docs/inspiration/*.md` | Attribution / gaps (not specification); no private repo names/links |
 | ADR | `docs/adr/NNNN-title.md` (local-only / gitignored) | Decision + context + consequences |
+| Plans | `docs/plans/` (gitignored) | Local planning only — never commit |
 
 ## Quality checklist
 

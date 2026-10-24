@@ -1,0 +1,104 @@
+id: taloneth_insp_safety_eval_recipes
+suite: taloneth_harness_research
+persona: taloneth
+title: Ship reusable safety evaluation recipes for injection and scope bleed
+narrative: 'Taloneth starts the CLI host with family `pass_through` and backend `mock`. They run Agentic
+  Recipe `safety_eval`: a fixture scenario is produced, an isolated reviewer judges without seeing agent
+  reasoning, and a deterministic scorer reports outcome, severity, context, and model/recipe versions.
+  Soft points are not evolvable. Related: `taloneth_insp_eval_matrix`. [^insp-dots-08]'
+implementation: Agentic Recipe `safety_eval` via `SafetyEvalTemplate` / `safety_eval_runner` and product
+  verb `run_recipe` (`SafetyEvalRecipeAdapter`).
+validation: Harness `user_story` scenario `safety_eval_recipe.yaml` drives `run_recipe`; expects shape
+  keys plus outcome/severity.
+footnotes:
+- id: insp-dots-08
+  label: OpenAI Dots agent safety (MH-DOTS-08)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md
+  note: Safety evaluation recipes
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: safety_eval
+  bind: binds/safety_eval.yaml
+steps:
+- do:
+    run_recipe:
+      name: safety_eval
+      path: binds/safety_eval.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: safety_eval
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - produce
+    - review
+    - score
+  - kind: 'true'
+    key: reviewer_isolated
+  - kind: 'true'
+    key: score_deterministic
+  - kind: equals
+    key: report_fields
+    value:
+    - outcome
+    - severity
+    - context
+    - model_version
+    - recipe_version
+  - kind: equals
+    key: reported_versions
+    value:
+    - m-1
+    - '1'
+  - kind: equals
+    key: scenario_classes
+    value:
+    - prompt_injection_in_tool_output
+    - scope_bleed
+    - authorization_change
+    - ambiguous_consent
+    - warning_disregard
+    - false_denial_control
+  - kind: equals
+    key: evolvable
+    value: []
+  - kind: equals
+    key: component_parents
+    value:
+      produce:
+      - produce_kind
+      - scenario_classes
+      review:
+      - omit_producer_reasoning
+      - review_kind
+      - review_prompt
+      score:
+      - score_kind
+      - severity_scale
+  - kind: 'true'
+    key: in_default_catalog
+  - kind: equals
+    key: outcome
+    value: pass
+  - kind: equals
+    key: severity
+    value: info
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

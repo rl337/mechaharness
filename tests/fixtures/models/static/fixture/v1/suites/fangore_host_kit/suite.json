@@ -9,42 +9,43 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_backend_describe_recipe",
-      "scenario": "describe_mock"
+      "scenario": "010_fangore_backend_describe_recipe"
     },
     {
       "story": "fangore_completer_flavors",
-      "scenario": "named_matched_flavors"
+      "scenario": "020_fangore_completer_flavors"
     },
     {
       "story": "fangore_config_access_policy",
-      "scenario": "config_access_policy"
+      "scenario": "030_fangore_config_access_policy"
     },
     {
       "story": "fangore_harness_family_react",
-      "scenario": "react_tool_round"
+      "scenario": "040_fangore_harness_family_react"
     },
     {
       "story": "fangore_harness_run_recipe",
-      "scenario": "catalog_and_run"
+      "scenario": "050_fangore_harness_run_recipe"
     },
     {
       "story": "fangore_harness_tool_loop_graph",
-      "scenario": "harness_components"
+      "scenario": "060_fangore_harness_tool_loop_graph"
     },
     {
       "story": "fangore_host_kit_event_tap",
-      "scenario": "tapped_node_lifecycle"
+      "scenario": "070_fangore_host_kit_event_tap"
     },
     {
-      "story": "fangore_host_kit_submit_once",
-      "scenario": "dispatch_durable_ok"
+      "story": "fangore_host_kit_submit_once__dispatch_durable_ok",
+      "scenario": "080_fangore_host_kit_submit_once_dispatch_durable_ok"
     },
     {
-      "story": "fangore_host_kit_submit_once",
-      "scenario": "resume_uncertain_with_handle"
+      "story": "fangore_host_kit_submit_once__resume_uncertain_with_handle",
+      "scenario": "090_fangore_host_kit_submit_once_resume_uncertain_with_handle"
     }
   ]
 }

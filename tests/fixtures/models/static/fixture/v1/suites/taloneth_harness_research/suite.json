@@ -9,110 +9,111 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "taloneth_atk_research_reject",
-      "scenario": "atk_research_reject"
+      "scenario": "010_taloneth_atk_research_reject"
     },
     {
       "story": "taloneth_cache_layout_experiment",
-      "scenario": "cache_layout_experiment"
+      "scenario": "020_taloneth_cache_layout_experiment"
     },
     {
       "story": "taloneth_insp_component_ablation",
-      "scenario": "component_ablation_delta"
+      "scenario": "030_taloneth_insp_component_ablation"
     },
     {
       "story": "taloneth_insp_correction_spec_debt",
-      "scenario": "specification_debt"
+      "scenario": "040_taloneth_insp_correction_spec_debt"
     },
     {
       "story": "taloneth_insp_cross_harness_failure",
-      "scenario": "cross_harness_failure_classify"
+      "scenario": "050_taloneth_insp_cross_harness_failure"
     },
     {
       "story": "taloneth_insp_eval_claims",
-      "scenario": "eval_claims_compose"
+      "scenario": "060_taloneth_insp_eval_claims"
     },
     {
       "story": "taloneth_insp_eval_matrix",
-      "scenario": "eval_matrix_aggregate"
+      "scenario": "070_taloneth_insp_eval_matrix"
     },
     {
       "story": "taloneth_insp_evaluation_outcome",
-      "scenario": "evaluation_outcome_filter"
+      "scenario": "080_taloneth_insp_evaluation_outcome"
     },
     {
       "story": "taloneth_insp_evaluator_compose",
-      "scenario": "evaluator_compose_run"
+      "scenario": "090_taloneth_insp_evaluator_compose"
     },
     {
       "story": "taloneth_insp_experiment_dimensions",
-      "scenario": "experiment_dimensions_digest"
+      "scenario": "100_taloneth_insp_experiment_dimensions"
     },
     {
       "story": "taloneth_insp_experiment_lineage",
-      "scenario": "experiment_lineage_resume"
+      "scenario": "110_taloneth_insp_experiment_lineage"
     },
     {
       "story": "taloneth_insp_exposure_discriminative",
-      "scenario": "exposure_discriminative_report"
+      "scenario": "120_taloneth_insp_exposure_discriminative"
     },
     {
       "story": "taloneth_insp_gated_objective",
-      "scenario": "gated_objective_evaluate"
+      "scenario": "130_taloneth_insp_gated_objective"
     },
     {
       "story": "taloneth_insp_harness_fingerprint",
-      "scenario": "harness_fingerprint_digest"
+      "scenario": "140_taloneth_insp_harness_fingerprint"
     },
     {
       "story": "taloneth_insp_harness_health",
-      "scenario": "harness_health"
+      "scenario": "150_taloneth_insp_harness_health"
     },
     {
       "story": "taloneth_insp_harness_hypothesis",
-      "scenario": "harness_experiment_retire"
+      "scenario": "160_taloneth_insp_harness_hypothesis"
     },
     {
       "story": "taloneth_insp_learning_export",
-      "scenario": "learning_export_pack"
+      "scenario": "170_taloneth_insp_learning_export"
     },
     {
       "story": "taloneth_insp_objective_policy",
-      "scenario": "objective_policy_aggregate"
+      "scenario": "180_taloneth_insp_objective_policy"
     },
     {
       "story": "taloneth_insp_recipe_evolution_loop",
-      "scenario": "recipe_evolution_candidates"
+      "scenario": "190_taloneth_insp_recipe_evolution_loop"
     },
     {
       "story": "taloneth_insp_recipe_final_test_gate",
-      "scenario": "recipe_final_test_gate"
+      "scenario": "200_taloneth_insp_recipe_final_test_gate"
     },
     {
       "story": "taloneth_insp_rule_promotion",
-      "scenario": "rule_promotion"
+      "scenario": "210_taloneth_insp_rule_promotion"
     },
     {
       "story": "taloneth_insp_run_parity",
-      "scenario": "parity_mismatch"
+      "scenario": "220_taloneth_insp_run_parity"
     },
     {
       "story": "taloneth_insp_safety_eval_recipes",
-      "scenario": "safety_eval_recipe"
+      "scenario": "230_taloneth_insp_safety_eval_recipes"
     },
     {
       "story": "taloneth_insp_scaffolding_retire",
-      "scenario": "harness_experiment_retire"
+      "scenario": "240_taloneth_insp_scaffolding_retire"
     },
     {
       "story": "taloneth_insp_scripted_driver_replay",
-      "scenario": "session"
+      "scenario": "250_taloneth_insp_scripted_driver_replay"
     },
     {
       "story": "taloneth_insp_trial_reliability",
-      "scenario": "trial_reliability_metrics"
+      "scenario": "260_taloneth_insp_trial_reliability"
     }
   ]
 }

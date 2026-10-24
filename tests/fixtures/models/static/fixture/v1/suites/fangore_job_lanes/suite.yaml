@@ -1,0 +1,9 @@
+id: fangore_job_lanes
+title: Job lane exposure, handoff, and deny rules
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

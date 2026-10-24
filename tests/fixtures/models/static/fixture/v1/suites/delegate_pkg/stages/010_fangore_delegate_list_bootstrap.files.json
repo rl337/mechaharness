@@ -1,0 +1,4 @@
+{
+  "tests/test_widget.py": "from widget import Widget\n\n\ndef test_starts_at_zero() -> None:\n    assert Widget().value == 0\n",
+  "widget/__init__.py": "\"\"\"Tiny Widget library \u2014 list-mode bootstrap.\"\"\"\n\nfrom __future__ import annotations\n\n\nclass Widget:\n    def __init__(self, value: int = 0) -> None:\n        self.value = int(value)\n"
+}

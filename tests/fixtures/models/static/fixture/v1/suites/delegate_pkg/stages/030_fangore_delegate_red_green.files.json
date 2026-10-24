@@ -1,0 +1,5 @@
+{
+  "README.md": "# Widget\n\nTiny in-workspace library for coding-delegate dogfood.\n\n## Usage\n\n```python\nfrom widget import Widget\n\nw = Widget()\nw.inc()\nw.double()\n```\n",
+  "tests/test_widget.py": "from widget import Widget\n\n\ndef test_starts_at_zero() -> None:\n    assert Widget().value == 0\n\n\ndef test_inc() -> None:\n    w = Widget()\n    assert w.inc() == 1\n    assert w.inc(2) == 3\n\n\ndef test_double() -> None:\n    w = Widget(3)\n    assert w.double() == 6\n    assert w.value == 6\n",
+  "widget/__init__.py": "\"\"\"Tiny Widget library \u2014 red-green double().\"\"\"\n\nfrom __future__ import annotations\n\n\nclass Widget:\n    def __init__(self, value: int = 0) -> None:\n        self.value = int(value)\n\n    def inc(self, n: int = 1) -> int:\n        self.value += int(n)\n        return self.value\n\n    def double(self) -> int:\n        self.value *= 2\n        return self.value\n"
+}

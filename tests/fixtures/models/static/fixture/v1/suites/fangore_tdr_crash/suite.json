@@ -9,30 +9,31 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_tdr_crash_after_accept_before_record",
-      "scenario": "crash_after_accept_before_record"
+      "scenario": "010_fangore_tdr_crash_after_accept_before_record"
     },
     {
       "story": "fangore_tdr_crash_after_accept_recorded",
-      "scenario": "crash_after_accept_recorded"
+      "scenario": "020_fangore_tdr_crash_after_accept_recorded"
     },
     {
       "story": "fangore_tdr_crash_after_final_commit",
-      "scenario": "crash_after_final_commit"
+      "scenario": "030_fangore_tdr_crash_after_final_commit"
     },
     {
       "story": "fangore_tdr_crash_after_intent_before_call",
-      "scenario": "crash_after_intent_before_call"
+      "scenario": "040_fangore_tdr_crash_after_intent_before_call"
     },
     {
       "story": "fangore_tdr_crash_after_reduce_before_checkpoint",
-      "scenario": "crash_after_reduce_before_checkpoint"
+      "scenario": "050_fangore_tdr_crash_after_reduce_before_checkpoint"
     },
     {
       "story": "fangore_tdr_crash_before_intent",
-      "scenario": "crash_before_intent"
+      "scenario": "060_fangore_tdr_crash_before_intent"
     }
   ]
 }

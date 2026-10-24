@@ -1,0 +1,34 @@
+id: taloneth_validator_qualification
+suite: taloneth_decision_eval
+persona: taloneth
+title: Qualify validators before they gate completion
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Before a schema
+  validator gates done, known-good, known-bad, and missing fixtures must run — including a weak always-pass
+  mutant that must fail qualification. Judge scores alone cannot complete a task (see `fangore_refund_verdict`).
+implementation: '`qualify_validator` / `validator_qualified` in `mechaharness.graph` (VER-04). `CliInstrumentor`
+  verb `validator_qualification`.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    validator_qualification:
+      good_fixtures:
+      - ok1
+      bad_fixtures:
+      - bad1
+      missing_fixtures:
+      - missing
+complete:
+  expect:
+  - kind: 'true'
+    key: honest_qualified
+  - kind: 'false'
+    key: weak_qualified
+cleanup: []

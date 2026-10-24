@@ -1,0 +1,65 @@
+id: fangore_decision_plane_policy__accept_billing
+suite: fangore_decision_plane
+persona: fangore
+title: Let code own the final decision-plane action with escalation (accept_billing)
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `decision_plane` with batched triage questions and fixture answers. He performs `run_recipe`
+  and verifies code-owned policy accepts billing, rejects illegal choices, and escalates below the confidence
+  floor. [^rvania-policy] [^rc-dp-policy] [^insp-pa-06-dp] [^insp-sr-08-dp] This stage covers the `accept_billing`
+  scenario.
+implementation: Agentic Recipe `decision_plane` via `AskBatchRunner` / `ApplyPolicyRunner` / `run_decision_plane_policy`.
+  Product CLI verb `run_recipe` with `DecisionPlaneRecipeAdapter`.
+validation: Harness `user_story` scenarios `accept_billing.yaml`, `invalid_team.yaml`, `low_confidence.yaml`
+  drive `run_recipe`; hard expects on final_action / escalate keys. Stage id `fangore_decision_plane_policy__accept_billing`
+  (scenario `accept_billing`).
+footnotes:
+- id: rvania-policy
+  label: Move Routine Decisions Off Your Big Model (rvaniaaaa)
+  url: https://x.com/rvaniaaaa/status/2107453108611662172
+  note: Rules 2,3,5,6,7 — batch ask; allowed levels; code policy; confidence; valid actions
+- id: rc-dp-policy
+  label: Recipes requirements DP-02 / DP-04 / DP-05 / DP-06
+  url: https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md
+  note: Batch, evidence vs policy, envelopes, escalation
+- id: insp-pa-06-dp
+  label: Personal agent reliability map (MH-PA-06 decision plane)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md
+  note: Model proposes / policy decides
+- id: insp-sr-08-dp
+  label: Self-revising recipe map (MH-SR-08 decision plane)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md
+  note: Decision resolve ≠ neighbor CR loop
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: decision_plane
+  bind: binds/accept_billing.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/accept_billing.yaml
+complete:
+  expect:
+  - kind: equals
+    key: final_action
+    value: billing
+  - kind: 'false'
+    key: escalate
+  - kind: equals
+    key: batch_invocation_count
+    value: 1
+  - kind: equals
+    key: escalation_route
+    value: host_policy
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

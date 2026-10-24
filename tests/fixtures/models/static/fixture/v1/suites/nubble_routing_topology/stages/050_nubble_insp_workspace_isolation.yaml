@@ -1,0 +1,43 @@
+id: nubble_insp_workspace_isolation
+suite: nubble_routing_topology
+persona: nubble
+title: Acquire workspace isolation through a host provider seam
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble asks branches
+  for isolation without hard-coding worktrees or containers — the host provider supplies the mechanism.
+  Accepts WalkingLabs L13 and Codex guidance[^wl-l13-workspace][^wl-codex-workspace].
+implementation: '`WorkspaceIsolationProvider` and `InMemoryWorkspaceIsolationProvider` in `mechaharness.isolation.workspace_isolation`
+  define the acquire/release capability seam.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l13-workspace
+  label: WalkingLabs L13 Autonomous Loops
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-13-loop-engineering/
+  note: Isolation as capability
+- id: wl-codex-workspace
+  label: WalkingLabs Codex harness design
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/codex/
+  note: Sandbox seam
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    workspace_isolation_acquire:
+      label: branch-a
+  expect: &id001
+  - kind: equals
+    key: provider_kind
+    value: memory
+  - kind: 'true'
+    key: released
+complete:
+  expect: *id001
+cleanup: []

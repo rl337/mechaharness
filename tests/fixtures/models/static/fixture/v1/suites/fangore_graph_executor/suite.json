@@ -9,86 +9,87 @@
   "vars": {},
   "setup": [],
   "cleanup": [],
+  "workspace": null,
   "stages": [
     {
       "story": "fangore_convergence_ceiling",
-      "scenario": "stagnation"
+      "scenario": "010_fangore_convergence_ceiling"
     },
     {
       "story": "fangore_graph_executor",
-      "scenario": "authorized_local_pipe"
+      "scenario": "020_fangore_graph_executor"
     },
     {
       "story": "fangore_graph_linkage_preflight",
-      "scenario": "runner_stop_and_ok"
+      "scenario": "030_fangore_graph_linkage_preflight"
     },
     {
       "story": "fangore_graph_one_step",
-      "scenario": "one_step"
+      "scenario": "040_fangore_graph_one_step"
     },
     {
       "story": "fangore_graph_soft_enter",
-      "scenario": "soft_enter"
+      "scenario": "050_fangore_graph_soft_enter"
     },
     {
       "story": "fangore_graph_template_soft_points",
-      "scenario": "graph_template_soft_points"
+      "scenario": "060_fangore_graph_template_soft_points"
     },
     {
       "story": "fangore_graph_until_before",
-      "scenario": "until_before"
+      "scenario": "070_fangore_graph_until_before"
     },
     {
       "story": "fangore_insp_budget_subgraph_rollup",
-      "scenario": "child_rollup"
+      "scenario": "080_fangore_insp_budget_subgraph_rollup"
     },
     {
       "story": "fangore_insp_dynamic_subgraph",
-      "scenario": "nested_child"
+      "scenario": "090_fangore_insp_dynamic_subgraph"
     },
     {
       "story": "fangore_insp_exit_clean_state",
-      "scenario": "exit_clean_state"
+      "scenario": "100_fangore_insp_exit_clean_state"
     },
     {
       "story": "fangore_insp_failure_attribution",
-      "scenario": "failure_attribution_trace"
+      "scenario": "110_fangore_insp_failure_attribution"
     },
     {
       "story": "fangore_insp_graph_budget",
-      "scenario": "soft_and_hard"
+      "scenario": "120_fangore_insp_graph_budget"
     },
     {
       "story": "fangore_insp_graph_transitions",
-      "scenario": "verify_rollback_end"
+      "scenario": "130_fangore_insp_graph_transitions"
     },
     {
       "story": "fangore_insp_inference_capture_preflight",
-      "scenario": "training_grade_required"
+      "scenario": "140_fangore_insp_inference_capture_preflight"
     },
     {
       "story": "fangore_insp_linkage_preflight",
-      "scenario": "missing_runner_and_ok"
+      "scenario": "150_fangore_insp_linkage_preflight"
     },
     {
       "story": "fangore_insp_loop_health",
-      "scenario": "loop_health"
+      "scenario": "160_fangore_insp_loop_health"
     },
     {
       "story": "fangore_insp_targeted_rollback",
-      "scenario": "select_produce"
+      "scenario": "170_fangore_insp_targeted_rollback"
     },
     {
       "story": "fangore_insp_verification_gate",
-      "scenario": "verification_outcome"
+      "scenario": "180_fangore_insp_verification_gate"
     },
     {
       "story": "fangore_node_components",
-      "scenario": "node_components"
+      "scenario": "190_fangore_node_components"
     },
     {
       "story": "fangore_traversal_contract",
-      "scenario": "traversal_contract"
+      "scenario": "200_fangore_traversal_contract"
     }
   ]
 }

@@ -1,0 +1,56 @@
+id: fangore_context_compiler_deficit
+suite: fangore_context_memory
+persona: fangore
+title: Report context deficits instead of silent truncation
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. Mandatory blockers
+  must not disappear when the prompt budget is tight. Success is a deficit report with unresolved gaps
+  named. Related observation chain: `fangore_context_observation_chain`.'
+implementation: '`ContextCompiler` builds a versioned `ContextManifest` with token estimates and unresolved
+  gaps. Working context is ephemeral; obligations stay in authoritative stores.
+
+
+  Covers: CTX-05.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: sol-pi
+  label: SoL-Pi
+  url: https://arxiv.org/abs/2609.20519
+  note: Empirical harness optimization and context mechanisms to evaluate
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    context_compiler_deficit:
+      token_budget: 5
+      state_revision: r-story
+      operation: chat
+      sources:
+        noise: word word word word word word word word word word word word
+        oath: MUST retain approval boundary and verification obligations forever and ever with lots of
+          text
+      mandatory:
+      - oath
+      blockers:
+      - awaiting-human
+      verification_obligations:
+      - tests-green
+complete:
+  expect:
+  - kind: 'true'
+    key: deficit
+  - kind: includes
+    key: unresolved_gaps
+    value:
+    - oath
+  - kind: includes
+    key: blockers
+    value:
+    - awaiting-human
+  - kind: 'false'
+    key: silent_truncate
+cleanup: []
