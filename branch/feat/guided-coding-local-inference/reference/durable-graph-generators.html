@@ -327,6 +327,13 @@ chain path, for example::</p>
 </div>
 <p>Cursor’s IDE idle timeout resets on these notifications. Progress is optional
 when the token is absent (offline / ScriptedDriver).</p>
+<p>During a Completer round, <code class="docutils literal notranslate"><span class="pre">ConversationalToolLoopRunner</span></code> watches the
+awaitable via <code class="docutils literal notranslate"><span class="pre">mechaharness.inference_progress.await_while_running</span></code>: it emits
+ticks <strong>only while the awaitable is still pending</strong>, then raises
+<code class="docutils literal notranslate"><span class="pre">InferenceTimeoutError</span></code> if wall time exceeds
+<code class="docutils literal notranslate"><span class="pre">MECHA_INFERENCE_TIMEOUT_SECONDS</span></code> (falls back to
+<code class="docutils literal notranslate"><span class="pre">MECHA_HTTP_TIMEOUT_SECONDS</span></code>, default <code class="docutils literal notranslate"><span class="pre">180</span></code>). Tick interval:
+<code class="docutils literal notranslate"><span class="pre">MECHA_INFERENCE_PROGRESS_TICK_SECONDS</span></code> (default <code class="docutils literal notranslate"><span class="pre">5</span></code>).</p>
 </section>
 </section>
 <section id="related">

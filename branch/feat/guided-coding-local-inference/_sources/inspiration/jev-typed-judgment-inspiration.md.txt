@@ -58,9 +58,9 @@ with local small models and larger models using the same tasks and fixtures.
 | Shadow / compare | `compare_shadow_decision` |
 
 MechaHarness owns generic typed-judgment interfaces, graph skeletons/recipes,
-replay/evaluation, and execution guarantees. June and other clients own domain
+replay/evaluation, and execution guarantees. AI assistant hosts and other clients own domain
 state, concrete tools, user permissions, thresholds, and instantiated
-client-specific graphs. Promote a June-born recipe only after removing domain
+client-specific graphs. Promote an AI assistant host-born recipe only after removing domain
 assumptions.
 
 ## Proposed foundation requirements

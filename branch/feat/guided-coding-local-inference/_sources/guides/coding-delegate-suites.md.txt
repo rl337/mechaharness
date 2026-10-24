@@ -43,7 +43,8 @@ Mechanism / transport stay in existing parallel suites (not new coding suites):
 4. **`fangore_delegate_refactor`** — rename `Widget` → `Gadget` across package,
    tests, README; forbid leftover `class Widget`.
 
-Authoring: `scripts/write_delegate_pkg_suite.py` + `suites/delegate_pkg/sources/`.
+Authoring: `suites/delegate_pkg/suite.yaml` + `stages/*.yaml` (+ optional
+`sources/` / `materialize-stage-files`).
 
 ```bash
 # Static (provisional)

@@ -113,7 +113,7 @@
 <p>Date: 2026-10-19
 Status: Proposed design and requirements, not an implemented API
 Project: MechaHarness
-Related use cases: Finder of Lost Keys photorealistic production; NeoStudio virtual production; local Qwen3 32B workers directed by frontier-model sessions</p>
+Related use cases: video production photorealistic pipelines; studio virtual production; local Qwen3 32B workers directed by frontier-model sessions</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
 <p>A frontier agent (Cursor, Codex, ChatGPT or another MCP-capable client) should be able to launch a MechaHarness graph and let inexpensive local inference and deterministic tools perform the token-heavy work. When the graph requires higher-level judgment, it should <strong>yield a structured guidance request as the result of the tool call</strong>. The same frontier-agent conversation then interprets the request and calls the tool again with guidance. The graph resumes from its durable checkpoint.</p>
@@ -131,7 +131,7 @@ Related use cases: Finder of Lost Keys photorealistic production; NeoStudio virt
 <li><p><code class="docutils literal notranslate"><span class="pre">list_recipes()</span></code> exposes discoverable recipe names and typed input schemas.</p></li>
 </ul>
 <p>Conceptual pseudocode (not a commitment to Python stack serialization):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">driver</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">"folk.performance"</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">driver</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">"vp.performance"</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
 <span class="k">while</span> <span class="n">status</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"completed"</span><span class="p">,</span> <span class="s2">"failed"</span><span class="p">,</span> <span class="s2">"cancelled"</span><span class="p">}:</span>
     <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"advice_requested"</span><span class="p">:</span>
         <span class="n">answer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">driver</span><span class="o">.</span><span class="n">obtain_guidance</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
@@ -158,7 +158,7 @@ Related use cases: Finder of Lost Keys photorealistic production; NeoStudio virt
 <h2>Yield protocol<a class="headerlink" href="#yield-protocol" title="Link to this heading"></a></h2>
 <p>Each externally visible yield is an ordered, immutable envelope:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">"run_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"folk-scene-072"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"run_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vp-scene-072"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"sequence"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"advice_requested"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"checkpoint_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cp-003"</span><span class="p">,</span>
@@ -170,7 +170,7 @@ Related use cases: Finder of Lost Keys photorealistic production; NeoStudio virt
 <span class="w">      </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"precise"</span><span class="p">,</span><span class="w"> </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Precise maneuver followed by collapse"</span><span class="p">}</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">"recommendation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"precise"</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">"evidence_refs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"artifact://folk-scene-072/performance-analysis"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"evidence_refs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"artifact://vp-scene-072/performance-analysis"</span><span class="p">],</span>
 <span class="w">    </span><span class="nt">"requested_authority"</span><span class="p">:</span><span class="w"> </span><span class="s2">"artistic_direction"</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">"context_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"scene-072@v4"</span>
 <span class="w">  </span><span class="p">}</span>
@@ -250,7 +250,7 @@ Related use cases: Finder of Lost Keys photorealistic production; NeoStudio virt
 <p><strong>M3: Scripted driver and replay.</strong> Strict fixtures, event recording, semantic replay and crash-location tests.</p>
 <p><strong>M4: Human drivers.</strong> Plain-text CLI first, curses/TUI second; both exercise MCP rather than private runtime internals.</p>
 <p><strong>M5: Parallel execution and ownership transfer.</strong> Related advisory batching, leases, controlled handoff and concurrency stress tests.</p>
-<p><strong>M6: Production pilot.</strong> FOLK character or performance workflow using local Qwen and deterministic QA, with a frontier agent advising only on ambiguous artistic decisions. Compare quality, costs and latency to an all-frontier baseline.</p>
+<p><strong>M6: Production pilot.</strong> Video production character or performance workflow using local Qwen and deterministic QA, with a frontier agent advising only on ambiguous artistic decisions. Compare quality, costs and latency to an all-frontier baseline.</p>
 </section>
 <section id="candidate-requirements">
 <h2>Candidate requirements<a class="headerlink" href="#candidate-requirements" title="Link to this heading"></a></h2>
@@ -284,7 +284,7 @@ Related use cases: Finder of Lost Keys photorealistic production; NeoStudio virt
 </section>
 <section id="design-constraint">
 <h2>Design constraint<a class="headerlink" href="#design-constraint" title="Link to this heading"></a></h2>
-<p><strong>Do not build a second harness around MCP or a new dependency injection framework.</strong> The generator is a new MechaHarness execution construct. MCP is one adapter, and curses, plain-text and test drivers are clients of the same contract. Production-specific artistic semantics remain with FOLK or NeoStudio.</p>
+<p><strong>Do not build a second harness around MCP or a new dependency injection framework.</strong> The generator is a new MechaHarness execution construct. MCP is one adapter, and curses, plain-text and test drivers are clients of the same contract. Production-specific artistic semantics remain with the video production or studio host.</p>
 </section>
 <section id="related">
 <h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>

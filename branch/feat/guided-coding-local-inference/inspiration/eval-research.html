@@ -140,18 +140,18 @@ https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents</p>
 <li><p><strong>Article-derived takeaway:</strong> which conclusion above the reference strengthens, qualifies, or challenges.</p></li>
 <li><p><strong>Reusable mechanism:</strong> the generic primitive, contract, evidence type, execution guarantee, or aggregation rule MechaHarness should expose.</p></li>
 <li><p><strong>Research ask:</strong> what the paper must resolve before that mechanism is designed.</p></li>
-<li><p><strong>Boundary check:</strong> anything application-semantic discovered by the paper must be handed upward to June rather than implemented in MechaHarness.</p></li>
+<li><p><strong>Boundary check:</strong> anything application-semantic discovered by the paper must be handed upward to the AI assistant host rather than implemented in MechaHarness.</p></li>
 </ol>
 <p>The intended result is not a generic <code class="docutils literal notranslate"><span class="pre">evals/</span></code> subsystem glued beside the harness. Existing tracing and execution evidence should become the substrate from which evaluators can establish typed claims about graph execution.</p>
 </section>
 <section id="mission">
 <h2>Mission<a class="headerlink" href="#mission" title="Link to this heading"></a></h2>
 <p>Design the reusable <strong>evaluation substrate</strong> that higher-level systems
-such as June can use without embedding application-specific definitions
+such as an AI assistant host can use without embedding application-specific definitions
 of quality into MechaHarness.</p>
 <p>The planning agent should treat MechaHarness as the layer that makes
 graph executions intrinsically observable, evidence-producing,
-repeatable, and evaluable. It should <strong>not</strong> define what a good June
+repeatable, and evaluable. It should <strong>not</strong> define what a good the AI assistant host
 research task, reminder, document update, or other application task
 means.</p>
 </section>
@@ -170,7 +170,7 @@ and latency be represented?</p></li>
 out from the agent being improved?</p></li>
 <li><p>How should routing, retry, escalation, promotion, and
 self-improvement consume structured verdicts?</p></li>
-<li><p>What extension points must exist for June to supply task-specific
+<li><p>What extension points must exist for the AI assistant host to supply task-specific
 graders and failure taxonomies?</p></li>
 <li><p>What must explicitly remain outside MechaHarness?</p></li>
 </ol>
@@ -306,7 +306,7 @@ https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents<br />
 Use as a practical synthesis of
 task/trial/grader/transcript/outcome/evaluation-harness concepts.
 Treat its distinction between evaluation harness and agent harness
-as especially relevant to the MechaHarness/June boundary.</p></li>
+as especially relevant to the MechaHarness/the AI assistant host boundary.</p></li>
 </ul>
 </section>
 <section id="expected-planning-output">
@@ -323,11 +323,11 @@ as especially relevant to the MechaHarness/June boundary.</p></li>
 <li><p>trace/state/outcome evidence requirements;</p></li>
 <li><p>hooks for routing, retry, escalation, promotion, and
 self-improvement;</p></li>
-<li><p>explicit June-facing extension points;</p></li>
+<li><p>explicit the AI assistant host-facing extension points;</p></li>
 <li><p>migration path from existing MechaHarness tracing/observability
 rather than replacing it;</p></li>
 <li><p>an explicit <strong>non-goals</strong> section identifying application semantics
-that belong in June.</p></li>
+that belong in the AI assistant host.</p></li>
 </ul>
 </section>
 <section id="boundary-rule">
@@ -335,7 +335,7 @@ that belong in June.</p></li>
 <p>When research suggests a concrete task rubric, benchmark scenario,
 product-specific success criterion, or domain failure taxonomy, do
 <strong>not</strong> put it into MechaHarness. Record the generic mechanism needed to
-express it and hand the semantic requirement to June.</p>
+express it and hand the semantic requirement to the AI assistant host.</p>
 </section>
 </section>
 

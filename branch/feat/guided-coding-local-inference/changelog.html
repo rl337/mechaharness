@@ -162,7 +162,7 @@ warning / <code class="docutils literal notranslate"><span class="pre">LATEST</s
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">counter_pkg</span></code> coding-delegate suite:</strong> sequential multi-file arc
 (package + pytest + CLI) with <code class="docutils literal notranslate"><span class="pre">coding_writes</span></code> stubs, <code class="docutils literal notranslate"><span class="pre">verify_runs.pytest</span></code>,
 and the same live Completer / repair path as <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code>. Roadmap:
-<code class="docutils literal notranslate"><span class="pre">docs/plans/coding-delegate-suites.md</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">docs/guides/coding-delegate-suites.md</span></code>.</p></li>
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">delegate_pkg</span></code> coding-delegate suite:</strong> one sequential Widget arc covering
 list-mode bootstrap, thorough guidance fork (code + README), red-green
 <code class="docutils literal notranslate"><span class="pre">double()</span></code>, and <code class="docutils literal notranslate"><span class="pre">Widget</span></code>→<code class="docutils literal notranslate"><span class="pre">Gadget</span></code> refactor. Live Completer is the gate;
@@ -197,6 +197,11 @@ a coding tool loop. Story scenarios: <code class="docutils literal notranslate">
 <code class="docutils literal notranslate"><span class="pre">notifications/progress</span></code> messages such as
 <code class="docutils literal notranslate"><span class="pre">guided_coding</span> <span class="pre">›</span> <span class="pre">plan_tile</span> <span class="pre">›</span> <span class="pre">work_item</span> <span class="pre">1</span> <span class="pre">›</span> <span class="pre">tool_round</span> <span class="pre">2</span> <span class="pre">›</span> <span class="pre">write_file</span></code>
 during generator local work (keeps Cursor stdio idle timeout alive).</p></li>
+<li><p><strong>Inference progress watchdog:</strong> <code class="docutils literal notranslate"><span class="pre">await_while_running</span></code> ticks MCP progress
+only while a Completer awaitable is still pending, then fails with
+<code class="docutils literal notranslate"><span class="pre">InferenceTimeoutError</span></code> after <code class="docutils literal notranslate"><span class="pre">MECHA_INFERENCE_TIMEOUT_SECONDS</span></code> (fallback
+<code class="docutils literal notranslate"><span class="pre">MECHA_HTTP_TIMEOUT_SECONDS</span></code>). Wired through
+<code class="docutils literal notranslate"><span class="pre">ConversationalToolLoopRunner</span></code>.</p></li>
 <li><p><strong>Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>):</strong> classify oneshot vs
 ordered list, refine conflicts, pre / per-item / post-list acceptance.
 Optional <code class="docutils literal notranslate"><span class="pre">scope_refinement</span></code> / <code class="docutils literal notranslate"><span class="pre">list_refinement</span></code> guidance is requested by
@@ -210,9 +215,9 @@ tools and a <code class="docutils literal notranslate"><span class="pre">Generat
 on the Cursor MCP <code class="docutils literal notranslate"><span class="pre">env</span></code> block. Story: <code class="docutils literal notranslate"><span class="pre">fangore_guided_coding_recipe</span></code>.</p></li>
 <li><p><strong>Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>):</strong> RDG-aligned spine
 collect → freeze → decide → independent QA → deterministic → gate, lifted
-from FOLK <code class="docutils literal notranslate"><span class="pre">ideation.infer.accept</span></code> for library reuse. Domain module
+from the video production host <code class="docutils literal notranslate"><span class="pre">ideation.infer.accept</span></code> for library reuse. Domain module
 <code class="docutils literal notranslate"><span class="pre">mechaharness.audited_decision</span></code>. Migration notes:
-<code class="docutils literal notranslate"><span class="pre">docs/inspiration/folk-audited-infer-migration.md</span></code>. Story:
+<code class="docutils literal notranslate"><span class="pre">docs/inspiration/video-production-audited-infer-migration.md</span></code>. Story:
 <code class="docutils literal notranslate"><span class="pre">fangore_audited_infer_accept</span></code>.</p></li>
 </ul>
 </section>
@@ -449,7 +454,7 @@ elements that must render within a parent graph node; kinds project existing
 events / soft points / nest / stop / budget / effects. Traversal projector
 and <code class="docutils literal notranslate"><span class="pre">embed_recipe_as_tool</span></code> (HF-08). Docs:
 <code class="docutils literal notranslate"><span class="pre">docs/reference/node-components.md</span></code>,
-<code class="docutils literal notranslate"><span class="pre">docs/requirements/dynamic-tool-graph.md</span></code>; June HF inspiration + map.</p></li>
+<code class="docutils literal notranslate"><span class="pre">docs/requirements/dynamic-tool-graph.md</span></code>; the AI assistant host HF inspiration + map.</p></li>
 <li><p><strong>HF-05:</strong> <code class="docutils literal notranslate"><span class="pre">host_graph_executor(event_log=)</span></code> and <code class="docutils literal notranslate"><span class="pre">tapping_event_log</span></code> /
 <code class="docutils literal notranslate"><span class="pre">TappingEventLog</span></code> for blessed-path event taps.</p></li>
 <li><p><strong>HF-07:</strong> Agentic Recipe <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code> +

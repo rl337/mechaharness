@@ -104,9 +104,9 @@ Applications own:
 - application-specific side effects;
 - readable host tiling that composes library and domain recipes.
 
-A downstream project such as June SHOULD be able to define June-specific recipes
+A downstream project such as an AI assistant host SHOULD be able to define host-specific recipes
 while reusing MechaHarness recipe primitives. A generally useful recipe born in
-June SHOULD be extractable back into MechaHarness without changing the recipe
+That host SHOULD be extractable back into MechaHarness without changing the recipe
 model.
 
 ## Requirements
@@ -173,7 +173,7 @@ A recipe MUST be able to contain both:
 
 Overrides MUST be constrained by the recipe contract. A caller MUST NOT mutate arbitrary internal structure accidentally.
 
-This permits a reusable MechaHarness recipe to be made concrete by June or another host without forking the recipe.
+This permits a reusable MechaHarness recipe to be made concrete by an AI assistant host or another host without forking the recipe.
 
 ### RC-07: Substrate is GraphTemplate
 
@@ -211,7 +211,7 @@ promotion and documentation as Agentic Recipes (names are catalog ids):
 | `initialize_preflight` | `InitializePreflightTemplate` | `fangore_insp_initialize_preflight` |
 | `decision_plane` | `DecisionPlaneTemplate` + `decision_plane_runtime` | `fangore_decision_plane_recipe`, `fangore_decision_plane_projection`, `fangore_decision_plane_policy`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_plane_model_policy`, `taloneth_decision_plane_shadow_compare`, `fangore_jev_citation_matching_claim`, `fangore_jev_context_budget_pack`, `fangore_jev_req_review_template_shape`, `fangore_jev_task_route_simple_local`, `fangore_jev_action_safety` |
 | `bounded_retry` | `BoundedRetryTemplate` | `fangore_bounded_retry_recipe` (+ durable resume composition) |
-| `audited_infer_accept` | `AuditedInferAcceptTemplate` + `audited_decision` | `fangore_audited_infer_accept` (FOLK `ideation.infer.accept` migrate) |
+| `audited_infer_accept` | `AuditedInferAcceptTemplate` + `audited_decision` | `fangore_audited_infer_accept` (video production host `ideation.infer.accept` migrate) |
 | `guided_coding` | `GuidedCodingTemplate` (tiles instruction plan + audited gate) | `fangore_guided_coding_recipe` |
 | `instruction_todo_plan` | `InstructionTodoPlanTemplate` (oneshot vs list + AC) | `fangore_instruction_todo_plan` |
 

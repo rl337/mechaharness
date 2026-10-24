@@ -169,6 +169,14 @@ chain path, for example::
 Cursor's IDE idle timeout resets on these notifications. Progress is optional
 when the token is absent (offline / ScriptedDriver).
 
+During a Completer round, ``ConversationalToolLoopRunner`` watches the
+awaitable via ``mechaharness.inference_progress.await_while_running``: it emits
+ticks **only while the awaitable is still pending**, then raises
+``InferenceTimeoutError`` if wall time exceeds
+``MECHA_INFERENCE_TIMEOUT_SECONDS`` (falls back to
+``MECHA_HTTP_TIMEOUT_SECONDS``, default ``180``). Tick interval:
+``MECHA_INFERENCE_PROGRESS_TICK_SECONDS`` (default ``5``).
+
 ## Related
 
 - [Architecture](../architecture.md) — structural map

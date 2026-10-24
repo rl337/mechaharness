@@ -30,19 +30,19 @@ For every reference below, the planning agent must record:
 1. **Article-derived takeaway:** which conclusion above the reference strengthens, qualifies, or challenges.
 2. **Reusable mechanism:** the generic primitive, contract, evidence type, execution guarantee, or aggregation rule MechaHarness should expose.
 3. **Research ask:** what the paper must resolve before that mechanism is designed.
-4. **Boundary check:** anything application-semantic discovered by the paper must be handed upward to June rather than implemented in MechaHarness.
+4. **Boundary check:** anything application-semantic discovered by the paper must be handed upward to the AI assistant host rather than implemented in MechaHarness.
 
 The intended result is not a generic `evals/` subsystem glued beside the harness. Existing tracing and execution evidence should become the substrate from which evaluators can establish typed claims about graph execution.
 
 ## Mission
 
 Design the reusable **evaluation substrate** that higher-level systems
-such as June can use without embedding application-specific definitions
+such as an AI assistant host can use without embedding application-specific definitions
 of quality into MechaHarness.
 
 The planning agent should treat MechaHarness as the layer that makes
 graph executions intrinsically observable, evidence-producing,
-repeatable, and evaluable. It should **not** define what a good June
+repeatable, and evaluable. It should **not** define what a good the AI assistant host
 research task, reminder, document update, or other application task
 means.
 
@@ -60,7 +60,7 @@ means.
     out from the agent being improved?
 6.  How should routing, retry, escalation, promotion, and
     self-improvement consume structured verdicts?
-7.  What extension points must exist for June to supply task-specific
+7.  What extension points must exist for the AI assistant host to supply task-specific
     graders and failure taxonomies?
 8.  What must explicitly remain outside MechaHarness?
 
@@ -208,7 +208,7 @@ means.
     Use as a practical synthesis of
     task/trial/grader/transcript/outcome/evaluation-harness concepts.
     Treat its distinction between evaluation harness and agent harness
-    as especially relevant to the MechaHarness/June boundary.
+    as especially relevant to the MechaHarness/the AI assistant host boundary.
 
 ## Expected planning output
 
@@ -224,15 +224,15 @@ Produce a MechaHarness implementation plan containing:
 -   trace/state/outcome evidence requirements;
 -   hooks for routing, retry, escalation, promotion, and
     self-improvement;
--   explicit June-facing extension points;
+-   explicit the AI assistant host-facing extension points;
 -   migration path from existing MechaHarness tracing/observability
     rather than replacing it;
 -   an explicit **non-goals** section identifying application semantics
-    that belong in June.
+    that belong in the AI assistant host.
 
 ## Boundary rule
 
 When research suggests a concrete task rubric, benchmark scenario,
 product-specific success criterion, or domain failure taxonomy, do
 **not** put it into MechaHarness. Record the generic mechanism needed to
-express it and hand the semantic requirement to June.
+express it and hand the semantic requirement to the AI assistant host.

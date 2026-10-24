@@ -120,7 +120,7 @@ status: <strong>proposal</strong> (source screenshot unverified); not an accepte
 requirement. Do not treat screenshot performance claims as benchmarks.</p>
 <p><strong>Ownership:</strong> MechaHarness owns recipe registry, typed composition, validation,
 deterministic execution, evaluation substrate, versioning/checkpoints, rollback
-hooks, observability, and safety gates. June owns workload selection,
+hooks, observability, and safety gates. The AI assistant host owns workload selection,
 orchestration, scheduling, experiment budgets, evaluation campaigns, and
 promotion policy. home_network owns sandboxed workers and experiment stores.
 JuneSpark may supply inference for proposals/evals within local budgets.</p>
@@ -192,7 +192,7 @@ JuneSpark may supply inference for proposals/evals within local budgets.</p>
 <td><p>Pure helpers; the graph executor does not call them, so hosts drive the revisit loop and checkpoint</p></td>
 </tr>
 <tr class="row-even"><td><p>MH-SR-09</p></td>
-<td><p>June↔MH evolution ownership</p></td>
+<td><p>the AI assistant host↔MH evolution ownership</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">recipe_lifecycle/recipe_promotion_policy.py</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_lifecycle/evolution_campaign_hooks.py</span></code>, <code class="docutils literal notranslate"><span class="pre">host_apis.py</span></code>, <code class="docutils literal notranslate"><span class="pre">di.py</span></code> (<code class="docutils literal notranslate"><span class="pre">get_recipe_promotion_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">get_evolution_campaign_hooks</span></code>), recipes-and-decision-plane.md</p></td>
 <td><p>partial</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_evolution_ownership_split</span></code></p></td>

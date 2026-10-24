@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>June host-friction inspiration &mdash; MechaHarness 0.7.1 documentation</title>
+  <title>AI assistant project host-friction inspiration &mdash; MechaHarness 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -98,9 +98,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">June host-friction inspiration</li>
+      <li class="breadcrumb-item active">AI assistant project host-friction inspiration</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/june-host-friction-inspiration.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/ai-assistant-host-friction-inspiration.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -108,24 +108,25 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="june-host-friction-inspiration">
-<h1>June host-friction inspiration<a class="headerlink" href="#june-host-friction-inspiration" title="Link to this heading"></a></h1>
-<p>June-sourced asks for a more readable MechaHarness host surface and for
-<strong>graph-visible</strong> tool loops / nested recipes. This is attribution and product
-context, not the normative library contract.</p>
+  <section id="ai-assistant-project-host-friction-inspiration">
+<h1>AI assistant project host-friction inspiration<a class="headerlink" href="#ai-assistant-project-host-friction-inspiration" title="Link to this heading"></a></h1>
+<p>Asks from an <strong>AI assistant</strong> host for a more readable MechaHarness host surface
+and for <strong>graph-visible</strong> tool loops / nested recipes. This is attribution and
+product context, not the normative library contract.</p>
+<p>Do not name or link private host repositories from this tree.</p>
 <p>Normative requirements:
 <a class="reference internal" href="../requirements/dynamic-tool-graph.html"><span class="std std-doc">Dynamic tool graph and node components</span></a>.</p>
 <p>Kind catalog:
 <a class="reference internal" href="../reference/node-components.html"><span class="std std-doc">Node components</span></a>.</p>
 <p>Requirements map:
-<a class="reference internal" href="june-host-friction-requirements-map.html"><span class="std std-doc">June host-friction requirements map</span></a>.</p>
+<a class="reference internal" href="ai-assistant-host-friction-requirements-map.html"><span class="std std-doc">AI assistant host-friction requirements map</span></a>.</p>
 <section id="provenance">
 <h2>Provenance<a class="headerlink" href="#provenance" title="Link to this heading"></a></h2>
-<p>June documents (host repo, not this tree):</p>
+<p>Host documents (private; summarized here, not linked):</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">docs/requirements/mechaharness-host-friction.md</span></code> — HF ledger</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">docs/requirements/mechaharness-dynamic-tool-graph.md</span></code> — HF-07 / HF-08</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">docs/requirements/interactive-chat-channels.md</span></code> — console blocked on MH</p></li>
+<li><p>Host-friction ledger (<code class="docutils literal notranslate"><span class="pre">HF-*</span></code> ids)</p></li>
+<li><p>Dynamic tool-graph requirements for conversational loops / recipe-as-tool</p></li>
+<li><p>Interactive chat / console requirements blocked on MechaHarness surfaces</p></li>
 </ul>
 <p>Floor at intake: <strong>mechaharness 0.4.0</strong> (host kit + Agentic Recipes).</p>
 </section>
@@ -154,9 +155,9 @@ context, not the normative library contract.</p>
 <p><strong>MechaHarness owns:</strong> graph topology, node-component query + traversal
 contract, <code class="docutils literal notranslate"><span class="pre">host_graph_executor</span></code> event tap, Agentic Recipe
 <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>, recipe-as-tool nest via subgraph.</p>
-<p><strong>June owns:</strong> web console (<code class="docutils literal notranslate"><span class="pre">WorldGraph</span></code> / <code class="docutils literal notranslate"><span class="pre">GraphViewport</span></code>), channel adapters,
-Comfy / DocumentStore, product bind of <code class="docutils literal notranslate"><span class="pre">june.chat</span></code>, deletion of parallel
-<code class="docutils literal notranslate"><span class="pre">on_phase</span></code> / <code class="docutils literal notranslate"><span class="pre">imagegen_mirror</span></code> paint paths after consuming MH.</p>
+<p><strong>AI assistant host owns:</strong> web console (world / viewport), channel adapters,
+media / document backends, product bind of chat surfaces, deletion of parallel
+phase / mirror paint paths after consuming MechaHarness.</p>
 </section>
 <section id="asks-in-scope-this-pack">
 <h2>Asks in scope (this pack)<a class="headerlink" href="#asks-in-scope-this-pack" title="Link to this heading"></a></h2>
@@ -181,11 +182,11 @@ Comfy / DocumentStore, product bind of <code class="docutils literal notranslate
 <p>Already landed in 0.4.0: HF-01 (partial), HF-02, HF-04. Open later: HF-03,
 HF-06 (subgraph clone).</p>
 </section>
-<section id="console-consumer-bones-june">
-<h2>Console consumer bones (June)<a class="headerlink" href="#console-consumer-bones-june" title="Link to this heading"></a></h2>
-<p>Durable path: MH checkpoints / <code class="docutils literal notranslate"><span class="pre">graph_node_*</span></code> → hub → world/scene → continuous
-zoom viewport. Temporary debt: soft-lane phase painting and hand-wired
-<code class="docutils literal notranslate"><span class="pre">TappingEventLog</span></code> until HF-05/07/08.</p>
+<section id="console-consumer-bones-host">
+<h2>Console consumer bones (host)<a class="headerlink" href="#console-consumer-bones-host" title="Link to this heading"></a></h2>
+<p>Durable path: MechaHarness checkpoints / <code class="docutils literal notranslate"><span class="pre">graph_node_*</span></code> → hub → world/scene →
+continuous zoom viewport. Temporary debt: soft-lane phase painting and
+hand-wired event taps until HF-05/07/08.</p>
 </section>
 </section>
 
