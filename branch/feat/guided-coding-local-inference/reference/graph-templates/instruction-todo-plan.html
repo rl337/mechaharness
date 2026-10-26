@@ -194,15 +194,19 @@ plan with <code class="docutils literal notranslate"><span class="pre">guidance_
 <td><p>guidance (optional)</p></td>
 <td><p>Asked when conflicts would fail post-accept</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_items</span></code> / <code class="docutils literal notranslate"><span class="pre">stop_contract</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">decompose</span></code></p></td>
+<td><p>guidance (dynamic)</p></td>
+<td><p>After verify/item failure escalate (see below)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_items</span></code> / <code class="docutils literal notranslate"><span class="pre">stop_contract</span></code></p></td>
 <td><p>budget</p></td>
 <td><p>Bound the <code class="docutils literal notranslate"><span class="pre">work_item</span></code> loop</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pre_acceptance</span></code> / <code class="docutils literal notranslate"><span class="pre">item_acceptance</span></code> / <code class="docutils literal notranslate"><span class="pre">post_acceptance</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pre_acceptance</span></code> / <code class="docutils literal notranslate"><span class="pre">item_acceptance</span></code> / <code class="docutils literal notranslate"><span class="pre">post_acceptance</span></code></p></td>
 <td><p>policy</p></td>
 <td><p>Three acceptance layers</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">*_kind</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">*_kind</span></code></p></td>
 <td><p>runner_kind</p></td>
 <td><p>Override <code class="docutils literal notranslate"><span class="pre">instruction.*</span></code> node kinds</p></td>
 </tr>
@@ -212,6 +216,33 @@ plan with <code class="docutils literal notranslate"><span class="pre">guidance_
 guidance soft points are <strong>not</strong> auto-queued — local work returns
 <code class="docutils literal notranslate"><span class="pre">request_guidance</span></code> and <code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator._advance</span></code> yields, then restarts
 after resume.</p>
+</section>
+<section id="failure-escalate-restore-consolidated-retry-guidance">
+<h2>Failure escalate: restore → consolidated retry → guidance<a class="headerlink" href="#failure-escalate-restore-consolidated-retry-guidance" title="Link to this heading"></a></h2>
+<p>When <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> exhausts <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> repair rounds (or a work
+item fails), it <strong>escalates</strong> instead of failing immediately:</p>
+<ol class="arabic simple">
+<li><p><strong>Consolidate</strong> failure lines into one restore-and-finish brief
+(<code class="docutils literal notranslate"><span class="pre">decompose_instructions_from_failures</span></code>) — not one todo per verify line.
+The brief leads with fixed non-negotiables (no <code class="docutils literal notranslate"><span class="pre">eval</span></code>/<code class="docutils literal notranslate"><span class="pre">exec</span></code>/<code class="docutils literal notranslate"><span class="pre">literal_eval</span></code>,
+keep API shape) and includes the <strong>full</strong> goal text (not a short clip).</p></li>
+<li><p><strong>Restore</strong> the coding workspace filesystem checkpoint (refreshed after each
+successful suite stage and at coding-burst start / success), then retry once
+in-process with that consolidated oneshot (<code class="docutils literal notranslate"><span class="pre">decompose_auto_applied</span></code>). Empty
+checkpoints never overwrite a non-empty workspace.</p></li>
+<li><p>If the retry still fails → yield <code class="docutils literal notranslate"><span class="pre">advice_requested</span></code> with
+<code class="docutils literal notranslate"><span class="pre">context_version=decompose</span></code> (proposed brief + failures).</p></li>
+<li><p>Driver answer (<code class="docutils literal notranslate"><span class="pre">accept_proposed</span></code>, revise text, or <code class="docutils literal notranslate"><span class="pre">structured.instructions</span></code>)
+restores the baseline again and restarts; clarification becomes the plan
+(list mode when multiple instructions are supplied).</p></li>
+<li><p>After a answered <code class="docutils literal notranslate"><span class="pre">decompose</span></code>, a further failure is terminal <code class="docutils literal notranslate"><span class="pre">failed</span></code> (no
+infinite yield loop).</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">write_file</span></code> / verify also AST-refuse <code class="docutils literal notranslate"><span class="pre">eval</span></code>/<code class="docutils literal notranslate"><span class="pre">exec</span></code>/<code class="docutils literal notranslate"><span class="pre">literal_eval</span></code> cheats when
+stories ban them; repair bursts get the same semantic host-verify hints.</p>
+<p>Linear story / CLI walks can set <code class="docutils literal notranslate"><span class="pre">answer.on_decompose:</span> <span class="pre">accept_proposed</span></code> so the
+durable instrumentor drains that escalate yield once without a second YAML
+step (MCP drivers still answer interactively when they omit the flag).</p>
 </section>
 <section id="node-components">
 <h2>Node components<a class="headerlink" href="#node-components" title="Link to this heading"></a></h2>
@@ -226,7 +257,7 @@ after resume.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">scope_refinement</span></code> / <code class="docutils literal notranslate"><span class="pre">guidance_request</span></code> when yielded)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">refine_plan</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">list_refinement</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">list_refinement</span></code> / <code class="docutils literal notranslate"><span class="pre">decompose</span></code> when yielded)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pre_accept</span></code> / <code class="docutils literal notranslate"><span class="pre">item_accept</span></code> / <code class="docutils literal notranslate"><span class="pre">post_accept</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (acceptance policies)</p></td>

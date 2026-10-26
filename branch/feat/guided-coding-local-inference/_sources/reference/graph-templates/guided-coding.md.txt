@@ -33,6 +33,17 @@ stays off the Cursor account.
 Optional plan refinement (`scope_refinement` / `list_refinement`) lives on the
 tiled `instruction_todo_plan` and is requested dynamically when needed.
 
+Before the Completer runs, local work **preflights** `verify_runs`. If they
+already pass, it reports `already_satisfied` / `changes_expected=false` and
+skips implementation (Python validate is the proof). Stories that assert
+`written_files` should use `includes_if` gated on `changes_expected`.
+
+After coding `verify_runs` / work-item failure, local work may **restore the
+pre-burst workspace**, retry once with a consolidated restore-and-finish brief,
+and if that still fails yield `decompose` guidance so the frontier driver can
+clarify (see
+[Instruction todo plan](./instruction-todo-plan.md#failure-escalate-restore--consolidated-retry--guidance)).
+
 ## Node components
 
 | Parent graph node | Components |

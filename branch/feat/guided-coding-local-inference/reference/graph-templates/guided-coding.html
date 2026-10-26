@@ -178,6 +178,15 @@ stays off the Cursor account.</p>
 </table>
 <p>Optional plan refinement (<code class="docutils literal notranslate"><span class="pre">scope_refinement</span></code> / <code class="docutils literal notranslate"><span class="pre">list_refinement</span></code>) lives on the
 tiled <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code> and is requested dynamically when needed.</p>
+<p>Before the Completer runs, local work <strong>preflights</strong> <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code>. If they
+already pass, it reports <code class="docutils literal notranslate"><span class="pre">already_satisfied</span></code> / <code class="docutils literal notranslate"><span class="pre">changes_expected=false</span></code> and
+skips implementation (Python validate is the proof). Stories that assert
+<code class="docutils literal notranslate"><span class="pre">written_files</span></code> should use <code class="docutils literal notranslate"><span class="pre">includes_if</span></code> gated on <code class="docutils literal notranslate"><span class="pre">changes_expected</span></code>.</p>
+<p>After coding <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> / work-item failure, local work may <strong>restore the
+pre-burst workspace</strong>, retry once with a consolidated restore-and-finish brief,
+and if that still fails yield <code class="docutils literal notranslate"><span class="pre">decompose</span></code> guidance so the frontier driver can
+clarify (see
+<a class="reference internal" href="instruction-todo-plan.html#failure-escalate-restore--consolidated-retry--guidance"><span class="std std-ref">Instruction todo plan</span></a>).</p>
 </section>
 <section id="node-components">
 <h2>Node components<a class="headerlink" href="#node-components" title="Link to this heading"></a></h2>

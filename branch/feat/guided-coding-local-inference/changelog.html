@@ -119,6 +119,45 @@ and this project adheres to <a class="reference external" href="https://semver.o
 <section id="added">
 <h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
 <ul class="simple">
+<li><p><strong>Verify failure escalate to decompose:</strong> after <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> repair is
+exhausted (or a coding work item fails), <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> builds
+one consolidated restore-and-finish brief
+(<code class="docutils literal notranslate"><span class="pre">decompose_instructions_from_failures</span></code>), restores a pre-burst workspace
+checkpoint, and retries once in oneshot mode; if that still fails it yields
+<code class="docutils literal notranslate"><span class="pre">context_version=decompose</span></code> guidance
+(<code class="docutils literal notranslate"><span class="pre">decompose_guidance_ask</span></code>) so the driver can clarify. Escalate briefs keep
+full goal text plus a fixed no-<code class="docutils literal notranslate"><span class="pre">eval</span></code>/<code class="docutils literal notranslate"><span class="pre">exec</span></code>/<code class="docutils literal notranslate"><span class="pre">literal_eval</span></code>
+non-negotiables block (no 400-char clip).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">AnswerBody.on_decompose</span></code>:</strong> durable <code class="docutils literal notranslate"><span class="pre">answer</span></code> may drain one
+<code class="docutils literal notranslate"><span class="pre">context_version=decompose</span></code> yield (<code class="docutils literal notranslate"><span class="pre">accept_proposed</span></code>) so linear coding
+story walks reach <code class="docutils literal notranslate"><span class="pre">completed</span></code> after verify escalate. Calc CLI stages set
+<code class="docutils literal notranslate"><span class="pre">on_decompose:</span> <span class="pre">accept_proposed</span></code>.</p></li>
+<li><p><strong>Coding implementation scope preamble:</strong> project-coding tool-loop system
+prompt and per-todo work brief constrain speculative next-stage features
+while requiring previously green host checks to stay green (extend, do not
+replace). Planning / ideation paths are unchanged.</p></li>
+<li><p><strong>Coding write / verify ban on <code class="docutils literal notranslate"><span class="pre">eval</span></code> cheats:</strong> <code class="docutils literal notranslate"><span class="pre">CodingWriteGuard</span></code> refuses
+<code class="docutils literal notranslate"><span class="pre">*.py</span></code> writes that call <code class="docutils literal notranslate"><span class="pre">eval</span></code> / <code class="docutils literal notranslate"><span class="pre">exec</span></code> / <code class="docutils literal notranslate"><span class="pre">literal_eval</span></code> (AST, not
+substring). Verify hints and repair briefs use semantic “do not call …”
+wording; <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> with eval-style <code class="docutils literal notranslate"><span class="pre">text_forbids</span></code> also AST-check;
+repair bursts get the same host-verify hint list as the first attempt.</p></li>
+<li><p><strong>Coding workspace checkpoint advances on success:</strong>
+<code class="docutils literal notranslate"><span class="pre">save_coding_workspace_checkpoint</span></code> / <code class="docutils literal notranslate"><span class="pre">restore_coding_workspace_checkpoint</span></code>
+copy the suite workspace tree. Sequential suites refresh the checkpoint after
+each successful stage; <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> refreshes at burst start and
+on <code class="docutils literal notranslate"><span class="pre">ok</span></code>. Restore refuses an empty checkpoint over a non-empty workspace
+(fixes escalate wiping <code class="docutils literal notranslate"><span class="pre">calc.py</span></code> after a stale empty 010 snapshot).</p></li>
+<li><p><strong>Suite / coding <code class="docutils literal notranslate"><span class="pre">TIMING.jsonl</span></code>:</strong> sequential suites append per-stage wall
+clock (and print <code class="docutils literal notranslate"><span class="pre">STAGE</span> <span class="pre">START/OK/FAIL</span></code>); <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> appends
+burst / work-item / verify-repair / escalate spans under the suite run root
+(<code class="docutils literal notranslate"><span class="pre">…/TIMING.jsonl</span></code>), including inference timeout and coding iteration knobs
+so live dogfood can see where hours go.</p></li>
+<li><p><strong>Coding already-satisfied preflight:</strong> before the Completer runs,
+<code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> executes <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code>; if they already pass it
+returns <code class="docutils literal notranslate"><span class="pre">already_satisfied</span></code> / <code class="docutils literal notranslate"><span class="pre">changes_expected=false</span></code> without
+<code class="docutils literal notranslate"><span class="pre">write_file</span></code>. Story expect <code class="docutils literal notranslate"><span class="pre">includes_if</span></code> (calc_cli) requires
+<code class="docutils literal notranslate"><span class="pre">written_files</span></code> only when changes were expected. Override with
+<code class="docutils literal notranslate"><span class="pre">force_implement:</span> <span class="pre">true</span></code>.</p></li>
 <li><p><strong>Coding write gutting guard:</strong> <code class="docutils literal notranslate"><span class="pre">CodingWriteGuard</span></code> on project-coding
 <code class="docutils literal notranslate"><span class="pre">write_file</span></code> refuses catastrophic shrink / syntax-breaking / def-dropping
 overwrites of existing files. <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> gains <code class="docutils literal notranslate"><span class="pre">min_bytes</span></code> and
