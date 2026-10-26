@@ -318,6 +318,7 @@ def _announce(state: SuiteRunState, suite: SuiteSpec) -> None:
         f" root={state.root}",
         f" workspace={state.workspace}",
         f" manifest={state.manifest_path}",
+        f" timing={state.root / 'TIMING.jsonl'}",
         f" completed={len(state.completed_stages)}/{len(suite.stages)}"
         + (f"  from={state.from_stage}" if state.from_stage else ""),
         " Rerun from a stage:",

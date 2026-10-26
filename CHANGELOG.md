@@ -9,6 +9,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Verify failure escalate to decompose:** after ``verify_runs`` repair is
+  exhausted (or a coding work item fails), ``ProjectCodingLocalWork`` builds
+  one consolidated restore-and-finish brief
+  (``decompose_instructions_from_failures``), restores a pre-burst workspace
+  checkpoint, and retries once in oneshot mode; if that still fails it yields
+  ``context_version=decompose`` guidance
+  (``decompose_guidance_ask``) so the driver can clarify. Escalate briefs keep
+  full goal text plus a fixed no-``eval``/``exec``/``literal_eval``
+  non-negotiables block (no 400-char clip).
+
+- **``AnswerBody.on_decompose``:** durable ``answer`` may drain one
+  ``context_version=decompose`` yield (``accept_proposed``) so linear coding
+  story walks reach ``completed`` after verify escalate. Calc CLI stages set
+  ``on_decompose: accept_proposed``.
+
+- **Coding implementation scope preamble:** project-coding tool-loop system
+  prompt and per-todo work brief constrain speculative next-stage features
+  while requiring previously green host checks to stay green (extend, do not
+  replace). Planning / ideation paths are unchanged.
+
+- **Coding write / verify ban on ``eval`` cheats:** ``CodingWriteGuard`` refuses
+  ``*.py`` writes that call ``eval`` / ``exec`` / ``literal_eval`` (AST, not
+  substring). Verify hints and repair briefs use semantic “do not call …”
+  wording; ``verify_runs`` with eval-style ``text_forbids`` also AST-check;
+  repair bursts get the same host-verify hint list as the first attempt.
+
+- **Coding workspace checkpoint advances on success:** 
+  ``save_coding_workspace_checkpoint`` / ``restore_coding_workspace_checkpoint``
+  copy the suite workspace tree. Sequential suites refresh the checkpoint after
+  each successful stage; ``ProjectCodingLocalWork`` refreshes at burst start and
+  on ``ok``. Restore refuses an empty checkpoint over a non-empty workspace
+  (fixes escalate wiping ``calc.py`` after a stale empty 010 snapshot).
+
+- **Suite / coding ``TIMING.jsonl``:** sequential suites append per-stage wall
+  clock (and print ``STAGE START/OK/FAIL``); ``ProjectCodingLocalWork`` appends
+  burst / work-item / verify-repair / escalate spans under the suite run root
+  (``…/TIMING.jsonl``), including inference timeout and coding iteration knobs
+  so live dogfood can see where hours go.
+
+- **Coding already-satisfied preflight:** before the Completer runs,
+  ``ProjectCodingLocalWork`` executes ``verify_runs``; if they already pass it
+  returns ``already_satisfied`` / ``changes_expected=false`` without
+  ``write_file``. Story expect ``includes_if`` (calc_cli) requires
+  ``written_files`` only when changes were expected. Override with
+  ``force_implement: true``.
+
 - **Coding write gutting guard:** ``CodingWriteGuard`` on project-coding
   ``write_file`` refuses catastrophic shrink / syntax-breaking / def-dropping
   overwrites of existing files. ``verify_runs`` gains ``min_bytes`` and

@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import tempfile
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+from mechaharness.coding_workspace_checkpoint import save_coding_workspace_checkpoint
+from mechaharness.run_timing import announce_timing, append_timing, inference_budget_fields
 
 from tests.stories.backend import StoryBackend
 from tests.stories.harness import run_story
@@ -150,7 +154,17 @@ async def _run_sequential(
     if run is not None and not pending:
         # All stages already completed for this run id.
         return
+    if run is not None:
+        append_timing(
+            run.workspace,
+            kind="suite_start",
+            suite_id=suite.id,
+            run_id=run.run_id,
+            backend=backend.mode,
+            **inference_budget_fields(),
+        )
     for index, stage in pending:
+        stage_key = f"{stage.story}/{stage.scenario}"
         try:
             case = resolve_stage_story_case(stage, model_filter=backend.model_filter)
         except LookupError as exc:
@@ -158,14 +172,33 @@ async def _run_sequential(
         if backend.mode == "live" and not live_eligible(case):
             if run is not None:
                 run.mark_completed(stage)
+                append_timing(
+                    run.workspace,
+                    kind="suite_stage",
+                    stage=stage_key,
+                    status="skipped_live_ineligible",
+                    elapsed_s=0.0,
+                )
             continue
         if run is not None:
             run.snapshot_workspace(stage)
+        announce_timing(f" STAGE START  {stage_key}")
+        t0 = time.perf_counter()
         try:
             await run_story(case, backend, suite_workspace=ctx.workspace)
         except Exception as exc:
+            elapsed = time.perf_counter() - t0
             if run is not None:
                 run.mark_failed(stage)
+                append_timing(
+                    run.workspace,
+                    kind="suite_stage",
+                    stage=stage_key,
+                    status="failed",
+                    elapsed_s=elapsed,
+                    error=str(exc)[:500],
+                )
+            announce_timing(f" STAGE FAIL   {stage_key}  {elapsed:.1f}s")
             remaining = suite.stages[index + 1 :]
             skip_note = ""
             if remaining:
@@ -177,13 +210,26 @@ async def _run_sequential(
                     f"\n suite_run_id={run.run_id}"
                     f"\n resume: MECHA_SUITE_RUN_ID={run.run_id} "
                     f"MECHA_SUITE_FROM={stage.story}/{stage.scenario}"
+                    f"\n timing: {run.root / 'TIMING.jsonl'}"
                 )
             raise AssertionError(
                 f"suite {suite.id!r} stage {stage.story}/{stage.scenario} "
                 f"failed{skip_note}: {exc}{run_note}"
             ) from exc
+        elapsed = time.perf_counter() - t0
+        announce_timing(f" STAGE OK     {stage_key}  {elapsed:.1f}s")
         if run is not None:
             run.mark_completed(stage)
+            append_timing(
+                run.workspace,
+                kind="suite_stage",
+                stage=stage_key,
+                status="ok",
+                elapsed_s=elapsed,
+            )
+            # Advance coding escalate baseline to this green workspace so the
+            # next stage (or mid-stage restore) does not rewind to empty 010.
+            save_coding_workspace_checkpoint(run.workspace)
 
 
 __all__ = [

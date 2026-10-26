@@ -1,8 +1,9 @@
 """Refuse catastrophic overwrites from coding-delegate ``write_file``.
 
 Local Completers sometimes "gut" an existing module — replace a large file
-with a tiny broken stub. :class:`CodingWriteGuard` blocks that at the tool
-boundary before the filesystem changes stick.
+with a tiny broken stub — or cheat with ``eval`` / ``exec``. 
+:class:`CodingWriteGuard` blocks that at the tool boundary before the
+filesystem changes stick.
 """
 
 from __future__ import annotations
@@ -11,6 +12,9 @@ import ast
 from dataclasses import dataclass
 from pathlib import Path
 
+# Call names Completers use to skip implementing a real parser.
+_FORBIDDEN_DYNAMIC_EXEC = frozenset({"eval", "exec", "literal_eval"})
+
 
 @dataclass(frozen=True)
 class CodingWriteGuard:
@@ -18,7 +22,7 @@ class CodingWriteGuard:
 
     Defaults match the observed failure mode: an existing multi-kilobyte
     ``.py`` file replaced by a handful of lines that no longer parse or retain
-    prior top-level definitions.
+    prior top-level definitions, or a rewrite that calls ``eval`` / ``exec``.
     """
 
     # New content must be at least this fraction of the prior byte length when
@@ -31,6 +35,8 @@ class CodingWriteGuard:
     require_python_parse: bool = True
     # When True, refuse if every prior top-level def/class name disappears.
     require_retain_some_defs: bool = True
+    # When True, refuse ``*.py`` that call eval / exec / ast.literal_eval.
+    forbid_eval_exec: bool = True
 
     def check(
         self,
@@ -46,7 +52,11 @@ class CodingWriteGuard:
 
         if existing is None:
             if suffix == ".py" and self.require_python_parse:
-                return _python_parse_error(rel, text)
+                err = _python_parse_error(rel, text)
+                if err:
+                    return err
+            if suffix == ".py" and self.forbid_eval_exec:
+                return _eval_exec_refuse_message(rel, text)
             return None
 
         old = existing
@@ -74,6 +84,11 @@ class CodingWriteGuard:
             if err:
                 return err
 
+        if suffix == ".py" and self.forbid_eval_exec:
+            err = _eval_exec_refuse_message(rel, text)
+            if err:
+                return err
+
         if (
             suffix == ".py"
             and self.require_retain_some_defs
@@ -88,6 +103,51 @@ class CodingWriteGuard:
                     f"defs/classes ({sample}) — looks like file gutting"
                 )
         return None
+
+
+def find_forbidden_dynamic_exec_calls(source: str) -> list[str]:
+    """Return ``eval`` / ``exec`` / ``literal_eval`` call names found in *source*.
+
+    Uses AST (not substring search) so ``eval (`` spacing and
+    ``ast.literal_eval`` / ``builtins.eval`` still match. Returns unique names
+    in encounter order. Empty when the source does not parse.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return []
+    found: list[str] = []
+    seen: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _forbidden_call_label(node.func)
+        if name is None or name in seen:
+            continue
+        seen.add(name)
+        found.append(name)
+    return found
+
+
+def _forbidden_call_label(func: ast.AST) -> str | None:
+    if isinstance(func, ast.Name) and func.id in _FORBIDDEN_DYNAMIC_EXEC:
+        return func.id
+    if isinstance(func, ast.Attribute) and func.attr in _FORBIDDEN_DYNAMIC_EXEC:
+        if isinstance(func.value, ast.Name):
+            return f"{func.value.id}.{func.attr}"
+        return func.attr
+    return None
+
+
+def _eval_exec_refuse_message(rel: str, text: str) -> str | None:
+    hits = find_forbidden_dynamic_exec_calls(text)
+    if not hits:
+        return None
+    labeled = ", ".join(hits)
+    return (
+        f"refused write to {rel}: do not call {labeled} on user input — "
+        "implement a real expression parser (eval/exec/literal_eval are banned)"
+    )
 
 
 def _python_parse_error(rel: str, text: str) -> str | None:
@@ -112,4 +172,8 @@ def _top_level_defs(source: str) -> set[str]:
 
 DEFAULT_CODING_WRITE_GUARD = CodingWriteGuard()
 
-__all__ = ["CodingWriteGuard", "DEFAULT_CODING_WRITE_GUARD"]
+__all__ = [
+    "CodingWriteGuard",
+    "DEFAULT_CODING_WRITE_GUARD",
+    "find_forbidden_dynamic_exec_calls",
+]

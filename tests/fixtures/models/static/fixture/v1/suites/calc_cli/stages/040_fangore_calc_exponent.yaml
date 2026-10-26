@@ -86,6 +86,7 @@ steps:
 - do:
     answer:
       choose: minimal
+      on_decompose: accept_proposed
   expect:
   - kind: equals
     key: kind
@@ -93,7 +94,9 @@ steps:
   - kind: gte
     key: resumes
     value: 1
-  - kind: includes
+  - kind: includes_if
+    if_key: changes_expected
+    if_equals: true
     key: written_files
     value:
     - calc.py

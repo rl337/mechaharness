@@ -70,6 +70,23 @@ class _GuardCase:
     needle: str | None = None
 
 
+_EVAL_CHEAT = '''\
+import sys
+def evaluate(expr):
+    return eval(expr)
+def main(argv=None):
+    print(evaluate(argv[0] if argv else sys.argv[1]))
+    return 0
+'''
+
+_AST_LITERAL_EVAL_CHEAT = '''\
+import ast
+def evaluate(expr):
+    return ast.literal_eval(expr)
+def main(argv=None):
+    return 0
+'''
+
 _GUARD_CASES = [
     _GuardCase(
         id="allow_new_file",
@@ -104,6 +121,20 @@ _GUARD_CASES = [
         new=("# wiped\n" + ("x = 1\n" * 400)),
         expect_refuse=True,
         needle="dropped all prior",
+    ),
+    _GuardCase(
+        id="refuse_eval_new_file",
+        existing=None,
+        new=_EVAL_CHEAT,
+        expect_refuse=True,
+        needle="eval",
+    ),
+    _GuardCase(
+        id="refuse_literal_eval",
+        existing=None,
+        new=_AST_LITERAL_EVAL_CHEAT,
+        expect_refuse=True,
+        needle="literal_eval",
     ),
 ]
 
@@ -157,6 +188,32 @@ def test_write_file_tool_allows_legitimate_growth(tmp_path: Path) -> None:
     result = write.handler(path="mod.py", content=expanded)
     assert result.startswith("wrote ")
     assert "extra" in (root / "mod.py").read_text(encoding="utf-8")
+
+
+def test_write_file_tool_refuses_eval_cheat(tmp_path: Path) -> None:
+    root = tmp_path
+    (root / "calc.py").write_text(
+        "def evaluate(expr):\n    return float(expr)\n",
+        encoding="utf-8",
+    )
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(root),
+        filesystem=RealFilesystem(),
+    )
+    write = tools.get("write_file")
+    assert write is not None
+    before = (root / "calc.py").read_text(encoding="utf-8")
+    result = write.handler(path="calc.py", content=_EVAL_CHEAT)
+    assert "refused" in result.lower()
+    assert "eval" in result.lower()
+    assert (root / "calc.py").read_text(encoding="utf-8") == before
+
+
+def test_find_forbidden_dynamic_exec_calls_spacing() -> None:
+    from mechaharness.coding_write_guard import find_forbidden_dynamic_exec_calls
+
+    src = "def evaluate(expr):\n    return eval (expr)\n"
+    assert "eval" in find_forbidden_dynamic_exec_calls(src)
 
 
 def test_custom_guard_can_be_stricter(tmp_path: Path) -> None:

@@ -256,6 +256,27 @@ def test_parse_prompt_tool_calls_balanced_json() -> None:
     assert "class X" in calls[0]["function"]["arguments"]["content"]
 
 
+def test_prompt_tools_system_includes_implementation_scope_discipline() -> None:
+    """Coding tool-loop preamble must constrain scope (not planning/ideation)."""
+    from mechaharness.project_coding import _prompt_tools_system
+    from mechaharness.tools.base import Tool
+
+    prompt = _prompt_tools_system(
+        [
+            Tool(
+                name="write_file",
+                handler=lambda **_: "ok",
+                description="write",
+                parameters={"type": "object"},
+            )
+        ]
+    )
+    assert "Scope discipline (implementation step)" in prompt
+    assert "Extending is not replacing" in prompt
+    assert "previously green host check" in prompt
+    assert "Leave truly unrequested next features" in prompt
+
+
 def test_normalize_assistant_parses_tool_calls_from_reasoning() -> None:
     """Thinking models may put <tool_call> only in reasoning_content."""
     from mechaharness.core.types import ChatMessage, CompletionResponse, Role
@@ -568,6 +589,204 @@ def test_project_coding_verify_repair_continues_after_empty_round(
         if str(r.get("item_id") or "").startswith("verify_repair")
     ]
     assert len(repair_ids) >= 2
+
+
+def test_project_coding_already_satisfied_skips_completer(tmp_path: Path) -> None:
+    """When host verify_runs already pass, report already_satisfied and do not write."""
+    from pyiv.files import RealFilesystem
+
+    from mechaharness.durable_graph_generator import GeneratorRunRecord
+
+    fs = RealFilesystem()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path), filesystem=fs
+    )
+    (tmp_path / "calc.py").write_text(
+        "def evaluate(expr):\n    return float(expr)\n\n"
+        "def main(argv=None):\n    import sys\n"
+        "    print(int(evaluate(sys.argv[1])))\n    return 0\n\n"
+        "if __name__ == '__main__':\n    raise SystemExit(main())\n",
+        encoding="utf-8",
+    )
+    calls = {"n": 0}
+
+    def complete(messages: object, meta: object) -> dict:
+        del messages, meta
+        calls["n"] += 1
+        return {"role": "assistant", "content": "should not run", "tool_calls": []}
+
+    work = ProjectCodingLocalWork(
+        tools=tools, complete=complete, workspace_root=tmp_path, max_iterations=4
+    )
+    out = work.run(
+        GeneratorRunRecord(
+            run_id="already",
+            recipe_id="guided_coding",
+            graph_id="g",
+            controller_id="c",
+            inputs={
+                "goal": "Add nothing; 42 must already work",
+                "max_iterations": 4,
+                "verify_runs": [
+                    {
+                        "path": "calc.py",
+                        "args": ["42"],
+                        "stdout_contains": "42",
+                        "exit_code": 0,
+                    }
+                ],
+            },
+            guidance_history=[{"response": {"choice_id": "minimal"}}],
+        )
+    )
+    assert out.get("result") == "ok"
+    assert out.get("already_satisfied") is True
+    assert out.get("changes_expected") is False
+    assert out.get("written_files") == []
+    assert calls["n"] == 0
+
+
+def test_project_coding_auto_decompose_consolidated_retry_succeeds(
+    tmp_path: Path,
+) -> None:
+    """After repair-exhausted verify fails, one consolidated retry can pass."""
+    from pyiv.files import RealFilesystem
+
+    from mechaharness.durable_graph_generator import GeneratorRunRecord
+
+    fs = RealFilesystem()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path), filesystem=fs
+    )
+    # Seed a green-ish baseline so escalate restore has something to copy.
+    (tmp_path / "seed.txt").write_text("keep\n", encoding="utf-8")
+    bad = "print('x')\n"
+    good = (
+        "def evaluate(expr):\n    return float(expr)\n\n"
+        "def main(argv=None):\n    return 0\n"
+    )
+    state = {"n": 0, "wrote_good": False}
+
+    def complete(messages: object, meta: object) -> dict:
+        del meta
+        state["n"] += 1
+        blob = repr(messages)
+        # Consolidated escalate brief cites failing checks; only then write good.
+        escalate_phase = "Failing checks:" in blob or "Re-establish every" in blob
+        content = good if escalate_phase else bad
+        if escalate_phase:
+            state["wrote_good"] = True
+        if state["n"] % 2 == 1:
+            return {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": f"w{state['n']}",
+                        "function": {
+                            "name": "write_file",
+                            "arguments": {"path": "calc.py", "content": content},
+                        },
+                    }
+                ],
+            }
+        return {"role": "assistant", "content": "done", "tool_calls": []}
+
+    work = ProjectCodingLocalWork(
+        tools=tools, complete=complete, workspace_root=tmp_path, max_iterations=4
+    )
+    out = work.run(
+        GeneratorRunRecord(
+            run_id="auto-decomp",
+            recipe_id="guided_coding",
+            graph_id="g",
+            controller_id="c",
+            inputs={
+                "goal": "Write calc.py with evaluate and main",
+                "max_iterations": 4,
+                "max_repair_rounds": 0,
+                "verify_runs": [
+                    {
+                        "path": "calc.py",
+                        "text_contains": ["def evaluate", "def main"],
+                    }
+                ],
+            },
+            guidance_history=[{"response": {"choice_id": "minimal"}}],
+        )
+    )
+    assert out.get("result") == "ok"
+    assert out.get("decompose_auto_applied") is True
+    assert state["wrote_good"] is True
+    assert "def main" in (tmp_path / "calc.py").read_text()
+    # Baseline seed survives the bad first write because escalate restores.
+    assert (tmp_path / "seed.txt").read_text(encoding="utf-8") == "keep\n"
+
+
+def test_project_coding_decompose_yield_when_consolidated_retry_fails(
+    tmp_path: Path,
+) -> None:
+    """If consolidated escalate retry still fails, yield ``decompose``."""
+    from pyiv.files import RealFilesystem
+
+    from mechaharness.durable_graph_generator import GeneratorRunRecord
+
+    fs = RealFilesystem()
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(tmp_path), filesystem=fs
+    )
+    bad = "print('x')\n"
+    state = {"n": 0}
+
+    def complete(messages: object, meta: object) -> dict:
+        del meta
+        state["n"] += 1
+        if state["n"] % 2 == 1:
+            return {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": f"w{state['n']}",
+                        "function": {
+                            "name": "write_file",
+                            "arguments": {"path": "calc.py", "content": bad},
+                        },
+                    }
+                ],
+            }
+        return {"role": "assistant", "content": "done", "tool_calls": []}
+
+    work = ProjectCodingLocalWork(
+        tools=tools, complete=complete, workspace_root=tmp_path, max_iterations=4
+    )
+    out = work.run(
+        GeneratorRunRecord(
+            run_id="decomp-yield",
+            recipe_id="guided_coding",
+            graph_id="g",
+            controller_id="c",
+            inputs={
+                "goal": "Write calc.py with evaluate and main",
+                "max_iterations": 4,
+                "max_repair_rounds": 0,
+                "verify_runs": [
+                    {
+                        "path": "calc.py",
+                        "text_contains": ["def evaluate", "def main"],
+                    }
+                ],
+            },
+            guidance_history=[{"response": {"choice_id": "minimal"}}],
+        )
+    )
+    assert out.get("result") == "needs_guidance"
+    assert out.get("plan_phase") == "decompose"
+    asks = out.get("request_guidance") or []
+    assert asks and asks[0].get("context_version") == "decompose"
+    proposed = asks[0].get("proposed_instructions") or []
+    assert len(proposed) == 1
+    assert "Re-establish every previously green" in proposed[0]
 
 
 def test_project_coding_write_recovery_nudge(tmp_path: Path) -> None:

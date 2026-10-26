@@ -189,3 +189,76 @@ def test_generator_request_guidance_then_restart() -> None:
     )
     assert y2.kind == "completed"
     assert y2.payload.get("restarted") is True
+
+
+class _DecomposeLocalWork(GeneratorLocalWork):
+    """First call yields decompose; after answer, builds list plan and completes."""
+
+    def run(self, record: GeneratorRunRecord) -> dict:
+        from mechaharness.instruction_plan import (
+            build_instruction_plan,
+            decompose_guidance_ask,
+            guidance_asks_to_payloads,
+            has_answered_decompose,
+        )
+
+        if not has_answered_decompose(list(record.guidance_history)):
+            ask = decompose_guidance_ask(
+                ["verify boom A", "verify boom B"],
+                ["fix A", "fix B"],
+            )
+            return {
+                "result": "needs_guidance",
+                "request_guidance": guidance_asks_to_payloads([ask]),
+                "plan_phase": "decompose",
+            }
+        built = build_instruction_plan(
+            dict(record.inputs or {}),
+            guidance_history=list(record.guidance_history),
+        )
+        assert built.plan is not None
+        assert built.plan.mode == "list"
+        assert len(built.plan.items) == 2
+        return {
+            "result": "ok",
+            "restarted": True,
+            "mode": built.plan.mode,
+            "plan": {
+                "items": [{"instruction": i.instruction} for i in built.plan.items]
+            },
+        }
+
+
+def test_generator_decompose_guidance_then_restart() -> None:
+    store = InMemoryGeneratorRunStore()
+    gen = DurableGraphGenerator(
+        registry=default_graph_templates(),
+        run_store=store,
+        event_log=InMemoryEventLog(),
+        datetime_service=PythonDateTimeService(),
+        local_work=_DecomposeLocalWork(),
+    )
+    y1 = gen.start(
+        "instruction_todo_plan",
+        {"goal": "oneshot that will escalate"},
+        controller_id="unit",
+        run_id="plan-decomp-1",
+    )
+    assert y1.kind == "advice_requested"
+    assert y1.payload.get("context_version") == "decompose"
+    assert y1.payload.get("proposed_instructions") == ["fix A", "fix B"]
+    y2 = gen.resume(
+        y1.run_id,
+        GuidanceResponse(
+            request_id=y1.request_id or "",
+            choice_id="accept_proposed",
+        ),
+        expected_sequence=y1.sequence,
+        controller_id="unit",
+        idempotency_key="plan-decomp-1:1",
+    )
+    assert y2.kind == "completed"
+    assert y2.payload.get("restarted") is True
+    assert y2.payload.get("mode") == "list"
+    items = (y2.payload.get("plan") or {}).get("items") or []
+    assert [i["instruction"] for i in items] == ["fix A", "fix B"]

@@ -60,6 +60,9 @@ class AnswerBody(BaseModel):
     replay: bool = False
     # Deliberately send a stale expected_sequence.
     stale: bool = False
+    # When resume yields ``context_version=decompose``, optionally drain once
+    # (coding verify escalate) so linear story walks can still reach completed.
+    on_decompose: Literal["accept_proposed", "ignore"] | None = None
 
 
 class InspectBody(BaseModel):
@@ -175,6 +178,9 @@ class StepObservation(BaseModel):
             "error",
             "written_files",
             "workspace_root",
+            "already_satisfied",
+            "changes_expected",
+            "message",
         }
     )
 
@@ -318,6 +324,7 @@ class DurableInstrumentor:
 
         previous = self._last_yield
         self._note_yield(y)
+        y = self._drain_decompose_if_requested(body, y, controller=controller)
         obs = self._from_yield("answer", y, inspect=True)
         if previous is not None:
             obs = obs.model_copy(
@@ -330,6 +337,62 @@ class DurableInstrumentor:
                 }
             )
         return obs
+
+    def _drain_decompose_if_requested(
+        self,
+        body: AnswerBody,
+        y: GraphYield,
+        *,
+        controller: str,
+    ) -> GraphYield:
+        """Resume once when escalate yields ``decompose`` and body opts in.
+
+        Also drains a single ``list_refinement`` escalate mis-route (accept_risk)
+        so linear walks are not stranded if conflict heuristics fire on
+        host-built todos; prefer fixing those heuristics separately.
+        """
+        policy = (body.on_decompose or "ignore").strip().lower()
+        if policy != "accept_proposed":
+            return y
+        if y.kind != "advice_requested" or self._run_id is None:
+            return y
+        ctx = str((y.payload or {}).get("context_version") or "")
+        if ctx == "decompose":
+            choice = "accept_proposed"
+        elif ctx == "list_refinement":
+            choice = "accept_risk"
+        else:
+            return y
+        request_id = y.request_id or ""
+        drain = GuidanceBinding(
+            choose=choice,
+            choice_id=choice,
+            request_id=request_id,
+        )
+        try:
+            nxt = self._gen.resume(
+                self._run_id,
+                drain.to_response(request_id=request_id),
+                expected_sequence=y.sequence,
+                request_id=request_id or None,
+                controller_id=controller,
+                idempotency_key=(
+                    f"{body.idempotency_key}:decompose"
+                    if body.idempotency_key
+                    else None
+                ),
+            )
+        except (PermissionError, ValueError):
+            return y
+        self._note_yield(nxt)
+        # If accept_risk then immediately yields decompose, drain that too once.
+        if (
+            ctx == "list_refinement"
+            and nxt.kind == "advice_requested"
+            and str((nxt.payload or {}).get("context_version") or "") == "decompose"
+        ):
+            return self._drain_decompose_if_requested(body, nxt, controller=controller)
+        return nxt
 
     def _do_inspect(self, body: InspectBody) -> StepObservation:
         run_id = body.run_id or self._run_id

@@ -210,6 +210,39 @@ class IncludesAssertion(CliAssertion):
             raise AssertionError(f"{body.key}: missing {missing} in {got}")
 
 
+class _IncludesIfParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str
+    value: list[Any]
+    if_key: str
+    if_equals: Any = True
+
+
+class IncludesIfAssertion(CliAssertion):
+    """Like ``includes``, but only when ``observation[if_key] == if_equals``.
+
+    Used when a write ledger is required only if the coding burst expected
+    changes (not when host verify was already green / ``already_satisfied``).
+    """
+
+    kind = "includes_if"
+    params_model = _IncludesIfParams
+
+    def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
+        body = cast(_IncludesIfParams, params)
+        gate = observation.get(body.if_key)
+        if gate != body.if_equals:
+            return
+        got = _lookup(observation, body.key)
+        missing = [item for item in body.value if item not in got]
+        if missing:
+            raise AssertionError(
+                f"{body.key}: missing {missing} in {got} "
+                f"(required because {body.if_key}={body.if_equals!r})"
+            )
+
+
 class _GteParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -300,6 +333,7 @@ def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
         FalseAssertion.kind: FalseAssertion,
         ErrorAssertion.kind: ErrorAssertion,
         IncludesAssertion.kind: IncludesAssertion,
+        IncludesIfAssertion.kind: IncludesIfAssertion,
         GteAssertion.kind: GteAssertion,
         LteAssertion.kind: LteAssertion,
         ContainsAssertion.kind: ContainsAssertion,

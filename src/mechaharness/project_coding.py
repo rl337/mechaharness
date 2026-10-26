@@ -366,6 +366,11 @@ def _prompt_tools_system(tool_defs: list[Any]) -> str:
         "Read existing files first; preserve prior behavior and APIs while adding "
         "the requested change (do not drop floats, operators, tests, or CLI entry "
         "points that already work).\n"
+        "Scope discipline (implementation step): do not add speculative "
+        "next-stage grammar, extra APIs, or drive-by refactors beyond the "
+        "request. Extending is not replacing — keep every previously green "
+        "host check working while you add what this todo / goal asks for. "
+        "Leave truly unrequested next features for a later explicit step.\n"
         f"Available tools:\n{json.dumps(catalog, indent=2)}"
     )
 

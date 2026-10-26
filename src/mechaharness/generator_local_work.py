@@ -19,6 +19,11 @@ from typing import Any
 
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
+from mechaharness.coding_workspace_checkpoint import (
+    restore_coding_workspace_checkpoint,
+    save_coding_workspace_checkpoint,
+)
+from mechaharness.coding_write_guard import find_forbidden_dynamic_exec_calls
 from mechaharness.conversational_tool_loop_runner import ConversationalToolLoopRunner
 from mechaharness.core.access import FsRead, FsWrite, GraphExecute, ProcessExec
 from mechaharness.durable_graph_generator import GeneratorRunRecord
@@ -26,11 +31,15 @@ from mechaharness.graph_templates.base import GraphTemplateParams
 from mechaharness.graph_templates.conversational_tool_loop import (
     ConversationalToolLoopTemplate,
 )
+from mechaharness.inference_progress import inference_timeout_seconds
 from mechaharness.instruction_plan import (
     InstructionPlan,
     TodoItem,
     build_instruction_plan,
+    decompose_guidance_ask,
+    decompose_instructions_from_failures,
     guidance_asks_to_payloads,
+    has_answered_decompose,
     verify_acceptance,
 )
 from mechaharness.mcp_progress import (
@@ -38,6 +47,7 @@ from mechaharness.mcp_progress import (
     get_mcp_progress,
     report_mcp_progress,
 )
+from mechaharness.run_timing import TimingSpan, append_timing, inference_budget_fields
 from mechaharness.tools.base import ToolRegistry
 
 _PLAN_RECIPES = frozenset(
@@ -164,9 +174,68 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         if rel and rel not in self._written_files:
             self._written_files.append(rel)
 
+    def _refresh_baseline_checkpoint(self) -> None:
+        """Snapshot current workspace so escalate restore undoes this burst only."""
+        if self._workspace_root:
+            save_coding_workspace_checkpoint(self._workspace_root)
+
+    def _restore_baseline_checkpoint(self) -> bool:
+        """Replace workspace from the latest coding checkpoint (suite or burst)."""
+        if not self._workspace_root:
+            return False
+        return restore_coding_workspace_checkpoint(self._workspace_root)
+
     async def _run_async(self, record: GeneratorRunRecord) -> dict[str, Any]:
         self._written_files = []
-        inputs = dict(record.inputs or {})
+        # After a decompose answer, prefer the last successful / burst baseline
+        # over a prior attempt's broken writes — then refresh so this attempt's
+        # escalate restores here, not an older empty suite-start tree.
+        if has_answered_decompose(list(record.guidance_history)):
+            self._restore_baseline_checkpoint()
+        self._refresh_baseline_checkpoint()
+        burst = TimingSpan(
+            self._workspace_root,
+            kind="coding_burst",
+            recipe_id=record.recipe_id,
+            run_id=record.run_id,
+            max_iterations=int(
+                (record.inputs or {}).get("max_iterations") or self._max_iterations
+            ),
+            max_repair_rounds=int(
+                (record.inputs or {}).get("max_repair_rounds", 6)
+            ),
+            inference_timeout_s=inference_timeout_seconds(),
+            answered_decompose=has_answered_decompose(
+                list(record.guidance_history)
+            ),
+            **inference_budget_fields(),
+        )
+        out = await self._run_async_body(
+            record,
+            inputs=dict(record.inputs or {}),
+            auto_escalated=False,
+            prior_item_results=[],
+        )
+        burst.end(
+            result=out.get("result"),
+            decompose_auto_applied=out.get("decompose_auto_applied"),
+            plan_phase=out.get("plan_phase"),
+            verify_runs=out.get("verify_runs"),
+            item_result_count=len(out.get("item_results") or []),
+            written_files=out.get("written_files"),
+        )
+        if out.get("result") == "ok" and self._workspace_root:
+            save_coding_workspace_checkpoint(self._workspace_root)
+        return out
+
+    async def _run_async_body(
+        self,
+        record: GeneratorRunRecord,
+        *,
+        inputs: dict[str, Any],
+        auto_escalated: bool,
+        prior_item_results: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         built = build_instruction_plan(
             inputs, guidance_history=list(record.guidance_history)
         )
@@ -196,7 +265,36 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 **self._artifact_fields(),
             }
 
-        item_results: list[dict[str, Any]] = []
+        # Host ask: do verify_runs already pass? If so, report already-exists and
+        # skip the Completer — Python validate is the proof; no write required.
+        force_implement = bool(inputs.get("force_implement"))
+        verify_runs = _normalize_verify_runs(inputs.get("verify_runs"))
+        if verify_runs and not force_implement:
+            preflight_failures = self._execute_verify_runs(verify_runs)
+            if not preflight_failures:
+                append_timing(
+                    self._workspace_root,
+                    kind="coding_already_satisfied",
+                    recipe_id=record.recipe_id,
+                    run_id=record.run_id,
+                    verify_runs=len(verify_runs),
+                )
+                return {
+                    "result": "ok",
+                    "already_satisfied": True,
+                    "changes_expected": False,
+                    "mode": plan.mode,
+                    "plan": _plan_payload(plan),
+                    "item_results": list(prior_item_results),
+                    "verify_runs": len(verify_runs),
+                    "message": (
+                        "Host verify_runs already pass — requested behavior "
+                        "already exists; no write_file required."
+                    ),
+                    **self._artifact_fields(),
+                }
+
+        item_results: list[dict[str, Any]] = list(prior_item_results)
         prefix = coding_progress_prefix(record.recipe_id)
         progress = get_mcp_progress()
         if progress is not None:
@@ -204,16 +302,32 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             progress.report("plan")
         for item_index, item in enumerate(plan.items, start=1):
             report_mcp_progress(f"work_item {item_index}")
+            item_span = TimingSpan(
+                self._workspace_root,
+                kind="coding_work_item",
+                item_id=item.id,
+                work_item_index=item_index,
+                recipe_id=record.recipe_id,
+                run_id=record.run_id,
+            )
             item_out = await self._run_item(
                 record, plan, item, work_item_index=item_index, path_prefix=prefix
             )
+            item_span.end(result=item_out.get("result"))
             if item_out.get("result") == "failed":
-                return {
-                    **item_out,
-                    "plan": _plan_payload(plan),
-                    "item_results": item_results,
-                    **self._artifact_fields(),
-                }
+                fail_lines = [
+                    str(item_out.get("error") or "work_item_failed"),
+                    f"item {item.id}: {item.instruction}",
+                ]
+                return await self._escalate_after_failures(
+                    record,
+                    inputs=inputs,
+                    plan=plan,
+                    failures=fail_lines,
+                    item_results=item_results + [{**item_out, "item_id": item.id}],
+                    auto_escalated=auto_escalated,
+                    error_prefix="work_item_failed",
+                )
             item_checks = _acceptance_checks(
                 inputs, "item_acceptance_checks", item_id=item.id
             )
@@ -224,15 +338,18 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 item.acceptance, evidence=evidence, checks=item_checks
             )
             if item.acceptance and item_checks and not ok:
-                return {
-                    "result": "failed",
-                    "error": "item_acceptance_failed",
-                    "item_id": item.id,
-                    "failures": failures,
-                    "plan": _plan_payload(plan),
-                    "item_results": item_results + [item_out],
-                    **self._artifact_fields(),
-                }
+                fail_lines = [f"item_acceptance:{item.id}:{f}" for f in failures] or [
+                    f"item_acceptance_failed:{item.id}"
+                ]
+                return await self._escalate_after_failures(
+                    record,
+                    inputs=inputs,
+                    plan=plan,
+                    failures=fail_lines,
+                    item_results=item_results + [item_out],
+                    auto_escalated=auto_escalated,
+                    error_prefix="item_acceptance_failed",
+                )
             item_results.append({**item_out, "item_id": item.id, "accepted": True})
 
         post_checks = _acceptance_checks(inputs, "post_acceptance_checks")
@@ -243,19 +360,26 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             plan.post_acceptance, evidence=post_evidence, checks=post_checks
         )
         if plan.post_acceptance and post_checks and not post_ok:
-            return {
-                "result": "failed",
-                "error": "post_acceptance_failed",
-                "failures": post_fail,
-                "plan": _plan_payload(plan),
-                "item_results": item_results,
-                **self._artifact_fields(),
-            }
+            return await self._escalate_after_failures(
+                record,
+                inputs=inputs,
+                plan=plan,
+                failures=[f"post_acceptance:{f}" for f in post_fail] or [
+                    "post_acceptance_failed"
+                ],
+                item_results=item_results,
+                auto_escalated=auto_escalated,
+                error_prefix="post_acceptance_failed",
+            )
 
-        verify_runs = _normalize_verify_runs(inputs.get("verify_runs"))
+        # Reuse preflight-normalized list when present; else normalize now.
+        if not verify_runs:
+            verify_runs = _normalize_verify_runs(inputs.get("verify_runs"))
         verify_failures = self._execute_verify_runs(verify_runs)
         repair_rounds = 0
-        max_repair_rounds = 6
+        max_repair_rounds = int(inputs.get("max_repair_rounds", 6))
+        if max_repair_rounds < 0:
+            max_repair_rounds = 0
         while (
             verify_failures
             and "write_file" in self._tools
@@ -272,6 +396,15 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 instruction=repair_goal,
                 acceptance=[],
             )
+            repair_span = TimingSpan(
+                self._workspace_root,
+                kind="coding_verify_repair",
+                round=repair_rounds,
+                max_rounds=max_repair_rounds,
+                failure_count=len(verify_failures),
+                recipe_id=record.recipe_id,
+                run_id=record.run_id,
+            )
             repair_out = await self._run_item(
                 record,
                 plan,
@@ -279,27 +412,128 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 work_item_index=len(plan.items) + repair_rounds,
                 path_prefix=prefix,
             )
+            repair_span.end(result=repair_out.get("result"))
             item_results.append({**repair_out, "item_id": repair_item.id})
             # Keep spending remaining rounds even when a tool-loop times out or
             # returns failed — one bad inference must not dump verify progress.
             verify_failures = self._execute_verify_runs(verify_runs)
         if verify_failures:
-            return {
-                "result": "failed",
-                "error": "verify_runs_failed: " + "; ".join(verify_failures),
-                "verify_failures": verify_failures,
-                "plan": _plan_payload(plan),
-                "item_results": item_results,
-                **self._artifact_fields(),
-            }
+            return await self._escalate_after_failures(
+                record,
+                inputs=inputs,
+                plan=plan,
+                failures=list(verify_failures),
+                item_results=item_results,
+                auto_escalated=auto_escalated,
+                error_prefix="verify_runs_failed",
+            )
 
         return {
             "result": "ok",
+            "already_satisfied": False,
+            "changes_expected": True,
             "mode": plan.mode,
             "plan": _plan_payload(plan),
             "item_results": item_results,
             "guidance": _latest_guidance_text(record),
             "verify_runs": len(verify_runs),
+            "decompose_auto_applied": bool(auto_escalated),
+            **self._artifact_fields(),
+        }
+
+    async def _escalate_after_failures(
+        self,
+        record: GeneratorRunRecord,
+        *,
+        inputs: dict[str, Any],
+        plan: InstructionPlan,
+        failures: list[str],
+        item_results: list[dict[str, Any]],
+        auto_escalated: bool,
+        error_prefix: str,
+    ) -> dict[str, Any]:
+        """Repair-exhausted path: restore baseline, one consolidated retry, else yield.
+
+        After a answered ``decompose`` guidance round, further failure is
+        terminal (no infinite yield loop).
+        """
+        goal = str(inputs.get("goal") or inputs.get("task") or "")
+        proposed = decompose_instructions_from_failures(goal, failures)
+        already_human = has_answered_decompose(list(record.guidance_history))
+
+        if already_human:
+            append_timing(
+                self._workspace_root,
+                kind="coding_escalate",
+                action="terminal_failed",
+                error_prefix=error_prefix,
+                failure_count=len(failures),
+                recipe_id=record.recipe_id,
+                run_id=record.run_id,
+            )
+            return {
+                "result": "failed",
+                "error": f"{error_prefix}: " + "; ".join(failures),
+                "verify_failures": failures,
+                "plan": _plan_payload(plan),
+                "item_results": item_results,
+                **self._artifact_fields(),
+            }
+
+        # One silent retry with the consolidated brief on the pre-burst tree.
+        # Avoids N per-verify rewrites thrashing a still-salvageable workspace.
+        if not auto_escalated and proposed:
+            append_timing(
+                self._workspace_root,
+                kind="coding_escalate",
+                action="auto_retry",
+                error_prefix=error_prefix,
+                failure_count=len(failures),
+                recipe_id=record.recipe_id,
+                run_id=record.run_id,
+            )
+            self._restore_baseline_checkpoint()
+            retry_inputs = {
+                **inputs,
+                "instruction_mode": "oneshot",
+                "instruction": proposed[0],
+                "decompose_auto_applied": True,
+            }
+            retry_inputs.pop("instructions", None)
+            escalate_span = TimingSpan(
+                self._workspace_root,
+                kind="coding_escalate_retry",
+                error_prefix=error_prefix,
+                recipe_id=record.recipe_id,
+                run_id=record.run_id,
+            )
+            out = await self._run_async_body(
+                record,
+                inputs=retry_inputs,
+                auto_escalated=True,
+                prior_item_results=item_results,
+            )
+            escalate_span.end(result=out.get("result"), plan_phase=out.get("plan_phase"))
+            return out
+
+        append_timing(
+            self._workspace_root,
+            kind="coding_escalate",
+            action="yield_decompose",
+            error_prefix=error_prefix,
+            failure_count=len(failures),
+            recipe_id=record.recipe_id,
+            run_id=record.run_id,
+        )
+        ask = decompose_guidance_ask(failures, proposed)
+        return {
+            "result": "needs_guidance",
+            "request_guidance": guidance_asks_to_payloads([ask]),
+            "plan_phase": "decompose",
+            "verify_failures": failures,
+            "proposed_instructions": list(proposed),
+            "plan": _plan_payload(plan),
+            "item_results": item_results,
             **self._artifact_fields(),
         }
 
@@ -381,6 +615,17 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                         failures.append(
                             f"verify_runs[{index}] {path}: file text must not "
                             f"contain {banned!r}"
+                        )
+                # Stronger than substring when stories ban eval/exec cheats.
+                if path.lower().endswith(".py") and _forbids_dynamic_exec(
+                    text_forbids
+                ):
+                    hits = find_forbidden_dynamic_exec_calls(body)
+                    if hits:
+                        failures.append(
+                            f"verify_runs[{index}] {path}: do not call "
+                            f"{', '.join(hits)} on user input — implement a "
+                            "real parser (eval/exec/literal_eval are banned)"
                         )
             if use_pytest or use_ruff or use_mypy:
                 if path and not target.exists():
@@ -504,32 +749,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             verify_runs = _normalize_verify_runs(
                 (record.inputs or {}).get("verify_runs")
             )
-            if verify_runs and not str(item.id).startswith("verify_repair"):
-                lines = []
-                for spec in verify_runs:
-                    path = spec.get("path")
-                    for needle in _as_str_list(spec.get("text_contains")):
-                        lines.append(f"  - {path} must contain {needle!r}")
-                    for banned in _as_str_list(spec.get("text_forbids")):
-                        lines.append(f"  - {path} must NOT contain {banned!r}")
-                    if spec.get("pytest"):
-                        lines.append(f"  - pytest -q {path} must exit 0")
-                    elif spec.get("ruff"):
-                        lines.append(
-                            f"  - ruff check {path or '.'} must exit 0"
-                        )
-                    elif spec.get("mypy"):
-                        lines.append(f"  - mypy {path or '.'} must exit 0")
-                    elif (
-                        "args" in spec
-                        or spec.get("stdout_contains") is not None
-                        or "exit_code" in spec
-                    ):
-                        args = " ".join(str(a) for a in list(spec.get("args") or []))
-                        out_n = spec.get("stdout_contains")
-                        lines.append(
-                            f"  - python {path} {args} → stdout contains {out_n!r}"
-                        )
+            # Include on verify_repair too — repair bursts need the same bans.
+            if verify_runs:
+                lines = _verify_runs_hint_lines(verify_runs)
                 if lines:
                     verify_hint = (
                         "\nHost will verify after you finish:\n"
@@ -549,6 +771,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                         "Read existing files first; extend them — do not rewrite "
                         "from scratch in a way that drops working behavior "
                         "(literals, operators, tests, CLI entry points). "
+                        "Prefer a minimal extend for this todo — do not invent "
+                        "next-stage features — but never delete or break "
+                        "previously working behavior to stay minimal. "
                         "Emit <tool_call> blocks in the answer content (not only "
                         "in reasoning). Prefer run_shell / pytest to self-check "
                         "before finishing. You MUST write_file before you stop."
@@ -793,6 +1018,59 @@ def _instruction_expects_write(instruction: str) -> bool:
     return any(marker in text for marker in markers)
 
 
+def _forbids_dynamic_exec(text_forbids: list[str]) -> bool:
+    """True when verify ``text_forbids`` is banning eval/exec-style cheats."""
+    for banned in text_forbids:
+        key = str(banned).strip().lower().rstrip("(")
+        if key in {"eval", "exec", "literal_eval", "ast.literal_eval"}:
+            return True
+        if "eval" in key or "exec" in key or "literal_eval" in key:
+            return True
+    return False
+
+
+def _verify_runs_hint_lines(verify_runs: list[dict[str, Any]]) -> list[str]:
+    """Human-facing verify checklist for coding / repair bursts."""
+    lines: list[str] = []
+    for spec in verify_runs:
+        path = spec.get("path")
+        for needle in _as_str_list(spec.get("text_contains")):
+            lines.append(f"  - {path} must contain {needle!r}")
+        forbids = _as_str_list(spec.get("text_forbids"))
+        if _forbids_dynamic_exec(forbids):
+            lines.append(
+                f"  - Do not call the eval, exec, or ast.literal_eval functions "
+                f"on the user expression in {path} (host rejects those calls)"
+            )
+            for banned in forbids:
+                key = str(banned).strip().lower().rstrip("(")
+                if key in {"eval", "exec", "literal_eval", "ast.literal_eval"}:
+                    continue
+                if "eval" in key or "exec" in key or "literal_eval" in key:
+                    continue
+                lines.append(f"  - {path} must NOT contain {banned!r}")
+        else:
+            for banned in forbids:
+                lines.append(f"  - {path} must NOT contain {banned!r}")
+        if spec.get("pytest"):
+            lines.append(f"  - pytest -q {path} must exit 0")
+        elif spec.get("ruff"):
+            lines.append(f"  - ruff check {path or '.'} must exit 0")
+        elif spec.get("mypy"):
+            lines.append(f"  - mypy {path or '.'} must exit 0")
+        elif (
+            "args" in spec
+            or spec.get("stdout_contains") is not None
+            or "exit_code" in spec
+        ):
+            args = " ".join(str(a) for a in list(spec.get("args") or []))
+            out_n = spec.get("stdout_contains")
+            lines.append(
+                f"  - python {path} {args} → stdout contains {out_n!r}"
+            )
+    return lines
+
+
 def _verify_repair_instruction(
     failures: list[str], *, round_i: int, max_rounds: int
 ) -> str:
@@ -804,12 +1082,15 @@ def _verify_repair_instruction(
         "1) Call read_file on the target file(s).\n"
         "2) Emit one <tool_call> write_file with the FULL fixed file contents "
         "in the answer content (not only in reasoning).\n"
-        "Extend the working parser — do not replace it with a stub. "
-        "Keep previously green literals/operators. Prefer "
-        "`def evaluate(expr)` and `def main(argv=None) -> int`. "
-        "No eval()/exec()/ast.literal_eval on user input. "
+        "Extend the working parser — do not replace it with a stub or drop "
+        "operators that already passed (^ right-assoc, * / over + -, parens, "
+        "fn(args)). Prefer `def evaluate(expr)` and `def main(argv=None) -> int`. "
+        "Do not call the eval, exec, or ast.literal_eval functions on the "
+        "user expression — implement a real parser (write_file will refuse "
+        "those calls). "
         "If * or / cases fail: tokenize them as operators and give * / "
-        "tighter precedence than + - (e.g. 2+3*4 → 14, 8/2*2 → 8).\n"
+        "tighter precedence than + - (e.g. 2+3*4 → 14, 8/2*2 → 8). "
+        "If ^ fails: keep right-associative power (2^3^2 → 512).\n"
         "Failures:\n"
         f"{failure_block}"
     )

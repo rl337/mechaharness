@@ -48,6 +48,7 @@ class GuidanceAsk:
     recommendation: str | None = None
     requested_authority: str = "advisory"
     parent_node_id: str | None = None
+    proposed_instructions: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -165,6 +166,9 @@ def guidance_answers(record_history: list[dict[str, Any]]) -> list[dict[str, Any
         raw_resp = entry.get("response")
         req: dict[str, Any] = raw_req if isinstance(raw_req, dict) else {}
         resp: dict[str, Any] = raw_resp if isinstance(raw_resp, dict) else {}
+        proposed = req.get("proposed_instructions") or []
+        if not isinstance(proposed, list):
+            proposed = _as_str_list(proposed)
         out.append(
             {
                 "context_version": str(req.get("context_version") or ""),
@@ -172,6 +176,7 @@ def guidance_answers(record_history: list[dict[str, Any]]) -> list[dict[str, Any
                 "choice_id": resp.get("choice_id"),
                 "text": resp.get("text"),
                 "structured": resp.get("structured") or {},
+                "proposed_instructions": [str(x).strip() for x in proposed if str(x).strip()],
             }
         )
     return out
@@ -179,6 +184,11 @@ def guidance_answers(record_history: list[dict[str, Any]]) -> list[dict[str, Any
 
 def _has_context(answers: list[dict[str, Any]], context_version: str) -> bool:
     return any(a.get("context_version") == context_version for a in answers)
+
+
+def has_answered_decompose(guidance_history: list[dict[str, Any]] | None) -> bool:
+    """True when the driver already answered a ``decompose`` guidance ask."""
+    return _has_context(guidance_answers(list(guidance_history or [])), "decompose")
 
 
 def _refined_texts_from_answers(
@@ -197,7 +207,103 @@ def _refined_texts_from_answers(
         text = ans.get("text")
         if isinstance(text, str) and text.strip():
             return _split_text_items(text)
+        # Driver accepted the proposed split without rewriting it.
+        if str(ans.get("choice_id") or "") in {
+            "accept_proposed",
+            "accept",
+            "proposed",
+        }:
+            proposed = ans.get("proposed_instructions") or []
+            if isinstance(proposed, list) and proposed:
+                return [str(x).strip() for x in proposed if str(x).strip()]
     return fallback
+
+
+_EXTEND_PREAMBLE = (
+    "Extend the existing workspace files — do not rewrite from scratch or "
+    "undo previously green behavior."
+)
+
+# Cap how many failure lines we paste into the consolidated escalate brief.
+_DECOMPOSE_FAILURE_LINE_CAP = 12
+
+# Fixed block kept outside any goal paste so hard bans never fall off a clip.
+_ESCALATE_HARD_CONSTRAINTS = (
+    "Non-negotiables: implement a real expression parser — do not call the "
+    "eval, exec, or ast.literal_eval functions on the user expression; keep "
+    "`def evaluate` / `def main`; extend prior green behavior (do not replace "
+    "a working file with a stub)."
+)
+
+
+def decompose_instructions_from_failures(
+    goal: str, failures: list[str]
+) -> list[str]:
+    """Build a single restore-and-finish instruction from failure lines.
+
+    One consolidated todo (not one item per verify line) so escalate retries
+    do not thrash the workspace with narrow per-check rewrites. The brief
+    lists the failing checks and still requires keeping prior green behavior.
+    """
+    cleaned = [str(line).strip() for line in failures if str(line).strip()]
+    if not cleaned:
+        goal_text = str(goal or "").strip()
+        return [goal_text] if goal_text else []
+    shown = cleaned[:_DECOMPOSE_FAILURE_LINE_CAP]
+    failure_block = "\n".join(f"- {line}" for line in shown)
+    if len(cleaned) > _DECOMPOSE_FAILURE_LINE_CAP:
+        failure_block += (
+            f"\n- …and {len(cleaned) - _DECOMPOSE_FAILURE_LINE_CAP} more"
+        )
+    goal_bit = str(goal or "").strip()
+    text = (
+        f"{_EXTEND_PREAMBLE} Re-establish every previously green host check, "
+        "then finish the remaining requested work without dropping working "
+        f"behavior.\n{_ESCALATE_HARD_CONSTRAINTS}\n"
+        f"Failing checks:\n{failure_block}"
+    )
+    if goal_bit:
+        # Full goal — do not truncate; hard constraints already lead above.
+        text = f"{text}\nGoal context:\n{goal_bit}"
+    return [text]
+
+
+def decompose_guidance_ask(
+    failures: list[str],
+    proposed: list[str],
+) -> GuidanceAsk:
+    """Ask the driver to clarify / confirm a decomposed todo list after failure."""
+    failure_block = "\n".join(f"- {line}" for line in failures) or "- (none listed)"
+    if proposed:
+        proposed_block = "\n".join(
+            f"{index}. {item}" for index, item in enumerate(proposed, start=1)
+        )
+    else:
+        proposed_block = "(no automatic split; reply with an ordered list)"
+    return GuidanceAsk(
+        question=(
+            "Coding / verify checks failed. Break the remaining work into an "
+            "ordered todo list (or accept the proposed split). Prefer small "
+            "extends that keep prior cases green.\n"
+            f"Failures:\n{failure_block}\n"
+            f"Proposed todos:\n{proposed_block}\n"
+            "Reply with a numbered list in text, or structured.instructions."
+        ),
+        context_version="decompose",
+        choices=[
+            {
+                "id": "accept_proposed",
+                "label": "Accept the proposed todo list",
+            },
+            {
+                "id": "revise",
+                "label": "I will revise the list in text / structured.instructions",
+            },
+        ],
+        recommendation="accept_proposed" if len(proposed) > 1 else "revise",
+        parent_node_id="refine_plan",
+        proposed_instructions=list(proposed),
+    )
 
 
 def build_instruction_plan(
@@ -213,8 +319,12 @@ def build_instruction_plan(
     """
     answers = guidance_answers(list(guidance_history or []))
     force = str(inputs.get("force_refinement") or "").strip().lower()
+    answered_decompose = _has_context(answers, "decompose")
 
     mode = classify_mode(inputs)
+    # Human decompose clarification forces list mode for the restart.
+    if answered_decompose:
+        mode = "list"
     if force == "scope" and not _has_context(answers, "scope_refinement"):
         return PlanBuildResult(
             guidance=[
@@ -272,11 +382,19 @@ def build_instruction_plan(
     if mode == "oneshot" and len(texts) > 1:
         texts = [" ".join(texts)] if texts else texts
 
-    texts = _refined_texts_from_answers(
-        answers, context_version="list_refinement", fallback=texts
-    )
-    if mode == "oneshot" and len(texts) > 1:
-        texts = [texts[0]]
+    if answered_decompose:
+        texts = _refined_texts_from_answers(
+            answers, context_version="decompose", fallback=texts
+        )
+        if len(texts) <= 1 and texts:
+            # Single clarified item is still executable as a one-item list.
+            pass
+    else:
+        texts = _refined_texts_from_answers(
+            answers, context_version="list_refinement", fallback=texts
+        )
+        if mode == "oneshot" and len(texts) > 1:
+            texts = [texts[0]]
 
     pre_ac = _as_str_list(
         inputs.get("pre_acceptance")
@@ -292,7 +410,16 @@ def build_instruction_plan(
         or (pre_ac if mode == "list" else item_ac_default)
     )
 
-    conflicts = detect_conflicts(texts) if mode == "list" else []
+    # Escalate-built lists are host-authored failure todos; heuristic "drop"/"keep"
+    # tokens in preambles must not block them behind list_refinement.
+    skip_conflict_heuristics = answered_decompose or bool(
+        inputs.get("decompose_auto_applied")
+    )
+    conflicts = (
+        []
+        if skip_conflict_heuristics
+        else (detect_conflicts(texts) if mode == "list" else [])
+    )
     declared = _as_str_list(inputs.get("known_conflicts"))
     conflicts = list(dict.fromkeys([*conflicts, *declared]))
 
@@ -359,7 +486,8 @@ def build_instruction_plan(
             post_acceptance=post_ac,
             conflicts=conflicts,
             refined=_has_context(answers, "list_refinement")
-            or _has_context(answers, "scope_refinement"),
+            or _has_context(answers, "scope_refinement")
+            or answered_decompose,
         )
     )
 
@@ -403,6 +531,8 @@ def guidance_asks_to_payloads(asks: list[GuidanceAsk]) -> list[dict[str, Any]]:
             payload["recommendation"] = ask.recommendation
         if ask.parent_node_id is not None:
             payload["parent_node_id"] = ask.parent_node_id
+        if ask.proposed_instructions:
+            payload["proposed_instructions"] = list(ask.proposed_instructions)
         out.append(payload)
     return out
 
@@ -416,9 +546,12 @@ __all__ = [
     "TodoItem",
     "build_instruction_plan",
     "classify_mode",
+    "decompose_guidance_ask",
+    "decompose_instructions_from_failures",
     "detect_conflicts",
     "extract_instruction_texts",
     "guidance_answers",
     "guidance_asks_to_payloads",
+    "has_answered_decompose",
     "verify_acceptance",
 ]
