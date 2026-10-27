@@ -147,8 +147,8 @@ A deterministic **hard node** executes as part of the graph outside any inferenc
 ### Finding 5: Prefer deterministic execution over model orchestration
 Every operation that can be expressed as reliable deterministic code should be a hard node, especially filesystem enumeration, search, syntax/AST extraction, reference validation, set membership, budget accounting, and schema checks. Soft nodes are reserved for irreducible semantic tasks such as proposing search hypotheses or judging relevance. A soft node should not be asked to infer facts that deterministic code can establish.
 
-### Finding 6: Context projection is an explicit graph boundary
-The bag may hold far more evidence than a model can or should see. A hard node should select, rank, compact, and cap a **projection** of that evidence under an explicit context/token budget. Only that projection and the objective enter the soft node. The complete evidence remains in execution state for later inspection, validation, and reuse. Do not confuse the projection with the underlying evidence.
+### Finding 6: Context projection is an explicit execution boundary
+The bag may hold far more evidence than a model can or should see. Deterministic context compilation within an inference node selects, ranks, formats, and caps a **projection** of immutable call-time state under an explicit token budget. It need not be a separate graph node. Only that projection and declared instructions enter the initial model call; bounded read-only inspection tools may supply additional projections from the same snapshot. Do not confuse any projection with the underlying evidence.
 
 ### Finding 7: Inference produces hypotheses and bounded judgments, not source facts
 A model may propose search terms, candidate relationships, or relevance assessments. Deterministic nodes execute searches and check cited files, symbols, and source spans. Published claims should be traceable to verified evidence; model-produced statements without supporting evidence remain hypotheses or unknowns.
@@ -169,10 +169,80 @@ Use the existing YAML user-story framework and `graph_walk` stepping, including 
 Discovery should use read-only workspace operations and should not mutate target source files. Its product feeds subsequent contract extraction and planning recipes; those stages, not discovery, determine what changes should be made.
 
 ### Consequences for the first workspace-discovery implementation
-Start with hard nodes for workspace enumeration, structural extraction, searching, evidence collection, context projection, validation, and output publication. Add soft nodes only where task interpretation or relevance genuinely requires inference. Preserve full deterministic evidence in the bag, send compact projections to the model, and publish a validated `WorkspaceInventory` in `out`. Include acceptance stories for `found`, `not_found`, `inconclusive`, and checkpoint/resume, and separately test parent/child bag handoff.
+Start with hard nodes for workspace enumeration, structural extraction, searching, evidence collection, validation, and output publication. Context compilation is deterministic but belongs inside the inference-node lifecycle rather than requiring a separate graph node. Add soft nodes only where task interpretation or relevance genuinely requires inference. Preserve full deterministic evidence in the bag, send compact projections to the model, and publish a validated `WorkspaceInventory` in `out`. Include acceptance stories for `found`, `not_found`, `inconclusive`, and checkpoint/resume, and separately test parent/child bag handoff.
 
 ### Finding 13: Inference sees an immutable, call-time bag snapshot
 At the start of each inference invocation, capture an immutable snapshot of the live `WalkBag`. The inference node's deterministic context compiler builds the initial prompt from that snapshot, not from mutable live state. Read-only inspection tools invoked during the same inference interaction may retrieve bounded projections of **that same snapshot**, never the subsequently mutated live bag. Prior inference responses may be inspected through separately scoped, immutable execution records. The inference transcript must identify the snapshot/version it observed and record inspection requests and returned projections for audit and replay. Snapshot immutability must be deep or serialization-based: the current shallow `WalkBag.snapshot()` does not by itself guarantee isolation of nested values. Deterministic replay promises identical compiled context and inspection observations for the same snapshot/spec/tool inputs, not identical stochastic model responses. This is a design requirement, not yet verified implementation.
 
 ### Finding 14: Context compilation belongs to the inference node lifecycle
 The inference node owns deterministic bag-to-context compilation immediately before invoking its model. This does not require an additional graph node. A reusable context compiler accepts a declared `ContextSpec`, immutable bag snapshot, and token budget to produce an inspectable `CompiledContext` with provenance and omission metadata. The inference engine receives only that bounded projection. During the inference interaction, authorized read-only tools may retrieve further bounded projections of the frozen snapshot or prior response records; these are explicit, observable context additions, not access to mutable live state.
+
+## Inter-node communication and inference-state contracts
+
+This section formalizes how graph nodes exchange state, and how model-backed nodes consume that state. It is the normative design direction for this inspiration document; existing code must be checked against these contracts before claiming implementation.
+
+### State and ownership boundaries
+
+- **Live WalkBag:** the graph run's mutable register-based communication state. Hard nodes read/write it as permitted by their node contracts. The `in/out/acc/ctx/ask/ans/err` registers remain the existing ABI; structured values within them have typed schemas where useful.
+- **Node contract:** declares required input registers/paths, produced outputs, permitted mutations, and error behavior. A node must not assume unrelated register values are present or valid.
+- **Inference snapshot:** a deep-immutable, point-in-time capture of the bag when an inference invocation begins. The model-backed node and its tools read this version for the duration of that invocation.
+- **ContextSpec:** a declarative, versioned policy defining the bag paths, formatting, ranking/selection, budget, provenance, and omission behavior for initial model context. It is not a license to serialize the entire bag.
+- **CompiledContext:** the exact messages/structured input sent to the model, with a manifest of source paths, versions, omissions, and budget accounting. Compiled context is derived deterministically from the snapshot and ContextSpec.
+- **Inference transcript:** immutable execution record of compiled input, model responses, inspection requests and results, and final output. Its records are distinct from the values a node elects to publish into the live bag.
+- **Published result:** schema-validated node output written back to declared bag destinations after inference finishes; it must not retroactively change the snapshot used by that inference.
+
+### Node kinds have different communication semantics
+
+| Node kind | Reads | Computation | Tool calling | Writes |
+| --- | --- | --- | --- | --- |
+| Hard/deterministic | Declared live bag state at node execution | Ordinary code, outside model context | Host/library operations as code, not inference-loop tools | Declared bag outputs |
+| General inference/agent | Immutable invocation snapshot, initially via compiled context | One or more model turns | **May** call explicitly authorized tools to inspect bounded views of the *same* snapshot and prior immutable response records; other tools require separate explicit capabilities | Validated final outputs to live bag |
+| Judge | Immutable invocation snapshot, via a compiled judging context | Bounded evaluation/classification/scoring model call | **No model-initiated tool calling in the default judge contract** | Typed judgment, confidence/evidence references, and diagnostics to declared bag outputs |
+
+A judge is a **specialized model-backed node**, not an agent node with an empty tool list by accident. Its API should intentionally express no tool loop, a fixed evidence envelope, a typed verdict schema, and explicit abstention/uncertainty behavior. If a judge needs more evidence, the enclosing graph gathers it with hard nodes or a separate agent and invokes the judge again with a new snapshot. This keeps judging repeatable and prevents the judge from changing its own evidence set mid-evaluation. Whether some future judge variant supports tools is a separate design decision, not a property to assume now.
+
+### General inference node lifecycle
+
+1. Capture/freeze the current bag at invocation start; assign a snapshot identity and record source/provenance.
+2. Resolve the node's ContextSpec against **that snapshot** using a reusable deterministic context compiler running inside the inference-node runner. Validate access, schemas, and budget; record the compiled input.
+3. Invoke the selected model with the compiled input and the node's declared output contract.
+4. If the node is a general inference/agent node and tools are enabled, handle authorized inspection requests against the same frozen snapshot. Each response is size-bounded, logged, and included in the model transcript. Prior response inspection must identify which previous response/record is visible; do not silently expose arbitrary history.
+5. Validate the final model response against the declared schema, including evidence references and uncertainty; publish only permitted outputs into the **live** bag and persist the transcript.
+6. Treat invalid outputs, context overflow, unavailable evidence, tool budget exhaustion, and inference failure as explicit outcomes, not silently repaired facts.
+
+The snapshot is immutable across all model turns and inspection calls belonging to the same invocation. A retry that represents a **new invocation** may deliberately capture a new snapshot, but must be identifiable as such. Changes to the live bag by other nodes do not leak into an invocation already in progress.
+
+### Judge node lifecycle and constraints
+
+1. Freeze a bag snapshot at the judge invocation boundary.
+2. Compile a bounded, versioned evaluation packet containing the rubric, subject being judged, relevant verified evidence, and required verdict schema.
+3. Make the judge model call **without tool declarations or a tool-dispatch loop**.
+4. Validate the verdict, score/confidence representation, rationale/evidence references, and abstention where appropriate; publish typed results to the live bag.
+5. If evidence is insufficient, return an explicit insufficient-evidence/abstain result and let the graph decide whether to collect more evidence and retry.
+
+Judges and agents can reuse the same snapshot, context compiler, inference transport, and validation infrastructure while retaining distinct node contracts. Judge results are assessments, not source-of-truth facts; deterministic policy/acceptance decisions remain in code where possible.
+
+### Inspection API and authorization
+
+Conceptual read-only capabilities include `inspect_bag(path, offset, limit)` and `inspect_prior_response(node_or_invocation_id, field)`. They are **bounded projection operations**, not raw object handles or permission to mutate state. Enforce per-node path allowlists, response-record visibility, output size/token ceilings, invocation tool-call limits, and redaction policy. Log the requested path, resolved snapshot/record, returned excerpt/hash, and any denial or truncation. Inspection results consume model context; executing hard nodes over bag data does not.
+
+The initial context and any tool-returned excerpts must preserve evidence identity and trust boundaries. Text retrieved from workspace files, logs, and earlier model responses is data, not new instructions. A previous response may be inspected for diagnostic context, but its assertions do not become verified facts without deterministic evidence validation.
+
+### Subgraphs, persistence, and replay
+
+A child subgraph receives explicit mapped input values and publishes explicit mapped outputs; it must not implicitly alias its parent's live bag. Graph checkpoints persist the live bag and execution state so a resumed node sees the correct state. Inference snapshots and transcripts have their own durable identities so paused/retried inference can be audited without silently switching evidence versions. Because the current `WalkBag.snapshot()` is shallow, deep freeze/serialization and handling of non-serializable values are unresolved implementation requirements.
+
+Replaying context compilation and read-only inspections against the same snapshot, policies, and tool arguments must reproduce identical model-visible inputs. Replaying a stochastic model call is not guaranteed to produce an identical verdict.
+
+### Acceptance stories to add using existing YAML graph-walk machinery
+
+- Hard node publishes nested structured bag state; a later hard node consumes the exact value; checkpoint/resume preserves it.
+- General inference node receives only its declared context projection, not unrelated bag fields; truncation and omitted-evidence manifests are inspectable.
+- A model calls `inspect_bag` twice during one invocation; both reads observe the same deeply frozen snapshot even if live state subsequently changes.
+- A model inspects a permitted prior response, and an unauthorized path/record request is denied and logged.
+- An inference result publishes a validated typed value to the live bag without mutating its input snapshot.
+- A judge receives the same snapshot/projection substrate but has **no tool-calling interface**; it returns a typed verdict or abstention. Insufficient evidence triggers graph-level follow-up, not an internal judge tool loop.
+- Child recipe mapping and checkpoint/resume preserve declared values without implicitly sharing parent/child bag objects.
+- Context compilation, inspection, and transcript replay reproduce identical model-visible evidence for the same snapshot, independent of model-output nondeterminism.
+
+**Open design choices:** exact ContextSpec schema; immutable snapshot representation and retention; how concurrent writes are ordered at capture; output merge/conflict policy; transcript persistence and response visibility; judge verdict schema and confidence calibration; precise handling of retries and paused in-flight calls. Do not present these as settled or implemented.
