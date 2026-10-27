@@ -256,6 +256,17 @@ Replaying context compilation and read-only inspections against the same snapsho
 
 **Status:** design and required tests; not implemented or verified by this documentation change.
 
+### Tracked user-story fixtures (initial red specifications)
+
+The following checked-in fixtures are the concrete acceptance-test backlog for this communication contract. **Keep this pointer current when moving, implementing, or replacing them** so the tests do not become detached from the architectural ruling:
+
+- [Story manifest](../../tests/fixtures/models/static/fixture/v1/stories/fangore_bag_inference_continuity/story.json) defines the `fangore_bag_inference_continuity` story.
+- [`bag_continuity.yaml`](../../tests/fixtures/models/static/fixture/v1/stories/fangore_bag_inference_continuity/scenarios/bag_continuity.yaml) covers state propagation from discovery through validation into a subsequent inference request.
+- [`bag_inspection.yaml`](../../tests/fixtures/models/static/fixture/v1/stories/fangore_bag_inference_continuity/scenarios/bag_inspection.yaml) covers immutable bag snapshot inspection, authorization, and transcript recording.
+- [`judge_no_tools.yaml`](../../tests/fixtures/models/static/fixture/v1/stories/fangore_bag_inference_continuity/scenarios/judge_no_tools.yaml) covers compiled judge evidence, typed verdicts, and the absence of tool calls.
+
+These are **red test specifications**, not proven passing tests. The existing runner must be wired to support their fixture behavior and observations before they can establish correctness. Do not mistake their presence in the repository for successful validation.
+
 ### Acceptance stories to add using existing YAML graph-walk machinery
 
 - Hard node publishes nested structured bag state; a later hard node consumes the exact value; checkpoint/resume preserves it.
