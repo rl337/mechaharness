@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspiration: Gastronomic Guided Development (alternative to guided_coding) &mdash; MechaHarness 0.7.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5a057da9"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="inspiration-gastronomic-guided-development-alternative-to-guided-coding">
+<h1>Inspiration: Gastronomic Guided Development (alternative to guided_coding)<a class="headerlink" href="#inspiration-gastronomic-guided-development-alternative-to-guided-coding" title="Link to this heading"></a></h1>
+<p><strong>Status:</strong> Architecture and story plan, not implementation
+<strong>Reference:</strong> <code class="docutils literal notranslate"><span class="pre">rl337/mechaharness</span></code>, PR #34 (<code class="docutils literal notranslate"><span class="pre">feat/guided-coding-local-inference</span></code>)
+<strong>Scope:</strong> One gastronomic product recipe, <code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code>, and its component subrecipes. The broader guided_usage/reasoning/planning/creativity family is explicitly deferred.</p>
+<section id="thesis">
+<h2>Thesis<a class="headerlink" href="#thesis" title="Link to this heading"></a></h2>
+<p>MechaHarness’s existing agentic recipes evolved bottom-up from concrete requirements. A gastronomic recipe is instead designed top-down from an observable product capability, then decomposed into small reusable recipes that each earn their implementation through practical user stories. This is <strong>not</strong> a new runtime, model-router framework, or universal guided_x interface.</p>
+<p><strong>Product promise:</strong> Given an existing codebase and a bounded development request, a cheaper local model can make a verified incremental change, preserve prior contracts, and either finish or yield an actionable diagnosis to a more capable guide. The system must not confuse more tool-loop attempts with improved problem understanding.</p>
+<p><strong>Experimental question:</strong> Does a deliberately composed development graph improve the same 30B model’s reliability relative to PR #34’s <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> under comparable tools, token/call budgets, workspace, and tests? A larger model is a separate control, not the primary success criterion.</p>
+</section>
+<section id="existing-substrate-to-reuse">
+<h2>Existing substrate to reuse<a class="headerlink" href="#existing-substrate-to-reuse" title="Link to this heading"></a></h2>
+<p>The PR #34 catalog already includes <code class="docutils literal notranslate"><span class="pre">context_pack</span></code>, <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>, <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code>, <code class="docutils literal notranslate"><span class="pre">independent_review</span></code>, <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>, <code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>, <code class="docutils literal notranslate"><span class="pre">fan_out_aggregate</span></code>, and <code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code>. <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> currently composes a brief, <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>, and <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>. <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> provides workspace tools, <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code>, checkpoints, repair rounds, and escalation guidance.</p>
+<p><strong>Reuse before extraction:</strong> Use existing graph tiling, dependency edges, soft points, durable generator/resume, stop contracts, runner bindings, workspace tools, and deterministic checks. Treat context engineering, evidence-based diagnosis, and invariant capture as candidate missing capabilities, not automatically as new primitives. Keep <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> unchanged as a baseline.</p>
+</section>
+<section id="proposed-composition">
+<h2>Proposed composition<a class="headerlink" href="#proposed-composition" title="Link to this heading"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>gastronomic_guided_development (product-level recipe)
+  intake_and_preflight
+    -&gt; inspect_workspace             [candidate subrecipe]
+    -&gt; capture_contract              [candidate subrecipe]
+    -&gt; design_change                 [candidate subrecipe]
+    -&gt; implement_slice               [reuse instruction_todo_plan / tool loop]
+    -&gt; verify_change                 [reuse verify_repair + host verify_runs]
+    -&gt; diagnose_failure?             [candidate subrecipe]
+          -&gt; focused_repair?          [reuse bounded_retry / verify_repair]
+          -&gt; revise_change_plan?      [re-enter design_change, bounded]
+          -&gt; request_guidance?        [existing soft-point yield/resume]
+    -&gt; final_regression_audit         [reuse audited_infer_accept]
+    -&gt; outcome
+</pre></div>
+</div>
+<p>These are <em>responsibilities</em> first. Do not create one template class per box until a story demonstrates a distinct, reusable graph contract. The product graph can initially tile existing recipes and host leaf operations.</p>
+<section id="product-contract">
+<h3>Product contract<a class="headerlink" href="#product-contract" title="Link to this heading"></a></h3>
+<p>Input: goal, workspace reference, acceptance criteria, optional guidance, model/tool bindings, budget, and prior checkpoint. Output: <code class="docutils literal notranslate"><span class="pre">completed</span> <span class="pre">|</span> <span class="pre">needs_guidance</span> <span class="pre">|</span> <span class="pre">failed</span></code>, verified artifacts, evidence references, changed files, preserved invariants, remaining failures, and suggested next action. Distinguish model assertions from host-observed test results.</p>
+</section>
+<section id="intermediate-artifacts">
+<h3>Intermediate artifacts<a class="headerlink" href="#intermediate-artifacts" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>WorkspaceInventory</strong>: entry points, relevant files, tests, interfaces, known unknowns, evidence paths and hashes.</p></li>
+<li><p><strong>ChangeContract</strong>: requested behavior, invariants, prohibited changes, verification commands, assumptions and provenance.</p></li>
+<li><p><strong>ChangePlan</strong>: small independently testable slices, dependency order, intended file boundaries, rollback points.</p></li>
+<li><p><strong>VerificationReport</strong>: actual command results, failing assertions, regression status, tool/protocol errors, artifact versions.</p></li>
+<li><p><strong>Diagnosis</strong>: failure class, evidence, suspected cause, next experiment, confidence, prior attempted repairs.</p></li>
+<li><p><strong>DevelopmentOutcome</strong>: acceptance evidence and references to the preceding artifacts.</p></li>
+</ol>
+<p>Prefer lightweight typed payloads or existing persisted graph state, not an additional database. Artifacts must be inspectable and resumable; each downstream step receives a <em>focused projection</em>, not an unbounded transcript.</p>
+</section>
+</section>
+<section id="candidate-component-subrecipes-and-practical-stories">
+<h2>Candidate component subrecipes and practical stories<a class="headerlink" href="#candidate-component-subrecipes-and-practical-stories" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Order</p></th>
+<th class="head"><p>Responsibility</p></th>
+<th class="head"><p>Existing leverage</p></th>
+<th class="head"><p>First practical user story</p></th>
+<th class="head"><p>Acceptance</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>Baseline instrumentation</p></td>
+<td><p>existing timing spans, suite runner</p></td>
+<td><p>As an experimenter, I can replay <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> and see the first failure by category</p></td>
+<td><p>Trace records stage, model, tokens/calls, tool errors, verification, checkpoint and outcome</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">inspect_workspace</span></code></p></td>
+<td><p>context_pack, workspace read tools</p></td>
+<td><p>As a coding agent, I can inspect an existing calculator before modifying it</p></td>
+<td><p>Inventory names real files, current API, CLI, tests, and supporting evidence; no writes</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">capture_contract</span></code></p></td>
+<td><p>acceptance policies, audited criteria freeze</p></td>
+<td><p>As a maintainer, I can preserve already-working number/add/sub behavior while adding multiplication</p></td>
+<td><p>Explicit prior invariants and executable checks are frozen before editing</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">design_change</span></code></p></td>
+<td><p>instruction_todo_plan, decision_plane</p></td>
+<td><p>As a coding agent, I can propose a bounded parser extension without rewriting unrelated grammar</p></td>
+<td><p>Plan identifies change boundary, order, risks, and test for each slice</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">implement_slice</span></code></p></td>
+<td><p>conversational_tool_loop, coding tools</p></td>
+<td><p>As a coding agent, I can apply exactly one planned change</p></td>
+<td><p>Real file write, tool result, and changed-file evidence; respects budget</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">verify_change</span></code></p></td>
+<td><p>verify_repair, verify_runs, audited_infer_accept</p></td>
+<td><p>As a maintainer, I can prove new functionality and all previous regression cases still work</p></td>
+<td><p>Host executes checks; false model claims cannot pass</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">diagnose_failure</span></code></p></td>
+<td><p>independent_review, decision_plane</p></td>
+<td><p>As an agent, I can distinguish syntax, tool protocol, runtime, semantics, regression, and budget failures</p></td>
+<td><p>Diagnostic classification links to actual failing evidence and recommends a distinct next action</p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">replan_from_evidence</span></code></p></td>
+<td><p>bounded_retry, guidance yield, checkpoint restore</p></td>
+<td><p>As an agent, I can stop repeating an ineffective fix and revise strategy or ask for guidance</p></td>
+<td><p>Repeated identical failure cannot cause unbounded retries; previous failed hypotheses recorded</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">final_regression_audit</span></code></p></td>
+<td><p>audited_infer_accept</p></td>
+<td><p>As a maintainer, I receive a defensible acceptance verdict</p></td>
+<td><p>Every required check has evidence; incomplete coverage cannot be reported as success</p></td>
+</tr>
+</tbody>
+</table>
+<p>Candidate names are provisional. For each story, first test whether an existing recipe plus a runner binding suffices. Extract a new subrecipe only when its independent contract and reuse are demonstrated.</p>
+</section>
+<section id="calculator-suite-as-the-initial-product-benchmark">
+<h2>Calculator suite as the initial product benchmark<a class="headerlink" href="#calculator-suite-as-the-initial-product-benchmark" title="Link to this heading"></a></h2>
+<p>Use PR #34’s sequential <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> stages unchanged: number, add/sub, multiply/divide, exponentiation, grouping, functions. The same workspace accumulates changes; earlier checks must stay green. Preserve <code class="docutils literal notranslate"><span class="pre">evaluate(expr)</span></code>, <code class="docutils literal notranslate"><span class="pre">main(argv=None)</span></code>, CLI exit codes, and the no-<code class="docutils literal notranslate"><span class="pre">eval</span></code>/<code class="docutils literal notranslate"><span class="pre">exec</span></code>/<code class="docutils literal notranslate"><span class="pre">ast.literal_eval</span></code> restrictions. The existing live Completer is the acceptance gate; static fixture success is only provisional.</p>
+<p>Run <strong>A</strong>: existing <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> with Qwen 30B. Run <strong>B</strong>: gastronomic guided development with the same Qwen 30B, tools, suite, and controlled budgets. Run <strong>C</strong>: original graph with Nemotron Super to measure model capability separately. Optionally run <strong>D</strong>: gastronomic graph with Nemotron. Use multiple trials with recorded settings; avoid declaring a winner from one stochastic run.</p>
+<p>Report: stages passed, prior regressions, first failure type, verified successful edits, model calls, input/output tokens, wall time, guidance calls, repair cycles, and repeat-failure loops. Record both aggregate and per-stage results. Do not compare only completion rate if one graph uses far more inference.</p>
+</section>
+<section id="implementation-increments-and-stop-go-gates">
+<h2>Implementation increments and stop/go gates<a class="headerlink" href="#implementation-increments-and-stop-go-gates" title="Link to this heading"></a></h2>
+<p><strong>Increment 0: Observability and baseline.</strong> Capture the existing PR #34 live failures. Identify whether failures are tool-format, execution, reasoning, context, or validator failures. No new recipe yet.</p>
+<p><strong>Increment 1: Inspect + contract.</strong> Implement the smallest inspect-and-freeze composition; demonstrate a stable, cited inventory and preserved API/invariants on calculator stages 1–3. Verify it works when resumed from a checkpoint.</p>
+<p><strong>Increment 2: Bounded change.</strong> Add plan/implement/verify composition using existing tool loop and verify machinery. Compare to the baseline on stages 1–4.</p>
+<p><strong>Increment 3: Evidence-driven recovery.</strong> Introduce diagnosis only if traces show undifferentiated repair loops. Test one induced precedence bug, one malformed tool-call response, and one stale-workspace regression. Require different remediation outcomes.</p>
+<p><strong>Increment 4: End-to-end alternative recipe.</strong> Run all six stages live, preserve prior checks, and produce a machine-readable outcome. Repeat trials and compare budgets.</p>
+<p><strong>Increment 5: Generalization.</strong> Apply one extracted subrecipe to <code class="docutils literal notranslate"><span class="pre">counter_pkg</span></code> or <code class="docutils literal notranslate"><span class="pre">delegate_pkg</span></code> before stabilizing its public catalog contract. Avoid calculator-specific names or assumptions in reusable code.</p>
+</section>
+<section id="engineering-guardrails">
+<h2>Engineering guardrails<a class="headerlink" href="#engineering-guardrails" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Do not modify <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> merely to make the new approach pass; retain a fair baseline.</p></li>
+<li><p>Do not introduce <code class="docutils literal notranslate"><span class="pre">guided_usage</span></code> or other guided expert recipes in this effort.</p></li>
+<li><p>No global universal <code class="docutils literal notranslate"><span class="pre">guided_x</span></code> schema; only the development product’s minimum contract.</p></li>
+<li><p>Reuse <code class="docutils literal notranslate"><span class="pre">GraphTemplate.tile</span></code>, soft points, dependency injection, existing checkpoint and generator machinery.</p></li>
+<li><p>Do not invent success based on a model-written summary; deterministic host evidence is authoritative for executable checks.</p></li>
+<li><p>Context packets must be bounded, source-linked, version-aware, and purpose-specific. Summaries cannot silently override source code.</p></li>
+<li><p>Separate implementation errors from malformed tool protocol and infrastructure errors.</p></li>
+<li><p>Every retry must either add evidence, change strategy, or terminate/escalate.</p></li>
+<li><p>Keep static deterministic stories for subrecipe contracts and at least one real-model integration gate.</p></li>
+<li><p>Prefer small, reviewable implementation PRs for individual subrecipes and user stories.</p></li>
+</ul>
+</section>
+<section id="open-design-questions">
+<h2>Open design questions<a class="headerlink" href="#open-design-questions" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Should <code class="docutils literal notranslate"><span class="pre">WorkspaceInventory</span></code> and <code class="docutils literal notranslate"><span class="pre">ChangeContract</span></code> be existing graph-state payloads, files in the workspace, or both?</p></li>
+<li><p>Which existing <code class="docutils literal notranslate"><span class="pre">context_pack</span></code> capabilities already satisfy focused context selection?</p></li>
+<li><p>Does the current host tool-loop support native tool calling for the local model, or must prompt-tool serialization be separately benchmarked?</p></li>
+<li><p>What is the smallest cross-recipe artifact contract needed for durable resume and independent verification?</p></li>
+<li><p>Which first failure in the current live <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> trace is actually causal? Do not prioritize speculative abstractions over observed failures.</p></li>
+</ol>
+</section>
+<section id="definition-of-done-for-this-inspiration-phase">
+<h2>Definition of done for this inspiration phase<a class="headerlink" href="#definition-of-done-for-this-inspiration-phase" title="Link to this heading"></a></h2>
+<p>A reviewed composition design, ordered subrecipe/story backlog, baseline experiment protocol, and clear first implementation slice. No claim that the gastronomic recipe improves Qwen reliability until a live controlled comparison supports it.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
