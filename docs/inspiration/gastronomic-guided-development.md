@@ -115,3 +115,15 @@ Report: stages passed, prior regressions, first failure type, verified successfu
 ## Definition of done for this inspiration phase
 
 A reviewed composition design, ordered subrecipe/story backlog, baseline experiment protocol, and clear first implementation slice. No claim that the gastronomic recipe improves Qwen reliability until a live controlled comparison supports it.
+
+## WalkBag state and debugger checkpoint contract
+
+The existing `WalkBag` is the native node-to-node state carrier within a running graph. Node runners access the mutable bag through `GraphRunContext.bag`; gastronomic recipes must use that mechanism rather than introducing a parallel artifact store or writing Markdown files. The register ABI (`in`, `out`, `acc`, `ctx`, `ask`, `ans`, `err`) is the starting point; any richer schema is a value stored in a register, not a new test verb.
+
+**Required user-story behavior:** whenever the YAML story executor checkpoints a paused graph walk, it must serialize the current bag contents alongside the graph execution state. Resuming from that checkpoint must reconstruct the bag before any subsequent node executes. A debugger inspection immediately before a node or before entering a subgraph must therefore see the same bag values that the node will consume. This is a test-framework execution contract, not a new semantic recipe or YAML verb.
+
+**Separate boundary concern:** a nested graph currently creates its own run context and bag. Do not assume the child's `out` automatically appears in the parent's bag. Define and test explicit input/output mapping at subgraph boundaries before relying on nested gastronomic composition. This is distinct from checkpoint persistence.
+
+Acceptance stories should prove: (1) a node writes a structured value into `out` or `acc`; (2) the story pauses before the next node and inspects it; (3) a checkpoint is serialized and the executor is reconstructed; (4) the resumed node reads the exact value; (5) the child graph receives declared inputs and publishes declared outputs through an explicit boundary mapping. Include nested checkpoint/resume and reject or explicitly encode non-serializable bag values rather than silently dropping them. Use the existing `graph_walk` and story assertions; do not add debugger-specific verbs.
+
+**Implementation status:** requirement/design only. Current `WalkBag.snapshot()` is shallow, and inspected `GraphExecutor` paths construct a new `GraphRunContext` on resume. Confirm the full story checkpoint machinery before choosing the serialization hook; do not mark this behavior implemented without a passing story.
