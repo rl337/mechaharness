@@ -234,6 +234,28 @@ A child subgraph receives explicit mapped input values and publishes explicit ma
 
 Replaying context compilation and read-only inspections against the same snapshot, policies, and tool arguments must reproduce identical model-visible inputs. Replaying a stochastic model call is not guaranteed to produce an identical verdict.
 
+
+### Unit-test runner and user-story state propagation
+
+**Finding: passing model fixtures is not equivalent to testing inter-node cognition.** A graph can execute all its nodes successfully while each inference call sees only its node-local prompt, losing the objective, verified observations, prior decisions, and corrections. This makes the model behave like a series of amnesiac one-shot calls and sharply limits multi-step coding capability. The test runner must exercise the same bag-to-context and response-to-bag contract as production, rather than testing isolated model calls with independently assembled fixture prompts.
+
+**Required execution path in the existing runner (no new test framework):**
+
+1. Create the story's graph and initialize its live `WalkBag` from declared story/recipe inputs. Node outputs must be written into the bag using the same production contract, not merely stored on `GraphNode.payload` or returned to the story assertion layer.
+2. Execute a hard node and assert its declared bag mutations. When an inference node is next, capture an immutable bag snapshot, compile its `ContextSpec` from that snapshot, and send the resulting messages to the mock/cassette/live backend. Test doubles must receive the **actual compiled request** so the story can inspect its content and provenance.
+3. For an agent-style inference fixture, support a sequence of model responses and read-only inspection tool calls over the frozen snapshot. Feed each tool result into that invocation's transcript, then validate and publish the final structured response to the live bag. Do not silently use the live bag for tool reads.
+4. Execute the following inference node against a **new snapshot of the updated live bag**. The node's ContextSpec must explicitly select prior structured outputs, evidence, and/or transcript excerpts needed for its task. **Preserve state across inference calls, not the entire raw chat history by default.** Each call is fresh in model context but not amnesiac in task state.
+5. Judge-node fixtures use the same snapshot and compilation path but one model response and no tool dispatch. A judge's typed verdict must become accessible to downstream nodes through declared bag outputs.
+6. At every existing `graph_walk` checkpoint, serialize live bag state with the graph; restore it before the next node executes. Verify nested values, explicit parent/child mappings, and replay of compiled context and inspection responses. Persist immutable invocation snapshot/transcript identities where a paused inference must be inspected or replayed.
+
+**Concrete regression story: multi-inference continuity.** In a small calculator workspace, the first inference node identifies relevant files and hypotheses and publishes a structured discovery result to `out` or another declared register. A hard node validates source references and writes verified evidence. The second inference node proposes a bounded change using the objective, the verified evidence, and the first inference result selected by its ContextSpec. A judge then evaluates the proposal using its own compiled evidence packet, without tools. Assert that the second model request actually includes the required prior facts, that unrelated bag contents are omitted, and that the judge sees the proposal and evidence. Pause/checkpoint between calls, resume, and assert the same model-visible inputs. Include a negative control where prior state is deliberately omitted and the fixture or request-contract assertion fails.
+
+**Implementation review targets:** `GraphRunContext.bag` in `graph_executor.py`; `cli_infer_runner.py` (currently a one-shot inference runner); `context_pack_runner.py` (currently reads upstream node payloads); the existing static-fixture/cassette user-story runner; and `graph_walk` checkpoint/resume. Review these paths to locate where state is dropped, rather than assuming the absence of continuity is already proven for every runner. The existing `model_input_manifest` and context-related user stories may provide reusable request-recording and assertion mechanisms.
+
+**Acceptance criterion:** a sequence of two inference calls separated by hard nodes must demonstrate that information written by the first call survives in the bag and is deliberately projected into the second call's request. Merely asserting that both inference calls returned successful responses is insufficient. The implementation must prove state continuity *at the model-input boundary*.
+
+**Status:** design and required tests; not implemented or verified by this documentation change.
+
 ### Acceptance stories to add using existing YAML graph-walk machinery
 
 - Hard node publishes nested structured bag state; a later hard node consumes the exact value; checkpoint/resume preserves it.
