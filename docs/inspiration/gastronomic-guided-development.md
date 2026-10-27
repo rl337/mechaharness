@@ -127,3 +127,46 @@ The existing `WalkBag` is the native node-to-node state carrier within a running
 Acceptance stories should prove: (1) a node writes a structured value into `out` or `acc`; (2) the story pauses before the next node and inspects it; (3) a checkpoint is serialized and the executor is reconstructed; (4) the resumed node reads the exact value; (5) the child graph receives declared inputs and publishes declared outputs through an explicit boundary mapping. Include nested checkpoint/resume and reject or explicitly encode non-serializable bag values rather than silently dropping them. Use the existing `graph_walk` and story assertions; do not add debugger-specific verbs.
 
 **Implementation status:** requirement/design only. Current `WalkBag.snapshot()` is shallow, and inspected `GraphExecutor` paths construct a new `GraphRunContext` on resume. Confirm the full story checkpoint machinery before choosing the serialization hook; do not mark this behavior implemented without a passing story.
+
+## Findings of fact and governing design principles
+
+The following findings record architectural conclusions established during recipe design. Treat them as durable precedents: future recipes should conform to them unless a subsequent explicit design decision supersedes a finding. These are design rulings, not claims that all required behavior is already implemented.
+
+### Finding 1: The bag is the native execution-state carrier
+MechaHarness provides a mutable `WalkBag` through `GraphRunContext.bag`. Nodes within a run communicate through its register ABI (`in`, `out`, `acc`, `ctx`, `ask`, `ans`, `err`). A recipe's machine-inspectable result should be published through this mechanism. A Markdown file or separate artifact store is not required merely to make recipe outputs testable.
+
+### Finding 2: Runtime availability and checkpoint durability are distinct
+The bag is available to nodes during live execution. The YAML user-story debugger must also serialize bag state with checkpoints and restore it before the next node runs. This is a requirement to implement and verify, not an assumption about the current executor. The current `WalkBag.snapshot()` is shallow, so checkpoint serialization needs an explicit value/encoding contract.
+
+### Finding 3: Subgraph state is not implicitly shared
+Nested graph execution constructs a distinct run context. Parent/child recipes need explicit, testable input and output transfer across that boundary. Sharing the budget ledger does not imply sharing the bag.
+
+### Finding 4: Hard nodes and inference tool calls have different context economics
+A deterministic **hard node** executes as part of the graph outside any inference call's context window. It may scan a repository, parse ASTs, build indexes, follow references, compute coverage, and update the bag without placing its intermediate data into model context. A deterministic **tool call made by a soft/inference node** still participates in an inference interaction: its invocation and returned observations can consume context. These mechanisms must not be treated as interchangeable simply because both ultimately run deterministic code.
+
+### Finding 5: Prefer deterministic execution over model orchestration
+Every operation that can be expressed as reliable deterministic code should be a hard node, especially filesystem enumeration, search, syntax/AST extraction, reference validation, set membership, budget accounting, and schema checks. Soft nodes are reserved for irreducible semantic tasks such as proposing search hypotheses or judging relevance. A soft node should not be asked to infer facts that deterministic code can establish.
+
+### Finding 6: Context projection is an explicit graph boundary
+The bag may hold far more evidence than a model can or should see. A hard node should select, rank, compact, and cap a **projection** of that evidence under an explicit context/token budget. Only that projection and the objective enter the soft node. The complete evidence remains in execution state for later inspection, validation, and reuse. Do not confuse the projection with the underlying evidence.
+
+### Finding 7: Inference produces hypotheses and bounded judgments, not source facts
+A model may propose search terms, candidate relationships, or relevance assessments. Deterministic nodes execute searches and check cited files, symbols, and source spans. Published claims should be traceable to verified evidence; model-produced statements without supporting evidence remain hypotheses or unknowns.
+
+### Finding 8: Discovery is objective-directed and may legitimately find nothing
+`workspace_discovery` receives a caller-supplied natural-language objective and workspace (with optional scope and budget). Its purpose is to identify workspace evidence relevant to that objective, not to exhaustively index everything or create a change plan. Distinguish `found`, `not_found`, `inconclusive`, and `failed`. A well-supported negative discovery is a valid result, while exhausted or inadequate coverage is inconclusive. Do not pressure the model to manufacture relevance.
+
+### Finding 9: Working state and published output have different contracts
+Intermediate indexes, search histories, candidate sets, and evidence can remain in the bag as working state. The final `WorkspaceInventory` is a schema-validated, bounded, machine-inspectable result published to `out`. The inventory should contain relevant findings, provenance, search coverage, and unknowns, without duplicating the entire index or prematurely prescribing code changes.
+
+### Finding 10: Recipe decomposition follows independent, testable semantics
+A recipe is a bounded, composable unit with meaningful inputs, outputs, and acceptance criteria; a simple `read_file` or `search_text` operation is ordinarily a tool/hard-node operation, not automatically a separate recipe. `workspace_discovery` may orchestrate deterministic analysis and a small number of inference decisions. Prefer the smallest number of soft nodes that reliably performs the semantic work, and do not over-decompose into inference-heavy wrappers.
+
+### Finding 11: Existing user-story and graph-walk facilities are the acceptance surface
+Use the existing YAML user-story framework and `graph_walk` stepping, including before/after pauses, subgraph entry, checkpoint, and resume. Do not invent new YAML verbs or a parallel testing infrastructure. Test hard-node outputs exactly, test soft-node decisions against controlled evidence, and verify that a checkpointed bag is restored intact. Distinguish test requirements from passing implementation.
+
+### Finding 12: Discovery does not imply authorization to modify the workspace
+Discovery should use read-only workspace operations and should not mutate target source files. Its product feeds subsequent contract extraction and planning recipes; those stages, not discovery, determine what changes should be made.
+
+### Consequences for the first workspace-discovery implementation
+Start with hard nodes for workspace enumeration, structural extraction, searching, evidence collection, context projection, validation, and output publication. Add soft nodes only where task interpretation or relevance genuinely requires inference. Preserve full deterministic evidence in the bag, send compact projections to the model, and publish a validated `WorkspaceInventory` in `out`. Include acceptance stories for `found`, `not_found`, `inconclusive`, and checkpoint/resume, and separately test parent/child bag handoff.
