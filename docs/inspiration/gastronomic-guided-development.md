@@ -279,3 +279,64 @@ These are **red test specifications**, not proven passing tests. The existing ru
 - Context compilation, inspection, and transcript replay reproduce identical model-visible evidence for the same snapshot, independent of model-output nondeterminism.
 
 **Open design choices:** exact ContextSpec schema; immutable snapshot representation and retention; how concurrent writes are ordered at capture; output merge/conflict policy; transcript persistence and response visibility; judge verdict schema and confidence calibration; precise handling of retries and paused in-flight calls. Do not present these as settled or implemented.
+
+## Deterministic hard-node capability contracts
+
+The following is a proposed implementation specification for a reusable hard-node capability library. It formalizes the inputs, computation, outputs, and failure behavior of each operation. **These are design contracts, not assertions that these runner kinds or YAML fields already exist.** Audit existing MechaHarness runners and helpers before adding new implementations.
+
+### Shared configuration and execution contract
+
+A hard-node configuration declares: (1) input bag paths and required schemas, (2) operation parameters, (3) output bag paths and schemas, (4) permitted side effects/capabilities, and (5) error and conflict policy. Inputs and outputs must not be inferred from incidental node payloads or arbitrary global state.
+
+Illustrative *proposed* configuration, not current YAML grammar:
+
+```yaml
+id: project_discovery
+kind: bag_transform
+operation: project
+reads:
+  source: acc.workspace_inventory
+parameters:
+  fields: [relevant_files, verified_symbols, unknowns]
+writes:
+  destination: ctx.discovery_summary
+  mode: replace
+on_error:
+  destination: err.project_discovery
+  policy: fail
+```
+
+Execution sequence: resolve declared bag paths → validate schemas and permissions → perform deterministic operation → validate outputs → atomically commit declared writes → record structured execution diagnostics. A failure must not leave partially published bag mutations. For pure transforms, identical input/configuration produces identical output. For workspace operations, reproducibility also requires recording the observed workspace revision, file hashes, relevant environment, and external command versions where applicable. Any explicit filesystem mutation requires a separate authorization and rollback/partial-effect contract; bag atomicity alone cannot roll back external side effects.
+
+Use the existing `WalkBag` registers (`in`, `out`, `acc`, `ctx`, `ask`, `ans`, `err`) with structured values stored beneath them. Working data ordinarily lives under `acc`/`ctx`; published recipe results under `out`; diagnostics under `err` or an explicitly declared diagnostic path. These are conventions, not an implicit data-routing mechanism: the node's declared write destinations govern.
+
+### Initial capability registry
+
+| Capability | Declared inputs | Deterministic computation | Declared outputs | Failure / boundary semantics |
+| --- | --- | --- | --- | --- |
+| `bag_project` | Source structured value, e.g. `acc.workspace_inventory`; selected field paths and optional rename/default policy | Select/rename nested fields into a new object; do not mutate source | `ctx.discovery_summary` | Missing required path or schema mismatch is typed failure; optional defaults explicit |
+| `bag_merge` | Multiple paths, e.g. `acc.search_results`, `acc.symbol_results`; merge policy | Merge via declared replace/append/keyed-union/reject-conflicts strategy | `acc.evidence` | Conflicts rejected or resolved only by declared policy; no silent overwrite |
+| `bag_validate` | Value e.g. `out.discovery`; versioned schema/registered contract | Check schema and produce field-level diagnostics | `acc.validation.discovery` | Invalid value yields structured report; optional fail-node policy |
+| `workspace_manifest` | `in.workspace` root/scope; ignore rules; traversal limits; filesystem-read grant | Enumerate normalized relative paths; classify types; collect size/hash; record exclusions | `acc.workspace.manifest` with files, omissions, errors, coverage | Inaccessible paths, symlink escape, traversal limits, and races reported explicitly |
+| `file_search` | `ask.search_queries`; `acc.workspace.manifest`; `ctx.search_budget` | Literal/regex search within declared scope; deduplicate; capture paths, line ranges, hashes | `acc.search.matches` with provenance/truncation | Invalid patterns, changed files, and budget exhaustion reported; no fabricated matches |
+| `source_extract` | `ask.source_requests` file/span refs; manifest/revision | Check path and revision; read bounded exact lines/syntax spans | `acc.evidence.excerpts` with text, location, hashes, rejected requests | Stale refs, missing files, out-of-bounds spans, size limits explicit |
+| `symbol_index` | Manifest file set; language/parser configuration; limits | Parse supported source files; extract definitions/imports/exports and stable symbol locations | `acc.workspace.symbol_index` plus diagnostics/coverage | Unsupported language and parse failures become coverage gaps, not invented symbols |
+| `evidence_resolve` | Model-proposed claims/refs e.g. `out.discovery`; manifest and verified excerpts | Resolve cited file/symbol/span identities, revision, existence, and support references | `acc.evidence.resolution` with verified/rejected/unresolved entries | Reference verification is deterministic; semantic truth beyond deterministic checks remains unverified |
+| `coverage_measure` | Search history, scoped manifest, parser coverage, budgets/thresholds | Calculate searched scope, exclusions, exhaustion, threshold satisfaction | `acc.discovery.coverage` with metrics, omissions, threshold results | Insufficient coverage must not be relabeled `not_found`; distinguish inconclusive |
+| `result_compare` | Actual e.g. `out`; expected `in.acceptance`; comparator config | Schema-aware exact/set/tolerance comparisons with explicitly ignored volatile fields | `acc.verification.comparison` with pass/fail and mismatch paths | Unsupported comparison types, invalid expectations, and schema mismatch reported |
+
+These example paths demonstrate data flow; actual recipes may bind other declared paths without changing capability semantics.
+
+### Capability granularity and reuse
+
+A capability is a deterministic operation, **not necessarily a separate Python runner class or agentic recipe**. Closely related bag transformations may share a constrained `bag_transform` runner with registered operations. Avoid an unrestricted expression/scripting language: each operation needs a stable schema, permissions, explicit writes, and predictable failure semantics. An agentic recipe composes hard capabilities and inference/judge nodes into an independently testable objective.
+
+Keep the context boundary from the preceding section: hard nodes may prepare, rank, and validate evidence in the live bag, but the inference node itself compiles its declared context from an immutable call-time snapshot. Hard nodes must not implicitly inject the whole bag into a model request.
+
+### User-story acceptance matrix
+
+For **each** capability, add an existing-framework YAML user story that initializes declared bag inputs, steps the hard node, inspects its exact output path, checks unrelated state remains unchanged, checkpoints and resumes before a downstream consumer, and verifies failure/denial behavior. Add property-style cases where useful (merge conflicts, invalid regex, stale source hashes, symlink escapes, missing fields, unsupported parsers, and coverage exhaustion). Test input/output schema errors and partial-write prevention. These are **required future tests**, not yet authored or run by this section.
+
+The existing inference-continuity fixtures linked above are the cross-node integration acceptance surface: verify that hard-node evidence and prior inference outputs survive in the bag and appear only through a subsequent inference node's declared context projection.
+
+**Open design choices:** exact runner/YAML binding syntax, whether path resolution is a common runtime service, merge/version conflict handling, external effect idempotency, schema registry/versioning, and how to represent workspace revisions. Decide these with reference to the current code and existing story machinery before implementation.
