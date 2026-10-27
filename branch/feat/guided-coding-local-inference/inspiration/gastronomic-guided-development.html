@@ -444,6 +444,17 @@
 <p><strong>Acceptance criterion:</strong> a sequence of two inference calls separated by hard nodes must demonstrate that information written by the first call survives in the bag and is deliberately projected into the second call’s request. Merely asserting that both inference calls returned successful responses is insufficient. The implementation must prove state continuity <em>at the model-input boundary</em>.</p>
 <p><strong>Status:</strong> design and required tests; not implemented or verified by this documentation change.</p>
 </section>
+<section id="tracked-user-story-fixtures-initial-red-specifications">
+<h3>Tracked user-story fixtures (initial red specifications)<a class="headerlink" href="#tracked-user-story-fixtures-initial-red-specifications" title="Link to this heading"></a></h3>
+<p>The following checked-in fixtures are the concrete acceptance-test backlog for this communication contract. <strong>Keep this pointer current when moving, implementing, or replacing them</strong> so the tests do not become detached from the architectural ruling:</p>
+<ul class="simple">
+<li><p><a class="reference download internal" download="" href="../_downloads/41ee2f601f4423fdebc4f79165aa767e/story.json"><span class="xref download myst">Story manifest</span></a> defines the <code class="docutils literal notranslate"><span class="pre">fangore_bag_inference_continuity</span></code> story.</p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/e0770c3ee74e212826d650022b6f54c8/bag_continuity.yaml"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">bag_continuity.yaml</span></code></span></a> covers state propagation from discovery through validation into a subsequent inference request.</p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/9701fe533f47bf736aafbed9ebeaf465/bag_inspection.yaml"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">bag_inspection.yaml</span></code></span></a> covers immutable bag snapshot inspection, authorization, and transcript recording.</p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/5e924a0867ef4c554eb58b0cc4a242b2/judge_no_tools.yaml"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">judge_no_tools.yaml</span></code></span></a> covers compiled judge evidence, typed verdicts, and the absence of tool calls.</p></li>
+</ul>
+<p>These are <strong>red test specifications</strong>, not proven passing tests. The existing runner must be wired to support their fixture behavior and observations before they can establish correctness. Do not mistake their presence in the repository for successful validation.</p>
+</section>
 <section id="acceptance-stories-to-add-using-existing-yaml-graph-walk-machinery">
 <h3>Acceptance stories to add using existing YAML graph-walk machinery<a class="headerlink" href="#acceptance-stories-to-add-using-existing-yaml-graph-walk-machinery" title="Link to this heading"></a></h3>
 <ul class="simple">
