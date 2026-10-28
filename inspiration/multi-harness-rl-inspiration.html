@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multi-Harness RL Inspiration for MechaHarness &mdash; MechaHarness 0.7.0 documentation</title>
+  <title>Multi-Harness RL Inspiration for MechaHarness &mdash; MechaHarness 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -212,7 +212,7 @@ https://fineenvs-multi-harness-rl.hf.space/?__theme=system#harbor</p>
 https://fineenvs-multi-harness-rl.hf.space/?__theme=system#white-box-vs-black-box-rl-environments
 https://fineenvs-multi-harness-rl.hf.space/?__theme=system#conclusions</p>
 <p>The black-box harness owns retries, tools, compaction, subagents, and termination; the trainer observes model interactions.</p>
-<p><strong>MechaHarness today:</strong> This fits the existing MechaHarness/June boundary.</p>
+<p><strong>MechaHarness today:</strong> This fits the existing MechaHarness/the AI assistant host boundary.</p>
 <p><strong>MH-MHRL-11:</strong> Training consumers SHOULD consume real MechaHarness execution artifacts rather than implementing a second training-only approximation of graph semantics.</p>
 </section>
 <section id="training-evaluation-behavior-shaping-constraints-should-match">
@@ -253,7 +253,7 @@ https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-we-rewarded</p>
 <p>Source:
 https://fineenvs-multi-harness-rl.hf.space/?__theme=system#sft-vs-rl</p>
 <p>FineEnvs uses captured successful trajectories for SFT as well as RL.</p>
-<p><strong>MechaHarness today:</strong> Event logs/traces already suit offline analysis; June is the natural owner of corpus/training policy.</p>
+<p><strong>MechaHarness today:</strong> Event logs/traces already suit offline analysis; the AI assistant host is the natural owner of corpus/training policy.</p>
 <p><strong>MH-MHRL-16:</strong> Exportable execution traces SHOULD retain sufficient provenance for downstream learning consumers, while MechaHarness avoids owning SFT/RL recipes or dataset curation.</p>
 </section>
 <section id="cross-harness-evaluation-is-a-compatibility-matrix">
@@ -302,11 +302,11 @@ https://fineenvs-multi-harness-rl.hf.space/?__theme=system#the-capture-proxy</p>
 </ol>
 <p>These should extend current harness experiment, research, EventLog, graph, inference, linkage, and failure-attribution surfaces rather than creating a parallel subsystem.</p>
 </section>
-<section id="ownership-boundary-mechaharness-vs-june">
-<h1>Ownership boundary: MechaHarness vs June<a class="headerlink" href="#ownership-boundary-mechaharness-vs-june" title="Link to this heading"></a></h1>
+<section id="ownership-boundary-mechaharness-vs-the-ai-assistant-host">
+<h1>Ownership boundary: MechaHarness vs the AI assistant host<a class="headerlink" href="#ownership-boundary-mechaharness-vs-the-ai-assistant-host" title="Link to this heading"></a></h1>
 <p><strong>MechaHarness should own:</strong> reproducible harness/config identity; execution/rollout representations; inference-capture contracts; trace/evaluation provenance; evidence-validity semantics; explicit evaluator aggregation; experiment variation/matrix mechanisms; downstream export surfaces; reusable graph/template mechanisms.</p>
-<p><strong>June should own:</strong> trace retention/privacy policy; nightly/offline mining; training corpus selection; LoRA/SFT/RL recipe choice; checkpoint lifecycle; promotion policy; June-specific graph realizations and soft-point bindings.</p>
-<p>In short: <strong>MechaHarness makes execution observable, comparable, reproducible, and optionally training-ready. June decides what to learn.</strong></p>
+<p><strong>the AI assistant host should own:</strong> trace retention/privacy policy; nightly/offline mining; training corpus selection; LoRA/SFT/RL recipe choice; checkpoint lifecycle; promotion policy; the AI assistant host-specific graph realizations and soft-point bindings.</p>
+<p>In short: <strong>MechaHarness makes execution observable, comparable, reproducible, and optionally training-ready. the AI assistant host decides what to learn.</strong></p>
 </section>
 <section id="priority">
 <h1>Priority<a class="headerlink" href="#priority" title="Link to this heading"></a></h1>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Local OpenAI-compat backend (openai_local) &mdash; MechaHarness 0.7.0 documentation</title>
+  <title>Local OpenAI-compat backend (openai_local) &mdash; MechaHarness 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -156,12 +156,23 @@ stay hard; cassette-exact token counts are soft.</p>
 </pre></div>
 </div>
 </section>
+<section id="cursor-mcp-guided-coding">
+<h2>Cursor MCP (guided coding)<a class="headerlink" href="#cursor-mcp-guided-coding" title="Link to this heading"></a></h2>
+<p>For Agentic Recipe <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>, put the same <code class="docutils literal notranslate"><span class="pre">MECHA_*</span></code> endpoint knobs on the
+MCP server <code class="docutils literal notranslate"><span class="pre">env</span></code> in <code class="docutils literal notranslate"><span class="pre">.cursor/mcp.json</span></code> and set <code class="docutils literal notranslate"><span class="pre">MECHA_MCP_HOST=project_coding</span></code>.
+That loads <code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig</span></code> (workspace tools + local-work burst). See
+<a class="reference internal" href="../reference/durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a> and
+<a class="reference internal" href="../reference/graph-templates/guided-coding.html"><span class="std std-doc">guided coding</span></a>.</p>
+<p>A project <code class="docutils literal notranslate"><span class="pre">.env</span></code> is optional and mainly for CLI/<code class="docutils literal notranslate"><span class="pre">mechaharness</span> <span class="pre">run</span></code> — hosts need
+not create one for MCP.</p>
+</section>
 <section id="host-config">
 <h2>Host Config<a class="headerlink" href="#host-config" title="Link to this heading"></a></h2>
 <p>Discover which profile is loaded, map grants/lane, and attach tools in a host
 <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> subclass. Use
 <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment.assert_compatible(require_media=True)</span></code>,
-<code class="docutils literal notranslate"><span class="pre">require_lane=&quot;judge&quot;</span></code>, or required grants to refuse mismatched work.</p>
+<code class="docutils literal notranslate"><span class="pre">require_lane=&quot;judge&quot;</span></code>, or required grants to refuse mismatched work.
+Prefer <code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig</span></code> when the host is the project workspace itself.</p>
 <section id="judge-lane-mecha-judge">
 <h3>Judge lane (<code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>)<a class="headerlink" href="#judge-lane-mecha-judge" title="Link to this heading"></a></h3>
 <p>Judge is not OpenAI chat. Connection env binds on <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code>

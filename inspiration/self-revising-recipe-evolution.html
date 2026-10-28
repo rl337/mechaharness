@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inspiration: Evaluation-driven evolution of composed recipes &mdash; MechaHarness 0.7.0 documentation</title>
+  <title>Inspiration: Evaluation-driven evolution of composed recipes &mdash; MechaHarness 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -163,7 +163,7 @@ Source confidence: <strong>unverified screenshot and social-media account</stron
 <h2>Ownership split<a class="headerlink" href="#ownership-split" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><strong>MechaHarness:</strong> recipe registry and typed composition, validation, deterministic execution, evaluation recipe, versioning/checkpoints, rollback hooks, observability, safety gates.</p></li>
-<li><p><strong>June:</strong> workload selection, orchestration, scheduling, experiment budgets, evaluation campaigns, and promotion policy.</p></li>
+<li><p><strong>the AI assistant host:</strong> workload selection, orchestration, scheduling, experiment budgets, evaluation campaigns, and promotion policy.</p></li>
 <li><p><strong>home_network:</strong> sandboxed workers, persistent experiment stores, telemetry, and service deployment on constrained hosts.</p></li>
 <li><p><strong>JuneSpark:</strong> inference for candidate proposals and evaluations where resource budgets permit; avoid assuming the screenshot’s 4B model or concurrency claims fit local hardware.</p></li>
 </ul>
@@ -172,7 +172,7 @@ Source confidence: <strong>unverified screenshot and social-media account</stron
 <h2>Open questions / TODO<a class="headerlink" href="#open-questions-todo" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>[ ] Define canonical recipe schema, typed interfaces, compatibility rules, and nested recipe version pinning.</p></li>
-<li><p>[ ] Decide whether June may auto-register successful compositions or only submit them for review.</p></li>
+<li><p>[ ] Decide whether the AI assistant host may auto-register successful compositions or only submit them for review.</p></li>
 <li><p>[ ] Specify exactly which soft-node fields can evolve and how permission changes are prohibited.</p></li>
 <li><p>[ ] Define evaluator data splits, contamination checks, statistical confidence, regression corpus, and final-test release policy.</p></li>
 <li><p>[ ] Define multi-objective scoring and hard safety/cost budgets.</p></li>

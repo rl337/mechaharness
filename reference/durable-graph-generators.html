@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Durable graph generators &mdash; MechaHarness 0.7.0 documentation</title>
+  <title>Durable graph generators &mdash; MechaHarness 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -276,17 +276,27 @@ plus a Cursor-style NDJSON handshake). Run it with::</p>
 </section>
 <section id="local-cursor-wiring">
 <h3>Local Cursor wiring<a class="headerlink" href="#local-cursor-wiring" title="Link to this heading"></a></h3>
+<p>Point MCP at the <strong>project interpreter</strong> (editable <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> in this
+repo, or the host env where <code class="docutils literal notranslate"><span class="pre">mechaharness</span></code> is installed). Do <strong>not</strong> create a
+separate MCP-only virtualenv.</p>
+<p>Inference endpoints and model id belong on the MCP server <code class="docutils literal notranslate"><span class="pre">env</span></code> block
+(primary). An optional project <code class="docutils literal notranslate"><span class="pre">.env</span></code> is only a convenience for CLI/pytest.</p>
 <p>Project-local <code class="docutils literal notranslate"><span class="pre">.cursor/mcp.json</span></code> (gitignored; absolute paths are machine-local)::</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>{
   "mcpServers": {
     "mechaharness-generator": {
       "command": "/ABS/PATH/to/.venv/bin/python",
       "args": ["-m", "mechaharness.mcp_graph_driver"],
-      "cwd": "/ABS/PATH/to/mechaharness",
+      "cwd": "/ABS/PATH/to/project",
       "env": {
-        "MECHA_GENERATOR_STORE": "/ABS/PATH/to/.mechaharness/generator-runs.json",
+        "MECHA_MCP_HOST": "project_coding",
+        "MECHA_WORKSPACE": "/ABS/PATH/to/project",
+        "MECHA_GENERATOR_STORE": "/ABS/PATH/to/project/.mechaharness/generator-runs.json",
         "MECHA_GENERATOR_CONTROLLER": "cursor-agent",
-        "PYTHONPATH": "/ABS/PATH/to/src",
+        "MECHA_INFERENCE_BACKEND": "openai_local",
+        "MECHA_BASE_URL": "http://127.0.0.1:8000/v1",
+        "MECHA_MODEL": "&lt;served-model-id&gt;",
+        "MECHA_API_KEY": "local",
         "PYTHONUNBUFFERED": "1"
       }
     }
@@ -294,6 +304,36 @@ plus a Cursor-style NDJSON handshake). Run it with::</p>
 }
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">MECHA_MCP_HOST=project_coding</span></code> loads
+:class:<code class="docutils literal notranslate"><span class="pre">~mechaharness.project_coding.ProjectCodingConfig</span></code> (workspace coding
+tools + <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> local-work burst after guidance). Restart the MCP
+server after changing <code class="docutils literal notranslate"><span class="pre">env</span></code> or editing library modules (stdio processes do
+not hot-reload).</p>
+<p>Recipe <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>: start → <code class="docutils literal notranslate"><span class="pre">advice_requested</span></code> (engineering direction)
+→ <code class="docutils literal notranslate"><span class="pre">generator_resume</span></code> with a short answer → local <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>
+burst (oneshot or todo list with acceptance) + audited gate payload on
+<code class="docutils literal notranslate"><span class="pre">completed</span></code>. Mid-plan human refinement: local work may return
+<code class="docutils literal notranslate"><span class="pre">request_guidance</span></code>; the generator yields again and restarts the plan after
+answers. See <a class="reference internal" href="graph-templates/guided-coding.html"><span class="std std-doc">guided coding</span></a> and
+<a class="reference internal" href="graph-templates/instruction-todo-plan.html"><span class="std std-doc">instruction todo plan</span></a>.</p>
+</section>
+<section id="mcp-progress-stdio-keep-alive">
+<h3>MCP progress (stdio keep-alive)<a class="headerlink" href="#mcp-progress-stdio-keep-alive" title="Link to this heading"></a></h3>
+<p>When the client sends <code class="docutils literal notranslate"><span class="pre">_meta.progressToken</span></code> on <code class="docutils literal notranslate"><span class="pre">tools/call</span></code>, the driver
+emits MCP <code class="docutils literal notranslate"><span class="pre">notifications/progress</span></code> while work runs. Messages use a recipe
+chain path, for example::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>guided_coding › plan_tile › work_item 1 › tool_round 2 › write_file
+</pre></div>
+</div>
+<p>Cursor’s IDE idle timeout resets on these notifications. Progress is optional
+when the token is absent (offline / ScriptedDriver).</p>
+<p>During a Completer round, <code class="docutils literal notranslate"><span class="pre">ConversationalToolLoopRunner</span></code> watches the
+awaitable via <code class="docutils literal notranslate"><span class="pre">mechaharness.inference_progress.await_while_running</span></code>: it emits
+ticks <strong>only while the awaitable is still pending</strong>, then raises
+<code class="docutils literal notranslate"><span class="pre">InferenceTimeoutError</span></code> if wall time exceeds
+<code class="docutils literal notranslate"><span class="pre">MECHA_INFERENCE_TIMEOUT_SECONDS</span></code> (falls back to
+<code class="docutils literal notranslate"><span class="pre">MECHA_HTTP_TIMEOUT_SECONDS</span></code>, default <code class="docutils literal notranslate"><span class="pre">180</span></code>). Tick interval:
+<code class="docutils literal notranslate"><span class="pre">MECHA_INFERENCE_PROGRESS_TICK_SECONDS</span></code> (default <code class="docutils literal notranslate"><span class="pre">5</span></code>).</p>
 </section>
 </section>
 <section id="related">

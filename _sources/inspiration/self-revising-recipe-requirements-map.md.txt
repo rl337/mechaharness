@@ -12,7 +12,7 @@ requirement. Do not treat screenshot performance claims as benchmarks.
 
 **Ownership:** MechaHarness owns recipe registry, typed composition, validation,
 deterministic execution, evaluation substrate, versioning/checkpoints, rollback
-hooks, observability, and safety gates. June owns workload selection,
+hooks, observability, and safety gates. The AI assistant host owns workload selection,
 orchestration, scheduling, experiment budgets, evaluation campaigns, and
 promotion policy. home_network owns sandboxed workers and experiment stores.
 JuneSpark may supply inference for proposals/evals within local budgets.
@@ -27,7 +27,7 @@ JuneSpark may supply inference for proposals/evals within local budgets.
 | MH-SR-06 | Candidate evolution loop | `recipe_lifecycle/recipe_evolution.py`, `research.ResearchLab`, `harness_experiment`, `evaluator`, `objective_policy` | partial | `taloneth_atk_research_reject`, `taloneth_insp_recipe_evolution_loop` | Pure propose / validate / select helpers; isolated evaluation and the campaign loop are host-driven (no executor ships by design) |
 | MH-SR-07 | Held-out final-test release gate | `evaluator.py` (`require_held_out_final_test`), `research.ResearchLab.promote`, `GraphTemplateRegistry.promote_with_final_test`, decision-export anti-leakage | partial | `taloneth_insp_evaluator_compose`, `taloneth_insp_recipe_final_test_gate` | Plain `GraphTemplateRegistry.promote` remains an ungated pointer move for hosts with their own gate |
 | MH-SR-08 | Conflict neighbors / cycle / checkpoint | `decision_conflict_checkpoint.py`, `ExecutionGraph.concurrent_write_conflicts`, `StopContract`, `CheckpointStore`, decision-plane | partial | `fangore_tdr_crash_after_accept_before_record`, `fangore_decision_plane_policy`, `fangore_insp_decision_conflict_checkpoint` | Pure helpers; the graph executor does not call them, so hosts drive the revisit loop and checkpoint |
-| MH-SR-09 | June↔MH evolution ownership | `recipe_lifecycle/recipe_promotion_policy.py`, `recipe_lifecycle/evolution_campaign_hooks.py`, `host_apis.py`, `di.py` (`get_recipe_promotion_policy`, `get_evolution_campaign_hooks`), recipes-and-decision-plane.md | partial | `fangore_insp_evolution_ownership_split` | Hooks are injectables with no-op defaults; `promote_recipe(..., hooks)` calls `on_promotion` after a successful pointer move. Workload selection, budgets, and `on_proposal` stay host-driven |
+| MH-SR-09 | the AI assistant host↔MH evolution ownership | `recipe_lifecycle/recipe_promotion_policy.py`, `recipe_lifecycle/evolution_campaign_hooks.py`, `host_apis.py`, `di.py` (`get_recipe_promotion_policy`, `get_evolution_campaign_hooks`), recipes-and-decision-plane.md | partial | `fangore_insp_evolution_ownership_split` | Hooks are injectables with no-op defaults; `promote_recipe(..., hooks)` calls `on_promotion` after a successful pointer move. Workload selection, budgets, and `on_proposal` stay host-driven |
 
 ## Related inspirations
 

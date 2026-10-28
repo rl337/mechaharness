@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.di &mdash; MechaHarness 0.7.0 documentation</title>
+  <title>mechaharness.di &mdash; MechaHarness 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -192,6 +192,10 @@
     <span class="n">LeaseControllerAuth</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.external_effect</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrashProbe</span><span class="p">,</span> <span class="n">NoopCrashProbe</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.generator_local_work</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GeneratorLocalWork</span><span class="p">,</span>
+    <span class="n">NoOpGeneratorLocalWork</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.graph_executor</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DefaultGraphFailurePolicy</span><span class="p">,</span>
@@ -741,6 +745,10 @@
             <span class="n">make_generator_run_store</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_binding</span><span class="p">(</span>
+            <span class="n">GeneratorLocalWork</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_generator_local_work</span><span class="p">()</span>
+        <span class="p">)</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">make_durable_graph_generator</span><span class="p">(</span><span class="n">injector</span><span class="p">:</span> <span class="n">Injector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DurableGraphGenerator</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DurableGraphGenerator</span><span class="p">(</span>
                 <span class="n">registry</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">GraphTemplateRegistry</span><span class="p">),</span>
@@ -749,6 +757,7 @@
                 <span class="n">datetime_service</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">DateTimeService</span><span class="p">),</span>
                 <span class="n">controller_auth</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">GeneratorControllerAuth</span><span class="p">),</span>
                 <span class="n">checkpoint_store</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">CheckpointStore</span><span class="p">),</span>
+                <span class="n">local_work</span><span class="o">=</span><span class="n">injector</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">GeneratorLocalWork</span><span class="p">),</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_register_override_or_factory</span><span class="p">(</span>
@@ -1203,6 +1212,15 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DurableGraphGenerator</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">DurableGraphGenerator</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Optional :class:`DurableGraphGenerator` override. ``None`` → factory."""</span>
         <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="MechaHarnessConfig.get_generator_local_work">
+<a class="viewcode-back" href="../../api/di.html#mechaharness.di.MechaHarnessConfig.get_generator_local_work">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_generator_local_work</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratorLocalWork</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">GeneratorLocalWork</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Post-guidance local work hook (default: no-op)."""</span>
+        <span class="k">return</span> <span class="n">NoOpGeneratorLocalWork</span></div>
 
 
 <div class="viewcode-block" id="MechaHarnessConfig.get_lifecycle_extension_registry">

@@ -36,10 +36,10 @@ types exist with unit/doctest coverage; *partial* / *gap* mean incomplete.
 inference-capture contracts, evaluation provenance, evidence validity, objective
 aggregation, experiment matrix/exposure surfaces, export packs.
 
-**June (or another client) owns:** corpus selection, training recipes, checkpoint
+**The AI assistant host (or another client) owns:** corpus selection, training recipes, checkpoint
 promotion, retention/privacy policy.
 
 ## Attribution
 
 Follow-on work must keep FineEnvs / Hugging Face permalinks in story footnotes
-(see each `story.json`), not only a link to the aggregate inspiration document.
+(see each suite stage YAML), not only a link to the aggregate inspiration document.

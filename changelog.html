@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Changelog &mdash; MechaHarness 0.7.0 documentation</title>
+  <title>Changelog &mdash; MechaHarness 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="_static/documentation_options.js?v=5a057da9"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -116,6 +116,150 @@
 and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <section id="unreleased">
 <h2>[Unreleased]<a class="headerlink" href="#unreleased" title="Link to this heading"></a></h2>
+<section id="added">
+<h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Verify failure escalate to decompose:</strong> after <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> repair is
+exhausted (or a coding work item fails), <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> builds
+one consolidated restore-and-finish brief
+(<code class="docutils literal notranslate"><span class="pre">decompose_instructions_from_failures</span></code>), restores a pre-burst workspace
+checkpoint, and retries once in oneshot mode; if that still fails it yields
+<code class="docutils literal notranslate"><span class="pre">context_version=decompose</span></code> guidance
+(<code class="docutils literal notranslate"><span class="pre">decompose_guidance_ask</span></code>) so the driver can clarify. Escalate briefs keep
+full goal text plus a fixed no-<code class="docutils literal notranslate"><span class="pre">eval</span></code>/<code class="docutils literal notranslate"><span class="pre">exec</span></code>/<code class="docutils literal notranslate"><span class="pre">literal_eval</span></code>
+non-negotiables block (no 400-char clip).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">AnswerBody.on_decompose</span></code>:</strong> durable <code class="docutils literal notranslate"><span class="pre">answer</span></code> may drain one
+<code class="docutils literal notranslate"><span class="pre">context_version=decompose</span></code> yield (<code class="docutils literal notranslate"><span class="pre">accept_proposed</span></code>) so linear coding
+story walks reach <code class="docutils literal notranslate"><span class="pre">completed</span></code> after verify escalate. Calc CLI stages set
+<code class="docutils literal notranslate"><span class="pre">on_decompose:</span> <span class="pre">accept_proposed</span></code>.</p></li>
+<li><p><strong>Coding implementation scope preamble:</strong> project-coding tool-loop system
+prompt and per-todo work brief constrain speculative next-stage features
+while requiring previously green host checks to stay green (extend, do not
+replace). Planning / ideation paths are unchanged.</p></li>
+<li><p><strong>Coding write / verify ban on <code class="docutils literal notranslate"><span class="pre">eval</span></code> cheats:</strong> <code class="docutils literal notranslate"><span class="pre">CodingWriteGuard</span></code> refuses
+<code class="docutils literal notranslate"><span class="pre">*.py</span></code> writes that call <code class="docutils literal notranslate"><span class="pre">eval</span></code> / <code class="docutils literal notranslate"><span class="pre">exec</span></code> / <code class="docutils literal notranslate"><span class="pre">literal_eval</span></code> (AST, not
+substring). Verify hints and repair briefs use semantic “do not call …”
+wording; <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> with eval-style <code class="docutils literal notranslate"><span class="pre">text_forbids</span></code> also AST-check;
+repair bursts get the same host-verify hint list as the first attempt.</p></li>
+<li><p><strong>Coding workspace checkpoint advances on success:</strong>
+<code class="docutils literal notranslate"><span class="pre">save_coding_workspace_checkpoint</span></code> / <code class="docutils literal notranslate"><span class="pre">restore_coding_workspace_checkpoint</span></code>
+copy the suite workspace tree. Sequential suites refresh the checkpoint after
+each successful stage; <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> refreshes at burst start and
+on <code class="docutils literal notranslate"><span class="pre">ok</span></code>. Restore refuses an empty checkpoint over a non-empty workspace
+(fixes escalate wiping <code class="docutils literal notranslate"><span class="pre">calc.py</span></code> after a stale empty 010 snapshot).</p></li>
+<li><p><strong>Suite / coding <code class="docutils literal notranslate"><span class="pre">TIMING.jsonl</span></code>:</strong> sequential suites append per-stage wall
+clock (and print <code class="docutils literal notranslate"><span class="pre">STAGE</span> <span class="pre">START/OK/FAIL</span></code>); <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> appends
+burst / work-item / verify-repair / escalate spans under the suite run root
+(<code class="docutils literal notranslate"><span class="pre">…/TIMING.jsonl</span></code>), including inference timeout and coding iteration knobs
+so live dogfood can see where hours go.</p></li>
+<li><p><strong>Coding already-satisfied preflight:</strong> before the Completer runs,
+<code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> executes <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code>; if they already pass it
+returns <code class="docutils literal notranslate"><span class="pre">already_satisfied</span></code> / <code class="docutils literal notranslate"><span class="pre">changes_expected=false</span></code> without
+<code class="docutils literal notranslate"><span class="pre">write_file</span></code>. Story expect <code class="docutils literal notranslate"><span class="pre">includes_if</span></code> (calc_cli) requires
+<code class="docutils literal notranslate"><span class="pre">written_files</span></code> only when changes were expected. Override with
+<code class="docutils literal notranslate"><span class="pre">force_implement:</span> <span class="pre">true</span></code>.</p></li>
+<li><p><strong>Coding write gutting guard:</strong> <code class="docutils literal notranslate"><span class="pre">CodingWriteGuard</span></code> on project-coding
+<code class="docutils literal notranslate"><span class="pre">write_file</span></code> refuses catastrophic shrink / syntax-breaking / def-dropping
+overwrites of existing files. <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> gains <code class="docutils literal notranslate"><span class="pre">min_bytes</span></code> and
+<code class="docutils literal notranslate"><span class="pre">python_parses</span></code>. Story <code class="docutils literal notranslate"><span class="pre">fangore_coding_write_guard</span></code>.</p></li>
+<li><p><strong>HTTP GitHub client (PR + CI logs):</strong> <code class="docutils literal notranslate"><span class="pre">HttpGitHubClient</span></code> /
+<code class="docutils literal notranslate"><span class="pre">GitHubConnectionConfig</span></code> (<code class="docutils literal notranslate"><span class="pre">MECHA_GITHUB_*</span></code> / <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>, not
+Settings) for pull requests, check runs, and job logs. Tools <code class="docutils literal notranslate"><span class="pre">ci_checks</span></code> /
+<code class="docutils literal notranslate"><span class="pre">ci_job_log</span></code>. <code class="docutils literal notranslate"><span class="pre">LocalGitHttpPullRequestCodingGit</span></code> when a token is bound.
+<code class="docutils literal notranslate"><span class="pre">RecordingGitHubClient</span></code> + story <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_diagnose</span></code>
+(<code class="docutils literal notranslate"><span class="pre">coding_github:</span> <span class="pre">local_mock_ci</span></code>) for forge lookup without network; repair
+remains <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_repair</span></code>.</p></li>
+<li><p><strong>Static-check repair lane:</strong> <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> accepts <code class="docutils literal notranslate"><span class="pre">ruff</span></code> / <code class="docutils literal notranslate"><span class="pre">mypy</span></code>
+rows. Story <code class="docutils literal notranslate"><span class="pre">fangore_coding_static_checks</span></code> seeds I001 / no-untyped-def and
+repairs under guided coding. Fixture suite <code class="docutils literal notranslate"><span class="pre">sources/</span></code> trees are ignored by
+root pytest collection.</p></li>
+<li><p><strong>Injectable <code class="docutils literal notranslate"><span class="pre">CodingGit</span></code> for project coding:</strong> ABC
+<code class="docutils literal notranslate"><span class="pre">mechaharness.coding_git.CodingGit</span></code> with default
+<code class="docutils literal notranslate"><span class="pre">LocalProcessCodingGit</span></code> (local <code class="docutils literal notranslate"><span class="pre">git</span></code> / <code class="docutils literal notranslate"><span class="pre">gh</span></code>, SSH agent) and
+<code class="docutils literal notranslate"><span class="pre">RecordingPullRequestCodingGit</span></code> (local git + mock forge) for stories/CI.
+Hosts override via <code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig(coding_git=…)</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_coding_git()</span></code> for HTTPS+token or forge-API backends. Tool names stay
+<code class="docutils literal notranslate"><span class="pre">git_status</span></code> / <code class="docutils literal notranslate"><span class="pre">git_log</span></code> / <code class="docutils literal notranslate"><span class="pre">git_diff</span></code> / <code class="docutils literal notranslate"><span class="pre">git_push</span></code> /
+<code class="docutils literal notranslate"><span class="pre">create_pull_request</span></code>. Stories <code class="docutils literal notranslate"><span class="pre">fangore_coding_git_inspect</span></code> /
+<code class="docutils literal notranslate"><span class="pre">fangore_coding_git_open_pr</span></code> seed a feature branch and keep GitHub mocked.</p></li>
+<li><p><strong>Sequential <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> coding suite (live-capable):</strong> ordered Fangore arc
+that grows a shared-workspace <code class="docutils literal notranslate"><span class="pre">calc.py</span></code> CLI through numbers → <code class="docutils literal notranslate"><span class="pre">+−</span></code> →
+<code class="docutils literal notranslate"><span class="pre">×÷</span></code> → <code class="docutils literal notranslate"><span class="pre">^</span></code> → parentheses → common functions. Suite injects
+<code class="docutils literal notranslate"><span class="pre">environment.workspace:</span> <span class="pre">suite</span></code>. Static CI uses <code class="docutils literal notranslate"><span class="pre">coding_write</span></code> stubs; live
+(<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code>) ignores stubs and drives
+<code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> with a real Completer via
+<code class="docutils literal notranslate"><span class="pre">completer_as_tool_loop_complete</span></code>.   Coding bursts honor <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> (file <code class="docutils literal notranslate"><span class="pre">text_contains</span></code> plus
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">calc.py</span> <span class="pre">…</span></code> checks, with one repair/refinement nudge), recover when
+the model finishes without <code class="docutils literal notranslate"><span class="pre">write_file</span></code>, and pass <code class="docutils literal notranslate"><span class="pre">MECHA_MAX_TOKENS</span></code> into
+completions. Goals require named <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">evaluate</span></code> / <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">main</span></code>. <code class="docutils literal notranslate"><span class="pre">project_coding</span></code> walks are live-eligible; the suite harness
+asserts live HTTP POSTs occurred. Authoring:
+<code class="docutils literal notranslate"><span class="pre">scripts/write_calc_cli_suite.py</span></code> + <code class="docutils literal notranslate"><span class="pre">suites/calc_cli/sources/</span></code>.</p></li>
+<li><p><strong>Sequential suite run ids:</strong> each sequential suite attempt gets a durable
+<code class="docutils literal notranslate"><span class="pre">run_id</span></code> under <code class="docutils literal notranslate"><span class="pre">.mechaharness/suite_runs/</span></code> (workspace + manifest). Banner /
+warning / <code class="docutils literal notranslate"><span class="pre">LATEST</span></code> make the id easy to find; <code class="docutils literal notranslate"><span class="pre">MECHA_SUITE_RUN_ID</span></code> +
+<code class="docutils literal notranslate"><span class="pre">MECHA_SUITE_FROM</span></code> resume or rerun from a stage without redoing priors.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">counter_pkg</span></code> coding-delegate suite:</strong> sequential multi-file arc
+(package + pytest + CLI) with <code class="docutils literal notranslate"><span class="pre">coding_writes</span></code> stubs, <code class="docutils literal notranslate"><span class="pre">verify_runs.pytest</span></code>,
+and the same live Completer / repair path as <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code>. Roadmap:
+<code class="docutils literal notranslate"><span class="pre">docs/guides/coding-delegate-suites.md</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">delegate_pkg</span></code> coding-delegate suite:</strong> one sequential Widget arc covering
+list-mode bootstrap, thorough guidance fork (code + README), red-green
+<code class="docutils literal notranslate"><span class="pre">double()</span></code>, and <code class="docutils literal notranslate"><span class="pre">Widget</span></code>→<code class="docutils literal notranslate"><span class="pre">Gadget</span></code> refactor. Live Completer is the gate;
+static stubs provisional. MCP reuses the same graph (no fourth suite).
+Authoring: <code class="docutils literal notranslate"><span class="pre">scripts/write_delegate_pkg_suite.py</span></code>.</p></li>
+<li><p><strong>User-story suites:</strong> thematic <code class="docutils literal notranslate"><span class="pre">suite.json</span></code> catalogs under
+<code class="docutils literal notranslate"><span class="pre">static/fixture/v1/suites/</span></code> with <code class="docutils literal notranslate"><span class="pre">execution.mode</span></code> <code class="docutils literal notranslate"><span class="pre">parallel</span></code> |
+<code class="docutils literal notranslate"><span class="pre">sequential</span></code>, <code class="docutils literal notranslate"><span class="pre">vars</span></code> / <code class="docutils literal notranslate"><span class="pre">setup</span></code> / <code class="docutils literal notranslate"><span class="pre">cleanup</span></code>, and explicit
+<code class="docutils literal notranslate"><span class="pre">stages</span></code> (<code class="docutils literal notranslate"><span class="pre">story</span></code> + <code class="docutils literal notranslate"><span class="pre">scenario</span></code>). Every static scenario is in exactly
+one primary suite. Pytest <code class="docutils literal notranslate"><span class="pre">test_user_story_suite</span></code>; static suite members
+leave <code class="docutils literal notranslate"><span class="pre">test_user_story</span></code> (HTTP twins remain there). Schema:
+<code class="docutils literal notranslate"><span class="pre">tests/stories/suite_spec.py</span></code>; membership helper
+<code class="docutils literal notranslate"><span class="pre">scripts/generate_user_story_suites.py</span></code>. Guide Suites section regenerated
+from fixtures.</p></li>
+<li><p><strong>Workspace verify verbs:</strong> <code class="docutils literal notranslate"><span class="pre">run_python</span></code> and <code class="docutils literal notranslate"><span class="pre">workspace_read</span></code> put
+<code class="docutils literal notranslate"><span class="pre">stdout</span></code> / <code class="docutils literal notranslate"><span class="pre">stderr</span></code> / <code class="docutils literal notranslate"><span class="pre">exit_code</span></code> or <code class="docutils literal notranslate"><span class="pre">exists</span></code> / <code class="docutils literal notranslate"><span class="pre">text</span></code> into the
+step observation bag for ordinary expects. <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code>
+records <code class="docutils literal notranslate"><span class="pre">written_files</span></code> / <code class="docutils literal notranslate"><span class="pre">workspace_root</span></code> on completed yields. Story
+<code class="docutils literal notranslate"><span class="pre">environment.workspace</span></code> / <code class="docutils literal notranslate"><span class="pre">local_work:</span> <span class="pre">project_coding</span></code> / <code class="docutils literal notranslate"><span class="pre">coding_write</span></code>
+bind a temp coding host. Durable + coding local work share the CLI
+<code class="docutils literal notranslate"><span class="pre">EventLog</span></code> so stories can pin <code class="docutils literal notranslate"><span class="pre">core:graph_yield</span></code> /
+<code class="docutils literal notranslate"><span class="pre">core:guidance_resume</span></code> / graph lifecycle via <code class="docutils literal notranslate"><span class="pre">tapped_event_types</span></code>.
+Scenario: <code class="docutils literal notranslate"><span class="pre">fangore_guided_coding_recipe</span></code> <code class="docutils literal notranslate"><span class="pre">helper_run_python.yaml</span></code>.</p></li>
+<li><p><strong>Story observation paths + plan classify:</strong> CLI expect <code class="docutils literal notranslate"><span class="pre">key</span></code> resolves
+dotted / indexed paths (<code class="docutils literal notranslate"><span class="pre">plan.items[0].instruction</span></code>). Durable step
+observations lift allowlisted yield payload fields (<code class="docutils literal notranslate"><span class="pre">context_version</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mode</span></code>, <code class="docutils literal notranslate"><span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">result</span></code>, <code class="docutils literal notranslate"><span class="pre">error</span></code>). <code class="docutils literal notranslate"><span class="pre">PlanClassifyLocalWork</span></code> and
+<code class="docutils literal notranslate"><span class="pre">environment.local_work:</span> <span class="pre">plan_classify</span></code> run classify/refine offline without
+a coding tool loop. Story scenarios: <code class="docutils literal notranslate"><span class="pre">oneshot_from_goal</span></code>,
+<code class="docutils literal notranslate"><span class="pre">numbered_list</span></code>, <code class="docutils literal notranslate"><span class="pre">conflict_list_refinement</span></code>, <code class="docutils literal notranslate"><span class="pre">explicit_list_mode</span></code>.</p></li>
+<li><p><strong>MCP progress paths:</strong> <code class="docutils literal notranslate"><span class="pre">tools/call</span></code> with <code class="docutils literal notranslate"><span class="pre">_meta.progressToken</span></code> emits
+<code class="docutils literal notranslate"><span class="pre">notifications/progress</span></code> messages such as
+<code class="docutils literal notranslate"><span class="pre">guided_coding</span> <span class="pre">›</span> <span class="pre">plan_tile</span> <span class="pre">›</span> <span class="pre">work_item</span> <span class="pre">1</span> <span class="pre">›</span> <span class="pre">tool_round</span> <span class="pre">2</span> <span class="pre">›</span> <span class="pre">write_file</span></code>
+during generator local work (keeps Cursor stdio idle timeout alive).</p></li>
+<li><p><strong>Inference progress watchdog:</strong> <code class="docutils literal notranslate"><span class="pre">await_while_running</span></code> ticks MCP progress
+only while a Completer awaitable is still pending, then fails with
+<code class="docutils literal notranslate"><span class="pre">InferenceTimeoutError</span></code> after <code class="docutils literal notranslate"><span class="pre">MECHA_INFERENCE_TIMEOUT_SECONDS</span></code> (fallback
+<code class="docutils literal notranslate"><span class="pre">MECHA_HTTP_TIMEOUT_SECONDS</span></code>). Wired through
+<code class="docutils literal notranslate"><span class="pre">ConversationalToolLoopRunner</span></code>.</p></li>
+<li><p><strong>Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>):</strong> classify oneshot vs
+ordered list, refine conflicts, pre / per-item / post-list acceptance.
+Optional <code class="docutils literal notranslate"><span class="pre">scope_refinement</span></code> / <code class="docutils literal notranslate"><span class="pre">list_refinement</span></code> guidance is requested by
+local work (<code class="docutils literal notranslate"><span class="pre">request_guidance</span></code>); answering restarts the plan. Domain
+<code class="docutils literal notranslate"><span class="pre">mechaharness.instruction_plan</span></code>. Story: <code class="docutils literal notranslate"><span class="pre">fangore_instruction_todo_plan</span></code>.</p></li>
+<li><p><strong>Guided coding Agentic Recipe (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>):</strong> frontier MCP guidance soft
+point tiles <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code> (<code class="docutils literal notranslate"><span class="pre">plan_tile</span></code>) + <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>
+(<code class="docutils literal notranslate"><span class="pre">audit_tile</span></code>). Host Config <code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig</span></code> registers workspace coding
+tools and a <code class="docutils literal notranslate"><span class="pre">GeneratorLocalWork</span></code> burst after guidance. MCP
+<code class="docutils literal notranslate"><span class="pre">MECHA_MCP_HOST=project_coding</span></code> binds that Config; inference endpoints belong
+on the Cursor MCP <code class="docutils literal notranslate"><span class="pre">env</span></code> block. Story: <code class="docutils literal notranslate"><span class="pre">fangore_guided_coding_recipe</span></code>.</p></li>
+<li><p><strong>Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>):</strong> RDG-aligned spine
+collect → freeze → decide → independent QA → deterministic → gate, lifted
+from the video production host <code class="docutils literal notranslate"><span class="pre">ideation.infer.accept</span></code> for library reuse. Domain module
+<code class="docutils literal notranslate"><span class="pre">mechaharness.audited_decision</span></code>. Migration notes:
+<code class="docutils literal notranslate"><span class="pre">docs/inspiration/video-production-audited-infer-migration.md</span></code>. Story:
+<code class="docutils literal notranslate"><span class="pre">fangore_audited_infer_accept</span></code>.</p></li>
+</ul>
+</section>
 </section>
 <section id="id1">
 <h2>[0.7.0] — 2026-10-22<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
@@ -135,8 +279,8 @@ and DI guides; align judge / openai-local / CLI-universe live-suite notes
 with expanded live story collection (#32 / #33).</p></li>
 </ul>
 </section>
-<section id="added">
-<h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
+<section id="id2">
+<h3>Added<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Stepped graph execution (SG-01..10):</strong> <code class="docutils literal notranslate"><span class="pre">RunControl</span></code> on <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run</span></code>
 (<code class="docutils literal notranslate"><span class="pre">one_step</span></code> / <code class="docutils literal notranslate"><span class="pre">until</span></code> / <code class="docutils literal notranslate"><span class="pre">paused</span></code>); soft subgraph enter-before-first-child;
@@ -188,8 +332,8 @@ instrumented <code class="docutils literal notranslate"><span class="pre">judge<
 walks (Wave 3).</p></li>
 </ul>
 </section>
-<section id="id2">
-<h3>Changed<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<section id="id3">
+<h3>Changed<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>User-story litmus (recipe expansion):</strong> missing graph path ⇒ add Agentic
 Recipe / runners, do not demote valid persona claims. Wave 3 demotion of
@@ -209,8 +353,8 @@ event query filters, and recipe evolvable-allowlist cases use <code class="docut
 over structs instead of near-clone functions.</p></li>
 </ul>
 </section>
-<section id="id3">
-<h3>Added<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id4">
+<h3>Added<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Customer-facing agent skills</strong> under <code class="docutils literal notranslate"><span class="pre">agent-skills/</span></code> (<code class="docutils literal notranslate"><span class="pre">use-mechaharness</span></code>,
 <code class="docutils literal notranslate"><span class="pre">mechaharness-observability</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.mdc</span></code>) plus
@@ -273,8 +417,8 @@ of envelope reason codes for <code class="docutils literal notranslate"><span cl
 </li>
 </ul>
 </section>
-<section id="id4">
-<h3>Changed<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id5">
+<h3>Changed<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Module layout (shims keep old imports working):</strong> <code class="docutils literal notranslate"><span class="pre">isolation/</span></code> package
 (<code class="docutils literal notranslate"><span class="pre">isolation_contract</span></code>, <code class="docutils literal notranslate"><span class="pre">workspace_isolation</span></code>, <code class="docutils literal notranslate"><span class="pre">cross_task_isolation</span></code>),
@@ -298,12 +442,12 @@ eight 5–9 line unit tests that only duplicated insp stories.</p></li>
 </ul>
 </section>
 </section>
-<section id="id5">
-<h2>[0.5.0] — 2026-10-18<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<section id="id6">
+<h2>[0.5.0] — 2026-10-18<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
 <p>pyiv 1.1 HTTP + stdlib DI cut (#30). Manual minor after a squash merge
 auto-bumped the tip to <code class="docutils literal notranslate"><span class="pre">0.4.2</span></code>.</p>
-<section id="id6">
-<h3>Changed<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="id7">
+<h3>Changed<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Floor <strong>pyiv ≥ 1.1.0</strong>. Register use-case stdlib injectables on
 <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (<code class="docutils literal notranslate"><span class="pre">Environment</span></code>, <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>, <code class="docutils literal notranslate"><span class="pre">Filesystem</span></code>,
@@ -337,19 +481,19 @@ explicitly in tests, or bind Memory*/Mock* doubles through Config /
 </ul>
 </section>
 </section>
-<section id="id7">
-<h2>[0.4.1] — 2026-10-14<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<section id="id8">
+<h2>[0.4.1] — 2026-10-14<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
 <p>Node components, recipe CLI/SVG render, and pyiv catalog multibinds (#26).
 Patch tip auto-bumped to <code class="docutils literal notranslate"><span class="pre">0.4.1</span></code> before this PyPI publish.</p>
-<section id="id8">
-<h3>Added<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<section id="id9">
+<h3>Added<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Node components</strong> (<code class="docutils literal notranslate"><span class="pre">mechaharness.node_component</span></code>): queryable sub-node
 elements that must render within a parent graph node; kinds project existing
 events / soft points / nest / stop / budget / effects. Traversal projector
 and <code class="docutils literal notranslate"><span class="pre">embed_recipe_as_tool</span></code> (HF-08). Docs:
 <code class="docutils literal notranslate"><span class="pre">docs/reference/node-components.md</span></code>,
-<code class="docutils literal notranslate"><span class="pre">docs/requirements/dynamic-tool-graph.md</span></code>; June HF inspiration + map.</p></li>
+<code class="docutils literal notranslate"><span class="pre">docs/requirements/dynamic-tool-graph.md</span></code>; the AI assistant host HF inspiration + map.</p></li>
 <li><p><strong>HF-05:</strong> <code class="docutils literal notranslate"><span class="pre">host_graph_executor(event_log=)</span></code> and <code class="docutils literal notranslate"><span class="pre">tapping_event_log</span></code> /
 <code class="docutils literal notranslate"><span class="pre">TappingEventLog</span></code> for blessed-path event taps.</p></li>
 <li><p><strong>HF-07:</strong> Agentic Recipe <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code> +
@@ -370,8 +514,8 @@ built on node components + graph structure (not Mermaid).</p></li>
 skill/rule require declaring node components on new recipes.</p></li>
 </ul>
 </section>
-<section id="id9">
-<h3>Changed<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<section id="id10">
+<h3>Changed<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Floor <strong>pyiv ≥ 0.4.3</strong> (catalog introspection / <code class="docutils literal notranslate"><span class="pre">contribute_map</span></code>).</p></li>
 <li><p>Agentic Recipe / backend / harness <strong>membership</strong> is a pyiv map multibind:
@@ -381,11 +525,11 @@ the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</
 </ul>
 </section>
 </section>
-<section id="id10">
-<h2>[0.4.0] — 2026-10-11<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
-<p>Host kit cut (#25). Merge tip auto-bumped to <code class="docutils literal notranslate"><span class="pre">0.4.0</span></code> before this PyPI publish.</p>
 <section id="id11">
-<h3>Added<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<h2>[0.4.0] — 2026-10-11<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<p>Host kit cut (#25). Merge tip auto-bumped to <code class="docutils literal notranslate"><span class="pre">0.4.0</span></code> before this PyPI publish.</p>
+<section id="id12">
+<h3>Added<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Host kit (<code class="docutils literal notranslate"><span class="pre">mechaharness.host_kit</span></code>): <code class="docutils literal notranslate"><span class="pre">host_graph_executor()</span></code> builds a
 Config-injected <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> with runners + optional SQLite durability;
@@ -397,13 +541,13 @@ Owning story <code class="docutils literal notranslate"><span class="pre">fangor
 </ul>
 </section>
 </section>
-<section id="id12">
-<h2>[0.3.2] — 2026-10-10<a class="headerlink" href="#id12" title="Link to this heading"></a></h2>
+<section id="id13">
+<h2>[0.3.2] — 2026-10-10<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
 <p>Agentic Recipes / typed decision-plane cut (#23) plus Jev typed-judgment
 domain stories (#24). GitHub tagged <code class="docutils literal notranslate"><span class="pre">v0.3.2</span></code> from the merge tip before this
 PyPI publish.</p>
-<section id="id13">
-<h3>Added<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<section id="id14">
+<h3>Added<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Agentic Recipes</strong> as a top-level product concept on the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code>
 substrate: composition helpers (<code class="docutils literal notranslate"><span class="pre">instance_key</span></code>, <code class="docutils literal notranslate"><span class="pre">tile</span></code>), catalog docs, and
@@ -420,17 +564,17 @@ stories: <code class="docutils literal notranslate"><span class="pre">fangore_je
 </ul>
 </section>
 </section>
-<section id="id14">
-<h2>[0.3.1] — 2026-10-06<a class="headerlink" href="#id14" title="Link to this heading"></a></h2>
+<section id="id15">
+<h2>[0.3.1] — 2026-10-06<a class="headerlink" href="#id15" title="Link to this heading"></a></h2>
 <p>PyPI cut of the 0.3.0 library (GitHub also tagged <code class="docutils literal notranslate"><span class="pre">v0.3.0</span></code> before auto-bump
 raced the publish).</p>
 </section>
-<section id="id15">
-<h2>[0.3.0] — 2026-10-06<a class="headerlink" href="#id15" title="Link to this heading"></a></h2>
+<section id="id16">
+<h2>[0.3.0] — 2026-10-06<a class="headerlink" href="#id16" title="Link to this heading"></a></h2>
 <p>Evaluation/rollout provenance cut inspired by FineEnvs multi-harness RL,
 plus transactional durable resume and WalkingLabs eval substrate.</p>
-<section id="id16">
-<h3>Added<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<section id="id17">
+<h3>Added<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>FineEnvs <code class="docutils literal notranslate"><span class="pre">MH-MHRL-*</span></code> library surfaces: <code class="docutils literal notranslate"><span class="pre">HarnessFingerprint</span></code>,
 <code class="docutils literal notranslate"><span class="pre">EvaluationOutcome</span></code>, <code class="docutils literal notranslate"><span class="pre">ObjectivePolicy</span></code>, run parity, experiment lineage,
@@ -451,8 +595,8 @@ and related surfaces). Map:
 <code class="docutils literal notranslate"><span class="pre">docs/inspiration/walkinglabs-eval-requirements-map.md</span></code>.</p></li>
 </ul>
 </section>
-<section id="id17">
-<h3>Changed<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<section id="id18">
+<h3>Changed<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Rename inference backend <code class="docutils literal notranslate"><span class="pre">junespark</span></code> → <code class="docutils literal notranslate"><span class="pre">openai_local</span></code> (same OpenAI-compat
 client, no baked-in <code class="docutils literal notranslate"><span class="pre">base_url</span></code>; set <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>). Live story shorthand
@@ -460,12 +604,12 @@ is <code class="docutils literal notranslate"><span class="pre">MECHA_LIVE_OPENA
 </ul>
 </section>
 </section>
-<section id="id18">
-<h2>[0.2.0] — 2026-09-30<a class="headerlink" href="#id18" title="Link to this heading"></a></h2>
+<section id="id19">
+<h2>[0.2.0] — 2026-09-30<a class="headerlink" href="#id19" title="Link to this heading"></a></h2>
 <p>Inspiration-aligned library cut for client orchestrators (graph templates,
 budgets, linkage, and related primitives).</p>
-<section id="id19">
-<h3>Added<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<section id="id20">
+<h3>Added<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Parameterized <code class="docutils literal notranslate"><span class="pre">graph_templates</span></code> package (fan-out/aggregate, verify/repair,
 independent review, environment repair) with soft points, provenance stamp,
@@ -483,8 +627,8 @@ sets) and host <code class="docutils literal notranslate"><span class="pre">Anno
 <code class="docutils literal notranslate"><span class="pre">fangore_completer_flavors</span></code>.</p></li>
 </ul>
 </section>
-<section id="id20">
-<h3>Changed<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<section id="id21">
+<h3>Changed<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>pyiv ≥ 0.4.2</strong> — floor bumped for <code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code> constructor injection. Constructor injection for
@@ -505,13 +649,13 @@ is not a concrete optional type).</p></li>
 </ul>
 </section>
 </section>
-<section id="id21">
-<h2>[0.1.2] — 2026-09-25<a class="headerlink" href="#id21" title="Link to this heading"></a></h2>
+<section id="id22">
+<h2>[0.1.2] — 2026-09-25<a class="headerlink" href="#id22" title="Link to this heading"></a></h2>
 <p>PyPI cut of the #12 requirements-addendum library (GitHub also tagged <code class="docutils literal notranslate"><span class="pre">v0.1.1</span></code>
 for the intermediate TestPyPI upload; production skipped that number after
 auto-bump raced the publish).</p>
-<section id="id22">
-<h3>Added<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<section id="id23">
+<h3>Added<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>REQUIREMENTS.md addendum incorporation: decision plane, convergence, context
 experiments, graph resume/fan-in, validator qualification, OBS export/metrics,
@@ -525,8 +669,8 @@ including gap stories for tool gating, human review, repair loops, and related
 paths; story <code class="docutils literal notranslate"><span class="pre">footnotes</span></code> and generated guide sync</p></li>
 </ul>
 </section>
-<section id="id23">
-<h3>Changed<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<section id="id24">
+<h3>Changed<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Keep <code class="docutils literal notranslate"><span class="pre">docs/adr/</span></code> and <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> local-only (gitignored; not published)</p></li>
 <li><p>Story acceptance is story-id primary; former INF/POL codes retired to local
@@ -534,12 +678,12 @@ archaeology mapping</p></li>
 </ul>
 </section>
 </section>
-<section id="id24">
-<h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#id24" title="Link to this heading"></a></h2>
+<section id="id25">
+<h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#id25" title="Link to this heading"></a></h2>
 <p>First public library cut: DI-first agent harness with native lanes, cost on the
 run path, built-in EventLog, judge/decide outcomes, and persona user stories.</p>
-<section id="id25">
-<h3>Added<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<section id="id26">
+<h3>Added<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>pyiv DI</strong> — <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> / <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code>; hosts subclass hooks
 (<code class="docutils literal notranslate"><span class="pre">get_inference_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_harness_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_access_policy</span></code>, judge
@@ -565,8 +709,8 @@ dual-mode static cassettes (CI, zero skips) / live via <code class="docutils lit
 principles on the home page; packaging, Trusted Publishing, and auto version bump</p></li>
 </ul>
 </section>
-<section id="id26">
-<h3>Changed<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<section id="id27">
+<h3>Changed<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">junespark</span></code> backend no longer ships a private LAN <code class="docutils literal notranslate"><span class="pre">base_url</span></code> default; set
 <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code></p></li>

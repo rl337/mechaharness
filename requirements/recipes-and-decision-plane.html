@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reusable graph recipes and typed decision-plane requirements &mdash; MechaHarness 0.7.0 documentation</title>
+  <title>Reusable graph recipes and typed decision-plane requirements &mdash; MechaHarness 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -210,9 +210,9 @@ router abstraction;</p></li>
 <li><p>application-specific side effects;</p></li>
 <li><p>readable host tiling that composes library and domain recipes.</p></li>
 </ul>
-<p>A downstream project such as June SHOULD be able to define June-specific recipes
+<p>A downstream project such as an AI assistant host SHOULD be able to define host-specific recipes
 while reusing MechaHarness recipe primitives. A generally useful recipe born in
-June SHOULD be extractable back into MechaHarness without changing the recipe
+That host SHOULD be extractable back into MechaHarness without changing the recipe
 model.</p>
 </section>
 <section id="requirements">
@@ -278,7 +278,7 @@ node component <code class="docutils literal notranslate"><span class="pre">guid
 <li><p>explicit soft points that a caller may bind or override.</p></li>
 </ul>
 <p>Overrides MUST be constrained by the recipe contract. A caller MUST NOT mutate arbitrary internal structure accidentally.</p>
-<p>This permits a reusable MechaHarness recipe to be made concrete by June or another host without forking the recipe.</p>
+<p>This permits a reusable MechaHarness recipe to be made concrete by an AI assistant host or another host without forking the recipe.</p>
 </section>
 <section id="rc-07-substrate-is-graphtemplate">
 <h3>RC-07: Substrate is GraphTemplate<a class="headerlink" href="#rc-07-substrate-is-graphtemplate" title="Link to this heading"></a></h3>
@@ -342,6 +342,18 @@ promotion and documentation as Agentic Recipes (names are catalog ids):</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">BoundedRetryTemplate</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code> (+ durable resume composition)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AuditedInferAcceptTemplate</span></code> + <code class="docutils literal notranslate"><span class="pre">audited_decision</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_audited_infer_accept</span></code> (video production host <code class="docutils literal notranslate"><span class="pre">ideation.infer.accept</span></code> migrate)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">guided_coding</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GuidedCodingTemplate</span></code> (tiles instruction plan + audited gate)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_guided_coding_recipe</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">InstructionTodoPlanTemplate</span></code> (oneshot vs list + AC)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_instruction_todo_plan</span></code></p></td>
 </tr>
 </tbody>
 </table>
