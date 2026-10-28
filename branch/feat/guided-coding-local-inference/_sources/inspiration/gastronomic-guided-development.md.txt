@@ -4,6 +4,8 @@
 **Reference:** `rl337/mechaharness`, PR #34 (`feat/guided-coding-local-inference`)
 **Scope:** One gastronomic product recipe, `gastronomic_guided_development`, and its component subrecipes. The broader guided_usage/reasoning/planning/creativity family is explicitly deferred.
 
+**Cursor execution plan:** [gastronomic-guided-development-execution-plan.md](gastronomic-guided-development-execution-plan.md). This is the ordered implementation and verification checklist. It explicitly covers canonical suite-stage migration of the provisional bag test fixtures, actual bag-aware graph-walk execution, durable state propagation, snapshot-bound inspection, and the workspace discovery vertical slice.
+
 ## Thesis
 
 MechaHarness's existing agentic recipes evolved bottom-up from concrete requirements. A gastronomic recipe is instead designed top-down from an observable product capability, then decomposed into small reusable recipes that each earn their implementation through practical user stories. This is **not** a new runtime, model-router framework, or universal guided_x interface.
