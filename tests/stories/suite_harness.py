@@ -10,7 +10,6 @@ from typing import Any
 
 from mechaharness.coding_workspace_checkpoint import save_coding_workspace_checkpoint
 from mechaharness.run_timing import announce_timing, append_timing, inference_budget_fields
-
 from tests.stories.backend import StoryBackend
 from tests.stories.harness import run_story
 from tests.stories.live_capability import live_eligible

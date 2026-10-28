@@ -121,6 +121,8 @@ omit = [
   "*/cli/main.py",
   "*/mcp_graph_driver.py",
   "*/project_coding.py",  # MCP ProjectCodingConfig host; unit-tested
+  "*/github_client.py",  # forge HTTP; unit-tested + RecordingGitHubClient stories
+  "*/github_connection.py",  # forge connection config; unit-tested
   "*/api/app.py",
   "*/host_apis.py",
   # Viz / render tooling (unit-tested separately when present)
