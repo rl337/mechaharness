@@ -26,6 +26,7 @@ from mechaharness.core.access import (
     MediaImage,
     MediaVideo,
     NetHttp,
+    ProcessExec,
 )
 from mechaharness.core.completer import Completer
 from mechaharness.core.contract import RunRequest, RunResponse
@@ -101,6 +102,7 @@ __all__ = [
     "Grant",
     "GraphEscalate",
     "GraphExecute",
+    "ProcessExec",
     "GraphExecutorError",
     "HarnessError",
     "InMemoryAccessControl",

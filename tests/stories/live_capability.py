@@ -1,8 +1,9 @@
 """Which story cases are meaningful under ``MECHA_STORY_BACKEND=live``.
 
 Live is for catching cassette fantasy: HTTP twins plus static stories that
-actually call a model (``infer`` / ``judge`` / ``judge_route``). Pure policy,
-recipe-shape, and scripted ``tool_loop`` walks stay offline-only.
+actually call a model (``infer`` / ``judge`` / ``judge_route``), and
+``project_coding`` walks whose local-work Completer upgrades onto the real
+reason lane (offline ``coding_write`` stubs are ignored in live mode).
 """
 
 from __future__ import annotations
@@ -44,8 +45,20 @@ def scenario_backend(case: StoryCase) -> str | None:
     return None
 
 
+def scenario_local_work(case: StoryCase) -> str | None:
+    """``environment.local_work`` from the scenario YAML, if set."""
+    path = case.scenario_path()
+    if path is None or not path.is_file():
+        return None
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    env = data.get("environment") if isinstance(data, dict) else None
+    if isinstance(env, dict) and env.get("local_work") is not None:
+        return str(env.get("local_work"))
+    return None
+
+
 def live_eligible(case: StoryCase) -> bool:
-    """Return True when this case should be collected in live mode."""
+    """Return True when this case should be collected / run in live mode."""
     if case.adapter != "in_process":
         return True
     verbs = scenario_verbs(case)
@@ -54,6 +67,9 @@ def live_eligible(case: StoryCase) -> bool:
     if scenario_backend(case) == "anthropic":
         # No Junespark Anthropic endpoint; keep cassette-only.
         return False
+    if scenario_local_work(case) == "project_coding":
+        # Live upgrades ProjectCodingLocalWork onto a real Completer.
+        return True
     return bool(verbs & _LIVE_MODEL_VERBS)
 
 

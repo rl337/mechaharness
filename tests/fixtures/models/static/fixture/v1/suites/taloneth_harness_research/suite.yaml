@@ -1,0 +1,9 @@
+id: taloneth_harness_research
+title: Harness research, ablation, and promotion gates
+persona: taloneth
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

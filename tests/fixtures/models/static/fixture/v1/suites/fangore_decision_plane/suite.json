@@ -1,0 +1,75 @@
+{
+  "id": "fangore_decision_plane",
+  "title": "Decision plane policy, projection, and audited infer",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_audited_infer_accept",
+      "scenario": "010_fangore_audited_infer_accept"
+    },
+    {
+      "story": "fangore_decision_plane_model_policy",
+      "scenario": "020_fangore_decision_plane_model_policy"
+    },
+    {
+      "story": "fangore_decision_plane_policy__accept_billing",
+      "scenario": "030_fangore_decision_plane_policy_accept_billing"
+    },
+    {
+      "story": "fangore_decision_plane_policy__invalid_team",
+      "scenario": "040_fangore_decision_plane_policy_invalid_team"
+    },
+    {
+      "story": "fangore_decision_plane_policy__low_confidence",
+      "scenario": "050_fangore_decision_plane_policy_low_confidence"
+    },
+    {
+      "story": "fangore_decision_plane_projection",
+      "scenario": "060_fangore_decision_plane_projection"
+    },
+    {
+      "story": "fangore_decision_plane_recipe",
+      "scenario": "070_fangore_decision_plane_recipe"
+    },
+    {
+      "story": "fangore_decision_plane_shadow",
+      "scenario": "080_fangore_decision_plane_shadow"
+    },
+    {
+      "story": "fangore_decision_plane_telemetry",
+      "scenario": "090_fangore_decision_plane_telemetry"
+    },
+    {
+      "story": "fangore_decision_surface_reject",
+      "scenario": "100_fangore_decision_surface_reject"
+    },
+    {
+      "story": "fangore_insp_anchor_evidence",
+      "scenario": "110_fangore_insp_anchor_evidence"
+    },
+    {
+      "story": "fangore_insp_decision_conflict_checkpoint__cleared_at_c",
+      "scenario": "120_fangore_insp_decision_conflict_checkpoint_cleared_at_c"
+    },
+    {
+      "story": "fangore_insp_decision_conflict_checkpoint__cycle_never_cleared",
+      "scenario": "130_fangore_insp_decision_conflict_checkpoint_cycle_never_cleared"
+    },
+    {
+      "story": "fangore_insp_decision_conflict_checkpoint__no_conflicts",
+      "scenario": "140_fangore_insp_decision_conflict_checkpoint_no_conflicts"
+    },
+    {
+      "story": "fangore_refund_verdict",
+      "scenario": "150_fangore_refund_verdict"
+    }
+  ]
+}

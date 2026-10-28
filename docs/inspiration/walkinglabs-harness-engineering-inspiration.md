@@ -27,7 +27,7 @@ Coverage labels:
 - **covered** — a first-class mechanism exists and no material change is needed.
 - **strengthen** — the mechanism exists but a useful invariant or integration is missing.
 - **gap** — a reusable mechanism appears absent.
-- **client-owned** — the concern belongs in June or another host; MechaHarness
+- **client-owned** — the concern belongs in the AI assistant host or another host; MechaHarness
   should expose only the reusable seam.
 
 WalkingLabs primarily teaches coding-agent workspaces. MechaHarness is a
@@ -766,7 +766,7 @@ This review does **not** recommend moving these into MechaHarness:
 - issue trackers;
 - persistent product goals;
 - document/knowledge-graph stores;
-- concrete June workflows;
+- concrete the AI assistant host workflows;
 - repository-specific AGENTS.md/CLAUDE.md files;
 - a mandatory git-worktree implementation;
 - a universal WIP=1 rule.

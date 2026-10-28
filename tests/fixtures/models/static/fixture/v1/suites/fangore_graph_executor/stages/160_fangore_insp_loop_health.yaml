@@ -1,0 +1,33 @@
+id: fangore_insp_loop_health
+suite: fangore_graph_executor
+persona: fangore
+title: Wind down loops when verification debt grows
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Long loops accumulate
+  verification debt; Fangore winds them down when independent verification age or repeated failures exceed
+  host thresholds. Accepts WalkingLabs L13 guidance[^wl-l13-loop].
+implementation: '`LoopHealthSignals` and `should_wind_down` in `mechaharness.loop_health` expose verification-debt
+  and failure signals.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l13-loop
+  label: WalkingLabs L13 Loop Engineering
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-13-loop-engineering/
+  note: Loop health
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    loop_health:
+      iterations_since_independent_verification: 6
+      repeated_failure_class_count: 1
+      unresolved_assumptions: 0
+complete:
+  expect:
+  - kind: 'true'
+    key: wind_down
+cleanup: []

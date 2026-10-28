@@ -1,0 +1,43 @@
+id: taloneth_insp_evaluator_compose
+suite: taloneth_harness_research
+persona: taloneth
+title: Run a versioned held-out evaluator to claims
+narrative: 'Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth wires
+  a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole
+  promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon].
+  Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: `taloneth_insp_recipe_final_test_gate`[^insp-sr-07-eval].'
+implementation: '`Evaluator`, `CallableEvaluator`, and `evaluate_claims` in `mechaharness.evaluator` compose
+  deterministic claim producers with version and held_out metadata beside VerificationPolicy.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: anth-evals-evaluator
+  label: Anthropic Demystifying evals for AI agents
+  url: https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents
+  note: Deterministic then model graders
+- id: arxiv-verif-horizon
+  label: Verification Horizon
+  url: https://arxiv.org/abs/2606.26300
+  note: Held-out evaluator versioning
+- id: insp-sr-07-eval
+  label: Self-revising recipe map (MH-SR-07 held_out)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md
+  note: held_out metadata; final-test gate is taloneth_insp_recipe_final_test_gate
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    evaluator_compose_run:
+      exists: true
+      held_out: true
+complete:
+  expect:
+  - kind: 'true'
+    key: passed
+  - kind: 'true'
+    key: held_out
+cleanup: []

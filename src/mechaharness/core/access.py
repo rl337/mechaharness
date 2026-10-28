@@ -145,6 +145,12 @@ class MediaAudio(CoreGrant):
     name = "media.audio"
 
 
+class ProcessExec(CoreGrant):
+    """Run a subprocess (tests / shell) under host workspace policy."""
+
+    name = "process.exec"
+
+
 class GraphExecute(CoreGrant):
     """Run an :class:`~mechaharness.graph_executor.GraphExecutor` over a plan."""
 

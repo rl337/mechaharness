@@ -110,6 +110,9 @@ Pattern stories **must** name the recipe catalog id.
 | `decision_plane` | shipped (+ runtime) | `fangore_decision_plane_*`, `taloneth_decision_plane_shadow_compare` |
 | `bounded_retry` | shipped | `fangore_bounded_retry_recipe` |
 | `conversational_tool_loop` | shipped | `fangore_conversational_tool_loop` |
+| `guided_coding` | shipped | `fangore_guided_coding_recipe` |
+| `instruction_todo_plan` | shipped | `fangore_instruction_todo_plan` |
+| `audited_infer_accept` | shipped | `fangore_audited_infer_accept` |
 | *(composition)* | `instance_key` / `tile` | `fangore_recipe_namespace_tile` |
 
 ## Anti-patterns

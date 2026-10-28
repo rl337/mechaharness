@@ -1,0 +1,64 @@
+id: fangore_host_kit_submit_once__resume_uncertain_with_handle
+suite: fangore_host_kit
+persona: fangore
+title: Wire a host graph executor and submit an external job once (resume_uncertain_with_handle)
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore builds a
+  host that dispatches a remote coding job from a durable plan. They need a short, readable way to register
+  that job step, choose durable storage, and submit exactly once — including after a crash where the remote
+  system may already have accepted the job. Complements `fangore_graph_executor` (authorized plan walk)
+  and `fangore_tdr_crash_after_accept_before_record` (crash-window reconciliation). Host wiring lives
+  in the dependency-injection guide[^host-kit-di]. This stage covers the `resume_uncertain_with_handle`
+  scenario.
+implementation: '`mechaharness.host_kit.host_graph_executor` subclasses `MechaHarnessConfig` and injects
+  a `GraphExecutor` with host runners, default graph grants, optional `SqliteCheckpointStore` via `checkpoint_path`
+  / `checkpoint_store`, and an injectable `CrashProbe`. `SubmitOnceEffectfulRunner` implements submit-once
+  / complete-on-accept. `CliInstrumentor` verb `host_kit_submit_once` runs the acceptance matrix. Module
+  doctests document the blessed host path.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys. Stage id `fangore_host_kit_submit_once__resume_uncertain_with_handle`
+  (scenario `resume_uncertain_with_handle`).
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    host_kit_submit_once:
+      id: resume_uncertain_with_handle
+      mode: resume_seeded
+      durable: true
+      run_id: hk-uncertain-ok
+      task_id: t1
+      seed:
+        effect_state: uncertain
+        external_handle: job-seeded-1
+        node_attempt: 1
+        node_status: running
+  expect: &id001
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: dispatch_count
+    value: 0
+  - kind: equals
+    key: external_handle
+    value: job-seeded-1
+  - kind: equals
+    key: durability
+    value: durable
+  - kind: 'true'
+    key: reconciliation_invoked
+  - kind: lte
+    key: cost_units
+    value: 1
+complete:
+  expect: *id001
+cleanup: []

@@ -1,0 +1,39 @@
+{
+  "id": "fangore_recipe_registry",
+  "title": "Recipe registry lineage, ports, and soft evolution",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_insp_recipe_lineage_promote",
+      "scenario": "010_fangore_insp_recipe_lineage_promote"
+    },
+    {
+      "story": "fangore_insp_recipe_port_search",
+      "scenario": "020_fangore_insp_recipe_port_search"
+    },
+    {
+      "story": "fangore_insp_recipe_version_pointer",
+      "scenario": "030_fangore_insp_recipe_version_pointer"
+    },
+    {
+      "story": "fangore_insp_registry_only_compose",
+      "scenario": "040_fangore_insp_registry_only_compose"
+    },
+    {
+      "story": "fangore_insp_soft_evolution_allowlist",
+      "scenario": "050_fangore_insp_soft_evolution_allowlist"
+    },
+    {
+      "story": "fangore_insp_template_incubation",
+      "scenario": "060_fangore_insp_template_incubation"
+    }
+  ]
+}

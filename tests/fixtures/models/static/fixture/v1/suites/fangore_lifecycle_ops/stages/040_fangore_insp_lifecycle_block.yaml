@@ -1,0 +1,48 @@
+id: fangore_insp_lifecycle_block
+suite: fangore_lifecycle_ops
+persona: fangore
+title: Skip one tool call without inventing a new plan
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He binds host lifecycle
+  extensions ['acme:block_write'] and runs product step `tool_lifecycle` (mode=tool). He verifies extension
+  effects on the tool/graph path.
+implementation: Product verb `tool_lifecycle` (`ToolLifecycleVerb`) with Config/host-bound `LifecycleExtension`
+  instances (story fixtures under tests.stories.hosts).
+validation: user_story `lifecycle_extension_block.yaml` tool_lifecycle; hard expects on extension observations.
+footnotes:
+- id: insp-r20-block
+  label: 'Inspiration requirements (req 20: block mode)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 20 — block
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  lifecycle_extensions: &id001
+  - acme:block_write
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    tool_lifecycle:
+      mode: tool
+      prompt: write
+      grants:
+      - core:fs.write
+      tool_calls:
+      - id: c1
+        name: write_file
+        arguments:
+          path: a.txt
+      extension_ids: *id001
+      goal: lifecycle
+complete:
+  expect:
+  - kind: equals
+    key: tool_result
+    value: blocked by host extension
+  - kind: 'true'
+    key: applied_block
+  - kind: 'false'
+    key: default_ran
+cleanup: []

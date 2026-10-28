@@ -78,8 +78,8 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Host integration](./requirements/host-integration.md) | Normative contract for apps that consume MechaHarness (HOST-01..07) |
 | [Agent skills (downstream)](./guides/agent-skills.md) | Customer-facing Cursor skills for host repos |
 | [Inspiration primitives](./reference/inspiration-primitives.md) | Leaf → map ID → DI? → blessed import |
-| [June host-friction inspiration](./inspiration/june-host-friction-inspiration.md) | June HF pack provenance; console consumer vs MH ownership |
-| [June host-friction requirements map](./inspiration/june-host-friction-requirements-map.md) | HF-* → modules → user stories |
+| [AI assistant host-friction inspiration](./inspiration/ai-assistant-host-friction-inspiration.md) | AI assistant host HF pack provenance; console consumer vs MH ownership |
+| [AI assistant host-friction requirements map](./inspiration/ai-assistant-host-friction-requirements-map.md) | HF-* → modules → user stories |
 | [WalkingLabs Harness Engineering inspiration](./inspiration/walkinglabs-harness-engineering-inspiration.md) | 50-point source-attributed audit of the online book against current MechaHarness |
 | [Eval research brief](./inspiration/eval-research.md) | Anthropic-inspired research handoff for reusable evaluator/evidence/verdict primitives |
 | [WalkingLabs + eval requirements map](./inspiration/walkinglabs-eval-requirements-map.md) | Backlog IDs → modules → user stories for WalkingLabs P0–P2 and eval substrate |
@@ -95,6 +95,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Self-revising recipe requirements map](./inspiration/self-revising-recipe-requirements-map.md) | MH-SR IDs → modules → user stories |
 | [Durable graph generators inspiration](./inspiration/durable-graph-generators-inversion-of-control.md) | Frontier/human/scripted drivers, ordered yields, MCP as adapter |
 | [Durable graph generators requirements map](./inspiration/durable-graph-generators-requirements-map.md) | R-IOC / DG IDs → modules → user stories |
+| [Video production audited-infer migration](./inspiration/video-production-audited-infer-migration.md) | Host alias `ideation.infer.accept` → `audited_infer_accept` |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |

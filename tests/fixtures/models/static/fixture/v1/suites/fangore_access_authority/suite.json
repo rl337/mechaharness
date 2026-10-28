@@ -1,0 +1,71 @@
+{
+  "id": "fangore_access_authority",
+  "title": "Grants, capability envelopes, and authority gates",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_capability_envelope_narrow",
+      "scenario": "010_fangore_capability_envelope_narrow"
+    },
+    {
+      "story": "fangore_compound_grants__grant_gate_allowed",
+      "scenario": "020_fangore_compound_grants_grant_gate_allowed"
+    },
+    {
+      "story": "fangore_compound_grants__grant_gate_denied",
+      "scenario": "030_fangore_compound_grants_grant_gate_denied"
+    },
+    {
+      "story": "fangore_human_review_pending",
+      "scenario": "040_fangore_human_review_pending"
+    },
+    {
+      "story": "fangore_insp_auth_epoch_resume",
+      "scenario": "050_fangore_insp_auth_epoch_resume"
+    },
+    {
+      "story": "fangore_insp_authority_gate",
+      "scenario": "060_fangore_insp_authority_gate"
+    },
+    {
+      "story": "fangore_insp_cross_task_isolation",
+      "scenario": "070_fangore_insp_cross_task_isolation"
+    },
+    {
+      "story": "fangore_insp_denial_equivalence",
+      "scenario": "080_fangore_insp_denial_equivalence"
+    },
+    {
+      "story": "fangore_insp_evolution_ownership_split",
+      "scenario": "090_fangore_insp_evolution_ownership_split"
+    },
+    {
+      "story": "fangore_insp_execution_token",
+      "scenario": "100_fangore_insp_execution_token"
+    },
+    {
+      "story": "fangore_insp_isolation_io",
+      "scenario": "110_fangore_insp_isolation_io"
+    },
+    {
+      "story": "fangore_insp_risk_autonomy",
+      "scenario": "120_fangore_insp_risk_autonomy"
+    },
+    {
+      "story": "fangore_insp_soft_vs_hard",
+      "scenario": "130_fangore_insp_soft_vs_hard"
+    },
+    {
+      "story": "fangore_insp_state_governance",
+      "scenario": "140_fangore_insp_state_governance"
+    }
+  ]
+}

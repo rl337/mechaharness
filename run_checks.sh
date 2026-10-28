@@ -58,7 +58,8 @@ else
   run_check "Mypy type checking" "$MYPY"
 fi
 
-run_check "User stories guide" "$PYTHON" scripts/generate_user_stories_md.py --check
+run_check "User story suites" "$PYTHON" -m tests.stories.commands sync-suites --check
+run_check "User stories guide" "$PYTHON" -m tests.stories.commands sync-guide --check
 
 run_check "Pytest" "$PYTEST" -q
 

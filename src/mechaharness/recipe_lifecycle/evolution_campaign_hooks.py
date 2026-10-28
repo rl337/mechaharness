@@ -1,6 +1,6 @@
 """Host-owned evolution campaign hooks (MH-SR-09).
 
-June (or another host) owns workload selection, experiment budgets, and
+The AI assistant host (or another host) owns workload selection, experiment budgets, and
 campaign bookkeeping. MechaHarness keeps validation: proposals are bounded by
 the registry and the evolvable allowlist before any hook sees them. Bind a host
 implementation with ``MechaHarnessConfig.get_evolution_campaign_hooks()``; the

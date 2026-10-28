@@ -1,28 +1,45 @@
-# user story: nubble_run_cost_events timestamps (openai_compat twin)
-kind: user_story
+id: nubble_run_cost_events__event_timestamps
+persona: nubble
+title: Record cost and inference events for every harness run (event_timestamps)
+narrative: 'Finance asks Nubble whether a harness run burned billable units. He starts the CLI host with
+  the default pass-through family and a mock reason backend, uses the built-in one-shot infer universe
+  (no custom recipe load), runs infer with a short prompt, and verifies completion by reading the event
+  log: an inference event and a cost event with non-zero units — the same signals he would forward to
+  billing. He also checks that those events carry the host clock timestamps he expects. This stage covers
+  the `event_timestamps` scenario.'
+implementation: 'CLI universe `cli:infer` via `CliInstrumentor` / `CliInferRunner` emits structured `EventLog`
+  records for inference and cost (`CostAccountant` / `core:cost`, `core:inference`) on the same stream
+  as graph lifecycle events. This is the baseline observability stream for every run — decisions, routing,
+  and tools extend the same log rather than a separate ledger.
 
+
+  Covers: OBS-01.'
+validation: 'Harness `user_story` scenarios `event_types.yaml` (environment + infer step + complete event/cost/token
+  expects) and `event_timestamps.yaml` (environment.clock + infer + complete timestamp expects). Cassette
+  `response.json`. Related: `tests/test_events.py`. Live: `MECHA_STORY_BACKEND=live`. Stage id `nubble_run_cost_events__event_timestamps`
+  (scenario `event_timestamps`).'
+footnotes: []
+kind: user_story
 environment:
   family: pass_through
   backend: openai_compat
   clock: '2026-01-15T12:00:00Z'
-
+  filesystem:
+    type: temp
 graph: null
-
 steps:
-  - do:
-      infer:
-        prompt: Say hello.
-
+- do:
+    infer:
+      prompt: Say hello.
 complete:
   expect:
-    - kind: equals
-      key: inference_ts
-      value: '2026-01-15T12:00:00Z'
-    - kind: equals
-      key: cost_ts
-      value: '2026-01-15T12:00:00Z'
-    - kind: lte
-      key: cost_units
-      value: 1
-
+  - kind: equals
+    key: inference_ts
+    value: '2026-01-15T12:00:00Z'
+  - kind: equals
+    key: cost_ts
+    value: '2026-01-15T12:00:00Z'
+  - kind: lte
+    key: cost_units
+    value: 1
 cleanup: []

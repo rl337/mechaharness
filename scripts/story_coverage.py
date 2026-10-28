@@ -22,6 +22,7 @@ def _run_pytest_cov() -> int:
         "-m",
         "pytest",
         "tests/stories/test_user_stories.py",
+        "tests/stories/test_user_story_suites.py",
         "-q",
         "--cov=mechaharness",
         "--cov-config=pyproject.toml",

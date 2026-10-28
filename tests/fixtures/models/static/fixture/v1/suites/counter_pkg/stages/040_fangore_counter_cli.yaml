@@ -1,0 +1,175 @@
+id: fangore_counter_cli
+suite: counter_pkg
+persona: fangore
+title: Add a CLI that drives Counter
+narrative: Fangore finishes the delegate arc with a thin CLI over the library — the expensive work stays
+  in the package; the CLI is the operator face.
+implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
+  `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`.
+  Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.'
+validation: 'Harness `user_story` scenario `cli.yaml` inside sequential suite `counter_pkg` (ordered).
+  Live eligibility: `environment.local_work: project_coding`.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: suite
+    contents: 040_fangore_counter_cli.files.json
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: counter-cli
+      inputs:
+        goal: 'Add `counter_cli.py` with `def main(argv=None) -> int` that supports `inc`, `dec`, and
+          `show` subcommands using a `counter.json` file in the workspace (create on first use). Print
+          the current value on stdout. Keep the library and tests green. Required contracts (non-negotiable):
+          keep package import `from counter import Counter` working; public class must be named `Counter`.
+          Do NOT use eval() or exec(). You MUST call write_file for every file you create or change before
+          finishing. Tests under tests/ must stay green (pytest).'
+        max_iterations: 24
+        verify_runs:
+        - path: counter_cli.py
+          text_contains:
+          - def main
+          - inc
+          - dec
+          - show
+          text_forbids:
+          - eval(
+          - exec(
+        - path: counter/__init__.py
+          text_contains:
+          - class Counter
+          text_forbids:
+          - eval(
+          - exec(
+        - exit_code: 0
+          path: tests/test_counter.py
+          pytest: true
+        - args:
+          - inc
+          exit_code: 0
+          path: counter_cli.py
+          stdout_contains: '1'
+        - args:
+          - inc
+          exit_code: 0
+          path: counter_cli.py
+          stdout_contains: '2'
+        - args:
+          - show
+          exit_code: 0
+          path: counter_cli.py
+          stdout_contains: '2'
+        - args:
+          - dec
+          exit_code: 0
+          path: counter_cli.py
+          stdout_contains: '1'
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+  - kind: includes
+    key: written_files
+    value:
+    - counter_cli.py
+    - counter/__init__.py
+    - tests/test_counter.py
+- do:
+    workspace_read:
+      path: counter_cli.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: def main
+  - key: text
+    kind: contains
+    value: inc
+  - key: text
+    kind: contains
+    value: dec
+  - key: text
+    kind: contains
+    value: show
+- do:
+    workspace_read:
+      path: counter/__init__.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: class Counter
+- do:
+    run_python:
+      args:
+      - show
+      path: counter_cli.py
+  expect:
+  - key: exit_code
+    kind: equals
+    value: 0
+  - key: stdout
+    kind: contains
+    value: '1'
+- do:
+    run_python:
+      args:
+      - inc
+      path: counter_cli.py
+  expect:
+  - key: exit_code
+    kind: equals
+    value: 0
+  - key: stdout
+    kind: contains
+    value: '2'
+- do:
+    run_python:
+      args:
+      - dec
+      path: counter_cli.py
+  expect:
+  - key: exit_code
+    kind: equals
+    value: 0
+  - key: stdout
+    kind: contains
+    value: '1'
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

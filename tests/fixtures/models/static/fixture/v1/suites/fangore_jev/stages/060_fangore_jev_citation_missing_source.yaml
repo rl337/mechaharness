@@ -1,0 +1,52 @@
+id: fangore_jev_citation_missing_source
+suite: fangore_jev
+persona: fangore
+title: Refuse to verify a claim with no source
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a source
+  document and claim, runs product step `judge` (fixture cassette offline; live System One when enabled)
+  for: Refuse to verify a claim with no source. He verifies claim_verified / escalate from the typed support
+  answer and confidence floor.'
+implementation: 'Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via injected
+  JudgeProvider. Code-owned claim_verified = selected==supported ∧ conf≥floor.'
+validation: 'Harness `user_story` scenario `missing_source.yaml`: judge step + response.json cassette;
+  hard expects on claim_verified / escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same
+  scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    judge:
+      state_path: inputs/state.txt
+      questions:
+      - id: support
+        kind: choice
+        instructions: Does the source support the claim?
+        options:
+        - id: supported
+          description: Supported
+        - id: contradicted
+          description: Contradicted
+        - id: insufficient
+          description: Insufficient
+        - id: unavailable
+          description: Unavailable
+        allowed_actions:
+        - supported
+        - contradicted
+        - insufficient
+        - unavailable
+      question_set_version: citation-v1
+      action_question_id: support
+      confidence_floor: 0.7
+      verified_selected: supported
+complete:
+  expect:
+  - kind: 'false'
+    key: claim_verified
+cleanup: []

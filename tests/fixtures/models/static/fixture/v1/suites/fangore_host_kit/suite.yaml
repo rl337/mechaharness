@@ -1,0 +1,9 @@
+id: fangore_host_kit
+title: Host kit, completer flavors, and harness families
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

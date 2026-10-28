@@ -1,0 +1,13 @@
+# Audited infer-accept spine with simple node ids (story).
+
+name: audited_infer_accept
+goal: audited hop demo
+
+soft_bindings:
+  task_id: demo-hop
+  simple_ids: true
+  modality: text
+  acceptance_criteria:
+  - done
+  decide_principal: decide_agent
+  qa_principal: qa_agent

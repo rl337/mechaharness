@@ -10,7 +10,7 @@ open (see Gaps); *gap* means the product contract is not shipped. Inspiration
 status: **proposal**, not an accepted requirement.
 
 **Ownership:** MechaHarness owns reusable graph primitives, recipes, grants,
-checkpoints, and audit envelopes. June owns personal identity, memory content,
+checkpoints, and audit envelopes. The AI assistant host owns personal identity, memory content,
 scheduling, and proactive prioritization. home_network owns supporting
 state/backup/health infrastructure.
 

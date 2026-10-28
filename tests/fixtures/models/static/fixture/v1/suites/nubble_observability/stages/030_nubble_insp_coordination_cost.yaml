@@ -1,0 +1,40 @@
+id: nubble_insp_coordination_cost
+suite: nubble_observability
+persona: nubble
+title: Report parallel coordination cost on fan-out
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble compares wall-clock
+  critical path, duplicated context, and fan-in review cost so parallelism is measured rather than assumed
+  beneficial. Accepts WalkingLabs L14 and P08 guidance[^wl-l14-coord][^wl-p08-coord].
+implementation: '`CoordinationCostMetrics` and `summarize_coordination_cost` in `mechaharness.coordination_cost`
+  report fan-out orchestration cost, including graphs tiled from the `fan_out_aggregate` Agentic Recipe.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l14-coord
+  label: WalkingLabs L14 Graph Engineering
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/
+  note: Coordination cost
+- id: wl-p08-coord
+  label: WalkingLabs P08 First Explicit Graph
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/
+  note: Measure parallelism
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    coordination_cost:
+      branch_count: 4
+      wall_clock_critical_path_ms: 5000
+      aggregate_cost_usd: 0.4
+      duplicated_context_tokens: 100
+      fan_in_review_cost_usd: 0.05
+complete:
+  expect:
+  - kind: equals
+    key: branch_count
+    value: 4
+cleanup: []

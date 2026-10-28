@@ -1,0 +1,64 @@
+id: fangore_environment_repair_recipe
+suite: fangore_recipes_tiling
+persona: fangore
+title: Run the environment repair Agentic Recipe
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. Before dependent
+  work continues, he runs Agentic Recipe `environment_repair`: diagnose missing substrate, attempt a bounded
+  repair, then recheck until the environment is ok — without calling a model. Related linkage failures
+  remain `nubble_insp_environment_linkage`. [^rc-env-repair]'
+implementation: Agentic Recipe `environment_repair` via `EnvironmentRepairTemplate` / `environment_repair_runner`
+  and product verb `run_recipe` (`EnvironmentRepairRecipeAdapter`).
+validation: Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recipe`; expects
+  environment_ok / repair_attempts plus shape keys.
+footnotes:
+- id: rc-env-repair
+  label: Recipes requirements (first-wave catalog)
+  url: https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md
+  note: environment_repair owning story
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: environment_repair
+  bind: binds/environment_repair.yaml
+steps:
+- do:
+    run_recipe:
+      name: environment_repair
+      path: binds/environment_repair.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: template_name
+    value: environment_repair
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - diagnose
+    - repair_env
+    - recheck
+  - kind: equals
+    key: recipe_category
+    value: agentic_recipe
+  - kind: 'true'
+    key: environment_ok
+  - kind: 'true'
+    key: recheck_ok
+  - kind: equals
+    key: repair_attempts
+    value: 1
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

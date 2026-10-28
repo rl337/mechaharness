@@ -1,0 +1,70 @@
+id: fangore_graph_executor
+suite: fangore_graph_executor
+persona: fangore
+title: Run a local plan through an authorized graph executor
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore ships a
+  host app with a produce → repair → consume plan. After linkage succeeds, the library must walk ready
+  steps, refuse execution without an execute grant, retry transient failures, escalate when retries are
+  exhausted, emit start and end telemetry, and finish the downstream consume step only after upstream
+  success. Checkpointed plans from `fangore_local_plan_resume` stay durable; preflight failures are covered
+  by `fangore_graph_linkage_preflight`. See inspiration requirements for authorized graph execution[^insp-executor].
+implementation: '`GraphExecutor` in `mechaharness.graph_executor` is a pyiv injectable: constructor takes
+  `EventLog`, `AccessControl`, `GraphNodeRunnerRegistry`, `GraphFailurePolicy`, `GraphEscalation`, and
+  `LinkageResolver`. Hosts register node runners by open `kind` string via `MechaHarnessConfig.get_node_runner_registry()`,
+  override failure/escalation/linkage hooks, and grant `core:graph.execute` / `core:graph.escalate`. The
+  executor emits `core:graph_start` / `core:graph_end` plus per-node events. `CliInstrumentor` verb `graph_executor_run`
+  exercises the path.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: loop-vs-graph-executor
+  label: Loop vs graph engineering
+  url: https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23
+  note: Executor advances durable plans hosts define
+- id: insp-executor
+  label: Inspiration requirements (graph execution)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Reqs 2 and 12 — linkage then execute; durable checkpoints
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    graph_executor_run:
+      goal: local pipe
+      produce_value: 1
+      max_attempts: 2
+      fail_until_attempt: 99
+      check_deny: true
+      grants:
+      - core:graph.execute
+      - core:graph.escalate
+  expect: &id001
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: consume_sum
+    value: 2
+  - kind: 'true'
+    key: emitted_graph_start
+  - kind: 'true'
+    key: emitted_graph_end
+  - kind: 'true'
+    key: denied_without_execute_grant
+  - kind: equals
+    key: flaky_attempts
+    value: 2
+  - kind: lte
+    key: cost_units
+    value: 4
+complete:
+  expect: *id001
+cleanup: []

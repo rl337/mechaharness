@@ -1,0 +1,50 @@
+id: taloneth_insp_scripted_driver_replay
+suite: taloneth_harness_research
+persona: taloneth
+title: Replay advisory decisions with a strict scripted driver
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`, loads the `verify_repair`
+  durable graph (controller `scripted`, store `memory`). Evaluation and CI need a first-class scripted
+  driver that asserts expected yield kinds and fails when unexpected advice appears. Tracks R-IOC-REPLAY
+  and R-IOC-OFFLINE. They walk product steps (start, answer) and verify completion from the structured
+  observation expects on this scenario. [^insp-ioc-04]
+implementation: '`ScriptedDriver` / `durable_generator_host.run_soft_point_session` run start/resume with
+  soft-point bindings and `strict_unexpected_advice`.'
+validation: 'Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.'
+footnotes:
+- id: insp-ioc-04
+  label: Durable graph generators (R-IOC-REPLAY)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md
+  note: R-IOC-REPLAY ScriptedDriver strict fixtures
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: verify_repair
+  durable:
+    controller: scripted
+    store: memory
+steps:
+- do:
+    start:
+      inputs:
+        guidance:
+        - question: Unexpected?
+          choices:
+          - id: x
+            label: X
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer: {}
+  expect_error: unexpected_advice
+complete:
+  expect:
+  - kind: equals
+    key: error
+    value: unexpected_advice
+cleanup: []

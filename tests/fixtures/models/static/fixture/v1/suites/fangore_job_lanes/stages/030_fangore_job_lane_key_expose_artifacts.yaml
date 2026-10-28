@@ -1,0 +1,65 @@
+id: fangore_job_lane_key_expose_artifacts
+suite: fangore_job_lanes
+persona: fangore
+title: FileArtifact URLs observe after key exposure allowlist
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets publishes
+  a `FileArtifact` under `asset_urls` with `allow_lanes` for billing. Billing observes `latest` and receives
+  the URL payload (JL-08).
+implementation: '`FileArtifact` on the run WalkBag; `JobLane.keys.asset_urls` exposure; `lane_publish`
+  / `lane_observe`.'
+validation: Harness `user_story` scenario `key_expose_artifacts.yaml`.
+footnotes:
+- id: jl-broker-artifacts
+  label: Job lane broker requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md
+  note: JL-08 FileArtifact under exposed keys
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  job_lanes:
+    assets.generate:
+      meta:
+        mode: deny_all
+      keys:
+        asset_urls:
+          mode: allow_lanes
+          lanes:
+          - billing.settle
+    billing.settle:
+      meta:
+        mode: open
+      keys: {}
+  filesystem:
+    type: temp
+steps:
+- do:
+    lane_publish:
+      keys:
+        asset_urls:
+          url: https://cdn.example/hero.png
+          media_type: image/png
+  lane: assets.generate
+  run_id: gen-art
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector:
+        latest: true
+      key: asset_urls
+  lane: billing.settle
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: value
+    value:
+      url: https://cdn.example/hero.png
+      media_type: image/png
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+cleanup: []

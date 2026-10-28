@@ -60,6 +60,9 @@ class AnswerBody(BaseModel):
     replay: bool = False
     # Deliberately send a stale expected_sequence.
     stale: bool = False
+    # When resume yields ``context_version=decompose``, optionally drain once
+    # (coding verify escalate) so linear story walks can still reach completed.
+    on_decompose: Literal["accept_proposed", "ignore"] | None = None
 
 
 class InspectBody(BaseModel):
@@ -165,24 +168,63 @@ class StepObservation(BaseModel):
     yield_obj: GraphYield | None = Field(default=None, exclude=True)
     inspect_obj: RunInspection | None = Field(default=None, exclude=True)
 
+    # Yield payload keys surfaced for story YAML expects (path-resolvable).
+    _PAYLOAD_EXPECT_KEYS = frozenset(
+        {
+            "context_version",
+            "mode",
+            "plan",
+            "result",
+            "error",
+            "written_files",
+            "workspace_root",
+            "already_satisfied",
+            "changes_expected",
+            "message",
+        }
+    )
+
     def as_expect_dict(self) -> dict[str, Any]:
         """Flat dict for hard ``expect`` / ``expect_error`` comparison."""
         data = self.model_dump(exclude={"yield_obj", "inspect_obj"})
         # Alias question onto pending_question when useful for YAML scans.
         if data.get("question") is None and data.get("pending_question"):
             data["question"] = data["pending_question"]
+        payload = (
+            self.yield_obj.payload
+            if self.yield_obj is not None and isinstance(self.yield_obj.payload, dict)
+            else {}
+        )
+        for key in self._PAYLOAD_EXPECT_KEYS:
+            if key in payload and payload[key] is not None:
+                # Prefer payload over empty script-level error when present.
+                if key == "error" and data.get("error") is not None:
+                    continue
+                data[key] = payload[key]
         return data
 
 
 class DurableInstrumentor:
     """Run a :class:`DurableScript` against a host durable generator."""
 
-    def __init__(self, script: DurableScript) -> None:
+    def __init__(
+        self,
+        script: DurableScript,
+        *,
+        local_work: Any | None = None,
+        event_log: Any | None = None,
+    ) -> None:
         self.script = script
+        self._local_work = local_work
+        self._event_log = event_log
         self._store: InMemoryGeneratorRunStore | None = (
             InMemoryGeneratorRunStore() if script.store == "shared" else None
         )
-        self._gen = build_host_generator(run_store=self._store)
+        self._gen = build_host_generator(
+            run_store=self._store,
+            local_work=self._local_work,
+            event_log=self._event_log,
+        )
         self._last_yield: GraphYield | None = None
         self._last_advice: GraphYield | None = None
         self._start_yield: GraphYield | None = None
@@ -282,6 +324,7 @@ class DurableInstrumentor:
 
         previous = self._last_yield
         self._note_yield(y)
+        y = self._drain_decompose_if_requested(body, y, controller=controller)
         obs = self._from_yield("answer", y, inspect=True)
         if previous is not None:
             obs = obs.model_copy(
@@ -294,6 +337,62 @@ class DurableInstrumentor:
                 }
             )
         return obs
+
+    def _drain_decompose_if_requested(
+        self,
+        body: AnswerBody,
+        y: GraphYield,
+        *,
+        controller: str,
+    ) -> GraphYield:
+        """Resume once when escalate yields ``decompose`` and body opts in.
+
+        Also drains a single ``list_refinement`` escalate mis-route (accept_risk)
+        so linear walks are not stranded if conflict heuristics fire on
+        host-built todos; prefer fixing those heuristics separately.
+        """
+        policy = (body.on_decompose or "ignore").strip().lower()
+        if policy != "accept_proposed":
+            return y
+        if y.kind != "advice_requested" or self._run_id is None:
+            return y
+        ctx = str((y.payload or {}).get("context_version") or "")
+        if ctx == "decompose":
+            choice = "accept_proposed"
+        elif ctx == "list_refinement":
+            choice = "accept_risk"
+        else:
+            return y
+        request_id = y.request_id or ""
+        drain = GuidanceBinding(
+            choose=choice,
+            choice_id=choice,
+            request_id=request_id,
+        )
+        try:
+            nxt = self._gen.resume(
+                self._run_id,
+                drain.to_response(request_id=request_id),
+                expected_sequence=y.sequence,
+                request_id=request_id or None,
+                controller_id=controller,
+                idempotency_key=(
+                    f"{body.idempotency_key}:decompose"
+                    if body.idempotency_key
+                    else None
+                ),
+            )
+        except (PermissionError, ValueError):
+            return y
+        self._note_yield(nxt)
+        # If accept_risk then immediately yields decompose, drain that too once.
+        if (
+            ctx == "list_refinement"
+            and nxt.kind == "advice_requested"
+            and str((nxt.payload or {}).get("context_version") or "") == "decompose"
+        ):
+            return self._drain_decompose_if_requested(body, nxt, controller=controller)
+        return nxt
 
     def _do_inspect(self, body: InspectBody) -> StepObservation:
         run_id = body.run_id or self._run_id
@@ -331,7 +430,11 @@ class DurableInstrumentor:
     def _do_rebuild(self) -> StepObservation:
         if self._store is None:
             raise ValueError("rebuild requires store: shared")
-        self._gen = build_host_generator(run_store=self._store)
+        self._gen = build_host_generator(
+            run_store=self._store,
+            local_work=self._local_work,
+            event_log=self._event_log,
+        )
         return StepObservation(verb="rebuild")
 
     def _do_list_recipes(self) -> StepObservation:

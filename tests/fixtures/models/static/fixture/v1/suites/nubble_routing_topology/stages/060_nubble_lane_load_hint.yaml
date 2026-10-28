@@ -1,0 +1,45 @@
+id: nubble_lane_load_hint
+suite: nubble_routing_topology
+persona: nubble
+title: Refuse work when the wrong inference profile is loaded
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble is on call
+  when a refund-routing job fails on the local inference host. The job needs the judge profile, but an
+  earlier experiment left the reason profile loaded instead. The harness must not fail with a vague error.
+  It must tell him, in plain operator language, that this work needs the judge lane and which load command
+  to run. When he switches to the correct profile, the page clears. He uses this story whenever a profile
+  mismatch wastes incident time.
+implementation: 'Exclusive lanes (reason / decide-judge / media) on `InferenceEnvironment` refuse cross-lane
+  work and surface load hints (`DEFAULT_LANE_LOAD_HINTS`). This is the operator-facing half of decide-versus-reason
+  profile discipline: bounded judge work must not run under a generative reason profile. Hosts supply
+  a real environment via Config instead of `NoOpInferenceEnvironment`.
+
+
+  Covers: INF-02.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    wrong_lane_deny:
+      active_lane: reason
+      require_lane: judge
+  expect: &id001
+  - kind: equals
+    key: error_type
+    value: InferenceEnvironmentError
+  - kind: contains
+    key: error_match
+    value: judge
+complete:
+  expect: *id001
+cleanup: []

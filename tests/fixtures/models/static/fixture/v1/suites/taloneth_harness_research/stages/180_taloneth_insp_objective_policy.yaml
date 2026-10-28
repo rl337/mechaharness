@@ -1,0 +1,55 @@
+id: taloneth_insp_objective_policy
+suite: taloneth_harness_research
+persona: taloneth
+title: Require an explicit policy before collapsing evaluator signals
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth refuses
+  silent weighted blends of verifier scores and wants gates and formula version written into the result.
+  Accepts FineEnvs reward aggregation guidance[^fineenvs-objective].
+implementation: '`ObjectivePolicy` and `aggregate_objective` in `mechaharness.objective_policy` record
+  component signals, formula, version, gates, and prerequisites on every scalar objective.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-objective
+  label: FineEnvs multi-harness RL — rewards aggregation
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards
+  note: MH-MHRL-07
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    objective_policy_aggregate:
+      policy:
+        policy_id: demo:lexi
+        version: '1'
+        component_signals:
+        - correct
+        - tokens
+        formula: lexicographic
+        gates:
+        - correct
+        lexicographic:
+        - correct
+        - tokens
+      claims:
+      - id: correct
+        statement: ok
+        status: pass
+      - id: tokens
+        statement: budget
+        status: pass
+complete:
+  expect:
+  - kind: 'true'
+    key: scored
+  - kind: equals
+    key: scalar
+    value: 1.0
+  - kind: equals
+    key: policy_id
+    value: demo:lexi
+cleanup: []

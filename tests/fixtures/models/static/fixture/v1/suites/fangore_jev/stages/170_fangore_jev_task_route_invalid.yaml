@@ -1,0 +1,50 @@
+id: fangore_jev_task_route_invalid
+suite: fangore_jev
+persona: fangore
+title: Escalate when the model invents a disallowed lane
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He escalates when
+  the model invents a disallowed lane. He verifies completion from structured observation expects.
+implementation: Product verb `judge`; disallowed selected lane forces escalate.
+validation: 'user_story judge; expect escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same
+  scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    judge:
+      state: 'WORKLOAD: anything.'
+      questions:
+      - id: route
+        kind: choice
+        instructions: Choose the execution lane for this workload.
+        options:
+        - id: local_small
+          description: local_small
+        - id: frontier
+          description: frontier
+        - id: tool
+          description: tool
+        - id: human
+          description: human
+        - id: mystery_gateway
+          description: mystery_gateway
+        allowed_actions:
+        - local_small
+        - frontier
+        - tool
+        - human
+      action_question_id: route
+      confidence_floor: 0.7
+      facts:
+        complexity: 0.1
+complete:
+  expect:
+  - kind: 'true'
+    key: escalate
+cleanup: []

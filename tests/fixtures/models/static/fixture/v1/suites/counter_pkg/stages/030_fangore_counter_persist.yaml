@@ -1,0 +1,113 @@
+id: fangore_counter_persist
+suite: counter_pkg
+persona: fangore
+title: Persist Counter state to a JSON file
+narrative: Fangore asks for durable state on disk so later CLI work can reload counts — still under the
+  same package and pytest gate.
+implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
+  `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`.
+  Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.'
+validation: 'Harness `user_story` scenario `persist.yaml` inside sequential suite `counter_pkg` (ordered).
+  Live eligibility: `environment.local_work: project_coding`.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: suite
+    contents: 030_fangore_counter_persist.files.json
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: counter-persist
+      inputs:
+        goal: 'Add `Counter.save(path)` and `Counter.load(path)` classmethod (or equivalent named `load`)
+          that round-trip `value` as JSON. Extend tests. Keep inc/dec. Required contracts (non-negotiable):
+          keep package import `from counter import Counter` working; public class must be named `Counter`.
+          Do NOT use eval() or exec(). You MUST call write_file for every file you create or change before
+          finishing. Tests under tests/ must stay green (pytest).'
+        max_iterations: 24
+        verify_runs:
+        - path: counter/__init__.py
+          text_contains:
+          - def save
+          - def load
+          text_forbids:
+          - eval(
+          - exec(
+        - path: tests/test_counter.py
+          text_contains:
+          - save
+          - load
+          text_forbids:
+          - eval(
+          - exec(
+        - exit_code: 0
+          path: tests/test_counter.py
+          pytest: true
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+  - kind: includes
+    key: written_files
+    value:
+    - counter/__init__.py
+    - tests/test_counter.py
+- do:
+    workspace_read:
+      path: counter/__init__.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: def save
+  - key: text
+    kind: contains
+    value: def load
+- do:
+    workspace_read:
+      path: tests/test_counter.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: save
+  - key: text
+    kind: contains
+    value: load
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

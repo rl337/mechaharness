@@ -1,6 +1,6 @@
 """Registry-bounded recipe evolution helpers (MH-SR-06).
 
-Pure structure for hosts (for example June) that own the campaign: this module
+Pure structure for hosts (for example an AI assistant project) that own the campaign: this module
 turns a trace summary into **soft-binding candidates only**, validates them
 against the registry and the evolvable allowlist, and selects among scored
 candidates under an explicit :class:`~mechaharness.objective_policy.ObjectivePolicy`

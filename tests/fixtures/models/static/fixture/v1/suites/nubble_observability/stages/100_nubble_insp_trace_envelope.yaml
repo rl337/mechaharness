@@ -1,0 +1,49 @@
+id: nubble_insp_trace_envelope
+suite: nubble_observability
+persona: nubble
+title: Require provenance on every trace envelope
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble rejects incomplete
+  traces that omit config fingerprint, routing, context provenance, or capability envelope refs so offline
+  archaeology can reconstruct the decision path. Accepts WalkingLabs L11 and DeepSeek guidance[^wl-l11-trace][^wl-deepseek-trace].
+  Trace audit substrate for personal-agent MH-PA-08[^insp-pa-08-trace].
+implementation: '`TraceEnvelope`, `envelope_complete`, and `require_trace_envelope` in `mechaharness.trace_envelope`
+  define required provenance fields for run/node events.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l11-trace
+  label: WalkingLabs L11 Runtime Observability
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-11-why-observability-belongs-inside-the-harness/
+  note: Trace reconstructs decisions
+- id: wl-deepseek-trace
+  label: WalkingLabs DeepSeek harness design
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/harness-designs/deepseek/
+  note: Observable execution-affecting state
+- id: insp-pa-08-trace
+  label: Personal agent reliability map (MH-PA-08 trace)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md
+  note: Trace envelope audit substrate
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    trace_envelope_complete:
+      config_fingerprint: cfg:1
+      graph_version: '1'
+      node_id: a
+      routing_decision: reason
+      context_provenance:
+      - ctx:1
+      capability_envelope_ref: env:1
+complete:
+  expect:
+  - kind: 'true'
+    key: complete
+  - kind: equals
+    key: missing
+    value: []
+cleanup: []

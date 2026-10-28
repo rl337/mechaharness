@@ -133,6 +133,12 @@ def run_soft_point_session(
 def build_host_generator(
     *,
     run_store: Any | None = None,
+    local_work: Any | None = None,
+    event_log: Any | None = None,
 ) -> DurableGraphGenerator:
     """Blessed Config/DI path for a durable generator with the default recipe catalog."""
-    return host_durable_graph_generator(run_store=run_store)
+    return host_durable_graph_generator(
+        run_store=run_store,
+        local_work=local_work,
+        event_log=event_log,
+    )

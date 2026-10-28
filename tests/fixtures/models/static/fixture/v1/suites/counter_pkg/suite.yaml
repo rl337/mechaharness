@@ -1,0 +1,12 @@
+id: counter_pkg
+title: Grow a Counter package with tests and CLI
+persona: fangore
+execution:
+  mode: sequential
+  ordered: true
+vars: {}
+setup:
+- ensure_workspace
+cleanup: []
+workspace: temp
+sources: sources

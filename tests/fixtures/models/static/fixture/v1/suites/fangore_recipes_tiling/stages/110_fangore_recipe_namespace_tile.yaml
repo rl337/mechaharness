@@ -1,0 +1,52 @@
+id: fangore_recipe_namespace_tile
+suite: fangore_recipes_tiling
+persona: fangore
+title: Embed two recipe instances without node-id collisions
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore tiles the
+  same Agentic Recipe twice in one parent plan. Each instance must keep distinct step identities and recipe
+  provenance so operators can tell which copy failed. Complements `fangore_insp_dynamic_subgraph` for
+  nested execution. He walks product steps (tile_recipe) and verifies completion from the structured observation
+  expects on this scenario. [^insp-sr-02-tile] Related: `fangore_insp_registry_only_compose`.'
+implementation: '`GraphTemplateParams.instance_key` namespaces node ids on instantiate. `GraphTemplate.tile`
+  embeds a recipe graph under a parent node via `SubgraphNodeRunner`. Provenance includes instance id,
+  params fingerprint, and logical-to-concrete node map (RC-01, RC-04, RC-05, RC-08).'
+validation: 'Harness `user_story` scenario `recipe_namespace_tile.yaml`: environment + graph + steps +
+  complete expects.'
+footnotes:
+- id: rc-namespace
+  label: Recipes requirements (RC-01/04/05/08)
+  url: https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md
+  note: Namespaced multi-instance tiling
+- id: insp-sr-02-tile
+  label: Self-revising recipe map (MH-SR-02 tile)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md
+  note: Recipe tiling; registry-only constraint is fangore_insp_registry_only_compose
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: {}
+steps:
+- do:
+    tile_recipe:
+      path: binds/verify_repair_tile.yaml
+complete:
+  expect:
+  - kind: equals
+    key: instance_count
+    value: 2
+  - kind: 'false'
+    key: node_id_overlap
+  - kind: 'true'
+    key: distinct_instance_ids
+  - kind: equals
+    key: parent_embed_kinds
+    value:
+    - subgraph
+    - subgraph
+  - kind: equals
+    key: namespaced_prefix_left
+    value: verify_repair/left/
+cleanup: []

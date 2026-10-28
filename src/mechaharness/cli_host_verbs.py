@@ -539,9 +539,12 @@ def default_cli_verb_classes() -> dict[str, type[CliVerb]]:
         ShadowDecisionBackendsVerb.name: ShadowDecisionBackendsVerb,
         TransactionalResumeVerb.name: TransactionalResumeVerb,
     }
+    from mechaharness.cli_workspace_verbs import workspace_cli_verb_classes
+
     verbs.update(durable_cli_verb_classes())
     verbs.update(policy_cli_verb_classes())
     verbs.update(surface_cli_verb_classes())
+    verbs.update(workspace_cli_verb_classes())
     return verbs
 
 

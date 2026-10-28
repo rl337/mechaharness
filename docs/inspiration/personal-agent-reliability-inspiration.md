@@ -5,7 +5,7 @@ Source: Hamza Khalid (@humzaakhalid), "100 Tips & Tricks for Building Your Perso
 Source scope: numbered recommendations 1–85 plus the concluding fifteen priority recommendations, as supplied in the source text. These are experience reports, not independently verified benchmarks.
 
 ## Motivation
-An always-on agent must make the *execution system*, rather than a language-model prompt, responsible for invariants. MechaHarness owns reusable graph primitives and recipes, not June's personal identity, memory content, or scheduling policy.
+An always-on agent must make the *execution system*, rather than a language-model prompt, responsible for invariants. MechaHarness owns reusable graph primitives and recipes, not the AI assistant host's personal identity, memory content, or scheduling policy.
 
 ## Proposed requirements and acceptance scenarios
 - **MH-PA-01: Typed provenance and freshness** (tips 6, 7, 65; priority 7–8). Tool results can carry source, observed_at, fetched_at, expiry/freshness policy, and degraded/stale status. A graph can reject stale evidence before an external decision. Test: eight-day-old CRM cache cannot be silently presented as current.
@@ -18,7 +18,7 @@ An always-on agent must make the *execution system*, rather than a language-mode
 - **MH-PA-08: Observability and audit** (tips 19, 78–79). Record recipe selection, model/tool usage, latency/cost, freshness, policy decisions, retries, and failure classifications. Make quarterly audit possible without reading entire transcripts.
 
 ## Architecture boundaries
-June supplies principal preferences, identity, domain memory, scheduling, and proactive prioritization. MechaHarness exposes execution interfaces and generic recipes. home_network hosts supporting state/backup/health infrastructure. Do not make Markdown the only persistence substrate; keep human-readable specifications in git and transactional state in suitable stores. Do not indiscriminately load all memory into model context.
+The AI assistant host supplies principal preferences, identity, domain memory, scheduling, and proactive prioritization. MechaHarness exposes execution interfaces and generic recipes. home_network hosts supporting state/backup/health infrastructure. Do not make Markdown the only persistence substrate; keep human-readable specifications in git and transactional state in suitable stores. Do not indiscriminately load all memory into model context.
 
 ## Open questions / TODO
 - [ ] Align authority gate with current graph hard/soft node resolution and precedence.

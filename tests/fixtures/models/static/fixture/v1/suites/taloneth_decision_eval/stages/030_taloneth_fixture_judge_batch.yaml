@@ -1,0 +1,81 @@
+id: taloneth_fixture_judge_batch
+suite: taloneth_decision_eval
+persona: taloneth
+title: Validate judge question batches without a live model
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth iterates
+  yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured
+  errors — including partial failure reporting — without a GPU host.
+implementation: 'Provider-neutral judge schema in `mechaharness.inference.judge` (`Choice`/`Noul`/`Score`
+  questions and signals, `Judgement`, `JudgeErrorItem`, provenance). `FixtureJudgeProvider` + `judge()`
+  validate batches and report per-question errors. Semantics cover closed-world answers, partial failure,
+  and calibration/provenance fields adapters must map.
+
+
+  Covers: JDG-01, JDG-02, JDG-03, JDG-04.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    fixture_judge_batch:
+      state:
+        ticket: double charge
+      questions:
+      - kind: noul
+        id: escalate
+        instructions: Needs human?
+      - kind: choice
+        id: route
+        instructions: Which team?
+        options:
+        - id: billing
+          description: Payments
+        - id: technical
+          description: Bugs
+        - id: other
+          description: Else
+      - kind: score
+        id: urgency
+        instructions: How urgent?
+        min: 0.0
+        max: 2.0
+        anchors:
+        - value: 0.0
+          description: not urgent
+        - value: 1.0
+          description: soon
+        - value: 2.0
+          description: blocking
+      answers:
+        escalate:
+          p_true: 0.82
+        route:
+          selected: billing
+          probabilities:
+            billing: 0.91
+            technical: 0.05
+            other: 0.04
+        urgency:
+          value: 1.7
+      question_set_version: lab-v1
+complete:
+  expect:
+  - kind: equals
+    key: answer_count
+    value: 3
+  - kind: equals
+    key: error_count
+    value: 0
+  - kind: exactly
+    key: answer_ids
+    value:
+    - escalate
+    - route
+    - urgency
+cleanup: []

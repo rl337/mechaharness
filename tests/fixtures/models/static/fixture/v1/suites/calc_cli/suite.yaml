@@ -1,0 +1,12 @@
+id: calc_cli
+title: Grow a CLI math expression calculator
+persona: fangore
+execution:
+  mode: sequential
+  ordered: true
+vars: {}
+setup:
+- ensure_workspace
+cleanup: []
+workspace: temp
+sources: sources

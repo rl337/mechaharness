@@ -1,0 +1,64 @@
+id: fangore_insp_independent_review
+suite: fangore_recipes_tiling
+persona: fangore
+title: Review artifacts in isolated reviewer context
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs Agentic
+  Recipe `independent_review` with two isolated reviewers that omit producer reasoning, aggregate findings,
+  and retain disagreement. Accepts inspiration requirement 10. Related: `fangore_insp_produce_critique_refine`.
+  [^insp-r10][^insp-pa-03-review]'
+implementation: Agentic Recipe `independent_review` via `IndependentReviewTemplate` / `independent_review_runner`
+  and product verb `run_recipe` (`IndependentReviewRecipeAdapter`).
+validation: Harness `user_story` scenario `independent_review_template.yaml` drives `run_recipe`; expects
+  review_count, omit_producer_reasoning, disagreement_retained.
+footnotes:
+- id: insp-r10
+  label: 'Inspiration requirements (req 10: independent review)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 10 — independent review
+- id: insp-pa-03-review
+  label: Personal agent reliability map (MH-PA-03 independent review)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md
+  note: Adversarial/independent review recipe substrate
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: independent_review
+  bind: binds/independent_review.yaml
+steps:
+- do:
+    run_recipe:
+      name: independent_review
+      path: binds/independent_review.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: review_count
+    value: 2
+  - kind: 'true'
+    key: omit_producer_reasoning
+  - kind: 'true'
+    key: retain_disagreement
+  - kind: 'true'
+    key: disagreement_retained
+  - kind: equals
+    key: finding_count
+    value: 2
+  - kind: equals
+    key: template_name
+    value: independent_review
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

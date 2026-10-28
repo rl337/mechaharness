@@ -1,0 +1,47 @@
+id: fangore_decision_plane_model_policy
+suite: fangore_decision_plane
+persona: fangore
+title: Bind a decision model flavor without baking size into the recipe
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He soft-binds `decision_model`
+  on the `decision_plane` recipe without baking a parameter count into the template, runs `run_recipe`,
+  and verifies ask_batch carries the flavor ref. [^rc-dp-size]
+implementation: Agentic Recipe `decision_plane` soft point `decision_model` via `run_recipe` / `DecisionPlaneRecipeAdapter`.
+validation: user_story model_soft_point.yaml run_recipe; soft_point_decision_model / ask_model_ref.
+footnotes:
+- id: rc-dp-size
+  label: Recipes requirements DP-09
+  url: https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md
+  note: Model size is policy, not architecture
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: decision_plane
+  bind: binds/model_soft_point.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/model_soft_point.yaml
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: decision_plane
+  - kind: 'true'
+    key: soft_point_decision_model
+  - kind: equals
+    key: ask_model_ref
+    value: flavor:local_decision
+  - kind: 'false'
+    key: describe_has_param_count
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

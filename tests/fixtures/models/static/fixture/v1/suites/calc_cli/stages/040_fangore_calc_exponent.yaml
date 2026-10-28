@@ -1,0 +1,163 @@
+id: fangore_calc_exponent
+suite: calc_cli
+persona: fangore
+title: Add right-associative exponentiation
+narrative: Fangore extends the calculator with `^` as right-associative exponentiation (`2^3^2`, `2*3^2`)
+  without breaking earlier precedence.
+implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`
+  and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live`
+  + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork`
+  via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk
+  `calc.py` and CLI stdout for this stage''s grammar plus regressions.'
+validation: 'Harness `user_story` scenario `exponent.yaml` inside sequential suite `calc_cli` (ordered).
+  Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when
+  coding stages run under live backend.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: suite
+    contents: 040_fangore_calc_exponent.files.json
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: calc-exponent
+      inputs:
+        goal: 'Update calc.py to add ^ as right-associative exponentiation: 2^3^2 → 512, 2*3^2 → 18. Keep
+          + - * / precedence. Required API shape (non-negotiable): define both `def evaluate(expr)` and
+          `def main(argv=None) -> int` by those exact names (main must not be only an inline `if __name__
+          == ''__main__''` block). main reads sys.argv[1], prints the result, exits 0 on success / 1 on
+          error / 2 on bad usage. Implement a real expression parser — do NOT use eval(), exec(), or ast.literal_eval
+          on the user expression. You MUST call write_file with the full calc.py contents before finishing.
+          Preserve number literals (42, 3.14) and all prior operators that already pass verify_runs —
+          extend the parser, do not drop working cases.'
+        max_iterations: 24
+        verify_runs:
+        - path: calc.py
+          text_contains:
+          - def evaluate
+          - def main
+          text_forbids:
+          - eval(
+          - exec(
+        - args:
+          - '42'
+          exit_code: 0
+          path: calc.py
+          stdout_contains: '42'
+        - args:
+          - '3.14'
+          exit_code: 0
+          path: calc.py
+          stdout_contains: '3.14'
+        - args:
+          - 2+3*4
+          exit_code: 0
+          path: calc.py
+          stdout_contains: '14'
+        - args:
+          - 2*3^2
+          exit_code: 0
+          path: calc.py
+          stdout_contains: '18'
+        - args:
+          - 2^3^2
+          exit_code: 0
+          path: calc.py
+          stdout_contains: '512'
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+      on_decompose: accept_proposed
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+  - kind: includes_if
+    if_key: changes_expected
+    if_equals: true
+    key: written_files
+    value:
+    - calc.py
+- do:
+    workspace_read:
+      path: calc.py
+  expect:
+  - kind: 'true'
+    key: exists
+  - kind: contains
+    key: text
+    value: def evaluate
+  - kind: contains
+    key: text
+    value: def main
+- do:
+    run_python:
+      path: calc.py
+      args:
+      - 2+3*4
+  expect:
+  - kind: equals
+    key: exit_code
+    value: 0
+  - kind: contains
+    key: stdout
+    value: '14'
+- do:
+    run_python:
+      path: calc.py
+      args:
+      - 2*3^2
+  expect:
+  - kind: equals
+    key: exit_code
+    value: 0
+  - kind: contains
+    key: stdout
+    value: '18'
+- do:
+    run_python:
+      path: calc.py
+      args:
+      - 2^3^2
+  expect:
+  - kind: equals
+    key: exit_code
+    value: 0
+  - kind: contains
+    key: stdout
+    value: '512'
+complete:
+  expect:
+  - kind: equals
+    key: exit_code
+    value: 0
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

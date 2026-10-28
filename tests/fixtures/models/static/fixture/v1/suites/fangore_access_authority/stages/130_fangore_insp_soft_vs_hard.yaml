@@ -1,0 +1,55 @@
+id: fangore_insp_soft_vs_hard
+suite: fangore_access_authority
+persona: fangore
+title: Enforce grants mechanically instead of by prompt alone
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Soft guidance may
+  ask models to be careful; hard grants still refuse unauthorized writes. Accepts inspiration requirement
+  9[^insp-r09]. Complements `fangore_insp_risk_autonomy`. Soft-vs-hard split for self-revising MH-SR-03[^insp-sr-03-hard].
+implementation: 'Harness tool loops consult `AccessControl` before execution — including fused or loop-proposed
+  calls — and denied calls emit access-check events and never run side effects. Failure defaults are deny
+  for mutations / external / privileged / uncertain scope; composed packs from `fangore_compound_grants`
+  still apply. Prompts never grant permission.
+
+
+  Covers: GAT-01, GAT-02, GAT-03.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-r09
+  label: 'Inspiration requirements (req 9: soft vs hard)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 9 — soft vs hard
+- id: insp-sr-03-hard
+  label: Self-revising recipe map (MH-SR-03 soft vs hard)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md
+  note: Soft guidance vs hard enforcement
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    tool_gating:
+      prompt: Write a.txt
+      deny_grants: []
+      allow_grants:
+      - core:fs.write
+      tool_calls:
+      - id: '1'
+        name: write_file
+        arguments:
+          path: a.txt
+  expect: &id001
+  - kind: 'true'
+    key: denied_without_grant
+  - kind: 'true'
+    key: allowed_with_grant
+complete:
+  expect: *id001
+cleanup: []

@@ -1,0 +1,41 @@
+id: taloneth_insp_experiment_dimensions
+suite: taloneth_harness_research
+persona: taloneth
+title: Declare fixed and varying harness experiment dimensions
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs
+  every harness experiment to state which configuration axes are fixed and which vary, with a reproducible
+  digest on traces. Accepts FineEnvs harness-overfitting axes guidance[^fineenvs-dims].
+implementation: '`ExperimentDimensions` and `require_dimension_trace_fields` in `mechaharness.experiment_dimensions`
+  canonicalize fixed/varying axes into a digest.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-dims
+  label: FineEnvs multi-harness RL — harness overfitting
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-models-overfit-to-a-single-harness
+  note: MH-MHRL-02
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    experiment_dimensions_digest:
+      fixed:
+        model_revision: m@1
+      varying:
+        tool_surface:
+        - Read
+        - Edit
+complete:
+  expect:
+  - kind: 'true'
+    key: has_digest
+  - kind: includes
+    key: varying_tools
+    value:
+    - Edit
+    - Read
+cleanup: []

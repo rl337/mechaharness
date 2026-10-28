@@ -137,7 +137,7 @@ https://fineenvs-multi-harness-rl.hf.space/?__theme=system#conclusions
 
 The black-box harness owns retries, tools, compaction, subagents, and termination; the trainer observes model interactions.
 
-**MechaHarness today:** This fits the existing MechaHarness/June boundary.
+**MechaHarness today:** This fits the existing MechaHarness/the AI assistant host boundary.
 
 **MH-MHRL-11:** Training consumers SHOULD consume real MechaHarness execution artifacts rather than implementing a second training-only approximation of graph semantics.
 
@@ -191,7 +191,7 @@ https://fineenvs-multi-harness-rl.hf.space/?__theme=system#sft-vs-rl
 
 FineEnvs uses captured successful trajectories for SFT as well as RL.
 
-**MechaHarness today:** Event logs/traces already suit offline analysis; June is the natural owner of corpus/training policy.
+**MechaHarness today:** Event logs/traces already suit offline analysis; the AI assistant host is the natural owner of corpus/training policy.
 
 **MH-MHRL-16:** Exportable execution traces SHOULD retain sufficient provenance for downstream learning consumers, while MechaHarness avoids owning SFT/RL recipes or dataset curation.
 
@@ -250,13 +250,13 @@ The FineEnvs material does not justify replacing MechaHarness architecture. It s
 
 These should extend current harness experiment, research, EventLog, graph, inference, linkage, and failure-attribution surfaces rather than creating a parallel subsystem.
 
-# Ownership boundary: MechaHarness vs June
+# Ownership boundary: MechaHarness vs the AI assistant host
 
 **MechaHarness should own:** reproducible harness/config identity; execution/rollout representations; inference-capture contracts; trace/evaluation provenance; evidence-validity semantics; explicit evaluator aggregation; experiment variation/matrix mechanisms; downstream export surfaces; reusable graph/template mechanisms.
 
-**June should own:** trace retention/privacy policy; nightly/offline mining; training corpus selection; LoRA/SFT/RL recipe choice; checkpoint lifecycle; promotion policy; June-specific graph realizations and soft-point bindings.
+**the AI assistant host should own:** trace retention/privacy policy; nightly/offline mining; training corpus selection; LoRA/SFT/RL recipe choice; checkpoint lifecycle; promotion policy; the AI assistant host-specific graph realizations and soft-point bindings.
 
-In short: **MechaHarness makes execution observable, comparable, reproducible, and optionally training-ready. June decides what to learn.**
+In short: **MechaHarness makes execution observable, comparable, reproducible, and optionally training-ready. the AI assistant host decides what to learn.**
 
 # Priority
 

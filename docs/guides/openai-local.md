@@ -49,12 +49,24 @@ MECHA_LIVE_OPENAI_COMPAT=1 MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
   pytest -q tests/stories -k nubble_run_cost
 ```
 
+## Cursor MCP (guided coding)
+
+For Agentic Recipe `guided_coding`, put the same `MECHA_*` endpoint knobs on the
+MCP server `env` in `.cursor/mcp.json` and set `MECHA_MCP_HOST=project_coding`.
+That loads `ProjectCodingConfig` (workspace tools + local-work burst). See
+[Durable graph generators](../reference/durable-graph-generators.md) and
+[guided coding](../reference/graph-templates/guided-coding.md).
+
+A project `.env` is optional and mainly for CLI/`mechaharness run` — hosts need
+not create one for MCP.
+
 ## Host Config
 
 Discover which profile is loaded, map grants/lane, and attach tools in a host
 `MechaHarnessConfig` subclass. Use
 `InferenceEnvironment.assert_compatible(require_media=True)`,
 `require_lane="judge"`, or required grants to refuse mismatched work.
+Prefer `ProjectCodingConfig` when the host is the project workspace itself.
 
 ### Judge lane (`MECHA_JUDGE_*`)
 

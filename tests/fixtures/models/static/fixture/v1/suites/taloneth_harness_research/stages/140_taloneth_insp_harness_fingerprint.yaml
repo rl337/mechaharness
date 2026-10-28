@@ -1,0 +1,56 @@
+id: taloneth_insp_harness_fingerprint
+suite: taloneth_harness_research
+persona: taloneth
+title: Stamp evaluation results with harness configuration identity
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth compares
+  the same model and task under two graph configurations and needs each result to carry which harness
+  configuration produced it, not only the model name. Accepts FineEnvs multi-harness RL guidance[^fineenvs-fingerprint].
+implementation: '`HarnessFingerprint`, `build_harness_fingerprint`, and `require_eval_provenance` in `mechaharness.harness_fingerprint`
+  bind model revision, harness family/version, config digests, tool/context surfaces, evaluator, environment,
+  and task identity into a stable digest attached to evaluation summaries.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-fingerprint
+  label: FineEnvs multi-harness RL — harness-attached scores
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#benchmark-scores-now-come-with-a-harness-attached
+  note: MH-MHRL-01
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    harness_fingerprint_digest:
+      summary:
+        model: model@r1
+        score: 0.9
+      a:
+        model_revision: model@r1
+        harness_family: react
+        harness_version: '2026.10'
+        config_fingerprint: cfg:aaa
+        tool_surface:
+        - Read
+        evaluator_id: demo:exists
+        environment_profile: local
+        task_id: task-1
+      b:
+        model_revision: model@r1
+        harness_family: react
+        harness_version: '2026.10'
+        config_fingerprint: cfg:bbb
+        tool_surface:
+        - Read
+        evaluator_id: demo:exists
+        environment_profile: local
+        task_id: task-1
+complete:
+  expect:
+  - kind: 'true'
+    key: digests_differ
+  - kind: 'true'
+    key: has_fingerprint
+cleanup: []

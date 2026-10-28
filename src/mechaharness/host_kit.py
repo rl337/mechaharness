@@ -1,6 +1,6 @@
 """Host-facing helpers for readable GraphExecutor / effectful wiring.
 
-Orchestrator hosts (June and peers) often need two things that are easy to
+Orchestrator hosts (AI assistant apps and peers) often need two things that are easy to
 get wrong when assembled by hand:
 
 1. A :class:`~mechaharness.graph_executor.GraphExecutor` wired through
@@ -488,6 +488,7 @@ def host_durable_graph_generator(
     checkpoint_path: str | Path | None = None,
     event_log: EventLog | None = None,
     controller_id_default: str = "host",
+    local_work: Any | None = None,
 ) -> DurableGraphGenerator:
     """Build a :class:`~mechaharness.durable_graph_generator.DurableGraphGenerator`.
 
@@ -497,6 +498,10 @@ def host_durable_graph_generator(
     process-restart hosts rehydrate pending guidance. Optional
     ``checkpoint_path`` / ``checkpoint_store`` bind the same durability seam
     used by :func:`host_graph_executor`.
+
+    Optional ``local_work`` binds :class:`~mechaharness.generator_local_work.GeneratorLocalWork`
+    (story hosts pass ``PlanClassifyLocalWork`` / project coding). Default is
+    Config ``NoOpGeneratorLocalWork``.
 
     ``controller_id_default`` is documentation-only; callers still pass
     ``controller_id`` on ``start`` / ``resume`` / ``cancel``.
@@ -510,11 +515,13 @@ def host_durable_graph_generator(
         GeneratorRunStore,
         InMemoryGeneratorRunStore,
     )
+    from mechaharness.generator_local_work import GeneratorLocalWork
 
     prebuilt_store = checkpoint_store
     sqlite_path = checkpoint_path
     elog = event_log
     bound_runs = run_store if run_store is not None else InMemoryGeneratorRunStore()
+    bound_local_work = local_work
 
     class _HostGeneratorConfig(MechaHarnessConfig):
         def get_inference_class(self) -> type:
@@ -531,6 +538,14 @@ def host_durable_graph_generator(
 
         def get_generator_run_store(self) -> GeneratorRunStore:
             return bound_runs
+
+        def get_generator_local_work(self) -> GeneratorLocalWork | type[GeneratorLocalWork]:
+            if bound_local_work is not None:
+                return cast(
+                    Union[GeneratorLocalWork, type[GeneratorLocalWork]],
+                    bound_local_work,
+                )
+            return super().get_generator_local_work()
 
         def configure(self) -> None:
             super().configure()

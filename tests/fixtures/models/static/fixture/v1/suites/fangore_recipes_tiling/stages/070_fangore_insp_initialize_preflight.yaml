@@ -1,0 +1,56 @@
+id: fangore_insp_initialize_preflight
+suite: fangore_recipes_tiling
+persona: fangore
+title: Run an initialize preflight recipe before work
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs Agentic
+  Recipe `initialize_preflight` so linkage, capability, and checkpoint checks complete before readiness
+  — accepting WalkingLabs L06 guidance. [^wl-l06-init]
+implementation: Agentic Recipe `initialize_preflight` via `InitializePreflightTemplate` / `initialize_preflight_runner`
+  and product verb `run_recipe` (`InitializePreflightRecipeAdapter`).
+validation: Harness `user_story` scenario `initialize_preflight_template.yaml` drives `run_recipe`; expects
+  preflight_ok plus node ids.
+footnotes:
+- id: wl-l06-init
+  label: WalkingLabs L06 Initialization Phase
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-06-why-initialization-needs-its-own-phase/
+  note: Init preflight
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: initialize_preflight
+  bind: binds/initialize_preflight.yaml
+steps:
+- do:
+    run_recipe:
+      name: initialize_preflight
+      path: binds/initialize_preflight.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: recipe_in_catalog
+  - kind: equals
+    key: status
+    value: ok
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - linkage
+    - capability_check
+    - checkpoint_compat
+    - ready
+  - kind: 'true'
+    key: preflight_ok
+  - kind: equals
+    key: template_name
+    value: initialize_preflight
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

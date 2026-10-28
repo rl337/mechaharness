@@ -1,0 +1,46 @@
+id: fangore_insp_targeted_rollback
+suite: fangore_graph_executor
+persona: fangore
+title: Roll back to the node that caused a verification defect
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. When verification
+  fails, Fangore wants structured attribution naming the repair target so the graph rolls back to that
+  layer instead of restarting from scratch. Accepts WalkingLabs P08 guidance[^wl-p08-rollback].
+implementation: '`attribute_with_repair_target` / `select_rollback_target`; `CliInstrumentor` verb `targeted_rollback_select`.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-p08-rollback
+  label: WalkingLabs P08 First Explicit Graph
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-08-graph-engineering-first-graph/
+  note: Targeted rollback
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    targeted_rollback_select:
+      error: verification_failed
+      node_id: verify
+      repair_target: produce
+      transitions:
+      - from_node: verify
+        kind: rollback
+        to_node: produce
+        reason: verification_failed
+  expect: &id001
+  - kind: equals
+    key: rollback_target
+    value: produce
+  - kind: equals
+    key: repair_target
+    value: produce
+complete:
+  expect: *id001
+cleanup: []

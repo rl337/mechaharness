@@ -1,0 +1,57 @@
+id: fangore_job_lane_cross_deny
+suite: fangore_job_lanes
+persona: fangore
+title: Cross-lane observe denies without exposure or grant
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets publishes
+  `asset_urls` under deny-all exposure. Billing calls `lane_observe` for that key and receives a typed
+  deny — no silent bleed across JobLanes.
+implementation: '`JobLaneBroker.observe` returns `status: denied` when publisher exposure and standing
+  grants/handoffs do not allow the caller (JL-05..06).'
+validation: Harness `user_story` scenario `cross_deny.yaml`.
+footnotes:
+- id: jl-broker-deny
+  label: Job lane broker requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md
+  note: Cross-lane deny-by-default
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  job_lanes:
+    assets.generate:
+      meta:
+        mode: deny_all
+      keys:
+        asset_urls:
+          mode: deny_all
+    billing.settle:
+      meta:
+        mode: open
+      keys: {}
+  filesystem:
+    type: temp
+steps:
+- do:
+    lane_publish:
+      keys:
+        asset_urls:
+          url: https://cdn.example/secret.png
+  lane: assets.generate
+  run_id: gen-1
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector:
+        latest: true
+      key: asset_urls
+  lane: billing.settle
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+cleanup: []

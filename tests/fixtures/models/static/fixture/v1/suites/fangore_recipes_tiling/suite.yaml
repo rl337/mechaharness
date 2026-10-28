@@ -1,0 +1,9 @@
+id: fangore_recipes_tiling
+title: Agentic Recipe tiling and repair loops
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

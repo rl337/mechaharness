@@ -1,0 +1,38 @@
+id: taloneth_insp_learning_export
+suite: taloneth_harness_research
+persona: taloneth
+title: Export provenance-rich trajectories without owning training recipes
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs
+  exportable execution packs that carry harness fingerprint, rollout refs, and outcomes so an AI assistant
+  host can curate SFT or RL corpora without MechaHarness choosing the recipe. Accepts FineEnvs SFT-vs-RL
+  reuse guidance[^fineenvs-export].
+implementation: '`LearningExportPack` and `build_learning_export` in `mechaharness.learning_export` bundle
+  decision exports with fingerprint, rollout, and outcome refs.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-export
+  label: FineEnvs multi-harness RL — SFT vs RL
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#sft-vs-rl
+  note: MH-MHRL-16
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    learning_export_pack:
+      harness_fingerprint: fp:1
+      rollout_graph_ref: rollout:1
+      split: train
+complete:
+  expect:
+  - kind: equals
+    key: schema_version
+    value: '1'
+  - kind: equals
+    key: harness_fingerprint
+    value: fp:1
+cleanup: []

@@ -13,6 +13,9 @@ from mechaharness.stop_contract import StopContract
 CompleteFn = Callable[[list[dict[str, Any]], Mapping[str, Any]], Any]
 ToolFn = Callable[[str, Any], Any]
 NestedRunFn = Callable[[ExecutionGraph, GraphRunContext, str], Awaitable[Any]]
+# Optional MCP / host progress: kwargs include tool_round (1-based) and
+# either phase=\"inference\" or tool=<name>.
+ProgressFn = Callable[..., None]
 
 
 class ConversationalToolLoopRunner(GraphNodeRunner):
@@ -21,7 +24,8 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
     ``complete`` returns an assistant-shaped dict with optional ``tool_calls``
     (OpenAI-style). ``dispatch_tool(name, arguments)`` returns a JSON-able
     result. Optional ``nested_run`` executes each round graph with shared
-    budget (HF-07 / HF-08 nested observability).
+    budget (HF-07 / HF-08 nested observability). Optional ``on_progress``
+    reports ``tool_round N / inference`` or ``tool_round N / <tool>``.
     """
 
     def __init__(
@@ -31,11 +35,13 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
         complete: CompleteFn,
         dispatch_tool: ToolFn,
         nested_run: NestedRunFn | None = None,
+        on_progress: ProgressFn | None = None,
     ) -> None:
         self._kinds = list(kinds or ["conversational_tool_loop"])
         self._complete = complete
         self._dispatch_tool = dispatch_tool
         self._nested_run = nested_run
+        self._on_progress = on_progress
 
     def kinds(self) -> Sequence[str]:
         return list(self._kinds)
@@ -77,11 +83,34 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
                     payload={"round": round_i, "phase": "inference"},
                 )
             )
+            self._emit_progress(tool_round=rounds_ran, phase="inference")
             # Soft dependency edge via depends_on only (no DependencyEdge required
             # for nested manual/nested_run execution).
-            assistant = self._complete(messages, {"round": round_i, "node_id": node.id})
-            if inspect.isawaitable(assistant):
-                assistant = await assistant
+            try:
+                assistant = await self._invoke_complete(
+                    messages,
+                    {"round": round_i, "node_id": node.id},
+                    tool_round=rounds_ran,
+                )
+            except Exception as exc:  # noqa: BLE001 — surface as node failure
+                from mechaharness.inference_progress import InferenceTimeoutError
+
+                llm_node = child.nodes[llm_id]
+                llm_node.status = NodeStatus.FAILED
+                llm_node.payload = {
+                    **llm_node.payload,
+                    "error": str(exc),
+                }
+                node.subgraph = child.checkpoint()
+                kind = (
+                    "inference_timeout"
+                    if isinstance(exc, InferenceTimeoutError)
+                    else "inference_error"
+                )
+                return NodeOutcome(
+                    status=NodeStatus.FAILED,
+                    error=f"{kind}: {exc}",
+                )
             if not isinstance(assistant, dict):
                 assistant = {"content": str(assistant), "tool_calls": []}
             messages.append(assistant)
@@ -98,6 +127,56 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
 
             tool_calls = list(assistant.get("tool_calls") or [])
             if not tool_calls:
+                # Prompt-parsed models sometimes emit a truncated / malformed
+                # <tool_call> block; nudge instead of treating that as done.
+                content_text = content if isinstance(content, str) else ""
+                reasoning_text = ""
+                for key in ("reasoning_content", "reasoning"):
+                    raw_r = assistant.get(key)
+                    if isinstance(raw_r, str) and raw_r.strip():
+                        reasoning_text = raw_r
+                        break
+                broken = False
+                if content_text and "<tool_call" in content_text.lower():
+                    try:
+                        from mechaharness.project_coding import (
+                            _looks_like_broken_tool_call,
+                        )
+
+                        broken = _looks_like_broken_tool_call(content_text)
+                    except Exception:  # noqa: BLE001
+                        broken = True
+                # Thinking models often burn the token budget on reasoning with
+                # empty content and no tool_calls — nudge rather than finish.
+                # Some also dump the plan into content without a tool_call.
+                thinking_only = (
+                    not content_text.strip()
+                    and bool(reasoning_text.strip())
+                )
+                prose_without_tools = (
+                    bool(content_text.strip())
+                    and "<tool_call" not in content_text.lower()
+                    and len(content_text.strip()) > 40
+                )
+                if (
+                    (broken or thinking_only or prose_without_tools)
+                    and round_i + 1 < max_iterations
+                ):
+                    nudge = (
+                        "Your previous tool_call was malformed or truncated. "
+                        "Emit one complete <tool_call>{\"name\":...\"arguments\":{...}}"
+                        "</tool_call> JSON block, then continue."
+                        if broken
+                        else (
+                            "You reasoned but did not emit a tool call in the final "
+                            "answer. Emit one complete "
+                            '<tool_call>{"name":"write_file","arguments":{...}}'
+                            "</tool_call> block in the answer content now "
+                            "(keep reasoning under two sentences)."
+                        )
+                    )
+                    messages.append({"role": "user", "content": nudge})
+                    continue
                 node.subgraph = child.checkpoint()
                 if self._nested_run is not None:
                     await self._nested_run(
@@ -125,6 +204,7 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
                         },
                     )
                 )
+                self._emit_progress(tool_round=rounds_ran, tool=name)
                 # HF-08: host may pre-attach recipe subgraph on call payload.
                 recipe_graph = call.get("subgraph") or call.get("recipe_graph")
                 if isinstance(recipe_graph, dict):
@@ -172,3 +252,46 @@ class ConversationalToolLoopRunner(GraphNodeRunner):
             payload=dict(node.payload),
             cost_units=float(rounds_ran),
         )
+
+    async def _invoke_complete(
+        self,
+        messages: list[dict[str, Any]],
+        meta: Mapping[str, Any],
+        *,
+        tool_round: int,
+    ) -> Any:
+        """Call ``complete``; watch awaitables with progress ticks + timeout."""
+        from mechaharness.inference_progress import (
+            await_while_running,
+            inference_timeout_seconds,
+        )
+        from mechaharness.mcp_progress import report_mcp_progress
+
+        raw = self._complete(messages, meta)
+        if not inspect.isawaitable(raw):
+            return raw
+
+        timeout = inference_timeout_seconds()
+
+        def on_tick(elapsed: float) -> None:
+            # Tick only while the Completer awaitable is still pending.
+            report_mcp_progress(
+                f"tool_round {tool_round}",
+                "inference",
+                message=(
+                    f"still running ({int(elapsed)}s / {int(timeout)}s)"
+                ),
+            )
+            self._emit_progress(tool_round=tool_round, phase="inference")
+
+        return await await_while_running(raw, on_tick=on_tick)
+
+    def _emit_progress(
+        self, *, tool_round: int, phase: str | None = None, tool: str | None = None
+    ) -> None:
+        if self._on_progress is None:
+            return
+        if tool is not None:
+            self._on_progress(tool_round=tool_round, tool=tool)
+        else:
+            self._on_progress(tool_round=tool_round, phase=phase or "inference")

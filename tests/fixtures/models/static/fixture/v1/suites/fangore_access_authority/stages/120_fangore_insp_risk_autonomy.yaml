@@ -1,0 +1,41 @@
+id: fangore_insp_risk_autonomy
+suite: fangore_access_authority
+persona: fangore
+title: Scale controls by action consequence class
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. High-consequence
+  writes demand stronger controls and visible approval frequency; low-risk work need not nag. Accepts
+  inspiration requirement 15[^insp-r15]. Contributes to personal-agent MH-PA-02; composed gate delta:
+  `fangore_insp_authority_gate`[^insp-pa-02-risk].'
+implementation: '`ConsequencePolicy` / `ActionConsequence` in `mechaharness.consequence` classify actions
+  (`low`…`critical`), flag approval and exhaustive verification needs, and expose `approval_frequency`
+  as a usability/safety metric. Grants in `AccessControl` remain the hard gate.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-r15
+  label: 'Inspiration requirements (req 15: risk-scaled autonomy)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 15 — risk-scaled autonomy
+- id: insp-pa-02-risk
+  label: Personal agent reliability map (MH-PA-02 consequence)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md
+  note: Consequence axis of authority gate; compose in fangore_insp_authority_gate
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    consequence_risk_scale:
+      action: fs.write
+      consequence: high
+complete:
+  expect:
+  - kind: 'true'
+    key: requires_stronger_controls
+  - kind: equals
+    key: approval_frequency
+    value: 1.0
+cleanup: []

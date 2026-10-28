@@ -1,0 +1,58 @@
+id: fangore_decision_surface_reject
+suite: fangore_decision_plane
+persona: fangore
+title: Reject model choices that are not on the allowed list
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. A triage model returns
+  a team name that was never on the allowed set. The product must treat that as a rejected proposal. Only
+  product judgement policy may unlock the next action — same split as `fangore_refund_verdict`.
+implementation: '`DecisionSurface` / `reject_invalid_choice` / `RulesDecisionBackend` in `mechaharness.decision_surfaces`
+  name the decision plane over judge signal types. Surfaces produce signals; they do not execute side
+  effects. Agentic Recipe `decision_plane` uses these envelopes in `mechaharness.decision_plane_runtime`
+  (`fangore_decision_plane_policy`).
+
+
+  Covers: POL-01.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    decision_surface_reject:
+      question:
+        kind: choice
+        id: route
+        instructions: Which team owns this?
+        options:
+        - id: billing
+          description: Billing
+        - id: technical
+          description: Technical
+      allowed_actions:
+      - billing
+      - technical
+      answers:
+        route: billing
+      invalid_choice: pirate-crew
+      state:
+        ticket: double charge
+  expect: &id001
+  - kind: 'false'
+    key: rules_rejected
+  - kind: 'true'
+    key: invalid_choice_rejected
+  - kind: equals
+    key: rules_source
+    value: rules
+complete:
+  expect: *id001
+cleanup: []

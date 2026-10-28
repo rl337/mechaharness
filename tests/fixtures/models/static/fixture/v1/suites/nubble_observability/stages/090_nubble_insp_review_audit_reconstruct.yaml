@@ -1,0 +1,188 @@
+id: nubble_insp_review_audit_reconstruct
+suite: nubble_observability
+persona: nubble
+title: Reconstruct why a consequential action was allowed without model recollection
+narrative: 'Nubble starts the CLI host with family `pass_through` and backend `mock`. An auditor can rebuild
+  a review from the saved decision log and trace alone: which recipe ran, what the policy decided and
+  under which revision, how trusted the source was, what scope was delegated, why something was denied,
+  who approved it, and which side effects actually happened. When any of that is missing the record says
+  exactly which part, instead of relying on what the model remembers. Related: `taloneth_policy_replay`,
+  `nubble_insp_trace_reconciliation`. Tracks MH-DOTS-09[^insp-dots-09].'
+implementation: '`ReviewAuditRecord` in `review_audit.py` composes `DecisionRecord` and `TraceEnvelope`
+  (recipe id and version, `policy_version` / `policy_revision`, approval, denial, and effect ids, freshness
+  summary) with caller-attested source trust, delegated scope, and denial reasons. `from_records()` prefers
+  the decision over the envelope on overlap; `missing_dimensions()` and `reconstructable()` name gaps
+  (denials need reasons and ids, human-approved verdicts need approval ids, executed actions need effect
+  ids).
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-dots-09
+  label: OpenAI Dots agent safety (MH-DOTS-09)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md
+  note: Review observability
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    review_audit_reconstruct:
+      scenarios:
+      - id: fully_attested
+        decision:
+          eventId: e1
+          stateHash: h
+          policyVersion: p1
+          verdict: ALLOW
+          recipeId: independent_review
+          recipeVersion: '1'
+          approvalIds:
+          - appr:1
+          effectIds:
+          - fx:1
+          executedAction: email.send
+        attested:
+          source_trust: trusted
+          delegated_scope: env:child-1
+          policy_revision: rev-7
+      - id: denied_without_reason
+        decision:
+          eventId: e2
+          stateHash: h
+          policyVersion: p1
+          verdict: DENY
+          recipeId: independent_review
+          recipeVersion: '1'
+        attested:
+          source_trust: untrusted
+          delegated_scope: env:child-1
+          policy_revision: rev-7
+      - id: denied_with_reason
+        decision:
+          eventId: e3
+          stateHash: h
+          policyVersion: p1
+          verdict: DENY
+          recipeId: independent_review
+          recipeVersion: '1'
+          denialIds:
+          - den:1
+        attested:
+          source_trust: untrusted
+          delegated_scope: env:child-1
+          policy_revision: rev-7
+          denial_reasons:
+          - untrusted_source
+      - id: asked_human_unapproved
+        decision:
+          eventId: e4
+          stateHash: h
+          policyVersion: p1
+          verdict: ASK_HUMAN
+          recipeId: verify_repair
+          recipeVersion: '2'
+        attested:
+          source_trust: trusted
+          delegated_scope: env:child-2
+          policy_revision: rev-7
+      - id: effect_not_recorded
+        decision:
+          eventId: e5
+          stateHash: h
+          policyVersion: p1
+          verdict: ALLOW
+          recipeId: verify_repair
+          recipeVersion: '2'
+          executedAction: file.write
+        attested:
+          source_trust: trusted
+          delegated_scope: env:child-2
+          policy_revision: rev-7
+      - id: envelope_fills_gaps
+        decision:
+          eventId: e6
+          stateHash: h
+          policyVersion: p1
+          verdict: ALLOW
+        envelope:
+          recipe_id: bounded_retry
+          recipe_version: '1'
+          policy_revision: rev-8
+          capability_envelope_ref: env:3
+        attested:
+          source_trust: trusted
+  expect: &id001
+  - kind: equals
+    key: scenarios
+    value:
+      fully_attested:
+        reconstructable: true
+        missing: []
+        approvals:
+        - appr:1
+        denials: []
+        effects:
+        - fx:1
+        policy:
+        - p1
+        - rev-7
+      denied_without_reason:
+        reconstructable: false
+        missing:
+        - denial_reasons
+        - denial_ids
+        approvals: []
+        denials: []
+        effects: []
+        policy:
+        - p1
+        - rev-7
+      denied_with_reason:
+        reconstructable: true
+        missing: []
+        approvals: []
+        denials:
+        - den:1
+        effects: []
+        policy:
+        - p1
+        - rev-7
+      asked_human_unapproved:
+        reconstructable: false
+        missing:
+        - approval_ids
+        approvals: []
+        denials: []
+        effects: []
+        policy:
+        - p1
+        - rev-7
+      effect_not_recorded:
+        reconstructable: false
+        missing:
+        - effect_ids
+        approvals: []
+        denials: []
+        effects: []
+        policy:
+        - p1
+        - rev-7
+      envelope_fills_gaps:
+        reconstructable: true
+        missing: []
+        approvals: []
+        denials: []
+        effects: []
+        policy:
+        - p1
+        - rev-8
+complete:
+  expect: *id001
+cleanup: []

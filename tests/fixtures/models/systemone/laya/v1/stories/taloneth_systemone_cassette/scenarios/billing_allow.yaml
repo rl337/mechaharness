@@ -1,3 +1,18 @@
+id: taloneth_systemone_cassette
+persona: taloneth
+title: Pin System One adapter behavior to a versioned cassette
+narrative: A new Laya build changes confidence fields. A versioned cassette must fail the story before
+  silent adapter drift ships.
+implementation: '`SystemOneJudgeProvider` maps System One HTTP JSON onto library judge types and provenance.
+  Connection/provider binding uses Config hooks (`get_judge_connection`, `get_judge_provider`). `CliInstrumentor`
+  verb `judge_route` runs the cassette through the real provider.
+
+
+  Covers: JDG wire map (System One).'
+validation: 'Harness `cli` scenario `billing_allow.yaml` on `systemone/laya` cassette: hard `route_selected`,
+  `verdict`, `answer_count`. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider`
+  (cassette-exact token softens; behavioral expects hard).'
+footnotes: []
 kind: cli
 commands:
 - judge_route:

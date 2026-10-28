@@ -1,0 +1,100 @@
+id: fangore_coding_ci_repair
+suite: fangore_guided_coding
+persona: fangore
+title: Diagnose a failed CI check and repair the workspace until local verify passes
+narrative: Fangore's pull request build fails on the checks job. After a forge lookup (see `fangore_coding_ci_diagnose`),
+  he starts guided coding against the project workspace, reads a failure log, repairs the broken source,
+  re-runs the same kind of local verify the pipeline used, and writes a short fix note for the next human
+  review. Static stories plant a failure log so repair stays offline; forge HTTP lookup is owned by the
+  diagnose story. Complements `fangore_coding_ci_diagnose`, `fangore_coding_git_inspect`, and `fangore_coding_git_open_pr`.
+implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
+  `ci_seed: failing_check`, and coding tools under `build_coding_tool_registry`. Static stories plant
+  a failure log and broken module; the Completer (or `coding_tool_script: ci_repair`) reads that log,
+  edits the module, and records `.mechaharness/ci_fix.md`. Forge check/job log tools are proven in `fangore_coding_ci_diagnose`.
+  Local re-check uses `ProjectCodingLocalWork` `verify_runs` / `run_python` (and host `run_checks.sh`
+  when bound) so repair stays on the cheap Completer lane. Soft point `external_guidance` remains the
+  human scope gate.'
+validation: 'Harness `user_story` scenario `repair.yaml` in suite `fangore_guided_coding`. Static mode
+  uses `coding_tool_script: ci_repair` against `ci_seed: failing_check`. Asserts `widget.py` contains
+  the repaired function and `.mechaharness/ci_fix.md` cites the failure. Live Completer may drive the
+  same tools with `MECHA_STORY_BACKEND=live`.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  ci_seed: failing_check
+  coding_tool_script: ci_repair
+  filesystem:
+    type: temp
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: coding-ci-repair-1
+      inputs:
+        goal: A CI checks job failed. Read .mechaharness/ci_failure.log, fix the broken source it names
+          so local verify would pass, and write .mechaharness/ci_fix.md naming the failing check step
+          and the file you changed. Do not open a pull request and do not call a real GitHub Actions host.
+        max_iterations: 16
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+- do:
+    answer:
+      choose: thorough
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+  - kind: includes
+    key: written_files
+    value:
+    - .mechaharness/ci_fix.md
+    - widget.py
+- do:
+    workspace_read:
+      path: widget.py
+  expect:
+  - kind: 'true'
+    key: exists
+  - kind: contains
+    key: text
+    value: def answer
+  - kind: contains
+    key: text
+    value: return 42
+- do:
+    workspace_read:
+      path: .mechaharness/ci_fix.md
+  expect:
+  - kind: 'true'
+    key: exists
+  - kind: contains
+    key: text
+    value: Run checks
+  - kind: contains
+    key: text
+    value: widget.py
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

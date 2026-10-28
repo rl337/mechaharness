@@ -1,0 +1,38 @@
+id: nubble_insp_efficiency_scorecard
+suite: nubble_observability
+persona: nubble
+title: Keep multidimensional efficiency dimensions observable
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble needs tool
+  calls, tokens, latency, and coordination cost kept as separate efficiency dimensions rather than a single
+  opaque proxy. Accepts FineEnvs tool-call efficiency observations[^fineenvs-efficiency].
+implementation: '`EfficiencyScorecard` and `build_efficiency_scorecard` in `mechaharness.efficiency_scorecard`
+  compose topology/cost/coordination/resume dimensions without silent collapse.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-efficiency
+  label: FineEnvs multi-harness RL — tool calls and tokens
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#tool-calls-and-tokens
+  note: MH-MHRL-19
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    efficiency_scorecard_build:
+      tool_calls: 3
+      tokens_out: 1200
+      latency_ms: 4000
+      coordination_cost: 1.5
+complete:
+  expect:
+  - kind: equals
+    key: tool_calls
+    value: 3.0
+  - kind: equals
+    key: tokens_out
+    value: 1200.0
+cleanup: []

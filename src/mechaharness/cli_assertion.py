@@ -2,15 +2,62 @@
 
 YAML ``expect`` is a list of ``{kind, ...}`` entries. ``kind`` is open
 identity — hosts/tests register more via ``cli_assertion_classes()``.
+
+``key`` may be a top-level observation name or a dotted / indexed path
+(``plan.items[0].instruction``).
 """
 
 from __future__ import annotations
 
+import re
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any, ClassVar, cast
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+# name | [index] tokens; dots separate names.
+_PATH_TOKEN = re.compile(r"([^.\[]+)|\[(\d+)\]")
+
+
+def resolve_observation_path(observation: Mapping[str, Any], path: str) -> Any:
+    """Resolve ``path`` into ``observation`` (dot + ``[index]``).
+
+    Bare keys (no ``.`` / ``[``) use exact top-level lookup. Nested paths
+    walk mappings and sequences; missing segments raise ``KeyError``.
+    """
+    if not path:
+        raise KeyError(path)
+    if "." not in path and "[" not in path:
+        if path not in observation:
+            raise KeyError(path)
+        return observation[path]
+
+    current: Any = observation
+    for match in _PATH_TOKEN.finditer(path):
+        name, index_s = match.group(1), match.group(2)
+        if name is not None:
+            if not isinstance(current, Mapping) or name not in current:
+                raise KeyError(path)
+            current = current[name]
+        else:
+            idx = int(index_s)
+            if not isinstance(current, Sequence) or isinstance(current, (str, bytes)):
+                raise KeyError(path)
+            if idx < 0 or idx >= len(current):
+                raise KeyError(path)
+            current = current[idx]
+    return current
+
+
+def _lookup(observation: Mapping[str, Any], key: str) -> Any:
+    """Resolve ``key`` or raise ``AssertionError`` with top-level keys listed."""
+    try:
+        return resolve_observation_path(observation, key)
+    except KeyError as exc:
+        raise AssertionError(
+            f"missing observation key {key!r}; got {sorted(observation)}"
+        ) from exc
 
 
 class CliAssertionSpec(BaseModel):
@@ -50,11 +97,7 @@ class EqualsAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_EqualsParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if got != body.value:
             raise AssertionError(
                 f"{body.key}: {got!r} != {body.value!r}"
@@ -74,11 +117,7 @@ class ExactlyAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_KeyParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if got != body.value:
             raise AssertionError(
                 f"{body.key}: {got!r} != {body.value!r}"
@@ -91,11 +130,7 @@ class PositiveAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_KeyParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if not (isinstance(got, (int, float)) and got > 0):
             raise AssertionError(f"{body.key}: expected positive, got {got!r}")
 
@@ -106,11 +141,7 @@ class NonemptyAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_KeyParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if got is None or (isinstance(got, str) and not got.strip()):
             raise AssertionError(f"{body.key}: expected nonempty, got {got!r}")
         if isinstance(got, (list, dict)) and not got:
@@ -123,11 +154,7 @@ class TrueAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_KeyParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if got is not True:
             raise AssertionError(f"{body.key}: expected True, got {got!r}")
 
@@ -138,11 +165,7 @@ class FalseAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_KeyParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if got is not False:
             raise AssertionError(f"{body.key}: expected False, got {got!r}")
 
@@ -181,14 +204,43 @@ class IncludesAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_IncludesParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         missing = [item for item in body.value if item not in got]
         if missing:
             raise AssertionError(f"{body.key}: missing {missing} in {got}")
+
+
+class _IncludesIfParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str
+    value: list[Any]
+    if_key: str
+    if_equals: Any = True
+
+
+class IncludesIfAssertion(CliAssertion):
+    """Like ``includes``, but only when ``observation[if_key] == if_equals``.
+
+    Used when a write ledger is required only if the coding burst expected
+    changes (not when host verify was already green / ``already_satisfied``).
+    """
+
+    kind = "includes_if"
+    params_model = _IncludesIfParams
+
+    def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
+        body = cast(_IncludesIfParams, params)
+        gate = observation.get(body.if_key)
+        if gate != body.if_equals:
+            return
+        got = _lookup(observation, body.key)
+        missing = [item for item in body.value if item not in got]
+        if missing:
+            raise AssertionError(
+                f"{body.key}: missing {missing} in {got} "
+                f"(required because {body.if_key}={body.if_equals!r})"
+            )
 
 
 class _GteParams(BaseModel):
@@ -206,11 +258,7 @@ class GteAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_GteParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if not isinstance(got, (int, float)) or got < body.value:
             raise AssertionError(f"{body.key}: {got!r} < {body.value!r}")
 
@@ -223,11 +271,7 @@ class LteAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_GteParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if not isinstance(got, (int, float)) or got > body.value:
             raise AssertionError(f"{body.key}: {got!r} > {body.value!r}")
 
@@ -247,11 +291,7 @@ class ContainsAssertion(CliAssertion):
 
     def check(self, observation: Mapping[str, Any], params: BaseModel) -> None:
         body = cast(_ContainsParams, params)
-        if body.key not in observation:
-            raise AssertionError(
-                f"missing observation key {body.key!r}; got {sorted(observation)}"
-            )
-        got = observation[body.key]
+        got = _lookup(observation, body.key)
         if body.value not in str(got):
             raise AssertionError(f"{body.key}: {body.value!r} not in {got!r}")
 
@@ -293,6 +333,7 @@ def default_cli_assertion_classes() -> dict[str, type[CliAssertion]]:
         FalseAssertion.kind: FalseAssertion,
         ErrorAssertion.kind: ErrorAssertion,
         IncludesAssertion.kind: IncludesAssertion,
+        IncludesIfAssertion.kind: IncludesIfAssertion,
         GteAssertion.kind: GteAssertion,
         LteAssertion.kind: LteAssertion,
         ContainsAssertion.kind: ContainsAssertion,
@@ -395,4 +436,5 @@ __all__ = [
     "is_cassette_exact_assertion",
     "parse_expect_list",
     "resolve_cli_assertions",
+    "resolve_observation_path",
 ]

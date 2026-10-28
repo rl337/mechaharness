@@ -14,7 +14,7 @@ The source materials describe a product and evaluations, not a drop-in reference
 
 
 ## Principle
-Persistent context must never imply persistent permission. MechaHarness is responsible for generic enforceable graph execution, independent action review, and resumable authorization. June is responsible for goals, memory, and configuring user-facing policy.
+Persistent context must never imply persistent permission. MechaHarness is responsible for generic enforceable graph execution, independent action review, and resumable authorization. The AI assistant host is responsible for goals, memory, and configuring user-facing policy.
 
 ## Proposed requirements
 1. **MH-DOTS-01 Capability-scoped execution token.** Every graph invocation carries a principal, goal/run identity, allowed operations/resources, expiry, trust origin and policy revision/authorization epoch. Child graphs receive attenuated authority only. *Test:* unrelated job or subgraph cannot inherit permission for an external send.
@@ -44,7 +44,7 @@ Integrate with existing hard/soft nodes, graph recipes, resumable execution and 
 - [ ] Specify independent reviewer independence, model routing and cost budgets.
 - [ ] Define irreversible effect ledger and crash injection matrix.
 - [ ] Build source-faithful multi-task evaluation fixtures with negative and false-positive tests.
-- [ ] Define typed contracts with June goal orchestration and user approval UX.
+- [ ] Define typed contracts with the AI assistant host goal orchestration and user approval UX.
 
 ## Incremental plan
 Start with scoped authority and action-time revalidation, then review and denial propagation, then crash/replay and cross-task evaluation suites. No runtime changes are proposed in this documentation PR.

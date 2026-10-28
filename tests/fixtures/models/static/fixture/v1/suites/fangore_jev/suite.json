@@ -1,0 +1,91 @@
+{
+  "id": "fangore_jev",
+  "title": "Judge evaluation vocabulary scenarios",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_jev_action_safety__delete_low_risk_no_grant",
+      "scenario": "010_fangore_jev_action_safety_delete_low_risk_no_grant"
+    },
+    {
+      "story": "fangore_jev_action_safety__read_high_risk_with_grant",
+      "scenario": "020_fangore_jev_action_safety_read_high_risk_with_grant"
+    },
+    {
+      "story": "fangore_jev_action_safety__read_low_risk_with_grant",
+      "scenario": "030_fangore_jev_action_safety_read_low_risk_with_grant"
+    },
+    {
+      "story": "fangore_jev_citation_growth_mismatch",
+      "scenario": "040_fangore_jev_citation_growth_mismatch"
+    },
+    {
+      "story": "fangore_jev_citation_matching_claim",
+      "scenario": "050_fangore_jev_citation_matching_claim"
+    },
+    {
+      "story": "fangore_jev_citation_missing_source",
+      "scenario": "060_fangore_jev_citation_missing_source"
+    },
+    {
+      "story": "fangore_jev_citation_uncertain_support",
+      "scenario": "070_fangore_jev_citation_uncertain_support"
+    },
+    {
+      "story": "fangore_jev_context_budget_pack",
+      "scenario": "080_fangore_jev_context_budget_pack"
+    },
+    {
+      "story": "fangore_jev_context_exclude_injection",
+      "scenario": "090_fangore_jev_context_exclude_injection"
+    },
+    {
+      "story": "fangore_jev_context_filter_stale_untrusted",
+      "scenario": "100_fangore_jev_context_filter_stale_untrusted"
+    },
+    {
+      "story": "fangore_jev_context_missing_scores_fallback",
+      "scenario": "110_fangore_jev_context_missing_scores_fallback"
+    },
+    {
+      "story": "fangore_jev_req_review_approve_missing_crash_tests",
+      "scenario": "120_fangore_jev_req_review_approve_missing_crash_tests"
+    },
+    {
+      "story": "fangore_jev_req_review_covered_with_tests",
+      "scenario": "130_fangore_jev_req_review_covered_with_tests"
+    },
+    {
+      "story": "fangore_jev_req_review_gap_found",
+      "scenario": "140_fangore_jev_req_review_gap_found"
+    },
+    {
+      "story": "fangore_jev_req_review_template_shape",
+      "scenario": "150_fangore_jev_req_review_template_shape"
+    },
+    {
+      "story": "fangore_jev_task_route_complex_frontier",
+      "scenario": "160_fangore_jev_task_route_complex_frontier"
+    },
+    {
+      "story": "fangore_jev_task_route_invalid",
+      "scenario": "170_fangore_jev_task_route_invalid"
+    },
+    {
+      "story": "fangore_jev_task_route_low_confidence",
+      "scenario": "180_fangore_jev_task_route_low_confidence"
+    },
+    {
+      "story": "fangore_jev_task_route_simple_local",
+      "scenario": "190_fangore_jev_task_route_simple_local"
+    }
+  ]
+}

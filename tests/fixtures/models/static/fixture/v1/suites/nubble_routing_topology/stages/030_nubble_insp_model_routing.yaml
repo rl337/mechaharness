@@ -1,0 +1,38 @@
+id: nubble_insp_model_routing
+suite: nubble_routing_topology
+persona: nubble
+title: Route nodes by declared capability needs
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble prefers declaring
+  what a step needs instead of hard-coding a model id, then picking among available classes. Accepts inspiration
+  requirement 13. He walks product steps (route_capabilities) and verifies completion from the structured
+  observation expects on this scenario. [^insp-r13]
+implementation: '`route_for_capability_needs` in `mechaharness.routing` selects a model class from declared
+  needs and available classes. `CliInstrumentor` verb `route_capabilities` exposes the host diagnostic.'
+validation: 'Harness `user_story` scenario `capability_route.yaml`: environment + graph + steps + complete
+  expects.'
+footnotes:
+- id: insp-r13
+  label: 'Inspiration requirements (req 13: model routing)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 13 — model routing
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    route_capabilities:
+      capability_needs:
+      - model:reason-large
+      available_model_classes:
+      - reason-fast
+      - reason-large
+complete:
+  expect:
+  - kind: equals
+    key: selected_model_class
+    value: reason-large
+cleanup: []

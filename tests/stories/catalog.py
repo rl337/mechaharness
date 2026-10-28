@@ -1,12 +1,13 @@
-"""Paths and discovery for versioned model story fixtures."""
+"""Paths and discovery for versioned model story fixtures (YAML SSOT)."""
 
 from __future__ import annotations
 
-import json
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 from tests.stories.scenarios.cli_scenario import load_cli_scenario
 from tests.stories.scenarios.user_story_scenario import load_user_story_scenario
@@ -30,11 +31,27 @@ TWIN_PARITY_FIELDS = (
     "validation",
     "footnotes",
 )
+_PROSE_KEYS = (
+    "id",
+    "suite",
+    "persona",
+    "title",
+    "kind",
+    "narrative",
+    "implementation",
+    "validation",
+    "footnotes",
+)
 
 
 @dataclass(frozen=True)
 class StoryCase:
-    """One (model version, story[, scenario]) under ``tests/fixtures/models``."""
+    """One (model version, story[, scenario]) under ``tests/fixtures/models``.
+
+    Suite stages live at ``suites/<suite>/stages/<stem>.yaml``. Twin / orphan
+    cases live at ``stories/<id>/scenarios/<stem>.yaml``. Prose fields are in
+    the YAML itself (no ``story.json``).
+    """
 
     family: str
     model: str
@@ -43,6 +60,7 @@ class StoryCase:
     adapter: str
     root: Path
     scenario_relpath: str | None = None
+    suite_id: str | None = None
 
     @property
     def model_key(self) -> str:
@@ -56,8 +74,21 @@ class StoryCase:
             return f"{base}/{stem}"
         return base
 
+    def asset_root(self) -> Path:
+        """Directory for binds/plans/response.json (suite assets or story root)."""
+        if self.suite_id is not None:
+            suite_dir = self.root.parent  # …/suites/<id>/stages → suite
+            base = self.story_id.split("__", 1)[0]
+            for candidate in (
+                suite_dir / "assets" / self.story_id,
+                suite_dir / "assets" / base,
+            ):
+                if candidate.is_dir():
+                    return candidate
+        return self.root
+
     def path(self, name: str) -> Path:
-        return self.root / name
+        return self.asset_root() / name
 
     def scenario_path(self) -> Path | None:
         if self.scenario_relpath is None:
@@ -65,63 +96,97 @@ class StoryCase:
         return self.root / self.scenario_relpath
 
     def load_json(self, name: str) -> dict[str, Any]:
+        import json
+
         return json.loads(self.path(name).read_text(encoding="utf-8"))
+
+    def load_meta(self) -> dict[str, Any]:
+        """Prose / kind fields from the stage or scenario YAML."""
+        path = self.scenario_path()
+        if path is None or not path.is_file():
+            raise FileNotFoundError(f"{self.label}: missing scenario YAML")
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if not isinstance(data, dict):
+            raise ValueError(f"{path}: root must be a mapping")
+        meta = {k: data.get(k) for k in _PROSE_KEYS if k in data or k == "footnotes"}
+        if "footnotes" not in meta:
+            meta["footnotes"] = data.get("footnotes") or []
+        if "id" not in meta or not meta["id"]:
+            meta["id"] = self.story_id
+        return meta
+
+
+def _load_manifest(manifest_path: Path) -> tuple[str, str, str, str]:
+    import json
+
+    version_dir = manifest_path.parent
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    family = str(manifest["family"])
+    model = str(manifest["model"])
+    version = str(manifest.get("version") or version_dir.name)
+    adapter = str(manifest.get("adapter") or family)
+    return family, model, version, adapter
 
 
 def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
-    """Walk ``family/model/version/stories/id`` trees.
-
-    ``kind: cli`` / ``kind: user_story`` expand to one case per ``scenarios/*.yaml``.
-    """
+    """Walk suite stages and twin ``stories/*/scenarios/*.yaml`` trees."""
     cases: list[StoryCase] = []
     if not FIXTURES_ROOT.is_dir():
         return cases
     for manifest_path in sorted(FIXTURES_ROOT.glob("*/*/v*/manifest.json")):
         version_dir = manifest_path.parent
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        family = str(manifest["family"])
-        model = str(manifest["model"])
-        version = str(manifest.get("version") or version_dir.name)
-        adapter = str(manifest.get("adapter") or family)
+        family, model, version, adapter = _load_manifest(manifest_path)
         model_key = f"{family}/{model}"
         if model_filter and model_key != model_filter and model != model_filter:
             continue
-        stories_dir = version_dir / "stories"
-        if not stories_dir.is_dir():
-            continue
-        for story_dir in sorted(p for p in stories_dir.iterdir() if p.is_dir()):
-            story_json = story_dir / "story.json"
-            if not story_json.is_file():
-                continue
-            meta = json.loads(story_json.read_text(encoding="utf-8"))
-            kind = meta.get("kind")
-            base = dict(
-                family=family,
-                model=model,
-                version=version,
-                story_id=story_dir.name,
-                adapter=adapter,
-                root=story_dir,
-            )
-            if kind in {"cli", "user_story"}:
-                scenarios_dir = story_dir / "scenarios"
-                yaml_files = (
-                    sorted(scenarios_dir.glob("*.yaml"))
-                    if scenarios_dir.is_dir()
-                    else []
-                )
-                if not yaml_files:
-                    cases.append(StoryCase(**base))
+
+        suites_dir = version_dir / "suites"
+        if suites_dir.is_dir():
+            for suite_dir in sorted(p for p in suites_dir.iterdir() if p.is_dir()):
+                stages_dir = suite_dir / "stages"
+                if not stages_dir.is_dir():
                     continue
-                for yaml_path in yaml_files:
+                for yaml_path in sorted(stages_dir.glob("*.yaml")):
+                    data = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
+                    story_id = str(data.get("id") or yaml_path.stem)
                     cases.append(
                         StoryCase(
-                            **base,
-                            scenario_relpath=f"scenarios/{yaml_path.name}",
+                            family=family,
+                            model=model,
+                            version=version,
+                            story_id=story_id,
+                            adapter=adapter,
+                            root=stages_dir,
+                            scenario_relpath=yaml_path.name,
+                            suite_id=suite_dir.name,
                         )
                     )
-                continue
-            cases.append(StoryCase(**base))
+
+        stories_dir = version_dir / "stories"
+        if stories_dir.is_dir():
+            for story_dir in sorted(p for p in stories_dir.iterdir() if p.is_dir()):
+                scenarios_dir = story_dir / "scenarios"
+                if not scenarios_dir.is_dir():
+                    continue
+                for yaml_path in sorted(scenarios_dir.glob("*.yaml")):
+                    data = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
+                    story_id = str(data.get("id") or story_dir.name)
+                    cases.append(
+                        StoryCase(
+                            family=family,
+                            model=model,
+                            version=version,
+                            story_id=story_id,
+                            adapter=adapter,
+                            root=story_dir,
+                            scenario_relpath=f"scenarios/{yaml_path.name}",
+                            suite_id=(
+                                str(data["suite"])
+                                if isinstance(data.get("suite"), str)
+                                else None
+                            ),
+                        )
+                    )
     return cases
 
 
@@ -159,27 +224,24 @@ def _validate_footnotes(data: dict[str, Any], *, path: Path) -> list[str]:
 
 
 def validate_story_payload(data: dict[str, Any], *, path: Path) -> list[str]:
-    """Return human-readable errors for one ``story.json``."""
+    """Return human-readable errors for one stage/scenario prose payload."""
     errors: list[str] = []
     for field in REQUIRED_STORY_FIELDS:
         value = data.get(field)
         if not isinstance(value, str) or not value.strip():
             errors.append(f"{path}: missing or empty required field {field!r}")
-    story_id = data.get("id")
-    if isinstance(story_id, str) and path.parent.name != story_id:
-        errors.append(
-            f"{path}: directory name {path.parent.name!r} != id {story_id!r}"
-        )
     errors.extend(_validate_footnotes(data, path=path))
     return errors
 
 
 def collect_canonical_stories() -> dict[str, dict[str, Any]]:
-    """Return story_id -> story.json, preferring static/fixture when present."""
+    """Return story_id -> prose meta, preferring static/fixture when present."""
     by_id: dict[str, list[tuple[Path, dict[str, Any]]]] = defaultdict(list)
     for case in iter_story_cases():
-        path = case.path("story.json")
-        data = case.load_json("story.json")
+        path = case.scenario_path()
+        if path is None:
+            continue
+        data = case.load_meta()
         by_id[str(data.get("id") or case.story_id)].append((path, data))
 
     canonical: dict[str, dict[str, Any]] = {}
@@ -193,22 +255,27 @@ def collect_canonical_stories() -> dict[str, dict[str, Any]]:
 
 
 def validate_story_fixtures() -> list[str]:
-    """Validate required fields, twin parity, harness kinds/ops, and id uniqueness."""
-    # Lazy import: harness → runners → catalog would cycle at module load.
+    """Validate required fields, twin parity, harness kinds, and YAML load."""
     from tests.stories.harness.registry import HARNESSES, known_ops_for
 
     errors: list[str] = []
     by_id: dict[str, list[tuple[Path, dict[str, Any]]]] = defaultdict(list)
     seen_cases: set[str] = set()
     for case in iter_story_cases():
-        path = case.path("story.json")
-        data = case.load_json("story.json")
+        path = case.scenario_path()
+        if path is None:
+            errors.append(f"{case.label}: missing scenario path")
+            continue
+        try:
+            data = case.load_meta()
+        except (OSError, ValueError) as exc:
+            errors.append(str(exc))
+            continue
         errors.extend(validate_story_payload(data, path=path))
         by_id[str(data.get("id") or case.story_id)].append((path, data))
 
-        # Harness family + op (once per story id under static when possible).
         kind = data.get("kind")
-        case_key = f"{case.family}/{case.model}/{case.story_id}"
+        case_key = f"{case.family}/{case.model}/{case.story_id}/{path.name}"
         if case_key in seen_cases:
             continue
         seen_cases.add(case_key)
@@ -220,25 +287,14 @@ def validate_story_fixtures() -> list[str]:
                 f"known: {sorted(HARNESSES)}"
             )
             continue
-        # App harnesses (YAML scenarios) — no request.op dispatch.
         if kind in {"cli", "user_story"}:
-            scenarios_dir = case.path("scenarios")
-            yaml_files = (
-                sorted(scenarios_dir.glob("*.yaml")) if scenarios_dir.is_dir() else []
-            )
-            if not yaml_files:
-                errors.append(
-                    f"{scenarios_dir}: missing scenarios/*.yaml for harness {kind!r}"
-                )
-                continue
-            for yaml_path in yaml_files:
-                try:
-                    if kind == "user_story":
-                        load_user_story_scenario(yaml_path)
-                    else:
-                        load_cli_scenario(yaml_path)
-                except (ValueError, OSError) as exc:
-                    errors.append(str(exc))
+            try:
+                if kind == "user_story":
+                    load_user_story_scenario(path)
+                else:
+                    load_cli_scenario(path)
+            except (ValueError, OSError) as exc:
+                errors.append(str(exc))
             continue
         req_path = case.path("request.json")
         if not req_path.is_file():
@@ -248,7 +304,9 @@ def validate_story_fixtures() -> list[str]:
         op = request.get("op")
         ops = known_ops_for(kind) or frozenset()
         if not isinstance(op, str) or not op.strip():
-            errors.append(f"{req_path}: missing non-empty string 'op' for harness {kind!r}")
+            errors.append(
+                f"{req_path}: missing non-empty string 'op' for harness {kind!r}"
+            )
         elif op not in ops:
             errors.append(
                 f"{req_path}: unknown op {op!r} for harness {kind!r}; "
@@ -265,16 +323,6 @@ def validate_story_fixtures() -> list[str]:
                     errors.append(
                         f"twin drift for {story_id!r}: {field} differs at {path}"
                     )
-
-    dir_to_ids: dict[str, set[str]] = defaultdict(set)
-    for case in iter_story_cases():
-        data = case.load_json("story.json")
-        dir_to_ids[case.story_id].add(str(data.get("id") or case.story_id))
-    for dirname, ids in sorted(dir_to_ids.items()):
-        if len(ids) > 1:
-            errors.append(
-                f"directory {dirname!r} maps to multiple story ids: {sorted(ids)}"
-            )
 
     footnote_owners: dict[str, str] = {}
     for story_id, data in collect_canonical_stories().items():

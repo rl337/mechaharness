@@ -1,0 +1,68 @@
+id: fangore_job_lane_observe_before
+suite: fangore_job_lanes
+persona: fangore
+title: before(t) selector returns the last eligible lane run
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He publishes two
+  runs on `assets.generate` with distinct `started_at` stamps, then observes with `before` a midpoint
+  timestamp and gets the earlier run (JL-04).
+implementation: '`ObserveSelector.before` / `at_or_before` on `JobLaneBroker.observe`; `lane_publish.started_at`.'
+validation: Harness `user_story` scenario `observe_before.yaml`.
+footnotes:
+- id: jl-broker-before
+  label: Job lane broker requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md
+  note: JL-04 run sequence selectors
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  job_lanes:
+    assets.generate:
+      meta:
+        mode: deny_all
+      keys:
+        asset_urls:
+          mode: open
+  filesystem:
+    type: temp
+steps:
+- do:
+    lane_publish:
+      started_at: '2026-10-21T10:00:00Z'
+      keys:
+        asset_urls:
+          url: https://cdn.example/early.png
+  lane: assets.generate
+  run_id: gen-early
+- do:
+    lane_publish:
+      started_at: '2026-10-21T14:00:00Z'
+      keys:
+        asset_urls:
+          url: https://cdn.example/late.png
+  lane: assets.generate
+  run_id: gen-late
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector:
+        before: '2026-10-21T12:00:00Z'
+      key: asset_urls
+  lane: assets.generate
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: run_id
+    value: gen-early
+  - kind: equals
+    key: value
+    value:
+      url: https://cdn.example/early.png
+complete:
+  expect:
+  - kind: equals
+    key: run_id
+    value: gen-early
+cleanup: []

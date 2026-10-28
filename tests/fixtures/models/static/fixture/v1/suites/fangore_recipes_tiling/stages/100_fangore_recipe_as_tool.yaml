@@ -1,0 +1,49 @@
+id: fangore_recipe_as_tool
+suite: fangore_recipes_tiling
+persona: fangore
+title: Nest a child recipe under a tool_call graph node
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore’s generate-image
+  tool should run a child oneshot recipe under that tool step so operators can zoom into prompt → generate
+  → verify without a parallel soft lane. Nested spend shares the parent budget; failure surfaces on the
+  tool node. Complements `fangore_insp_dynamic_subgraph`, `fangore_insp_budget_subgraph_rollup`, and `fangore_conversational_tool_loop`.
+  He walks product steps (recipe_plan) and verifies completion from the structured observation expects
+  on this scenario. [^ai-asst-hf08][^insp-sr-02-tool]
+implementation: '`mechaharness.node_component.embed_recipe_as_tool` attaches a child `ExecutionGraph`
+  on a `tool_call` graph node using the same nest shape as `SubgraphNodeRunner.embed`. `GraphExecutor`
+  runs the child with `child_run_id` and shared budget (HF-08). Parent exposes a `child_graph` node component
+  via `node_components_for`.'
+validation: 'Harness `user_story` scenario `recipe_as_tool.yaml`: environment + graph + steps + complete
+  expects.'
+footnotes:
+- id: ai-asst-hf08
+  label: AI assistant host-friction requirements map
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/ai-assistant-host-friction-requirements-map.md
+  note: HF-08 recipe-as-tool
+- id: insp-sr-02-tool
+  label: Self-revising recipe map (MH-SR-02 recipe-as-tool)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md
+  note: Nested recipe embedding
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    recipe_plan:
+      path: plans/recipe_as_tool.yaml
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: 'true'
+    key: child_run_id_nonempty
+  - kind: equals
+    key: child_status
+    value: ok
+  - kind: 'true'
+    key: has_child_graph_component
+cleanup: []

@@ -1,0 +1,34 @@
+id: fangore_context_observation_chain
+suite: fangore_context_memory
+persona: fangore
+title: Keep original observations and refuse fabricated reductions
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Tool output must
+  stay addressable as an immutable observation. A cheaper summary is allowed only when it points at a
+  real observation; fabricated receipts must fail lookup. Compaction happens at semantic boundaries, and
+  action fusion only for predeclared sequences. Compiler deficits remain `fangore_context_compiler_deficit`.
+implementation: '`ObservationStore` / `ObservationRef`, `reduce_evidence`, `compact_at_boundary`, and
+  `fuse_actions` under `CtxFlags` in `mechaharness.context_experiments`.
+
+
+  Covers: CTX-01, CTX-02, CTX-03, CTX-04.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    context_observation_chain: {}
+complete:
+  expect:
+  - kind: 'true'
+    key: fabricated_receipt
+  - kind: 'true'
+    key: fused
+  - kind: 'true'
+    key: compacted
+cleanup: []

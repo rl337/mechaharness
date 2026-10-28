@@ -24,14 +24,17 @@ def test_live_filter_keeps_http_twins_and_model_static() -> None:
 
 
 def test_live_eligible_anthropic_static_excluded() -> None:
-    root = Path("tests/fixtures/models/static/fixture/v1/stories")
+    root = Path(
+        "tests/fixtures/models/static/fixture/v1/suites/nubble_observability/stages"
+    )
     case = StoryCase(
         family="static",
         model="fixture",
         version="v1",
         story_id="nubble_anthropic_cassette_infer",
         adapter="in_process",
-        root=root / "nubble_anthropic_cassette_infer",
-        scenario_relpath="scenarios/cassette_infer.yaml",
+        root=root,
+        scenario_relpath="010_nubble_anthropic_cassette_infer.yaml",
+        suite_id="nubble_observability",
     )
     assert not live_eligible(case)

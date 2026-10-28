@@ -1,0 +1,90 @@
+id: fangore_insp_effect_revalidation
+suite: fangore_lifecycle_ops
+persona: fangore
+title: Revalidate authority at side-effect dispatch after pause or revocation
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline
+  graph that plans then publishes. He walks with `graph_walk` until *before* the publish execute node,
+  advances the live authorization epoch (revocation), then continues. Publish fails closed with `revalidation_failed`
+  and the effect runner never runs. Related: `fangore_insp_wake_reresolve`, `fangore_human_review_pending`,
+  `fangore_insp_auth_epoch_resume`. Tracks MH-DOTS-02[^insp-dots-02] via stepped control SG-08[^sg-reval].'
+implementation: '`revalidate_before_effect` on `execute`-phase nodes; `GraphExecutor.live_authorization_epoch`;
+  `graph_walk` start/until/set_live_epoch/continue. Observe/prepare phases skip revalidation.'
+validation: Harness `user_story` scenario `effect_revalidation_check.yaml`.
+footnotes:
+- id: insp-dots-02
+  label: OpenAI Dots agent safety (MH-DOTS-02)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md
+  note: Revalidate before consequential side effects
+- id: sg-reval
+  label: Stepped graph execution requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md
+  note: SG-08 live epoch between pauses
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: publish
+    nodes:
+    - id: plan
+      kind: compute
+    - id: publish
+      kind: publish
+      depends_on:
+      - plan
+      payload:
+        tool_phase: execute
+steps:
+- do:
+    graph_walk:
+      action: start
+      until: publish
+      stop: before
+      envelope_epoch: 2
+      live_authorization_epoch: 2
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: stopped_before
+    value: publish
+  - kind: equals
+    key: effect_calls
+    value: 1
+- do:
+    graph_walk:
+      action: set_live_epoch
+      live_authorization_epoch: 3
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: live_authorization_epoch
+    value: 3
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: failed
+  - kind: contains
+    key: node_error
+    value: revalidation_failed:authorization_epoch_advanced:2!=3
+  - kind: equals
+    key: effect_calls
+    value: 1
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: failed
+  - kind: equals
+    key: effect_calls
+    value: 1
+cleanup: []

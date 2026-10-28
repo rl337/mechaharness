@@ -1,0 +1,9 @@
+id: fangore_decision_plane
+title: Decision plane policy, projection, and audited infer
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

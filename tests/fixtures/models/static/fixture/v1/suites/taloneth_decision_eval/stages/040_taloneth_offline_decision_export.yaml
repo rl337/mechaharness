@@ -1,0 +1,58 @@
+id: taloneth_offline_decision_export
+suite: taloneth_decision_eval
+persona: taloneth
+title: Export decision data without leaking future outcomes
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Offline study needs
+  decision-time features without future outcome leakage. Missing labels stay missing.
+implementation: '`DecisionRecord` / `DecisionLog` / `export_offline_dataset` persist append-only learning
+  records and versioned exports without default future leakage.
+
+
+  Covers: OBS-02.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    offline_decision_export:
+      records:
+      - eventId: d1
+        stateHash: h1
+        policyVersion: p1
+        verdict: ALLOW
+        outcomeId: late-success
+        allowedCandidates:
+        - a
+        - b
+        excludedCandidates:
+          c: unauthorized
+      - eventId: d2
+        stateHash: h2
+        policyVersion: p1
+        verdict: ASK_HUMAN
+        terminationReason: interrupted
+        outcomeId: null
+      split: train
+      include_outcomes: false
+complete:
+  expect:
+  - kind: equals
+    key: record_count
+    value: 2
+  - kind: 'false'
+    key: outcomes_leaked
+  - kind: exactly
+    key: lineage
+    value:
+    - d1
+    - d2
+  - kind: equals
+    key: split
+    value: train
+cleanup: []

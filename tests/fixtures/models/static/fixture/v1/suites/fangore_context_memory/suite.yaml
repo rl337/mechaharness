@@ -1,0 +1,9 @@
+id: fangore_context_memory
+title: Context layers, compaction, and derived memory
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

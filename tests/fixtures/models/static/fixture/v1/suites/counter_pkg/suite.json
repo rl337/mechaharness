@@ -1,0 +1,33 @@
+{
+  "id": "counter_pkg",
+  "title": "Grow a Counter package with tests and CLI",
+  "persona": "fangore",
+  "execution": {
+    "mode": "sequential",
+    "ordered": true
+  },
+  "vars": {},
+  "setup": [
+    "ensure_workspace"
+  ],
+  "cleanup": [],
+  "workspace": "temp",
+  "stages": [
+    {
+      "story": "fangore_counter_bootstrap",
+      "scenario": "010_fangore_counter_bootstrap"
+    },
+    {
+      "story": "fangore_counter_mutate",
+      "scenario": "020_fangore_counter_mutate"
+    },
+    {
+      "story": "fangore_counter_persist",
+      "scenario": "030_fangore_counter_persist"
+    },
+    {
+      "story": "fangore_counter_cli",
+      "scenario": "040_fangore_counter_cli"
+    }
+  ]
+}

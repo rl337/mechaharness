@@ -1,0 +1,32 @@
+id: fangore_derived_memory
+suite: fangore_context_memory
+persona: fangore
+title: Rebuild derived memory without letting rank invent authority
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. When derived memory
+  is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval
+  rank must not confer authority over approval rules.'
+implementation: '`DerivedMemoryStore` / `DerivedMemoryRecord` separate provenance, validity, and retrieval
+  priority. Consolidation is optional and idempotent; `retrieval_candidates` must not elevate non-authoritative
+  rumors.
+
+
+  Covers: CTX-06, CTX-07.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    derived_memory: {}
+complete:
+  expect:
+  - kind: 'true'
+    key: authority_outranks_popularity
+  - kind: 'true'
+    key: idempotent
+cleanup: []

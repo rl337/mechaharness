@@ -1,8 +1,8 @@
 # Dynamic tool graph and node components
 
 Normative requirements for graph-visible harness/recipe interiors and the
-**node component** contract. Inspiration and June provenance:
-[june-host-friction-inspiration.md](../inspiration/june-host-friction-inspiration.md).
+**node component** contract. Inspiration and AI assistant host provenance:
+[ai-assistant-host-friction-inspiration.md](../inspiration/ai-assistant-host-friction-inspiration.md).
 
 Kind catalog (non-normative listing of current kinds):
 [Node components](../reference/node-components.md).

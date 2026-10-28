@@ -1,0 +1,32 @@
+id: nubble_model_affinity
+suite: nubble_routing_topology
+persona: nubble
+title: Keep model affinity inside a coherent work loop
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Within one coherent
+  loop, Nubble wants routing to prefer the already-chosen lane unless a phase boundary justifies a switch.
+  Random lane thrash must not win on unit price alone. He walks product steps (check_model_affinity) and
+  verifies completion from the structured observation expects on this scenario.
+implementation: '`route_at_boundary` and `activate_scoped_policy` in `mechaharness.routing` keep affinity
+  inside a coherent work loop; uncalibrated policies do not activate. `CliInstrumentor` verb `check_model_affinity`
+  exposes the diagnostic.'
+validation: 'Harness `user_story` scenario `affinity_lane.yaml`: environment + graph + steps + complete
+  expects.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    check_model_affinity: {}
+complete:
+  expect:
+  - kind: equals
+    key: selected_lane
+    value: judge
+  - kind: 'true'
+    key: uncalibrated_is_null
+cleanup: []

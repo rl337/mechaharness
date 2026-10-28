@@ -1,0 +1,88 @@
+id: fangore_insp_authority_gate
+suite: fangore_access_authority
+persona: fangore
+title: Compose capability, impact, trust, and approval into one authority gate
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `authority_gate`
+  over a matrix of evaluate scenarios so untrusted forwarded content cannot authorize an external send
+  and high-impact actions still require configured authority. Related: `fangore_compound_grants`. Tracks
+  MH-PA-02[^insp-pa-02].'
+implementation: '`AuthorityGate.evaluate` composes AccessControl, CapabilityEnvelope, ConsequencePolicy,
+  trust, verdict, and approval. Product verb `authority_gate`. Hosts inject the gate via Config when wiring
+  it onto graph soft-points later.'
+validation: Harness `user_story` scenario `authority_gate_evaluate.yaml` drives `authority_gate`; expects
+  the decisions matrix.
+footnotes:
+- id: insp-pa-02
+  label: Personal agent reliability (MH-PA-02)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md
+  note: Authority policy gate
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  grants:
+  - core:graph.execute
+  - core:fs.read
+  filesystem:
+    type: temp
+steps:
+- do:
+    authority_gate:
+      now: '2026-10-18T12:00:00Z'
+      access_grants:
+      - core:graph.execute
+      - core:fs.read
+      actions:
+      - action: email.send
+        consequence: high
+      - action: fs.read
+        consequence: low
+      scenarios:
+      - id: read_low
+        evaluate:
+          action: fs.read
+          required_grants:
+          - core:fs.read
+      - id: send_asks
+        evaluate:
+          action: email.send
+      - id: send_approved
+        evaluate:
+          action: email.send
+          approved: true
+      - id: forwarded_send
+        evaluate:
+          action: email.send
+          approved: true
+          source_trust: untrusted
+      - id: no_grant
+        evaluate:
+          action: fs.read
+          required_grants:
+          - core:net.http
+      - id: expired_envelope
+        evaluate:
+          action: fs.read
+          envelope:
+            expires_at: '2026-10-18T11:00:00Z'
+      - id: policy_deny
+        evaluate:
+          action: fs.read
+          verdict:
+            kind: DENY
+            reasonCodes:
+            - r
+            policyVersion: '1'
+complete:
+  expect:
+  - kind: equals
+    key: decisions
+    value:
+      read_low: allow
+      send_asks: ask_human:consequence_requires_approval
+      send_approved: allow
+      forwarded_send: deny:untrusted_source
+      no_grant: deny:access_denied
+      expired_envelope: deny:envelope_expired
+      policy_deny: deny:verdict_deny
+cleanup: []

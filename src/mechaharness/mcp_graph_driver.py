@@ -20,6 +20,12 @@ Environment:
   ``.mechaharness/generator-runs.json`` under cwd)
 - ``MECHA_GENERATOR_CONTROLLER`` — default controller id (default
   ``mcp-driver``)
+- ``MECHA_MCP_HOST`` — ``project_coding`` binds
+  :class:`~mechaharness.project_coding.ProjectCodingConfig` (workspace tools +
+  Settings / ``MECHA_BASE_URL``). Unset → bare registry generator.
+- ``MECHA_WORKSPACE`` — project root for coding tools (default: cwd)
+- ``MECHA_BASE_URL`` / ``MECHA_MODEL`` / ``MECHA_API_KEY`` /
+  ``MECHA_INFERENCE_BACKEND`` — local inference (blessed on MCP ``env``)
 
 Run::
 
@@ -123,7 +129,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, BinaryIO, Callable, Literal
+from typing import Any, BinaryIO, Callable, Literal, cast
 
 from pyiv.time import PythonDateTimeService
 
@@ -161,13 +167,36 @@ def build_generator(
     store_path: str | Path | None = None,
     controller_default: str | None = None,
 ) -> DurableGraphGenerator:
-    """Construct a generator with a file-backed run store (MCP-process safe)."""
+    """Construct a generator with a file-backed run store (MCP-process safe).
+
+    When ``MECHA_MCP_HOST`` is ``project_coding`` (default), builds via
+    :class:`~mechaharness.project_coding.ProjectCodingConfig` so Settings /
+    MCP ``env`` bind ``openai_local`` and coding tools. Set
+    ``MECHA_MCP_HOST=none`` for a bare registry-only generator (doctests).
+    """
     del controller_default  # callers pass controller_id per op
     path = Path(
         store_path
         or os.environ.get("MECHA_GENERATOR_STORE")
         or Path.cwd() / ".mechaharness" / "generator-runs.json"
     )
+    from mechaharness.project_coding import mcp_host_config_class
+
+    host_cls = mcp_host_config_class()
+    if host_cls is not None:
+        from mechaharness.di import get_injector
+
+        store = FileGeneratorRunStore(path)
+
+        class _McpHostConfig(host_cls):  # type: ignore[misc,valid-type]
+            def get_generator_run_store(self) -> FileGeneratorRunStore:
+                return store
+
+        return cast(
+            DurableGraphGenerator,
+            get_injector(_McpHostConfig).inject(DurableGraphGenerator),
+        )
+
     templates = {name: cls() for name, cls in default_graph_template_classes().items()}
     registry = GraphTemplateRegistry(templates)
     return DurableGraphGenerator(
@@ -411,7 +440,36 @@ class GeneratorMcpServer:
             )
             return
         try:
-            result = handler(params if isinstance(params, dict) else {})
+            safe_params = params if isinstance(params, dict) else {}
+            if method == "tools/call":
+                from mechaharness.mcp_progress import (
+                    extract_progress_token,
+                    mcp_progress_scope,
+                )
+
+                progress_token = extract_progress_token(safe_params)
+                tool_name = safe_params.get("name")
+                if progress_token is None:
+                    _log(
+                        "tools/call missing _meta.progressToken — "
+                        "no notifications/progress (Cursor idle timeout may fire)"
+                    )
+                else:
+                    _log(
+                        f"tools/call progressToken={progress_token!r} "
+                        f"tool={tool_name!r}"
+                    )
+                with mcp_progress_scope(
+                    progress_token,
+                    self._write_message,
+                ) as progress:
+                    if progress is not None:
+                        progress.report(
+                            str(tool_name) if isinstance(tool_name, str) else "tools/call"
+                        )
+                    result = handler(safe_params)
+            else:
+                result = handler(safe_params)
             self._write_message({"jsonrpc": "2.0", "id": req_id, "result": result})
         except Exception as exc:  # noqa: BLE001 — surface to MCP client
             _log(traceback.format_exc())
@@ -492,6 +550,12 @@ class GeneratorMcpServer:
                         "evidence_refs": ["artifact://demo/performance-analysis"],
                     }
                 ]
+            from mechaharness.mcp_progress import get_mcp_progress
+
+            progress = get_mcp_progress()
+            if progress is not None:
+                progress.base_segments = [recipe_id]
+                progress.report("start")
             y = self._gen.start(
                 recipe_id,
                 inputs,
@@ -515,6 +579,16 @@ class GeneratorMcpServer:
                     deferred=bool(arguments.get("deferred") or False),
                     refused=bool(arguments.get("refused") or False),
                 )
+            from mechaharness.mcp_progress import get_mcp_progress
+
+            progress = get_mcp_progress()
+            if progress is not None:
+                try:
+                    record = self._gen.inspect(run_id)
+                    progress.base_segments = [str(record.recipe_id)]
+                except Exception:  # noqa: BLE001
+                    pass
+                progress.report("resume")
             y = self._gen.resume(
                 run_id,
                 response,

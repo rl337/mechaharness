@@ -1,0 +1,46 @@
+id: fangore_decision_plane_recipe
+suite: fangore_decision_plane
+persona: fangore
+title: Run a typed decision-plane Agentic Recipe with batched questions
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He soft-binds questions/state/facts
+  on the `decision_plane` Agentic Recipe, runs it via `run_recipe`, and verifies the typed batch path
+  yields a code-owned final action. [^rc-decision-plane]
+implementation: Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` runners and product verb `run_recipe`
+  (`DecisionPlaneRecipeAdapter`).
+validation: user_story template_shape.yaml run_recipe; template_name/has_soft_point/final_action.
+footnotes:
+- id: rc-decision-plane
+  label: Recipes requirements (typed decision plane)
+  url: https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md
+  note: DP-01..07 reference recipe
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: decision_plane
+  bind: binds/decision_plane.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/decision_plane.yaml
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: decision_plane
+  - kind: 'true'
+    key: has_soft_point
+  - kind: equals
+    key: final_action
+    value: billing
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

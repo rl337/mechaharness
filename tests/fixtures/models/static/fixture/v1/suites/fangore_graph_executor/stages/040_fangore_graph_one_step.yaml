@@ -1,0 +1,84 @@
+id: fangore_graph_one_step
+suite: fangore_graph_executor
+persona: fangore
+title: Advance a graph one frontier node per step
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a linear
+  three-node inline graph and uses `graph_walk` start/step so each step executes exactly one leaf. Tracks
+  SG-04/09[^sg-step].
+implementation: '`RunControl(mode=one_step)` on `GraphExecutor.run`; CLI `graph_walk` actions `start`
+  / `step` / `continue`.'
+validation: Harness `user_story` scenario `one_step.yaml`.
+footnotes:
+- id: sg-step
+  label: Stepped graph execution requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md
+  note: SG-04 one_step
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: linear
+    nodes:
+    - id: a
+      kind: compute
+    - id: b
+      kind: compute
+      depends_on:
+      - a
+    - id: c
+      kind: compute
+      depends_on:
+      - b
+steps:
+- do:
+    graph_walk:
+      action: start
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: effect_calls
+    value: 1
+  - kind: equals
+    key: node_statuses
+    value:
+      a: succeeded
+      b: ready
+      c: blocked
+- do:
+    graph_walk:
+      action: step
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: effect_calls
+    value: 2
+- do:
+    graph_walk:
+      action: step
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: effect_calls
+    value: 3
+  - kind: equals
+    key: node_statuses
+    value:
+      a: succeeded
+      b: succeeded
+      c: succeeded
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+cleanup: []

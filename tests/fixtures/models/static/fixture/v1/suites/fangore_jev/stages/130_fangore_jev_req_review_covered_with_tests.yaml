@@ -1,0 +1,49 @@
+id: fangore_jev_req_review_covered_with_tests
+suite: fangore_jev
+persona: fangore
+title: Accept a change when requirements and crash tests are covered
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He judges requirements
+  coverage over a PR diff and story facts, then applies crash-test policy. He verifies completion from
+  structured observation expects.
+implementation: Product verb `judge` over PR/story state; code-owned outcome from coverage + crash_tests_present.
+validation: 'user_story `covered_with_tests.yaml` judge + cassette; expect outcome=continue_review. Live
+  (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider` (cassette-exact
+  token softens; behavioral expects hard).'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    judge:
+      state_path: inputs/state.txt
+      questions:
+      - id: coverage
+        kind: choice
+        instructions: Are the PR change and user stories covered, including crash tests?
+        options:
+        - id: covered
+          description: Covered
+        - id: gap
+          description: Gap
+        - id: unclear
+          description: Unclear
+        allowed_actions:
+        - covered
+        - gap
+        - unclear
+      question_set_version: req-review-v1
+      action_question_id: coverage
+      confidence_floor: 0.7
+      facts:
+        crash_tests_present: true
+complete:
+  expect:
+  - kind: equals
+    key: outcome
+    value: continue_review
+cleanup: []

@@ -1,0 +1,9 @@
+id: fangore_lifecycle_ops
+title: Lifecycle extensions, wake, WIP, and tool effects
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

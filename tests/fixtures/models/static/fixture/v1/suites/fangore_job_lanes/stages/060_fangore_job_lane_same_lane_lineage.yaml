@@ -1,0 +1,67 @@
+id: fangore_job_lane_same_lane_lineage
+suite: fangore_job_lanes
+persona: fangore
+title: Later run in a job lane observes an earlier run's key
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He configures JobLane
+  `assets.generate`, publishes `asset_urls` on an early run, then from a later run in the same lane observes
+  `latest` and reads the published artifact URL. Same-lane lineage is allowed by default (JL-07).
+implementation: '`JobLaneBroker` in `mechaharness.job_lane_broker`; product verbs `lane_publish` / `lane_observe`
+  in `cli_policy_verbs`; story Config binds via `environment.job_lanes` and step `lane` / `run_id` (JL-01..10).'
+validation: Harness `user_story` scenario `same_lane_lineage.yaml`.
+footnotes:
+- id: jl-broker-same
+  label: Job lane broker requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md
+  note: JL-07 same-lane observe
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  job_lanes:
+    assets.generate:
+      meta:
+        mode: deny_all
+      keys:
+        asset_urls:
+          mode: deny_all
+  filesystem:
+    type: temp
+steps:
+- do:
+    lane_publish:
+      keys:
+        asset_urls:
+          url: https://cdn.example/early.png
+  lane: assets.generate
+  run_id: gen-early
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector:
+        latest: true
+      key: asset_urls
+  lane: assets.generate
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: run_id
+    value: gen-early
+  - kind: equals
+    key: value
+    value:
+      url: https://cdn.example/early.png
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: run_id
+    value: gen-early
+cleanup: []

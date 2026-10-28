@@ -1,0 +1,65 @@
+id: fangore_insp_tool_result_freshness
+suite: fangore_lifecycle_ops
+persona: fangore
+title: Reject stale tool evidence before external decisions
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `tool_result_freshness`:
+  an eight-day-old CRM cache and an expired quote are rejected as errors; a live CRM result within TTL
+  passes. Context freshness scoring in `fangore_jev_context_budget_pack` and `fangore_insp_context_provider`
+  covers retrieved context; this story covers typed tool-result TTL. Tracks MH-PA-01[^insp-pa-01].'
+implementation: '`ToolResultFreshnessPolicy.reject_if_stale` via product verb `tool_result_freshness`
+  (`cli_policy_verbs`). Walk-bag `in`/`out` carry policy inputs and rejected/passed ids.'
+validation: Harness `user_story` walks `tool_result_freshness`; expects rejected_ids and passed_ids.
+footnotes:
+- id: insp-pa-01
+  label: Personal agent reliability (MH-PA-01)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md
+  note: Typed provenance and freshness
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    tool_result_freshness:
+      now: '2026-10-18T12:00:00Z'
+      policy:
+        max_age_seconds: 86400
+        require_provenance: false
+      results:
+      - tool_call_id: crm_cache_8d
+        content: deal open
+        source: crm.cache
+        observed_at: '2026-10-10T12:00:00Z'
+      - tool_call_id: quote_expired
+        content: price 10
+        source: pricing
+        expires_at: '2026-10-18T11:00:00Z'
+      - tool_call_id: crm_live
+        content: deal open
+        source: crm.api
+        observed_at: '2026-10-18T11:45:00Z'
+        expires_at: '2026-10-18T13:00:00Z'
+  expect:
+  - kind: equals
+    key: rejected_ids
+    value:
+    - crm_cache_8d
+    - quote_expired
+  - kind: equals
+    key: passed_ids
+    value:
+    - crm_live
+complete:
+  expect:
+  - kind: equals
+    key: rejected_ids
+    value:
+    - crm_cache_8d
+    - quote_expired
+  - kind: equals
+    key: passed_ids
+    value:
+    - crm_live
+cleanup: []

@@ -1,0 +1,84 @@
+id: fangore_insp_alert_escalation_rules
+suite: fangore_lifecycle_ops
+persona: fangore
+title: Escalate alerts by deterministic once, repeated, and persistent rules
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `alert_escalation`:
+  occurrence counts map to log → surface → propose with per-alert overrides; unordered thresholds are
+  refused. No model participates. Decision-plane policy already separates model proposal from code decision
+  (`fangore_decision_plane_policy`). Tracks MH-PA-06[^insp-pa-06].'
+implementation: '`AlertEscalationPolicy` / `AlertOccurrenceCounter` via product verb `alert_escalation`
+  (`cli_policy_verbs`). Walk-bag `in`/`out` carry policy inputs and ladder outcomes.'
+validation: Harness `user_story` walks `alert_escalation`; expects ladder / override_ladder / counter_walk
+  and unordered_refused.
+footnotes:
+- id: insp-pa-06
+  label: Personal agent reliability (MH-PA-06)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md
+  note: Deterministic alert/error rules
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    alert_escalation:
+      policy:
+        repeated_at: 2
+        persistent_at: 4
+        overrides:
+          disk_full:
+          - 1
+          - 2
+      alert: queue_lag
+      counts:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 6
+      override_alert: disk_full
+      override_counts:
+      - 1
+      - 2
+      unordered_policy:
+        repeated_at: 3
+        persistent_at: 3
+  expect:
+  - kind: equals
+    key: ladder
+    value:
+    - log
+    - surface
+    - surface
+    - propose
+    - propose
+  - kind: equals
+    key: override_ladder
+    value:
+    - surface
+    - propose
+  - kind: equals
+    key: counter_walk
+    value:
+    - log
+    - surface
+    - surface
+    - propose
+    - propose
+  - kind: 'true'
+    key: unordered_refused
+complete:
+  expect:
+  - kind: 'true'
+    key: unordered_refused
+  - kind: equals
+    key: ladder
+    value:
+    - log
+    - surface
+    - surface
+    - propose
+    - propose
+cleanup: []

@@ -1,0 +1,67 @@
+{
+  "id": "nubble_observability",
+  "title": "Cost, trace, and audit observability",
+  "persona": "nubble",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "nubble_anthropic_cassette_infer",
+      "scenario": "010_nubble_anthropic_cassette_infer"
+    },
+    {
+      "story": "nubble_graph_event_correlators",
+      "scenario": "020_nubble_graph_event_correlators"
+    },
+    {
+      "story": "nubble_insp_coordination_cost",
+      "scenario": "030_nubble_insp_coordination_cost"
+    },
+    {
+      "story": "nubble_insp_efficiency_scorecard",
+      "scenario": "040_nubble_insp_efficiency_scorecard"
+    },
+    {
+      "story": "nubble_insp_guidance_cost_budget",
+      "scenario": "050_nubble_insp_guidance_cost_budget"
+    },
+    {
+      "story": "nubble_insp_model_input_replay",
+      "scenario": "060_nubble_insp_model_input_replay"
+    },
+    {
+      "story": "nubble_insp_recipe_audit_dimensions",
+      "scenario": "070_nubble_insp_recipe_audit_dimensions"
+    },
+    {
+      "story": "nubble_insp_resume_cost",
+      "scenario": "080_nubble_insp_resume_cost"
+    },
+    {
+      "story": "nubble_insp_review_audit_reconstruct",
+      "scenario": "090_nubble_insp_review_audit_reconstruct"
+    },
+    {
+      "story": "nubble_insp_trace_envelope",
+      "scenario": "100_nubble_insp_trace_envelope"
+    },
+    {
+      "story": "nubble_insp_trace_reconciliation",
+      "scenario": "110_nubble_insp_trace_reconciliation"
+    },
+    {
+      "story": "nubble_run_cost_events__event_timestamps",
+      "scenario": "120_nubble_run_cost_events_event_timestamps"
+    },
+    {
+      "story": "nubble_run_cost_events__event_types",
+      "scenario": "130_nubble_run_cost_events_event_types"
+    }
+  ]
+}

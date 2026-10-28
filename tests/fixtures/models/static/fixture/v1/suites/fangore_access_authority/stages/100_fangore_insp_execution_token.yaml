@@ -1,0 +1,92 @@
+id: fangore_insp_execution_token
+suite: fangore_access_authority
+persona: fangore
+title: Carry principal, expiry, and trust origin on every graph invocation
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `execution_token`
+  so a parent CapabilityEnvelope (principal, expiry, trust origin, authorization epoch) can only attenuate
+  into children: a child cannot raise the epoch, swap principal or trust origin, or outlive the parent''s
+  expiry. Tracks MH-DOTS-01[^insp-dots-01].'
+implementation: '`CapabilityEnvelope.narrow()` via product verb `execution_token` (`cli_policy_verbs`);
+  walk-bag registers `in`/`out` carry parent and outcomes. Related: `fangore_capability_envelope_narrow`.'
+validation: Harness `user_story` walks `execution_token`; expects attenuate ok and refuse raise/swap/outlive
+  attempts.
+footnotes:
+- id: insp-dots-01
+  label: OpenAI Dots agent safety (MH-DOTS-01)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md
+  note: Capability-scoped execution token
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    execution_token:
+      parent:
+        grants:
+        - core:graph.execute
+        - core:fs.read
+        tool_names:
+        - Read
+        principal: user:fangore
+        expires_at: '2026-10-18T12:00:00Z'
+        trust_origin: host:console
+        authorization_epoch: 3
+      attempts:
+      - id: attenuate
+        narrow:
+          expires_at: '2026-10-18T11:00:00Z'
+      - id: raise_epoch
+        narrow:
+          authorization_epoch: 4
+      - id: swap_principal
+        narrow:
+          principal: user:other
+      - id: swap_origin
+        narrow:
+          trust_origin: host:webhook
+      - id: outlive_parent
+        narrow:
+          expires_at: '2026-10-18T13:00:00Z'
+      inherit_attempt: attenuate
+  expect:
+  - kind: equals
+    key: outcomes
+    value:
+      attenuate: ok
+      raise_epoch: refused:widens authorization_epoch
+      swap_principal: refused:changes principal
+      swap_origin: refused:changes trust_origin
+      outlive_parent: refused:widens expires_at
+  - kind: equals
+    key: refused_ids
+    value:
+    - outlive_parent
+    - raise_epoch
+    - swap_origin
+    - swap_principal
+  - kind: equals
+    key: accepted_ids
+    value:
+    - attenuate
+  - kind: equals
+    key: inherited_principal
+    value: user:fangore
+  - kind: equals
+    key: inherited_epoch
+    value: 3
+complete:
+  expect:
+  - kind: equals
+    key: accepted_ids
+    value:
+    - attenuate
+  - kind: equals
+    key: inherited_principal
+    value: user:fangore
+  - kind: equals
+    key: inherited_epoch
+    value: 3
+cleanup: []

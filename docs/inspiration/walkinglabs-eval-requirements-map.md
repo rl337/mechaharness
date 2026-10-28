@@ -42,5 +42,5 @@ delivered with WL-P0-5.
 ## Attribution
 
 Follow-on work must keep the **exact WalkingLabs / Anthropic / arXiv permalink**
-in story footnotes (see each `story.json`), not only a link to the aggregate
+in story footnotes (see each suite stage YAML), not only a link to the aggregate
 inspiration documents.

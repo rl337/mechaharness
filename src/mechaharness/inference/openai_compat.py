@@ -168,12 +168,20 @@ class OpenAICompatStrategy(InferenceStrategy):
         settings: Settings,
         client: AsyncHttpClient,
         *,
-        timeout: float = 120.0,
+        timeout: float | None = None,
     ) -> None:
         self.base_url = (settings.base_url or "https://api.openai.com/v1").rstrip("/")
         self.api_key = settings.api_key
         self.default_model = settings.model
-        self._timeout = timeout
+        # Thinking / local models often exceed 120s; operators set
+        # MECHA_HTTP_TIMEOUT_SECONDS (e.g. 300) on the MCP env block.
+        if timeout is not None:
+            self._timeout = float(timeout)
+        else:
+            import os
+
+            raw = os.environ.get("MECHA_HTTP_TIMEOUT_SECONDS")
+            self._timeout = float(raw) if raw else 120.0
         self._owns_client = False
         self._client = client
 

@@ -1,0 +1,73 @@
+id: fangore_job_lane_meta_allowlist
+suite: fangore_job_lanes
+persona: fangore
+title: Lane meta is open only to allowlisted caller lanes
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets exposes run
+  meta only to `billing.settle`. Billing observes meta successfully; a third lane is denied.
+implementation: '`JobLane.meta` `ExposureRule` with `allow_lanes`; `lane_observe` with `meta: true` (JL-06).'
+validation: Harness `user_story` scenario `meta_allowlist.yaml`.
+footnotes:
+- id: jl-broker-meta
+  label: Job lane broker requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md
+  note: Meta exposure allowlist
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  job_lanes:
+    assets.generate:
+      meta:
+        mode: allow_lanes
+        lanes:
+        - billing.settle
+      keys: {}
+    billing.settle:
+      meta:
+        mode: open
+      keys: {}
+    audit.review:
+      meta:
+        mode: open
+      keys: {}
+  filesystem:
+    type: temp
+steps:
+- do:
+    lane_publish:
+      keys: {}
+      meta:
+        trigger: cron
+  lane: assets.generate
+  run_id: gen-meta
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector:
+        latest: true
+      meta: true
+  lane: billing.settle
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: run_id
+    value: gen-meta
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector:
+        latest: true
+      meta: true
+  lane: audit.review
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+cleanup: []

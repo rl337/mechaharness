@@ -1,0 +1,39 @@
+id: fangore_insp_instruction_scope
+suite: fangore_guided_coding
+persona: fangore
+title: Scope instruction components with authority and cost
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Instruction components
+  declare scope, authority, and estimated context cost so entry files stay routers rather than encyclopedias.
+  Accepts WalkingLabs L04 guidance[^wl-l04-instr].
+implementation: '`InstructionComponent` fields `scope`, `priority`, `authority`, and `estimated_context_cost`
+  in `mechaharness.instruction_component`.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l04-instr
+  label: WalkingLabs L04 Split Instructions
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-04-why-one-giant-instruction-file-fails/
+  note: Instruction metadata
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    instruction_scope_metadata:
+      title: Router
+      body: See details on demand
+      scope: entry
+      authority: ops
+      estimated_context_cost: 120
+complete:
+  expect:
+  - kind: equals
+    key: scope
+    value: entry
+  - kind: equals
+    key: estimated_context_cost
+    value: 120
+cleanup: []

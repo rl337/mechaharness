@@ -1,0 +1,60 @@
+id: fangore_decision_plane_projection
+suite: fangore_decision_plane
+persona: fangore
+title: Project decision state and facts without calling a model
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `decision_plane` with a deliberate projection bind (ticket + channel; secret omitted). He performs
+  `run_recipe` and verifies the project_state node omits secrets, records facts fingerprints, and never
+  invokes a model. [^rvania-decision] [^rc-dp-proj]
+implementation: Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` and `ProjectStateRunner` /
+  `project_decision_state`. Product CLI verb `run_recipe` with `DecisionPlaneRecipeAdapter`.
+validation: Harness `user_story` scenario `project_state.yaml` drives `run_recipe` with bind path; hard
+  expects on projection/facts observation keys.
+footnotes:
+- id: rvania-decision
+  label: Move Routine Decisions Off Your Big Model (rvaniaaaa)
+  url: https://x.com/rvaniaaaa/status/2107453108611662172
+  note: Rules 1 and 4 — structured state; exact math in code
+- id: rc-dp-proj
+  label: Recipes requirements DP-01 / DP-03
+  url: https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md
+  note: Structured projection; deterministic facts
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: decision_plane
+  bind: binds/project_state.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/project_state.yaml
+complete:
+  expect:
+  - kind: equals
+    key: projection
+    value:
+      ticket_id: T-9
+      channel: email
+  - kind: exactly
+    key: facts
+    value:
+    - duplicate_charge
+    - amount_cents
+  - kind: 'false'
+    key: projection_has_secret
+  - kind: 'true'
+    key: no_model_invocation
+  - kind: 'true'
+    key: facts_fingerprint_nonempty
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

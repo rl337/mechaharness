@@ -1,0 +1,114 @@
+id: fangore_counter_bootstrap
+suite: counter_pkg
+persona: fangore
+title: Bootstrap a Counter package with a failing-then-green test
+narrative: 'Fangore hands an expensive bootstrap to guided coding: a tiny library package plus a pytest
+  that pins the public constructor contract. Live mode uses a real Completer; static mode uses multi-file
+  coding_writes stubs. This stage is the multi-file successor to `fangore_calc_parse_number`.'
+implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
+  `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`.
+  Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.'
+validation: 'Harness `user_story` scenario `bootstrap.yaml` inside sequential suite `counter_pkg` (ordered).
+  Live eligibility: `environment.local_work: project_coding`.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: suite
+    contents: 010_fangore_counter_bootstrap.files.json
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: counter-bootstrap
+      inputs:
+        goal: 'Create a Python package `counter/` with `__init__.py` exporting `Counter` (start value
+          0, attribute `value`). Add `tests/test_counter.py` with a test that constructs Counter and asserts
+          value == 0. Required contracts (non-negotiable): keep package import `from counter import Counter`
+          working; public class must be named `Counter`. Do NOT use eval() or exec(). You MUST call write_file
+          for every file you create or change before finishing. Tests under tests/ must stay green (pytest).'
+        max_iterations: 24
+        verify_runs:
+        - path: counter/__init__.py
+          text_contains:
+          - class Counter
+          - value
+          text_forbids:
+          - eval(
+          - exec(
+        - path: tests/test_counter.py
+          text_contains:
+          - Counter
+          - def test_
+          text_forbids:
+          - eval(
+          - exec(
+        - exit_code: 0
+          path: tests/test_counter.py
+          pytest: true
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: gte
+    key: resumes
+    value: 1
+  - kind: includes
+    key: written_files
+    value:
+    - counter/__init__.py
+    - tests/test_counter.py
+- do:
+    workspace_read:
+      path: counter/__init__.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: class Counter
+  - key: text
+    kind: contains
+    value: value
+- do:
+    workspace_read:
+      path: tests/test_counter.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: Counter
+  - key: text
+    kind: contains
+    value: def test_
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

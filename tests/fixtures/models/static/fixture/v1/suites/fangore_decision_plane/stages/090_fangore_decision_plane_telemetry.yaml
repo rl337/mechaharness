@@ -1,0 +1,59 @@
+id: fangore_decision_plane_telemetry
+suite: fangore_decision_plane
+persona: fangore
+title: Export evaluation-ready decision-plane telemetry without raw context
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `decision_plane` with projection, fixture answers, model_ref, and a raw body that must not appear
+  in telemetry. He performs `run_recipe` and verifies evaluation-ready fields without raw context. [^rc-dp-telemetry]
+  [^insp-pa-08-telem]
+implementation: Agentic Recipe `decision_plane` via `build_decision_plane_telemetry` / `DecisionPlaneRecipeAdapter`.
+  Product CLI verb `run_recipe`.
+validation: Harness `user_story` scenario `telemetry_fields.yaml` drives `run_recipe`; hard expects on
+  telemetry observation keys.
+footnotes:
+- id: rc-dp-telemetry
+  label: Recipes requirements DP-08
+  url: https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md
+  note: Evaluation-ready decision telemetry
+- id: insp-pa-08-telem
+  label: Personal agent reliability map (MH-PA-08 telemetry)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md
+  note: Decision/cost telemetry
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: decision_plane
+  bind: binds/telemetry_fields.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/telemetry_fields.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: has_question_schema_ids
+  - kind: 'true'
+    key: has_projection_fingerprint
+  - kind: equals
+    key: final_action
+    value: billing
+  - kind: equals
+    key: model_ref
+    value: flavor:local_decision
+  - kind: equals
+    key: latency_ms
+    value: 42
+  - kind: 'false'
+    key: includes_raw_body
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

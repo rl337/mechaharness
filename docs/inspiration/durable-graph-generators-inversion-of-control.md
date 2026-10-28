@@ -3,7 +3,7 @@
 Date: 2026-10-19
 Status: Proposed design and requirements, not an implemented API
 Project: MechaHarness
-Related use cases: Finder of Lost Keys photorealistic production; NeoStudio virtual production; local Qwen3 32B workers directed by frontier-model sessions
+Related use cases: video production photorealistic pipelines; studio virtual production; local Qwen3 32B workers directed by frontier-model sessions
 
 ## Motivation
 
@@ -26,7 +26,7 @@ A graph run is a **durable, externally driven generator**:
 Conceptual pseudocode (not a commitment to Python stack serialization):
 
 ```python
-status = await driver.start("folk.performance", inputs)
+status = await driver.start("vp.performance", inputs)
 while status.kind not in {"completed", "failed", "cancelled"}:
     if status.kind == "advice_requested":
         answer = await driver.obtain_guidance(status)
@@ -54,7 +54,7 @@ Each externally visible yield is an ordered, immutable envelope:
 
 ```json
 {
-  "run_id": "folk-scene-072",
+  "run_id": "vp-scene-072",
   "sequence": 3,
   "kind": "advice_requested",
   "checkpoint_id": "cp-003",
@@ -66,7 +66,7 @@ Each externally visible yield is an ordered, immutable envelope:
       {"id": "precise", "label": "Precise maneuver followed by collapse"}
     ],
     "recommendation": "precise",
-    "evidence_refs": ["artifact://folk-scene-072/performance-analysis"],
+    "evidence_refs": ["artifact://vp-scene-072/performance-analysis"],
     "requested_authority": "artistic_direction",
     "context_version": "scene-072@v4"
   }
@@ -156,7 +156,7 @@ Include offline unit/contract tests and optional live end-to-end tests against a
 
 **M5: Parallel execution and ownership transfer.** Related advisory batching, leases, controlled handoff and concurrency stress tests.
 
-**M6: Production pilot.** FOLK character or performance workflow using local Qwen and deterministic QA, with a frontier agent advising only on ambiguous artistic decisions. Compare quality, costs and latency to an all-frontier baseline.
+**M6: Production pilot.** Video production character or performance workflow using local Qwen and deterministic QA, with a frontier agent advising only on ambiguous artistic decisions. Compare quality, costs and latency to an all-frontier baseline.
 
 ## Candidate requirements
 
@@ -186,7 +186,7 @@ Include offline unit/contract tests and optional live end-to-end tests against a
 
 ## Design constraint
 
-**Do not build a second harness around MCP or a new dependency injection framework.** The generator is a new MechaHarness execution construct. MCP is one adapter, and curses, plain-text and test drivers are clients of the same contract. Production-specific artistic semantics remain with FOLK or NeoStudio.
+**Do not build a second harness around MCP or a new dependency injection framework.** The generator is a new MechaHarness execution construct. MCP is one adapter, and curses, plain-text and test drivers are clients of the same contract. Production-specific artistic semantics remain with the video production or studio host.
 
 ## Related
 

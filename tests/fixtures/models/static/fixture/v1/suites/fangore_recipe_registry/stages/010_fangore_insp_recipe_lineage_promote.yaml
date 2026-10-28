@@ -1,0 +1,60 @@
+id: fangore_insp_recipe_lineage_promote
+suite: fangore_recipe_registry
+persona: fangore
+title: Attach lineage and test results when promoting a recipe version
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. New recipe versions
+  are immutable artifacts with provenance, lineage, test results, and a reversible promotion pointer.
+  Research and rule promotion patterns exist (`taloneth_insp_rule_promotion`); the recipe catalog now
+  keeps versions instead of overwriting by name. Tracks MH-SR-05. He walks product steps (recipe_plan)
+  and verifies completion from the structured observation expects on this scenario. [^insp-sr-05]
+implementation: '`GraphTemplateRegistry.add_version(template, parent_version=...)` records the lineage
+  DAG and refuses to replace a stored name+version; `attach_evaluation` / `evaluations` hang eval results
+  on a version; `promote` and `rollback` move a reversible pointer; `merge` carries versions, lineage,
+  evaluations, and pointer. Held-out release gates (MH-SR-07) and the evolution loop (MH-SR-06) remain
+  separate stories.'
+validation: 'Harness `user_story` scenario `recipe_registry_versions.yaml`: environment + graph + steps
+  + complete expects.'
+footnotes:
+- id: insp-sr-05
+  label: Self-revising recipe evolution (MH-SR-05)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md
+  note: Immutable lineage and promote/rollback
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    recipe_plan:
+      path: plans/registry_versions.yaml
+complete:
+  expect:
+  - kind: equals
+    key: active_version
+    value: '1'
+  - kind: equals
+    key: versions
+    value:
+    - '1'
+    - '2'
+    - '3'
+  - kind: equals
+    key: lineage
+    value:
+      '1': null
+      '2': '1'
+      '3': '2'
+  - kind: equals
+    key: evaluation_counts
+    value:
+      '1': 0
+      '2': 1
+      '3': 1
+  - kind: equals
+    key: errors
+    value:
+    - add_version:KeyError
+cleanup: []

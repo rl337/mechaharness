@@ -1,0 +1,43 @@
+id: fangore_decision_plane_policy__invalid_team
+suite: fangore_decision_plane
+persona: fangore
+title: Let code own the final decision-plane action with escalation (invalid_team)
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `decision_plane` with batched triage questions and fixture answers. He performs `run_recipe`
+  and verifies code-owned policy accepts billing, rejects illegal choices, and escalates below the confidence
+  floor. [^rvania-policy] [^rc-dp-policy] [^insp-pa-06-dp] [^insp-sr-08-dp] This stage covers the `invalid_team`
+  scenario.
+implementation: Agentic Recipe `decision_plane` via `AskBatchRunner` / `ApplyPolicyRunner` / `run_decision_plane_policy`.
+  Product CLI verb `run_recipe` with `DecisionPlaneRecipeAdapter`.
+validation: Harness `user_story` scenarios `accept_billing.yaml`, `invalid_team.yaml`, `low_confidence.yaml`
+  drive `run_recipe`; hard expects on final_action / escalate keys. Stage id `fangore_decision_plane_policy__invalid_team`
+  (scenario `invalid_team`).
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: decision_plane
+  bind: binds/invalid_team.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/invalid_team.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: escalate
+  - kind: equals
+    key: escalation_reason
+    value: choice_not_allowed
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

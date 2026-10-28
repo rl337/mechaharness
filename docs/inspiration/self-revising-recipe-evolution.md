@@ -51,14 +51,14 @@ The dramatic assertion that framework engineering is obsolete is **not** adopted
 ## Ownership split
 
 - **MechaHarness:** recipe registry and typed composition, validation, deterministic execution, evaluation recipe, versioning/checkpoints, rollback hooks, observability, safety gates.
-- **June:** workload selection, orchestration, scheduling, experiment budgets, evaluation campaigns, and promotion policy.
+- **the AI assistant host:** workload selection, orchestration, scheduling, experiment budgets, evaluation campaigns, and promotion policy.
 - **home_network:** sandboxed workers, persistent experiment stores, telemetry, and service deployment on constrained hosts.
 - **JuneSpark:** inference for candidate proposals and evaluations where resource budgets permit; avoid assuming the screenshot's 4B model or concurrency claims fit local hardware.
 
 ## Open questions / TODO
 
 - [ ] Define canonical recipe schema, typed interfaces, compatibility rules, and nested recipe version pinning.
-- [ ] Decide whether June may auto-register successful compositions or only submit them for review.
+- [ ] Decide whether the AI assistant host may auto-register successful compositions or only submit them for review.
 - [ ] Specify exactly which soft-node fields can evolve and how permission changes are prohibited.
 - [ ] Define evaluator data splits, contamination checks, statistical confidence, regression corpus, and final-test release policy.
 - [ ] Define multi-objective scoring and hard safety/cost budgets.

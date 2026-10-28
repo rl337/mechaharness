@@ -12,7 +12,7 @@ description: >-
 
 A **graph node** is a `GraphNode` in an `ExecutionGraph`. A **node component**
 is a sub-node element that **must** have `parent_node_id` and **must** render
-inside that parent’s frame. Hosts (e.g. June console) pre-layout from query and
+inside that parent’s frame. Hosts (e.g. the AI assistant host console) pre-layout from query and
 light up from traversal.
 
 Normative:

@@ -1,0 +1,12 @@
+id: delegate_pkg
+title: Delegate coding arcs on a shared Widget package
+persona: fangore
+execution:
+  mode: sequential
+  ordered: true
+vars: {}
+setup:
+- ensure_workspace
+cleanup: []
+workspace: temp
+sources: sources

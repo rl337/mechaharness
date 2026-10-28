@@ -1,0 +1,103 @@
+id: fangore_guided_coding_recipe__session
+suite: fangore_guided_coding
+persona: fangore
+title: Guide local coding via the guided_coding Agentic Recipe (session)
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `guided_coding`
+  durable graph (controller `story`, store `memory`). He wants Cursor to answer only short engineering
+  direction while a project-local MechaHarness process classifies oneshot vs todo list and does the token-heavy
+  file edits under pre/item/post acceptance. Start yields `advice_requested` from soft point `external_guidance`;
+  he answers `minimal` in a later call and the run completes. In a workspace-backed walk he has the agent
+  write a small helper module, confirms the file on disk, and runs Python against it to check stdout.
+  Git inspect and mocked pull-request handoffs are owned by `fangore_coding_git_inspect` and `fangore_coding_git_open_pr`.
+  Complements `fangore_instruction_todo_plan`, `fangore_insp_graph_guidance_yield`, and `fangore_conversational_tool_loop`.
+  He walks product steps (start, answer, workspace_read, run_python) and verifies completion from the
+  structured observation expects on each scenario. This stage covers the `session` scenario.
+implementation: 'Agentic Recipe catalog id `guided_coding` (`GuidedCodingTemplate`) tiles `instruction_todo_plan`
+  and `audited_infer_accept` under `plan_tile` / `audit_tile` with soft point `external_guidance` (`kind=guidance`).
+  MCP `MECHA_MCP_HOST=project_coding` binds `ProjectCodingConfig` (workspace coding tools + `GeneratorLocalWork`
+  / `ProjectCodingLocalWork` burst after guidance, including `request_guidance` restart for plan refinement).
+  Injectable `CodingGit` (default `LocalProcessCodingGit`; story/CI often `RecordingPullRequestCodingGit`)
+  backs optional git/PR tools — see `fangore_coding_git_inspect` / `fangore_coding_git_open_pr`. Story
+  hosts bind `environment.local_work: project_coding` with a temp workspace and optional `coding_write`
+  stub. `ProjectCodingLocalWork` records `written_files` / `workspace_root` on the completed yield. Product
+  verbs `workspace_read` and `run_python` put file text and stdout/stderr/exit_code into the step observation
+  bag. `DurableGraphGenerator._advance` invokes the injectable local-work hook when the guidance queue
+  is empty.'
+validation: Harness `user_story` scenarios `session.yaml` (NoOp guidance smoke) and `helper_run_python.yaml`
+  (project_coding workspace write + workspace_read + run_python expects). Both scenarios pin generator
+  counters (`guidance_yields` / `resumes` / `local_steps`) and `tapped_event_types` / `event_types` so
+  unexpected durable or coding-graph executions fail hard. Unit tests `tests/test_project_coding.py` (including
+  git tool confinement / unsafe-ref rejection), `tests/test_guided_coding_recipe.py`, and `tests/test_cli_workspace_verbs.py`
+  cover tools confinement, plan/audit tile topology, offline local-work file write, and workspace verbs.
+  Stage id `fangore_guided_coding_recipe__session` (scenario `session`).
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: guided-coding-1
+      inputs:
+        goal: add a small helper
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: equals
+    key: guidance_yields
+    value: 1
+  - kind: equals
+    key: resumes
+    value: 0
+  - kind: equals
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+  - kind: equals
+    key: guidance_yields
+    value: 1
+  - kind: equals
+    key: resumes
+    value: 1
+  - kind: equals
+    key: local_steps
+    value: 2
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: 'true'
+    key: pending_cleared
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+  - kind: exactly
+    key: tapped_event_types
+    value:
+    - core:graph_node
+    - core:graph_node
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_node
+    - core:graph_yield
+cleanup: []
