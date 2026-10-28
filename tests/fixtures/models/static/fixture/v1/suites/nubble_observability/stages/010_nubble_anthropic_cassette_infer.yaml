@@ -1,0 +1,57 @@
+id: nubble_anthropic_cassette_infer
+suite: nubble_observability
+persona: nubble
+title: Infer through the Anthropic strategy with a cassette
+narrative: Nubble proves the Anthropic Messages backend is a first-class reason lane without a live model.
+  He starts the CLI host with family pass-through and backend anthropic (cassette from response.json),
+  uses the default one-shot infer universe, runs infer with a short prompt, and verifies completion by
+  matching the cassette text plus inference/cost events and token totals from the recorded usage.
+implementation: '`UserStoryScenario.environment.backend=anthropic` builds `AnthropicStrategy` + `MemoryAsyncHttpClient`
+  against `response.json` (`/v1/messages`). `cli:infer` / `CliInferRunner` emits `core:inference` with
+  usage and priced `core:cost`.'
+validation: 'Harness `user_story` scenario `cassette_infer.yaml`: environment backend anthropic, infer
+  step, complete expects for event_types, text, tokens, cost_units.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: anthropic
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    infer:
+      prompt: Say hello.
+  expect:
+  - kind: equals
+    key: text
+    value: hello
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:inference
+    - core:cost
+  - kind: equals
+    key: text
+    value: hello
+  - kind: equals
+    key: prompt_tokens
+    value: 6
+  - kind: equals
+    key: completion_tokens
+    value: 1
+  - kind: equals
+    key: total_tokens
+    value: 7
+  - kind: lte
+    key: total_tokens
+    value: 7
+  - kind: positive
+    key: cost_units
+  - kind: lte
+    key: cost_units
+    value: 1
+cleanup: []

@@ -1,0 +1,39 @@
+{
+  "id": "fangore_job_lanes",
+  "title": "Job lane exposure, handoff, and deny rules",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_job_lane_cross_deny",
+      "scenario": "010_fangore_job_lane_cross_deny"
+    },
+    {
+      "story": "fangore_job_lane_handoff_oneshot",
+      "scenario": "020_fangore_job_lane_handoff_oneshot"
+    },
+    {
+      "story": "fangore_job_lane_key_expose_artifacts",
+      "scenario": "030_fangore_job_lane_key_expose_artifacts"
+    },
+    {
+      "story": "fangore_job_lane_meta_allowlist",
+      "scenario": "040_fangore_job_lane_meta_allowlist"
+    },
+    {
+      "story": "fangore_job_lane_observe_before",
+      "scenario": "050_fangore_job_lane_observe_before"
+    },
+    {
+      "story": "fangore_job_lane_same_lane_lineage",
+      "scenario": "060_fangore_job_lane_same_lane_lineage"
+    }
+  ]
+}

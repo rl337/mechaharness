@@ -1,0 +1,70 @@
+id: fangore_instruction_todo_plan__explicit_list_mode
+suite: fangore_guided_coding
+persona: fangore
+title: Execute oneshot or todo-list instructions via instruction_todo_plan (explicit_list_mode)
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`, loads the `instruction_todo_plan`
+  durable graph (controller `story`, store `memory`). He wants the local agent to judge whether a task
+  is a oneshot or an ordered list, refine conflicts before work, verify pre-list and per-item acceptance,
+  then check post-list acceptance so later todos have not undone earlier ones. With plan_classify local
+  work he can ask for a oneshot helper from a goal, follow a numbered instruction list, resolve conflicting
+  todos via list refinement, or force list mode explicitly. A separate session schedules scope refinement
+  guidance when he answers oneshot without classify. Complements `fangore_guided_coding_recipe` (which
+  tiles this recipe as `plan_tile`). He walks product steps (start, answer) and verifies completion from
+  the structured observation expects on each scenario. This stage covers the `explicit_list_mode` scenario.
+implementation: 'Agentic Recipe catalog id `instruction_todo_plan` (`InstructionTodoPlanTemplate`) with
+  stages classify → refine_plan → pre_accept → work_item* → item_accept → post_accept → complete. Domain
+  `mechaharness.instruction_plan` builds the plan; `PlanClassifyLocalWork` runs classify/refine without
+  a coding tool loop for offline stories (`environment.local_work: plan_classify`). Optional soft points
+  `scope_refinement` / `list_refinement` (`kind=guidance`, not required) are requested via local-work
+  `request_guidance` (or scheduled in inputs.guidance for offline smoke). `DurableGraphGenerator._advance`
+  enqueues those asks, yields `advice_requested`, and restarts local work after resume with `guidance_history`.
+  Step observations lift allowlisted yield payload fields (`context_version`, `mode`, `plan`) for path
+  expects.'
+validation: Harness `user_story` scenarios `session.yaml` (scheduled scope_refinement), `oneshot_from_goal.yaml`,
+  `numbered_list.yaml`, `conflict_list_refinement.yaml`, `explicit_list_mode.yaml`. Unit tests `tests/test_instruction_todo_plan.py`
+  and `tests/test_instruction_plan_integration.py` (`classify_mode`) cover topology and pure classifier
+  edges. Stage id `fangore_instruction_todo_plan__explicit_list_mode` (scenario `explicit_list_mode`).
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: plan_classify
+  filesystem:
+    type: temp
+graph:
+  recipe: instruction_todo_plan
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: explicit-list-1
+      inputs:
+        instruction_mode: list
+        instructions:
+        - item1
+        - item2
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: plan.mode
+    value: list
+  - kind: equals
+    key: plan.items[0].instruction
+    value: item1
+  - kind: equals
+    key: plan.items[1].instruction
+    value: item2
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: plan.mode
+    value: list
+cleanup: []

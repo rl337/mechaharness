@@ -1,0 +1,38 @@
+id: fangore_insp_sparse_advisor
+suite: fangore_durable_ioc
+persona: fangore
+title: Consult an advisor without transferring task ownership
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Sparse advisor counsel
+  helps at hard boundaries while the active executor keeps ownership. Budgets stop routine consultation.
+  Accepts inspiration requirement 18[^insp-r18].
+implementation: '`Advisor` / `AdvisorPolicy` in `mechaharness.advisor` are distinct from `GraphEscalation`
+  (ownership transfer). `DefaultAdvisorPolicy` rate-limits consultations; `consult_advisor` records `AdvisorObservation`
+  and never transfers task ownership. Default DI binds `RejectAdvisor` with an explicit continue fallback.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-r18
+  label: 'Inspiration requirements (req 18: advisor)'
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
+  note: Req 18 — advisor
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    sparse_advisor:
+      max_consultations: 1
+      trigger: consequential_planning
+complete:
+  expect:
+  - kind: 'true'
+    key: first_consult_ok
+  - kind: 'true'
+    key: second_consult_blocked
+  - kind: equals
+    key: observation_count
+    value: 1
+cleanup: []

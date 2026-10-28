@@ -13,9 +13,44 @@ from mechaharness.cli_assertion import (
     check_assertions,
     default_cli_assertion_classes,
     is_cassette_exact_assertion,
+    resolve_observation_path,
 )
 from mechaharness.cli_instrumentor import CliStepResult, _token_totals
 from mechaharness.core.types import Usage
+
+
+def test_resolve_observation_path_nested() -> None:
+    obs = {
+        "plan": {
+            "mode": "list",
+            "items": [
+                {"instruction": "add helper"},
+                {"instruction": "add test"},
+            ],
+        }
+    }
+    assert resolve_observation_path(obs, "plan.mode") == "list"
+    assert (
+        resolve_observation_path(obs, "plan.items[0].instruction") == "add helper"
+    )
+    assert resolve_observation_path(obs, "plan.items[1].instruction") == "add test"
+    with pytest.raises(KeyError):
+        resolve_observation_path(obs, "plan.items[9].instruction")
+
+
+def test_equals_assertion_nested_path() -> None:
+    obs = {"plan": {"mode": "oneshot", "items": [{"instruction": "do thing"}]}}
+    EqualsAssertion().check(
+        obs,
+        EqualsAssertion.params_model(
+            key="plan.items[0].instruction", value="do thing"
+        ),
+    )
+    with pytest.raises(AssertionError, match="missing observation key"):
+        EqualsAssertion().check(
+            obs,
+            EqualsAssertion.params_model(key="plan.items[2].instruction", value="x"),
+        )
 
 
 def test_lte_and_gte_assertions() -> None:

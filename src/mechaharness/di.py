@@ -82,6 +82,10 @@ from mechaharness.durable_graph_generator import (
     LeaseControllerAuth,
 )
 from mechaharness.external_effect import CrashProbe, NoopCrashProbe
+from mechaharness.generator_local_work import (
+    GeneratorLocalWork,
+    NoOpGeneratorLocalWork,
+)
 from mechaharness.graph import GraphStore
 from mechaharness.graph_executor import (
     DefaultGraphFailurePolicy,
@@ -621,6 +625,10 @@ class MechaHarnessConfig(Config):
             make_generator_run_store,
         )
 
+        self._register_binding(
+            GeneratorLocalWork, self.get_generator_local_work()
+        )
+
         def make_durable_graph_generator(injector: Injector) -> DurableGraphGenerator:
             return DurableGraphGenerator(
                 registry=injector.inject(GraphTemplateRegistry),
@@ -629,6 +637,7 @@ class MechaHarnessConfig(Config):
                 datetime_service=injector.inject(DateTimeService),
                 controller_auth=injector.inject(GeneratorControllerAuth),
                 checkpoint_store=injector.inject(CheckpointStore),
+                local_work=injector.inject(GeneratorLocalWork),
             )
 
         self._register_override_or_factory(
@@ -930,6 +939,12 @@ class MechaHarnessConfig(Config):
     ) -> DurableGraphGenerator | type[DurableGraphGenerator] | None:
         """Optional :class:`DurableGraphGenerator` override. ``None`` → factory."""
         return None
+
+    def get_generator_local_work(
+        self,
+    ) -> GeneratorLocalWork | type[GeneratorLocalWork]:
+        """Post-guidance local work hook (default: no-op)."""
+        return NoOpGeneratorLocalWork
 
     def get_lifecycle_extension_registry(self) -> LifecycleExtensionRegistry:
         """Ordered lifecycle extensions (default: empty)."""

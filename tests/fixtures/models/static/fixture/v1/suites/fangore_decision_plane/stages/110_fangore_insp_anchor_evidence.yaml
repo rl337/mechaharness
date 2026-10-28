@@ -1,0 +1,36 @@
+id: fangore_insp_anchor_evidence
+suite: fangore_decision_plane
+persona: fangore
+title: Require external anchor evidence on high-autonomy work
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. High-autonomy graphs
+  must periodically attach labeled external anchors so branches cannot drift on mutually reinforcing model
+  judgments alone. Accepts WalkingLabs L14 guidance[^wl-l14-anchor].
+implementation: '`AnchorRequirement`, `AnchorEvidence`, and `anchors_satisfied` in `mechaharness.anchor_evidence`
+  label and require anchor kinds.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: wl-l14-anchor
+  label: WalkingLabs L14 Graph Engineering
+  url: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-14-graph-engineering/
+  note: External anchors
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    anchor_evidence_require:
+      kinds:
+      - external_observation
+      min_count: 1
+      anchors:
+      - kind: external_observation
+        ref: obs:1
+complete:
+  expect:
+  - kind: 'true'
+    key: satisfied
+cleanup: []

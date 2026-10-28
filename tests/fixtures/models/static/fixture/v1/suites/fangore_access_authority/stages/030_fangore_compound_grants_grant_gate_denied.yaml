@@ -1,0 +1,42 @@
+id: fangore_compound_grants__grant_gate_denied
+suite: fangore_access_authority
+persona: fangore
+title: Compose read-only and write permission packs (grant_gate_denied)
+narrative: Fangore starts the CLI host with family `tool_loop` and backend `mock`. A read-only environment
+  pack refuses the write tool; composing it with a write pack via `environment.access_policy` layers allows
+  the same tool. He walks `tool_loop` and verifies permission_denied vs allowed. This stage covers the
+  `grant_gate_denied` scenario.
+implementation: '`AccessPolicy` deny-by-default grants; `CompoundPolicy` unions packs via story `environment.access_policy`
+  / Config `get_access_policy`. `AccessControl` enforces tool grants on the product `tool_loop` verb.'
+validation: Harness `user_story` scenarios `grant_gate_denied.yaml` and `grant_gate_allowed.yaml` drive
+  `tool_loop` with environment grants; expects permission_denied / allowed. Stage id `fangore_compound_grants__grant_gate_denied`
+  (scenario `grant_gate_denied`).
+footnotes: []
+kind: user_story
+environment:
+  family: tool_loop
+  backend: mock
+  grants:
+  - core:fs.read
+  filesystem:
+    type: temp
+steps:
+- do:
+    tool_loop:
+      prompt: Write a.txt
+      tool_name: write_file
+      tool_grants:
+      - core:fs.write
+      family: tool_loop
+complete:
+  expect:
+  - kind: equals
+    key: permission_denied
+    value: true
+  - kind: equals
+    key: allowed
+    value: false
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

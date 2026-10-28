@@ -1,0 +1,36 @@
+id: fangore_insp_approval_interrupt
+suite: fangore_durable_ioc
+persona: fangore
+title: Suspend a graph for durable human approval
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `approval_interrupt`
+  to suspend for durable human approval then resume with an actor provenance stamp.
+implementation: '`suspend_for_approval` / `resume_approval` via product verb `approval_interrupt`. Maps
+  to durable advice/approval yields when hosts compose it into graphs later.'
+validation: Harness `user_story` scenario `approval_interrupt_cycle.yaml` drives `approval_interrupt`;
+  expects pending → approved with actor provenance.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    approval_interrupt:
+      reason: Deploy to production
+      decision: approve
+      actor: ops@acme
+      checkpoint: ckpt:1
+complete:
+  expect:
+  - kind: equals
+    key: initial_status
+    value: pending
+  - kind: equals
+    key: final_status
+    value: approved
+  - kind: contains
+    key: actor_contains
+    value: ops@acme
+cleanup: []

@@ -13,6 +13,10 @@ from mechaharness.cli_verb import CliProbe, CliVerb
 from mechaharness.core.access import AccessControl, GrantPolicyLike
 from mechaharness.core.completer import Completer
 from mechaharness.di import MechaHarnessConfig, _expose_ctor_type_hints
+from mechaharness.generator_local_work import (
+    GeneratorLocalWork,
+    NoOpGeneratorLocalWork,
+)
 from mechaharness.harness.base import AbstractHarness
 from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
@@ -67,6 +71,8 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         capability_envelope: CapabilityEnvelope | None = None,
         budget_policy: BudgetPolicy | None = None,
         job_lane_broker: JobLaneBroker | None = None,
+        generator_local_work: GeneratorLocalWork | type[GeneratorLocalWork] | None = None,
+        workspace_root: object | None = None,
     ) -> None:
         self._completer = completer
         self._datetime_service = datetime_service
@@ -81,7 +87,16 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         self._capability_envelope = capability_envelope
         self._budget_policy = budget_policy
         self._job_lane_broker = job_lane_broker
+        self._generator_local_work = generator_local_work
+        self._workspace_root = workspace_root
         super().__init__()
+
+    def get_generator_local_work(
+        self,
+    ) -> GeneratorLocalWork | type[GeneratorLocalWork]:
+        if self._generator_local_work is not None:
+            return self._generator_local_work
+        return NoOpGeneratorLocalWork
 
     def get_rag_retriever(self) -> type[RagRetriever] | RagRetriever:
         if self._rag_retriever is not None:
@@ -166,6 +181,8 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         access_policy = self._access_policy
         _expose_ctor_type_hints(_CliMaps)
 
+        workspace_root = self._workspace_root
+
         def make_cli(injector: Injector) -> CliInstrumentor:
             maps = injector.inject(_CliMaps)
             return CliInstrumentor(
@@ -184,6 +201,8 @@ class TestHarnessCliConfig(MechaHarnessConfig):
                 grants=grants,
                 access_policy=access_policy,
                 job_lane_broker=injector.inject(JobLaneBroker),
+                generator_local_work=injector.inject(GeneratorLocalWork),
+                workspace_root=workspace_root,
             )
 
         self.register(CliInstrumentor, make_cli)

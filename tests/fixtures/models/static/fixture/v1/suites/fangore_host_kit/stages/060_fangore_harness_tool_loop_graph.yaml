@@ -1,0 +1,80 @@
+id: fangore_harness_tool_loop_graph
+suite: fangore_host_kit
+persona: fangore
+title: See inference and tool calls as node components inside a harness run
+narrative: Fangore starts the CLI host with family `tool_loop` and backend `mock`. Fangore runs a tool-loop
+  harness with one tool then a final answer. The console must treat inference and each tool call as node
+  components under a harness parent — not an opaque blob — using the same kinds as recipe interiors. Complements
+  `fangore_traversal_contract` and `fangore_insp_soft_vs_hard`. He walks product steps (tool_loop) and
+  verifies completion from the structured observation expects on this scenario. [^ai-asst-nc-harness]
+implementation: '`CliInstrumentor` verb `tool_loop` runs `ToolLoopHarness` on the stamped/tapped EventLog.
+  The harness emits `turn_start`, `inference`, `tool_call`, and `tool_result` with `parent_node_id` /
+  `component_id`. `node_components_for_harness` lists planned components; `traversal_from_events` recovers
+  them after the run.'
+validation: 'Harness `user_story` scenario `harness_components.yaml`: environment + graph + steps + complete
+  expects.'
+footnotes:
+- id: ai-asst-nc-harness
+  label: AI assistant host-friction inspiration
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/ai-assistant-host-friction-inspiration.md
+  note: Harness-interior node components
+kind: user_story
+environment:
+  family: tool_loop
+  backend: mock
+  filesystem:
+    type: temp
+graph: null
+steps:
+- do:
+    tool_loop:
+      prompt: find it
+      tool_name: lookup
+      family: tool_loop
+      max_turns: 4
+complete:
+  expect:
+  - kind: equals
+    key: text
+    value: done
+  - kind: equals
+    key: status
+    value: ok
+  - kind: includes
+    key: event_types
+    value:
+    - core:inference
+    - core:cost
+    - core:tool_call
+  - kind: equals
+    key: total_tokens
+    value: 4
+  - kind: lte
+    key: total_tokens
+    value: 4
+  - kind: exactly
+    key: traversal_kinds
+    value:
+    - turn_start
+    - cost
+    - inference
+    - tool_call
+    - access_check
+    - cost
+    - tool_result
+    - turn_start
+    - cost
+    - inference
+  - kind: exactly
+    key: component_parent_ids
+    value:
+    - harness
+    - harness
+    - harness
+    - harness
+    - harness
+    - harness
+  - kind: lte
+    key: cost_units
+    value: 3
+cleanup: []

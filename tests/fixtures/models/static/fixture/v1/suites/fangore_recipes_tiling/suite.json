@@ -1,0 +1,63 @@
+{
+  "id": "fangore_recipes_tiling",
+  "title": "Agentic Recipe tiling and repair loops",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_bounded_repair_loop",
+      "scenario": "010_fangore_bounded_repair_loop"
+    },
+    {
+      "story": "fangore_bounded_retry_recipe",
+      "scenario": "020_fangore_bounded_retry_recipe"
+    },
+    {
+      "story": "fangore_conversational_tool_loop",
+      "scenario": "030_fangore_conversational_tool_loop"
+    },
+    {
+      "story": "fangore_environment_repair_recipe",
+      "scenario": "040_fangore_environment_repair_recipe"
+    },
+    {
+      "story": "fangore_insp_fan_in_policy",
+      "scenario": "050_fangore_insp_fan_in_policy"
+    },
+    {
+      "story": "fangore_insp_independent_review",
+      "scenario": "060_fangore_insp_independent_review"
+    },
+    {
+      "story": "fangore_insp_initialize_preflight",
+      "scenario": "070_fangore_insp_initialize_preflight"
+    },
+    {
+      "story": "fangore_insp_produce_critique_refine",
+      "scenario": "080_fangore_insp_produce_critique_refine"
+    },
+    {
+      "story": "fangore_insp_stop_contract",
+      "scenario": "090_fangore_insp_stop_contract"
+    },
+    {
+      "story": "fangore_recipe_as_tool",
+      "scenario": "100_fangore_recipe_as_tool"
+    },
+    {
+      "story": "fangore_recipe_namespace_tile",
+      "scenario": "110_fangore_recipe_namespace_tile"
+    },
+    {
+      "story": "fangore_verify_repair_recipe",
+      "scenario": "120_fangore_verify_repair_recipe"
+    }
+  ]
+}

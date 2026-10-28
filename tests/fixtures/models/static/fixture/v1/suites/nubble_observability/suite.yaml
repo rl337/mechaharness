@@ -1,0 +1,9 @@
+id: nubble_observability
+title: Cost, trace, and audit observability
+persona: nubble
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

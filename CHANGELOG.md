@@ -7,6 +7,161 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Verify failure escalate to decompose:** after ``verify_runs`` repair is
+  exhausted (or a coding work item fails), ``ProjectCodingLocalWork`` builds
+  one consolidated restore-and-finish brief
+  (``decompose_instructions_from_failures``), restores a pre-burst workspace
+  checkpoint, and retries once in oneshot mode; if that still fails it yields
+  ``context_version=decompose`` guidance
+  (``decompose_guidance_ask``) so the driver can clarify. Escalate briefs keep
+  full goal text plus a fixed no-``eval``/``exec``/``literal_eval``
+  non-negotiables block (no 400-char clip).
+
+- **``AnswerBody.on_decompose``:** durable ``answer`` may drain one
+  ``context_version=decompose`` yield (``accept_proposed``) so linear coding
+  story walks reach ``completed`` after verify escalate. Calc CLI stages set
+  ``on_decompose: accept_proposed``.
+
+- **Coding implementation scope preamble:** project-coding tool-loop system
+  prompt and per-todo work brief constrain speculative next-stage features
+  while requiring previously green host checks to stay green (extend, do not
+  replace). Planning / ideation paths are unchanged.
+
+- **Coding write / verify ban on ``eval`` cheats:** ``CodingWriteGuard`` refuses
+  ``*.py`` writes that call ``eval`` / ``exec`` / ``literal_eval`` (AST, not
+  substring). Verify hints and repair briefs use semantic “do not call …”
+  wording; ``verify_runs`` with eval-style ``text_forbids`` also AST-check;
+  repair bursts get the same host-verify hint list as the first attempt.
+
+- **Coding workspace checkpoint advances on success:** 
+  ``save_coding_workspace_checkpoint`` / ``restore_coding_workspace_checkpoint``
+  copy the suite workspace tree. Sequential suites refresh the checkpoint after
+  each successful stage; ``ProjectCodingLocalWork`` refreshes at burst start and
+  on ``ok``. Restore refuses an empty checkpoint over a non-empty workspace
+  (fixes escalate wiping ``calc.py`` after a stale empty 010 snapshot).
+
+- **Suite / coding ``TIMING.jsonl``:** sequential suites append per-stage wall
+  clock (and print ``STAGE START/OK/FAIL``); ``ProjectCodingLocalWork`` appends
+  burst / work-item / verify-repair / escalate spans under the suite run root
+  (``…/TIMING.jsonl``), including inference timeout and coding iteration knobs
+  so live dogfood can see where hours go.
+
+- **Coding already-satisfied preflight:** before the Completer runs,
+  ``ProjectCodingLocalWork`` executes ``verify_runs``; if they already pass it
+  returns ``already_satisfied`` / ``changes_expected=false`` without
+  ``write_file``. Story expect ``includes_if`` (calc_cli) requires
+  ``written_files`` only when changes were expected. Override with
+  ``force_implement: true``.
+
+- **Coding write gutting guard:** ``CodingWriteGuard`` on project-coding
+  ``write_file`` refuses catastrophic shrink / syntax-breaking / def-dropping
+  overwrites of existing files. ``verify_runs`` gains ``min_bytes`` and
+  ``python_parses``. Story ``fangore_coding_write_guard``.
+
+- **HTTP GitHub client (PR + CI logs):** ``HttpGitHubClient`` /
+  ``GitHubConnectionConfig`` (``MECHA_GITHUB_*`` / ``GITHUB_TOKEN``, not
+  Settings) for pull requests, check runs, and job logs. Tools ``ci_checks`` /
+  ``ci_job_log``. ``LocalGitHttpPullRequestCodingGit`` when a token is bound.
+  ``RecordingGitHubClient`` + story ``fangore_coding_ci_diagnose``
+  (``coding_github: local_mock_ci``) for forge lookup without network; repair
+  remains ``fangore_coding_ci_repair``.
+
+- **Static-check repair lane:** ``verify_runs`` accepts ``ruff`` / ``mypy``
+  rows. Story ``fangore_coding_static_checks`` seeds I001 / no-untyped-def and
+  repairs under guided coding. Fixture suite ``sources/`` trees are ignored by
+  root pytest collection.
+
+
+- **Injectable ``CodingGit`` for project coding:** ABC
+  ``mechaharness.coding_git.CodingGit`` with default
+  ``LocalProcessCodingGit`` (local ``git`` / ``gh``, SSH agent) and
+  ``RecordingPullRequestCodingGit`` (local git + mock forge) for stories/CI.
+  Hosts override via ``ProjectCodingConfig(coding_git=…)`` /
+  ``get_coding_git()`` for HTTPS+token or forge-API backends. Tool names stay
+  ``git_status`` / ``git_log`` / ``git_diff`` / ``git_push`` /
+  ``create_pull_request``. Stories ``fangore_coding_git_inspect`` /
+  ``fangore_coding_git_open_pr`` seed a feature branch and keep GitHub mocked.
+
+- **Sequential ``calc_cli`` coding suite (live-capable):** ordered Fangore arc
+  that grows a shared-workspace ``calc.py`` CLI through numbers → ``+−`` →
+  ``×÷`` → ``^`` → parentheses → common functions. Suite injects
+  ``environment.workspace: suite``. Static CI uses ``coding_write`` stubs; live
+  (``MECHA_STORY_BACKEND=live``) ignores stubs and drives
+  ``ProjectCodingLocalWork`` with a real Completer via
+  ``completer_as_tool_loop_complete``.   Coding bursts honor ``verify_runs`` (file ``text_contains`` plus
+  ``python calc.py …`` checks, with one repair/refinement nudge), recover when
+  the model finishes without ``write_file``, and pass ``MECHA_MAX_TOKENS`` into
+  completions. Goals require named ``def evaluate`` / ``def main``. ``project_coding`` walks are live-eligible; the suite harness
+  asserts live HTTP POSTs occurred. Authoring:
+  ``scripts/write_calc_cli_suite.py`` + ``suites/calc_cli/sources/``.
+- **Sequential suite run ids:** each sequential suite attempt gets a durable
+  ``run_id`` under ``.mechaharness/suite_runs/`` (workspace + manifest). Banner /
+  warning / ``LATEST`` make the id easy to find; ``MECHA_SUITE_RUN_ID`` +
+  ``MECHA_SUITE_FROM`` resume or rerun from a stage without redoing priors.
+- **``counter_pkg`` coding-delegate suite:** sequential multi-file arc
+  (package + pytest + CLI) with ``coding_writes`` stubs, ``verify_runs.pytest``,
+  and the same live Completer / repair path as ``calc_cli``. Roadmap:
+  ``docs/guides/coding-delegate-suites.md``.
+- **``delegate_pkg`` coding-delegate suite:** one sequential Widget arc covering
+  list-mode bootstrap, thorough guidance fork (code + README), red-green
+  ``double()``, and ``Widget``→``Gadget`` refactor. Live Completer is the gate;
+  static stubs provisional. MCP reuses the same graph (no fourth suite).
+  Authoring: ``scripts/write_delegate_pkg_suite.py``.
+- **User-story suites:** thematic ``suite.json`` catalogs under
+  ``static/fixture/v1/suites/`` with ``execution.mode`` ``parallel`` |
+  ``sequential``, ``vars`` / ``setup`` / ``cleanup``, and explicit
+  ``stages`` (``story`` + ``scenario``). Every static scenario is in exactly
+  one primary suite. Pytest ``test_user_story_suite``; static suite members
+  leave ``test_user_story`` (HTTP twins remain there). Schema:
+  ``tests/stories/suite_spec.py``; membership helper
+  ``scripts/generate_user_story_suites.py``. Guide Suites section regenerated
+  from fixtures.
+- **Workspace verify verbs:** ``run_python`` and ``workspace_read`` put
+  ``stdout`` / ``stderr`` / ``exit_code`` or ``exists`` / ``text`` into the
+  step observation bag for ordinary expects. ``ProjectCodingLocalWork``
+  records ``written_files`` / ``workspace_root`` on completed yields. Story
+  ``environment.workspace`` / ``local_work: project_coding`` / ``coding_write``
+  bind a temp coding host. Durable + coding local work share the CLI
+  ``EventLog`` so stories can pin ``core:graph_yield`` /
+  ``core:guidance_resume`` / graph lifecycle via ``tapped_event_types``.
+  Scenario: ``fangore_guided_coding_recipe`` ``helper_run_python.yaml``.
+- **Story observation paths + plan classify:** CLI expect ``key`` resolves
+  dotted / indexed paths (``plan.items[0].instruction``). Durable step
+  observations lift allowlisted yield payload fields (``context_version``,
+  ``mode``, ``plan``, ``result``, ``error``). ``PlanClassifyLocalWork`` and
+  ``environment.local_work: plan_classify`` run classify/refine offline without
+  a coding tool loop. Story scenarios: ``oneshot_from_goal``,
+  ``numbered_list``, ``conflict_list_refinement``, ``explicit_list_mode``.
+- **MCP progress paths:** ``tools/call`` with ``_meta.progressToken`` emits
+  ``notifications/progress`` messages such as
+  ``guided_coding › plan_tile › work_item 1 › tool_round 2 › write_file``
+  during generator local work (keeps Cursor stdio idle timeout alive).
+
+- **Inference progress watchdog:** ``await_while_running`` ticks MCP progress
+  only while a Completer awaitable is still pending, then fails with
+  ``InferenceTimeoutError`` after ``MECHA_INFERENCE_TIMEOUT_SECONDS`` (fallback
+  ``MECHA_HTTP_TIMEOUT_SECONDS``). Wired through
+  ``ConversationalToolLoopRunner``.
+- **Instruction todo plan (`instruction_todo_plan`):** classify oneshot vs
+  ordered list, refine conflicts, pre / per-item / post-list acceptance.
+  Optional `scope_refinement` / `list_refinement` guidance is requested by
+  local work (`request_guidance`); answering restarts the plan. Domain
+  `mechaharness.instruction_plan`. Story: `fangore_instruction_todo_plan`.
+- **Guided coding Agentic Recipe (`guided_coding`):** frontier MCP guidance soft
+  point tiles `instruction_todo_plan` (`plan_tile`) + `audited_infer_accept`
+  (`audit_tile`). Host Config `ProjectCodingConfig` registers workspace coding
+  tools and a `GeneratorLocalWork` burst after guidance. MCP
+  `MECHA_MCP_HOST=project_coding` binds that Config; inference endpoints belong
+  on the Cursor MCP `env` block. Story: `fangore_guided_coding_recipe`.
+- **Audited infer-accept (`audited_infer_accept`):** RDG-aligned spine
+  collect → freeze → decide → independent QA → deterministic → gate, lifted
+  from the video production host `ideation.infer.accept` for library reuse. Domain module
+  `mechaharness.audited_decision`. Migration notes:
+  `docs/inspiration/video-production-audited-infer-migration.md`. Story:
+  `fangore_audited_infer_accept`.
+
 ## [0.7.0] — 2026-10-22
 
 Job lanes, stepped graph execution, user-story migration / recipe execute,
@@ -223,7 +378,7 @@ Patch tip auto-bumped to `0.4.1` before this PyPI publish.
   events / soft points / nest / stop / budget / effects. Traversal projector
   and `embed_recipe_as_tool` (HF-08). Docs:
   `docs/reference/node-components.md`,
-  `docs/requirements/dynamic-tool-graph.md`; June HF inspiration + map.
+  `docs/requirements/dynamic-tool-graph.md`; the AI assistant host HF inspiration + map.
 - **HF-05:** `host_graph_executor(event_log=)` and `tapping_event_log` /
   `TappingEventLog` for blessed-path event taps.
 - **HF-07:** Agentic Recipe `conversational_tool_loop` +

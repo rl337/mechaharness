@@ -1,0 +1,127 @@
+id: fangore_delegate_list_bootstrap
+suite: delegate_pkg
+persona: fangore
+title: Bootstrap a Widget package from a numbered todo list
+narrative: Fangore hands a multi-step bootstrap as an ordered instruction list so guided coding classifies
+  list mode and runs a coding burst per todo under shared workspace acceptance. Live Completer is the
+  proof gate; static multi-file stubs are only a provisional mirror. Complements `fangore_instruction_todo_plan`
+  (plan-only) and `fangore_counter_bootstrap` (oneshot package bootstrap).
+implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
+  `environment.workspace: suite`, soft point `external_guidance` (choices minimal/thorough), and budget
+  soft point `max_iterations`. List stages pass `instruction_mode: list` into `ProjectCodingLocalWork`
+  / `build_instruction_plan`. Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids`
+  with repair. Live mode binds `completer_as_tool_loop_complete`; static `coding_writes` are provisional
+  until the live suite passes. MCP `MECHA_MCP_HOST=project_coding` drives the same `DurableGraphGenerator`
+  graph (no separate suite).'
+validation: 'Harness `user_story` scenario `list_bootstrap.yaml` inside sequential suite `delegate_pkg`
+  (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette
+  green as proof until live Completer on the suite host has passed.'
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: suite
+    contents: 010_fangore_delegate_list_bootstrap.files.json
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: memory
+steps:
+- do:
+    start:
+      run_id: delegate-list_bootstrap
+      inputs:
+        goal: 'Follow the instruction list in order. Required contracts (non-negotiable): keep package
+          import `from widget import …` working. Do NOT use eval() or exec(). You MUST call write_file
+          for every file you create or change before finishing. Tests under tests/ must stay green (pytest).
+          Public class must be named `Widget`.'
+        instruction_mode: list
+        instructions:
+        - Create package `widget/` with `__init__.py` exporting class `Widget` (start value 0, attribute
+          `value`).
+        - Add `tests/test_widget.py` with a test that constructs Widget and asserts value == 0.
+        max_iterations: 24
+        verify_runs:
+        - path: widget/__init__.py
+          text_contains:
+          - class Widget
+          - value
+          text_forbids:
+          - eval(
+          - exec(
+        - path: tests/test_widget.py
+          text_contains:
+          - Widget
+          - def test_
+          text_forbids:
+          - eval(
+          - exec(
+        - exit_code: 0
+          path: tests/test_widget.py
+          pytest: true
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+  - kind: gte
+    key: guidance_yields
+    value: 1
+  - kind: gte
+    key: local_steps
+    value: 1
+- do:
+    answer:
+      choose: minimal
+  expect:
+  - key: kind
+    kind: equals
+    value: completed
+  - key: resumes
+    kind: gte
+    value: 1
+  - key: written_files
+    kind: includes
+    value:
+    - widget/__init__.py
+    - tests/test_widget.py
+  - key: mode
+    kind: equals
+    value: list
+- do:
+    workspace_read:
+      path: widget/__init__.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: class Widget
+  - key: text
+    kind: contains
+    value: value
+- do:
+    workspace_read:
+      path: tests/test_widget.py
+  expect:
+  - key: exists
+    kind: 'true'
+  - key: text
+    kind: contains
+    value: Widget
+  - key: text
+    kind: contains
+    value: def test_
+complete:
+  expect:
+  - kind: includes
+    key: event_types
+    value:
+    - core:graph_yield
+    - core:guidance_resume
+    - core:graph_start
+    - core:graph_end
+cleanup: []

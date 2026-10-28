@@ -1,0 +1,76 @@
+id: fangore_graph_soft_enter
+suite: fangore_graph_executor
+persona: fangore
+title: Entering a soft subgraph node pauses before the first child
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline
+  graph whose only root is a subgraph (soft call site). One `graph_walk` step enters the call frame and
+  stops before the child's first node — no child runner has executed yet. A following step runs the first
+  child. Tracks SG-05[^sg-soft].
+implementation: '`GraphExecutor._enter_subgraph_node` on `one_step` when the frontier is a subgraph; parent
+  stays `RUNNING` with `entered`; child checkpointed under `run_id:node_id`.'
+validation: Harness `user_story` scenario `soft_enter.yaml`.
+footnotes:
+- id: sg-soft
+  label: Stepped graph execution requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md
+  note: SG-05 soft enter
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: soft-call
+    nodes:
+    - id: soft
+      kind: subgraph
+      subgraph:
+        goal: child
+        nodes:
+          c1:
+            id: c1
+            kind: compute
+            status: pending
+          c2:
+            id: c2
+            kind: compute
+            status: pending
+            depends_on:
+            - c1
+        edges: []
+        version: '1'
+steps:
+- do:
+    graph_walk:
+      action: start
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: entered_node_id
+    value: soft
+  - kind: equals
+    key: stopped_before
+    value: c1
+  - kind: equals
+    key: effect_calls
+    value: 0
+- do:
+    graph_walk:
+      action: step
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: effect_calls
+    value: 1
+complete:
+  expect:
+  - kind: equals
+    key: effect_calls
+    value: 1
+cleanup: []

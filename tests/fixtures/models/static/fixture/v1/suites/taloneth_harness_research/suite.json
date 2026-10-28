@@ -1,0 +1,119 @@
+{
+  "id": "taloneth_harness_research",
+  "title": "Harness research, ablation, and promotion gates",
+  "persona": "taloneth",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "taloneth_atk_research_reject",
+      "scenario": "010_taloneth_atk_research_reject"
+    },
+    {
+      "story": "taloneth_cache_layout_experiment",
+      "scenario": "020_taloneth_cache_layout_experiment"
+    },
+    {
+      "story": "taloneth_insp_component_ablation",
+      "scenario": "030_taloneth_insp_component_ablation"
+    },
+    {
+      "story": "taloneth_insp_correction_spec_debt",
+      "scenario": "040_taloneth_insp_correction_spec_debt"
+    },
+    {
+      "story": "taloneth_insp_cross_harness_failure",
+      "scenario": "050_taloneth_insp_cross_harness_failure"
+    },
+    {
+      "story": "taloneth_insp_eval_claims",
+      "scenario": "060_taloneth_insp_eval_claims"
+    },
+    {
+      "story": "taloneth_insp_eval_matrix",
+      "scenario": "070_taloneth_insp_eval_matrix"
+    },
+    {
+      "story": "taloneth_insp_evaluation_outcome",
+      "scenario": "080_taloneth_insp_evaluation_outcome"
+    },
+    {
+      "story": "taloneth_insp_evaluator_compose",
+      "scenario": "090_taloneth_insp_evaluator_compose"
+    },
+    {
+      "story": "taloneth_insp_experiment_dimensions",
+      "scenario": "100_taloneth_insp_experiment_dimensions"
+    },
+    {
+      "story": "taloneth_insp_experiment_lineage",
+      "scenario": "110_taloneth_insp_experiment_lineage"
+    },
+    {
+      "story": "taloneth_insp_exposure_discriminative",
+      "scenario": "120_taloneth_insp_exposure_discriminative"
+    },
+    {
+      "story": "taloneth_insp_gated_objective",
+      "scenario": "130_taloneth_insp_gated_objective"
+    },
+    {
+      "story": "taloneth_insp_harness_fingerprint",
+      "scenario": "140_taloneth_insp_harness_fingerprint"
+    },
+    {
+      "story": "taloneth_insp_harness_health",
+      "scenario": "150_taloneth_insp_harness_health"
+    },
+    {
+      "story": "taloneth_insp_harness_hypothesis",
+      "scenario": "160_taloneth_insp_harness_hypothesis"
+    },
+    {
+      "story": "taloneth_insp_learning_export",
+      "scenario": "170_taloneth_insp_learning_export"
+    },
+    {
+      "story": "taloneth_insp_objective_policy",
+      "scenario": "180_taloneth_insp_objective_policy"
+    },
+    {
+      "story": "taloneth_insp_recipe_evolution_loop",
+      "scenario": "190_taloneth_insp_recipe_evolution_loop"
+    },
+    {
+      "story": "taloneth_insp_recipe_final_test_gate",
+      "scenario": "200_taloneth_insp_recipe_final_test_gate"
+    },
+    {
+      "story": "taloneth_insp_rule_promotion",
+      "scenario": "210_taloneth_insp_rule_promotion"
+    },
+    {
+      "story": "taloneth_insp_run_parity",
+      "scenario": "220_taloneth_insp_run_parity"
+    },
+    {
+      "story": "taloneth_insp_safety_eval_recipes",
+      "scenario": "230_taloneth_insp_safety_eval_recipes"
+    },
+    {
+      "story": "taloneth_insp_scaffolding_retire",
+      "scenario": "240_taloneth_insp_scaffolding_retire"
+    },
+    {
+      "story": "taloneth_insp_scripted_driver_replay",
+      "scenario": "250_taloneth_insp_scripted_driver_replay"
+    },
+    {
+      "story": "taloneth_insp_trial_reliability",
+      "scenario": "260_taloneth_insp_trial_reliability"
+    }
+  ]
+}

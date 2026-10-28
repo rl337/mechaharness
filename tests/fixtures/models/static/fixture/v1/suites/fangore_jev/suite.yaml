@@ -1,0 +1,9 @@
+id: fangore_jev
+title: Judge evaluation vocabulary scenarios
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

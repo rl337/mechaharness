@@ -1,0 +1,96 @@
+id: fangore_job_lane_handoff_oneshot
+suite: fangore_job_lanes
+persona: fangore
+title: HandoffRecord unlocks named refs once across lanes
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets publishes
+  two memo keys under deny-all exposure, then hands off only `memo:1` to billing via `lane_handoff`. Billing
+  observes the shared ref and is denied the unshared one; a ghost handoff refuses.
+implementation: '`JobLaneBroker.handoff` consumes `HandoffRecord.evidence_refs`; verbs `lane_publish`
+  / `lane_handoff` / `lane_observe`.'
+validation: Harness `user_story` scenario `handoff_oneshot.yaml`.
+footnotes:
+- id: jl-broker-handoff
+  label: Job lane broker requirements
+  url: https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md
+  note: One-shot handoff share
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  job_lanes:
+    assets.generate:
+      meta:
+        mode: deny_all
+      keys:
+        memo:1:
+          mode: deny_all
+        memo:2:
+          mode: deny_all
+    billing.settle:
+      meta:
+        mode: open
+      keys: {}
+  filesystem:
+    type: temp
+steps:
+- do:
+    lane_publish:
+      keys:
+        memo:1: shared-secret
+        memo:2: private
+  lane: assets.generate
+  run_id: gen-1
+- do:
+    lane_handoff:
+      from_lane: assets.generate
+      to_lane: billing.settle
+      evidence_refs:
+      - memo:1
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector:
+        latest: true
+      key: memo:1
+  lane: billing.settle
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: value
+    value: shared-secret
+- do:
+    lane_observe:
+      target_lane: assets.generate
+      selector:
+        latest: true
+      key: memo:2
+  lane: billing.settle
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+- do:
+    lane_handoff:
+      from_lane: assets.generate
+      to_lane: billing.settle
+      evidence_refs:
+      - memo:ghost
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+  - kind: equals
+    key: error
+    value: lane 'assets.generate' cannot hand off unreadable 'memo:ghost'
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: denied
+cleanup: []

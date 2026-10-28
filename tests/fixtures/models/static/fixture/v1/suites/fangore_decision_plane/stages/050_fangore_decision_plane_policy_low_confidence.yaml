@@ -1,0 +1,46 @@
+id: fangore_decision_plane_policy__low_confidence
+suite: fangore_decision_plane
+persona: fangore
+title: Let code own the final decision-plane action with escalation (low_confidence)
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `decision_plane` with batched triage questions and fixture answers. He performs `run_recipe`
+  and verifies code-owned policy accepts billing, rejects illegal choices, and escalates below the confidence
+  floor. [^rvania-policy] [^rc-dp-policy] [^insp-pa-06-dp] [^insp-sr-08-dp] This stage covers the `low_confidence`
+  scenario.
+implementation: Agentic Recipe `decision_plane` via `AskBatchRunner` / `ApplyPolicyRunner` / `run_decision_plane_policy`.
+  Product CLI verb `run_recipe` with `DecisionPlaneRecipeAdapter`.
+validation: Harness `user_story` scenarios `accept_billing.yaml`, `invalid_team.yaml`, `low_confidence.yaml`
+  drive `run_recipe`; hard expects on final_action / escalate keys. Stage id `fangore_decision_plane_policy__low_confidence`
+  (scenario `low_confidence`).
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: decision_plane
+  bind: binds/low_confidence.yaml
+steps:
+- do:
+    run_recipe:
+      name: decision_plane
+      path: binds/low_confidence.yaml
+complete:
+  expect:
+  - kind: 'true'
+    key: escalate
+  - kind: equals
+    key: escalation_reason
+    value: confidence_below_floor
+  - kind: equals
+    key: escalation_route
+    value: host_policy
+  - kind: lte
+    key: budget_spent
+    value: 10
+  - kind: lte
+    key: cost_units
+    value: 10
+cleanup: []

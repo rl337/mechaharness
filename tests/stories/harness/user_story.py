@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
+from pyiv.files import RealFilesystem
 from pyiv.http import AsyncUrllibHttpClient, MemoryAsyncHttpClient
 from pyiv.process import OsEnvironment
 from pyiv.time import MockDateTimeService
@@ -16,15 +20,23 @@ from mechaharness.cli_instrumentor import CliInstrumentor
 from mechaharness.config import Settings
 from mechaharness.core.types import ChatMessage, Role, ToolCall, Usage
 from mechaharness.di import get_injector
+from mechaharness.generator_local_work import (
+    GeneratorLocalWork,
+    PlanClassifyLocalWork,
+    ProjectCodingLocalWork,
+)
 from mechaharness.inference.anthropic import AnthropicStrategy
 from mechaharness.inference.judge import FixtureJudgeProvider, JudgeProvider
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.project_coding_tools import WorkspacePaths, build_coding_tool_registry
+from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
 from tests.stories.catalog import StoryCase
 from tests.stories.cli_probes.config import TestHarnessCliConfig
 from tests.stories.scenarios.user_story_scenario import (
+    CodingWriteBlock,
     EnvironmentBlock,
     UserStoryScenario,
     load_user_story_scenario,
@@ -49,14 +61,23 @@ class UserStoryHarness:
     def known_ops(self) -> frozenset[str]:
         return frozenset()
 
-    async def run(self, case: StoryCase, backend: StoryBackend) -> None:
+    async def run(
+        self,
+        case: StoryCase,
+        backend: StoryBackend,
+        *,
+        suite_workspace: Path | None = None,
+    ) -> None:
         path = case.scenario_path()
         if path is None or not path.is_file():
             raise AssertionError(f"{case.label}: missing user_story scenario YAML")
         scenario = load_user_story_scenario(path)
-        config = self._build_config(case, backend, scenario)
+        config = self._build_config(
+            case, backend, scenario, suite_workspace=suite_workspace
+        )
         instrumentor = get_injector(config).inject(CliInstrumentor)
-        instrumentor.bind_base_dir = path.parent.parent
+        # binds/plans/response live under suite assets/<story_id>/ (or twin root).
+        instrumentor.bind_base_dir = case.asset_root()
         assertions = resolve_cli_assertions(config)
         result = await run_user_story_scenario(scenario, instrumentor)
         scenario.assert_expect(
@@ -71,6 +92,8 @@ class UserStoryHarness:
         case: StoryCase,
         backend: StoryBackend,
         scenario: UserStoryScenario,
+        *,
+        suite_workspace: Path | None = None,
     ) -> TestHarnessCliConfig:
         env = scenario.environment
         response: dict = {}
@@ -100,6 +123,22 @@ class UserStoryHarness:
         lifecycle_extensions = self._build_lifecycle_extensions(scenario)
 
         access_kw = self._access_budget_kwargs(env)
+        workspace_root = self._resolve_workspace(
+            env, scenario_path, suite_workspace=suite_workspace
+        )
+        live_model = (
+            os.environ.get("MECHA_MODEL", "").strip()
+            or model
+        )
+        access_kw.update(
+            self._local_work_kwargs(
+                env,
+                workspace_root,
+                backend=backend,
+                model=live_model,
+                scenario_path=scenario_path,
+            )
+        )
         if env.backend == "anthropic":
             return self._anthropic_config(
                 backend,
@@ -148,6 +187,202 @@ class UserStoryHarness:
             rag_retriever=rag_retriever,
             lifecycle_extensions=lifecycle_extensions,
             **access_kw,
+        )
+
+    def _resolve_workspace(
+        self,
+        env: EnvironmentBlock,
+        scenario_path: Path | None,
+        *,
+        suite_workspace: Path | None = None,
+    ) -> Path | None:
+        fs = env.filesystem
+        if fs is None:
+            return None
+        raw = fs.path if fs.path else fs.type
+        if raw == "suite":
+            if suite_workspace is None:
+                raise AssertionError(
+                    "environment.filesystem.type=suite requires a sequential "
+                    "suite workspace (run via test_user_story_suite)"
+                )
+            return suite_workspace.resolve()
+        if raw == "temp":
+            return Path(tempfile.mkdtemp(prefix="mecha-story-ws-"))
+        path = Path(raw).expanduser()
+        if path.is_absolute():
+            return path.resolve()
+        base = scenario_path.parent if scenario_path is not None else Path.cwd()
+        return (base / path).resolve()
+
+    def _load_coding_writes(
+        self,
+        env: EnvironmentBlock,
+        scenario_path: Path | None,
+    ) -> list[CodingWriteBlock]:
+        fs = env.filesystem
+        if fs is None or not fs.contents:
+            return []
+        if scenario_path is None:
+            raise AssertionError(
+                "environment.filesystem.contents requires a scenario path"
+            )
+        path = (scenario_path.parent / fs.contents).resolve()
+        if not path.is_file():
+            raise AssertionError(f"filesystem.contents missing: {path}")
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            return [
+                CodingWriteBlock(path=str(k), content=str(v))
+                for k, v in raw.items()
+            ]
+        if isinstance(raw, list):
+            return [
+                CodingWriteBlock(path=str(item["path"]), content=str(item["content"]))
+                for item in raw
+                if isinstance(item, dict)
+            ]
+        raise AssertionError(
+            f"{path}: files.json must be an object or list of "
+            "{path, content} entries"
+        )
+
+    def _local_work_kwargs(
+        self,
+        env: EnvironmentBlock,
+        workspace_root: Path | None,
+        *,
+        backend: StoryBackend,
+        model: str,
+        scenario_path: Path | None = None,
+    ) -> dict[str, Any]:
+        kwargs: dict[str, Any] = {}
+        if workspace_root is not None:
+            kwargs["workspace_root"] = workspace_root
+        if env.local_work == "plan_classify":
+            kwargs["generator_local_work"] = PlanClassifyLocalWork
+        elif env.local_work == "project_coding":
+            if workspace_root is None:
+                raise AssertionError(
+                    "environment.local_work=project_coding requires "
+                    "environment.filesystem"
+                )
+            writes = self._load_coding_writes(env, scenario_path)
+            if env.git_seed == "feature_branch":
+                _seed_feature_branch_git_repo(workspace_root)
+            if env.ci_seed == "failing_check":
+                _seed_failing_ci_check(workspace_root)
+            if env.static_seed == "ruff_imports":
+                _seed_static_ruff_imports(workspace_root)
+            if env.static_seed == "mypy_untyped":
+                _seed_static_mypy_untyped(workspace_root)
+            if env.write_guard_seed == "healthy_module":
+                _seed_healthy_module_for_write_guard(workspace_root)
+            kwargs["generator_local_work"] = self._project_coding_local_work(
+                workspace_root,
+                writes,
+                backend=backend,
+                model=model,
+                coding_git=env.coding_git,
+                coding_github=env.coding_github,
+                coding_tool_script=env.coding_tool_script,
+            )
+        return kwargs
+
+    def _project_coding_local_work(
+        self,
+        workspace_root: Path,
+        coding_writes: list[CodingWriteBlock],
+        *,
+        backend: StoryBackend,
+        model: str,
+        coding_git: str | None = None,
+        coding_github: str | None = None,
+        coding_tool_script: str | None = None,
+    ) -> GeneratorLocalWork:
+        from mechaharness.coding_git import (
+            LocalProcessCodingGit,
+            RecordingPullRequestCodingGit,
+        )
+        from mechaharness.github_client import RecordingGitHubClient
+        from mechaharness.github_connection import GitHubConnectionConfig
+
+        local_git = LocalProcessCodingGit(workspace=workspace_root)
+        if coding_git == "local_mock_pr":
+            bound_git = RecordingPullRequestCodingGit(local_git)
+        else:
+            bound_git = local_git
+        github = None
+        github_connection = None
+        if coding_github == "local_mock_ci":
+            github = RecordingGitHubClient()
+            github_connection = GitHubConnectionConfig(
+                token="story-mock",
+                owner="acme",
+                repo="demo",
+            )
+        tools = build_coding_tool_registry(
+            workspace=WorkspacePaths(workspace_root),
+            filesystem=RealFilesystem(),
+            coding_git=bound_git,
+            github=github,
+            github_connection=github_connection,
+        )
+        if backend.mode == "live":
+            # Ignore offline stubs; drive tools with a real Completer.
+            # Pull requests stay on RecordingPullRequestCodingGit when
+            # coding_git=local_mock_pr (no forge).
+            complete = self._live_coding_complete(tools, model=model)
+            max_iterations = int(os.environ.get("MECHA_CODING_MAX_ITERATIONS", "24"))
+        elif coding_tool_script:
+            steps = _coding_tool_script_steps(coding_tool_script)
+            complete = _coding_tool_script_stub(steps)
+            max_iterations = max(8, len(steps) + 2)
+        elif coding_writes:
+            complete = _coding_writes_stub(tools, coding_writes)
+            # One tool round per stub file, plus a finish round.
+            max_iterations = max(8, len(coding_writes) + 2)
+        else:
+            from mechaharness.project_coding import _offline_stub_complete
+
+            complete = _offline_stub_complete(tools)
+            max_iterations = 8
+        return ProjectCodingLocalWork(
+            tools=tools,
+            complete=complete,
+            workspace_root=workspace_root,
+            max_iterations=max_iterations,
+        )
+
+    def _live_coding_complete(self, tools: ToolRegistry, *, model: str) -> Any:
+        """OpenAI-compat Completer adapted for ProjectCodingLocalWork tool loops."""
+        from mechaharness.project_coding import completer_as_tool_loop_complete
+
+        if not os.environ.get("MECHA_BASE_URL"):
+            raise AssertionError(
+                "MECHA_BASE_URL is required for live project_coding stories"
+            )
+        settings = Settings(
+            inference_backend="openai_compat",
+            harness_family="pass_through",
+            model=model,
+            base_url=os.environ.get("MECHA_BASE_URL"),
+            api_key=os.environ.get("MECHA_API_KEY", "local"),
+            max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "2048")),
+        )
+        # Keep HTTP ceiling aligned with MECHA_INFERENCE_TIMEOUT_SECONDS so a
+        # stuck thinking-model Completer fails the node instead of hanging the
+        # suite (cancel alone may not interrupt urllib promptly).
+        from mechaharness.inference_progress import inference_timeout_seconds
+
+        http_timeout = float(inference_timeout_seconds())
+        client = CountingLiveHttpClient(timeout=http_timeout)
+        strategy = OpenAICompatStrategy(settings, client=client, timeout=http_timeout)
+        return completer_as_tool_loop_complete(
+            strategy,
+            tools=tools,
+            model=str(settings.model or model),
+            max_tokens=int(settings.max_tokens or 2048),
         )
 
     def _access_budget_kwargs(self, env: EnvironmentBlock) -> dict:
@@ -415,3 +650,477 @@ class UserStoryHarness:
             rag_retriever=rag_retriever if isinstance(rag_retriever, RagRetriever) else None,
             **(access_kw or {}),
         )
+
+
+class CountingLiveHttpClient(AsyncUrllibHttpClient):
+    """Async HTTP client that counts POSTs for live-inference proof."""
+
+    post_count: int = 0
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        type(self).post_count = 0
+
+    async def request(
+        self,
+        method: str,
+        url: str,
+        *,
+        headers: Any = None,
+        params: Any = None,
+        data: Any = None,
+        json: Any = None,
+        timeout: float | None = None,
+    ) -> Any:
+        if str(method).upper() == "POST":
+            type(self).post_count += 1
+        return await super().request(
+            method,
+            url,
+            headers=headers,
+            params=params,
+            data=data,
+            json=json,
+            timeout=timeout,
+        )
+
+
+def reset_live_http_post_count() -> None:
+    CountingLiveHttpClient.post_count = 0
+
+
+def live_http_post_count() -> int:
+    return int(CountingLiveHttpClient.post_count)
+
+
+def _coding_writes_stub(
+    tools: ToolRegistry,
+    coding_writes: list[CodingWriteBlock],
+) -> Any:
+    """Deterministic Completer that writes one or more workspace files then finishes."""
+
+    pending = list(coding_writes)
+    state = {"i": 0}
+
+    planned_paths = {b.path for b in pending}
+
+    def complete(messages: object, meta: object = None) -> dict[str, Any]:
+        del messages, meta
+        if state["i"] < len(pending) and "write_file" in tools:
+            block = pending[state["i"]]
+            state["i"] += 1
+            path = block.path
+            # Seed empty __init__.py for nested packages when the stub tree
+            # did not already include one (single-file helper arcs).
+            parts = Path(path).parts
+            if len(parts) > 1:
+                init_rel = str(Path(parts[0]) / "__init__.py")
+                if init_rel not in planned_paths and init_rel != path:
+                    try:
+                        tools.get("write_file").handler(path=init_rel, content="")
+                    except Exception:  # noqa: BLE001
+                        pass
+            return {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": f"call_write_{state['i']}",
+                        "function": {
+                            "name": "write_file",
+                            "arguments": {
+                                "path": path,
+                                "content": block.content,
+                            },
+                        },
+                    }
+                ],
+            }
+        return {"role": "assistant", "content": "done", "tool_calls": []}
+
+    return complete
+
+
+def _coding_write_stub(
+    tools: ToolRegistry,
+    coding_write: CodingWriteBlock,
+) -> Any:
+    """Backward-compatible single-file stub."""
+    return _coding_writes_stub(tools, [coding_write])
+
+
+def _seed_feature_branch_git_repo(root: Path) -> None:
+    """Init main + feature branch with one divergent commit (local git only)."""
+    import subprocess
+
+    def run(args: list[str]) -> None:
+        subprocess.run(args, cwd=str(root), check=True, capture_output=True, text=True)
+
+    run(["git", "init", "-b", "main"])
+    run(["git", "config", "user.email", "story@example.com"])
+    run(["git", "config", "user.name", "Mecha Story"])
+    (root / "README.md").write_text("# demo\n", encoding="utf-8")
+    run(["git", "add", "README.md"])
+    run(["git", "commit", "-m", "init on main"])
+    run(["git", "checkout", "-b", "feature"])
+    (root / "helper.py").write_text(
+        "def answer() -> int:\n    return 42\n", encoding="utf-8"
+    )
+    run(["git", "add", "helper.py"])
+    run(["git", "commit", "-m", "add helper on feature"])
+
+
+def _seed_healthy_module_for_write_guard(root: Path) -> None:
+    """Plant a substantial module that a careless Completer might try to gut."""
+    body = (
+        '"""Healthy module used to prove CodingWriteGuard refusals."""\n\n'
+        "from __future__ import annotations\n\n"
+        "from dataclasses import dataclass\n\n\n"
+        "@dataclass\n"
+        "class WorkspacePaths:\n"
+        '    """Resolve paths under a workspace root."""\n\n'
+        "    root: str\n\n"
+        "    def resolve(self, relative: str) -> str:\n"
+        '        return f"{self.root}/{relative}"\n\n\n'
+        "def build_coding_tool_registry(*, workspace: WorkspacePaths) -> dict:\n"
+        '    """Register confined tools under *workspace*."""\n\n'
+        "    def read_file(path: str) -> str:\n"
+        '        return f"read:{path}"\n\n'
+        "    return {\"read_file\": read_file, \"paths\": workspace}\n\n\n"
+        "def helper() -> int:\n"
+        "    return 42\n"
+    )
+    body = body + ("\n# padding for CodingWriteGuard.min_existing_bytes\n" * 20)
+    (root / "healthy_module.py").write_text(body, encoding="utf-8")
+
+
+def _seed_failing_ci_check(root: Path) -> None:
+    """Plant a broken module and a fake Actions failure log for CI repair stories."""
+    (root / "widget.py").write_text(
+        "def answer() -> int:\n    return 'not-an-int'\n",
+        encoding="utf-8",
+    )
+    mech = root / ".mechaharness"
+    mech.mkdir(parents=True, exist_ok=True)
+    (mech / "ci_failure.log").write_text(
+        "\n".join(
+            [
+                "Job: checks",
+                "Step: Run checks",
+                "Conclusion: failure",
+                "",
+                "_________________ ERROR collecting tests/test_widget.py _________________",
+                "tests/test_widget.py:3: in <module>",
+                "    from widget import answer",
+                "E   TypeError: answer() must return int, got str",
+                "",
+                "Failed: widget.py: answer() returns str instead of int 42",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _seed_static_ruff_imports(root: Path) -> None:
+    """Plant unsorted imports (ruff I001) plus a CI-shaped failure log."""
+    (root / "messy.py").write_text(
+        "from pathlib import Path\n"
+        "import sys\n"
+        "import os\n"
+        "\n"
+        "def main() -> int:\n"
+        "    return len(sys.argv) + int(bool(Path('.').exists())) + len(os.name)\n",
+        encoding="utf-8",
+    )
+    mech = root / ".mechaharness"
+    mech.mkdir(parents=True, exist_ok=True)
+    (mech / "ci_failure.log").write_text(
+        "\n".join(
+            [
+                "Running: Ruff lint",
+                "Command: ruff check .",
+                "I001 [*] Import block is un-sorted or un-formatted",
+                "  --> messy.py:1:1",
+                "Found 1 error.",
+                "✗ Ruff lint failed (exit code: 1)",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _seed_static_mypy_untyped(root: Path) -> None:
+    """Plant an untyped def (mypy no-untyped-def) plus a CI-shaped failure log."""
+    (root / "mypy.ini").write_text(
+        "[mypy]\npython_version = 3.10\ndisallow_untyped_defs = True\n",
+        encoding="utf-8",
+    )
+    (root / "typed_mod.py").write_text(
+        "def answer(x):\n"
+        "    return x + 1\n",
+        encoding="utf-8",
+    )
+    mech = root / ".mechaharness"
+    mech.mkdir(parents=True, exist_ok=True)
+    (mech / "ci_failure.log").write_text(
+        "\n".join(
+            [
+                "Running: Mypy type checking",
+                "Command: mypy .",
+                "typed_mod.py:1: error: Function is missing a type annotation"
+                "  [no-untyped-def]",
+                "Found 1 error in 1 file",
+                "✗ Mypy type checking failed (exit code: 1)",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _coding_tool_script_steps(script_id: str) -> list[dict[str, Any]]:
+    """Named offline Completer scripts that exercise CodingGit tools."""
+    if script_id == "git_inspect":
+        return [
+            {"name": "git_status", "arguments": {}},
+            {"name": "git_log", "arguments": {"base": "main", "max_count": 10}},
+            {
+                "name": "git_diff",
+                "arguments": {"base": "main", "stat_only": True},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/git_inspect.md",
+                    "content": (
+                        "# git inspect\n\n"
+                        "branch feature vs main\n"
+                        "helper.py added\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "git_open_pr":
+        return [
+            {"name": "git_log", "arguments": {"base": "main", "max_count": 10}},
+            {
+                "name": "git_diff",
+                "arguments": {"base": "main", "stat_only": True},
+            },
+            {
+                "name": "create_pull_request",
+                "arguments": {
+                    "title": "Add helper on feature",
+                    "body": (
+                        "## Summary\n"
+                        "- Add helper.py on the feature branch.\n\n"
+                        "## Test plan\n"
+                        "- [ ] Local git inspect vs main\n"
+                        "- [ ] Mock PR URL recorded\n"
+                    ),
+                    "base": "main",
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/pr_url.txt",
+                    "content": "https://example.test/pull/1\n",
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "ci_repair":
+        return [
+            {
+                "name": "read_file",
+                "arguments": {"path": ".mechaharness/ci_failure.log"},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": "widget.py",
+                    "content": "def answer() -> int:\n    return 42\n",
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/ci_fix.md",
+                    "content": (
+                        "# CI fix\n\n"
+                        "Failed step: Run checks\n"
+                        "Changed: widget.py — answer() now returns int 42\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "ci_diagnose":
+        return [
+            {"name": "ci_checks", "arguments": {"ref": "HEAD"}},
+            {
+                "name": "ci_job_log",
+                "arguments": {"job_id": "9001", "max_bytes": 20_000},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/ci_diagnosis.md",
+                    "content": (
+                        "# CI diagnosis\n\n"
+                        "Check: checks — conclusion failure\n"
+                        "Job id: 9001\n"
+                        "Root causes:\n"
+                        "- Ruff I001 import block unsorted "
+                        "(project_coding.py)\n"
+                        "- Mypy no-untyped-def / assignment "
+                        "(github_client.py, generator_local_work.py)\n"
+                        "- Pytest ModuleNotFoundError: widget\n"
+                        "- Coverage 77.55% below 78.0%\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "static_ruff_repair":
+        return [
+            {
+                "name": "read_file",
+                "arguments": {"path": ".mechaharness/ci_failure.log"},
+            },
+            {
+                "name": "run_shell",
+                "arguments": {"command": "python -m ruff check messy.py"},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": "messy.py",
+                    "content": (
+                        "import os\n"
+                        "import sys\n"
+                        "from pathlib import Path\n"
+                        "\n"
+                        "\n"
+                        "def main() -> int:\n"
+                        "    return (\n"
+                        "        len(sys.argv)\n"
+                        "        + int(bool(Path('.').exists()))\n"
+                        "        + len(os.name)\n"
+                        "    )\n"
+                    ),
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/ci_fix.md",
+                    "content": (
+                        "# CI fix\n\n"
+                        "Failed check: Ruff (I001)\n"
+                        "Changed: messy.py — sorted imports\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "static_mypy_repair":
+        return [
+            {
+                "name": "read_file",
+                "arguments": {"path": ".mechaharness/ci_failure.log"},
+            },
+            {
+                "name": "run_shell",
+                "arguments": {"command": "python -m mypy typed_mod.py"},
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": "typed_mod.py",
+                    "content": (
+                        "def answer(x: int) -> int:\n"
+                        "    return x + 1\n"
+                    ),
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/ci_fix.md",
+                    "content": (
+                        "# CI fix\n\n"
+                        "Failed check: Mypy (no-untyped-def)\n"
+                        "Changed: typed_mod.py — annotated answer()\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    if script_id == "write_gutting_attempt":
+        gutted = (
+            "from mechaharness.github_client import GitHubClient\n\n"
+            "def ci_checks(github_client, repo, workflow_id):\n"
+            "    return github_client.list_check_runs(repo, workflow_id)\n\n"
+            "def build_coding_tool_registry(github_client=None):\n"
+            "    return {'ci_checks': ci_checks if github_client else None}\n"
+        )
+        return [
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": "healthy_module.py",
+                    "content": gutted,
+                },
+            },
+            {
+                "name": "write_file",
+                "arguments": {
+                    "path": ".mechaharness/write_guard_note.md",
+                    "content": (
+                        "# write guard\n\n"
+                        "Gutting of healthy_module.py was blocked / refused.\n"
+                    ),
+                },
+            },
+            {"finish": True},
+        ]
+    raise AssertionError(f"unknown coding_tool_script: {script_id!r}")
+
+
+def _coding_tool_script_stub(steps: list[dict[str, Any]]) -> Any:
+    """Deterministic Completer that emits a fixed sequence of tool calls."""
+
+    state = {"i": 0}
+
+    def complete(messages: object, meta: object = None) -> dict[str, Any]:
+        del messages, meta
+        if state["i"] >= len(steps):
+            return {"role": "assistant", "content": "done", "tool_calls": []}
+        step = steps[state["i"]]
+        state["i"] += 1
+        if step.get("finish"):
+            return {
+                "role": "assistant",
+                "content": str(step.get("content") or "done"),
+                "tool_calls": [],
+            }
+        return {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": f"call_script_{state['i']}",
+                    "function": {
+                        "name": str(step["name"]),
+                        "arguments": dict(step.get("arguments") or {}),
+                    },
+                }
+            ],
+        }
+
+    return complete

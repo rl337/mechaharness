@@ -1,0 +1,43 @@
+id: taloneth_insp_experiment_lineage
+suite: taloneth_harness_research
+persona: taloneth
+title: Resume experiments without resampling consumed cases
+narrative: Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth needs
+  mid-corpus experiment resume to remember which cases were already consumed so a crash cannot replay
+  tasks and contaminate later training. Accepts FineEnvs resume integrity findings[^fineenvs-lineage].
+implementation: '`ExperimentCheckpoint` in `mechaharness.experiment_lineage` persists consumed case ids,
+  sampler state, assignment, checkpoint identity, and evidence digests; `consume` refuses duplicates.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes:
+- id: fineenvs-lineage
+  label: FineEnvs multi-harness RL — resume contamination
+  url: https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-the-two-harbor-runs-declined
+  note: MH-MHRL-13
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    experiment_lineage_resume:
+      experiment_id: exp-1
+      assignment: treatment
+      consume:
+      - case-a
+      corpus:
+      - case-a
+      - case-b
+      - case-c
+complete:
+  expect:
+  - kind: equals
+    key: remaining
+    value:
+    - case-b
+    - case-c
+  - kind: 'true'
+    key: duplicate_refused
+cleanup: []

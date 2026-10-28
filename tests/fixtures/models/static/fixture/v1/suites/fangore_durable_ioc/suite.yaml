@@ -1,0 +1,9 @@
+id: fangore_durable_ioc
+title: Durable IoC, guidance yield, and local plan resume
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

@@ -1,0 +1,107 @@
+id: nubble_insp_recipe_audit_dimensions
+suite: nubble_observability
+persona: nubble
+title: Audit recipe selection and freshness without reading full transcripts
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. A quarterly audit
+  can see which recipe and version made each decision, how the verdicts split, and how much of the evidence
+  was fresh or stale, without reading whole transcripts. Decisions that do not name a recipe are left
+  out of the per-recipe rollup instead of being guessed. Cost and decision telemetry already ship via
+  `fangore_decision_plane_telemetry` and `nubble_insp_trace_envelope`. Tracks MH-PA-08[^insp-pa-08].
+implementation: 'Optional `recipe_id`, `recipe_version`, and `freshness_summary` (plus approval, denial,
+  and effect ids) on `DecisionRecord` and `TraceEnvelope`; `summarize_freshness()` in `tool_result_freshness.py`
+  counts fresh versus stale tool results; `summarize_recipe_audit()` and `RecipeAuditRow` in `review_audit.py`
+  roll decisions up per recipe selection. The new envelope fields are optional and do not change `envelope_complete`.
+
+
+  Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when
+  no src product verb exists yet).'
+validation: Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper); hard expects
+  on declared observation keys.
+footnotes:
+- id: insp-pa-08
+  label: Personal agent reliability (MH-PA-08)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md
+  note: Observability and audit
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    recipe_audit_dimensions:
+      now: '2026-10-18T12:00:00Z'
+      decisions:
+      - eventId: d1
+        stateHash: h
+        policyVersion: p1
+        verdict: ALLOW
+        recipeId: independent_review
+        recipeVersion: '1'
+        tool_results:
+        - tool_call_id: a
+          content: x
+          expires_at: '2026-10-18T13:00:00Z'
+        - tool_call_id: b
+          content: x
+          expires_at: '2026-10-18T11:00:00Z'
+      - eventId: d2
+        stateHash: h
+        policyVersion: p1
+        verdict: DENY
+        recipeId: independent_review
+        recipeVersion: '1'
+      - eventId: d3
+        stateHash: h
+        policyVersion: p1
+        verdict: ALLOW
+        recipeId: verify_repair
+        recipeVersion: '2'
+        tool_results:
+        - tool_call_id: c
+          content: x
+          expires_at: '2026-10-19T00:00:00Z'
+      - eventId: d4
+        stateHash: h
+        policyVersion: p1
+        verdict: ALLOW
+      envelope:
+        config_fingerprint: cfg:1
+        graph_version: '1'
+        node_id: n
+        routing_decision: reason
+        context_provenance:
+        - ctx:goal
+        capability_envelope_ref: env:1
+        recipe_id: independent_review
+        recipe_version: '1'
+  expect: &id001
+  - kind: equals
+    key: rows
+    value:
+    - - independent_review
+      - '1'
+      - 2
+      - ALLOW: 1
+        DENY: 1
+      - 1
+      - 1
+    - - verify_repair
+      - '2'
+      - 1
+      - ALLOW: 1
+      - 1
+      - 0
+  - kind: 'true'
+    key: unattributed_skipped
+  - kind: equals
+    key: envelope_recipe
+    value:
+    - independent_review
+    - '1'
+  - kind: 'true'
+    key: envelope_still_complete
+complete:
+  expect: *id001
+cleanup: []

@@ -1,0 +1,29 @@
+id: nubble_repo_topology
+suite: nubble_routing_topology
+persona: nubble
+title: Budget repository topology maps and fall back when stale
+narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble feeds the
+  context compiler a budgeted repository map. When the map is over budget or stale, the system must omit
+  paths honestly and still allow source inspection fallback — not pretend the map is complete.
+implementation: '`RepositoryTopologyProvider` builds budgeted `TopologyView` entries with omissions and
+  invalidation; stale maps fall back to source inspection.
+
+
+  Covers: CTX-08.'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    repo_topology: {}
+complete:
+  expect:
+  - kind: 'true'
+    key: has_omissions_or_entries
+cleanup: []

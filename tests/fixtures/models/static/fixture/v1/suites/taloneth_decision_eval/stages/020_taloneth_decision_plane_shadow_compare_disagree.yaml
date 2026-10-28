@@ -1,0 +1,50 @@
+id: taloneth_decision_plane_shadow_compare__disagree
+suite: taloneth_decision_eval
+persona: taloneth
+title: Compare shadowed decision-plane answers before promotion (disagree)
+narrative: 'Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth reviews
+  shadow versus production answers on matched refund triage cases to decide whether a smaller decision
+  model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay
+  missing. Related: `fangore_decision_plane_shadow`, `taloneth_shadow_decision_backends`.[^rc-dp-shadow-t]
+  This stage covers the `disagree` scenario.'
+implementation: '`compare_shadow_decision` plus `build_decision_plane_telemetry` support promotion evidence
+  for Agentic Recipe `decision_plane` without inventing unavailable candidate results (DP-07, DP-08).'
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
+  on declared observation keys. Stage id `taloneth_decision_plane_shadow_compare__disagree` (scenario
+  `disagree`).
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    decision_plane_shadow_compare:
+      questions:
+      - id: team
+        kind: choice
+        options:
+        - id: billing
+          label: Billing
+        - id: technical
+          label: Technical
+        allowed_actions:
+        - billing
+        - technical
+      production_answers:
+        team: billing
+      shadow_answers:
+        team: technical
+      confidence: 0.9
+      confidence_floor: 0.7
+      with_telemetry: true
+complete:
+  expect:
+  - kind: equals
+    key: agreement
+    value: false
+  - kind: 'true'
+    key: telemetry_has_shadow_action
+cleanup: []
