@@ -244,3 +244,158 @@ async def test_walk_bag_survives_checkpoint_across_new_executor() -> None:
     )
     assert done.status == "ok"
     assert seen == [{"discovery": {"status": "found"}}]
+
+
+@pytest.mark.asyncio
+async def test_walk_bag_not_shared_across_run_ids() -> None:
+    from mechaharness.core.access import GraphExecute
+    from mechaharness.di import MechaHarnessConfig
+    from mechaharness.harness.base import AbstractHarness
+    from mechaharness.harness.pass_through import PassThroughHarness
+    from mechaharness.inference.base import InferenceStrategy
+    from mechaharness.inference.mock import MockInferenceStrategy
+    from mechaharness.walk_bag import WalkBagRegister
+
+    async def writer(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del node
+        context.bag.put(WalkBagRegister.ACC, {"run": context.run_id})
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    class Cfg(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return [GraphExecute]
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return GraphNodeRunnerRegistry(
+                [CallableGraphNodeRunner(["write"], writer)]
+            )
+
+    executor = get_injector(Cfg()).inject(GraphExecutor)
+    g1 = ExecutionGraph(goal="a")
+    g1.add_node(GraphNode(id="w", kind="write"))
+    r1 = await executor.run(
+        g1,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id="run-a",
+        control=RunControl(mode="one_step"),
+    )
+    g2 = ExecutionGraph(goal="b")
+    g2.add_node(GraphNode(id="w", kind="write"))
+    r2 = await executor.run(
+        g2,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id="run-b",
+        control=RunControl(mode="one_step"),
+    )
+    assert r1.graph.walk_bag["acc"] == {"run": "run-a"}
+    assert r2.graph.walk_bag["acc"] == {"run": "run-b"}
+    assert executor.store.latest(run_id="run-a").walk_bag["acc"] == {"run": "run-a"}  # type: ignore[index]
+    assert executor.store.latest(run_id="run-b").walk_bag["acc"] == {"run": "run-b"}  # type: ignore[index]
+
+
+@pytest.mark.asyncio
+async def test_subgraph_bag_inputs_outputs_no_implicit_share(tmp_path: object) -> None:
+    """Child bag is projected; only bag_outputs reach the parent; no aliasing."""
+    from pathlib import Path
+
+    from mechaharness.core.access import GraphExecute
+    from mechaharness.di import MechaHarnessConfig
+    from mechaharness.harness.base import AbstractHarness
+    from mechaharness.harness.pass_through import PassThroughHarness
+    from mechaharness.inference.base import InferenceStrategy
+    from mechaharness.inference.mock import MockInferenceStrategy
+    from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
+    from mechaharness.walk_bag import WalkBagRegister
+    from pyiv.time import PythonDateTimeService
+
+    seen_child_in: list[object] = []
+
+    async def seed(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del node
+        context.bag.put(
+            WalkBagRegister.ACC,
+            {"discovery": {"status": "found", "n": 1}},
+        )
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    async def child_work(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del node
+        inbound = context.bag.require(WalkBagRegister.IN)
+        seen_child_in.append(dict(inbound) if isinstance(inbound, dict) else inbound)
+        # Mutate nested value — must not leak into parent acc without mapping.
+        context.bag.path_put("in.status", "child-mutated")
+        context.bag.put(WalkBagRegister.OUT, {"verified": True})
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    async def parent_after(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del node
+        # Mapped output present; unmapped child mutation must not touch discovery.
+        assert context.bag.path_get("acc.discovery.status") == "found"
+        assert context.bag.path_get("acc.child_out.verified") is True
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    class Cfg(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return [GraphExecute]
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return GraphNodeRunnerRegistry(
+                [
+                    CallableGraphNodeRunner(["seed"], seed),
+                    CallableGraphNodeRunner(["child_work"], child_work),
+                    CallableGraphNodeRunner(["after"], parent_after),
+                ]
+            )
+
+        def get_checkpoint_store(self) -> SqliteCheckpointStore:
+            root = Path(str(tmp_path))
+            return SqliteCheckpointStore(
+                root / "bag-nest.sqlite",
+                datetime_service=PythonDateTimeService(),
+            )
+
+    executor = get_injector(Cfg()).inject(GraphExecutor)
+    child = ExecutionGraph(goal="child")
+    child.add_node(GraphNode(id="cw", kind="child_work"))
+    parent = ExecutionGraph(goal="parent")
+    parent.add_node(GraphNode(id="seed", kind="seed"))
+    parent.add_node(
+        GraphNode(
+            id="nest",
+            kind="subgraph",
+            depends_on=["seed"],
+            subgraph=child.model_dump(mode="json"),
+            payload={
+                "bag_inputs": {"in": "acc.discovery"},
+                "bag_outputs": {"acc.child_out": "out"},
+            },
+        )
+    )
+    parent.add_node(GraphNode(id="after", kind="after", depends_on=["nest"]))
+    result = await executor.run(
+        parent,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id="bag-nest",
+    )
+    assert result.status == "ok"
+    assert seen_child_in == [{"status": "found", "n": 1}]
+    assert result.graph.walk_bag["acc"]["discovery"]["status"] == "found"
+    assert result.graph.walk_bag["acc"]["child_out"] == {"verified": True}
+
+    # SQLite reopen durability for the parent bag after nested merge.
+    reopened = get_injector(Cfg()).inject(GraphExecutor)
+    restored = reopened.store.latest(run_id="bag-nest")
+    assert restored is not None
+    assert restored.walk_bag["acc"]["child_out"] == {"verified": True}

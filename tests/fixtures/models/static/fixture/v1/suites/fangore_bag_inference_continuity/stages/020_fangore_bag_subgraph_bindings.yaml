@@ -1,0 +1,108 @@
+id: fangore_bag_subgraph_bindings
+suite: fangore_bag_inference_continuity
+persona: fangore
+title: Map parent bag into a subgraph and publish declared outputs only
+narrative: Fangore starts the CLI host with family `pass_through` and backend
+  `mock`. He loads a parent graph that seeds `acc.discovery`, nests a subgraph
+  with `bag_inputs` / `bag_outputs`, and continues to completion. The child
+  must see a deep-copied projection of discovery on `in`, and only the declared
+  `out` mapping may appear on the parent bag afterward — child mutations of
+  nested input values must not rewrite the parent's `acc.discovery`.
+implementation: '`GraphExecutor._project_child_bag` / `_merge_child_bag_outputs`
+  with `WalkBag.project_from` / `merge_from`; subgraph node payload
+  `bag_inputs` (child←parent) and `bag_outputs` (parent←child).'
+validation: Suite stage `020_fangore_bag_subgraph_bindings` — after continue,
+  `bag.acc.discovery.status` stays `found` and `bag.acc.child_out.verified` is
+  true.
+footnotes:
+- id: gastronomic-m1-nested
+  label: Gastronomic guided-development M1 (nested bag mappings)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Child bags are projected; outputs only via declared mappings
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: nested bag bindings without implicit share
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          acc:
+            discovery:
+              status: found
+              n: 1
+    - id: nest
+      kind: subgraph
+      depends_on:
+      - seed
+      payload:
+        bag_inputs:
+          in: acc.discovery
+        bag_outputs:
+          acc.child_out: out
+      subgraph:
+        goal: child
+        nodes:
+          child_work:
+            id: child_work
+            kind: compute
+            status: pending
+            payload:
+              bag_put:
+                out:
+                  verified: true
+        edges: []
+        version: '1'
+    - id: after
+      kind: compute
+      depends_on:
+      - nest
+      payload:
+        bag_require: acc.child_out
+steps:
+- do:
+    graph_walk:
+      action: start
+      until: nest
+      stop: before
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: stopped_before
+    value: nest
+  - kind: equals
+    key: bag.acc.discovery.status
+    value: found
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: node_error
+    value: ""
+  - kind: equals
+    key: bag.acc.discovery.status
+    value: found
+  - kind: equals
+    key: bag.acc.child_out.verified
+    value: true
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.acc.child_out.verified
+    value: true
+cleanup: []
