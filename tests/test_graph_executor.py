@@ -304,6 +304,8 @@ async def test_subgraph_bag_inputs_outputs_no_implicit_share(tmp_path: object) -
     """Child bag is projected; only bag_outputs reach the parent; no aliasing."""
     from pathlib import Path
 
+    from pyiv.time import PythonDateTimeService
+
     from mechaharness.core.access import GraphExecute
     from mechaharness.di import MechaHarnessConfig
     from mechaharness.harness.base import AbstractHarness
@@ -312,7 +314,6 @@ async def test_subgraph_bag_inputs_outputs_no_implicit_share(tmp_path: object) -
     from mechaharness.inference.mock import MockInferenceStrategy
     from mechaharness.sqlite_checkpoint_store import SqliteCheckpointStore
     from mechaharness.walk_bag import WalkBagRegister
-    from pyiv.time import PythonDateTimeService
 
     seen_child_in: list[object] = []
 
