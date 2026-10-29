@@ -1,5 +1,5 @@
 id: fangore_bag_inference_continuity
-title: Walk bag continuity across stepped graph pause and resume
+title: Walk bag continuity, nested bindings, and ContextSpec inference
 persona: fangore
 execution:
   mode: parallel
