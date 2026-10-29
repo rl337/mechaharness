@@ -1,4 +1,4 @@
-"""WalkBag register ABI and FileArtifact contracts."""
+"""WalkBag register ABI, paths, deep serialize, and FileArtifact contracts."""
 
 from __future__ import annotations
 
@@ -7,7 +7,13 @@ from dataclasses import dataclass
 import pytest
 from pydantic import ValidationError
 
-from mechaharness.walk_bag import FileArtifact, WalkBag, WalkBagRegister
+from mechaharness.walk_bag import (
+    FileArtifact,
+    WalkBag,
+    WalkBagPathError,
+    WalkBagRegister,
+    WalkBagSerializeError,
+)
 
 
 @dataclass(frozen=True)
@@ -68,3 +74,60 @@ def test_graph_run_context_default_bag() -> None:
     )
     ctx.bag.put(WalkBagRegister.CTX, {"epoch": 1})
     assert ctx.bag.require(WalkBagRegister.CTX) == {"epoch": 1}
+
+
+def test_walk_bag_path_get_put_require() -> None:
+    bag = WalkBag()
+    bag.path_put("acc.discovery.status", "found")
+    assert bag.path_get("acc.discovery.status") == "found"
+    assert bag.path_require("acc.discovery.status") == "found"
+    assert bag.require("acc") == {"discovery": {"status": "found"}}
+
+
+def test_walk_bag_path_missing() -> None:
+    bag = WalkBag()
+    with pytest.raises(WalkBagPathError, match="missing path"):
+        bag.path_get("acc.discovery.status")
+
+
+def test_walk_bag_serialize_roundtrip_file_artifact() -> None:
+    bag = WalkBag()
+    bag.put("out", FileArtifact(path="/tmp/a.bin", media_type="application/octet-stream"))
+    bag.put("acc", {"discovery": {"status": "found"}})
+    restored = WalkBag.deserialize(bag.serialize())
+    assert restored.path_get("acc.discovery.status") == "found"
+    out = restored.require("out")
+    assert isinstance(out, FileArtifact)
+    assert out.path == "/tmp/a.bin"
+
+
+def test_walk_bag_deep_snapshot_isolates_nested_mutation() -> None:
+    bag = WalkBag()
+    bag.put("acc", {"n": 1})
+    snap = bag.deep_snapshot()
+    bag.path_put("acc.n", 2)
+    assert snap.path_get("acc.n") == 1
+
+
+def test_walk_bag_serialize_rejects_unsupported() -> None:
+    bag = WalkBag()
+    bag.put("acc", {"fn": lambda: None})  # type: ignore[dict-item]
+    with pytest.raises(WalkBagSerializeError):
+        bag.serialize()
+
+
+def test_walk_bag_staged_writes_atomic_on_encode_failure() -> None:
+    bag = WalkBag()
+    bag.put("acc", {"ok": True})
+    batch = bag.staged_writes().put("acc.n", 1)
+    with pytest.raises(WalkBagSerializeError):
+        batch.put("acc.bad", object())  # type: ignore[arg-type]
+    assert bag.require("acc") == {"ok": True}
+    assert "n" not in bag.require("acc")
+
+
+def test_walk_bag_staged_writes_commit() -> None:
+    bag = WalkBag()
+    bag.staged_writes().put("acc.a", 1).put("acc.b", 2).commit()
+    assert bag.path_get("acc.a") == 1
+    assert bag.path_get("acc.b") == 2

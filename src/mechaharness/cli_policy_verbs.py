@@ -1192,6 +1192,9 @@ class GraphWalkVerb(CliVerb):
         def _node_statuses(graph: ExecutionGraph) -> dict[str, str]:
             return {nid: n.status.value for nid, n in graph.nodes.items()}
 
+        def _bag_observation(graph: ExecutionGraph) -> dict[str, Any]:
+            return dict(graph.walk_bag or {})
+
         if body.action == "start":
             nodes_spec = list(body.nodes)
             inline = getattr(runtime, "inline_graph", None)
@@ -1211,8 +1214,28 @@ class GraphWalkVerb(CliVerb):
             calls: list[str] = []
 
             async def run_node(node: GraphNode, context: Any) -> NodeOutcome:
-                del context
                 calls.append(node.id)
+                puts = node.payload.get("bag_put")
+                if isinstance(puts, dict):
+                    for key, value in puts.items():
+                        key_s = str(key)
+                        if "." in key_s:
+                            context.bag.path_put(key_s, value)
+                        else:
+                            context.bag.put(key_s, value)
+                req = node.payload.get("bag_require")
+                if req is not None:
+                    req_s = str(req)
+                    try:
+                        if "." in req_s:
+                            context.bag.path_require(req_s)
+                        else:
+                            context.bag.require(req_s)
+                    except KeyError as exc:
+                        return NodeOutcome(
+                            status=NodeStatus.FAILED,
+                            error=str(exc),
+                        )
                 return NodeOutcome(status=NodeStatus.SUCCEEDED)
 
             kinds = sorted({str(n.get("kind") or "compute") for n in nodes_spec})
@@ -1315,6 +1338,7 @@ class GraphWalkVerb(CliVerb):
                 "effect_calls": len(calls),
                 "node_error": node_error,
                 "error": result.error,
+                "bag": _bag_observation(result.graph),
             }
 
         if session is None:
@@ -1375,6 +1399,7 @@ class GraphWalkVerb(CliVerb):
             "step_effect_calls": len(calls) - before_calls,
             "node_error": node_error,
             "error": result.error,
+            "bag": _bag_observation(result.graph),
         }
 
 

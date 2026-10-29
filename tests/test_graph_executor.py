@@ -172,3 +172,75 @@ def test_fixture_matrix_is_non_empty() -> None:
     assert len(_CASES) >= 15, "expected a broad static matrix under fixtures/graph_executor"
     ids = [c.id for c in _CASES]
     assert len(ids) == len(set(ids)), f"duplicate case ids: {ids}"
+
+
+@pytest.mark.asyncio
+async def test_walk_bag_survives_checkpoint_across_new_executor() -> None:
+    """M1: bag on checkpoint is hydrated when a fresh executor resumes the run."""
+    from mechaharness.core.access import GraphExecute
+    from mechaharness.di import MechaHarnessConfig
+    from mechaharness.harness.base import AbstractHarness
+    from mechaharness.harness.pass_through import PassThroughHarness
+    from mechaharness.inference.base import InferenceStrategy
+    from mechaharness.inference.mock import MockInferenceStrategy
+    from mechaharness.walk_bag import WalkBagRegister
+
+    seen: list[object] = []
+
+    async def writer(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del node
+        context.bag.put(
+            WalkBagRegister.ACC,
+            {"discovery": {"status": "found"}},
+        )
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    async def reader(node: GraphNode, context: GraphRunContext) -> NodeOutcome:
+        del node
+        seen.append(context.bag.require(WalkBagRegister.ACC))
+        return NodeOutcome(status=NodeStatus.SUCCEEDED)
+
+    class Cfg(MechaHarnessConfig):
+        def get_inference_class(self) -> type[InferenceStrategy]:
+            return MockInferenceStrategy
+
+        def get_harness_class(self) -> type[AbstractHarness]:
+            return PassThroughHarness
+
+        def get_grants(self) -> list[object]:
+            return [GraphExecute]
+
+        def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
+            return GraphNodeRunnerRegistry(
+                [
+                    CallableGraphNodeRunner(["write"], writer),
+                    CallableGraphNodeRunner(["read"], reader),
+                ]
+            )
+
+    first = get_injector(Cfg()).inject(GraphExecutor)
+    graph = ExecutionGraph(goal="bag")
+    graph.add_node(GraphNode(id="w", kind="write"))
+    graph.add_node(GraphNode(id="r", kind="read", depends_on=["w"]))
+    paused = await first.run(
+        graph,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id="bag-persist",
+        control=RunControl(mode="one_step"),
+    )
+    assert paused.status == "paused"
+    assert paused.graph.walk_bag.get("acc") == {"discovery": {"status": "found"}}
+
+    # New executor, same EventLog-backed store via a second inject of the same
+    # Config would get a fresh in-memory log — reuse the first store explicitly.
+    second = get_injector(Cfg()).inject(GraphExecutor)
+    second.store = first.store
+    done = await second.run(
+        paused.graph,
+        budget_policy=BudgetPolicy.unlimited(),
+        run_id="bag-persist",
+        resume=True,
+        control=RunControl(mode="one_step"),
+    )
+    assert done.status == "ok"
+    assert seen == [{"discovery": {"status": "found"}}]
