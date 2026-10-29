@@ -192,6 +192,49 @@ class WalkBag:
         """Independent deep copy via serialize/deserialize round-trip."""
         return self.deserialize(self.serialize())
 
+    @staticmethod
+    def copy_value(value: Any) -> Any:
+        """Deep-copy a JSON/FileArtifact bag value (no shared nested refs)."""
+        return _decode(_encode(value))
+
+    @classmethod
+    def project_from(
+        cls,
+        source: WalkBag,
+        *,
+        bindings: Mapping[str, str],
+    ) -> WalkBag:
+        """New bag copying ``bindings`` values: ``dest_path → source_path``.
+
+        Used to seed a child subgraph bag from declared parent paths. Missing
+        source paths fail closed; values are deep-copied.
+        """
+        dest = cls()
+        if not bindings:
+            return dest
+        batch = dest.staged_writes()
+        for dest_path, source_path in bindings.items():
+            batch.put(str(dest_path), cls.copy_value(source.path_require(str(source_path))))
+        batch.commit()
+        return dest
+
+    def merge_from(
+        self,
+        source: WalkBag,
+        *,
+        bindings: Mapping[str, str],
+    ) -> None:
+        """Copy ``bindings`` into this bag: ``dest_path → source_path`` (deep)."""
+        if not bindings:
+            return
+        batch = self.staged_writes()
+        for dest_path, source_path in bindings.items():
+            batch.put(
+                str(dest_path),
+                self.copy_value(source.path_require(str(source_path))),
+            )
+        batch.commit()
+
     def staged_writes(self) -> WalkBagWriteBatch:
         """Collect validated puts, then apply atomically on :meth:`WalkBagWriteBatch.commit`."""
         return WalkBagWriteBatch(self)

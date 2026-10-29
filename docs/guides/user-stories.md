@@ -119,9 +119,9 @@ Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_g
 
 ### `fangore_bag_inference_continuity` — Walk bag continuity across stepped graph pause and resume
 
-Persona **fangore**; execution `parallel`; 1 stage(s).
+Persona **fangore**; execution `parallel`; 2 stage(s).
 
-Stories: `fangore_bag_checkpoint_persist`
+Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_subgraph_bindings`
 
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
@@ -633,6 +633,22 @@ Suite stage `010_fangore_bag_checkpoint_persist` — start pauses with `bag.acc`
 #### Footnotes
 
 1. [Gastronomic guided-development M1 (bag durability)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Checkpoint/resume must carry WalkBag with graph state
+
+### `fangore_bag_subgraph_bindings` — Map parent bag into a subgraph and publish declared outputs only
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a parent graph that seeds `acc.discovery`, nests a subgraph with `bag_inputs` / `bag_outputs`, and continues to completion. The child must see a deep-copied projection of discovery on `in`, and only the declared `out` mapping may appear on the parent bag afterward — child mutations of nested input values must not rewrite the parent's `acc.discovery`.
+
+#### Implementation
+
+`GraphExecutor._project_child_bag` / `_merge_child_bag_outputs` with `WalkBag.project_from` / `merge_from`; subgraph node payload `bag_inputs` (child←parent) and `bag_outputs` (parent←child).
+
+#### Validation
+
+Suite stage `020_fangore_bag_subgraph_bindings` — after continue, `bag.acc.discovery.status` stays `found` and `bag.acc.child_out.verified` is true.
+
+#### Footnotes
+
+1. [Gastronomic guided-development M1 (nested bag mappings)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Child bags are projected; outputs only via declared mappings
 
 ### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 

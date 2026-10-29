@@ -1,7 +1,8 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0/M1 bag checkpoint path landed on `feat/bag-checkpoint-persistence` (suite
-`fangore_bag_inference_continuity` / story `fangore_bag_checkpoint_persist`). M2+ still open.
+**Status:** M0/M1 landed on `feat/bag-checkpoint-persistence` (checkpoint hydrate +
+nested `bag_inputs`/`bag_outputs`). Suite `fangore_bag_inference_continuity`
+covers pause/resume and subgraph bindings. M2+ still open.
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.

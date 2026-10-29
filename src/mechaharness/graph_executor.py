@@ -821,8 +821,12 @@ class GraphExecutor:
                     control=child_control,
                 )
                 if child_result.status == "paused":
-                    self.store.save(
-                        graph, run_id=rid, boundary="reduce", fingerprint=fingerprint
+                    self._save_checkpoint(
+                        graph,
+                        context.bag,
+                        run_id=rid,
+                        boundary="reduce",
+                        fingerprint=fingerprint,
                     )
                     return self._result(
                         status="paused",
@@ -841,6 +845,9 @@ class GraphExecutor:
                     if child_result.status == "ok":
                         parent.status = NodeStatus.SUCCEEDED
                         parent.error = None
+                        self._merge_child_bag_outputs(
+                            parent, context.bag, child_result.graph
+                        )
                     elif child_result.status == "soft_exhausted":
                         parent.status = NodeStatus.SUCCEEDED
                         parent.error = None
@@ -1001,6 +1008,35 @@ class GraphExecutor:
             graph, run_id=run_id, boundary=boundary, fingerprint=fingerprint
         )
 
+    @staticmethod
+    def _bag_path_bindings(node: GraphNode, key: str) -> dict[str, str]:
+        """``payload.bag_inputs`` / ``bag_outputs``: dest_path → source_path."""
+        raw = node.payload.get(key)
+        if raw is None:
+            return {}
+        if not isinstance(raw, Mapping):
+            raise GraphExecutorError(f"node {node.id!r} payload.{key} must be a mapping")
+        return {str(dest): str(src) for dest, src in raw.items()}
+
+    def _project_child_bag(self, node: GraphNode, parent_bag: WalkBag) -> WalkBag:
+        """Child bag from declared ``bag_inputs`` (empty when unbound — no share)."""
+        return WalkBag.project_from(
+            parent_bag, bindings=self._bag_path_bindings(node, "bag_inputs")
+        )
+
+    def _merge_child_bag_outputs(
+        self,
+        node: GraphNode,
+        parent_bag: WalkBag,
+        child_graph: ExecutionGraph,
+    ) -> None:
+        """Copy declared ``bag_outputs`` from child checkpoint into the parent bag."""
+        bindings = self._bag_path_bindings(node, "bag_outputs")
+        if not bindings:
+            return
+        child_bag = WalkBag.deserialize(child_graph.walk_bag)
+        parent_bag.merge_from(child_bag, bindings=bindings)
+
     def _entered_parent_id(self, graph: ExecutionGraph) -> str | None:
         for node in graph.nodes.values():
             if (
@@ -1144,8 +1180,10 @@ class GraphExecutor:
             return
         child = ExecutionGraph.resume(raw)
         child_run_id = f"{context.run_id}:{node.id}"
-        self.store.save(
+        child_bag = self._project_child_bag(node, context.bag)
+        self._save_checkpoint(
             child,
+            child_bag,
             run_id=child_run_id,
             boundary="dispatch",
             fingerprint=child.config_fingerprint,
@@ -1194,6 +1232,7 @@ class GraphExecutor:
             )
             return
         child = ExecutionGraph.resume(raw)
+        child.walk_bag = self._project_child_bag(node, context.bag).serialize()
         child_run_id = f"{context.run_id}:{node.id}"
         # Share the parent ledger so nested spend aggregates.
         child_result = await self.run(
@@ -1214,6 +1253,7 @@ class GraphExecutor:
         if child_result.status == "ok":
             node.status = NodeStatus.SUCCEEDED
             node.error = None
+            self._merge_child_bag_outputs(node, context.bag, child_result.graph)
         elif child_result.status == "soft_exhausted":
             # Parent soft wind-down already reflected on shared budget.
             node.status = NodeStatus.SUCCEEDED

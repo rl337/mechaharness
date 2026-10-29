@@ -14,6 +14,10 @@
     {
       "story": "fangore_bag_checkpoint_persist",
       "scenario": "010_fangore_bag_checkpoint_persist"
+    },
+    {
+      "story": "fangore_bag_subgraph_bindings",
+      "scenario": "020_fangore_bag_subgraph_bindings"
     }
   ]
 }

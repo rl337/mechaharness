@@ -131,3 +131,32 @@ def test_walk_bag_staged_writes_commit() -> None:
     bag.staged_writes().put("acc.a", 1).put("acc.b", 2).commit()
     assert bag.path_get("acc.a") == 1
     assert bag.path_get("acc.b") == 2
+
+
+def test_walk_bag_path_present_null_distinct_from_missing() -> None:
+    bag = WalkBag()
+    bag.path_put("acc.note", None)
+    assert bag.path_get("acc.note") is None
+    with pytest.raises(WalkBagPathError):
+        bag.path_get("acc.other")
+
+
+def test_walk_bag_project_from_and_merge_deep_copies() -> None:
+    parent = WalkBag()
+    parent.put("acc", {"discovery": {"status": "found"}})
+    child = WalkBag.project_from(parent, bindings={"in": "acc.discovery"})
+    child.path_put("in.status", "mutated")
+    assert parent.path_get("acc.discovery.status") == "found"
+    child.put("out", {"ok": True})
+    parent.merge_from(child, bindings={"acc.child_out": "out"})
+    assert parent.path_get("acc.child_out") == {"ok": True}
+    child.path_put("out.ok", False)
+    assert parent.path_get("acc.child_out.ok") is True
+
+
+def test_legacy_checkpoint_without_walk_bag_field_resumes() -> None:
+    from mechaharness.graph import ExecutionGraph
+
+    raw = {"goal": "legacy", "nodes": {}, "edges": []}
+    graph = ExecutionGraph.resume(raw)
+    assert graph.walk_bag == {}
