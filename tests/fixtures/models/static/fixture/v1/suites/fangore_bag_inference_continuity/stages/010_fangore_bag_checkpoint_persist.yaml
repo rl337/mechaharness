@@ -1,0 +1,102 @@
+id: fangore_bag_checkpoint_persist
+suite: fangore_bag_inference_continuity
+persona: fangore
+title: Carry bag evidence across a stepped graph checkpoint
+narrative: Fangore starts the CLI host with family `pass_through` and backend
+  `mock`. He loads a two-node inline graph where the first leaf publishes
+  discovery evidence onto the walk bag (`acc`) and the second leaf requires
+  that register before succeeding. He pauses after the writer (`graph_walk`
+  start / one_step), asserts the bag observation still holds the evidence,
+  then resumes (`step`). The consumer must see the same `acc` values from the
+  checkpoint — not an empty bag — so later inference nodes can trust
+  inter-step continuity.
+implementation: '`WalkBag.serialize` / `deserialize` on `ExecutionGraph.walk_bag`;
+  `GraphExecutor` hydrates `GraphRunContext.bag` on resume and syncs the bag
+  before every checkpoint save; story-host `graph_walk` runners honor
+  `payload.bag_put` / `payload.bag_require` and surface `bag` on observations.'
+validation: Suite stage `010_fangore_bag_checkpoint_persist` — start pauses with
+  `bag.acc` populated; step resume completes with the same nested evidence and
+  no `node_error`.
+footnotes:
+- id: gastronomic-m1
+  label: Gastronomic guided-development M1 (bag durability)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Checkpoint/resume must carry WalkBag with graph state
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: prove walk bag survives pause then resume
+    nodes:
+    - id: write_evidence
+      kind: compute
+      payload:
+        bag_put:
+          acc:
+            discovery:
+              status: found
+              files:
+              - calc.py
+    - id: consume_evidence
+      kind: compute
+      depends_on:
+      - write_evidence
+      payload:
+        bag_require: acc
+steps:
+- do:
+    graph_walk:
+      action: start
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: effect_calls
+    value: 1
+  - kind: equals
+    key: node_statuses.write_evidence
+    value: succeeded
+  - kind: equals
+    key: bag.acc.discovery.status
+    value: found
+  - kind: equals
+    key: bag.acc.discovery.files
+    value:
+    - calc.py
+- do:
+    graph_walk:
+      action: step
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: effect_calls
+    value: 2
+  - kind: equals
+    key: node_error
+    value: ""
+  - kind: equals
+    key: node_statuses.consume_evidence
+    value: succeeded
+  - kind: equals
+    key: bag.acc.discovery.status
+    value: found
+  - kind: equals
+    key: bag.acc.discovery.files
+    value:
+    - calc.py
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.acc.discovery.status
+    value: found
+cleanup: []

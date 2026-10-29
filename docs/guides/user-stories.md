@@ -117,6 +117,12 @@ Persona **fangore**; execution `parallel`; 14 stage(s).
 
 Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_gate_allowed`, `fangore_compound_grants__grant_gate_denied`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`, `fangore_insp_authority_gate`, `fangore_insp_cross_task_isolation`, `fangore_insp_denial_equivalence`, `fangore_insp_evolution_ownership_split`, `fangore_insp_execution_token`, `fangore_insp_isolation_io`, `fangore_insp_risk_autonomy`, `fangore_insp_soft_vs_hard`, `fangore_insp_state_governance`
 
+### `fangore_bag_inference_continuity` — Walk bag continuity across stepped graph pause and resume
+
+Persona **fangore**; execution `parallel`; 1 stage(s).
+
+Stories: `fangore_bag_checkpoint_persist`
+
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
 Persona **fangore**; execution `parallel`; 6 stage(s).
@@ -611,6 +617,22 @@ Agentic Recipe catalog id `backend_describe` (`BackendDescribeTemplate`) with a 
 #### Validation
 
 Harness `user_story` scenario `describe_mock.yaml`: environment + graph + steps + complete expects.
+
+### `fangore_bag_checkpoint_persist` — Carry bag evidence across a stepped graph checkpoint
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads a two-node inline graph where the first leaf publishes discovery evidence onto the walk bag (`acc`) and the second leaf requires that register before succeeding. He pauses after the writer (`graph_walk` start / one_step), asserts the bag observation still holds the evidence, then resumes (`step`). The consumer must see the same `acc` values from the checkpoint — not an empty bag — so later inference nodes can trust inter-step continuity.
+
+#### Implementation
+
+`WalkBag.serialize` / `deserialize` on `ExecutionGraph.walk_bag`; `GraphExecutor` hydrates `GraphRunContext.bag` on resume and syncs the bag before every checkpoint save; story-host `graph_walk` runners honor `payload.bag_put` / `payload.bag_require` and surface `bag` on observations.
+
+#### Validation
+
+Suite stage `010_fangore_bag_checkpoint_persist` — start pauses with `bag.acc` populated; step resume completes with the same nested evidence and no `node_error`.
+
+#### Footnotes
+
+1. [Gastronomic guided-development M1 (bag durability)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Checkpoint/resume must carry WalkBag with graph state
 
 ### `fangore_bounded_repair_loop` — Bound verification repair loops to a fixed number of attempts
 

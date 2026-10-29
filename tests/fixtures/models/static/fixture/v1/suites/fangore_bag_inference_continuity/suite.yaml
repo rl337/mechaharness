@@ -1,0 +1,9 @@
+id: fangore_bag_inference_continuity
+title: Walk bag continuity across stepped graph pause and resume
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []
