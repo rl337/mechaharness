@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cursor execution plan: Gastronomic guided development &mdash; MechaHarness 0.7.1 documentation</title>
+  <title>Cursor execution plan: Gastronomic guided development &mdash; MechaHarness 0.8.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=5a057da9"></script>
+      <script src="../_static/documentation_options.js?v=486e5634"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -110,9 +110,10 @@
              
   <section id="cursor-execution-plan-gastronomic-guided-development">
 <h1>Cursor execution plan: Gastronomic guided development<a class="headerlink" href="#cursor-execution-plan-gastronomic-guided-development" title="Link to this heading"></a></h1>
-<p><strong>Status:</strong> M0/M1 landed on <code class="docutils literal notranslate"><span class="pre">feat/bag-checkpoint-persistence</span></code> (checkpoint hydrate +
-nested <code class="docutils literal notranslate"><span class="pre">bag_inputs</span></code>/<code class="docutils literal notranslate"><span class="pre">bag_outputs</span></code>). Suite <code class="docutils literal notranslate"><span class="pre">fangore_bag_inference_continuity</span></code>
-covers pause/resume and subgraph bindings. M2+ still open.
+<p><strong>Status:</strong> M0/M1/M2 landed (<code class="docutils literal notranslate"><span class="pre">feat/bag-context-spec-m2</span></code>). Suite
+<code class="docutils literal notranslate"><span class="pre">fangore_bag_inference_continuity</span></code> covers pause/resume, subgraph bindings, and
+ContextSpec infer→bag→infer continuity (<code class="docutils literal notranslate"><span class="pre">030_fangore_bag_context_spec_continuity</span></code>).
+M3+ still open.
 <strong>Repository:</strong> <code class="docutils literal notranslate"><span class="pre">rl337/mechaharness</span></code>
 <strong>Architecture and rulings:</strong> <a class="reference internal" href="gastronomic-guided-development.html"><span class="std std-doc">gastronomic-guided-development.md</span></a>
 <strong>Primary target:</strong> A read-only <code class="docutils literal notranslate"><span class="pre">workspace_discovery</span></code> vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.
@@ -137,17 +138,22 @@ covers pause/resume and subgraph bindings. M2+ still open.
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">src/mechaharness/walk_bag.py</span></code> now has path get/put, <code class="docutils literal notranslate"><span class="pre">serialize</span></code>/<code class="docutils literal notranslate"><span class="pre">deserialize</span></code>, staged writes, and deep snapshot; <code class="docutils literal notranslate"><span class="pre">snapshot()</span></code> remains shallow for in-process views.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ExecutionGraph.walk_bag</span></code> holds the serialized bag; <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> syncs before checkpoint saves and hydrates <code class="docutils literal notranslate"><span class="pre">GraphRunContext.bag</span></code> on resume.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/mechaharness/cli_infer_runner.py</span></code> builds a one-shot request from <code class="docutils literal notranslate"><span class="pre">node.payload.prompt/system</span></code> and returns its answer in <code class="docutils literal notranslate"><span class="pre">NodeOutcome.payload</span></code>. It does not compile prompts from the bag or publish structured inference outputs into it.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">src/mechaharness/context_pack_runner.py</span></code> presently passes retrieved candidates via upstream node payloads. Its deterministic budget-selection helper is reusable, but it is not yet general bag-to-inference context compilation.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">GraphWalkVerb</span></code> still uses a host-local runner, but it honors <code class="docutils literal notranslate"><span class="pre">payload.bag_put</span></code> /
-<code class="docutils literal notranslate"><span class="pre">payload.bag_require</span></code> and returns a <code class="docutils literal notranslate"><span class="pre">bag</span></code> observation from <code class="docutils literal notranslate"><span class="pre">ExecutionGraph.walk_bag</span></code>.
-Compiled model-input observations remain M2.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/mechaharness/cli_infer_runner.py</span></code> still supports legacy <code class="docutils literal notranslate"><span class="pre">prompt</span></code>/<code class="docutils literal notranslate"><span class="pre">system</span></code>
+one-shots. Bag-aware nodes pass <code class="docutils literal notranslate"><span class="pre">payload.context</span></code> (<code class="docutils literal notranslate"><span class="pre">ContextSpec</span></code>): freeze bag →
+compile → Completer → publish to <code class="docutils literal notranslate"><span class="pre">response.writes</span></code>. <code class="docutils literal notranslate"><span class="pre">last_model_inputs</span></code> records
+included/omitted paths and continuity flags for story observation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/mechaharness/context_spec.py</span></code> is the deterministic bag→messages compiler
+(<code class="docutils literal notranslate"><span class="pre">freeze_bag_snapshot</span></code> / <code class="docutils literal notranslate"><span class="pre">compile_context_spec</span></code> / <code class="docutils literal notranslate"><span class="pre">publish_response_to_bag</span></code>).
+<code class="docutils literal notranslate"><span class="pre">context_pack_runner.py</span></code> remains a separate RAG packing path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GraphWalkVerb</span></code> registers compute (<code class="docutils literal notranslate"><span class="pre">bag_put</span></code>/<code class="docutils literal notranslate"><span class="pre">bag_require</span></code>) and
+<code class="docutils literal notranslate"><span class="pre">infer</span></code>/<code class="docutils literal notranslate"><span class="pre">cli:infer</span></code> via <code class="docutils literal notranslate"><span class="pre">CliInferRunner</span></code>, returning <code class="docutils literal notranslate"><span class="pre">bag</span></code> and <code class="docutils literal notranslate"><span class="pre">model_inputs</span></code>
+observations. Optional <code class="docutils literal notranslate"><span class="pre">payload.completion</span></code> scripts Completer text for mock stories.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">src/mechaharness/model_input_manifest.py</span></code> already provides reconstruction and hashing of model-visible messages and tool definitions. <code class="docutils literal notranslate"><span class="pre">core.types.CompletionRequest</span></code> and <code class="docutils literal notranslate"><span class="pre">ChatMessage</span></code> support tools/tool results. Reuse these primitives.</p></li>
-<li><p>Canonical suite is now under
+<li><p>Canonical suite is under
 <code class="docutils literal notranslate"><span class="pre">tests/fixtures/models/static/fixture/v1/suites/fangore_bag_inference_continuity/</span></code>.
-Stage <code class="docutils literal notranslate"><span class="pre">010_fangore_bag_checkpoint_persist</span></code> covers M1 pause/resume bag durability.
-Infer→bag→infer continuity (<code class="docutils literal notranslate"><span class="pre">bag_continuity</span></code> model-input asserts) remains M2;
-inspiration copies under <code class="docutils literal notranslate"><span class="pre">docs/inspiration/fixtures/</span></code> are not collected.</p></li>
+Stages <code class="docutils literal notranslate"><span class="pre">010</span></code>/<code class="docutils literal notranslate"><span class="pre">020</span></code> cover M1; <code class="docutils literal notranslate"><span class="pre">030_fangore_bag_context_spec_continuity</span></code> covers M2
+model-input continuity. Inspiration copies under <code class="docutils literal notranslate"><span class="pre">docs/inspiration/fixtures/</span></code>
+are not collected.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">src/mechaharness/graph.py</span></code> <code class="docutils literal notranslate"><span class="pre">ExecutionGraph.checkpoint()</span></code> dumps the model, and <code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> serializes that checkpoint. An explicitly typed run-bag field on the graph is a plausible minimal persistence path; inspect compatibility and fingerprint implications before selecting it. Avoid changing the entire store API unless necessary.</p></li>
 </ol>
 </section>
