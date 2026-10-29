@@ -1,0 +1,617 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspiration: Gastronomic Guided Development (alternative to guided_coding) &mdash; MechaHarness 0.8.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=486e5634"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="inspiration-gastronomic-guided-development-alternative-to-guided-coding">
+<h1>Inspiration: Gastronomic Guided Development (alternative to guided_coding)<a class="headerlink" href="#inspiration-gastronomic-guided-development-alternative-to-guided-coding" title="Link to this heading"></a></h1>
+<p><strong>Status:</strong> Architecture and story plan, not implementation
+<strong>Reference:</strong> <code class="docutils literal notranslate"><span class="pre">rl337/mechaharness</span></code>, PR #34 (<code class="docutils literal notranslate"><span class="pre">feat/guided-coding-local-inference</span></code>)
+<strong>Scope:</strong> One gastronomic product recipe, <code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code>, and its component subrecipes. The broader guided_usage/reasoning/planning/creativity family is explicitly deferred.</p>
+<p><strong>Cursor execution plan:</strong> <a class="reference internal" href="gastronomic-guided-development-execution-plan.html"><span class="std std-doc">gastronomic-guided-development-execution-plan.md</span></a>. This is the ordered implementation and verification checklist. It explicitly covers canonical suite-stage migration of the provisional bag test fixtures, actual bag-aware graph-walk execution, durable state propagation, snapshot-bound inspection, and the workspace discovery vertical slice.</p>
+<section id="thesis">
+<h2>Thesis<a class="headerlink" href="#thesis" title="Link to this heading"></a></h2>
+<p>MechaHarness’s existing agentic recipes evolved bottom-up from concrete requirements. A gastronomic recipe is instead designed top-down from an observable product capability, then decomposed into small reusable recipes that each earn their implementation through practical user stories. This is <strong>not</strong> a new runtime, model-router framework, or universal guided_x interface.</p>
+<p><strong>Product promise:</strong> Given an existing codebase and a bounded development request, a cheaper local model can make a verified incremental change, preserve prior contracts, and either finish or yield an actionable diagnosis to a more capable guide. The system must not confuse more tool-loop attempts with improved problem understanding.</p>
+<p><strong>Experimental question:</strong> Does a deliberately composed development graph improve the same 30B model’s reliability relative to PR #34’s <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> under comparable tools, token/call budgets, workspace, and tests? A larger model is a separate control, not the primary success criterion.</p>
+</section>
+<section id="existing-substrate-to-reuse">
+<h2>Existing substrate to reuse<a class="headerlink" href="#existing-substrate-to-reuse" title="Link to this heading"></a></h2>
+<p>The PR #34 catalog already includes <code class="docutils literal notranslate"><span class="pre">context_pack</span></code>, <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>, <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>, <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code>, <code class="docutils literal notranslate"><span class="pre">independent_review</span></code>, <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>, <code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>, <code class="docutils literal notranslate"><span class="pre">fan_out_aggregate</span></code>, and <code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code>. <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> currently composes a brief, <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>, and <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>. <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> provides workspace tools, <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code>, checkpoints, repair rounds, and escalation guidance.</p>
+<p><strong>Reuse before extraction:</strong> Use existing graph tiling, dependency edges, soft points, durable generator/resume, stop contracts, runner bindings, workspace tools, and deterministic checks. Treat context engineering, evidence-based diagnosis, and invariant capture as candidate missing capabilities, not automatically as new primitives. Keep <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> unchanged as a baseline.</p>
+</section>
+<section id="proposed-composition">
+<h2>Proposed composition<a class="headerlink" href="#proposed-composition" title="Link to this heading"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>gastronomic_guided_development (product-level recipe)
+  intake_and_preflight
+    -&gt; inspect_workspace             [candidate subrecipe]
+    -&gt; capture_contract              [candidate subrecipe]
+    -&gt; design_change                 [candidate subrecipe]
+    -&gt; implement_slice               [reuse instruction_todo_plan / tool loop]
+    -&gt; verify_change                 [reuse verify_repair + host verify_runs]
+    -&gt; diagnose_failure?             [candidate subrecipe]
+          -&gt; focused_repair?          [reuse bounded_retry / verify_repair]
+          -&gt; revise_change_plan?      [re-enter design_change, bounded]
+          -&gt; request_guidance?        [existing soft-point yield/resume]
+    -&gt; final_regression_audit         [reuse audited_infer_accept]
+    -&gt; outcome
+</pre></div>
+</div>
+<p>These are <em>responsibilities</em> first. Do not create one template class per box until a story demonstrates a distinct, reusable graph contract. The product graph can initially tile existing recipes and host leaf operations.</p>
+<section id="product-contract">
+<h3>Product contract<a class="headerlink" href="#product-contract" title="Link to this heading"></a></h3>
+<p>Input: goal, workspace reference, acceptance criteria, optional guidance, model/tool bindings, budget, and prior checkpoint. Output: <code class="docutils literal notranslate"><span class="pre">completed</span> <span class="pre">|</span> <span class="pre">needs_guidance</span> <span class="pre">|</span> <span class="pre">failed</span></code>, verified artifacts, evidence references, changed files, preserved invariants, remaining failures, and suggested next action. Distinguish model assertions from host-observed test results.</p>
+</section>
+<section id="intermediate-artifacts">
+<h3>Intermediate artifacts<a class="headerlink" href="#intermediate-artifacts" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>WorkspaceInventory</strong>: entry points, relevant files, tests, interfaces, known unknowns, evidence paths and hashes.</p></li>
+<li><p><strong>ChangeContract</strong>: requested behavior, invariants, prohibited changes, verification commands, assumptions and provenance.</p></li>
+<li><p><strong>ChangePlan</strong>: small independently testable slices, dependency order, intended file boundaries, rollback points.</p></li>
+<li><p><strong>VerificationReport</strong>: actual command results, failing assertions, regression status, tool/protocol errors, artifact versions.</p></li>
+<li><p><strong>Diagnosis</strong>: failure class, evidence, suspected cause, next experiment, confidence, prior attempted repairs.</p></li>
+<li><p><strong>DevelopmentOutcome</strong>: acceptance evidence and references to the preceding artifacts.</p></li>
+</ol>
+<p>Prefer lightweight typed payloads or existing persisted graph state, not an additional database. Artifacts must be inspectable and resumable; each downstream step receives a <em>focused projection</em>, not an unbounded transcript.</p>
+</section>
+</section>
+<section id="candidate-component-subrecipes-and-practical-stories">
+<h2>Candidate component subrecipes and practical stories<a class="headerlink" href="#candidate-component-subrecipes-and-practical-stories" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Order</p></th>
+<th class="head"><p>Responsibility</p></th>
+<th class="head"><p>Existing leverage</p></th>
+<th class="head"><p>First practical user story</p></th>
+<th class="head"><p>Acceptance</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>Baseline instrumentation</p></td>
+<td><p>existing timing spans, suite runner</p></td>
+<td><p>As an experimenter, I can replay <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> and see the first failure by category</p></td>
+<td><p>Trace records stage, model, tokens/calls, tool errors, verification, checkpoint and outcome</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">inspect_workspace</span></code></p></td>
+<td><p>context_pack, workspace read tools</p></td>
+<td><p>As a coding agent, I can inspect an existing calculator before modifying it</p></td>
+<td><p>Inventory names real files, current API, CLI, tests, and supporting evidence; no writes</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">capture_contract</span></code></p></td>
+<td><p>acceptance policies, audited criteria freeze</p></td>
+<td><p>As a maintainer, I can preserve already-working number/add/sub behavior while adding multiplication</p></td>
+<td><p>Explicit prior invariants and executable checks are frozen before editing</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">design_change</span></code></p></td>
+<td><p>instruction_todo_plan, decision_plane</p></td>
+<td><p>As a coding agent, I can propose a bounded parser extension without rewriting unrelated grammar</p></td>
+<td><p>Plan identifies change boundary, order, risks, and test for each slice</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">implement_slice</span></code></p></td>
+<td><p>conversational_tool_loop, coding tools</p></td>
+<td><p>As a coding agent, I can apply exactly one planned change</p></td>
+<td><p>Real file write, tool result, and changed-file evidence; respects budget</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">verify_change</span></code></p></td>
+<td><p>verify_repair, verify_runs, audited_infer_accept</p></td>
+<td><p>As a maintainer, I can prove new functionality and all previous regression cases still work</p></td>
+<td><p>Host executes checks; false model claims cannot pass</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">diagnose_failure</span></code></p></td>
+<td><p>independent_review, decision_plane</p></td>
+<td><p>As an agent, I can distinguish syntax, tool protocol, runtime, semantics, regression, and budget failures</p></td>
+<td><p>Diagnostic classification links to actual failing evidence and recommends a distinct next action</p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">replan_from_evidence</span></code></p></td>
+<td><p>bounded_retry, guidance yield, checkpoint restore</p></td>
+<td><p>As an agent, I can stop repeating an ineffective fix and revise strategy or ask for guidance</p></td>
+<td><p>Repeated identical failure cannot cause unbounded retries; previous failed hypotheses recorded</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">final_regression_audit</span></code></p></td>
+<td><p>audited_infer_accept</p></td>
+<td><p>As a maintainer, I receive a defensible acceptance verdict</p></td>
+<td><p>Every required check has evidence; incomplete coverage cannot be reported as success</p></td>
+</tr>
+</tbody>
+</table>
+<p>Candidate names are provisional. For each story, first test whether an existing recipe plus a runner binding suffices. Extract a new subrecipe only when its independent contract and reuse are demonstrated.</p>
+</section>
+<section id="calculator-suite-as-the-initial-product-benchmark">
+<h2>Calculator suite as the initial product benchmark<a class="headerlink" href="#calculator-suite-as-the-initial-product-benchmark" title="Link to this heading"></a></h2>
+<p>Use PR #34’s sequential <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> stages unchanged: number, add/sub, multiply/divide, exponentiation, grouping, functions. The same workspace accumulates changes; earlier checks must stay green. Preserve <code class="docutils literal notranslate"><span class="pre">evaluate(expr)</span></code>, <code class="docutils literal notranslate"><span class="pre">main(argv=None)</span></code>, CLI exit codes, and the no-<code class="docutils literal notranslate"><span class="pre">eval</span></code>/<code class="docutils literal notranslate"><span class="pre">exec</span></code>/<code class="docutils literal notranslate"><span class="pre">ast.literal_eval</span></code> restrictions. The existing live Completer is the acceptance gate; static fixture success is only provisional.</p>
+<p>Run <strong>A</strong>: existing <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> with Qwen 30B. Run <strong>B</strong>: gastronomic guided development with the same Qwen 30B, tools, suite, and controlled budgets. Run <strong>C</strong>: original graph with Nemotron Super to measure model capability separately. Optionally run <strong>D</strong>: gastronomic graph with Nemotron. Use multiple trials with recorded settings; avoid declaring a winner from one stochastic run.</p>
+<p>Report: stages passed, prior regressions, first failure type, verified successful edits, model calls, input/output tokens, wall time, guidance calls, repair cycles, and repeat-failure loops. Record both aggregate and per-stage results. Do not compare only completion rate if one graph uses far more inference.</p>
+</section>
+<section id="implementation-increments-and-stop-go-gates">
+<h2>Implementation increments and stop/go gates<a class="headerlink" href="#implementation-increments-and-stop-go-gates" title="Link to this heading"></a></h2>
+<p><strong>Increment 0: Observability and baseline.</strong> Capture the existing PR #34 live failures. Identify whether failures are tool-format, execution, reasoning, context, or validator failures. No new recipe yet.</p>
+<p><strong>Increment 1: Inspect + contract.</strong> Implement the smallest inspect-and-freeze composition; demonstrate a stable, cited inventory and preserved API/invariants on calculator stages 1–3. Verify it works when resumed from a checkpoint.</p>
+<p><strong>Increment 2: Bounded change.</strong> Add plan/implement/verify composition using existing tool loop and verify machinery. Compare to the baseline on stages 1–4.</p>
+<p><strong>Increment 3: Evidence-driven recovery.</strong> Introduce diagnosis only if traces show undifferentiated repair loops. Test one induced precedence bug, one malformed tool-call response, and one stale-workspace regression. Require different remediation outcomes.</p>
+<p><strong>Increment 4: End-to-end alternative recipe.</strong> Run all six stages live, preserve prior checks, and produce a machine-readable outcome. Repeat trials and compare budgets.</p>
+<p><strong>Increment 5: Generalization.</strong> Apply one extracted subrecipe to <code class="docutils literal notranslate"><span class="pre">counter_pkg</span></code> or <code class="docutils literal notranslate"><span class="pre">delegate_pkg</span></code> before stabilizing its public catalog contract. Avoid calculator-specific names or assumptions in reusable code.</p>
+</section>
+<section id="engineering-guardrails">
+<h2>Engineering guardrails<a class="headerlink" href="#engineering-guardrails" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Do not modify <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> merely to make the new approach pass; retain a fair baseline.</p></li>
+<li><p>Do not introduce <code class="docutils literal notranslate"><span class="pre">guided_usage</span></code> or other guided expert recipes in this effort.</p></li>
+<li><p>No global universal <code class="docutils literal notranslate"><span class="pre">guided_x</span></code> schema; only the development product’s minimum contract.</p></li>
+<li><p>Reuse <code class="docutils literal notranslate"><span class="pre">GraphTemplate.tile</span></code>, soft points, dependency injection, existing checkpoint and generator machinery.</p></li>
+<li><p>Do not invent success based on a model-written summary; deterministic host evidence is authoritative for executable checks.</p></li>
+<li><p>Context packets must be bounded, source-linked, version-aware, and purpose-specific. Summaries cannot silently override source code.</p></li>
+<li><p>Separate implementation errors from malformed tool protocol and infrastructure errors.</p></li>
+<li><p>Every retry must either add evidence, change strategy, or terminate/escalate.</p></li>
+<li><p>Keep static deterministic stories for subrecipe contracts and at least one real-model integration gate.</p></li>
+<li><p>Prefer small, reviewable implementation PRs for individual subrecipes and user stories.</p></li>
+</ul>
+</section>
+<section id="open-design-questions">
+<h2>Open design questions<a class="headerlink" href="#open-design-questions" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Should <code class="docutils literal notranslate"><span class="pre">WorkspaceInventory</span></code> and <code class="docutils literal notranslate"><span class="pre">ChangeContract</span></code> be existing graph-state payloads, files in the workspace, or both?</p></li>
+<li><p>Which existing <code class="docutils literal notranslate"><span class="pre">context_pack</span></code> capabilities already satisfy focused context selection?</p></li>
+<li><p>Does the current host tool-loop support native tool calling for the local model, or must prompt-tool serialization be separately benchmarked?</p></li>
+<li><p>What is the smallest cross-recipe artifact contract needed for durable resume and independent verification?</p></li>
+<li><p>Which first failure in the current live <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> trace is actually causal? Do not prioritize speculative abstractions over observed failures.</p></li>
+</ol>
+</section>
+<section id="definition-of-done-for-this-inspiration-phase">
+<h2>Definition of done for this inspiration phase<a class="headerlink" href="#definition-of-done-for-this-inspiration-phase" title="Link to this heading"></a></h2>
+<p>A reviewed composition design, ordered subrecipe/story backlog, baseline experiment protocol, and clear first implementation slice. No claim that the gastronomic recipe improves Qwen reliability until a live controlled comparison supports it.</p>
+</section>
+<section id="walkbag-state-and-debugger-checkpoint-contract">
+<h2>WalkBag state and debugger checkpoint contract<a class="headerlink" href="#walkbag-state-and-debugger-checkpoint-contract" title="Link to this heading"></a></h2>
+<p>The existing <code class="docutils literal notranslate"><span class="pre">WalkBag</span></code> is the native node-to-node state carrier within a running graph. Node runners access the mutable bag through <code class="docutils literal notranslate"><span class="pre">GraphRunContext.bag</span></code>; gastronomic recipes must use that mechanism rather than introducing a parallel artifact store or writing Markdown files. The register ABI (<code class="docutils literal notranslate"><span class="pre">in</span></code>, <code class="docutils literal notranslate"><span class="pre">out</span></code>, <code class="docutils literal notranslate"><span class="pre">acc</span></code>, <code class="docutils literal notranslate"><span class="pre">ctx</span></code>, <code class="docutils literal notranslate"><span class="pre">ask</span></code>, <code class="docutils literal notranslate"><span class="pre">ans</span></code>, <code class="docutils literal notranslate"><span class="pre">err</span></code>) is the starting point; any richer schema is a value stored in a register, not a new test verb.</p>
+<p><strong>Required user-story behavior:</strong> whenever the YAML story executor checkpoints a paused graph walk, it must serialize the current bag contents alongside the graph execution state. Resuming from that checkpoint must reconstruct the bag before any subsequent node executes. A debugger inspection immediately before a node or before entering a subgraph must therefore see the same bag values that the node will consume. This is a test-framework execution contract, not a new semantic recipe or YAML verb.</p>
+<p><strong>Separate boundary concern:</strong> a nested graph currently creates its own run context and bag. Do not assume the child’s <code class="docutils literal notranslate"><span class="pre">out</span></code> automatically appears in the parent’s bag. Define and test explicit input/output mapping at subgraph boundaries before relying on nested gastronomic composition. This is distinct from checkpoint persistence.</p>
+<p>Acceptance stories should prove: (1) a node writes a structured value into <code class="docutils literal notranslate"><span class="pre">out</span></code> or <code class="docutils literal notranslate"><span class="pre">acc</span></code>; (2) the story pauses before the next node and inspects it; (3) a checkpoint is serialized and the executor is reconstructed; (4) the resumed node reads the exact value; (5) the child graph receives declared inputs and publishes declared outputs through an explicit boundary mapping. Include nested checkpoint/resume and reject or explicitly encode non-serializable bag values rather than silently dropping them. Use the existing <code class="docutils literal notranslate"><span class="pre">graph_walk</span></code> and story assertions; do not add debugger-specific verbs.</p>
+<p><strong>Implementation status:</strong> requirement/design only. Current <code class="docutils literal notranslate"><span class="pre">WalkBag.snapshot()</span></code> is shallow, and inspected <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> paths construct a new <code class="docutils literal notranslate"><span class="pre">GraphRunContext</span></code> on resume. Confirm the full story checkpoint machinery before choosing the serialization hook; do not mark this behavior implemented without a passing story.</p>
+</section>
+<section id="findings-of-fact-and-governing-design-principles">
+<h2>Findings of fact and governing design principles<a class="headerlink" href="#findings-of-fact-and-governing-design-principles" title="Link to this heading"></a></h2>
+<p>The following findings record architectural conclusions established during recipe design. Treat them as durable precedents: future recipes should conform to them unless a subsequent explicit design decision supersedes a finding. These are design rulings, not claims that all required behavior is already implemented.</p>
+<section id="finding-1-the-bag-is-the-native-execution-state-carrier">
+<h3>Finding 1: The bag is the native execution-state carrier<a class="headerlink" href="#finding-1-the-bag-is-the-native-execution-state-carrier" title="Link to this heading"></a></h3>
+<p>MechaHarness provides a mutable <code class="docutils literal notranslate"><span class="pre">WalkBag</span></code> through <code class="docutils literal notranslate"><span class="pre">GraphRunContext.bag</span></code>. Nodes within a run communicate through its register ABI (<code class="docutils literal notranslate"><span class="pre">in</span></code>, <code class="docutils literal notranslate"><span class="pre">out</span></code>, <code class="docutils literal notranslate"><span class="pre">acc</span></code>, <code class="docutils literal notranslate"><span class="pre">ctx</span></code>, <code class="docutils literal notranslate"><span class="pre">ask</span></code>, <code class="docutils literal notranslate"><span class="pre">ans</span></code>, <code class="docutils literal notranslate"><span class="pre">err</span></code>). A recipe’s machine-inspectable result should be published through this mechanism. A Markdown file or separate artifact store is not required merely to make recipe outputs testable.</p>
+</section>
+<section id="finding-2-runtime-availability-and-checkpoint-durability-are-distinct">
+<h3>Finding 2: Runtime availability and checkpoint durability are distinct<a class="headerlink" href="#finding-2-runtime-availability-and-checkpoint-durability-are-distinct" title="Link to this heading"></a></h3>
+<p>The bag is available to nodes during live execution. The YAML user-story debugger must also serialize bag state with checkpoints and restore it before the next node runs. This is a requirement to implement and verify, not an assumption about the current executor. The current <code class="docutils literal notranslate"><span class="pre">WalkBag.snapshot()</span></code> is shallow, so checkpoint serialization needs an explicit value/encoding contract.</p>
+</section>
+<section id="finding-3-subgraph-state-is-not-implicitly-shared">
+<h3>Finding 3: Subgraph state is not implicitly shared<a class="headerlink" href="#finding-3-subgraph-state-is-not-implicitly-shared" title="Link to this heading"></a></h3>
+<p>Nested graph execution constructs a distinct run context. Parent/child recipes need explicit, testable input and output transfer across that boundary. Sharing the budget ledger does not imply sharing the bag.</p>
+</section>
+<section id="finding-4-hard-nodes-and-inference-tool-calls-have-different-context-economics">
+<h3>Finding 4: Hard nodes and inference tool calls have different context economics<a class="headerlink" href="#finding-4-hard-nodes-and-inference-tool-calls-have-different-context-economics" title="Link to this heading"></a></h3>
+<p>A deterministic <strong>hard node</strong> executes as part of the graph outside any inference call’s context window. It may scan a repository, parse ASTs, build indexes, follow references, compute coverage, and update the bag without placing its intermediate data into model context. A deterministic <strong>tool call made by a soft/inference node</strong> still participates in an inference interaction: its invocation and returned observations can consume context. These mechanisms must not be treated as interchangeable simply because both ultimately run deterministic code.</p>
+</section>
+<section id="finding-5-prefer-deterministic-execution-over-model-orchestration">
+<h3>Finding 5: Prefer deterministic execution over model orchestration<a class="headerlink" href="#finding-5-prefer-deterministic-execution-over-model-orchestration" title="Link to this heading"></a></h3>
+<p>Every operation that can be expressed as reliable deterministic code should be a hard node, especially filesystem enumeration, search, syntax/AST extraction, reference validation, set membership, budget accounting, and schema checks. Soft nodes are reserved for irreducible semantic tasks such as proposing search hypotheses or judging relevance. A soft node should not be asked to infer facts that deterministic code can establish.</p>
+</section>
+<section id="finding-6-context-projection-is-an-explicit-execution-boundary">
+<h3>Finding 6: Context projection is an explicit execution boundary<a class="headerlink" href="#finding-6-context-projection-is-an-explicit-execution-boundary" title="Link to this heading"></a></h3>
+<p>The bag may hold far more evidence than a model can or should see. Deterministic context compilation within an inference node selects, ranks, formats, and caps a <strong>projection</strong> of immutable call-time state under an explicit token budget. It need not be a separate graph node. Only that projection and declared instructions enter the initial model call; bounded read-only inspection tools may supply additional projections from the same snapshot. Do not confuse any projection with the underlying evidence.</p>
+</section>
+<section id="finding-7-inference-produces-hypotheses-and-bounded-judgments-not-source-facts">
+<h3>Finding 7: Inference produces hypotheses and bounded judgments, not source facts<a class="headerlink" href="#finding-7-inference-produces-hypotheses-and-bounded-judgments-not-source-facts" title="Link to this heading"></a></h3>
+<p>A model may propose search terms, candidate relationships, or relevance assessments. Deterministic nodes execute searches and check cited files, symbols, and source spans. Published claims should be traceable to verified evidence; model-produced statements without supporting evidence remain hypotheses or unknowns.</p>
+</section>
+<section id="finding-8-discovery-is-objective-directed-and-may-legitimately-find-nothing">
+<h3>Finding 8: Discovery is objective-directed and may legitimately find nothing<a class="headerlink" href="#finding-8-discovery-is-objective-directed-and-may-legitimately-find-nothing" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">workspace_discovery</span></code> receives a caller-supplied natural-language objective and workspace (with optional scope and budget). Its purpose is to identify workspace evidence relevant to that objective, not to exhaustively index everything or create a change plan. Distinguish <code class="docutils literal notranslate"><span class="pre">found</span></code>, <code class="docutils literal notranslate"><span class="pre">not_found</span></code>, <code class="docutils literal notranslate"><span class="pre">inconclusive</span></code>, and <code class="docutils literal notranslate"><span class="pre">failed</span></code>. A well-supported negative discovery is a valid result, while exhausted or inadequate coverage is inconclusive. Do not pressure the model to manufacture relevance.</p>
+</section>
+<section id="finding-9-working-state-and-published-output-have-different-contracts">
+<h3>Finding 9: Working state and published output have different contracts<a class="headerlink" href="#finding-9-working-state-and-published-output-have-different-contracts" title="Link to this heading"></a></h3>
+<p>Intermediate indexes, search histories, candidate sets, and evidence can remain in the bag as working state. The final <code class="docutils literal notranslate"><span class="pre">WorkspaceInventory</span></code> is a schema-validated, bounded, machine-inspectable result published to <code class="docutils literal notranslate"><span class="pre">out</span></code>. The inventory should contain relevant findings, provenance, search coverage, and unknowns, without duplicating the entire index or prematurely prescribing code changes.</p>
+</section>
+<section id="finding-10-recipe-decomposition-follows-independent-testable-semantics">
+<h3>Finding 10: Recipe decomposition follows independent, testable semantics<a class="headerlink" href="#finding-10-recipe-decomposition-follows-independent-testable-semantics" title="Link to this heading"></a></h3>
+<p>A recipe is a bounded, composable unit with meaningful inputs, outputs, and acceptance criteria; a simple <code class="docutils literal notranslate"><span class="pre">read_file</span></code> or <code class="docutils literal notranslate"><span class="pre">search_text</span></code> operation is ordinarily a tool/hard-node operation, not automatically a separate recipe. <code class="docutils literal notranslate"><span class="pre">workspace_discovery</span></code> may orchestrate deterministic analysis and a small number of inference decisions. Prefer the smallest number of soft nodes that reliably performs the semantic work, and do not over-decompose into inference-heavy wrappers.</p>
+</section>
+<section id="finding-11-existing-user-story-and-graph-walk-facilities-are-the-acceptance-surface">
+<h3>Finding 11: Existing user-story and graph-walk facilities are the acceptance surface<a class="headerlink" href="#finding-11-existing-user-story-and-graph-walk-facilities-are-the-acceptance-surface" title="Link to this heading"></a></h3>
+<p>Use the existing YAML user-story framework and <code class="docutils literal notranslate"><span class="pre">graph_walk</span></code> stepping, including before/after pauses, subgraph entry, checkpoint, and resume. Do not invent new YAML verbs or a parallel testing infrastructure. Test hard-node outputs exactly, test soft-node decisions against controlled evidence, and verify that a checkpointed bag is restored intact. Distinguish test requirements from passing implementation.</p>
+</section>
+<section id="finding-12-discovery-does-not-imply-authorization-to-modify-the-workspace">
+<h3>Finding 12: Discovery does not imply authorization to modify the workspace<a class="headerlink" href="#finding-12-discovery-does-not-imply-authorization-to-modify-the-workspace" title="Link to this heading"></a></h3>
+<p>Discovery should use read-only workspace operations and should not mutate target source files. Its product feeds subsequent contract extraction and planning recipes; those stages, not discovery, determine what changes should be made.</p>
+</section>
+<section id="consequences-for-the-first-workspace-discovery-implementation">
+<h3>Consequences for the first workspace-discovery implementation<a class="headerlink" href="#consequences-for-the-first-workspace-discovery-implementation" title="Link to this heading"></a></h3>
+<p>Start with hard nodes for workspace enumeration, structural extraction, searching, evidence collection, validation, and output publication. Context compilation is deterministic but belongs inside the inference-node lifecycle rather than requiring a separate graph node. Add soft nodes only where task interpretation or relevance genuinely requires inference. Preserve full deterministic evidence in the bag, send compact projections to the model, and publish a validated <code class="docutils literal notranslate"><span class="pre">WorkspaceInventory</span></code> in <code class="docutils literal notranslate"><span class="pre">out</span></code>. Include acceptance stories for <code class="docutils literal notranslate"><span class="pre">found</span></code>, <code class="docutils literal notranslate"><span class="pre">not_found</span></code>, <code class="docutils literal notranslate"><span class="pre">inconclusive</span></code>, and checkpoint/resume, and separately test parent/child bag handoff.</p>
+</section>
+<section id="finding-13-inference-sees-an-immutable-call-time-bag-snapshot">
+<h3>Finding 13: Inference sees an immutable, call-time bag snapshot<a class="headerlink" href="#finding-13-inference-sees-an-immutable-call-time-bag-snapshot" title="Link to this heading"></a></h3>
+<p>At the start of each inference invocation, capture an immutable snapshot of the live <code class="docutils literal notranslate"><span class="pre">WalkBag</span></code>. The inference node’s deterministic context compiler builds the initial prompt from that snapshot, not from mutable live state. Read-only inspection tools invoked during the same inference interaction may retrieve bounded projections of <strong>that same snapshot</strong>, never the subsequently mutated live bag. Prior inference responses may be inspected through separately scoped, immutable execution records. The inference transcript must identify the snapshot/version it observed and record inspection requests and returned projections for audit and replay. Snapshot immutability must be deep or serialization-based: the current shallow <code class="docutils literal notranslate"><span class="pre">WalkBag.snapshot()</span></code> does not by itself guarantee isolation of nested values. Deterministic replay promises identical compiled context and inspection observations for the same snapshot/spec/tool inputs, not identical stochastic model responses. This is a design requirement, not yet verified implementation.</p>
+</section>
+<section id="finding-14-context-compilation-belongs-to-the-inference-node-lifecycle">
+<h3>Finding 14: Context compilation belongs to the inference node lifecycle<a class="headerlink" href="#finding-14-context-compilation-belongs-to-the-inference-node-lifecycle" title="Link to this heading"></a></h3>
+<p>The inference node owns deterministic bag-to-context compilation immediately before invoking its model. This does not require an additional graph node. A reusable context compiler accepts a declared <code class="docutils literal notranslate"><span class="pre">ContextSpec</span></code>, immutable bag snapshot, and token budget to produce an inspectable <code class="docutils literal notranslate"><span class="pre">CompiledContext</span></code> with provenance and omission metadata. The inference engine receives only that bounded projection. During the inference interaction, authorized read-only tools may retrieve further bounded projections of the frozen snapshot or prior response records; these are explicit, observable context additions, not access to mutable live state.</p>
+</section>
+</section>
+<section id="inter-node-communication-and-inference-state-contracts">
+<h2>Inter-node communication and inference-state contracts<a class="headerlink" href="#inter-node-communication-and-inference-state-contracts" title="Link to this heading"></a></h2>
+<p>This section formalizes how graph nodes exchange state, and how model-backed nodes consume that state. It is the normative design direction for this inspiration document; existing code must be checked against these contracts before claiming implementation.</p>
+<section id="state-and-ownership-boundaries">
+<h3>State and ownership boundaries<a class="headerlink" href="#state-and-ownership-boundaries" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Live WalkBag:</strong> the graph run’s mutable register-based communication state. Hard nodes read/write it as permitted by their node contracts. The <code class="docutils literal notranslate"><span class="pre">in/out/acc/ctx/ask/ans/err</span></code> registers remain the existing ABI; structured values within them have typed schemas where useful.</p></li>
+<li><p><strong>Node contract:</strong> declares required input registers/paths, produced outputs, permitted mutations, and error behavior. A node must not assume unrelated register values are present or valid.</p></li>
+<li><p><strong>Inference snapshot:</strong> a deep-immutable, point-in-time capture of the bag when an inference invocation begins. The model-backed node and its tools read this version for the duration of that invocation.</p></li>
+<li><p><strong>ContextSpec:</strong> a declarative, versioned policy defining the bag paths, formatting, ranking/selection, budget, provenance, and omission behavior for initial model context. It is not a license to serialize the entire bag.</p></li>
+<li><p><strong>CompiledContext:</strong> the exact messages/structured input sent to the model, with a manifest of source paths, versions, omissions, and budget accounting. Compiled context is derived deterministically from the snapshot and ContextSpec.</p></li>
+<li><p><strong>Inference transcript:</strong> immutable execution record of compiled input, model responses, inspection requests and results, and final output. Its records are distinct from the values a node elects to publish into the live bag.</p></li>
+<li><p><strong>Published result:</strong> schema-validated node output written back to declared bag destinations after inference finishes; it must not retroactively change the snapshot used by that inference.</p></li>
+</ul>
+</section>
+<section id="node-kinds-have-different-communication-semantics">
+<h3>Node kinds have different communication semantics<a class="headerlink" href="#node-kinds-have-different-communication-semantics" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Node kind</p></th>
+<th class="head"><p>Reads</p></th>
+<th class="head"><p>Computation</p></th>
+<th class="head"><p>Tool calling</p></th>
+<th class="head"><p>Writes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Hard/deterministic</p></td>
+<td><p>Declared live bag state at node execution</p></td>
+<td><p>Ordinary code, outside model context</p></td>
+<td><p>Host/library operations as code, not inference-loop tools</p></td>
+<td><p>Declared bag outputs</p></td>
+</tr>
+<tr class="row-odd"><td><p>General inference/agent</p></td>
+<td><p>Immutable invocation snapshot, initially via compiled context</p></td>
+<td><p>One or more model turns</p></td>
+<td><p><strong>May</strong> call explicitly authorized tools to inspect bounded views of the <em>same</em> snapshot and prior immutable response records; other tools require separate explicit capabilities</p></td>
+<td><p>Validated final outputs to live bag</p></td>
+</tr>
+<tr class="row-even"><td><p>Judge</p></td>
+<td><p>Immutable invocation snapshot, via a compiled judging context</p></td>
+<td><p>Bounded evaluation/classification/scoring model call</p></td>
+<td><p><strong>No model-initiated tool calling in the default judge contract</strong></p></td>
+<td><p>Typed judgment, confidence/evidence references, and diagnostics to declared bag outputs</p></td>
+</tr>
+</tbody>
+</table>
+<p>A judge is a <strong>specialized model-backed node</strong>, not an agent node with an empty tool list by accident. Its API should intentionally express no tool loop, a fixed evidence envelope, a typed verdict schema, and explicit abstention/uncertainty behavior. If a judge needs more evidence, the enclosing graph gathers it with hard nodes or a separate agent and invokes the judge again with a new snapshot. This keeps judging repeatable and prevents the judge from changing its own evidence set mid-evaluation. Whether some future judge variant supports tools is a separate design decision, not a property to assume now.</p>
+</section>
+<section id="general-inference-node-lifecycle">
+<h3>General inference node lifecycle<a class="headerlink" href="#general-inference-node-lifecycle" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Capture/freeze the current bag at invocation start; assign a snapshot identity and record source/provenance.</p></li>
+<li><p>Resolve the node’s ContextSpec against <strong>that snapshot</strong> using a reusable deterministic context compiler running inside the inference-node runner. Validate access, schemas, and budget; record the compiled input.</p></li>
+<li><p>Invoke the selected model with the compiled input and the node’s declared output contract.</p></li>
+<li><p>If the node is a general inference/agent node and tools are enabled, handle authorized inspection requests against the same frozen snapshot. Each response is size-bounded, logged, and included in the model transcript. Prior response inspection must identify which previous response/record is visible; do not silently expose arbitrary history.</p></li>
+<li><p>Validate the final model response against the declared schema, including evidence references and uncertainty; publish only permitted outputs into the <strong>live</strong> bag and persist the transcript.</p></li>
+<li><p>Treat invalid outputs, context overflow, unavailable evidence, tool budget exhaustion, and inference failure as explicit outcomes, not silently repaired facts.</p></li>
+</ol>
+<p>The snapshot is immutable across all model turns and inspection calls belonging to the same invocation. A retry that represents a <strong>new invocation</strong> may deliberately capture a new snapshot, but must be identifiable as such. Changes to the live bag by other nodes do not leak into an invocation already in progress.</p>
+</section>
+<section id="judge-node-lifecycle-and-constraints">
+<h3>Judge node lifecycle and constraints<a class="headerlink" href="#judge-node-lifecycle-and-constraints" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Freeze a bag snapshot at the judge invocation boundary.</p></li>
+<li><p>Compile a bounded, versioned evaluation packet containing the rubric, subject being judged, relevant verified evidence, and required verdict schema.</p></li>
+<li><p>Make the judge model call <strong>without tool declarations or a tool-dispatch loop</strong>.</p></li>
+<li><p>Validate the verdict, score/confidence representation, rationale/evidence references, and abstention where appropriate; publish typed results to the live bag.</p></li>
+<li><p>If evidence is insufficient, return an explicit insufficient-evidence/abstain result and let the graph decide whether to collect more evidence and retry.</p></li>
+</ol>
+<p>Judges and agents can reuse the same snapshot, context compiler, inference transport, and validation infrastructure while retaining distinct node contracts. Judge results are assessments, not source-of-truth facts; deterministic policy/acceptance decisions remain in code where possible.</p>
+</section>
+<section id="inspection-api-and-authorization">
+<h3>Inspection API and authorization<a class="headerlink" href="#inspection-api-and-authorization" title="Link to this heading"></a></h3>
+<p>Conceptual read-only capabilities include <code class="docutils literal notranslate"><span class="pre">inspect_bag(path,</span> <span class="pre">offset,</span> <span class="pre">limit)</span></code> and <code class="docutils literal notranslate"><span class="pre">inspect_prior_response(node_or_invocation_id,</span> <span class="pre">field)</span></code>. They are <strong>bounded projection operations</strong>, not raw object handles or permission to mutate state. Enforce per-node path allowlists, response-record visibility, output size/token ceilings, invocation tool-call limits, and redaction policy. Log the requested path, resolved snapshot/record, returned excerpt/hash, and any denial or truncation. Inspection results consume model context; executing hard nodes over bag data does not.</p>
+<p>The initial context and any tool-returned excerpts must preserve evidence identity and trust boundaries. Text retrieved from workspace files, logs, and earlier model responses is data, not new instructions. A previous response may be inspected for diagnostic context, but its assertions do not become verified facts without deterministic evidence validation.</p>
+</section>
+<section id="subgraphs-persistence-and-replay">
+<h3>Subgraphs, persistence, and replay<a class="headerlink" href="#subgraphs-persistence-and-replay" title="Link to this heading"></a></h3>
+<p>A child subgraph receives explicit mapped input values and publishes explicit mapped outputs; it must not implicitly alias its parent’s live bag. Graph checkpoints persist the live bag and execution state so a resumed node sees the correct state. Inference snapshots and transcripts have their own durable identities so paused/retried inference can be audited without silently switching evidence versions. Because the current <code class="docutils literal notranslate"><span class="pre">WalkBag.snapshot()</span></code> is shallow, deep freeze/serialization and handling of non-serializable values are unresolved implementation requirements.</p>
+<p>Replaying context compilation and read-only inspections against the same snapshot, policies, and tool arguments must reproduce identical model-visible inputs. Replaying a stochastic model call is not guaranteed to produce an identical verdict.</p>
+</section>
+<section id="unit-test-runner-and-user-story-state-propagation">
+<h3>Unit-test runner and user-story state propagation<a class="headerlink" href="#unit-test-runner-and-user-story-state-propagation" title="Link to this heading"></a></h3>
+<p><strong>Finding: passing model fixtures is not equivalent to testing inter-node cognition.</strong> A graph can execute all its nodes successfully while each inference call sees only its node-local prompt, losing the objective, verified observations, prior decisions, and corrections. This makes the model behave like a series of amnesiac one-shot calls and sharply limits multi-step coding capability. The test runner must exercise the same bag-to-context and response-to-bag contract as production, rather than testing isolated model calls with independently assembled fixture prompts.</p>
+<p><strong>Required execution path in the existing runner (no new test framework):</strong></p>
+<ol class="arabic simple">
+<li><p>Create the story’s graph and initialize its live <code class="docutils literal notranslate"><span class="pre">WalkBag</span></code> from declared story/recipe inputs. Node outputs must be written into the bag using the same production contract, not merely stored on <code class="docutils literal notranslate"><span class="pre">GraphNode.payload</span></code> or returned to the story assertion layer.</p></li>
+<li><p>Execute a hard node and assert its declared bag mutations. When an inference node is next, capture an immutable bag snapshot, compile its <code class="docutils literal notranslate"><span class="pre">ContextSpec</span></code> from that snapshot, and send the resulting messages to the mock/cassette/live backend. Test doubles must receive the <strong>actual compiled request</strong> so the story can inspect its content and provenance.</p></li>
+<li><p>For an agent-style inference fixture, support a sequence of model responses and read-only inspection tool calls over the frozen snapshot. Feed each tool result into that invocation’s transcript, then validate and publish the final structured response to the live bag. Do not silently use the live bag for tool reads.</p></li>
+<li><p>Execute the following inference node against a <strong>new snapshot of the updated live bag</strong>. The node’s ContextSpec must explicitly select prior structured outputs, evidence, and/or transcript excerpts needed for its task. <strong>Preserve state across inference calls, not the entire raw chat history by default.</strong> Each call is fresh in model context but not amnesiac in task state.</p></li>
+<li><p>Judge-node fixtures use the same snapshot and compilation path but one model response and no tool dispatch. A judge’s typed verdict must become accessible to downstream nodes through declared bag outputs.</p></li>
+<li><p>At every existing <code class="docutils literal notranslate"><span class="pre">graph_walk</span></code> checkpoint, serialize live bag state with the graph; restore it before the next node executes. Verify nested values, explicit parent/child mappings, and replay of compiled context and inspection responses. Persist immutable invocation snapshot/transcript identities where a paused inference must be inspected or replayed.</p></li>
+</ol>
+<p><strong>Concrete regression story: multi-inference continuity.</strong> In a small calculator workspace, the first inference node identifies relevant files and hypotheses and publishes a structured discovery result to <code class="docutils literal notranslate"><span class="pre">out</span></code> or another declared register. A hard node validates source references and writes verified evidence. The second inference node proposes a bounded change using the objective, the verified evidence, and the first inference result selected by its ContextSpec. A judge then evaluates the proposal using its own compiled evidence packet, without tools. Assert that the second model request actually includes the required prior facts, that unrelated bag contents are omitted, and that the judge sees the proposal and evidence. Pause/checkpoint between calls, resume, and assert the same model-visible inputs. Include a negative control where prior state is deliberately omitted and the fixture or request-contract assertion fails.</p>
+<p><strong>Implementation review targets:</strong> <code class="docutils literal notranslate"><span class="pre">GraphRunContext.bag</span></code> in <code class="docutils literal notranslate"><span class="pre">graph_executor.py</span></code>; <code class="docutils literal notranslate"><span class="pre">cli_infer_runner.py</span></code> (currently a one-shot inference runner); <code class="docutils literal notranslate"><span class="pre">context_pack_runner.py</span></code> (currently reads upstream node payloads); the existing static-fixture/cassette user-story runner; and <code class="docutils literal notranslate"><span class="pre">graph_walk</span></code> checkpoint/resume. Review these paths to locate where state is dropped, rather than assuming the absence of continuity is already proven for every runner. The existing <code class="docutils literal notranslate"><span class="pre">model_input_manifest</span></code> and context-related user stories may provide reusable request-recording and assertion mechanisms.</p>
+<p><strong>Acceptance criterion:</strong> a sequence of two inference calls separated by hard nodes must demonstrate that information written by the first call survives in the bag and is deliberately projected into the second call’s request. Merely asserting that both inference calls returned successful responses is insufficient. The implementation must prove state continuity <em>at the model-input boundary</em>.</p>
+<p><strong>Status:</strong> design and required tests; not implemented or verified by this documentation change.</p>
+</section>
+<section id="tracked-user-story-fixtures-initial-red-specifications">
+<h3>Tracked user-story fixtures (initial red specifications)<a class="headerlink" href="#tracked-user-story-fixtures-initial-red-specifications" title="Link to this heading"></a></h3>
+<p>The following checked-in fixtures are the concrete acceptance-test backlog for this communication contract. <strong>Keep this pointer current when moving, implementing, or replacing them</strong> so the tests do not become detached from the architectural ruling:</p>
+<ul class="simple">
+<li><p>Provisional RED walk stubs (not collected by pytest until migrated to suite stages) live under <a class="reference download internal" download="" href="../_downloads/8168d3099306836e302dcdaf23ff470a/story.json"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">fixtures/fangore_bag_inference_continuity/</span></code></span></a>.</p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/1988b7e01ac82cf9cc6db8ac57b16c55/bag_continuity.yaml"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">bag_continuity.yaml</span></code></span></a> covers state propagation from discovery through validation into a subsequent inference request.</p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/73d721ec1514d6e317f8b1e4758dc029/bag_inspection.yaml"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">bag_inspection.yaml</span></code></span></a> covers immutable bag snapshot inspection, authorization, and transcript recording.</p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/4ef7f5c8d56affc8e083e755c710bf31/judge_no_tools.yaml"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">judge_no_tools.yaml</span></code></span></a> covers compiled judge evidence, typed verdicts, and the absence of tool calls.</p></li>
+</ul>
+<p>These are <strong>red test specifications</strong>, not proven passing tests. The existing runner must be wired to support their fixture behavior and observations before they can establish correctness. Do not mistake their presence in the repository for successful validation.</p>
+</section>
+<section id="acceptance-stories-to-add-using-existing-yaml-graph-walk-machinery">
+<h3>Acceptance stories to add using existing YAML graph-walk machinery<a class="headerlink" href="#acceptance-stories-to-add-using-existing-yaml-graph-walk-machinery" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Hard node publishes nested structured bag state; a later hard node consumes the exact value; checkpoint/resume preserves it.</p></li>
+<li><p>General inference node receives only its declared context projection, not unrelated bag fields; truncation and omitted-evidence manifests are inspectable.</p></li>
+<li><p>A model calls <code class="docutils literal notranslate"><span class="pre">inspect_bag</span></code> twice during one invocation; both reads observe the same deeply frozen snapshot even if live state subsequently changes.</p></li>
+<li><p>A model inspects a permitted prior response, and an unauthorized path/record request is denied and logged.</p></li>
+<li><p>An inference result publishes a validated typed value to the live bag without mutating its input snapshot.</p></li>
+<li><p>A judge receives the same snapshot/projection substrate but has <strong>no tool-calling interface</strong>; it returns a typed verdict or abstention. Insufficient evidence triggers graph-level follow-up, not an internal judge tool loop.</p></li>
+<li><p>Child recipe mapping and checkpoint/resume preserve declared values without implicitly sharing parent/child bag objects.</p></li>
+<li><p>Context compilation, inspection, and transcript replay reproduce identical model-visible evidence for the same snapshot, independent of model-output nondeterminism.</p></li>
+</ul>
+<p><strong>Open design choices:</strong> exact ContextSpec schema; immutable snapshot representation and retention; how concurrent writes are ordered at capture; output merge/conflict policy; transcript persistence and response visibility; judge verdict schema and confidence calibration; precise handling of retries and paused in-flight calls. Do not present these as settled or implemented.</p>
+</section>
+</section>
+<section id="deterministic-hard-node-capability-contracts">
+<h2>Deterministic hard-node capability contracts<a class="headerlink" href="#deterministic-hard-node-capability-contracts" title="Link to this heading"></a></h2>
+<p>The following is a proposed implementation specification for a reusable hard-node capability library. It formalizes the inputs, computation, outputs, and failure behavior of each operation. <strong>These are design contracts, not assertions that these runner kinds or YAML fields already exist.</strong> Audit existing MechaHarness runners and helpers before adding new implementations.</p>
+<section id="shared-configuration-and-execution-contract">
+<h3>Shared configuration and execution contract<a class="headerlink" href="#shared-configuration-and-execution-contract" title="Link to this heading"></a></h3>
+<p>A hard-node configuration declares: (1) input bag paths and required schemas, (2) operation parameters, (3) output bag paths and schemas, (4) permitted side effects/capabilities, and (5) error and conflict policy. Inputs and outputs must not be inferred from incidental node payloads or arbitrary global state.</p>
+<p>Illustrative <em>proposed</em> configuration, not current YAML grammar:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project_discovery</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bag_transform</span>
+<span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project</span>
+<span class="nt">reads</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">acc.workspace_inventory</span>
+<span class="nt">parameters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">fields</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">relevant_files</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">verified_symbols</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">unknowns</span><span class="p p-Indicator">]</span>
+<span class="nt">writes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">destination</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ctx.discovery_summary</span>
+<span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replace</span>
+<span class="nt">on_error</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">destination</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">err.project_discovery</span>
+<span class="w">  </span><span class="nt">policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fail</span>
+</pre></div>
+</div>
+<p>Execution sequence: resolve declared bag paths → validate schemas and permissions → perform deterministic operation → validate outputs → atomically commit declared writes → record structured execution diagnostics. A failure must not leave partially published bag mutations. For pure transforms, identical input/configuration produces identical output. For workspace operations, reproducibility also requires recording the observed workspace revision, file hashes, relevant environment, and external command versions where applicable. Any explicit filesystem mutation requires a separate authorization and rollback/partial-effect contract; bag atomicity alone cannot roll back external side effects.</p>
+<p>Use the existing <code class="docutils literal notranslate"><span class="pre">WalkBag</span></code> registers (<code class="docutils literal notranslate"><span class="pre">in</span></code>, <code class="docutils literal notranslate"><span class="pre">out</span></code>, <code class="docutils literal notranslate"><span class="pre">acc</span></code>, <code class="docutils literal notranslate"><span class="pre">ctx</span></code>, <code class="docutils literal notranslate"><span class="pre">ask</span></code>, <code class="docutils literal notranslate"><span class="pre">ans</span></code>, <code class="docutils literal notranslate"><span class="pre">err</span></code>) with structured values stored beneath them. Working data ordinarily lives under <code class="docutils literal notranslate"><span class="pre">acc</span></code>/<code class="docutils literal notranslate"><span class="pre">ctx</span></code>; published recipe results under <code class="docutils literal notranslate"><span class="pre">out</span></code>; diagnostics under <code class="docutils literal notranslate"><span class="pre">err</span></code> or an explicitly declared diagnostic path. These are conventions, not an implicit data-routing mechanism: the node’s declared write destinations govern.</p>
+</section>
+<section id="initial-capability-registry">
+<h3>Initial capability registry<a class="headerlink" href="#initial-capability-registry" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Capability</p></th>
+<th class="head"><p>Declared inputs</p></th>
+<th class="head"><p>Deterministic computation</p></th>
+<th class="head"><p>Declared outputs</p></th>
+<th class="head"><p>Failure / boundary semantics</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bag_project</span></code></p></td>
+<td><p>Source structured value, e.g. <code class="docutils literal notranslate"><span class="pre">acc.workspace_inventory</span></code>; selected field paths and optional rename/default policy</p></td>
+<td><p>Select/rename nested fields into a new object; do not mutate source</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ctx.discovery_summary</span></code></p></td>
+<td><p>Missing required path or schema mismatch is typed failure; optional defaults explicit</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bag_merge</span></code></p></td>
+<td><p>Multiple paths, e.g. <code class="docutils literal notranslate"><span class="pre">acc.search_results</span></code>, <code class="docutils literal notranslate"><span class="pre">acc.symbol_results</span></code>; merge policy</p></td>
+<td><p>Merge via declared replace/append/keyed-union/reject-conflicts strategy</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.evidence</span></code></p></td>
+<td><p>Conflicts rejected or resolved only by declared policy; no silent overwrite</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bag_validate</span></code></p></td>
+<td><p>Value e.g. <code class="docutils literal notranslate"><span class="pre">out.discovery</span></code>; versioned schema/registered contract</p></td>
+<td><p>Check schema and produce field-level diagnostics</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.validation.discovery</span></code></p></td>
+<td><p>Invalid value yields structured report; optional fail-node policy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">workspace_manifest</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">in.workspace</span></code> root/scope; ignore rules; traversal limits; filesystem-read grant</p></td>
+<td><p>Enumerate normalized relative paths; classify types; collect size/hash; record exclusions</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.workspace.manifest</span></code> with files, omissions, errors, coverage</p></td>
+<td><p>Inaccessible paths, symlink escape, traversal limits, and races reported explicitly</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">file_search</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ask.search_queries</span></code>; <code class="docutils literal notranslate"><span class="pre">acc.workspace.manifest</span></code>; <code class="docutils literal notranslate"><span class="pre">ctx.search_budget</span></code></p></td>
+<td><p>Literal/regex search within declared scope; deduplicate; capture paths, line ranges, hashes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.search.matches</span></code> with provenance/truncation</p></td>
+<td><p>Invalid patterns, changed files, and budget exhaustion reported; no fabricated matches</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">source_extract</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ask.source_requests</span></code> file/span refs; manifest/revision</p></td>
+<td><p>Check path and revision; read bounded exact lines/syntax spans</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.evidence.excerpts</span></code> with text, location, hashes, rejected requests</p></td>
+<td><p>Stale refs, missing files, out-of-bounds spans, size limits explicit</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">symbol_index</span></code></p></td>
+<td><p>Manifest file set; language/parser configuration; limits</p></td>
+<td><p>Parse supported source files; extract definitions/imports/exports and stable symbol locations</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.workspace.symbol_index</span></code> plus diagnostics/coverage</p></td>
+<td><p>Unsupported language and parse failures become coverage gaps, not invented symbols</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">evidence_resolve</span></code></p></td>
+<td><p>Model-proposed claims/refs e.g. <code class="docutils literal notranslate"><span class="pre">out.discovery</span></code>; manifest and verified excerpts</p></td>
+<td><p>Resolve cited file/symbol/span identities, revision, existence, and support references</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.evidence.resolution</span></code> with verified/rejected/unresolved entries</p></td>
+<td><p>Reference verification is deterministic; semantic truth beyond deterministic checks remains unverified</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">coverage_measure</span></code></p></td>
+<td><p>Search history, scoped manifest, parser coverage, budgets/thresholds</p></td>
+<td><p>Calculate searched scope, exclusions, exhaustion, threshold satisfaction</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.discovery.coverage</span></code> with metrics, omissions, threshold results</p></td>
+<td><p>Insufficient coverage must not be relabeled <code class="docutils literal notranslate"><span class="pre">not_found</span></code>; distinguish inconclusive</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">result_compare</span></code></p></td>
+<td><p>Actual e.g. <code class="docutils literal notranslate"><span class="pre">out</span></code>; expected <code class="docutils literal notranslate"><span class="pre">in.acceptance</span></code>; comparator config</p></td>
+<td><p>Schema-aware exact/set/tolerance comparisons with explicitly ignored volatile fields</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">acc.verification.comparison</span></code> with pass/fail and mismatch paths</p></td>
+<td><p>Unsupported comparison types, invalid expectations, and schema mismatch reported</p></td>
+</tr>
+</tbody>
+</table>
+<p>These example paths demonstrate data flow; actual recipes may bind other declared paths without changing capability semantics.</p>
+</section>
+<section id="capability-granularity-and-reuse">
+<h3>Capability granularity and reuse<a class="headerlink" href="#capability-granularity-and-reuse" title="Link to this heading"></a></h3>
+<p>A capability is a deterministic operation, <strong>not necessarily a separate Python runner class or agentic recipe</strong>. Closely related bag transformations may share a constrained <code class="docutils literal notranslate"><span class="pre">bag_transform</span></code> runner with registered operations. Avoid an unrestricted expression/scripting language: each operation needs a stable schema, permissions, explicit writes, and predictable failure semantics. An agentic recipe composes hard capabilities and inference/judge nodes into an independently testable objective.</p>
+<p>Keep the context boundary from the preceding section: hard nodes may prepare, rank, and validate evidence in the live bag, but the inference node itself compiles its declared context from an immutable call-time snapshot. Hard nodes must not implicitly inject the whole bag into a model request.</p>
+</section>
+<section id="user-story-acceptance-matrix">
+<h3>User-story acceptance matrix<a class="headerlink" href="#user-story-acceptance-matrix" title="Link to this heading"></a></h3>
+<p>For <strong>each</strong> capability, add an existing-framework YAML user story that initializes declared bag inputs, steps the hard node, inspects its exact output path, checks unrelated state remains unchanged, checkpoints and resumes before a downstream consumer, and verifies failure/denial behavior. Add property-style cases where useful (merge conflicts, invalid regex, stale source hashes, symlink escapes, missing fields, unsupported parsers, and coverage exhaustion). Test input/output schema errors and partial-write prevention. These are <strong>required future tests</strong>, not yet authored or run by this section.</p>
+<p>The existing inference-continuity fixtures linked above are the cross-node integration acceptance surface: verify that hard-node evidence and prior inference outputs survive in the bag and appear only through a subsequent inference node’s declared context projection.</p>
+<p><strong>Open design choices:</strong> exact runner/YAML binding syntax, whether path resolution is a common runtime service, merge/version conflict handling, external effect idempotency, schema registry/versioning, and how to represent workspace revisions. Decide these with reference to the current code and existing story machinery before implementation.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

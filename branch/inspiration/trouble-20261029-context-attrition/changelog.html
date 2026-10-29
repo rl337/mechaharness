@@ -1,0 +1,761 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Changelog &mdash; MechaHarness 0.8.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=486e5634"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="mechaharness.external_effect" href="api/external_effect.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            MechaHarness
+              <img src="_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Changelog</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/changelog.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading"></a></h1>
+<p>All notable changes to this project are documented in this file.</p>
+<p>The format is based on <a class="reference external" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>,
+and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<section id="unreleased">
+<h2>[Unreleased]<a class="headerlink" href="#unreleased" title="Link to this heading"></a></h2>
+<section id="added">
+<h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Verify failure escalate to decompose:</strong> after <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> repair is
+exhausted (or a coding work item fails), <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> builds
+one consolidated restore-and-finish brief
+(<code class="docutils literal notranslate"><span class="pre">decompose_instructions_from_failures</span></code>), restores a pre-burst workspace
+checkpoint, and retries once in oneshot mode; if that still fails it yields
+<code class="docutils literal notranslate"><span class="pre">context_version=decompose</span></code> guidance
+(<code class="docutils literal notranslate"><span class="pre">decompose_guidance_ask</span></code>) so the driver can clarify. Escalate briefs keep
+full goal text plus a fixed no-<code class="docutils literal notranslate"><span class="pre">eval</span></code>/<code class="docutils literal notranslate"><span class="pre">exec</span></code>/<code class="docutils literal notranslate"><span class="pre">literal_eval</span></code>
+non-negotiables block (no 400-char clip).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">AnswerBody.on_decompose</span></code>:</strong> durable <code class="docutils literal notranslate"><span class="pre">answer</span></code> may drain one
+<code class="docutils literal notranslate"><span class="pre">context_version=decompose</span></code> yield (<code class="docutils literal notranslate"><span class="pre">accept_proposed</span></code>) so linear coding
+story walks reach <code class="docutils literal notranslate"><span class="pre">completed</span></code> after verify escalate. Calc CLI stages set
+<code class="docutils literal notranslate"><span class="pre">on_decompose:</span> <span class="pre">accept_proposed</span></code>.</p></li>
+<li><p><strong>Coding implementation scope preamble:</strong> project-coding tool-loop system
+prompt and per-todo work brief constrain speculative next-stage features
+while requiring previously green host checks to stay green (extend, do not
+replace). Planning / ideation paths are unchanged.</p></li>
+<li><p><strong>Coding write / verify ban on <code class="docutils literal notranslate"><span class="pre">eval</span></code> cheats:</strong> <code class="docutils literal notranslate"><span class="pre">CodingWriteGuard</span></code> refuses
+<code class="docutils literal notranslate"><span class="pre">*.py</span></code> writes that call <code class="docutils literal notranslate"><span class="pre">eval</span></code> / <code class="docutils literal notranslate"><span class="pre">exec</span></code> / <code class="docutils literal notranslate"><span class="pre">literal_eval</span></code> (AST, not
+substring). Verify hints and repair briefs use semantic “do not call …”
+wording; <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> with eval-style <code class="docutils literal notranslate"><span class="pre">text_forbids</span></code> also AST-check;
+repair bursts get the same host-verify hint list as the first attempt.</p></li>
+<li><p><strong>Coding workspace checkpoint advances on success:</strong>
+<code class="docutils literal notranslate"><span class="pre">save_coding_workspace_checkpoint</span></code> / <code class="docutils literal notranslate"><span class="pre">restore_coding_workspace_checkpoint</span></code>
+copy the suite workspace tree. Sequential suites refresh the checkpoint after
+each successful stage; <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> refreshes at burst start and
+on <code class="docutils literal notranslate"><span class="pre">ok</span></code>. Restore refuses an empty checkpoint over a non-empty workspace
+(fixes escalate wiping <code class="docutils literal notranslate"><span class="pre">calc.py</span></code> after a stale empty 010 snapshot).</p></li>
+<li><p><strong>Suite / coding <code class="docutils literal notranslate"><span class="pre">TIMING.jsonl</span></code>:</strong> sequential suites append per-stage wall
+clock (and print <code class="docutils literal notranslate"><span class="pre">STAGE</span> <span class="pre">START/OK/FAIL</span></code>); <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> appends
+burst / work-item / verify-repair / escalate spans under the suite run root
+(<code class="docutils literal notranslate"><span class="pre">…/TIMING.jsonl</span></code>), including inference timeout and coding iteration knobs
+so live dogfood can see where hours go.</p></li>
+<li><p><strong>Coding already-satisfied preflight:</strong> before the Completer runs,
+<code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> executes <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code>; if they already pass it
+returns <code class="docutils literal notranslate"><span class="pre">already_satisfied</span></code> / <code class="docutils literal notranslate"><span class="pre">changes_expected=false</span></code> without
+<code class="docutils literal notranslate"><span class="pre">write_file</span></code>. Story expect <code class="docutils literal notranslate"><span class="pre">includes_if</span></code> (calc_cli) requires
+<code class="docutils literal notranslate"><span class="pre">written_files</span></code> only when changes were expected. Override with
+<code class="docutils literal notranslate"><span class="pre">force_implement:</span> <span class="pre">true</span></code>.</p></li>
+<li><p><strong>Coding write gutting guard:</strong> <code class="docutils literal notranslate"><span class="pre">CodingWriteGuard</span></code> on project-coding
+<code class="docutils literal notranslate"><span class="pre">write_file</span></code> refuses catastrophic shrink / syntax-breaking / def-dropping
+overwrites of existing files. <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> gains <code class="docutils literal notranslate"><span class="pre">min_bytes</span></code> and
+<code class="docutils literal notranslate"><span class="pre">python_parses</span></code>. Story <code class="docutils literal notranslate"><span class="pre">fangore_coding_write_guard</span></code>.</p></li>
+<li><p><strong>HTTP GitHub client (PR + CI logs):</strong> <code class="docutils literal notranslate"><span class="pre">HttpGitHubClient</span></code> /
+<code class="docutils literal notranslate"><span class="pre">GitHubConnectionConfig</span></code> (<code class="docutils literal notranslate"><span class="pre">MECHA_GITHUB_*</span></code> / <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>, not
+Settings) for pull requests, check runs, and job logs. Tools <code class="docutils literal notranslate"><span class="pre">ci_checks</span></code> /
+<code class="docutils literal notranslate"><span class="pre">ci_job_log</span></code>. <code class="docutils literal notranslate"><span class="pre">LocalGitHttpPullRequestCodingGit</span></code> when a token is bound.
+<code class="docutils literal notranslate"><span class="pre">RecordingGitHubClient</span></code> + story <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_diagnose</span></code>
+(<code class="docutils literal notranslate"><span class="pre">coding_github:</span> <span class="pre">local_mock_ci</span></code>) for forge lookup without network; repair
+remains <code class="docutils literal notranslate"><span class="pre">fangore_coding_ci_repair</span></code>.</p></li>
+<li><p><strong>Static-check repair lane:</strong> <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> accepts <code class="docutils literal notranslate"><span class="pre">ruff</span></code> / <code class="docutils literal notranslate"><span class="pre">mypy</span></code>
+rows. Story <code class="docutils literal notranslate"><span class="pre">fangore_coding_static_checks</span></code> seeds I001 / no-untyped-def and
+repairs under guided coding. Fixture suite <code class="docutils literal notranslate"><span class="pre">sources/</span></code> trees are ignored by
+root pytest collection.</p></li>
+<li><p><strong>Injectable <code class="docutils literal notranslate"><span class="pre">CodingGit</span></code> for project coding:</strong> ABC
+<code class="docutils literal notranslate"><span class="pre">mechaharness.coding_git.CodingGit</span></code> with default
+<code class="docutils literal notranslate"><span class="pre">LocalProcessCodingGit</span></code> (local <code class="docutils literal notranslate"><span class="pre">git</span></code> / <code class="docutils literal notranslate"><span class="pre">gh</span></code>, SSH agent) and
+<code class="docutils literal notranslate"><span class="pre">RecordingPullRequestCodingGit</span></code> (local git + mock forge) for stories/CI.
+Hosts override via <code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig(coding_git=…)</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_coding_git()</span></code> for HTTPS+token or forge-API backends. Tool names stay
+<code class="docutils literal notranslate"><span class="pre">git_status</span></code> / <code class="docutils literal notranslate"><span class="pre">git_log</span></code> / <code class="docutils literal notranslate"><span class="pre">git_diff</span></code> / <code class="docutils literal notranslate"><span class="pre">git_push</span></code> /
+<code class="docutils literal notranslate"><span class="pre">create_pull_request</span></code>. Stories <code class="docutils literal notranslate"><span class="pre">fangore_coding_git_inspect</span></code> /
+<code class="docutils literal notranslate"><span class="pre">fangore_coding_git_open_pr</span></code> seed a feature branch and keep GitHub mocked.</p></li>
+<li><p><strong>Sequential <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code> coding suite (live-capable):</strong> ordered Fangore arc
+that grows a shared-workspace <code class="docutils literal notranslate"><span class="pre">calc.py</span></code> CLI through numbers → <code class="docutils literal notranslate"><span class="pre">+−</span></code> →
+<code class="docutils literal notranslate"><span class="pre">×÷</span></code> → <code class="docutils literal notranslate"><span class="pre">^</span></code> → parentheses → common functions. Suite injects
+<code class="docutils literal notranslate"><span class="pre">environment.workspace:</span> <span class="pre">suite</span></code>. Static CI uses <code class="docutils literal notranslate"><span class="pre">coding_write</span></code> stubs; live
+(<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code>) ignores stubs and drives
+<code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code> with a real Completer via
+<code class="docutils literal notranslate"><span class="pre">completer_as_tool_loop_complete</span></code>.   Coding bursts honor <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> (file <code class="docutils literal notranslate"><span class="pre">text_contains</span></code> plus
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">calc.py</span> <span class="pre">…</span></code> checks, with one repair/refinement nudge), recover when
+the model finishes without <code class="docutils literal notranslate"><span class="pre">write_file</span></code>, and pass <code class="docutils literal notranslate"><span class="pre">MECHA_MAX_TOKENS</span></code> into
+completions. Goals require named <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">evaluate</span></code> / <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">main</span></code>. <code class="docutils literal notranslate"><span class="pre">project_coding</span></code> walks are live-eligible; the suite harness
+asserts live HTTP POSTs occurred. Authoring:
+<code class="docutils literal notranslate"><span class="pre">scripts/write_calc_cli_suite.py</span></code> + <code class="docutils literal notranslate"><span class="pre">suites/calc_cli/sources/</span></code>.</p></li>
+<li><p><strong>Sequential suite run ids:</strong> each sequential suite attempt gets a durable
+<code class="docutils literal notranslate"><span class="pre">run_id</span></code> under <code class="docutils literal notranslate"><span class="pre">.mechaharness/suite_runs/</span></code> (workspace + manifest). Banner /
+warning / <code class="docutils literal notranslate"><span class="pre">LATEST</span></code> make the id easy to find; <code class="docutils literal notranslate"><span class="pre">MECHA_SUITE_RUN_ID</span></code> +
+<code class="docutils literal notranslate"><span class="pre">MECHA_SUITE_FROM</span></code> resume or rerun from a stage without redoing priors.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">counter_pkg</span></code> coding-delegate suite:</strong> sequential multi-file arc
+(package + pytest + CLI) with <code class="docutils literal notranslate"><span class="pre">coding_writes</span></code> stubs, <code class="docutils literal notranslate"><span class="pre">verify_runs.pytest</span></code>,
+and the same live Completer / repair path as <code class="docutils literal notranslate"><span class="pre">calc_cli</span></code>. Roadmap:
+<code class="docutils literal notranslate"><span class="pre">docs/guides/coding-delegate-suites.md</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">delegate_pkg</span></code> coding-delegate suite:</strong> one sequential Widget arc covering
+list-mode bootstrap, thorough guidance fork (code + README), red-green
+<code class="docutils literal notranslate"><span class="pre">double()</span></code>, and <code class="docutils literal notranslate"><span class="pre">Widget</span></code>→<code class="docutils literal notranslate"><span class="pre">Gadget</span></code> refactor. Live Completer is the gate;
+static stubs provisional. MCP reuses the same graph (no fourth suite).
+Authoring: <code class="docutils literal notranslate"><span class="pre">scripts/write_delegate_pkg_suite.py</span></code>.</p></li>
+<li><p><strong>User-story suites:</strong> thematic <code class="docutils literal notranslate"><span class="pre">suite.json</span></code> catalogs under
+<code class="docutils literal notranslate"><span class="pre">static/fixture/v1/suites/</span></code> with <code class="docutils literal notranslate"><span class="pre">execution.mode</span></code> <code class="docutils literal notranslate"><span class="pre">parallel</span></code> |
+<code class="docutils literal notranslate"><span class="pre">sequential</span></code>, <code class="docutils literal notranslate"><span class="pre">vars</span></code> / <code class="docutils literal notranslate"><span class="pre">setup</span></code> / <code class="docutils literal notranslate"><span class="pre">cleanup</span></code>, and explicit
+<code class="docutils literal notranslate"><span class="pre">stages</span></code> (<code class="docutils literal notranslate"><span class="pre">story</span></code> + <code class="docutils literal notranslate"><span class="pre">scenario</span></code>). Every static scenario is in exactly
+one primary suite. Pytest <code class="docutils literal notranslate"><span class="pre">test_user_story_suite</span></code>; static suite members
+leave <code class="docutils literal notranslate"><span class="pre">test_user_story</span></code> (HTTP twins remain there). Schema:
+<code class="docutils literal notranslate"><span class="pre">tests/stories/suite_spec.py</span></code>; membership helper
+<code class="docutils literal notranslate"><span class="pre">scripts/generate_user_story_suites.py</span></code>. Guide Suites section regenerated
+from fixtures.</p></li>
+<li><p><strong>Workspace verify verbs:</strong> <code class="docutils literal notranslate"><span class="pre">run_python</span></code> and <code class="docutils literal notranslate"><span class="pre">workspace_read</span></code> put
+<code class="docutils literal notranslate"><span class="pre">stdout</span></code> / <code class="docutils literal notranslate"><span class="pre">stderr</span></code> / <code class="docutils literal notranslate"><span class="pre">exit_code</span></code> or <code class="docutils literal notranslate"><span class="pre">exists</span></code> / <code class="docutils literal notranslate"><span class="pre">text</span></code> into the
+step observation bag for ordinary expects. <code class="docutils literal notranslate"><span class="pre">ProjectCodingLocalWork</span></code>
+records <code class="docutils literal notranslate"><span class="pre">written_files</span></code> / <code class="docutils literal notranslate"><span class="pre">workspace_root</span></code> on completed yields. Story
+<code class="docutils literal notranslate"><span class="pre">environment.workspace</span></code> / <code class="docutils literal notranslate"><span class="pre">local_work:</span> <span class="pre">project_coding</span></code> / <code class="docutils literal notranslate"><span class="pre">coding_write</span></code>
+bind a temp coding host. Durable + coding local work share the CLI
+<code class="docutils literal notranslate"><span class="pre">EventLog</span></code> so stories can pin <code class="docutils literal notranslate"><span class="pre">core:graph_yield</span></code> /
+<code class="docutils literal notranslate"><span class="pre">core:guidance_resume</span></code> / graph lifecycle via <code class="docutils literal notranslate"><span class="pre">tapped_event_types</span></code>.
+Scenario: <code class="docutils literal notranslate"><span class="pre">fangore_guided_coding_recipe</span></code> <code class="docutils literal notranslate"><span class="pre">helper_run_python.yaml</span></code>.</p></li>
+<li><p><strong>Story observation paths + plan classify:</strong> CLI expect <code class="docutils literal notranslate"><span class="pre">key</span></code> resolves
+dotted / indexed paths (<code class="docutils literal notranslate"><span class="pre">plan.items[0].instruction</span></code>). Durable step
+observations lift allowlisted yield payload fields (<code class="docutils literal notranslate"><span class="pre">context_version</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mode</span></code>, <code class="docutils literal notranslate"><span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">result</span></code>, <code class="docutils literal notranslate"><span class="pre">error</span></code>). <code class="docutils literal notranslate"><span class="pre">PlanClassifyLocalWork</span></code> and
+<code class="docutils literal notranslate"><span class="pre">environment.local_work:</span> <span class="pre">plan_classify</span></code> run classify/refine offline without
+a coding tool loop. Story scenarios: <code class="docutils literal notranslate"><span class="pre">oneshot_from_goal</span></code>,
+<code class="docutils literal notranslate"><span class="pre">numbered_list</span></code>, <code class="docutils literal notranslate"><span class="pre">conflict_list_refinement</span></code>, <code class="docutils literal notranslate"><span class="pre">explicit_list_mode</span></code>.</p></li>
+<li><p><strong>MCP progress paths:</strong> <code class="docutils literal notranslate"><span class="pre">tools/call</span></code> with <code class="docutils literal notranslate"><span class="pre">_meta.progressToken</span></code> emits
+<code class="docutils literal notranslate"><span class="pre">notifications/progress</span></code> messages such as
+<code class="docutils literal notranslate"><span class="pre">guided_coding</span> <span class="pre">›</span> <span class="pre">plan_tile</span> <span class="pre">›</span> <span class="pre">work_item</span> <span class="pre">1</span> <span class="pre">›</span> <span class="pre">tool_round</span> <span class="pre">2</span> <span class="pre">›</span> <span class="pre">write_file</span></code>
+during generator local work (keeps Cursor stdio idle timeout alive).</p></li>
+<li><p><strong>Inference progress watchdog:</strong> <code class="docutils literal notranslate"><span class="pre">await_while_running</span></code> ticks MCP progress
+only while a Completer awaitable is still pending, then fails with
+<code class="docutils literal notranslate"><span class="pre">InferenceTimeoutError</span></code> after <code class="docutils literal notranslate"><span class="pre">MECHA_INFERENCE_TIMEOUT_SECONDS</span></code> (fallback
+<code class="docutils literal notranslate"><span class="pre">MECHA_HTTP_TIMEOUT_SECONDS</span></code>). Wired through
+<code class="docutils literal notranslate"><span class="pre">ConversationalToolLoopRunner</span></code>.</p></li>
+<li><p><strong>Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>):</strong> classify oneshot vs
+ordered list, refine conflicts, pre / per-item / post-list acceptance.
+Optional <code class="docutils literal notranslate"><span class="pre">scope_refinement</span></code> / <code class="docutils literal notranslate"><span class="pre">list_refinement</span></code> guidance is requested by
+local work (<code class="docutils literal notranslate"><span class="pre">request_guidance</span></code>); answering restarts the plan. Domain
+<code class="docutils literal notranslate"><span class="pre">mechaharness.instruction_plan</span></code>. Story: <code class="docutils literal notranslate"><span class="pre">fangore_instruction_todo_plan</span></code>.</p></li>
+<li><p><strong>Guided coding Agentic Recipe (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>):</strong> frontier MCP guidance soft
+point tiles <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code> (<code class="docutils literal notranslate"><span class="pre">plan_tile</span></code>) + <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>
+(<code class="docutils literal notranslate"><span class="pre">audit_tile</span></code>). Host Config <code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig</span></code> registers workspace coding
+tools and a <code class="docutils literal notranslate"><span class="pre">GeneratorLocalWork</span></code> burst after guidance. MCP
+<code class="docutils literal notranslate"><span class="pre">MECHA_MCP_HOST=project_coding</span></code> binds that Config; inference endpoints belong
+on the Cursor MCP <code class="docutils literal notranslate"><span class="pre">env</span></code> block. Story: <code class="docutils literal notranslate"><span class="pre">fangore_guided_coding_recipe</span></code>.</p></li>
+<li><p><strong>Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>):</strong> RDG-aligned spine
+collect → freeze → decide → independent QA → deterministic → gate, lifted
+from the video production host <code class="docutils literal notranslate"><span class="pre">ideation.infer.accept</span></code> for library reuse. Domain module
+<code class="docutils literal notranslate"><span class="pre">mechaharness.audited_decision</span></code>. Migration notes:
+<code class="docutils literal notranslate"><span class="pre">docs/inspiration/video-production-audited-infer-migration.md</span></code>. Story:
+<code class="docutils literal notranslate"><span class="pre">fangore_audited_infer_accept</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<section id="id1">
+<h2>[0.7.0] — 2026-10-22<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>Job lanes, stepped graph execution, user-story migration / recipe execute,
+live model verification against reason + judge hosts, and pyiv ≥ 1.1.1 (#32,
+#33). Tip auto-bumped past unreleased <code class="docutils literal notranslate"><span class="pre">0.6.0</span></code> after the #33 merge.</p>
+<section id="changed">
+<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Floor <strong>pyiv ≥ 1.1.1</strong>.</p></li>
+<li><p>Live story mode collects HTTP twins <strong>and</strong> static <code class="docutils literal notranslate"><span class="pre">infer</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> /
+<code class="docutils literal notranslate"><span class="pre">judge_route</span></code> walks against real reason + judge hosts; cassette-exact token
+counts are soft while behavioral expects stay hard. Aligns two JEV fixtures
+with live Laya classifications.</p></li>
+<li><p>Docs: mark <code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code> / stepped <code class="docutils literal notranslate"><span class="pre">RunControl</span></code> as shipped in architecture
+and DI guides; align judge / openai-local / CLI-universe live-suite notes
+with expanded live story collection (#32 / #33).</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>Added<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Stepped graph execution (SG-01..10):</strong> <code class="docutils literal notranslate"><span class="pre">RunControl</span></code> on <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run</span></code>
+(<code class="docutils literal notranslate"><span class="pre">one_step</span></code> / <code class="docutils literal notranslate"><span class="pre">until</span></code> / <code class="docutils literal notranslate"><span class="pre">paused</span></code>); soft subgraph enter-before-first-child;
+product verb <code class="docutils literal notranslate"><span class="pre">graph_walk</span></code>; <code class="docutils literal notranslate"><span class="pre">graph.inline</span></code> on user_story YAML. Owns
+<code class="docutils literal notranslate"><span class="pre">fangore_graph_until_before</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_graph_one_step</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_graph_soft_enter</span></code>; migrates <code class="docutils literal notranslate"><span class="pre">fangore_insp_effect_revalidation</span></code>.</p></li>
+<li><p><strong>JobLaneBroker (JL-01..10):</strong> lane-scoped run sequences, WalkBags, exposure /
+grants / handoff, and authorized <code class="docutils literal notranslate"><span class="pre">observe</span></code> (<code class="docutils literal notranslate"><span class="pre">mechaharness.job_lane_broker</span></code>).
+Config bind via <code class="docutils literal notranslate"><span class="pre">get_job_lane_broker()</span></code>; CLI verbs <code class="docutils literal notranslate"><span class="pre">lane_publish</span></code> /
+<code class="docutils literal notranslate"><span class="pre">lane_observe</span></code> / <code class="docutils literal notranslate"><span class="pre">lane_grant</span></code> / <code class="docutils literal notranslate"><span class="pre">lane_handoff</span></code>; story YAML
+<code class="docutils literal notranslate"><span class="pre">environment.job_lanes</span></code> + step <code class="docutils literal notranslate"><span class="pre">lane</span></code> / <code class="docutils literal notranslate"><span class="pre">run_id</span></code>. Matrix stories
+<code class="docutils literal notranslate"><span class="pre">fangore_job_lane_*</span></code>; <code class="docutils literal notranslate"><span class="pre">fangore_insp_cross_task_isolation</span></code> retargeted.
+<code class="docutils literal notranslate"><span class="pre">CrossTaskIsolationGuard</span></code> remains as a deprecated shim.</p></li>
+<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">transactional_resume</span></code>:</strong> crash-window durable coding-job
+resume via <code class="docutils literal notranslate"><span class="pre">host_graph_executor</span></code> + <code class="docutils literal notranslate"><span class="pre">ArmedCrashProbe</span></code> (DR-10). Wave 2 P1
+stories (<code class="docutils literal notranslate"><span class="pre">fangore_tdr_crash_*</span></code>) migrate onto <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code>.</p></li>
+<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">judge</span></code>:</strong> judge-lane twin of <code class="docutils literal notranslate"><span class="pre">infer</span></code> (typed questions over
+state via <code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code> + cassette/live). JEV citation / route / safety /
+requirements stories walk this verb with real inputs.</p></li>
+<li><p><strong>Agentic Recipe <code class="docutils literal notranslate"><span class="pre">context_pack</span></code>:</strong> host <code class="docutils literal notranslate"><span class="pre">RagRetriever</span></code> →
+<code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code> (fixture retriever for stories).</p></li>
+<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code>:</strong> Config-bound lifecycle extensions on
+tool-loop or tiny graph (replaces <code class="docutils literal notranslate"><span class="pre">lifecycle_case</span></code>).</p></li>
+<li><p><strong>Product CLI verb <code class="docutils literal notranslate"><span class="pre">assemble_context</span></code>:</strong> thin pack leaf for already-scored
+candidate lists.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> execute:</strong> <code class="docutils literal notranslate"><span class="pre">decision_plane_runner</span></code> +
+<code class="docutils literal notranslate"><span class="pre">DecisionPlaneRecipeAdapter</span></code> (<code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>). Restores
+<code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_{projection,policy,shadow,telemetry}</span></code> and promotes
+recipe / model_policy stories off instantiate-only (G0).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code> / <code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code> execute:</strong> fixture runners +
+<code class="docutils literal notranslate"><span class="pre">VerifyRepairRecipeAdapter</span></code> / <code class="docutils literal notranslate"><span class="pre">BoundedRetryRecipeAdapter</span></code> promote those
+stories to <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> outcome walks (G1 batch 1).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code>:</strong> migrated from <code class="docutils literal notranslate"><span class="pre">bounded_repair_loop</span></code> probe
+onto <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code> <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> (G1 batch 2).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">independent_review</span></code> execute:</strong> <code class="docutils literal notranslate"><span class="pre">independent_review_runner</span></code> +
+<code class="docutils literal notranslate"><span class="pre">IndependentReviewRecipeAdapter</span></code> promote inspiration + JEV shape stories
+(G1 batch 3).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">environment_repair</span></code> / <code class="docutils literal notranslate"><span class="pre">initialize_preflight</span></code> execute:</strong> fixture runners +
+adapters promote those stories to <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> (G1 batch 4).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code> / <code class="docutils literal notranslate"><span class="pre">safety_eval</span></code> execute:</strong> fixture runners +
+adapters complete G1 control-recipe promotion (G1 batch 5).</p></li>
+</ul>
+</section>
+<section id="removed">
+<h3>Removed<a class="headerlink" href="#removed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Case-bag verbs <code class="docutils literal notranslate"><span class="pre">decision_case</span></code> and <code class="docutils literal notranslate"><span class="pre">lifecycle_case</span></code>:</strong> replaced by
+instrumented <code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">context_pack</span></code> / <code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> / <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code>
+walks (Wave 3).</p></li>
+</ul>
+</section>
+<section id="id3">
+<h3>Changed<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>User-story litmus (recipe expansion):</strong> missing graph path ⇒ add Agentic
+Recipe / runners, do not demote valid persona claims. Wave 3 demotion of
+<code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_{projection,policy,shadow,telemetry}</span></code> retracted —
+restore under G0
+(recipe expansion guide). Remaining
+probe batches regrouped as G0–G7 (recipe-first), not thin-verb then YAML.</p></li>
+<li><p><strong>Story harness redesign:</strong> <code class="docutils literal notranslate"><span class="pre">story.json</span></code> <code class="docutils literal notranslate"><span class="pre">kind</span></code> is now a reusable harness
+family (<code class="docutils literal notranslate"><span class="pre">pure_api</span></code>, <code class="docutils literal notranslate"><span class="pre">access_authority</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_execution</span></code>, …) under
+<code class="docutils literal notranslate"><span class="pre">tests/stories/harness/</span></code>; <code class="docutils literal notranslate"><span class="pre">request.json</span></code> requires <code class="docutils literal notranslate"><span class="pre">op</span></code> for the surface within
+that family. New acceptance coverage should be fixtures-only by default —
+register a new <code class="docutils literal notranslate"><span class="pre">op</span></code> or harness only when the execution <em>shape</em> changes, never
+a per-story kind. Catalog validation rejects unknown kinds/ops.</p></li>
+<li><p><strong>Unit tests table-driven where cheap:</strong> <code class="docutils literal notranslate"><span class="pre">test_api_connection</span></code>, access-policy /
+grant-key matrices, tool-phase effect matrix (assert + registry in one loop),
+event query filters, and recipe evolvable-allowlist cases use <code class="docutils literal notranslate"><span class="pre">&#64;parametrize</span></code>
+over structs instead of near-clone functions.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3>Added<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Customer-facing agent skills</strong> under <code class="docutils literal notranslate"><span class="pre">agent-skills/</span></code> (<code class="docutils literal notranslate"><span class="pre">use-mechaharness</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mechaharness-observability</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.mdc</span></code>) plus
+<a class="reference internal" href="#docs/guides/agent-skills.md"><span class="xref myst">Agent skills for your project</span></a> with GitHub raw
+links on <code class="docutils literal notranslate"><span class="pre">main</span></code>, and <a class="reference internal" href="#docs/requirements/host-integration.md"><span class="xref myst">Host integration requirements</span></a>
+(HOST-01..07). Maintainer requirement: keep them in sync when public host
+APIs / correlators / promote guidance change (see <code class="docutils literal notranslate"><span class="pre">project-docs</span></code> skill).
+Docs index has a <strong>Downstream consumers</strong> section.</p></li>
+<li><p><strong>Dots / personal-agent safety primitives:</strong> <code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code> execution-token
+fields (<code class="docutils literal notranslate"><span class="pre">principal</span></code>, <code class="docutils literal notranslate"><span class="pre">expires_at</span></code>, <code class="docutils literal notranslate"><span class="pre">trust_origin</span></code>, <code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code>) with
+attenuation-only <code class="docutils literal notranslate"><span class="pre">narrow()</span></code>; <code class="docutils literal notranslate"><span class="pre">ToolPhase</span></code> (<code class="docutils literal notranslate"><span class="pre">observe</span></code> / <code class="docutils literal notranslate"><span class="pre">prepare</span></code> / <code class="docutils literal notranslate"><span class="pre">execute</span></code>)
+on <code class="docutils literal notranslate"><span class="pre">Tool</span></code> and <code class="docutils literal notranslate"><span class="pre">OperationContract</span></code>; authorization epoch persisted on graph
+checkpoints and checked on <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run(resume=True)</span></code>;
+<code class="docutils literal notranslate"><span class="pre">ToolResult</span></code> provenance/freshness fields + <code class="docutils literal notranslate"><span class="pre">tool_result_freshness</span></code>;
+<code class="docutils literal notranslate"><span class="pre">effect_revalidation</span></code>, <code class="docutils literal notranslate"><span class="pre">AuthorityGate</span></code>, <code class="docutils literal notranslate"><span class="pre">DenialStore</span></code>, <code class="docutils literal notranslate"><span class="pre">CrossTaskIsolationGuard</span></code>;
+<code class="docutils literal notranslate"><span class="pre">HandoffRecord</span></code> <code class="docutils literal notranslate"><span class="pre">goals</span></code> / <code class="docutils literal notranslate"><span class="pre">exclusions</span></code> / <code class="docutils literal notranslate"><span class="pre">verdict</span></code>.</p></li>
+<li><p><strong>Self-revising recipe substrate:</strong> <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code> versions, active
+pointer, <code class="docutils literal notranslate"><span class="pre">promote</span></code> / <code class="docutils literal notranslate"><span class="pre">rollback</span></code>, lineage, evaluation attachments, and
+<code class="docutils literal notranslate"><span class="pre">composition_violations</span></code>; <code class="docutils literal notranslate"><span class="pre">SoftPoint.evolvable</span></code> allowlist; Agentic Recipe
+<code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code>.</p></li>
+<li><p><strong>Alerts, correction debt, conflict checkpoints (phase 4):</strong>
+<code class="docutils literal notranslate"><span class="pre">AlertEscalationPolicy</span></code> (once/log → repeated/surface → persistent/propose,
+deterministic); <code class="docutils literal notranslate"><span class="pre">SpecificationDebtRecord</span></code> / <code class="docutils literal notranslate"><span class="pre">SpecificationDebtLedger</span></code> /
+<code class="docutils literal notranslate"><span class="pre">capture_correction</span></code> (schema only; hosts generate tests) with optional
+<code class="docutils literal notranslate"><span class="pre">PromotionRecord.record_id</span></code>; <code class="docutils literal notranslate"><span class="pre">decision_conflict_checkpoint</span></code> neighbor-revisit
+helpers over <code class="docutils literal notranslate"><span class="pre">concurrent_write_conflicts</span></code> (no second CR engine).</p></li>
+<li><p><strong>Eval, evolution, safety, port search (phase 5):</strong> held-out final-test gate
+(<code class="docutils literal notranslate"><span class="pre">require_held_out_final_test</span></code>, <code class="docutils literal notranslate"><span class="pre">FinalTestGateError</span></code>) mandatory on
+<code class="docutils literal notranslate"><span class="pre">ResearchLab.promote</span></code> when <code class="docutils literal notranslate"><span class="pre">held_out_protected</span></code> and available as
+<code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry.promote_with_final_test</span></code>; <code class="docutils literal notranslate"><span class="pre">recipe_evolution</span></code>
+(trace summaries → registry-bounded soft-binding candidates → objective
+selection, no model calls); Agentic Recipe <code class="docutils literal notranslate"><span class="pre">safety_eval</span></code>;
+<code class="docutils literal notranslate"><span class="pre">GraphTemplate.io_contract</span></code> and <code class="docutils literal notranslate"><span class="pre">recipe_port_search.search_compatible_recipes</span></code>
+(catalog ids only).</p></li>
+<li><p><strong>Audit and ownership hooks (phase 6):</strong> optional <code class="docutils literal notranslate"><span class="pre">recipe_id</span></code>,
+<code class="docutils literal notranslate"><span class="pre">recipe_version</span></code>, <code class="docutils literal notranslate"><span class="pre">freshness_summary</span></code>, approval / denial / effect ids on
+<code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> and <code class="docutils literal notranslate"><span class="pre">TraceEnvelope</span></code> (+ <code class="docutils literal notranslate"><span class="pre">policy_revision</span></code>); <code class="docutils literal notranslate"><span class="pre">ReviewAuditRecord</span></code>
+and <code class="docutils literal notranslate"><span class="pre">summarize_recipe_audit</span></code>; <code class="docutils literal notranslate"><span class="pre">summarize_freshness</span></code>;
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_recipe_promotion_policy()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_evolution_campaign_hooks()</span></code> (no-op defaults, DI-first).</p></li>
+<li><p><strong>Inspiration surface consistency pass:</strong></p>
+<ul>
+<li><p><em>Observability:</em> <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> merges <code class="docutils literal notranslate"><span class="pre">graph_id</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_goal</span></code>,
+<code class="docutils literal notranslate"><span class="pre">recipe_id</span></code> / <code class="docutils literal notranslate"><span class="pre">recipe_version</span></code> / <code class="docutils literal notranslate"><span class="pre">recipe_instance_id</span></code>, <code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code>
+(and <code class="docutils literal notranslate"><span class="pre">live_authorization_epoch</span></code>), and nested <code class="docutils literal notranslate"><span class="pre">parent_run_id</span></code> / <code class="docutils literal notranslate"><span class="pre">nest_depth</span></code>
+into every <code class="docutils literal notranslate"><span class="pre">core:graph_*</span></code> lifecycle event; <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run(parent_run_id=)</span></code>;
+<code class="docutils literal notranslate"><span class="pre">mechaharness.event_correlators</span></code> (<code class="docutils literal notranslate"><span class="pre">graph_trace_context</span></code>,
+<code class="docutils literal notranslate"><span class="pre">project_node_attempt_rows</span></code>); <code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> / <code class="docutils literal notranslate"><span class="pre">TraceEnvelope</span></code> gain matching
+<code class="docutils literal notranslate"><span class="pre">graph_id</span></code> / <code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code> fields. Contract:
+<code class="docutils literal notranslate"><span class="pre">docs/requirements/event-analytics-schema.md</span></code> (OBS-A01..A06) and the
+<code class="docutils literal notranslate"><span class="pre">event-observability</span></code> skill.</p></li>
+<li><p><em>Host wiring:</em> <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.get_authority_gate()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_denial_store()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_tool_result_freshness_policy()</span></code>; <code class="docutils literal notranslate"><span class="pre">host_kit.host_authority_gate</span></code> /
+<code class="docutils literal notranslate"><span class="pre">host_denial_store</span></code>; <code class="docutils literal notranslate"><span class="pre">mechaharness.host_apis</span></code> re-export catalog;
+<code class="docutils literal notranslate"><span class="pre">promote_recipe(...,</span> <span class="pre">hooks=)</span></code> calls <code class="docutils literal notranslate"><span class="pre">EvolutionCampaignHooks.on_promotion</span></code>
+after a successful pointer move; <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry.search_compatible</span></code>.</p></li>
+<li><p><em>Shared helper:</em> <code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope.authority_issue</span></code> is now the single source
+of envelope reason codes for <code class="docutils literal notranslate"><span class="pre">AuthorityGate</span></code> and <code class="docutils literal notranslate"><span class="pre">revalidate_before_effect</span></code>.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id5">
+<h3>Changed<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Module layout (shims keep old imports working):</strong> <code class="docutils literal notranslate"><span class="pre">isolation/</span></code> package
+(<code class="docutils literal notranslate"><span class="pre">isolation_contract</span></code>, <code class="docutils literal notranslate"><span class="pre">workspace_isolation</span></code>, <code class="docutils literal notranslate"><span class="pre">cross_task_isolation</span></code>),
+<code class="docutils literal notranslate"><span class="pre">recipe_lifecycle/</span></code> package (<code class="docutils literal notranslate"><span class="pre">recipe_evolution</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_promotion_policy</span></code>,
+<code class="docutils literal notranslate"><span class="pre">evolution_campaign_hooks</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_port_search</span></code>); <code class="docutils literal notranslate"><span class="pre">tool_phase</span></code> folded into
+<code class="docutils literal notranslate"><span class="pre">operation_registry</span></code>, <code class="docutils literal notranslate"><span class="pre">specification_debt</span></code> into <code class="docutils literal notranslate"><span class="pre">rule_promotion</span></code>,
+<code class="docutils literal notranslate"><span class="pre">review_audit</span></code> into <code class="docutils literal notranslate"><span class="pre">decision_log</span></code>; <code class="docutils literal notranslate"><span class="pre">graph_template</span></code> shim now re-exports the
+full <code class="docutils literal notranslate"><span class="pre">graph_templates</span></code> surface (<code class="docutils literal notranslate"><span class="pre">ProduceCritiqueRefineTemplate</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SafetyEvalTemplate</span></code>, …).</p></li>
+<li><p><strong>Story hygiene:</strong> removed native/insp twin stories
+(<code class="docutils literal notranslate"><span class="pre">fangore_tool_gating</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_consequence_risk_scale</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_sparse_advisor_consult</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_verification_outcome_gate</span></code>,
+<code class="docutils literal notranslate"><span class="pre">taloneth_harness_experiment_retire</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_capability_envelope</span></code>)
+keeping one story per concept with the richer implementation text; dead
+<code class="docutils literal notranslate"><span class="pre">inspiration_delta_contract</span></code> runner removed; <code class="docutils literal notranslate"><span class="pre">tests/stories/runners.py</span></code> split
+into a <code class="docutils literal notranslate"><span class="pre">tests/stories/runners/</span></code> package of domain modules with a thin
+<code class="docutils literal notranslate"><span class="pre">run_story</span></code> dispatcher; new story <code class="docutils literal notranslate"><span class="pre">nubble_graph_event_correlators</span></code>; deleted
+eight 5–9 line unit tests that only duplicated insp stories.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ResearchLab.promote</span></code> now requires <code class="docutils literal notranslate"><span class="pre">final_test=</span></code> (a passing held-out
+<code class="docutils literal notranslate"><span class="pre">EvaluatorResult</span></code>) unless the <code class="docutils literal notranslate"><span class="pre">EvalProtocol</span></code> sets <code class="docutils literal notranslate"><span class="pre">held_out_protected=False</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<section id="id6">
+<h2>[0.5.0] — 2026-10-18<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p>pyiv 1.1 HTTP + stdlib DI cut (#30). Manual minor after a squash merge
+auto-bumped the tip to <code class="docutils literal notranslate"><span class="pre">0.4.2</span></code>.</p>
+<section id="id7">
+<h3>Changed<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Floor <strong>pyiv ≥ 1.1.0</strong>. Register use-case stdlib injectables on
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (<code class="docutils literal notranslate"><span class="pre">Environment</span></code>, <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>, <code class="docutils literal notranslate"><span class="pre">Filesystem</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Clock</span></code>, <code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code>) and route high-residue edges through them:
+judge <code class="docutils literal notranslate"><span class="pre">from_env</span></code>, checkpoint stamps, <code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code>, decision JSONL.</p></li>
+<li><p>Inference and judge HTTP use injectable <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>
+(<code class="docutils literal notranslate"><span class="pre">AsyncUrllibHttpClient</span></code> by default; <code class="docutils literal notranslate"><span class="pre">MemoryAsyncHttpClient</span></code> in tests)
+instead of raw <code class="docutils literal notranslate"><span class="pre">httpx</span></code>. Dropped runtime <code class="docutils literal notranslate"><span class="pre">httpx</span></code>; keep it as a <strong>dev</strong>
+extra for FastAPI/Starlette <code class="docutils literal notranslate"><span class="pre">TestClient</span></code> (<code class="docutils literal notranslate"><span class="pre">tests/test_api.py</span></code>).</p></li>
+<li><p>Shared services bind in <code class="docutils literal notranslate"><span class="pre">configure()</span></code> and are consumed by constructor
+injection / <code class="docutils literal notranslate"><span class="pre">inject(T)</span></code>. Removed Config <code class="docutils literal notranslate"><span class="pre">getattr</span></code> service caches and
+sibling <code class="docutils literal notranslate"><span class="pre">get_*</span></code> collaborator pulls (<code class="docutils literal notranslate"><span class="pre">EventLog</span></code>, <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>,
+judge connection, <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code>, <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code>, …). Missing
+bindings fail at inject time.</p></li>
+<li><p>Domain ctors require injectables (no silent OS/stdlib/HTTP defaults):
+<code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphStore</span></code>, <code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code>, checkpoint
+<code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>, <code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> /
+<code class="docutils literal notranslate"><span class="pre">for_judge(env=…)</span></code>, OpenAI/Anthropic/SystemOne <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>.</p></li>
+<li><p>Normative docs: <code class="docutils literal notranslate"><span class="pre">docs/requirements/dependency-injection.md</span></code>;
+<code class="docutils literal notranslate"><span class="pre">di-first</span></code> rule and <code class="docutils literal notranslate"><span class="pre">di-config-ownership</span></code> skill updated.</p></li>
+</ul>
+</section>
+<section id="migration">
+<h3>Migration<a class="headerlink" href="#migration" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Subclass Config (or use <code class="docutils literal notranslate"><span class="pre">run()</span></code> / host kit); do not hand-wire services
+via Config getters as a locator.</p></li>
+<li><p>Pass <code class="docutils literal notranslate"><span class="pre">Environment</span></code> / <code class="docutils literal notranslate"><span class="pre">Filesystem</span></code> / <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code> / <code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code>
+explicitly in tests, or bind Memory*/Mock* doubles through Config /
+<code class="docutils literal notranslate"><span class="pre">pyiv.override</span></code> (<code class="docutils literal notranslate"><span class="pre">tests/support/stdlib_doubles.py</span></code>).</p></li>
+</ul>
+</section>
+</section>
+<section id="id8">
+<h2>[0.4.1] — 2026-10-14<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<p>Node components, recipe CLI/SVG render, and pyiv catalog multibinds (#26).
+Patch tip auto-bumped to <code class="docutils literal notranslate"><span class="pre">0.4.1</span></code> before this PyPI publish.</p>
+<section id="id9">
+<h3>Added<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Node components</strong> (<code class="docutils literal notranslate"><span class="pre">mechaharness.node_component</span></code>): queryable sub-node
+elements that must render within a parent graph node; kinds project existing
+events / soft points / nest / stop / budget / effects. Traversal projector
+and <code class="docutils literal notranslate"><span class="pre">embed_recipe_as_tool</span></code> (HF-08). Docs:
+<code class="docutils literal notranslate"><span class="pre">docs/reference/node-components.md</span></code>,
+<code class="docutils literal notranslate"><span class="pre">docs/requirements/dynamic-tool-graph.md</span></code>; the AI assistant host HF inspiration + map.</p></li>
+<li><p><strong>HF-05:</strong> <code class="docutils literal notranslate"><span class="pre">host_graph_executor(event_log=)</span></code> and <code class="docutils literal notranslate"><span class="pre">tapping_event_log</span></code> /
+<code class="docutils literal notranslate"><span class="pre">TappingEventLog</span></code> for blessed-path event taps.</p></li>
+<li><p><strong>HF-07:</strong> Agentic Recipe <code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code> +
+<code class="docutils literal notranslate"><span class="pre">ConversationalToolLoopRunner</span></code> expanding <code class="docutils literal notranslate"><span class="pre">tools.subgraph</span></code> rounds.</p></li>
+<li><p>Harness emits enrich <code class="docutils literal notranslate"><span class="pre">turn_start</span></code> / <code class="docutils literal notranslate"><span class="pre">inference</span></code> / <code class="docutils literal notranslate"><span class="pre">tool_call</span></code> /
+<code class="docutils literal notranslate"><span class="pre">tool_result</span></code> with <code class="docutils literal notranslate"><span class="pre">parent_node_id</span></code> and <code class="docutils literal notranslate"><span class="pre">component_id</span></code> for traversal.</p></li>
+<li><p>Stories: <code class="docutils literal notranslate"><span class="pre">fangore_host_kit_event_tap</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_node_components</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_traversal_contract</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_harness_tool_loop_graph</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_conversational_tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_recipe_as_tool</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_harness_run_recipe</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_backend_describe_recipe</span></code>.</p></li>
+<li><p>CLI <code class="docutils literal notranslate"><span class="pre">recipes</span></code> group: <code class="docutils literal notranslate"><span class="pre">list</span></code> / <code class="docutils literal notranslate"><span class="pre">show</span></code> / <code class="docutils literal notranslate"><span class="pre">render</span></code> / <code class="docutils literal notranslate"><span class="pre">run</span></code>. <code class="docutils literal notranslate"><span class="pre">render</span></code> writes an
+SVG from <code class="docutils literal notranslate"><span class="pre">recipe_diagram</span></code> (ER field tables, harness loop containers,
+serpentine interiors, fan-out/fan-in stack bands) with explanations below;
+built on node components + graph structure (not Mermaid).</p></li>
+<li><p>Agentic Recipes <code class="docutils literal notranslate"><span class="pre">harness_run</span></code> and <code class="docutils literal notranslate"><span class="pre">backend_describe</span></code> (CLI <code class="docutils literal notranslate"><span class="pre">run</span></code> /
+<code class="docutils literal notranslate"><span class="pre">describe</span></code> library paths) with recipe runners.</p></li>
+<li><p>Agent guidance: <code class="docutils literal notranslate"><span class="pre">.cursor/skills/node-components/SKILL.md</span></code>; agentic-recipes
+skill/rule require declaring node components on new recipes.</p></li>
+</ul>
+</section>
+<section id="id10">
+<h3>Changed<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Floor <strong>pyiv ≥ 0.4.3</strong> (catalog introspection / <code class="docutils literal notranslate"><span class="pre">contribute_map</span></code>).</p></li>
+<li><p>Agentic Recipe / backend / harness <strong>membership</strong> is a pyiv map multibind:
+<code class="docutils literal notranslate"><span class="pre">graph_template_classes()</span></code> / <code class="docutils literal notranslate"><span class="pre">inference_classes()</span></code> / <code class="docutils literal notranslate"><span class="pre">harness_classes()</span></code> →
+<code class="docutils literal notranslate"><span class="pre">contribute_map</span></code> + <code class="docutils literal notranslate"><span class="pre">catalog_keys</span></code>. <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code> is injected from
+the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> map (hosts extend via class-map hooks, not a second list).</p></li>
+</ul>
+</section>
+</section>
+<section id="id11">
+<h2>[0.4.0] — 2026-10-11<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<p>Host kit cut (#25). Merge tip auto-bumped to <code class="docutils literal notranslate"><span class="pre">0.4.0</span></code> before this PyPI publish.</p>
+<section id="id12">
+<h3>Added<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Host kit (<code class="docutils literal notranslate"><span class="pre">mechaharness.host_kit</span></code>): <code class="docutils literal notranslate"><span class="pre">host_graph_executor()</span></code> builds a
+Config-injected <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> with runners + optional SQLite durability;
+<code class="docutils literal notranslate"><span class="pre">SubmitOnceEffectfulRunner</span></code> covers the common submit-once / complete-on-accept
+/ never-silent-redispatch effect pattern; <code class="docutils literal notranslate"><span class="pre">effectful_external_handle()</span></code> reads
+the recorded handle from a <code class="docutils literal notranslate"><span class="pre">GraphResult</span></code> without scraping node maps by hand.
+Owning story <code class="docutils literal notranslate"><span class="pre">fangore_host_kit_submit_once</span></code>; pydoc doctests +
+<code class="docutils literal notranslate"><span class="pre">tests/fixtures/host_kit/</span></code> matrix; DI guide host-kit section.</p></li>
+</ul>
+</section>
+</section>
+<section id="id13">
+<h2>[0.3.2] — 2026-10-10<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
+<p>Agentic Recipes / typed decision-plane cut (#23) plus Jev typed-judgment
+domain stories (#24). GitHub tagged <code class="docutils literal notranslate"><span class="pre">v0.3.2</span></code> from the merge tip before this
+PyPI publish.</p>
+<section id="id14">
+<h3>Added<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Agentic Recipes</strong> as a top-level product concept on the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code>
+substrate: composition helpers (<code class="docutils literal notranslate"><span class="pre">instance_key</span></code>, <code class="docutils literal notranslate"><span class="pre">tile</span></code>), catalog docs, and
+requirements in <code class="docutils literal notranslate"><span class="pre">docs/requirements/recipes-and-decision-plane.md</span></code>.</p></li>
+<li><p>Reference recipes <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> and <code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>, plus owning stories
+for <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code>, <code class="docutils literal notranslate"><span class="pre">environment_repair</span></code>, and recipe namespace tiling.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">decision_plane_runtime</span></code>: structured projection, batched typed questions,
+code-owned policy with escalation, shadow compare, evaluation telemetry,
+<code class="docutils literal notranslate"><span class="pre">assemble_context_within_budget</span></code>, and <code class="docutils literal notranslate"><span class="pre">action_question_id</span></code> routing.</p></li>
+<li><p>Jev typed-judgment inspiration + requirements map, with Fangore domain
+stories: <code class="docutils literal notranslate"><span class="pre">fangore_jev_citation_matching_claim</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_context_budget_pack</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_jev_req_review_template_shape</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_jev_task_route_simple_local</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fangore_jev_action_safety</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<section id="id15">
+<h2>[0.3.1] — 2026-10-06<a class="headerlink" href="#id15" title="Link to this heading"></a></h2>
+<p>PyPI cut of the 0.3.0 library (GitHub also tagged <code class="docutils literal notranslate"><span class="pre">v0.3.0</span></code> before auto-bump
+raced the publish).</p>
+</section>
+<section id="id16">
+<h2>[0.3.0] — 2026-10-06<a class="headerlink" href="#id16" title="Link to this heading"></a></h2>
+<p>Evaluation/rollout provenance cut inspired by FineEnvs multi-harness RL,
+plus transactional durable resume and WalkingLabs eval substrate.</p>
+<section id="id17">
+<h3>Added<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>FineEnvs <code class="docutils literal notranslate"><span class="pre">MH-MHRL-*</span></code> library surfaces: <code class="docutils literal notranslate"><span class="pre">HarnessFingerprint</span></code>,
+<code class="docutils literal notranslate"><span class="pre">EvaluationOutcome</span></code>, <code class="docutils literal notranslate"><span class="pre">ObjectivePolicy</span></code>, run parity, experiment lineage,
+<code class="docutils literal notranslate"><span class="pre">RolloutGraph</span></code>, trace reconciliation, eval matrix, cross-harness failure
+taxonomy, <code class="docutils literal notranslate"><span class="pre">InferenceCapture</span></code> + linkage preflight, learning export packs,
+experiment dimensions, exposure/discriminative telemetry, and efficiency
+scorecards. Map: <code class="docutils literal notranslate"><span class="pre">docs/inspiration/fineenvs-mh-mhrl-requirements-map.md</span></code>.</p></li>
+<li><p>Transactional durable graph resume: injectable <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> seam,
+<code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code> reference backend, opt-in <code class="docutils literal notranslate"><span class="pre">EffectfulGraphNodeRunner</span></code>
+with effect intent/acceptance/reconciliation, and crash-injection probes.
+Story: <code class="docutils literal notranslate"><span class="pre">fangore_tdr_crash_after_accept_before_record</span></code>. Requirements:
+<code class="docutils literal notranslate"><span class="pre">docs/requirements/transactional-durable-resume.md</span></code>. Module doctests (and
+Sphinx API pages) document Config wiring and SQLite restart usage;
+pytest runs <code class="docutils literal notranslate"><span class="pre">--doctest-modules</span></code> over <code class="docutils literal notranslate"><span class="pre">src/mechaharness</span></code>.</p></li>
+<li><p>WalkingLabs / eval-research inspiration primitives and persona stories
+(trace envelope, claims/evaluators/trials, context layers, WIP/fan-in,
+and related surfaces). Map:
+<code class="docutils literal notranslate"><span class="pre">docs/inspiration/walkinglabs-eval-requirements-map.md</span></code>.</p></li>
+</ul>
+</section>
+<section id="id18">
+<h3>Changed<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Rename inference backend <code class="docutils literal notranslate"><span class="pre">junespark</span></code> → <code class="docutils literal notranslate"><span class="pre">openai_local</span></code> (same OpenAI-compat
+client, no baked-in <code class="docutils literal notranslate"><span class="pre">base_url</span></code>; set <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>). Live story shorthand
+is <code class="docutils literal notranslate"><span class="pre">MECHA_LIVE_OPENAI_COMPAT</span></code>. Guide: <code class="docutils literal notranslate"><span class="pre">docs/guides/openai-local.md</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<section id="id19">
+<h2>[0.2.0] — 2026-09-30<a class="headerlink" href="#id19" title="Link to this heading"></a></h2>
+<p>Inspiration-aligned library cut for client orchestrators (graph templates,
+budgets, linkage, and related primitives).</p>
+<section id="id20">
+<h3>Added<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Parameterized <code class="docutils literal notranslate"><span class="pre">graph_templates</span></code> package (fan-out/aggregate, verify/repair,
+independent review, environment repair) with soft points, provenance stamp,
+and demotion; reference docs under <code class="docutils literal notranslate"><span class="pre">docs/reference/graph-templates/</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">Budget</span></code> with soft wind-down and hard fail; required on
+<code class="docutils literal notranslate"><span class="pre">GraphExecutor.run</span></code>; nested subgraph spend rolls into the shared ledger.
+Stories: <code class="docutils literal notranslate"><span class="pre">fangore_insp_graph_budget</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_insp_budget_subgraph_rollup</span></code>.</p></li>
+<li><p>Pre-exec <code class="docutils literal notranslate"><span class="pre">LinkageResolver</span></code>, <code class="docutils literal notranslate"><span class="pre">StopContract</span></code>, capability envelopes, context
+providers, verification / delegation / advisor policies, consequence scaling,
+harness experiments, instruction gotchas, and failure attribution.</p></li>
+<li><p>Inspiration requirements map and persona stories covering reqs 1–19.</p></li>
+<li><p>Same-lane Completer / JudgeProvider <strong>flavors</strong> via
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.completer_bindings()</span></code> / <code class="docutils literal notranslate"><span class="pre">judge_bindings()</span></code> (<code class="docutils literal notranslate"><span class="pre">Named</span></code> tag
+sets) and host <code class="docutils literal notranslate"><span class="pre">Annotated[T,</span> <span class="pre">Named|Matched]</span></code> constructor params. Story:
+<code class="docutils literal notranslate"><span class="pre">fangore_completer_flavors</span></code>.</p></li>
+</ul>
+</section>
+<section id="id21">
+<h3>Changed<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>pyiv ≥ 0.4.2</strong> — floor bumped for <code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code> constructor injection. Constructor injection for
+harness/strategy; hosts must subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (or use <code class="docutils literal notranslate"><span class="pre">run()</span></code>).
+<code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code> requires injectable deps; <code class="docutils literal notranslate"><span class="pre">HarnessConfig.subagent_tools</span></code>
+replaces the harness kwarg. <code class="docutils literal notranslate"><span class="pre">InMemoryAccessControl</span></code> /
+<code class="docutils literal notranslate"><span class="pre">InMemoryCostAccountant</span></code> require <code class="docutils literal notranslate"><span class="pre">event_log</span></code> (and policy for access).</p></li>
+</ul>
+</section>
+<section id="fixed">
+<h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">eval_type_backport</span></code> on all Python versions so CI (3.12) and the CLI
+can import <code class="docutils literal notranslate"><span class="pre">mechaharness.di</span></code> (previously gated behind <code class="docutils literal notranslate"><span class="pre">python_version</span> <span class="pre">&lt;</span> <span class="pre">'3.10'</span></code>).</p></li>
+<li><p>Normalize PEP 604 optional <code class="docutils literal notranslate"><span class="pre">Named</span></code>/<code class="docutils literal notranslate"><span class="pre">Matched</span></code> constructor hints for pyiv on
+Python 3.12; stop injecting <code class="docutils literal notranslate"><span class="pre">GraphExecutor.fingerprint_parts</span></code> (GenericAlias
+is not a concrete optional type).</p></li>
+</ul>
+</section>
+</section>
+<section id="id22">
+<h2>[0.1.2] — 2026-09-25<a class="headerlink" href="#id22" title="Link to this heading"></a></h2>
+<p>PyPI cut of the #12 requirements-addendum library (GitHub also tagged <code class="docutils literal notranslate"><span class="pre">v0.1.1</span></code>
+for the intermediate TestPyPI upload; production skipped that number after
+auto-bump raced the publish).</p>
+<section id="id23">
+<h3>Added<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>REQUIREMENTS.md addendum incorporation: decision plane, convergence, context
+experiments, graph resume/fan-in, validator qualification, OBS export/metrics,
+ATK-style research; host track generalized to a nameless local inference source</p></li>
+<li><p>Library implementations: <code class="docutils literal notranslate"><span class="pre">OperationContract</span></code>, <code class="docutils literal notranslate"><span class="pre">ConvergenceGuard</span></code>, decision
+surfaces, shadow decision-backend reports, context compiler / derived memory /
+topology / cache layout, offline decision export, topology metrics, validator
+qualification, hierarchical fan-in</p></li>
+<li><p>Persona user stories as acceptance vocabulary (Nubble / Fangore / Taloneth),
+including gap stories for tool gating, human review, repair loops, and related
+paths; story <code class="docutils literal notranslate"><span class="pre">footnotes</span></code> and generated guide sync</p></li>
+</ul>
+</section>
+<section id="id24">
+<h3>Changed<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Keep <code class="docutils literal notranslate"><span class="pre">docs/adr/</span></code> and <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> local-only (gitignored; not published)</p></li>
+<li><p>Story acceptance is story-id primary; former INF/POL codes retired to local
+archaeology mapping</p></li>
+</ul>
+</section>
+</section>
+<section id="id25">
+<h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#id25" title="Link to this heading"></a></h2>
+<p>First public library cut: DI-first agent harness with native lanes, cost on the
+run path, built-in EventLog, judge/decide outcomes, and persona user stories.</p>
+<section id="id26">
+<h3>Added<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>pyiv DI</strong> — <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> / <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code>; hosts subclass hooks
+(<code class="docutils literal notranslate"><span class="pre">get_inference_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_harness_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_access_policy</span></code>, judge
+connection/provider). OpenAPI <code class="docutils literal notranslate"><span class="pre">RunRequest</span></code> / <code class="docutils literal notranslate"><span class="pre">run()</span></code> remains the non-DI facade</p></li>
+<li><p><strong>EventLog</strong> — namespaced, host-extendable event types; queryable in-memory /
+logging logs; harness lifecycle, inference, tools, cost, and access checks</p></li>
+<li><p><strong>Cost</strong> — Ability units, <code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code>, <code class="docutils literal notranslate"><span class="pre">core:cost</span></code> on harness runs</p></li>
+<li><p><strong>Access</strong> — deny-by-default grants, <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code>, <code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> composition,
+<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code> / Config <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code></p></li>
+<li><p><strong>Harness families</strong> — <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>, <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code>, <code class="docutils literal notranslate"><span class="pre">react</span></code>, OpenAI/Anthropic
+tool families on the shared EventLog + cost path; Completer nesting</p></li>
+<li><p><strong>Lanes</strong> — <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment.active_lane()</span></code> (<code class="docutils literal notranslate"><span class="pre">reason</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> / <code class="docutils literal notranslate"><span class="pre">media</span></code>);
+wrong-lane errors name operator load hints</p></li>
+<li><p><strong>Judge</strong> — typed <code class="docutils literal notranslate"><span class="pre">judge()</span></code> → <code class="docutils literal notranslate"><span class="pre">Judgement</span></code> (signals); <code class="docutils literal notranslate"><span class="pre">JudgementPolicy</span></code> /
+<code class="docutils literal notranslate"><span class="pre">decide()</span></code> verdicts; System One adapter; injectable <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code> /
+<code class="docutils literal notranslate"><span class="pre">SimpleHttpConnectionConfig.from_env</span></code> (<code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>); outcomes
+<code class="docutils literal notranslate"><span class="pre">Completion</span></code> / <code class="docutils literal notranslate"><span class="pre">Judgement</span></code> / <code class="docutils literal notranslate"><span class="pre">Generation</span></code></p></li>
+<li><p><strong>Phase 1–5 scaffolds</strong> — routing, graph, research, context experiments,
+operation registry, decision log</p></li>
+<li><p><strong>Persona user stories</strong> — Nubble / Fangore / Taloneth prose narratives;
+dual-mode static cassettes (CI, zero skips) / live via <code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND</span></code></p></li>
+<li><p><strong>Docs site</strong> — Sphinx + Pages at https://rl337.org/mechaharness/; founding
+principles on the home page; packaging, Trusted Publishing, and auto version bump</p></li>
+</ul>
+</section>
+<section id="id27">
+<h3>Changed<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">junespark</span></code> backend no longer ships a private LAN <code class="docutils literal notranslate"><span class="pre">base_url</span></code> default; set
+<code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code></p></li>
+<li><p>Settings stays slim: judge HTTP knobs bind on <code class="docutils literal notranslate"><span class="pre">APIConnectionConfig</span></code>, not as a
+provider bag on <code class="docutils literal notranslate"><span class="pre">Settings</span></code></p></li>
+</ul>
+</section>
+<section id="security">
+<h3>Security<a class="headerlink" href="#security" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Purged historical <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> (host LAN inventory) from git history prior
+to public release</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api/external_effect.html" class="btn btn-neutral float-left" title="mechaharness.external_effect" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

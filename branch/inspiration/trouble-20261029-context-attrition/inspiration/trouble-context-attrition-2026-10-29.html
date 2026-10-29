@@ -1,0 +1,215 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trouble inspiration: evidence attrition across inference boundaries &mdash; MechaHarness 0.8.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=486e5634"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Trouble inspiration: evidence attrition across inference boundaries</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-context-attrition-2026-10-29.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trouble-inspiration-evidence-attrition-across-inference-boundaries">
+<h1>Trouble inspiration: evidence attrition across inference boundaries<a class="headerlink" href="#trouble-inspiration-evidence-attrition-across-inference-boundaries" title="Link to this heading"></a></h1>
+<p>Status: <strong>research and candidate user-story extensions</strong>, not a new normative API or implementation.
+Discovery date: 2026-10-29. Capability ID: <strong>TR-20261029-CONTEXT-ATTRITION</strong>.
+Owner: <strong>MechaHarness</strong> (generic context compilation, compaction, inference envelopes, observability and acceptance).</p>
+<section id="source-map-and-claims">
+<h2>Source map and claims<a class="headerlink" href="#source-map-and-claims" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Curated Trouble entry: https://rl337.org/trouble/posts/2115618251023536321.html ; archived source JSON: https://github.com/rl337/trouble/blob/main/posts/2026/10/29/2115618251023536321.json ; original post: https://x.com/ComputerPapers/status/2115618251023536321</p></li>
+<li><p>Sehgal, Panahandeh and Ezzati-Jivan, <em>Context Is a Pipeline, Not a Window: Information Attrition in LLM Agent Harnesses</em>, submitted 2026-10-26, arXiv v1: https://arxiv.org/html/2610.36114v1 ; abstract: https://arxiv.org/abs/2610.36114 ; replication package: https://doi.org/10.5281/zenodo.23614755 .</p></li>
+<li><p>Relevant original sections: §II pipeline model; §III-B replay and row-aware cutter; §III-C framework survey; §IV controlled experiment; §VI validity limits; §VII model-free CI tests.</p></li>
+</ul>
+<p><strong>What the paper actually shows:</strong> 720 field runs generated 11,189 tool results; 3,827 were truncated by fixed-position JSON text slicing, and all cut results were malformed. One late-position field reached the model in 4.7% of 742 calls versus 99.3% for an adjacent early field. Maximum per-call prompt occupancy was 5.75% of a 400k window, so the defect was <em>upstream delivery</em>, not a full model context. A deterministic replay of 864 results showed all oversized prefix-sliced payloads broke, while row-aware cuts preserved valid payloads. One 33,370-character production listing lost all 128 late-list records under a 6,000-character cap. In a controlled spawned-fault experiment, reversed-order truncation increased median calls from 53 to 76 (+43%) and computations from 18 to 36, while finding yield fell from 0.61 to 0.31. Accuracy stayed similar when another evidence route existed. A smaller quiet-fault replay favored repaired delivery (3/6 correct versus 0/5), but authors explicitly do <strong>not</strong> claim the original field-wide accuracy split is causally established. These are source findings, not measured MechaHarness outcomes.</p>
+<p><strong>Mechanism:</strong> Treat context as five boundaries: S1 produced tool result -&gt; delivered model representation; S2 delivered -&gt; agent action/turn budget; S3 action -&gt; retained history; S4 retained -&gt; transferred finding/handoff; S5 transferred -&gt; persisted next-run state. Different boundaries lose different things. A fixed-character prefix slice is especially dangerous for serialized maps/lists: it can cut in the middle of JSON and systematically erase late keys. Safer candidate policies include row-aware reduction, schema-aware projection, explicit omitted-field manifests, and paging via durable observation references. No single algorithm is mandated.</p>
+</section>
+<section id="repository-reality-main-inspected-2026-10-29">
+<h2>Repository reality (main inspected 2026-10-29)<a class="headerlink" href="#repository-reality-main-inspected-2026-10-29" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Existing canonical story: https://github.com/rl337/mechaharness/blob/main/tests/fixtures/models/static/fixture/v1/suites/fangore_context_memory/stages/010_fangore_context_compiler_deficit.yaml . Story <strong>fangore_context_compiler_deficit</strong> requires a deficit report when mandatory sources exceed a prompt budget; the fixture checks unresolved gaps, blockers and no silent omission.</p></li>
+<li><p>Existing context compaction story <strong>fangore_insp_context_compaction</strong>: https://github.com/rl337/mechaharness/blob/main/tests/fixtures/models/static/fixture/v1/suites/fangore_context_memory/stages/040_fangore_insp_context_compaction.yaml .</p></li>
+<li><p>Implementation: https://github.com/rl337/mechaharness/blob/main/src/mechaharness/context_compaction.py defines CompactionInput, CompactionResult, DefaultStagedCompaction and discarded_classes. Its distill stage truncates <strong>any string content over 200 characters</strong> by taking its first 200 characters plus an ellipsis; it does not parse a tool-result schema or record which fields disappeared. This is an observed code property, not proof that all inference routes use this compactor.</p></li>
+<li><p>Product surface: https://github.com/rl337/mechaharness/blob/main/src/mechaharness/context_surface.py exposes context_compiler_deficit and context_compaction_staged, but the staged probe returns only discarded_classes. https://github.com/rl337/mechaharness/blob/main/tests/test_context_compaction.py currently checks adjacent deduplication; it does not exercise oversized structured tool payloads or field-level survival.</p></li>
+<li><p>Context layering and provider seams already exist: src/mechaharness/context_layers.py, context_provider.py and context_experiments.py. Open PR https://github.com/rl337/mechaharness/pull/36 adds ContextSpec bag-to-inference continuity and must be reviewed before modifying inference-envelope paths. <strong>Do not duplicate</strong> its graph-state propagation contract.</p></li>
+</ul>
+<p><strong>Coverage decision: C (partially specified), with an observable test gap.</strong> Existing stories protect mandatory <em>source selection</em> and record coarse discarded classes. They do not currently prove schema-valid <em>structured tool delivery</em> at S1, or an evidence-survival metric at S4. Do not replace existing stories with a new context subsystem.</p>
+</section>
+<section id="candidate-extension-mh-ctx-attr-01-preserve-or-explicitly-reject-structured-tool-evidence">
+<h2>Candidate extension MH-CTX-ATTR-01: preserve or explicitly reject structured tool evidence<a class="headerlink" href="#candidate-extension-mh-ctx-attr-01-preserve-or-explicitly-reject-structured-tool-evidence" title="Link to this heading"></a></h2>
+<p><strong>Persona / why:</strong> As a graph author debugging a tool-using agent, I want the compiled model-visible representation of a structured tool result to remain parseable and to disclose every omitted required field, so that a low token budget cannot silently erase the evidence needed for a decision.</p>
+<p><strong>Existing story relationship:</strong> Extend <strong>fangore_context_compiler_deficit</strong> and <strong>fangore_insp_context_compaction</strong>, rather than inventing a parallel story family. A new fixture may be warranted if the acceptance runner cannot express tool-output delivery under those scenarios.</p>
+<p><strong>Setup:</strong> Use a deterministic synthetic tool result with early and late arrays, a required late record identifying a culprit, 6,000-character-equivalent budget, and explicit field obligations. Also include a small payload, a long plain-text payload, and a maliciously malformed JSON string. Test original and reversed field order, and both full and tight budgets. The fixture should expose the produced payload and the exact representation handed to inference (not merely the durable bag).</p>
+<p><strong>Action:</strong> Compile/compact, then inspect the final model-facing message and omission manifest. Run with inference mocked; no model is needed to prove S1.</p>
+<p><strong>Required observables / acceptance:</strong></p>
+<ol class="arabic simple">
+<li><p>Any output declared to be structured JSON is valid JSON at delivery, or the compiler rejects/marks it incomplete before inference. A literal prefix-sliced JSON fragment is never silently presented as a complete result.</p></li>
+<li><p>Required fields and their source IDs are either present with intact values or explicitly named in a deficit that prevents a false success outcome. Optional-field omission is recorded with field path, policy, budget and reason.</p></li>
+<li><p>Reordering keys or moving the decisive record to the tail cannot change <em>whether loss is disclosed</em>. When policy promises required-field preservation, both orders preserve the field.</p></li>
+<li><p>A large payload can be reduced by a declared structural policy or exposed through a bounded reference/page operation. A budget overflow cannot masquerade as a valid empty result.</p></li>
+<li><p>The original produced tool payload remains available through its authoritative observation reference, subject to access controls; no fabricated reconstruction.</p></li>
+<li><p>A resumed graph preserves the source-to-delivery evidence link and any unresolved deficit; no promotion of a truncated summary into authoritative state.</p></li>
+</ol>
+<p><strong>Negative cases:</strong> required field absent from the original payload; malformed upstream JSON; oversized nested arrays; tool returning a non-JSON string; no available paging provider; a permission-restricted field. These must have distinct, testable outcomes.</p>
+<p><strong>Implementation investigation:</strong> Trace all call sites of DefaultStagedCompaction and ContextCompiler through the current model adapter and PR #36; establish whether the 200-character truncation is applied to actual tool-role messages. Decide how to represent typed field obligations and structured reduction without breaking existing callers. Compare (a) schema-aware projection, (b) whole-record sampling with coverage metadata, (c) durable observation handles and paging, (d) fail-closed delivery for required evidence. A generic formatter is not enough unless it validates the exact delivered bytes.</p>
+</section>
+<section id="candidate-extension-mh-ctx-attr-02-measure-evidence-survival-at-graph-boundaries">
+<h2>Candidate extension MH-CTX-ATTR-02: measure evidence survival at graph boundaries<a class="headerlink" href="#candidate-extension-mh-ctx-attr-02-measure-evidence-survival-at-graph-boundaries" title="Link to this heading"></a></h2>
+<p><strong>Persona / why:</strong> As a harness evaluator, I want to distinguish work the tools produced from evidence the model received and findings the downstream decision actually consumed, so that success and token cost are not the only signals of harness quality.</p>
+<p><strong>Existing story relationship:</strong> Extend context-observation and trace/telemetry acceptance rather than introducing an independent monitoring stack.</p>
+<p><strong>Setup/action:</strong> Execute a deterministic fan-out graph where two workers compute identifiable findings; one finding is transferred, one intentionally omitted. Repeat with a truncated tool result, a turn-limit stop, and a resumed graph. Attach stable observation IDs to source, compiled view, and transferred finding.</p>
+<p><strong>Acceptance:</strong> Per-boundary counts distinguish produced, delivered, retained, transferred and persisted records; a lost finding cannot be reported as transferred; absence is not interpreted as a negative finding; the report includes structured-payload validity and required-field survival; the evaluator can calculate a narrowly defined transfer yield (findings recorded / computations performed) without claiming it measures relevance; duplicate retries do not inflate unique evidence counts. Deterministic fixture assertions should work without a live model. A live-agent evaluation may compare tool calls, total tokens and task accuracy as secondary metrics.</p>
+<p><strong>Unknowns:</strong> What constitutes a stable finding ID? Which graph event currently records produced-vs-delivered? What is the right aggregation scope across nested graphs and resume? How to avoid storing sensitive raw payloads in telemetry?</p>
+</section>
+<section id="ready-for-implementation-acceptance-plan">
+<h2>Ready-for-implementation acceptance plan<a class="headerlink" href="#ready-for-implementation-acceptance-plan" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Extend the existing Fangore story fixture(s) using the native YAML and real product CLI verbs; do not add a fake passing probe.</p></li>
+<li><p>Add unit tests for ordered/reversed maps, nested arrays, long tool-role messages, malformed input and paging references.</p></li>
+<li><p>Add an integration acceptance walk that compares tool-produced, context-compiled and model-visible representations at a real inference boundary.</p></li>
+<li><p>Add restart/replay tests using the existing durable graph machinery; verify stable evidence IDs and no duplicate transfer counts.</p></li>
+<li><p>Use the paper’s public replication data only if license and fixture compatibility permit; synthetic minimal examples are sufficient for the mechanical regression.</p></li>
+</ol>
+</section>
+<section id="other-related-trouble-signals-deferred-not-new-requirements-here">
+<h2>Other related Trouble signals (deferred, not new requirements here)<a class="headerlink" href="#other-related-trouble-signals-deferred-not-new-requirements-here" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Duplicate-write safety: https://rl337.org/trouble/posts/2115685301678907769.html . MechaHarness already has external-effect and transactional-resume requirements; inspect existing DR-10 fixtures before proposing another idempotency story.</p></li>
+<li><p>Approval-gate bypass: https://rl337.org/trouble/posts/2115315131152556136.html and https://github.com/otsoa-dubief/airlock/security/advisories/GHSA-mgf8-gh7g-q4rg . MechaHarness already has AuthorityGate, approval interrupts and authorization-epoch resume. Advisory details and bypass reproduction remain to be verified before asserting a gap.</p></li>
+<li><p>Independent coverage/disproof recipe: https://rl337.org/trouble/posts/2115641269406093385.html and https://github.com/cloudflare/security-audit-skill . Its six phases and typed findings are worth comparing to existing generic verify/repair and independent-review recipes, but this pass did not establish a missing reusable primitive.</p></li>
+</ul>
+</section>
+<section id="cross-repository-trace">
+<h2>Cross-repository trace<a class="headerlink" href="#cross-repository-trace" title="Link to this heading"></a></h2>
+<p>Discovery ledger is proposed in rl337/trouble at state/inspiration-watch-ledger.json, capability TR-20261029-CONTEXT-ATTRITION. This dossier is non-normative until accepted into the repository’s canonical user stories and tests. No runtime implementation is included.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
