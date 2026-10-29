@@ -23,6 +23,24 @@ def test_live_filter_keeps_http_twins_and_model_static() -> None:
     assert not any("fangore_denial_equivalence" in label for label in labels)
 
 
+def test_live_eligible_bag_inference_continuity_suite() -> None:
+    root = Path(
+        "tests/fixtures/models/static/fixture/v1/suites/"
+        "fangore_bag_inference_continuity/stages"
+    )
+    case = StoryCase(
+        family="static",
+        model="fixture",
+        version="v1",
+        story_id="fangore_bag_checkpoint_persist",
+        adapter="in_process",
+        root=root,
+        scenario_relpath="010_fangore_bag_checkpoint_persist.yaml",
+        suite_id="fangore_bag_inference_continuity",
+    )
+    assert live_eligible(case)
+
+
 def test_live_eligible_anthropic_static_excluded() -> None:
     root = Path(
         "tests/fixtures/models/static/fixture/v1/suites/nubble_observability/stages"

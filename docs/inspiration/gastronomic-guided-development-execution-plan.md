@@ -1,11 +1,13 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** Implementation-ready plan, not implemented or tested by this document
+**Status:** M0/M1 landed on `feat/bag-checkpoint-persistence` (checkpoint hydrate +
+nested `bag_inputs`/`bag_outputs`). Suite `fangore_bag_inference_continuity`
+covers pause/resume and subgraph bindings. M2+ still open.
 **Repository:** `rl337/mechaharness`
-**Starting branch / PR:** `feat/guided-coding-local-inference` / PR #34
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.
 **Secondary target:** Extend that foundation into the full gastronomic guided development composition after the vertical slice is green.
+**Canonical bag-checkpoint story:** `tests/fixtures/models/static/fixture/v1/suites/fangore_bag_inference_continuity/` (inspiration copies under `docs/inspiration/fixtures/` are retired references only).
 
 ## Instructions to the Cursor agent
 
@@ -24,13 +26,19 @@ Implement this plan in dependency order. Inspect the real implementation and rep
 
 Verified on the target branch before drafting this plan:
 
-1. `src/mechaharness/walk_bag.py` has `get/put/require/snapshot`; `snapshot()` is **shallow**, and there is no built-in dotted-path reader or transactional mutation API.
-2. `GraphRunContext` has a default `bag`, but `GraphExecutor._run_graph()` creates a fresh run context on entry and resume. `CheckpointStore.save()` presently checkpoints the `ExecutionGraph` only; neither the graph model nor the SQLite store shows a dedicated persisted bag field.
+1. `src/mechaharness/walk_bag.py` now has path get/put, `serialize`/`deserialize`, staged writes, and deep snapshot; `snapshot()` remains shallow for in-process views.
+2. `ExecutionGraph.walk_bag` holds the serialized bag; `GraphExecutor` syncs before checkpoint saves and hydrates `GraphRunContext.bag` on resume.
 3. `src/mechaharness/cli_infer_runner.py` builds a one-shot request from `node.payload.prompt/system` and returns its answer in `NodeOutcome.payload`. It does not compile prompts from the bag or publish structured inference outputs into it.
 4. `src/mechaharness/context_pack_runner.py` presently passes retrieved candidates via upstream node payloads. Its deterministic budget-selection helper is reusable, but it is not yet general bag-to-inference context compilation.
-5. `src/mechaharness/cli_policy_verbs.py` `GraphWalkVerb` binds a `CallableGraphNodeRunner` whose handler always succeeds and merely records node IDs. Its observations do not currently expose the bag, compiled model requests, or tool transcripts.
+5. `GraphWalkVerb` still uses a host-local runner, but it honors `payload.bag_put` /
+   `payload.bag_require` and returns a `bag` observation from `ExecutionGraph.walk_bag`.
+   Compiled model-input observations remain M2.
 6. `src/mechaharness/model_input_manifest.py` already provides reconstruction and hashing of model-visible messages and tool definitions. `core.types.CompletionRequest` and `ChatMessage` support tools/tool results. Reuse these primitives.
-7. The previously added `fangore_bag_inference_continuity` walks are parked under `docs/inspiration/fixtures/fangore_bag_inference_continuity/` (legacy `story.json` + scenarios) so they are **not** collected by pytest. `.cursor/skills/user-stories/SKILL.md` says the authored source of truth is `static/fixture/v1/suites/<suite>/stages/*.yaml` with narrative, implementation, and validation metadata. Some old scenario assertions use observation paths not yet emitted by `graph_walk`. Do not claim they are collected, executable, or green until demonstrated.
+7. Canonical suite is now under
+   `tests/fixtures/models/static/fixture/v1/suites/fangore_bag_inference_continuity/`.
+   Stage `010_fangore_bag_checkpoint_persist` covers M1 pause/resume bag durability.
+   Infer→bag→infer continuity (`bag_continuity` model-input asserts) remains M2;
+   inspiration copies under `docs/inspiration/fixtures/` are not collected.
 8. `src/mechaharness/graph.py` `ExecutionGraph.checkpoint()` dumps the model, and `SqliteCheckpointStore` serializes that checkpoint. An explicitly typed run-bag field on the graph is a plausible minimal persistence path; inspect compatibility and fingerprint implications before selecting it. Avoid changing the entire store API unless necessary.
 
 ## Delivery strategy and stop gates

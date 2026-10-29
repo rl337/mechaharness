@@ -61,6 +61,10 @@ def live_eligible(case: StoryCase) -> bool:
     """Return True when this case should be collected / run in live mode."""
     if case.adapter != "in_process":
         return True
+    # Bag checkpoint continuity underpins multi-step live inference; always
+    # collect so live suite runs prove pause/resume still carries WalkBag.
+    if case.suite_id == "fangore_bag_inference_continuity":
+        return True
     verbs = scenario_verbs(case)
     if verbs & _LIVE_EXCLUDE_VERBS:
         return False
