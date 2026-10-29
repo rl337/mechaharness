@@ -111,6 +111,9 @@ class ExecutionGraph(BaseModel):
     recipe_definition_fingerprint: str | None = None
     recipe_params_fingerprint: str | None = None
     recipe_node_map: dict[str, str] = Field(default_factory=dict)
+    # Serialized WalkBag (JSON-safe + tagged FileArtifact). Empty on legacy
+    # checkpoints; GraphExecutor hydrates GraphRunContext.bag on resume.
+    walk_bag: dict[str, Any] = Field(default_factory=dict)
 
     def add_node(self, node: GraphNode) -> GraphNode:
         self.nodes[node.id] = node
