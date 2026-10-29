@@ -1,0 +1,236 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budget (soft / hard spend) &mdash; MechaHarness 0.8.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=486e5634"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Budget (soft / hard spend)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/reference/budget.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="budget-soft-hard-spend">
+<h1>Budget (soft / hard spend)<a class="headerlink" href="#budget-soft-hard-spend" title="Link to this heading"></a></h1>
+<p>Execution spend ceilings for graph and recipe runs. Module:
+<code class="docutils literal notranslate"><span class="pre">mechaharness.budget</span></code>. Stability: evolving.</p>
+<section id="surface">
+<h2>Surface<a class="headerlink" href="#surface" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Item</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Module</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.budget</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Enforced by</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Stability</p></td>
+<td><p>evolving</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="policy-and-ledger">
+<h2>Policy and ledger<a class="headerlink" href="#policy-and-ledger" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code> declares optional <code class="docutils literal notranslate"><span class="pre">soft_limit</span></code> and <code class="docutils literal notranslate"><span class="pre">hard_limit</span></code> in abstract
+cost units (<code class="docutils literal notranslate"><span class="pre">unit</span></code>: <code class="docutils literal notranslate"><span class="pre">units</span></code> | <code class="docutils literal notranslate"><span class="pre">usd</span></code> | <code class="docutils literal notranslate"><span class="pre">tokens</span></code>). <code class="docutils literal notranslate"><span class="pre">hard_limit=None</span></code> means
+<strong>unlimited</strong>. Soft is optional; when both are set, soft must be <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code> hard.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Budget</span></code> is the mutable spend ledger for one run. Nested subgraphs share the
+ledger via <code class="docutils literal notranslate"><span class="pre">Budget.child()</span></code> so child <code class="docutils literal notranslate"><span class="pre">NodeOutcome.cost_units</span></code> count against
+the parent ceiling.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Level</p></th>
+<th class="head"><p>Executor behavior</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Soft</p></td>
+<td><p>Wind down: cancel remaining open nodes; status <code class="docutils literal notranslate"><span class="pre">soft_exhausted</span></code>, error <code class="docutils literal notranslate"><span class="pre">soft_budget_exceeded</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Hard</p></td>
+<td><p>Fail: status <code class="docutils literal notranslate"><span class="pre">failed</span></code>, error <code class="docutils literal notranslate"><span class="pre">hard_budget_exceeded</span></code> (charge is post-attempt)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Default node cost is <code class="docutils literal notranslate"><span class="pre">1.0</span></code> when a runner does not set <code class="docutils literal notranslate"><span class="pre">cost_units</span></code>.</p>
+</section>
+<section id="softpoint-kind-budget-is-not-this">
+<h2>SoftPoint <code class="docutils literal notranslate"><span class="pre">kind=&quot;budget&quot;</span></code> is not this<a class="headerlink" href="#softpoint-kind-budget-is-not-this" title="Link to this heading"></a></h2>
+<p>Recipe soft-point <code class="docutils literal notranslate"><span class="pre">kind=&quot;budget&quot;</span></code> means stop/turns / loop bounds — <strong>not</strong>
+<code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code>. Do not confuse the two.</p>
+</section>
+<section id="host-recipe-run-pattern">
+<h2>Host recipe-run pattern<a class="headerlink" href="#host-recipe-run-pattern" title="Link to this heading"></a></h2>
+<p>Hosts pass spend ceilings the same way as authorization (see
+<a class="reference internal" href="access.html"><span class="std std-doc">Access control</span></a>):</p>
+<ol class="arabic simple">
+<li><p><strong>Per-run</strong> — <code class="docutils literal notranslate"><span class="pre">run_recipe(...,</span> <span class="pre">budget_policy=BudgetPolicy(...))</span></code> or CLI
+<code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> body field <code class="docutils literal notranslate"><span class="pre">budget:</span> <span class="pre">{soft_limit,</span> <span class="pre">hard_limit,</span> <span class="pre">unit}</span></code>.</p></li>
+<li><p><strong>Instrumentor / story</strong> — <code class="docutils literal notranslate"><span class="pre">environment.budget</span></code> on <code class="docutils literal notranslate"><span class="pre">user_story</span></code> binds a
+default on <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code>; omit → <code class="docutils literal notranslate"><span class="pre">BudgetPolicy.unlimited()</span></code>.</p></li>
+<li><p><strong>Product verb</strong> — <code class="docutils literal notranslate"><span class="pre">run_budgeted_graph</span></code> exercises a fixed compute graph
+under soft/hard or nested rollup (for acceptance walks).</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.budget</span><span class="w"> </span><span class="kn">import</span> <span class="n">BudgetPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.recipe_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_recipe</span>
+
+<span class="k">await</span> <span class="n">run_recipe</span><span class="p">(</span>
+    <span class="s2">"verify_repair"</span><span class="p">,</span>
+    <span class="n">runners</span><span class="o">=</span><span class="n">runners</span><span class="p">,</span>
+    <span class="n">budget_policy</span><span class="o">=</span><span class="n">BudgetPolicy</span><span class="p">(</span><span class="n">soft_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">hard_limit</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+    <span class="n">grants</span><span class="o">=</span><span class="p">[</span><span class="s2">"core:graph.execute"</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">budget</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">soft_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">hard_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">    </span><span class="nt">unit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">units</span>
+</pre></div>
+</div>
+<p>Host-kit / adapters keep unlimited until a policy is supplied — intentional
+no-op defaults.</p>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="access.html"><span class="std std-doc">Access control</span></a> — grants + recipe-run kwargs</p></li>
+<li><p><a class="reference internal" href="../requirements/host-integration.html"><span class="std std-doc">Host integration</span></a> — HOST-08</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
