@@ -75,3 +75,5 @@ Owner: **MechaHarness** (generic context compilation, compaction, inference enve
 ## Cross-repository trace
 
 Discovery ledger is proposed in rl337/trouble at state/inspiration-watch-ledger.json, capability TR-20261029-CONTEXT-ATTRITION. This dossier is non-normative until accepted into the repository's canonical user stories and tests. No runtime implementation is included.
+
+Cross-repository discovery ledger draft PR: https://github.com/rl337/trouble/pull/38 . Other resulting draft PRs: https://github.com/rl337/mechaharness/pull/37 , https://github.com/rl337/project-template/pull/1 , https://github.com/rl337/june/pull/26 .
