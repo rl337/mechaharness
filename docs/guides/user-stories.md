@@ -117,11 +117,11 @@ Persona **fangore**; execution `parallel`; 14 stage(s).
 
 Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_gate_allowed`, `fangore_compound_grants__grant_gate_denied`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`, `fangore_insp_authority_gate`, `fangore_insp_cross_task_isolation`, `fangore_insp_denial_equivalence`, `fangore_insp_evolution_ownership_split`, `fangore_insp_execution_token`, `fangore_insp_isolation_io`, `fangore_insp_risk_autonomy`, `fangore_insp_soft_vs_hard`, `fangore_insp_state_governance`
 
-### `fangore_bag_inference_continuity` — Walk bag continuity across stepped graph pause and resume
+### `fangore_bag_inference_continuity` — Walk bag continuity, nested bindings, and ContextSpec inference
 
-Persona **fangore**; execution `parallel`; 2 stage(s).
+Persona **fangore**; execution `parallel`; 3 stage(s).
 
-Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_subgraph_bindings`
+Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_subgraph_bindings`
 
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
@@ -633,6 +633,22 @@ Suite stage `010_fangore_bag_checkpoint_persist` — start pauses with `bag.acc`
 #### Footnotes
 
 1. [Gastronomic guided-development M1 (bag durability)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Checkpoint/resume must carry WalkBag with graph state
+
+### `fangore_bag_context_spec_continuity` — Compile bag evidence into a second inference request
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads an inline graph that seeds a goal plus unrelated bag noise, runs a bag-aware discovery inference that publishes structured hypotheses to `out.discovery`, validates that evidence with a hard compute node into `out.verified`, then pauses before the planning inference. On resume the planner's ContextSpec must compile only the goal, discovery, and verified evidence into the Completer request — not the noise register — and publish `out.plan` from the scripted completion.
+
+#### Implementation
+
+`ContextSpec` / `compile_context_spec` / `publish_response_to_bag` in `context_spec`; bag-aware `CliInferRunner` freezes the walk bag per invocation, records `model_inputs`, and calls Completer; story-host `graph_walk` registers `infer`/`cli:infer` via `CliInferRunner` and surfaces `model_inputs` observations.
+
+#### Validation
+
+Suite stage `030_fangore_bag_context_spec_continuity` — pause before `plan` shows nonempty `bag.out.discovery` and hard-node `out.verified`; continue completes with `model_inputs.plan.includes_verified_discovery=true` and `includes_unrelated_bag_data=false`, plus nonempty `bag.out.plan`. Static mock uses `payload.completion` scripts; live upgrades onto the reason Completer.
+
+#### Footnotes
+
+1. [Gastronomic guided-development M2 (ContextSpec + infer publication)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Second inference must see authorized bag state from the first, not noise
 
 ### `fangore_bag_subgraph_bindings` — Map parent bag into a subgraph and publish declared outputs only
 

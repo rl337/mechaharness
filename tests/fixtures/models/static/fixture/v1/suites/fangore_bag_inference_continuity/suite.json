@@ -1,6 +1,6 @@
 {
   "id": "fangore_bag_inference_continuity",
-  "title": "Walk bag continuity across stepped graph pause and resume",
+  "title": "Walk bag continuity, nested bindings, and ContextSpec inference",
   "persona": "fangore",
   "execution": {
     "mode": "parallel",
@@ -18,6 +18,10 @@
     {
       "story": "fangore_bag_subgraph_bindings",
       "scenario": "020_fangore_bag_subgraph_bindings"
+    },
+    {
+      "story": "fangore_bag_context_spec_continuity",
+      "scenario": "030_fangore_bag_context_spec_continuity"
     }
   ]
 }

@@ -1,0 +1,161 @@
+id: fangore_bag_context_spec_continuity
+suite: fangore_bag_inference_continuity
+persona: fangore
+title: Compile bag evidence into a second inference request
+narrative: Fangore starts the CLI host with family `pass_through` and backend
+  `mock`. He loads an inline graph that seeds a goal plus unrelated bag noise,
+  runs a bag-aware discovery inference that publishes structured hypotheses to
+  `out.discovery`, validates that evidence with a hard compute node into
+  `out.verified`, then pauses before the planning inference. On resume the
+  planner's ContextSpec must compile only the goal, discovery, and verified
+  evidence into the Completer request — not the noise register — and publish
+  `out.plan` from the scripted completion.
+implementation: '`ContextSpec` / `compile_context_spec` / `publish_response_to_bag`
+  in `context_spec`; bag-aware `CliInferRunner` freezes the walk bag per
+  invocation, records `model_inputs`, and calls Completer; story-host
+  `graph_walk` registers `infer`/`cli:infer` via `CliInferRunner` and surfaces
+  `model_inputs` observations.'
+validation: Suite stage `030_fangore_bag_context_spec_continuity` — pause before
+  `plan` shows nonempty `bag.out.discovery` and hard-node `out.verified`; continue
+  completes with `model_inputs.plan.includes_verified_discovery=true` and
+  `includes_unrelated_bag_data=false`, plus nonempty `bag.out.plan`. Static mock
+  uses `payload.completion` scripts; live upgrades onto the reason Completer.
+footnotes:
+- id: gastronomic-m2
+  label: Gastronomic guided-development M2 (ContextSpec + infer publication)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Second inference must see authorized bag state from the first, not noise
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: carry discovery evidence between inference nodes
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: bootstrap a calculator that evaluates number literals
+          ctx.noise:
+            secret: do-not-send-to-model
+    - id: discover
+      kind: infer
+      depends_on:
+      - seed
+      payload:
+        completion:
+          status: found
+          files:
+          - calc.py
+          hypotheses:
+          - parse number literals first
+        context:
+          version: "1"
+          system: Identify relevant files. Reply with one JSON object only — no markdown, no prose.
+          user_preamble: Use only the following bag evidence.
+          reads:
+          - path: in.goal
+            required: true
+          response:
+            writes: out.discovery
+            parse: json
+    - id: validate
+      kind: compute
+      depends_on:
+      - discover
+      payload:
+        bag_require: out.discovery
+        bag_put:
+          out.verified:
+            discovery_status: found
+            files_ok: true
+    - id: plan
+      kind: infer
+      depends_on:
+      - validate
+      payload:
+        completion:
+          action: add_number_parser
+          uses:
+          - calc.py
+        context:
+          version: "1"
+          system: Propose a bounded change. Reply with one JSON object only — no markdown, no prose.
+          user_preamble: Use only the following bag evidence.
+          reads:
+          - path: in.goal
+            required: true
+          - path: out.discovery
+            required: true
+          - path: out.verified
+            required: true
+          response:
+            writes: out.plan
+            parse: json
+steps:
+- do:
+    graph_walk:
+      action: start
+      until: plan
+      stop: before
+  expect:
+  - kind: equals
+    key: stopped_before
+    value: plan
+  - kind: nonempty
+    key: bag.out.discovery
+  - kind: equals
+    key: bag.out.verified.files_ok
+    value: true
+  - kind: includes
+    key: model_inputs.discover.included_paths
+    value:
+    - in.goal
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: node_error
+    value: ""
+  - kind: equals
+    key: model_inputs.plan.includes_verified_discovery
+    value: true
+  - kind: equals
+    key: model_inputs.plan.includes_unrelated_bag_data
+    value: false
+  - kind: includes
+    key: model_inputs.plan.included_paths
+    value:
+    - in.goal
+    - out.discovery
+    - out.verified
+  - kind: contains
+    key: model_inputs.plan.messages[1].content
+    value: bootstrap a calculator
+  - kind: contains
+    key: model_inputs.plan.messages[1].content
+    value: out.verified
+  - kind: nonempty
+    key: bag.out.plan
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: nonempty
+    key: bag.out.plan
+  - kind: equals
+    key: model_inputs.plan.includes_verified_discovery
+    value: true
+  - kind: equals
+    key: model_inputs.plan.includes_unrelated_bag_data
+    value: false
+cleanup: []
