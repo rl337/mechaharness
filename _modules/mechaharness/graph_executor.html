@@ -241,6 +241,7 @@
     <span class="n">ExecutionGraph</span><span class="p">,</span>
     <span class="n">GraphNode</span><span class="p">,</span>
     <span class="n">NodeStatus</span><span class="p">,</span>
+    <span class="n">RecoveryBoundary</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.lifecycle_extension</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AfterGraphNode</span><span class="p">,</span>
@@ -992,6 +993,7 @@
             <span class="n">parent_agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_agent_id</span><span class="p">,</span>
             <span class="n">envelope</span><span class="o">=</span><span class="n">envelope</span><span class="p">,</span>
             <span class="n">config_fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">,</span>
+            <span class="n">bag</span><span class="o">=</span><span class="n">WalkBag</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">walk_bag</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span>
             <span class="n">GraphStart</span><span class="p">,</span>
@@ -1006,7 +1008,13 @@
             <span class="p">},</span>
             <span class="n">rid</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"dispatch"</span><span class="p">,</span> <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+            <span class="n">graph</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span>
+            <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
+            <span class="n">boundary</span><span class="o">=</span><span class="s2">"dispatch"</span><span class="p">,</span>
+            <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Soft-enter resume: parent already RUNNING with an entered child frame —</span>
         <span class="c1"># step/continue the child run_id instead of re-entering the call site.</span>
@@ -1033,8 +1041,12 @@
                     <span class="n">control</span><span class="o">=</span><span class="n">child_control</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">child_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"paused"</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-                        <span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span><span class="p">,</span> <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+                        <span class="n">graph</span><span class="p">,</span>
+                        <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
+                        <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span><span class="p">,</span>
+                        <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">(</span>
                         <span class="n">status</span><span class="o">=</span><span class="s2">"paused"</span><span class="p">,</span>
@@ -1053,6 +1065,9 @@
                     <span class="k">if</span> <span class="n">child_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"ok"</span><span class="p">:</span>
                         <span class="n">parent</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">NodeStatus</span><span class="o">.</span><span class="n">SUCCEEDED</span>
                         <span class="n">parent</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_child_bag_outputs</span><span class="p">(</span>
+                            <span class="n">parent</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span> <span class="n">child_result</span><span class="o">.</span><span class="n">graph</span>
+                        <span class="p">)</span>
                     <span class="k">elif</span> <span class="n">child_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"soft_exhausted"</span><span class="p">:</span>
                         <span class="n">parent</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">NodeStatus</span><span class="o">.</span><span class="n">SUCCEEDED</span>
                         <span class="n">parent</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1077,8 +1092,12 @@
                         <span class="n">rid</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">if</span> <span class="n">control</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"one_step"</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-                        <span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span><span class="p">,</span> <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+                        <span class="n">graph</span><span class="p">,</span>
+                        <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
+                        <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span><span class="p">,</span>
+                        <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">(</span>
                         <span class="n">status</span><span class="o">=</span><span class="s2">"paused"</span><span class="p">,</span>
@@ -1097,7 +1116,13 @@
         <span class="k">except</span> <span class="n">InjectedProcessCrash</span><span class="p">:</span>
             <span class="k">raise</span>
         <span class="k">except</span> <span class="n">GraphExecutorError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"commit"</span><span class="p">,</span> <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+                <span class="n">graph</span><span class="p">,</span>
+                <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
+                <span class="n">boundary</span><span class="o">=</span><span class="s2">"commit"</span><span class="p">,</span>
+                <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"hard_budget_exceeded"</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_fail_open_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">"hard_budget_exceeded"</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span>
@@ -1127,14 +1152,26 @@
                 <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="n">LinkageError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"commit"</span><span class="p">,</span> <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+                <span class="n">graph</span><span class="p">,</span>
+                <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
+                <span class="n">boundary</span><span class="o">=</span><span class="s2">"commit"</span><span class="p">,</span>
+                <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span><span class="n">GraphEnd</span><span class="p">,</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)},</span> <span class="n">rid</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">(</span>
                 <span class="n">status</span><span class="o">=</span><span class="s2">"failed"</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">budget</span><span class="o">=</span><span class="n">ledger</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">paused</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span><span class="p">,</span> <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+                <span class="n">graph</span><span class="p">,</span>
+                <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
+                <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span><span class="p">,</span>
+                <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">(</span>
                 <span class="n">status</span><span class="o">=</span><span class="s2">"paused"</span><span class="p">,</span>
                 <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span>
@@ -1145,7 +1182,13 @@
                 <span class="n">active_run_id</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">pause</span><span class="o">.</span><span class="n">active_run_id</span> <span class="ow">or</span> <span class="n">rid</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"commit"</span><span class="p">,</span> <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+            <span class="n">graph</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span>
+            <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
+            <span class="n">boundary</span><span class="o">=</span><span class="s2">"commit"</span><span class="p">,</span>
+            <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">crash_probe</span><span class="o">.</span><span class="n">maybe_crash</span><span class="p">(</span>
             <span class="s2">"after_final_commit"</span><span class="p">,</span>
             <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span>
@@ -1169,6 +1212,50 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">(</span>
             <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">rid</span><span class="p">,</span> <span class="n">budget</span><span class="o">=</span><span class="n">ledger</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span>
         <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save_checkpoint</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">graph</span><span class="p">:</span> <span class="n">ExecutionGraph</span><span class="p">,</span>
+        <span class="n">bag</span><span class="p">:</span> <span class="n">WalkBag</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">boundary</span><span class="p">:</span> <span class="n">RecoveryBoundary</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fingerprint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Persist graph + serialized walk bag at a recovery boundary."""</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">walk_bag</span> <span class="o">=</span> <span class="n">bag</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+            <span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="n">boundary</span><span class="p">,</span> <span class="n">fingerprint</span><span class="o">=</span><span class="n">fingerprint</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bag_path_bindings</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">GraphNode</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""``payload.bag_inputs`` / ``bag_outputs``: dest_path → source_path."""</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">raw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">GraphExecutorError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"node </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">!r}</span><span class="s2"> payload.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> must be a mapping"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="p">):</span> <span class="nb">str</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="k">for</span> <span class="n">dest</span><span class="p">,</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_project_child_bag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">GraphNode</span><span class="p">,</span> <span class="n">parent_bag</span><span class="p">:</span> <span class="n">WalkBag</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WalkBag</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Child bag from declared ``bag_inputs`` (empty when unbound — no share)."""</span>
+        <span class="k">return</span> <span class="n">WalkBag</span><span class="o">.</span><span class="n">project_from</span><span class="p">(</span>
+            <span class="n">parent_bag</span><span class="p">,</span> <span class="n">bindings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bag_path_bindings</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">"bag_inputs"</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_merge_child_bag_outputs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">node</span><span class="p">:</span> <span class="n">GraphNode</span><span class="p">,</span>
+        <span class="n">parent_bag</span><span class="p">:</span> <span class="n">WalkBag</span><span class="p">,</span>
+        <span class="n">child_graph</span><span class="p">:</span> <span class="n">ExecutionGraph</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Copy declared ``bag_outputs`` from child checkpoint into the parent bag."""</span>
+        <span class="n">bindings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bag_path_bindings</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">"bag_outputs"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bindings</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">child_bag</span> <span class="o">=</span> <span class="n">WalkBag</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">child_graph</span><span class="o">.</span><span class="n">walk_bag</span><span class="p">)</span>
+        <span class="n">parent_bag</span><span class="o">.</span><span class="n">merge_from</span><span class="p">(</span><span class="n">child_bag</span><span class="p">,</span> <span class="n">bindings</span><span class="o">=</span><span class="n">bindings</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_entered_parent_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="n">ExecutionGraph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -1245,13 +1332,17 @@
                     <span class="n">context</span><span class="o">.</span><span class="n">pause</span><span class="o">.</span><span class="n">stopped_before</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">child_ready</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">child_ready</span> <span class="k">else</span> <span class="kc">None</span>
                     <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+                    <span class="n">graph</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span>
+                <span class="p">)</span>
                 <span class="k">return</span> <span class="kc">True</span>
 
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_node</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">budget</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="ow">is</span> <span class="n">BudgetLevel</span><span class="o">.</span><span class="n">HARD</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">GraphExecutorError</span><span class="p">(</span><span class="s2">"hard_budget_exceeded"</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
+                <span class="n">graph</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span> <span class="n">boundary</span><span class="o">=</span><span class="s2">"reduce"</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">control</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"until"</span>
@@ -1309,8 +1400,10 @@
             <span class="k">return</span>
         <span class="n">child</span> <span class="o">=</span> <span class="n">ExecutionGraph</span><span class="o">.</span><span class="n">resume</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
         <span class="n">child_run_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+        <span class="n">child_bag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project_child_bag</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span>
             <span class="n">child</span><span class="p">,</span>
+            <span class="n">child_bag</span><span class="p">,</span>
             <span class="n">run_id</span><span class="o">=</span><span class="n">child_run_id</span><span class="p">,</span>
             <span class="n">boundary</span><span class="o">=</span><span class="s2">"dispatch"</span><span class="p">,</span>
             <span class="n">fingerprint</span><span class="o">=</span><span class="n">child</span><span class="o">.</span><span class="n">config_fingerprint</span><span class="p">,</span>
@@ -1359,6 +1452,7 @@
             <span class="p">)</span>
             <span class="k">return</span>
         <span class="n">child</span> <span class="o">=</span> <span class="n">ExecutionGraph</span><span class="o">.</span><span class="n">resume</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">walk_bag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project_child_bag</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">)</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
         <span class="n">child_run_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">run_id</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span>
         <span class="c1"># Share the parent ledger so nested spend aggregates.</span>
         <span class="n">child_result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
@@ -1379,6 +1473,7 @@
         <span class="k">if</span> <span class="n">child_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"ok"</span><span class="p">:</span>
             <span class="n">node</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">NodeStatus</span><span class="o">.</span><span class="n">SUCCEEDED</span>
             <span class="n">node</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_merge_child_bag_outputs</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">bag</span><span class="p">,</span> <span class="n">child_result</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">child_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">"soft_exhausted"</span><span class="p">:</span>
             <span class="c1"># Parent soft wind-down already reflected on shared budget.</span>
             <span class="n">node</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">NodeStatus</span><span class="o">.</span><span class="n">SUCCEEDED</span>
