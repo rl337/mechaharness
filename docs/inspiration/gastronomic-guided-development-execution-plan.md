@@ -1,8 +1,9 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0/M1 landed on `feat/bag-checkpoint-persistence` (checkpoint hydrate +
-nested `bag_inputs`/`bag_outputs`). Suite `fangore_bag_inference_continuity`
-covers pause/resume and subgraph bindings. M2+ still open.
+**Status:** M0/M1/M2 landed (`feat/bag-context-spec-m2`). Suite
+`fangore_bag_inference_continuity` covers pause/resume, subgraph bindings, and
+ContextSpec infer→bag→infer continuity (`030_fangore_bag_context_spec_continuity`).
+M3+ still open.
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.
@@ -28,17 +29,22 @@ Verified on the target branch before drafting this plan:
 
 1. `src/mechaharness/walk_bag.py` now has path get/put, `serialize`/`deserialize`, staged writes, and deep snapshot; `snapshot()` remains shallow for in-process views.
 2. `ExecutionGraph.walk_bag` holds the serialized bag; `GraphExecutor` syncs before checkpoint saves and hydrates `GraphRunContext.bag` on resume.
-3. `src/mechaharness/cli_infer_runner.py` builds a one-shot request from `node.payload.prompt/system` and returns its answer in `NodeOutcome.payload`. It does not compile prompts from the bag or publish structured inference outputs into it.
-4. `src/mechaharness/context_pack_runner.py` presently passes retrieved candidates via upstream node payloads. Its deterministic budget-selection helper is reusable, but it is not yet general bag-to-inference context compilation.
-5. `GraphWalkVerb` still uses a host-local runner, but it honors `payload.bag_put` /
-   `payload.bag_require` and returns a `bag` observation from `ExecutionGraph.walk_bag`.
-   Compiled model-input observations remain M2.
+3. `src/mechaharness/cli_infer_runner.py` still supports legacy `prompt`/`system`
+   one-shots. Bag-aware nodes pass `payload.context` (`ContextSpec`): freeze bag →
+   compile → Completer → publish to `response.writes`. `last_model_inputs` records
+   included/omitted paths and continuity flags for story observation.
+4. `src/mechaharness/context_spec.py` is the deterministic bag→messages compiler
+   (`freeze_bag_snapshot` / `compile_context_spec` / `publish_response_to_bag`).
+   `context_pack_runner.py` remains a separate RAG packing path.
+5. `GraphWalkVerb` registers compute (`bag_put`/`bag_require`) and
+   `infer`/`cli:infer` via `CliInferRunner`, returning `bag` and `model_inputs`
+   observations. Optional `payload.completion` scripts Completer text for mock stories.
 6. `src/mechaharness/model_input_manifest.py` already provides reconstruction and hashing of model-visible messages and tool definitions. `core.types.CompletionRequest` and `ChatMessage` support tools/tool results. Reuse these primitives.
-7. Canonical suite is now under
+7. Canonical suite is under
    `tests/fixtures/models/static/fixture/v1/suites/fangore_bag_inference_continuity/`.
-   Stage `010_fangore_bag_checkpoint_persist` covers M1 pause/resume bag durability.
-   Infer→bag→infer continuity (`bag_continuity` model-input asserts) remains M2;
-   inspiration copies under `docs/inspiration/fixtures/` are not collected.
+   Stages `010`/`020` cover M1; `030_fangore_bag_context_spec_continuity` covers M2
+   model-input continuity. Inspiration copies under `docs/inspiration/fixtures/`
+   are not collected.
 8. `src/mechaharness/graph.py` `ExecutionGraph.checkpoint()` dumps the model, and `SqliteCheckpointStore` serializes that checkpoint. An explicitly typed run-bag field on the graph is a plausible minimal persistence path; inspect compatibility and fingerprint implications before selecting it. Avoid changing the entire store API unless necessary.
 
 ## Delivery strategy and stop gates

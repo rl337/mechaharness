@@ -150,12 +150,13 @@ class UserStoryHarness:
                 rag_retriever=rag_retriever,
                 access_kw=access_kw,
             )
+        step_verbs = {next(iter(s.do)) for s in scenario.steps if s.do}
         if env.backend == "openai_compat" or (
             backend.mode == "live"
             and env.backend == "mock"
-            and any(next(iter(s.do)) == "infer" for s in scenario.steps)
+            and bool(step_verbs & {"infer", "graph_walk"})
         ):
-            # Live upgrades scripted mock infer walks onto the real reason lane.
+            # Live upgrades scripted mock infer / graph_walk onto the reason lane.
             return self._openai_compat_config(
                 backend,
                 response,

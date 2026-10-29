@@ -7,6 +7,7 @@ case bags. See ``docs/reference/access.md`` and ``docs/reference/budget.md``.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from typing import Any, Literal
 
@@ -1195,6 +1196,24 @@ class GraphWalkVerb(CliVerb):
         def _bag_observation(graph: ExecutionGraph) -> dict[str, Any]:
             return dict(graph.walk_bag or {})
 
+        def _model_inputs_observation(infer_runner: Any) -> dict[str, Any]:
+            if infer_runner is None:
+                return {}
+            return dict(getattr(infer_runner, "last_model_inputs", {}) or {})
+
+        def _completion_scripts(nodes: list[dict[str, Any]]) -> dict[str, str]:
+            out: dict[str, str] = {}
+            for raw in nodes:
+                payload = raw.get("payload")
+                if not isinstance(payload, dict) or "completion" not in payload:
+                    continue
+                value = payload["completion"]
+                if isinstance(value, (dict, list)):
+                    out[str(raw["id"])] = json.dumps(value, sort_keys=True)
+                else:
+                    out[str(raw["id"])] = str(value)
+            return out
+
         if body.action == "start":
             nodes_spec = list(body.nodes)
             inline = getattr(runtime, "inline_graph", None)
@@ -1238,9 +1257,73 @@ class GraphWalkVerb(CliVerb):
                         )
                 return NodeOutcome(status=NodeStatus.SUCCEEDED)
 
+            from mechaharness.cli_infer_runner import (
+                DEFAULT_INFER_KINDS,
+                CliInferRunner,
+                NodeScriptedCompleter,
+            )
+            from mechaharness.core.access import InMemoryCostAccountant
+            from mechaharness.core.completer import Completer
+            from mechaharness.core.events import EventLog
+
             kinds = sorted({str(n.get("kind") or "compute") for n in nodes_spec})
             # Subgraph kind is handled by the executor; still register leaf kinds.
+            infer_kind_set = set(DEFAULT_INFER_KINDS)
             leaf_kinds = [k for k in kinds if k != "subgraph"]
+            compute_kinds = [k for k in leaf_kinds if k not in infer_kind_set]
+            needs_infer = any(k in infer_kind_set for k in leaf_kinds)
+
+            scripts = _completion_scripts(nodes_spec)
+            infer_runner: CliInferRunner | None = None
+            runners: list[Any] = []
+            if compute_kinds or not needs_infer:
+                runners.append(
+                    CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
+                )
+
+            # Bind Completer / EventLog first so CliInferRunner is in the registry
+            # snapshot when Config.configure registers GraphNodeRunnerRegistry.
+            class _ServicesCfg(MechaHarnessConfig):
+                def get_inference_class(self) -> type[InferenceStrategy]:
+                    return MockInferenceStrategy
+
+                def get_harness_class(self) -> type[AbstractHarness]:
+                    return PassThroughHarness
+
+                def get_grants(self) -> list[object]:
+                    return [GraphExecute, *list(body.grants)]
+
+            services = get_injector(_ServicesCfg())
+            if needs_infer:
+                base_completer = services.inject(Completer)
+                host_completer = getattr(runtime, "completer", None)
+                if isinstance(host_completer, Completer):
+                    base_completer = host_completer
+                completer: Completer = base_completer
+                # Scripted replies are for static/mock doubles only. Live
+                # OpenAI-compat / Anthropic Completers must see the compiled
+                # ContextSpec request (payload.completion is ignored).
+                from mechaharness.inference.anthropic import AnthropicStrategy
+                from mechaharness.inference.openai_compat import OpenAICompatStrategy
+
+                if scripts and not isinstance(
+                    base_completer, (OpenAICompatStrategy, AnthropicStrategy)
+                ):
+                    completer = NodeScriptedCompleter(scripts, base_completer)
+                event_log = services.inject(EventLog)
+                host_log = getattr(runtime, "event_log", None)
+                if host_log is not None:
+                    event_log = host_log
+                cost = InMemoryCostAccountant(event_log)
+                host_model = getattr(runtime, "model", None)
+                infer_runner = CliInferRunner(
+                    completer,
+                    cost,
+                    event_log,
+                    model=str(host_model or "cli-default"),
+                    kinds=list(DEFAULT_INFER_KINDS),
+                )
+                runners.append(infer_runner)
 
             class Cfg(MechaHarnessConfig):
                 def get_inference_class(self) -> type[InferenceStrategy]:
@@ -1253,9 +1336,7 @@ class GraphWalkVerb(CliVerb):
                     return [GraphExecute, *list(body.grants)]
 
                 def get_node_runner_registry(self) -> GraphNodeRunnerRegistry:
-                    return GraphNodeRunnerRegistry(
-                        [CallableGraphNodeRunner(leaf_kinds or ["compute"], run_node)]
-                    )
+                    return GraphNodeRunnerRegistry(list(runners))
 
             executor = get_injector(Cfg()).inject(GraphExecutor)
             live = body.live_authorization_epoch
@@ -1310,6 +1391,7 @@ class GraphWalkVerb(CliVerb):
                 "envelope": envelope,
                 "calls": calls,
                 "live_epoch": live,
+                "infer_runner": infer_runner,
             }
             runtime.graph_walk_session = session
             result = await executor.run(
@@ -1339,6 +1421,7 @@ class GraphWalkVerb(CliVerb):
                 "node_error": node_error,
                 "error": result.error,
                 "bag": _bag_observation(result.graph),
+                "model_inputs": _model_inputs_observation(infer_runner),
             }
 
         if session is None:
@@ -1400,6 +1483,7 @@ class GraphWalkVerb(CliVerb):
             "node_error": node_error,
             "error": result.error,
             "bag": _bag_observation(result.graph),
+            "model_inputs": _model_inputs_observation(session.get("infer_runner")),
         }
 
 
