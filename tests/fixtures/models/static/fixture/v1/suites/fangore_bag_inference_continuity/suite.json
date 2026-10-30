@@ -1,6 +1,6 @@
 {
   "id": "fangore_bag_inference_continuity",
-  "title": "Walk bag continuity, nested bindings, and ContextSpec inference",
+  "title": "Walk bag continuity, ContextSpec inference, snapshot inspect, and judge",
   "persona": "fangore",
   "execution": {
     "mode": "parallel",
@@ -22,6 +22,14 @@
     {
       "story": "fangore_bag_context_spec_continuity",
       "scenario": "030_fangore_bag_context_spec_continuity"
+    },
+    {
+      "story": "fangore_bag_snapshot_inspect",
+      "scenario": "040_fangore_bag_snapshot_inspect"
+    },
+    {
+      "story": "fangore_bag_judge_no_tools",
+      "scenario": "050_fangore_bag_judge_no_tools"
     }
   ]
 }

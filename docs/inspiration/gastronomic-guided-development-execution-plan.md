@@ -1,9 +1,8 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0/M1/M2 landed (`feat/bag-context-spec-m2`). Suite
-`fangore_bag_inference_continuity` covers pause/resume, subgraph bindings, and
-ContextSpec infer→bag→infer continuity (`030_fangore_bag_context_spec_continuity`).
-M3+ still open.
+**Status:** M0–M2 on main; M3 in progress (`feat/bag-snapshot-inspect-m3`) —
+snapshot-bound `inspect_bag` / `inspect_prior_response` plus no-tool
+`CliJudgeRunner`. M4+ still open.
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.
