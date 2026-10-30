@@ -110,10 +110,9 @@
              
   <section id="cursor-execution-plan-gastronomic-guided-development">
 <h1>Cursor execution plan: Gastronomic guided development<a class="headerlink" href="#cursor-execution-plan-gastronomic-guided-development" title="Link to this heading"></a></h1>
-<p><strong>Status:</strong> M0/M1/M2 landed (<code class="docutils literal notranslate"><span class="pre">feat/bag-context-spec-m2</span></code>). Suite
-<code class="docutils literal notranslate"><span class="pre">fangore_bag_inference_continuity</span></code> covers pause/resume, subgraph bindings, and
-ContextSpec infer→bag→infer continuity (<code class="docutils literal notranslate"><span class="pre">030_fangore_bag_context_spec_continuity</span></code>).
-M3+ still open.
+<p><strong>Status:</strong> M0–M2 on main; M3 in progress (<code class="docutils literal notranslate"><span class="pre">feat/bag-snapshot-inspect-m3</span></code>) —
+snapshot-bound <code class="docutils literal notranslate"><span class="pre">inspect_bag</span></code> / <code class="docutils literal notranslate"><span class="pre">inspect_prior_response</span></code> plus no-tool
+<code class="docutils literal notranslate"><span class="pre">CliJudgeRunner</span></code>. M4+ still open.
 <strong>Repository:</strong> <code class="docutils literal notranslate"><span class="pre">rl337/mechaharness</span></code>
 <strong>Architecture and rulings:</strong> <a class="reference internal" href="gastronomic-guided-development.html"><span class="std std-doc">gastronomic-guided-development.md</span></a>
 <strong>Primary target:</strong> A read-only <code class="docutils literal notranslate"><span class="pre">workspace_discovery</span></code> vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.
