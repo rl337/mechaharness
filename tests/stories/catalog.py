@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -128,7 +129,7 @@ def _load_manifest(manifest_path: Path) -> tuple[str, str, str, str]:
     return family, model, version, adapter
 
 
-def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
+def _discover_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
     """Walk suite stages and twin ``stories/*/scenarios/*.yaml`` trees."""
     cases: list[StoryCase] = []
     if not FIXTURES_ROOT.is_dir():
@@ -188,6 +189,34 @@ def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
                         )
                     )
     return cases
+
+
+@functools.lru_cache(maxsize=16)
+def _iter_story_cases_cached(model_filter: str | None) -> tuple[StoryCase, ...]:
+    """Cached discovery; fixtures are static for the life of a test process."""
+    return tuple(_discover_story_cases(model_filter=model_filter))
+
+
+def iter_story_cases(*, model_filter: str | None = None) -> list[StoryCase]:
+    """Walk suite stages and twin ``stories/*/scenarios/*.yaml`` trees.
+
+    Results are cached per ``model_filter``. Call ``clear_story_case_cache`` if
+    fixtures change mid-process (rare; sync/authoring tools).
+    """
+    return list(_iter_story_cases_cached(model_filter))
+
+
+def clear_story_case_cache() -> None:
+    """Drop cached story / suite catalog indexes (after fixture rewrites)."""
+    _iter_story_cases_cached.cache_clear()
+    # Suite catalog indexes depend on this list; clear lazily via import.
+    try:
+        from tests.stories import suite_catalog as _suite_catalog
+    except ImportError:
+        return
+    clear = getattr(_suite_catalog, "clear_suite_catalog_cache", None)
+    if clear is not None:
+        clear()
 
 
 def _validate_footnotes(data: dict[str, Any], *, path: Path) -> list[str]:

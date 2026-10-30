@@ -221,18 +221,21 @@ class CliInferRunner(GraphNodeRunner):
         invocation_id = new_invocation_id()
         toolkit: SnapshotInspectionToolkit | None = None
         tools = None
+        inspection_policy: InspectionPolicy | None = None
         inspection_raw = node.payload.get("inspection")
         if inspection_raw is not None:
-            policy = inspection_policy_from_mapping(inspection_raw)
-            allowed_ids = policy.allowed_invocation_ids
+            inspection_policy = inspection_policy_from_mapping(inspection_raw)
+            allowed_ids = inspection_policy.allowed_invocation_ids
             if allowed_ids is None:
                 # Default: every recorded prior response in this walk.
                 allowed_ids = list(self.prior_responses)
-                policy = policy.model_copy(update={"allowed_invocation_ids": allowed_ids})
+                inspection_policy = inspection_policy.model_copy(
+                    update={"allowed_invocation_ids": allowed_ids}
+                )
             toolkit = SnapshotInspectionToolkit(
                 frozen,
                 snapshot_id=snapshot_id,
-                policy=policy,
+                policy=inspection_policy,
                 prior_responses=self.prior_responses,
             )
             tools = toolkit.tool_definitions()
@@ -268,7 +271,7 @@ class CliInferRunner(GraphNodeRunner):
             ),
             "tool_definitions": [t.model_dump(mode="json") for t in (tools or [])],
         }
-        if toolkit is None:
+        if toolkit is None or inspection_policy is None:
             return await self._complete_and_finish(
                 node,
                 context=context,
@@ -286,7 +289,7 @@ class CliInferRunner(GraphNodeRunner):
             snapshot_id=compiled.snapshot_id,
             invocation_id=invocation_id,
             toolkit=toolkit,
-            policy=inspection_policy_from_mapping(inspection_raw),
+            policy=inspection_policy,
         )
 
     async def _run_inspection_loop(
