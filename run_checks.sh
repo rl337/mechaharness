@@ -61,7 +61,11 @@ fi
 run_check "User story suites" "$PYTHON" -m tests.stories.commands sync-suites --check
 run_check "User stories guide" "$PYTHON" -m tests.stories.commands sync-guide --check
 
-run_check "Pytest" "$PYTEST" -q
+# Unit / schema pytest only. Story suite runners are exercised once below under
+# coverage (avoids a full double pass of ~200 stages in CI).
+run_check "Pytest" "$PYTEST" -q \
+  --ignore=tests/stories/test_user_stories.py \
+  --ignore=tests/stories/test_user_story_suites.py
 
 # Story-suite branch coverage + gap report; fails if below fail_under in
 # pyproject.toml [tool.coverage.report] (coverage must not drop).
