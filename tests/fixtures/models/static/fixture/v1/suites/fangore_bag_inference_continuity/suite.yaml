@@ -1,5 +1,5 @@
 id: fangore_bag_inference_continuity
-title: Walk bag continuity, nested bindings, and ContextSpec inference
+title: Walk bag continuity, ContextSpec inference, snapshot inspect, and judge
 persona: fangore
 execution:
   mode: parallel

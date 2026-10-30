@@ -1,0 +1,163 @@
+id: fangore_bag_snapshot_inspect
+suite: fangore_bag_inference_continuity
+persona: fangore
+title: Inspect a frozen bag snapshot while the live bag mutates
+narrative: Fangore starts the CLI host with family `pass_through` and backend
+  `mock`. He seeds verified evidence and a secret noise register, runs a prior
+  bag-aware inference that publishes a note, then an agent inference whose
+  ContextSpec plus `inspection` tools call `inspect_bag` twice around a live-bag
+  mutation, attempt an unauthorized path, and inspect the prior response. The
+  two authorized bag reads must match the frozen snapshot, the forbidden path
+  must be denied, and tool results must appear in the inference transcript.
+implementation: '`SnapshotInspectionToolkit` in `bag_inspect`; bag-aware
+  `CliInferRunner` inspection tool loop bound to one frozen snapshot; prior
+  responses recorded for `inspect_prior_response`; `graph_walk` surfaces
+  `inference.*` observations.'
+validation: Suite stage `040_fangore_bag_snapshot_inspect` — after continue,
+  `inference.agent.inspection_snapshot_stable`,
+  `unauthorized_inspection_denied`, and `tool_results_in_transcript` are true.
+footnotes:
+- id: gastronomic-m3-inspect
+  label: Gastronomic guided-development M3 (snapshot inspection)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Inspection tools read the invocation snapshot, not live bag mutations
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: inspect prior evidence without observing live bag mutations
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          out.evidence:
+            status: found
+            files:
+            - calc.py
+          ctx.secret: do-not-inspect
+          in.goal: verify calculator evidence
+    - id: note
+      kind: infer
+      depends_on:
+      - seed
+      payload:
+        completion:
+          note: prior discovery note
+        context:
+          version: "1"
+          system: Summarize evidence. Reply with one JSON object only.
+          reads:
+          - path: out.evidence
+            required: true
+          response:
+            writes: out.prior_note
+            parse: json
+    - id: agent
+      kind: infer
+      depends_on:
+      - note
+      payload:
+        mutate_live_after_first_inspect:
+          out.evidence:
+            status: mutated-live
+            files:
+            - other.py
+        inspection:
+          allowed_paths:
+          - out.evidence
+          max_tool_calls: 6
+          max_bytes: 4096
+        completion_turns:
+        - tool_calls:
+          - id: c1
+            name: inspect_bag
+            arguments:
+              path: out.evidence
+        - tool_calls:
+          - id: c2
+            name: inspect_bag
+            arguments:
+              path: out.evidence
+        - tool_calls:
+          - id: c3
+            name: inspect_bag
+            arguments:
+              path: ctx.secret
+        - tool_calls:
+          - id: c4
+            name: inspect_prior_response
+            arguments:
+              invocation_id: "*"
+              field: published
+        - content:
+            ok: true
+            inspected: out.evidence
+        context:
+          version: "1"
+          system: Use inspection tools then reply with one JSON object only.
+          user_preamble: Inspect authorized evidence only.
+          reads:
+          - path: in.goal
+            required: true
+          response:
+            writes: out.agent
+            parse: json
+steps:
+- do:
+    graph_walk:
+      action: start
+      until: agent
+      stop: before
+  expect:
+  - kind: equals
+    key: stopped_before
+    value: agent
+  - kind: nonempty
+    key: bag.out.prior_note
+  - kind: equals
+    key: bag.out.evidence.status
+    value: found
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: node_error
+    value: ""
+  - kind: equals
+    key: inference.agent.inspection_snapshot_stable
+    value: true
+  - kind: equals
+    key: inference.agent.unauthorized_inspection_denied
+    value: true
+  - kind: equals
+    key: inference.agent.tool_results_in_transcript
+    value: true
+  - kind: gte
+    key: inference.agent.tool_call_count
+    value: 3
+  - kind: equals
+    key: bag.out.evidence.status
+    value: mutated-live
+  - kind: nonempty
+    key: bag.out.agent
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: inference.agent.inspection_snapshot_stable
+    value: true
+  - kind: equals
+    key: inference.agent.unauthorized_inspection_denied
+    value: true
+cleanup: []
