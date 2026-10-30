@@ -22,7 +22,7 @@ Taloneth owns judge contracts, adapter drift checks, and harness experiments. He
 
 ## Running the suite
 
-Default CI runs **every** story offline (static fixture + cassettes) — no skips.
+Default CI runs **every** story offline (static fixture + cassettes) — no skips. `./run_checks.sh` runs unit pytest without the story suite modules, then runs those suites once under `scripts/story_coverage.py` (so stages are not paid for twice).
 
 ```bash
 # CI / offline — all stories, zero skips
@@ -117,11 +117,11 @@ Persona **fangore**; execution `parallel`; 14 stage(s).
 
 Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_gate_allowed`, `fangore_compound_grants__grant_gate_denied`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`, `fangore_insp_authority_gate`, `fangore_insp_cross_task_isolation`, `fangore_insp_denial_equivalence`, `fangore_insp_evolution_ownership_split`, `fangore_insp_execution_token`, `fangore_insp_isolation_io`, `fangore_insp_risk_autonomy`, `fangore_insp_soft_vs_hard`, `fangore_insp_state_governance`
 
-### `fangore_bag_inference_continuity` — Walk bag continuity, nested bindings, and ContextSpec inference
+### `fangore_bag_inference_continuity` — Walk bag continuity, ContextSpec inference, snapshot inspect, and judge
 
-Persona **fangore**; execution `parallel`; 3 stage(s).
+Persona **fangore**; execution `parallel`; 5 stage(s).
 
-Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_subgraph_bindings`
+Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_judge_no_tools`, `fangore_bag_snapshot_inspect`, `fangore_bag_subgraph_bindings`
 
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
@@ -649,6 +649,38 @@ Suite stage `030_fangore_bag_context_spec_continuity` — pause before `plan` sh
 #### Footnotes
 
 1. [Gastronomic guided-development M2 (ContextSpec + infer publication)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Second inference must see authorized bag state from the first, not noise
+
+### `fangore_bag_judge_no_tools` — Judge bag evidence with zero tool definitions
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a proposal plus verified evidence (and unrelated noise), then runs a bag-aware `judge` node whose ContextSpec selects only the authorized paths. The judge Completer receives no tool schemas, performs no tool calls, and publishes a typed verdict to `out.judgment`.
+
+#### Implementation
+
+`CliJudgeRunner` compiles `ContextSpec` against a frozen bag snapshot, refuses tool loops, validates typed verdicts, and publishes to the live bag; `graph_walk` registers `judge`/`cli:judge` and surfaces `inference.judge.*`.
+
+#### Validation
+
+Suite stage `050_fangore_bag_judge_no_tools` — continue completes with `inference.judge.tool_call_count=0`, `inference.judge.includes_verified_evidence=true`, and `bag.out.judgment.valid=true`.
+
+#### Footnotes
+
+1. [Gastronomic guided-development M3 (no-tool judge)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Judges compile bag context but never receive or dispatch tools
+
+### `fangore_bag_snapshot_inspect` — Inspect a frozen bag snapshot while the live bag mutates
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds verified evidence and a secret noise register, runs a prior bag-aware inference that publishes a note, then an agent inference whose ContextSpec plus `inspection` tools call `inspect_bag` twice around a live-bag mutation, attempt an unauthorized path, and inspect the prior response. The two authorized bag reads must match the frozen snapshot, the forbidden path must be denied, and tool results must appear in the inference transcript.
+
+#### Implementation
+
+`SnapshotInspectionToolkit` in `bag_inspect`; bag-aware `CliInferRunner` inspection tool loop bound to one frozen snapshot; prior responses recorded for `inspect_prior_response`; `graph_walk` surfaces `inference.*` observations.
+
+#### Validation
+
+Suite stage `040_fangore_bag_snapshot_inspect` — after continue, `inference.agent.inspection_snapshot_stable`, `unauthorized_inspection_denied`, and `tool_results_in_transcript` are true.
+
+#### Footnotes
+
+1. [Gastronomic guided-development M3 (snapshot inspection)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Inspection tools read the invocation snapshot, not live bag mutations
 
 ### `fangore_bag_subgraph_bindings` — Map parent bag into a subgraph and publish declared outputs only
 

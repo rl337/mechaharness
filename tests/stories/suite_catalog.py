@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -136,7 +137,7 @@ def generated_suite_json_payload(suite: SuiteSpec) -> dict[str, Any]:
     }
 
 
-def iter_suite_cases(*, model_filter: str | None = None) -> list[SuiteCase]:
+def _discover_suite_cases(*, model_filter: str | None = None) -> list[SuiteCase]:
     """Walk ``family/model/version/suites/*/`` (suite.yaml or suite.json)."""
     cases: list[SuiteCase] = []
     if not FIXTURES_ROOT.is_dir():
@@ -171,14 +172,59 @@ def iter_suite_cases(*, model_filter: str | None = None) -> list[SuiteCase]:
     return cases
 
 
+@functools.lru_cache(maxsize=16)
+def _iter_suite_cases_cached(model_filter: str | None) -> tuple[SuiteCase, ...]:
+    return tuple(_discover_suite_cases(model_filter=model_filter))
+
+
+def iter_suite_cases(*, model_filter: str | None = None) -> list[SuiteCase]:
+    """Walk ``family/model/version/suites/*/`` (suite.yaml or suite.json).
+
+    Cached per ``model_filter``; see ``clear_suite_catalog_cache``.
+    """
+    return list(_iter_suite_cases_cached(model_filter))
+
+
 def _scenario_stem(case: StoryCase) -> str | None:
     if case.scenario_relpath is None:
         return None
     return Path(case.scenario_relpath).stem
 
 
-def static_story_scenario_keys() -> set[tuple[str, str]]:
-    """All ``(story_id, scenario_stem)`` under ``static/fixture`` suite stages."""
+@functools.lru_cache(maxsize=1)
+def _story_case_by_stage() -> dict[tuple[str, str], tuple[StoryCase, ...]]:
+    """Index ``(story_id, scenario_stem) -> StoryCase`` for O(1) stage resolve."""
+    index: dict[tuple[str, str], list[StoryCase]] = {}
+    for case in iter_story_cases():
+        stem = _scenario_stem(case)
+        if stem is None:
+            continue
+        index.setdefault((case.story_id, stem), []).append(case)
+    return {key: tuple(matches) for key, matches in index.items()}
+
+
+@functools.lru_cache(maxsize=1)
+def _story_cases_by_scenario_stem() -> dict[str, tuple[StoryCase, ...]]:
+    index: dict[str, list[StoryCase]] = {}
+    for case in iter_story_cases():
+        stem = _scenario_stem(case)
+        if stem is None:
+            continue
+        index.setdefault(stem, []).append(case)
+    return {stem: tuple(matches) for stem, matches in index.items()}
+
+
+def clear_suite_catalog_cache() -> None:
+    """Drop cached suite lists and stage→story indexes."""
+    _iter_suite_cases_cached.cache_clear()
+    _story_case_by_stage.cache_clear()
+    _story_cases_by_scenario_stem.cache_clear()
+    _suite_stage_keys_cached.cache_clear()
+    _static_story_scenario_keys_cached.cache_clear()
+
+
+@functools.lru_cache(maxsize=1)
+def _static_story_scenario_keys_cached() -> frozenset[tuple[str, str]]:
     keys: set[tuple[str, str]] = set()
     for case in iter_story_cases():
         if "static/fixture" not in case.root.as_posix():
@@ -189,12 +235,24 @@ def static_story_scenario_keys() -> set[tuple[str, str]]:
         if stem is None:
             continue
         keys.add((case.story_id, stem))
-    return keys
+    return frozenset(keys)
+
+
+def static_story_scenario_keys() -> set[tuple[str, str]]:
+    """All ``(story_id, scenario_stem)`` under ``static/fixture`` suite stages."""
+    return set(_static_story_scenario_keys_cached())
+
+
+@functools.lru_cache(maxsize=1)
+def _suite_stage_keys_cached() -> frozenset[tuple[str, str]]:
+    return frozenset(
+        (s.story, s.scenario) for case in iter_suite_cases() for s in case.suite.stages
+    )
 
 
 def suite_stage_keys(suites: list[SuiteSpec] | None = None) -> set[tuple[str, str]]:
     if suites is None:
-        suites = [c.suite for c in iter_suite_cases()]
+        return set(_suite_stage_keys_cached())
     return {(s.story, s.scenario) for suite in suites for s in suite.stages}
 
 
@@ -215,19 +273,14 @@ def resolve_stage_story_case(
     *,
     model_filter: str | None = None,
 ) -> StoryCase:
-    """Resolve a suite stage to a StoryCase."""
-    matches = [
-        c
-        for c in iter_story_cases()
-        if c.story_id == stage.story and _scenario_stem(c) == stage.scenario
-    ]
+    """Resolve a suite stage to a StoryCase (indexed; catalog scanned once)."""
+    matches = list(_story_case_by_stage().get((stage.story, stage.scenario), ()))
     if not matches:
         # Allow resolve by scenario stem alone when story id matches yaml id.
         matches = [
             c
-            for c in iter_story_cases()
-            if _scenario_stem(c) == stage.scenario
-            and (c.story_id == stage.story or stage.scenario.endswith(stage.story))
+            for c in _story_cases_by_scenario_stem().get(stage.scenario, ())
+            if c.story_id == stage.story or stage.scenario.endswith(stage.story)
         ]
     if not matches:
         raise LookupError(
@@ -338,6 +391,7 @@ __all__ = [
     "KNOWN_SUITE_HOOKS",
     "SuiteCase",
     "author_to_suite_spec",
+    "clear_suite_catalog_cache",
     "discover_stage_rows",
     "generated_suite_json_payload",
     "is_static_suite_covered",

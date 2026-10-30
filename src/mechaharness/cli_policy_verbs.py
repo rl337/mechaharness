@@ -1196,10 +1196,21 @@ class GraphWalkVerb(CliVerb):
         def _bag_observation(graph: ExecutionGraph) -> dict[str, Any]:
             return dict(graph.walk_bag or {})
 
-        def _model_inputs_observation(infer_runner: Any) -> dict[str, Any]:
-            if infer_runner is None:
-                return {}
-            return dict(getattr(infer_runner, "last_model_inputs", {}) or {})
+        def _model_inputs_observation(*runners: Any) -> dict[str, Any]:
+            out: dict[str, Any] = {}
+            for runner in runners:
+                if runner is None:
+                    continue
+                out.update(dict(getattr(runner, "last_model_inputs", {}) or {}))
+            return out
+
+        def _inference_observation(*runners: Any) -> dict[str, Any]:
+            out: dict[str, Any] = {}
+            for runner in runners:
+                if runner is None:
+                    continue
+                out.update(dict(getattr(runner, "last_inference", {}) or {}))
+            return out
 
         def _completion_scripts(nodes: list[dict[str, Any]]) -> dict[str, str]:
             out: dict[str, str] = {}
@@ -1212,6 +1223,19 @@ class GraphWalkVerb(CliVerb):
                     out[str(raw["id"])] = json.dumps(value, sort_keys=True)
                 else:
                     out[str(raw["id"])] = str(value)
+            return out
+
+        def _completion_turns(
+            nodes: list[dict[str, Any]],
+        ) -> dict[str, list[dict[str, Any]]]:
+            out: dict[str, list[dict[str, Any]]] = {}
+            for raw in nodes:
+                payload = raw.get("payload")
+                if not isinstance(payload, dict):
+                    continue
+                turns = payload.get("completion_turns")
+                if isinstance(turns, list) and turns:
+                    out[str(raw["id"])] = [dict(item) for item in turns]
             return out
 
         if body.action == "start":
@@ -1262,6 +1286,10 @@ class GraphWalkVerb(CliVerb):
                 CliInferRunner,
                 NodeScriptedCompleter,
             )
+            from mechaharness.cli_judge_runner import (
+                DEFAULT_JUDGE_KINDS,
+                CliJudgeRunner,
+            )
             from mechaharness.core.access import InMemoryCostAccountant
             from mechaharness.core.completer import Completer
             from mechaharness.core.events import EventLog
@@ -1269,19 +1297,24 @@ class GraphWalkVerb(CliVerb):
             kinds = sorted({str(n.get("kind") or "compute") for n in nodes_spec})
             # Subgraph kind is handled by the executor; still register leaf kinds.
             infer_kind_set = set(DEFAULT_INFER_KINDS)
+            judge_kind_set = set(DEFAULT_JUDGE_KINDS)
+            special_kinds = infer_kind_set | judge_kind_set
             leaf_kinds = [k for k in kinds if k != "subgraph"]
-            compute_kinds = [k for k in leaf_kinds if k not in infer_kind_set]
+            compute_kinds = [k for k in leaf_kinds if k not in special_kinds]
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
+            needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
             scripts = _completion_scripts(nodes_spec)
+            turns = _completion_turns(nodes_spec)
             infer_runner: CliInferRunner | None = None
+            judge_runner: CliJudgeRunner | None = None
             runners: list[Any] = []
-            if compute_kinds or not needs_infer:
+            if compute_kinds or not (needs_infer or needs_judge):
                 runners.append(
                     CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
                 )
 
-            # Bind Completer / EventLog first so CliInferRunner is in the registry
+            # Bind Completer / EventLog first so runners are in the registry
             # snapshot when Config.configure registers GraphNodeRunnerRegistry.
             class _ServicesCfg(MechaHarnessConfig):
                 def get_inference_class(self) -> type[InferenceStrategy]:
@@ -1294,7 +1327,7 @@ class GraphWalkVerb(CliVerb):
                     return [GraphExecute, *list(body.grants)]
 
             services = get_injector(_ServicesCfg())
-            if needs_infer:
+            if needs_infer or needs_judge:
                 base_completer = services.inject(Completer)
                 host_completer = getattr(runtime, "completer", None)
                 if isinstance(host_completer, Completer):
@@ -1306,24 +1339,39 @@ class GraphWalkVerb(CliVerb):
                 from mechaharness.inference.anthropic import AnthropicStrategy
                 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 
-                if scripts and not isinstance(
+                if (scripts or turns) and not isinstance(
                     base_completer, (OpenAICompatStrategy, AnthropicStrategy)
                 ):
-                    completer = NodeScriptedCompleter(scripts, base_completer)
+                    completer = NodeScriptedCompleter(
+                        scripts, base_completer, turns=turns
+                    )
                 event_log = services.inject(EventLog)
                 host_log = getattr(runtime, "event_log", None)
                 if host_log is not None:
                     event_log = host_log
                 cost = InMemoryCostAccountant(event_log)
                 host_model = getattr(runtime, "model", None)
-                infer_runner = CliInferRunner(
-                    completer,
-                    cost,
-                    event_log,
-                    model=str(host_model or "cli-default"),
-                    kinds=list(DEFAULT_INFER_KINDS),
-                )
-                runners.append(infer_runner)
+                shared_priors: dict[str, Any] = {}
+                if needs_infer:
+                    infer_runner = CliInferRunner(
+                        completer,
+                        cost,
+                        event_log,
+                        model=str(host_model or "cli-default"),
+                        kinds=list(DEFAULT_INFER_KINDS),
+                    )
+                    infer_runner.prior_responses = shared_priors
+                    runners.append(infer_runner)
+                if needs_judge:
+                    judge_runner = CliJudgeRunner(
+                        completer,
+                        cost,
+                        event_log,
+                        model=str(host_model or "cli-judge"),
+                        kinds=list(DEFAULT_JUDGE_KINDS),
+                        prior_responses=shared_priors,
+                    )
+                    runners.append(judge_runner)
 
             class Cfg(MechaHarnessConfig):
                 def get_inference_class(self) -> type[InferenceStrategy]:
@@ -1392,6 +1440,7 @@ class GraphWalkVerb(CliVerb):
                 "calls": calls,
                 "live_epoch": live,
                 "infer_runner": infer_runner,
+                "judge_runner": judge_runner,
             }
             runtime.graph_walk_session = session
             result = await executor.run(
@@ -1421,7 +1470,8 @@ class GraphWalkVerb(CliVerb):
                 "node_error": node_error,
                 "error": result.error,
                 "bag": _bag_observation(result.graph),
-                "model_inputs": _model_inputs_observation(infer_runner),
+                "model_inputs": _model_inputs_observation(infer_runner, judge_runner),
+                "inference": _inference_observation(infer_runner, judge_runner),
             }
 
         if session is None:
@@ -1483,7 +1533,12 @@ class GraphWalkVerb(CliVerb):
             "node_error": node_error,
             "error": result.error,
             "bag": _bag_observation(result.graph),
-            "model_inputs": _model_inputs_observation(session.get("infer_runner")),
+            "model_inputs": _model_inputs_observation(
+                session.get("infer_runner"), session.get("judge_runner")
+            ),
+            "inference": _inference_observation(
+                session.get("infer_runner"), session.get("judge_runner")
+            ),
         }
 
 
