@@ -132,7 +132,7 @@
 </section>
 <section id="running-the-suite">
 <h2>Running the suite<a class="headerlink" href="#running-the-suite" title="Link to this heading"></a></h2>
-<p>Default CI runs <strong>every</strong> story offline (static fixture + cassettes) — no skips.</p>
+<p>Default CI runs <strong>every</strong> story offline (static fixture + cassettes) — no skips. <code class="docutils literal notranslate"><span class="pre">./run_checks.sh</span></code> runs unit pytest without the story suite modules, then runs those suites once under <code class="docutils literal notranslate"><span class="pre">scripts/story_coverage.py</span></code> (so stages are not paid for twice).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># CI / offline — all stories, zero skips</span>
 pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories
 
