@@ -22,7 +22,7 @@ Taloneth owns judge contracts, adapter drift checks, and harness experiments. He
 
 ## Running the suite
 
-Default CI runs **every** story offline (static fixture + cassettes) — no skips.
+Default CI runs **every** story offline (static fixture + cassettes) — no skips. `./run_checks.sh` runs unit pytest without the story suite modules, then runs those suites once under `scripts/story_coverage.py` (so stages are not paid for twice).
 
 ```bash
 # CI / offline — all stories, zero skips

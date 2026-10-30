@@ -8,6 +8,7 @@ from pathlib import Path
 
 from pyiv.command import CLICommand
 
+from tests.stories.catalog import clear_story_case_cache
 from tests.stories.suite_catalog import (
     generated_suite_json_payload,
     iter_suite_cases,
@@ -47,6 +48,8 @@ class SyncSuitesCommand(CLICommand):
 
     def run(self) -> None:
         root: Path = self.args.root or static_suites_root()
+        # Authoring rewrites stages on disk; drop discovery caches first.
+        clear_story_case_cache()
         errors = validate_suite_fixtures(require_full_static_coverage=True)
         if errors:
             for err in errors:
