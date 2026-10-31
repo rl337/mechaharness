@@ -1,8 +1,8 @@
 # Template: gastronomic_guided_development
 
-Product composition for gastronomic guided development. Read-only discovery,
-contract freeze, and plan decomposition are tiled; mutating coding stages are
-deferred. `guided_coding` remains the baseline control.
+Product composition for gastronomic guided development. Discovery, contract,
+plan, and scoped execute are tiled; verification/repair stages are deferred.
+`guided_coding` remains the baseline control.
 
 | Item | Value |
 |------|-------|
@@ -18,7 +18,8 @@ seed
   → discovery_tile (workspace_discovery)
   → contract_tile (contract_extraction)
   → plan_tile (change_decomposition)
-  → publish / publish_contract / publish_inventory
+  → execute_tile (change_execution)
+  → publish / publish_plan / publish_contract / publish_inventory
 ```
 
 ## Soft points
@@ -28,10 +29,12 @@ seed
 | `discovery_bindings` | task_state | Forwarded to `workspace_discovery` |
 | `contract_bindings` | task_state | Forwarded to `contract_extraction` |
 | `plan_bindings` | task_state | Forwarded to `change_decomposition` |
+| `execution_bindings` | task_state | Forwarded to `change_execution` |
 | `hypotheses_payload` | task_state | Optional discovery soft point |
 | `interpret_payload` | task_state | Optional discovery soft point |
 | `propose_payload` | task_state | Optional contract soft point |
 | `plan_propose_payload` | task_state | Optional plan soft point |
+| `apply_payload` | task_state | Optional execution soft point |
 
 ## Node components
 
@@ -40,6 +43,7 @@ seed
 | `discovery_tile` | `child_graph` |
 | `contract_tile` | `child_graph` |
 | `plan_tile` | `child_graph` |
+| `execute_tile` | `child_graph` |
 
 ## Stories
 

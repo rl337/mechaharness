@@ -1306,6 +1306,10 @@ class GraphWalkVerb(CliVerb):
                 DISCOVERY_HARD_KINDS,
                 DiscoveryHardNodeRunner,
             )
+            from mechaharness.execution_hard_nodes import (
+                EXECUTION_HARD_KINDS,
+                ExecutionHardNodeRunner,
+            )
             from mechaharness.plan_hard_nodes import (
                 PLAN_HARD_KINDS,
                 PlanHardNodeRunner,
@@ -1316,13 +1320,20 @@ class GraphWalkVerb(CliVerb):
             discovery_kind_set = set(DISCOVERY_HARD_KINDS)
             contract_kind_set = set(CONTRACT_HARD_KINDS)
             plan_kind_set = set(PLAN_HARD_KINDS)
-            hard_kind_set = discovery_kind_set | contract_kind_set | plan_kind_set
+            execution_kind_set = set(EXECUTION_HARD_KINDS)
+            hard_kind_set = (
+                discovery_kind_set
+                | contract_kind_set
+                | plan_kind_set
+                | execution_kind_set
+            )
             special_kinds = infer_kind_set | judge_kind_set | hard_kind_set
             leaf_kinds = [k for k in kinds if k != "subgraph"]
             compute_kinds = [k for k in leaf_kinds if k not in special_kinds]
             discovery_kinds = [k for k in leaf_kinds if k in discovery_kind_set]
             contract_kinds = [k for k in leaf_kinds if k in contract_kind_set]
             plan_kinds = [k for k in leaf_kinds if k in plan_kind_set]
+            execution_kinds = [k for k in leaf_kinds if k in execution_kind_set]
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
             needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
@@ -1337,25 +1348,47 @@ class GraphWalkVerb(CliVerb):
                 or discovery_kinds
                 or contract_kinds
                 or plan_kinds
+                or execution_kinds
             ):
                 runners.append(
                     CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
                 )
+            host_fs = getattr(runtime, "filesystem", None)
+            default_ws = getattr(runtime, "workspace_root", None)
             if discovery_kinds:
-                host_fs = getattr(runtime, "filesystem", None)
                 runners.append(
                     DiscoveryHardNodeRunner(
                         discovery_kinds,
                         filesystem=host_fs
                         if host_fs is not None
                         else RealFilesystem(),
-                        default_workspace=getattr(runtime, "workspace_root", None),
+                        default_workspace=default_ws,
                     )
                 )
             if contract_kinds:
                 runners.append(ContractHardNodeRunner(contract_kinds))
             if plan_kinds:
                 runners.append(PlanHardNodeRunner(plan_kinds))
+            if execution_kinds:
+                apply_kinds = [k for k in execution_kinds if k == "execution_apply"]
+                other_exec = [k for k in execution_kinds if k != "execution_apply"]
+                fs = host_fs if host_fs is not None else RealFilesystem()
+                if other_exec:
+                    runners.append(
+                        ExecutionHardNodeRunner(
+                            other_exec,
+                            filesystem=fs,
+                            default_workspace=default_ws,
+                        )
+                    )
+                if apply_kinds:
+                    runners.append(
+                        ExecutionHardNodeRunner(
+                            apply_kinds,
+                            filesystem=fs,
+                            default_workspace=default_ws,
+                        )
+                    )
 
             # Bind Completer / EventLog first so runners are in the registry
             # snapshot when Config.configure registers GraphNodeRunnerRegistry.

@@ -45,7 +45,8 @@ owning user stories):
 | [workspace_discovery](./graph-templates/workspace-discovery.md) | `workspace_discovery` | `fangore_workspace_discovery_found` | Read-only evidence inventory (`found`/`not_found`/…) |
 | [contract_extraction](./graph-templates/contract-extraction.md) | `contract_extraction` | `fangore_contract_extraction_found` | Freeze inventory into typed `ChangeContract` |
 | [change_decomposition](./graph-templates/change-decomposition.md) | `change_decomposition` | `fangore_change_decomposition_ordered` | Ordered ChangePlan slices from a contract |
-| [gastronomic_guided_development](./graph-templates/gastronomic-guided-development.md) | `gastronomic_guided_development` | `fangore_gastronomic_guided_development_shape` | Product tile: discovery → contract → plan |
+| [change_execution](./graph-templates/change-execution.md) | `change_execution` | `fangore_change_execution_apply` | Scoped slice apply with diff + hashes |
+| [gastronomic_guided_development](./graph-templates/gastronomic-guided-development.md) | `gastronomic_guided_development` | `fangore_gastronomic_guided_development_shape` | Product tile: discovery → contract → plan → execute |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
 `GraphTemplate.tile` (embed under a parent node). Story:
@@ -109,7 +110,8 @@ held-out gate guards `ResearchLab.promote`.
 | `workspace_discovery` | Read-only workspace evidence → typed inventory |
 | `contract_extraction` | Freeze priors → typed ChangeContract |
 | `change_decomposition` | Contract → ordered ChangePlan slices |
-| `gastronomic_guided_development` | Product composition (discovery → contract → plan; coding deferred) |
+| `change_execution` | Approved slice → scoped writes → ChangeExecution |
+| `gastronomic_guided_development` | Product composition (discovery → contract → plan → execute; verify deferred) |
 
 These are distinct Agentic Recipes on the same `GraphTemplate` substrate.
 
