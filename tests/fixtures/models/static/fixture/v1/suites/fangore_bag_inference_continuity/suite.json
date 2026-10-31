@@ -30,6 +30,10 @@
     {
       "story": "fangore_bag_judge_no_tools",
       "scenario": "050_fangore_bag_judge_no_tools"
+    },
+    {
+      "story": "fangore_bag_discovery_hard_nodes",
+      "scenario": "060_fangore_bag_discovery_hard_nodes"
     }
   ]
 }

@@ -216,6 +216,18 @@ class UserStoryHarness:
         base = scenario_path.parent if scenario_path is not None else Path.cwd()
         return (base / path).resolve()
 
+    def _seed_workspace_files(
+        self,
+        env: EnvironmentBlock,
+        scenario_path: Path | None,
+        workspace_root: Path,
+    ) -> None:
+        """Materialize ``filesystem.contents`` onto ``workspace_root``."""
+        for block in self._load_coding_writes(env, scenario_path):
+            target = workspace_root / block.path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(block.content, encoding="utf-8")
+
     def _load_coding_writes(
         self,
         env: EnvironmentBlock,
@@ -260,6 +272,10 @@ class UserStoryHarness:
         kwargs: dict[str, Any] = {}
         if workspace_root is not None:
             kwargs["workspace_root"] = workspace_root
+            # Hard-node / non-coding stories still need files.json on disk.
+            # project_coding seeds via its Completer write stub instead.
+            if env.local_work != "project_coding":
+                self._seed_workspace_files(env, scenario_path, workspace_root)
         if env.local_work == "plan_classify":
             kwargs["generator_local_work"] = PlanClassifyLocalWork
         elif env.local_work == "project_coding":

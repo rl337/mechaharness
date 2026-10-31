@@ -119,9 +119,9 @@ Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_g
 
 ### `fangore_bag_inference_continuity` — Walk bag continuity, ContextSpec inference, snapshot inspect, and judge
 
-Persona **fangore**; execution `parallel`; 5 stage(s).
+Persona **fangore**; execution `parallel`; 6 stage(s).
 
-Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_judge_no_tools`, `fangore_bag_snapshot_inspect`, `fangore_bag_subgraph_bindings`
+Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_discovery_hard_nodes`, `fangore_bag_judge_no_tools`, `fangore_bag_snapshot_inspect`, `fangore_bag_subgraph_bindings`
 
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
@@ -649,6 +649,22 @@ Suite stage `030_fangore_bag_context_spec_continuity` — pause before `plan` sh
 #### Footnotes
 
 1. [Gastronomic guided-development M2 (ContextSpec + infer publication)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Second inference must see authorized bag state from the first, not noise
+
+### `fangore_bag_discovery_hard_nodes` — Run P0 discovery hard nodes over a tiny workspace
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a calculator workspace and WalkBag hypotheses, then steps deterministic hard nodes — `workspace_manifest`, `file_search`, `source_extract`, `evidence_resolve`, `bag_project`, `bag_validate`, and `coverage_measure` — so verified evidence lands on declared bag paths without partial writes or invented citations.
+
+#### Implementation
+
+`DiscoveryHardNodeRunner` / P0 capabilities in `discovery_hard_nodes`; `graph_walk` registers hard kinds alongside compute / infer / judge. Workspace confinement reuses `WorkspacePaths`.
+
+#### Validation
+
+Suite stage `060_fangore_bag_discovery_hard_nodes` — after the walk, manifest lists two files, search matches `ZeroDivisionError`, `bag.acc.discovery.verified.ok` is false (fabricated path rejected), projected summary omits noise, unrelated bag state is preserved, and coverage is `sufficient`. Typed non-exceptional failures (stale hash, invalid regex, extract rejects, truncation/inconclusive coverage, atomic failed writes) live in `tests/test_discovery_hard_nodes.py`.
+
+#### Footnotes
+
+1. [Gastronomic guided-development M4 (P0 discovery hard nodes)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Deterministic hard nodes publish to declared bag paths only
 
 ### `fangore_bag_judge_no_tools` — Judge bag evidence with zero tool definitions
 
