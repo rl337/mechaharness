@@ -1,0 +1,28 @@
+{
+  "id": "change_execution_defaults",
+  "description": "change_execution constrains slice then applies scoped revisions",
+  "template": "change_execution",
+  "params": {
+    "goal": "Apply multiply helper",
+    "inputs": {
+      "goal": "Apply multiply helper",
+      "approved_slice": {
+        "id": "arithmetic",
+        "scope": {"paths": ["src/calc/arithmetic.py"]}
+      },
+      "workspace": {"root": "."}
+    }
+  },
+  "expect": {
+    "template_name": "change_execution",
+    "template_status": "active",
+    "node_ids": ["seed", "constrain", "apply", "publish", "validate"],
+    "edge_count": 4,
+    "nodes": {
+      "constrain": {"kind": "execution_constrain"},
+      "apply": {"kind": "execution_apply"},
+      "publish": {"kind": "execution_publish"},
+      "validate": {"kind": "execution_validate"}
+    }
+  }
+}

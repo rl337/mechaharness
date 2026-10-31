@@ -39,7 +39,9 @@ steps:
           contracts (non-negotiable): keep package import `from widget import …` working. Do NOT use eval()
           or exec(). You MUST call write_file for every file you create or change before finishing. Tests
           under tests/ must stay green (pytest).'
+        instruction_mode: oneshot
         max_iterations: 24
+        max_repair_rounds: 4
         verify_runs:
         - path: widget/__init__.py
           text_contains:
