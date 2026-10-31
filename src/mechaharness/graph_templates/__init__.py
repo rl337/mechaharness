@@ -66,6 +66,10 @@ from mechaharness.graph_templates.produce_critique_refine import (
 )
 from mechaharness.graph_templates.safety_eval import SafetyEvalTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
+from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
+from mechaharness.graph_templates.gastronomic_guided_development import (
+    GastronomicGuidedDevelopmentTemplate,
+)
 from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 
 __all__ = [
@@ -73,11 +77,13 @@ __all__ = [
     "BackendDescribeTemplate",
     "BoundedRetryTemplate",
     "ContextPackTemplate",
+    "ContractExtractionTemplate",
     "ConversationalToolLoopTemplate",
     "DecisionPlaneTemplate",
     "DemoGuidanceTemplate",
     "EnvironmentRepairTemplate",
     "FanOutAggregateTemplate",
+    "GastronomicGuidedDevelopmentTemplate",
     "GraphTemplate",
     "GraphTemplateParams",
     "GraphTemplateRegistry",
