@@ -1,0 +1,188 @@
+id: fangore_bag_discovery_hard_nodes
+suite: fangore_bag_inference_continuity
+persona: fangore
+title: Run P0 discovery hard nodes over a tiny workspace
+narrative: Fangore starts the CLI host with family `pass_through` and backend
+  `mock`. He seeds a calculator workspace and WalkBag hypotheses, then steps
+  deterministic hard nodes — `workspace_manifest`, `file_search`,
+  `source_extract`, `evidence_resolve`, `bag_project`, `bag_validate`, and
+  `coverage_measure` — so verified evidence lands on declared bag paths without
+  partial writes or invented citations.
+implementation: '`DiscoveryHardNodeRunner` / P0 capabilities in
+  `discovery_hard_nodes`; `graph_walk` registers hard kinds alongside compute /
+  infer / judge. Workspace confinement reuses `WorkspacePaths`.'
+validation: Suite stage `060_fangore_bag_discovery_hard_nodes` — after the walk,
+  manifest lists two files, search matches `ZeroDivisionError`,
+  `bag.acc.discovery.verified.ok` is false (fabricated path rejected), projected
+  summary omits noise, unrelated bag state is preserved, and coverage is
+  `sufficient`. Typed non-exceptional failures (stale hash, invalid regex,
+  extract rejects, truncation/inconclusive coverage, atomic failed writes) live
+  in `tests/test_discovery_hard_nodes.py`.
+footnotes:
+- id: gastronomic-m4
+  label: Gastronomic guided-development M4 (P0 discovery hard nodes)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Deterministic hard nodes publish to declared bag paths only
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: 060_fangore_bag_discovery_hard_nodes.files.json
+graph:
+  inline:
+    goal: discover calculator division handling via hard nodes
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.workspace:
+            root: .
+          in.goal: Find division-by-zero handling
+          ask.search_queries:
+          - id: zdiv
+            pattern: ZeroDivisionError
+            mode: literal
+          ask.source_requests:
+          - path: calc.py
+            start_line: 4
+            end_line: 6
+          out.discovery:
+            status: found
+            files:
+            - calc.py
+            - fabricated.py
+            noise: do-not-project
+          ctx.unrelated: keep-me
+    - id: manifest
+      kind: workspace_manifest
+      depends_on:
+      - seed
+      payload:
+        reads:
+          workspace: in.workspace
+        writes:
+          destination: acc.discovery.manifest
+        parameters:
+          max_files: 50
+    - id: search
+      kind: file_search
+      depends_on:
+      - manifest
+      payload:
+        reads:
+          workspace: in.workspace
+          manifest: acc.discovery.manifest
+          queries: ask.search_queries
+        writes:
+          destination: acc.discovery.matches
+        parameters:
+          max_matches: 20
+    - id: extract
+      kind: source_extract
+      depends_on:
+      - search
+      payload:
+        reads:
+          workspace: in.workspace
+          manifest: acc.discovery.manifest
+          requests: ask.source_requests
+        writes:
+          destination: acc.discovery.excerpts
+    - id: resolve
+      kind: evidence_resolve
+      depends_on:
+      - extract
+      payload:
+        reads:
+          proposals: out.discovery
+          manifest: acc.discovery.manifest
+          excerpts: acc.discovery.excerpts
+        writes:
+          destination: acc.discovery.verified
+    - id: project
+      kind: bag_project
+      depends_on:
+      - resolve
+      payload:
+        reads:
+          source: out.discovery
+        writes:
+          destination: ctx.discovery_summary
+        parameters:
+          fields:
+          - status
+          - files
+    - id: validate
+      kind: bag_validate
+      depends_on:
+      - project
+      payload:
+        reads:
+          source: ctx.discovery_summary
+        writes:
+          destination: acc.validation.discovery
+        parameters:
+          required_fields:
+          - status
+          - files
+    - id: coverage
+      kind: coverage_measure
+      depends_on:
+      - validate
+      payload:
+        reads:
+          manifest: acc.discovery.manifest
+          search: acc.discovery.matches
+        writes:
+          destination: acc.discovery.coverage
+        parameters:
+          min_files_scanned: 1
+steps:
+- do:
+    graph_walk:
+      action: start
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: node_statuses.seed
+    value: succeeded
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.acc.discovery.manifest.coverage.file_count
+    value: 2
+  - kind: nonempty
+    key: bag.acc.discovery.matches.matches
+  - kind: nonempty
+    key: bag.acc.discovery.excerpts.excerpts
+  - kind: equals
+    key: bag.acc.discovery.verified.ok
+    value: false
+  - kind: equals
+    key: bag.ctx.discovery_summary.status
+    value: found
+  - kind: equals
+    key: bag.acc.validation.discovery.ok
+    value: true
+  - kind: equals
+    key: bag.acc.discovery.coverage.status
+    value: sufficient
+  - kind: equals
+    key: bag.ctx.unrelated
+    value: keep-me
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+cleanup: []
