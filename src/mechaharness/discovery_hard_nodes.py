@@ -9,6 +9,7 @@ read-only on the workspace; bag mutations are atomic via
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -29,6 +30,8 @@ DISCOVERY_HARD_KINDS: tuple[str, ...] = (
     "source_extract",
     "evidence_resolve",
     "coverage_measure",
+    "discovery_preflight",
+    "inventory_publish",
 )
 
 _DEFAULT_EXCLUDES = frozenset(
@@ -481,6 +484,129 @@ def measure_discovery_coverage(
     }
 
 
+def run_discovery_preflight(
+    *,
+    goal: Any,
+    workspace: Any,
+    constraints: Any = None,
+) -> dict[str, Any]:
+    """Validate declared discovery inputs before workspace IO."""
+    errors: list[dict[str, str]] = []
+    if not isinstance(goal, str) or not goal.strip():
+        errors.append({"path": "in.goal", "message": "non-empty string required"})
+    if not isinstance(workspace, Mapping) or not str(workspace.get("root") or "").strip():
+        if not (isinstance(workspace, str) and workspace.strip()):
+            errors.append({"path": "in.workspace", "message": "root required"})
+    constraints_map = constraints if isinstance(constraints, Mapping) else {}
+    read_only = constraints_map.get("read_only", True)
+    if read_only is not True and read_only != "true":
+        errors.append(
+            {"path": "in.constraints.read_only", "message": "discovery requires read_only"}
+        )
+    return {
+        "ok": not errors,
+        "errors": errors,
+        "read_only": True,
+        "constraints": {
+            "max_files": int(constraints_map.get("max_files") or 100),
+            "max_search_results": int(constraints_map.get("max_search_results") or 50),
+            "max_inference_invocations": int(
+                constraints_map.get("max_inference_invocations") or 3
+            ),
+            "max_inspection_calls": int(
+                constraints_map.get("max_inspection_calls") or 6
+            ),
+        },
+    }
+
+
+def publish_workspace_inventory(
+    *,
+    goal: Any,
+    manifest: Mapping[str, Any],
+    verified: Mapping[str, Any],
+    coverage: Mapping[str, Any],
+    proposed: Mapping[str, Any] | None = None,
+    preflight: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Assemble typed ``WorkspaceInventory``; model cannot force ``found`` alone."""
+    if isinstance(preflight, Mapping) and preflight.get("ok") is False:
+        status = "failed"
+    elif str(coverage.get("status") or "") in {"inconclusive", "insufficient"} or bool(
+        coverage.get("truncated")
+    ):
+        status = "inconclusive"
+    else:
+        verified_rows = [
+            row
+            for row in (verified.get("verified") or [])
+            if isinstance(row, Mapping) and row.get("path")
+        ]
+        if verified_rows:
+            status = "found"
+        elif str(coverage.get("status") or "") == "sufficient":
+            status = "not_found"
+        else:
+            status = "inconclusive"
+
+    files_meta = {
+        str(row["path"]): row
+        for row in (manifest.get("files") or [])
+        if isinstance(row, Mapping) and row.get("path")
+    }
+    relevant: list[dict[str, Any]] = []
+    for row in verified.get("verified") or []:
+        if not isinstance(row, Mapping):
+            continue
+        path = str(row.get("path") or "")
+        if not path:
+            continue
+        meta = files_meta.get(path) or {}
+        relevant.append(
+            {
+                "path": path,
+                "sha256": row.get("sha256") or meta.get("sha256"),
+                "start_line": row.get("start_line"),
+                "end_line": row.get("end_line"),
+                "evidence_id": f"verified:{path}",
+            }
+        )
+
+    fingerprint = hashlib.sha256(
+        json_dumps_stable(
+            {
+                "files": [
+                    {"path": f.get("path"), "sha256": f.get("sha256")}
+                    for f in (manifest.get("files") or [])
+                    if isinstance(f, Mapping)
+                ]
+            }
+        ).encode("utf-8")
+    ).hexdigest()
+
+    return {
+        "status": status,
+        "objective": goal if isinstance(goal, str) else str(goal or ""),
+        "workspace_revision": fingerprint,
+        "relevant_files": relevant,
+        "tests": [
+            row
+            for row in relevant
+            if str(row.get("path") or "").startswith("tests/")
+            or "/test_" in str(row.get("path") or "")
+        ],
+        "unknowns": list((proposed or {}).get("unknowns") or [])
+        if isinstance(proposed, Mapping)
+        else [],
+        "coverage": dict(coverage),
+        "rejected_claims": list(verified.get("rejected") or []),
+    }
+
+
+def json_dumps_stable(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, default=str)
+
+
 class DiscoveryHardNodeRunner(GraphNodeRunner):
     """Run P0 discovery hard-node kinds with atomic declared bag writes."""
 
@@ -648,19 +774,49 @@ class DiscoveryHardNodeRunner(GraphNodeRunner):
             workspace_path = str(reads.get("workspace") or "in.workspace")
             manifest_path = str(reads.get("manifest") or "acc.discovery.manifest")
             requests_path = str(reads.get("requests") or "ask.source_requests")
+            matches_path = reads.get("matches")
             root = _resolve_workspace_root(
                 _read_path(bag, workspace_path),
                 default_workspace=self._default_workspace,
             )
             manifest = _as_mapping(_read_path(bag, manifest_path), label="manifest")
-            requests_raw = _read_path(bag, requests_path)
+            requests_raw = _read_path(bag, requests_path, required=False)
+            if isinstance(requests_raw, Mapping):
+                nested = requests_raw.get("source_requests")
+                if isinstance(nested, list):
+                    requests_raw = nested
+                else:
+                    requests_raw = []
+            if requests_raw is None:
+                requests_raw = []
             if not isinstance(requests_raw, list):
                 raise DiscoveryHardNodeError("source requests must be a list")
+            requests = [r for r in requests_raw if isinstance(r, Mapping)]
+            if not requests and isinstance(matches_path, str) and matches_path.strip():
+                matches_raw = _read_path(bag, matches_path, required=False)
+                match_rows = (
+                    list(matches_raw.get("matches") or [])
+                    if isinstance(matches_raw, Mapping)
+                    else []
+                )
+                for row in match_rows:
+                    if not isinstance(row, Mapping) or not row.get("path"):
+                        continue
+                    line = int(row.get("line") or 0)
+                    if line < 1:
+                        continue
+                    requests.append(
+                        {
+                            "path": row["path"],
+                            "start_line": max(1, line - 1),
+                            "end_line": line + 1,
+                        }
+                    )
             return extract_source_spans(
                 fs=self._fs,
                 root=root,
                 manifest=manifest,
-                requests=[r for r in requests_raw if isinstance(r, Mapping)],
+                requests=requests,
                 max_lines=int(parameters.get("max_lines") or 80),
             )
 
@@ -700,6 +856,51 @@ class DiscoveryHardNodeRunner(GraphNodeRunner):
                 min_files_scanned=int(parameters.get("min_files_scanned") or 1),
             )
 
+        if kind == "discovery_preflight":
+            goal_path = str(reads.get("goal") or "in.goal")
+            workspace_path = str(reads.get("workspace") or "in.workspace")
+            constraints_path = reads.get("constraints")
+            constraints = None
+            if isinstance(constraints_path, str) and constraints_path.strip():
+                constraints = _read_path(bag, constraints_path, required=False)
+            report = run_discovery_preflight(
+                goal=_read_path(bag, goal_path),
+                workspace=_read_path(bag, workspace_path),
+                constraints=constraints,
+            )
+            if parameters.get("fail_if_invalid") and not report["ok"]:
+                raise DiscoveryHardNodeError(
+                    "discovery_preflight failed: "
+                    + ", ".join(e["path"] for e in report["errors"])
+                )
+            return report
+
+        if kind == "inventory_publish":
+            goal_path = str(reads.get("goal") or "in.goal")
+            manifest_path = str(reads.get("manifest") or "acc.discovery.manifest")
+            verified_path = str(reads.get("verified") or "acc.discovery.verified")
+            coverage_path = str(reads.get("coverage") or "acc.discovery.coverage")
+            proposed_path = reads.get("proposed")
+            preflight_path = reads.get("preflight")
+            proposed = None
+            if isinstance(proposed_path, str) and proposed_path.strip():
+                proposed_raw = _read_path(bag, proposed_path, required=False)
+                if isinstance(proposed_raw, Mapping):
+                    proposed = proposed_raw
+            preflight = None
+            if isinstance(preflight_path, str) and preflight_path.strip():
+                preflight_raw = _read_path(bag, preflight_path, required=False)
+                if isinstance(preflight_raw, Mapping):
+                    preflight = preflight_raw
+            return publish_workspace_inventory(
+                goal=_read_path(bag, goal_path),
+                manifest=_as_mapping(_read_path(bag, manifest_path), label="manifest"),
+                verified=_as_mapping(_read_path(bag, verified_path), label="verified"),
+                coverage=_as_mapping(_read_path(bag, coverage_path), label="coverage"),
+                proposed=proposed,
+                preflight=preflight,
+            )
+
         raise DiscoveryHardNodeError(f"unsupported hard-node kind {kind!r}")
 
 
@@ -710,6 +911,8 @@ __all__ = [
     "build_workspace_manifest",
     "extract_source_spans",
     "measure_discovery_coverage",
+    "publish_workspace_inventory",
     "resolve_evidence_refs",
+    "run_discovery_preflight",
     "search_manifest_files",
 ]

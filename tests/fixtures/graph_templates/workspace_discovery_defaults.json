@@ -1,0 +1,45 @@
+{
+  "id": "workspace_discovery_defaults",
+  "description": "workspace_discovery tiles preflight through inventory publish",
+  "template": "workspace_discovery",
+  "params": {
+    "goal": "Find calculator division-by-zero handling",
+    "inputs": {
+      "goal": "Find calculator division-by-zero handling",
+      "workspace": {"root": "."},
+      "constraints": {
+        "read_only": true,
+        "max_files": 100,
+        "max_search_results": 50
+      }
+    }
+  },
+  "expect": {
+    "template_name": "workspace_discovery",
+    "template_status": "active",
+    "node_ids": [
+      "seed",
+      "preflight",
+      "manifest",
+      "hypotheses",
+      "search",
+      "extract",
+      "interpret",
+      "resolve",
+      "coverage",
+      "publish"
+    ],
+    "edge_count": 9,
+    "nodes": {
+      "preflight": {"kind": "discovery_preflight"},
+      "manifest": {"kind": "workspace_manifest"},
+      "hypotheses": {"kind": "infer"},
+      "search": {"kind": "file_search"},
+      "extract": {"kind": "source_extract"},
+      "interpret": {"kind": "infer"},
+      "resolve": {"kind": "evidence_resolve"},
+      "coverage": {"kind": "coverage_measure"},
+      "publish": {"kind": "inventory_publish"}
+    }
+  }
+}

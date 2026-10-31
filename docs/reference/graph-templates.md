@@ -42,6 +42,7 @@ owning user stories):
 | [guided_coding](./graph-templates/guided-coding.md) | `guided_coding` | `fangore_guided_coding_recipe` | Frontier guidance → instruction plan → audited gate |
 | [instruction_todo_plan](./graph-templates/instruction-todo-plan.md) | `instruction_todo_plan` | `fangore_instruction_todo_plan` | Oneshot vs list; refine; pre/item/post acceptance |
 | [audited_infer_accept](./graph-templates/audited-infer-accept.md) | `audited_infer_accept` | `fangore_audited_infer_accept` | Collect → freeze → decide → QA → deterministic → gate |
+| [workspace_discovery](./graph-templates/workspace-discovery.md) | `workspace_discovery` | `fangore_workspace_discovery_found` | Read-only evidence inventory (`found`/`not_found`/…) |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
 `GraphTemplate.tile` (embed under a parent node). Story:
@@ -102,6 +103,7 @@ held-out gate guards `ResearchLab.promote`.
 | `verify_repair` | Oracle / verify then repair until stop |
 | `safety_eval` | Produce → isolated review → deterministic score (measure-only) |
 | `decision_plane` | Bounded decision surfaces with policy / shadow / telemetry |
+| `workspace_discovery` | Read-only workspace evidence → typed inventory |
 
 These are distinct Agentic Recipes on the same `GraphTemplate` substrate.
 

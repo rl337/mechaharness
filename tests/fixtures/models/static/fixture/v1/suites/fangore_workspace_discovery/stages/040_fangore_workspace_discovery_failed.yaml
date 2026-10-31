@@ -1,0 +1,106 @@
+id: fangore_workspace_discovery_failed
+suite: fangore_workspace_discovery
+persona: fangore
+title: Publish failed when discovery preflight rejects malformed inputs
+narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds an empty
+  goal so `discovery_preflight` records `ok: false` without aborting the walk, then `inventory_publish`
+  must emit typed `failed` status.'
+implementation: '`run_discovery_preflight` + `publish_workspace_inventory` failed branch.'
+validation: Suite stage `040_fangore_workspace_discovery_failed` — inventory status `failed`.
+footnotes:
+- id: gastronomic-m5-failed
+  label: Gastronomic M5
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Fatal input errors are typed failed
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: ../assets/calc_discovery/workspace.files.json
+graph:
+  inline:
+    goal: malformed discovery inputs
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: ''
+          in.workspace:
+            root: .
+          in.constraints:
+            read_only: true
+          acc.discovery.manifest:
+            files: []
+            coverage:
+              file_count: 0
+              truncated: false
+          acc.discovery.verified:
+            verified: []
+            rejected: []
+            ok: true
+          acc.discovery.coverage:
+            status: insufficient
+            file_count: 0
+          acc.discovery.proposed_findings:
+            files: []
+            unknowns: []
+    - id: preflight
+      kind: discovery_preflight
+      depends_on:
+      - seed
+      payload:
+        reads:
+          goal: in.goal
+          workspace: in.workspace
+          constraints: in.constraints
+        writes:
+          destination: acc.discovery.preflight
+        parameters:
+          fail_if_invalid: false
+    - id: publish
+      kind: inventory_publish
+      depends_on:
+      - preflight
+      payload:
+        reads:
+          goal: in.goal
+          manifest: acc.discovery.manifest
+          verified: acc.discovery.verified
+          coverage: acc.discovery.coverage
+          proposed: acc.discovery.proposed_findings
+          preflight: acc.discovery.preflight
+        writes:
+          destination: out.workspace_inventory
+steps:
+- do:
+    graph_walk:
+      action: start
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: node_statuses.seed
+    value: succeeded
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.acc.discovery.preflight.ok
+    value: false
+  - kind: equals
+    key: bag.out.workspace_inventory.status
+    value: failed
+complete:
+  expect:
+  - kind: equals
+    key: bag.out.workspace_inventory.status
+    value: failed
+cleanup: []
