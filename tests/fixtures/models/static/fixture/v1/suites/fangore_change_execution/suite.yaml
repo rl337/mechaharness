@@ -1,0 +1,9 @@
+id: fangore_change_execution
+title: ChangeExecution scoped apply and gastronomic execute tiling
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []
