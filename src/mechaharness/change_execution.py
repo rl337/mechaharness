@@ -46,7 +46,8 @@ def extract_execution_constraints(
             "errors": [{"path": "approved_slice", "message": "required"}],
         }
 
-    scope = selected.get("scope") if isinstance(selected.get("scope"), Mapping) else {}
+    scope_raw = selected.get("scope")
+    scope: Mapping[str, Any] = scope_raw if isinstance(scope_raw, Mapping) else {}
     allowed: list[str] = []
     for path in scope.get("paths") or []:
         rel = _norm_rel(str(path))
