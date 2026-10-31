@@ -304,8 +304,8 @@ python<span class="w"> </span>-m<span class="w"> </span>tests.stories.commands<s
 </section>
 <section id="fangore-workspace-discovery-read-only-workspace-discovery-agentic-recipe-outcomes">
 <h3><code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery</span></code> — Read-only workspace_discovery Agentic Recipe outcomes<a class="headerlink" href="#fangore-workspace-discovery-read-only-workspace-discovery-agentic-recipe-outcomes" title="Link to this heading"></a></h3>
-<p>Persona <strong>fangore</strong>; execution <code class="docutils literal notranslate"><span class="pre">parallel</span></code>; 8 stage(s).</p>
-<p>Stories: <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_checkpoint</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_continuity</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_failed</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_found</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_inconclusive</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_negative_control</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_not_found</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_snapshot_tools</span></code></p>
+<p>Persona <strong>fangore</strong>; execution <code class="docutils literal notranslate"><span class="pre">parallel</span></code>; 9 stage(s).</p>
+<p>Stories: <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_checkpoint</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_continuity</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_failed</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_found</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_inconclusive</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_negative_control</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_not_found</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_recipe_shape</span></code>, <code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_snapshot_tools</span></code></p>
 </section>
 <section id="nubble-observability-cost-trace-and-audit-observability">
 <h3><code class="docutils literal notranslate"><span class="pre">nubble_observability</span></code> — Cost, trace, and audit observability<a class="headerlink" href="#nubble-observability-cost-trace-and-audit-observability" title="Link to this heading"></a></h3>
@@ -3287,19 +3287,37 @@ python<span class="w"> </span>-m<span class="w"> </span>tests.stories.commands<s
 </ol>
 </section>
 </section>
-<section id="fangore-workspace-discovery-snapshot-tools-interpret-may-inspect-the-frozen-discovery-snapshot-only">
-<h3><code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_snapshot_tools</span></code> — Interpret may inspect the frozen discovery snapshot only<a class="headerlink" href="#fangore-workspace-discovery-snapshot-tools-interpret-may-inspect-the-frozen-discovery-snapshot-only" title="Link to this heading"></a></h3>
-<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. On the interpret soft point he permits snapshot inspection of matches and hypotheses, denies ctx.secret, and still publishes verified found inventory.</p>
+<section id="fangore-workspace-discovery-recipe-shape-instantiate-the-workspace-discovery-agentic-recipe-shape">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_recipe_shape</span></code> — Instantiate the workspace_discovery Agentic Recipe shape<a class="headerlink" href="#fangore-workspace-discovery-recipe-shape-instantiate-the-workspace-discovery-agentic-recipe-shape" title="Link to this heading"></a></h3>
+<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. He loads Agentic Recipe <code class="docutils literal notranslate"><span class="pre">workspace_discovery</span></code> from a RecipeBind, and verifies the stamped graph exposes preflight through inventory publish node ids so hosts can tile discovery before walking bag-backed stages.</p>
 <section id="id686">
 <h4>Implementation<a class="headerlink" href="#id686" title="Link to this heading"></a></h4>
-<p>SnapshotInspectionToolkit on CliInferRunner interpret node within workspace_discovery walk.</p>
+<p>Agentic Recipe <code class="docutils literal notranslate"><span class="pre">workspace_discovery</span></code> via <code class="docutils literal notranslate"><span class="pre">WorkspaceDiscoveryTemplate</span></code> / <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> and catalog registration in <code class="docutils literal notranslate"><span class="pre">default_graph_template_classes</span></code>.</p>
 </section>
 <section id="id687">
 <h4>Validation<a class="headerlink" href="#id687" title="Link to this heading"></a></h4>
-<p>Suite stage <code class="docutils literal notranslate"><span class="pre">070_fangore_workspace_discovery_snapshot_tools</span></code> — inspection flags + found inventory.</p>
+<p>Suite stage <code class="docutils literal notranslate"><span class="pre">005_fangore_workspace_discovery_recipe_shape</span></code> — template_name and subgraph node ids for the discovery topology.</p>
 </section>
 <section id="id688">
 <h4>Footnotes<a class="headerlink" href="#id688" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md">Gastronomic guided-development M5 (workspace_discovery shape)</a> — Catalog recipe must instantiate with soft points</p></li>
+</ol>
+</section>
+</section>
+<section id="fangore-workspace-discovery-snapshot-tools-interpret-may-inspect-the-frozen-discovery-snapshot-only">
+<h3><code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_snapshot_tools</span></code> — Interpret may inspect the frozen discovery snapshot only<a class="headerlink" href="#fangore-workspace-discovery-snapshot-tools-interpret-may-inspect-the-frozen-discovery-snapshot-only" title="Link to this heading"></a></h3>
+<p>Fangore starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. On the interpret soft point he permits snapshot inspection of matches and hypotheses, denies ctx.secret, and still publishes verified found inventory.</p>
+<section id="id689">
+<h4>Implementation<a class="headerlink" href="#id689" title="Link to this heading"></a></h4>
+<p>SnapshotInspectionToolkit on CliInferRunner interpret node within workspace_discovery walk.</p>
+</section>
+<section id="id690">
+<h4>Validation<a class="headerlink" href="#id690" title="Link to this heading"></a></h4>
+<p>Suite stage <code class="docutils literal notranslate"><span class="pre">070_fangore_workspace_discovery_snapshot_tools</span></code> — inspection flags + found inventory.</p>
+</section>
+<section id="id691">
+<h4>Footnotes<a class="headerlink" href="#id691" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md">Gastronomic M5</a> — Bounded snapshot tools on I2</p></li>
 </ol>
@@ -3310,497 +3328,497 @@ python<span class="w"> </span>-m<span class="w"> </span>tests.stories.commands<s
 <h2>Taloneth’s stories<a class="headerlink" href="#taloneth-s-stories" title="Link to this heading"></a></h2>
 <section id="taloneth-atk-research-reject-reject-research-candidates-that-fail-verified-success">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_atk_research_reject</span></code> — Reject research candidates that fail verified success<a class="headerlink" href="#taloneth-atk-research-reject-reject-research-candidates-that-fail-verified-success" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code>. Generic research loop for self-revising MH-SR-06; recipe-from-traces: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_recipe_evolution_loop</span></code><a class="footnote-reference brackets" href="#insp-sr-06-research" id="id689" role="doc-noteref"><span class="fn-bracket">[</span>133<span class="fn-bracket">]</span></a>.</p>
-<section id="id690">
-<h4>Implementation<a class="headerlink" href="#id690" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> / <code class="docutils literal notranslate"><span class="pre">EvalProtocol</span></code> run bounded research: inspect → hypothesis → isolated experiment → ATK-style search → frozen evaluation protocol → promote/rollback. Production evaluators stay protected.</p>
-<p>Covers: EXP-01, EXP-02, EXP-03, EXP-04.</p>
-</section>
-<section id="id691">
-<h4>Validation<a class="headerlink" href="#id691" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
-</section>
-<section id="id692">
-<h4>Footnotes<a class="headerlink" href="#id692" title="Link to this heading"></a></h4>
-</section>
-</section>
-<section id="taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment">
-<h3><code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code> — Measure cache-aware prompt layout as an explicit experiment<a class="headerlink" href="#taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.</p>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. A cheap backend fails verified success against a frozen baseline. Research must reject it, keep negative results, and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code>. Generic research loop for self-revising MH-SR-06; recipe-from-traces: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_recipe_evolution_loop</span></code><a class="footnote-reference brackets" href="#insp-sr-06-research" id="id692" role="doc-noteref"><span class="fn-bracket">[</span>133<span class="fn-bracket">]</span></a>.</p>
 <section id="id693">
 <h4>Implementation<a class="headerlink" href="#id693" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">compile_cache_aware_layout</span></code> / <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code> under <code class="docutils literal notranslate"><span class="pre">CtxFlags.cache_aware_layout</span></code> — an independent experiment toggle with prefix identity diagnostics.</p>
-<p>Covers: CTX-09.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> / <code class="docutils literal notranslate"><span class="pre">EvalProtocol</span></code> run bounded research: inspect → hypothesis → isolated experiment → ATK-style search → frozen evaluation protocol → promote/rollback. Production evaluators stay protected.</p>
+<p>Covers: EXP-01, EXP-02, EXP-03, EXP-04.</p>
 </section>
 <section id="id694">
 <h4>Validation<a class="headerlink" href="#id694" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
+<section id="id695">
+<h4>Footnotes<a class="headerlink" href="#id695" title="Link to this heading"></a></h4>
 </section>
-<section id="taloneth-decision-plane-shadow-compare-candidate-unavailable-compare-shadowed-decision-plane-answers-before-promotion-candidate-unavailable">
-<h3><code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare__candidate_unavailable</span></code> — Compare shadowed decision-plane answers before promotion (candidate_unavailable)<a class="headerlink" href="#taloneth-decision-plane-shadow-compare-candidate-unavailable-compare-shadowed-decision-plane-answers-before-promotion-candidate-unavailable" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_shadow_decision_backends</span></code>.<a class="footnote-reference brackets" href="#rc-dp-shadow-t" id="id695" role="doc-noteref"><span class="fn-bracket">[</span>134<span class="fn-bracket">]</span></a> This stage covers the <code class="docutils literal notranslate"><span class="pre">candidate_unavailable</span></code> scenario.</p>
+</section>
+<section id="taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code> — Measure cache-aware prompt layout as an explicit experiment<a class="headerlink" href="#taloneth-cache-layout-experiment-measure-cache-aware-prompt-layout-as-an-explicit-experiment" title="Link to this heading"></a></h3>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.</p>
 <section id="id696">
 <h4>Implementation<a class="headerlink" href="#id696" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">compare_shadow_decision</span></code> plus <code class="docutils literal notranslate"><span class="pre">build_decision_plane_telemetry</span></code> support promotion evidence for Agentic Recipe <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> without inventing unavailable candidate results (DP-07, DP-08).</p>
+<p><code class="docutils literal notranslate"><span class="pre">compile_cache_aware_layout</span></code> / <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code> under <code class="docutils literal notranslate"><span class="pre">CtxFlags.cache_aware_layout</span></code> — an independent experiment toggle with prefix identity diagnostics.</p>
+<p>Covers: CTX-09.</p>
 </section>
 <section id="id697">
 <h4>Validation<a class="headerlink" href="#id697" title="Link to this heading"></a></h4>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
+</section>
+</section>
+<section id="taloneth-decision-plane-shadow-compare-candidate-unavailable-compare-shadowed-decision-plane-answers-before-promotion-candidate-unavailable">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare__candidate_unavailable</span></code> — Compare shadowed decision-plane answers before promotion (candidate_unavailable)<a class="headerlink" href="#taloneth-decision-plane-shadow-compare-candidate-unavailable-compare-shadowed-decision-plane-answers-before-promotion-candidate-unavailable" title="Link to this heading"></a></h3>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_shadow_decision_backends</span></code>.<a class="footnote-reference brackets" href="#rc-dp-shadow-t" id="id698" role="doc-noteref"><span class="fn-bracket">[</span>134<span class="fn-bracket">]</span></a> This stage covers the <code class="docutils literal notranslate"><span class="pre">candidate_unavailable</span></code> scenario.</p>
+<section id="id699">
+<h4>Implementation<a class="headerlink" href="#id699" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">compare_shadow_decision</span></code> plus <code class="docutils literal notranslate"><span class="pre">build_decision_plane_telemetry</span></code> support promotion evidence for Agentic Recipe <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> without inventing unavailable candidate results (DP-07, DP-08).</p>
+</section>
+<section id="id700">
+<h4>Validation<a class="headerlink" href="#id700" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys. Stage id <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare__candidate_unavailable</span></code> (scenario <code class="docutils literal notranslate"><span class="pre">candidate_unavailable</span></code>).</p>
 </section>
-<section id="id698">
-<h4>Footnotes<a class="headerlink" href="#id698" title="Link to this heading"></a></h4>
+<section id="id701">
+<h4>Footnotes<a class="headerlink" href="#id701" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-decision-plane-shadow-compare-disagree-compare-shadowed-decision-plane-answers-before-promotion-disagree">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare__disagree</span></code> — Compare shadowed decision-plane answers before promotion (disagree)<a class="headerlink" href="#taloneth-decision-plane-shadow-compare-disagree-compare-shadowed-decision-plane-answers-before-promotion-disagree" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_shadow_decision_backends</span></code>.<a class="footnote-reference brackets" href="#rc-dp-shadow-t" id="id699" role="doc-noteref"><span class="fn-bracket">[</span>134<span class="fn-bracket">]</span></a> This stage covers the <code class="docutils literal notranslate"><span class="pre">disagree</span></code> scenario.</p>
-<section id="id700">
-<h4>Implementation<a class="headerlink" href="#id700" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth reviews shadow versus production answers on matched refund triage cases to decide whether a smaller decision model is ready to own the path. Agreement and telemetry must be honest; missing candidate results stay missing. Related: <code class="docutils literal notranslate"><span class="pre">fangore_decision_plane_shadow</span></code>, <code class="docutils literal notranslate"><span class="pre">taloneth_shadow_decision_backends</span></code>.<a class="footnote-reference brackets" href="#rc-dp-shadow-t" id="id702" role="doc-noteref"><span class="fn-bracket">[</span>134<span class="fn-bracket">]</span></a> This stage covers the <code class="docutils literal notranslate"><span class="pre">disagree</span></code> scenario.</p>
+<section id="id703">
+<h4>Implementation<a class="headerlink" href="#id703" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">compare_shadow_decision</span></code> plus <code class="docutils literal notranslate"><span class="pre">build_decision_plane_telemetry</span></code> support promotion evidence for Agentic Recipe <code class="docutils literal notranslate"><span class="pre">decision_plane</span></code> without inventing unavailable candidate results (DP-07, DP-08).</p>
 </section>
-<section id="id701">
-<h4>Validation<a class="headerlink" href="#id701" title="Link to this heading"></a></h4>
+<section id="id704">
+<h4>Validation<a class="headerlink" href="#id704" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys. Stage id <code class="docutils literal notranslate"><span class="pre">taloneth_decision_plane_shadow_compare__disagree</span></code> (scenario <code class="docutils literal notranslate"><span class="pre">disagree</span></code>).</p>
 </section>
 </section>
 <section id="taloneth-fixture-judge-batch-validate-judge-question-batches-without-a-live-model">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_fixture_judge_batch</span></code> — Validate judge question batches without a live model<a class="headerlink" href="#taloneth-fixture-judge-batch-validate-judge-question-batches-without-a-live-model" title="Link to this heading"></a></h3>
 <p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth iterates yes/no, choice, and score questions offline. Clean batches validate; missing answers must surface structured errors — including partial failure reporting — without a GPU host.</p>
-<section id="id702">
-<h4>Implementation<a class="headerlink" href="#id702" title="Link to this heading"></a></h4>
+<section id="id705">
+<h4>Implementation<a class="headerlink" href="#id705" title="Link to this heading"></a></h4>
 <p>Provider-neutral judge schema in <code class="docutils literal notranslate"><span class="pre">mechaharness.inference.judge</span></code> (<code class="docutils literal notranslate"><span class="pre">Choice</span></code>/<code class="docutils literal notranslate"><span class="pre">Noul</span></code>/<code class="docutils literal notranslate"><span class="pre">Score</span></code> questions and signals, <code class="docutils literal notranslate"><span class="pre">Judgement</span></code>, <code class="docutils literal notranslate"><span class="pre">JudgeErrorItem</span></code>, provenance). <code class="docutils literal notranslate"><span class="pre">FixtureJudgeProvider</span></code> + <code class="docutils literal notranslate"><span class="pre">judge()</span></code> validate batches and report per-question errors. Semantics cover closed-world answers, partial failure, and calibration/provenance fields adapters must map.</p>
 <p>Covers: JDG-01, JDG-02, JDG-03, JDG-04.</p>
 </section>
-<section id="id703">
-<h4>Validation<a class="headerlink" href="#id703" title="Link to this heading"></a></h4>
+<section id="id706">
+<h4>Validation<a class="headerlink" href="#id706" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
 </section>
 <section id="taloneth-insp-component-ablation-ablate-harness-components-against-a-matched-corpus">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_component_ablation</span></code> — Ablate harness components against a matched corpus<a class="headerlink" href="#taloneth-insp-component-ablation-ablate-harness-components-against-a-matched-corpus" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance<a class="footnote-reference brackets" href="#wl-l02-ablation" id="id704" role="doc-noteref"><span class="fn-bracket">[</span>135<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-p01-ablation" id="id705" role="doc-noteref"><span class="fn-bracket">[</span>136<span class="fn-bracket">]</span></a>.</p>
-<section id="id706">
-<h4>Implementation<a class="headerlink" href="#id706" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth runs a component-ablation experiment that disables named harness pieces against a matched corpus so retirement decisions rest on success/cost deltas. Accepts WalkingLabs L02 and P01 guidance<a class="footnote-reference brackets" href="#wl-l02-ablation" id="id707" role="doc-noteref"><span class="fn-bracket">[</span>135<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-p01-ablation" id="id708" role="doc-noteref"><span class="fn-bracket">[</span>136<span class="fn-bracket">]</span></a>.</p>
+<section id="id709">
+<h4>Implementation<a class="headerlink" href="#id709" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ComponentAblationExperiment</span></code> and <code class="docutils literal notranslate"><span class="pre">ablation_delta</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.component_ablation</span></code> standardize baseline fingerprint, disabled component IDs, and quality/cost deltas.</p>
 </section>
-<section id="id707">
-<h4>Validation<a class="headerlink" href="#id707" title="Link to this heading"></a></h4>
+<section id="id710">
+<h4>Validation<a class="headerlink" href="#id710" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id708">
-<h4>Footnotes<a class="headerlink" href="#id708" title="Link to this heading"></a></h4>
+<section id="id711">
+<h4>Footnotes<a class="headerlink" href="#id711" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-correction-spec-debt-capture-corrections-as-reviewed-specification-debt-before-policy-change">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_correction_spec_debt</span></code> — Capture corrections as reviewed specification debt before policy change<a class="headerlink" href="#taloneth-insp-correction-spec-debt-capture-corrections-as-reviewed-specification-debt-before-policy-change" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. When a person corrects the agent, the correction is recorded as outstanding specification debt: the correction text, the scenarios that failed, and a link to the rule-promotion record it may harden into. The record stays flagged for human review until someone accepts it, and the host (not the library) generates the regression test and attaches it. Soft-to-hard promotion with provenance exists in <code class="docutils literal notranslate"><span class="pre">taloneth_insp_rule_promotion</span></code>. Tracks MH-PA-07<a class="footnote-reference brackets" href="#insp-pa-07" id="id709" role="doc-noteref"><span class="fn-bracket">[</span>137<span class="fn-bracket">]</span></a>.</p>
-<section id="id710">
-<h4>Implementation<a class="headerlink" href="#id710" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. When a person corrects the agent, the correction is recorded as outstanding specification debt: the correction text, the scenarios that failed, and a link to the rule-promotion record it may harden into. The record stays flagged for human review until someone accepts it, and the host (not the library) generates the regression test and attaches it. Soft-to-hard promotion with provenance exists in <code class="docutils literal notranslate"><span class="pre">taloneth_insp_rule_promotion</span></code>. Tracks MH-PA-07<a class="footnote-reference brackets" href="#insp-pa-07" id="id712" role="doc-noteref"><span class="fn-bracket">[</span>137<span class="fn-bracket">]</span></a>.</p>
+<section id="id713">
+<h4>Implementation<a class="headerlink" href="#id713" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">SpecificationDebtRecord</span></code>, <code class="docutils literal notranslate"><span class="pre">SpecificationDebtLedger</span></code>, and <code class="docutils literal notranslate"><span class="pre">capture_correction()</span></code> in <code class="docutils literal notranslate"><span class="pre">specification_debt.py</span></code> hold the correction, <code class="docutils literal notranslate"><span class="pre">failing_scenario_refs</span></code>, <code class="docutils literal notranslate"><span class="pre">promotion_record_id</span></code> (from <code class="docutils literal notranslate"><span class="pre">PromotionRecord.record_id</span></code>), <code class="docutils literal notranslate"><span class="pre">review_required</span></code>, and a host-filled <code class="docutils literal notranslate"><span class="pre">generated_test_ref</span></code>; <code class="docutils literal notranslate"><span class="pre">link_test()</span></code> and <code class="docutils literal notranslate"><span class="pre">approve()</span></code> move status <code class="docutils literal notranslate"><span class="pre">open</span></code> → <code class="docutils literal notranslate"><span class="pre">test_linked</span></code> → <code class="docutils literal notranslate"><span class="pre">closed</span></code>. The library owns only the ledger schema; test generation stays with the host.</p>
 <p>Acceptance walks the registered CLI verb (TestHarnessCliConfig promotes remaining story probes when no src product verb exists yet).</p>
 </section>
-<section id="id711">
-<h4>Validation<a class="headerlink" href="#id711" title="Link to this heading"></a></h4>
+<section id="id714">
+<h4>Validation<a class="headerlink" href="#id714" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> walks the promoted product/test verb (no <code class="docutils literal notranslate"><span class="pre">probe:</span></code> wrapper); hard expects on declared observation keys.</p>
 </section>
-<section id="id712">
-<h4>Footnotes<a class="headerlink" href="#id712" title="Link to this heading"></a></h4>
+<section id="id715">
+<h4>Footnotes<a class="headerlink" href="#id715" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-cross-harness-failure-separate-semantic-task-failure-from-invalid-tool-protocol">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_cross_harness_failure</span></code> — Separate semantic task failure from invalid tool protocol<a class="headerlink" href="#taloneth-insp-cross-harness-failure-separate-semantic-task-failure-from-invalid-tool-protocol" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes<a class="footnote-reference brackets" href="#fineenvs-xharness" id="id713" role="doc-noteref"><span class="fn-bracket">[</span>138<span class="fn-bracket">]</span></a>.</p>
-<section id="id714">
-<h4>Implementation<a class="headerlink" href="#id714" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs cross-harness evaluation to classify invalid tool names and schema errors separately from simply getting the task wrong. Accepts FineEnvs out-of-harness failure modes<a class="footnote-reference brackets" href="#fineenvs-xharness" id="id716" role="doc-noteref"><span class="fn-bracket">[</span>138<span class="fn-bracket">]</span></a>.</p>
+<section id="id717">
+<h4>Implementation<a class="headerlink" href="#id717" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">CrossHarnessFailure</span></code> and <code class="docutils literal notranslate"><span class="pre">classify_cross_harness_failure</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.cross_harness_failure</span></code> emit taxonomy kinds usable as claims inside matrix cells.</p>
 </section>
-<section id="id715">
-<h4>Validation<a class="headerlink" href="#id715" title="Link to this heading"></a></h4>
+<section id="id718">
+<h4>Validation<a class="headerlink" href="#id718" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id716">
-<h4>Footnotes<a class="headerlink" href="#id716" title="Link to this heading"></a></h4>
+<section id="id719">
+<h4>Footnotes<a class="headerlink" href="#id719" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-eval-claims-compose-typed-evaluation-claims-without-opaque-scores">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_eval_claims</span></code> — Compose typed evaluation claims without opaque scores<a class="headerlink" href="#taloneth-insp-eval-claims-compose-typed-evaluation-claims-without-opaque-scores" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL<a class="footnote-reference brackets" href="#anth-evals-claims" id="id717" role="doc-noteref"><span class="fn-bracket">[</span>139<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-bineval" id="id718" role="doc-noteref"><span class="fn-bracket">[</span>140<span class="fn-bracket">]</span></a>.</p>
-<section id="id719">
-<h4>Implementation<a class="headerlink" href="#id719" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs evaluators to emit independent pass/fail/unknown claims backed by evidence refs, not a single opaque score that hides which assertion failed. Accepts Anthropic eval guidance and BINEVAL<a class="footnote-reference brackets" href="#anth-evals-claims" id="id720" role="doc-noteref"><span class="fn-bracket">[</span>139<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-bineval" id="id721" role="doc-noteref"><span class="fn-bracket">[</span>140<span class="fn-bracket">]</span></a>.</p>
+<section id="id722">
+<h4>Implementation<a class="headerlink" href="#id722" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">Evidence</span></code>, <code class="docutils literal notranslate"><span class="pre">Claim</span></code>, and <code class="docutils literal notranslate"><span class="pre">compose_claims</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.eval_evidence</span></code> provide typed evidence pointers and binary assertion composition.</p>
 </section>
-<section id="id720">
-<h4>Validation<a class="headerlink" href="#id720" title="Link to this heading"></a></h4>
+<section id="id723">
+<h4>Validation<a class="headerlink" href="#id723" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id721">
-<h4>Footnotes<a class="headerlink" href="#id721" title="Link to this heading"></a></h4>
+<section id="id724">
+<h4>Footnotes<a class="headerlink" href="#id724" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-eval-matrix-keep-model-harness-task-matrix-cells-for-drill-down">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_eval_matrix</span></code> — Keep model-harness-task matrix cells for drill-down<a class="headerlink" href="#taloneth-insp-eval-matrix-keep-model-harness-task-matrix-cells-for-drill-down" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth evaluates the same model under multiple harness configurations and must keep every matrix cell so averages cannot hide a catastrophic compatibility failure. Accepts FineEnvs cross-harness matrix practice<a class="footnote-reference brackets" href="#fineenvs-matrix" id="id722" role="doc-noteref"><span class="fn-bracket">[</span>141<span class="fn-bracket">]</span></a>.</p>
-<section id="id723">
-<h4>Implementation<a class="headerlink" href="#id723" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth evaluates the same model under multiple harness configurations and must keep every matrix cell so averages cannot hide a catastrophic compatibility failure. Accepts FineEnvs cross-harness matrix practice<a class="footnote-reference brackets" href="#fineenvs-matrix" id="id725" role="doc-noteref"><span class="fn-bracket">[</span>141<span class="fn-bracket">]</span></a>.</p>
+<section id="id726">
+<h4>Implementation<a class="headerlink" href="#id726" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">EvalMatrix</span></code> and <code class="docutils literal notranslate"><span class="pre">EvalMatrixCell</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.eval_matrix</span></code> index trials by model, harness fingerprint, and task family, and <code class="docutils literal notranslate"><span class="pre">aggregate</span></code> retains cell drill-down.</p>
 </section>
-<section id="id724">
-<h4>Validation<a class="headerlink" href="#id724" title="Link to this heading"></a></h4>
+<section id="id727">
+<h4>Validation<a class="headerlink" href="#id727" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id725">
-<h4>Footnotes<a class="headerlink" href="#id725" title="Link to this heading"></a></h4>
+<section id="id728">
+<h4>Footnotes<a class="headerlink" href="#id728" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-evaluation-outcome-keep-infrastructure-failures-out-of-task-success-scores">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_evaluation_outcome</span></code> — Keep infrastructure failures out of task-success scores<a class="headerlink" href="#taloneth-insp-evaluation-outcome-keep-infrastructure-failures-out-of-task-success-scores" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs a dead sandbox or broken trace to count as unscorable execution failure, not as proof the model answered incorrectly. Accepts FineEnvs reward separation guidance<a class="footnote-reference brackets" href="#fineenvs-outcome" id="id726" role="doc-noteref"><span class="fn-bracket">[</span>142<span class="fn-bracket">]</span></a>.</p>
-<section id="id727">
-<h4>Implementation<a class="headerlink" href="#id727" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs a dead sandbox or broken trace to count as unscorable execution failure, not as proof the model answered incorrectly. Accepts FineEnvs reward separation guidance<a class="footnote-reference brackets" href="#fineenvs-outcome" id="id729" role="doc-noteref"><span class="fn-bracket">[</span>142<span class="fn-bracket">]</span></a>.</p>
+<section id="id730">
+<h4>Implementation<a class="headerlink" href="#id730" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">EvaluationOutcome</span></code> and <code class="docutils literal notranslate"><span class="pre">outcome_from_failure</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.evaluation_outcome</span></code>, with <code class="docutils literal notranslate"><span class="pre">task_trials</span></code> / <code class="docutils literal notranslate"><span class="pre">pass_at_k</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.eval_trial</span></code> excluding non-task outcomes from denominators.</p>
 </section>
-<section id="id728">
-<h4>Validation<a class="headerlink" href="#id728" title="Link to this heading"></a></h4>
+<section id="id731">
+<h4>Validation<a class="headerlink" href="#id731" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id729">
-<h4>Footnotes<a class="headerlink" href="#id729" title="Link to this heading"></a></h4>
+<section id="id732">
+<h4>Footnotes<a class="headerlink" href="#id732" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-evaluator-compose-run-a-versioned-held-out-evaluator-to-claims">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_evaluator_compose</span></code> — Run a versioned held-out evaluator to claims<a class="headerlink" href="#taloneth-insp-evaluator-compose-run-a-versioned-held-out-evaluator-to-claims" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon<a class="footnote-reference brackets" href="#anth-evals-evaluator" id="id730" role="doc-noteref"><span class="fn-bracket">[</span>143<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-verif-horizon" id="id731" role="doc-noteref"><span class="fn-bracket">[</span>144<span class="fn-bracket">]</span></a>. Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_recipe_final_test_gate</span></code><a class="footnote-reference brackets" href="#insp-sr-07-eval" id="id732" role="doc-noteref"><span class="fn-bracket">[</span>145<span class="fn-bracket">]</span></a>.</p>
-<section id="id733">
-<h4>Implementation<a class="headerlink" href="#id733" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon<a class="footnote-reference brackets" href="#anth-evals-evaluator" id="id733" role="doc-noteref"><span class="fn-bracket">[</span>143<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-verif-horizon" id="id734" role="doc-noteref"><span class="fn-bracket">[</span>144<span class="fn-bracket">]</span></a>. Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_recipe_final_test_gate</span></code><a class="footnote-reference brackets" href="#insp-sr-07-eval" id="id735" role="doc-noteref"><span class="fn-bracket">[</span>145<span class="fn-bracket">]</span></a>.</p>
+<section id="id736">
+<h4>Implementation<a class="headerlink" href="#id736" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">Evaluator</span></code>, <code class="docutils literal notranslate"><span class="pre">CallableEvaluator</span></code>, and <code class="docutils literal notranslate"><span class="pre">evaluate_claims</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.evaluator</span></code> compose deterministic claim producers with version and held_out metadata beside VerificationPolicy.</p>
 </section>
-<section id="id734">
-<h4>Validation<a class="headerlink" href="#id734" title="Link to this heading"></a></h4>
+<section id="id737">
+<h4>Validation<a class="headerlink" href="#id737" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id735">
-<h4>Footnotes<a class="headerlink" href="#id735" title="Link to this heading"></a></h4>
+<section id="id738">
+<h4>Footnotes<a class="headerlink" href="#id738" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-experiment-dimensions-declare-fixed-and-varying-harness-experiment-dimensions">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_experiment_dimensions</span></code> — Declare fixed and varying harness experiment dimensions<a class="headerlink" href="#taloneth-insp-experiment-dimensions-declare-fixed-and-varying-harness-experiment-dimensions" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs every harness experiment to state which configuration axes are fixed and which vary, with a reproducible digest on traces. Accepts FineEnvs harness-overfitting axes guidance<a class="footnote-reference brackets" href="#fineenvs-dims" id="id736" role="doc-noteref"><span class="fn-bracket">[</span>146<span class="fn-bracket">]</span></a>.</p>
-<section id="id737">
-<h4>Implementation<a class="headerlink" href="#id737" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs every harness experiment to state which configuration axes are fixed and which vary, with a reproducible digest on traces. Accepts FineEnvs harness-overfitting axes guidance<a class="footnote-reference brackets" href="#fineenvs-dims" id="id739" role="doc-noteref"><span class="fn-bracket">[</span>146<span class="fn-bracket">]</span></a>.</p>
+<section id="id740">
+<h4>Implementation<a class="headerlink" href="#id740" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ExperimentDimensions</span></code> and <code class="docutils literal notranslate"><span class="pre">require_dimension_trace_fields</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.experiment_dimensions</span></code> canonicalize fixed/varying axes into a digest.</p>
 </section>
-<section id="id738">
-<h4>Validation<a class="headerlink" href="#id738" title="Link to this heading"></a></h4>
+<section id="id741">
+<h4>Validation<a class="headerlink" href="#id741" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id739">
-<h4>Footnotes<a class="headerlink" href="#id739" title="Link to this heading"></a></h4>
+<section id="id742">
+<h4>Footnotes<a class="headerlink" href="#id742" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-experiment-lineage-resume-experiments-without-resampling-consumed-cases">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_experiment_lineage</span></code> — Resume experiments without resampling consumed cases<a class="headerlink" href="#taloneth-insp-experiment-lineage-resume-experiments-without-resampling-consumed-cases" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs mid-corpus experiment resume to remember which cases were already consumed so a crash cannot replay tasks and contaminate later training. Accepts FineEnvs resume integrity findings<a class="footnote-reference brackets" href="#fineenvs-lineage" id="id740" role="doc-noteref"><span class="fn-bracket">[</span>147<span class="fn-bracket">]</span></a>.</p>
-<section id="id741">
-<h4>Implementation<a class="headerlink" href="#id741" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs mid-corpus experiment resume to remember which cases were already consumed so a crash cannot replay tasks and contaminate later training. Accepts FineEnvs resume integrity findings<a class="footnote-reference brackets" href="#fineenvs-lineage" id="id743" role="doc-noteref"><span class="fn-bracket">[</span>147<span class="fn-bracket">]</span></a>.</p>
+<section id="id744">
+<h4>Implementation<a class="headerlink" href="#id744" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ExperimentCheckpoint</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.experiment_lineage</span></code> persists consumed case ids, sampler state, assignment, checkpoint identity, and evidence digests; <code class="docutils literal notranslate"><span class="pre">consume</span></code> refuses duplicates.</p>
 </section>
-<section id="id742">
-<h4>Validation<a class="headerlink" href="#id742" title="Link to this heading"></a></h4>
+<section id="id745">
+<h4>Validation<a class="headerlink" href="#id745" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id743">
-<h4>Footnotes<a class="headerlink" href="#id743" title="Link to this heading"></a></h4>
+<section id="id746">
+<h4>Footnotes<a class="headerlink" href="#id746" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-exposure-discriminative-report-unequal-exposure-and-no-learning-signal-ties">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_exposure_discriminative</span></code> — Report unequal exposure and no-learning-signal ties<a class="headerlink" href="#taloneth-insp-exposure-discriminative-report-unequal-exposure-and-no-learning-signal-ties" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings<a class="footnote-reference brackets" href="#fineenvs-exposure" id="id744" role="doc-noteref"><span class="fn-bracket">[</span>148<span class="fn-bracket">]</span></a>.</p>
-<section id="id745">
-<h4>Implementation<a class="headerlink" href="#id745" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs equal rollout counts to still reveal unequal token and call exposure, and to flag all-success ties that provide no learning contrast. Accepts FineEnvs exposure and discriminative-value findings<a class="footnote-reference brackets" href="#fineenvs-exposure" id="id747" role="doc-noteref"><span class="fn-bracket">[</span>148<span class="fn-bracket">]</span></a>.</p>
+<section id="id748">
+<h4>Implementation<a class="headerlink" href="#id748" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ExposureLedger</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.exposure_accounting</span></code> and <code class="docutils literal notranslate"><span class="pre">discriminative_report</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.discriminative_value</span></code> summarize arm exposure and tie telemetry.</p>
 </section>
-<section id="id746">
-<h4>Validation<a class="headerlink" href="#id746" title="Link to this heading"></a></h4>
+<section id="id749">
+<h4>Validation<a class="headerlink" href="#id749" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id747">
-<h4>Footnotes<a class="headerlink" href="#id747" title="Link to this heading"></a></h4>
+<section id="id750">
+<h4>Footnotes<a class="headerlink" href="#id750" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-gated-objective-apply-efficiency-only-after-correctness-gates-pass">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_gated_objective</span></code> — Apply efficiency only after correctness gates pass<a class="headerlink" href="#taloneth-insp-gated-objective-apply-efficiency-only-after-correctness-gates-pass" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs harness experiments to satisfy correctness first and only then prefer lower token use, matching gated FineEnvs reward design<a class="footnote-reference brackets" href="#fineenvs-gated" id="id748" role="doc-noteref"><span class="fn-bracket">[</span>149<span class="fn-bracket">]</span></a>.</p>
-<section id="id749">
-<h4>Implementation<a class="headerlink" href="#id749" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs harness experiments to satisfy correctness first and only then prefer lower token use, matching gated FineEnvs reward design<a class="footnote-reference brackets" href="#fineenvs-gated" id="id751" role="doc-noteref"><span class="fn-bracket">[</span>149<span class="fn-bracket">]</span></a>.</p>
+<section id="id752">
+<h4>Implementation<a class="headerlink" href="#id752" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">HarnessExperimentRunner.evaluate</span></code> accepts an <code class="docutils literal notranslate"><span class="pre">ObjectivePolicy</span></code> and uses gates plus <code class="docutils literal notranslate"><span class="pre">compare_lexicographic</span></code> so efficiency cannot beat a failed correctness gate.</p>
 </section>
-<section id="id750">
-<h4>Validation<a class="headerlink" href="#id750" title="Link to this heading"></a></h4>
+<section id="id753">
+<h4>Validation<a class="headerlink" href="#id753" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id751">
-<h4>Footnotes<a class="headerlink" href="#id751" title="Link to this heading"></a></h4>
+<section id="id754">
+<h4>Footnotes<a class="headerlink" href="#id754" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-harness-fingerprint-stamp-evaluation-results-with-harness-configuration-identity">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_harness_fingerprint</span></code> — Stamp evaluation results with harness configuration identity<a class="headerlink" href="#taloneth-insp-harness-fingerprint-stamp-evaluation-results-with-harness-configuration-identity" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth compares the same model and task under two graph configurations and needs each result to carry which harness configuration produced it, not only the model name. Accepts FineEnvs multi-harness RL guidance<a class="footnote-reference brackets" href="#fineenvs-fingerprint" id="id752" role="doc-noteref"><span class="fn-bracket">[</span>150<span class="fn-bracket">]</span></a>.</p>
-<section id="id753">
-<h4>Implementation<a class="headerlink" href="#id753" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth compares the same model and task under two graph configurations and needs each result to carry which harness configuration produced it, not only the model name. Accepts FineEnvs multi-harness RL guidance<a class="footnote-reference brackets" href="#fineenvs-fingerprint" id="id755" role="doc-noteref"><span class="fn-bracket">[</span>150<span class="fn-bracket">]</span></a>.</p>
+<section id="id756">
+<h4>Implementation<a class="headerlink" href="#id756" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">HarnessFingerprint</span></code>, <code class="docutils literal notranslate"><span class="pre">build_harness_fingerprint</span></code>, and <code class="docutils literal notranslate"><span class="pre">require_eval_provenance</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.harness_fingerprint</span></code> bind model revision, harness family/version, config digests, tool/context surfaces, evaluator, environment, and task identity into a stable digest attached to evaluation summaries.</p>
 </section>
-<section id="id754">
-<h4>Validation<a class="headerlink" href="#id754" title="Link to this heading"></a></h4>
+<section id="id757">
+<h4>Validation<a class="headerlink" href="#id757" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id755">
-<h4>Footnotes<a class="headerlink" href="#id755" title="Link to this heading"></a></h4>
+<section id="id758">
+<h4>Footnotes<a class="headerlink" href="#id758" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-harness-health-snapshot-harness-health-for-cleanup-evidence">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_harness_health</span></code> — Snapshot harness health for cleanup evidence<a class="headerlink" href="#taloneth-insp-harness-health-snapshot-harness-health-for-cleanup-evidence" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance<a class="footnote-reference brackets" href="#wl-l02-health" id="id756" role="doc-noteref"><span class="fn-bracket">[</span>151<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-l12-health" id="id757" role="doc-noteref"><span class="fn-bracket">[</span>152<span class="fn-bracket">]</span></a>.</p>
-<section id="id758">
-<h4>Implementation<a class="headerlink" href="#id758" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth captures unused extensions, dead soft points, and unexercised routes as a harness-health snapshot so cleanup can be scheduled by the host. Accepts WalkingLabs L02 and L12 guidance<a class="footnote-reference brackets" href="#wl-l02-health" id="id759" role="doc-noteref"><span class="fn-bracket">[</span>151<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-l12-health" id="id760" role="doc-noteref"><span class="fn-bracket">[</span>152<span class="fn-bracket">]</span></a>.</p>
+<section id="id761">
+<h4>Implementation<a class="headerlink" href="#id761" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">HarnessHealthSnapshot</span></code> and <code class="docutils literal notranslate"><span class="pre">needs_cleanup</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.harness_health</span></code> provide the optional health schema.</p>
 </section>
-<section id="id759">
-<h4>Validation<a class="headerlink" href="#id759" title="Link to this heading"></a></h4>
+<section id="id762">
+<h4>Validation<a class="headerlink" href="#id762" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id760">
-<h4>Footnotes<a class="headerlink" href="#id760" title="Link to this heading"></a></h4>
+<section id="id763">
+<h4>Footnotes<a class="headerlink" href="#id763" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-harness-hypothesis-express-a-harness-change-as-a-testable-hypothesis">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_harness_hypothesis</span></code> — Express a harness change as a testable hypothesis<a class="headerlink" href="#taloneth-insp-harness-hypothesis-express-a-harness-change-as-a-testable-hypothesis" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14<a class="footnote-reference brackets" href="#insp-r14" id="id761" role="doc-noteref"><span class="fn-bracket">[</span>153<span class="fn-bracket">]</span></a>.</p>
-<section id="id762">
-<h4>Implementation<a class="headerlink" href="#id762" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth writes the failure mode and expected metric before shipping a harness tweak, then evaluates with and without the change. Accepts inspiration requirement 14<a class="footnote-reference brackets" href="#insp-r14" id="id764" role="doc-noteref"><span class="fn-bracket">[</span>153<span class="fn-bracket">]</span></a>.</p>
+<section id="id765">
+<h4>Implementation<a class="headerlink" href="#id765" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> carries hypothesis, intervention, failure_mode, evidence, and <code class="docutils literal notranslate"><span class="pre">to_trace_fields</span></code> for version/assignment on traces.</p>
 </section>
-<section id="id763">
-<h4>Validation<a class="headerlink" href="#id763" title="Link to this heading"></a></h4>
+<section id="id766">
+<h4>Validation<a class="headerlink" href="#id766" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id764">
-<h4>Footnotes<a class="headerlink" href="#id764" title="Link to this heading"></a></h4>
+<section id="id767">
+<h4>Footnotes<a class="headerlink" href="#id767" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-learning-export-export-provenance-rich-trajectories-without-owning-training-recipes">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_learning_export</span></code> — Export provenance-rich trajectories without owning training recipes<a class="headerlink" href="#taloneth-insp-learning-export-export-provenance-rich-trajectories-without-owning-training-recipes" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs exportable execution packs that carry harness fingerprint, rollout refs, and outcomes so an AI assistant host can curate SFT or RL corpora without MechaHarness choosing the recipe. Accepts FineEnvs SFT-vs-RL reuse guidance<a class="footnote-reference brackets" href="#fineenvs-export" id="id765" role="doc-noteref"><span class="fn-bracket">[</span>154<span class="fn-bracket">]</span></a>.</p>
-<section id="id766">
-<h4>Implementation<a class="headerlink" href="#id766" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs exportable execution packs that carry harness fingerprint, rollout refs, and outcomes so an AI assistant host can curate SFT or RL corpora without MechaHarness choosing the recipe. Accepts FineEnvs SFT-vs-RL reuse guidance<a class="footnote-reference brackets" href="#fineenvs-export" id="id768" role="doc-noteref"><span class="fn-bracket">[</span>154<span class="fn-bracket">]</span></a>.</p>
+<section id="id769">
+<h4>Implementation<a class="headerlink" href="#id769" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">LearningExportPack</span></code> and <code class="docutils literal notranslate"><span class="pre">build_learning_export</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.learning_export</span></code> bundle decision exports with fingerprint, rollout, and outcome refs.</p>
 </section>
-<section id="id767">
-<h4>Validation<a class="headerlink" href="#id767" title="Link to this heading"></a></h4>
+<section id="id770">
+<h4>Validation<a class="headerlink" href="#id770" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id768">
-<h4>Footnotes<a class="headerlink" href="#id768" title="Link to this heading"></a></h4>
+<section id="id771">
+<h4>Footnotes<a class="headerlink" href="#id771" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-objective-policy-require-an-explicit-policy-before-collapsing-evaluator-signals">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_objective_policy</span></code> — Require an explicit policy before collapsing evaluator signals<a class="headerlink" href="#taloneth-insp-objective-policy-require-an-explicit-policy-before-collapsing-evaluator-signals" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth refuses silent weighted blends of verifier scores and wants gates and formula version written into the result. Accepts FineEnvs reward aggregation guidance<a class="footnote-reference brackets" href="#fineenvs-objective" id="id769" role="doc-noteref"><span class="fn-bracket">[</span>155<span class="fn-bracket">]</span></a>.</p>
-<section id="id770">
-<h4>Implementation<a class="headerlink" href="#id770" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth refuses silent weighted blends of verifier scores and wants gates and formula version written into the result. Accepts FineEnvs reward aggregation guidance<a class="footnote-reference brackets" href="#fineenvs-objective" id="id772" role="doc-noteref"><span class="fn-bracket">[</span>155<span class="fn-bracket">]</span></a>.</p>
+<section id="id773">
+<h4>Implementation<a class="headerlink" href="#id773" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ObjectivePolicy</span></code> and <code class="docutils literal notranslate"><span class="pre">aggregate_objective</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.objective_policy</span></code> record component signals, formula, version, gates, and prerequisites on every scalar objective.</p>
 </section>
-<section id="id771">
-<h4>Validation<a class="headerlink" href="#id771" title="Link to this heading"></a></h4>
+<section id="id774">
+<h4>Validation<a class="headerlink" href="#id774" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id772">
-<h4>Footnotes<a class="headerlink" href="#id772" title="Link to this heading"></a></h4>
+<section id="id775">
+<h4>Footnotes<a class="headerlink" href="#id775" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-recipe-evolution-loop-evolve-recipe-candidates-from-traces-under-registry-and-safety-gates">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_recipe_evolution_loop</span></code> — Evolve recipe candidates from traces under registry and safety gates<a class="headerlink" href="#taloneth-insp-recipe-evolution-loop-evolve-recipe-candidates-from-traces-under-registry-and-safety-gates" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. A host can summarize past traces into suggestions, and the library turns them into a short list of candidate recipe settings that stay inside the catalog and inside the settings marked safe to tune. Anything that names an unknown recipe, an unknown or fixed setting, or a setting the host did not allow is reported as rejected rather than quietly dropped. Candidates are then chosen by an explicit scoring policy that respects its gates and a baseline. They walk product steps (recipe_plan) and verify completion from the structured observation expects on this scenario. <a class="footnote-reference brackets" href="#insp-sr-06" id="id773" role="doc-noteref"><span class="fn-bracket">[</span>156<span class="fn-bracket">]</span></a> Related: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_recipe_final_test_gate</span></code>.</p>
-<section id="id774">
-<h4>Implementation<a class="headerlink" href="#id774" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. A host can summarize past traces into suggestions, and the library turns them into a short list of candidate recipe settings that stay inside the catalog and inside the settings marked safe to tune. Anything that names an unknown recipe, an unknown or fixed setting, or a setting the host did not allow is reported as rejected rather than quietly dropped. Candidates are then chosen by an explicit scoring policy that respects its gates and a baseline. They walk product steps (recipe_plan) and verify completion from the structured observation expects on this scenario. <a class="footnote-reference brackets" href="#insp-sr-06" id="id776" role="doc-noteref"><span class="fn-bracket">[</span>156<span class="fn-bracket">]</span></a> Related: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_recipe_final_test_gate</span></code>.</p>
+<section id="id777">
+<h4>Implementation<a class="headerlink" href="#id777" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">recipe_evolution.py</span></code>: <code class="docutils literal notranslate"><span class="pre">RecipeTraceSummary</span></code> / <code class="docutils literal notranslate"><span class="pre">SoftBindingSuggestion</span></code> in, <code class="docutils literal notranslate"><span class="pre">propose_candidates()</span></code> out as <code class="docutils literal notranslate"><span class="pre">RecipeCandidate</span></code> soft-binding dicts validated by <code class="docutils literal notranslate"><span class="pre">validate_candidate()</span></code> against <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code> names, <code class="docutils literal notranslate"><span class="pre">GraphTemplate.evolvable_soft_point_names()</span></code>, and an optional host allowlist; <code class="docutils literal notranslate"><span class="pre">select_candidate()</span></code> picks over <code class="docutils literal notranslate"><span class="pre">ScoredCandidate</span></code> results built from <code class="docutils literal notranslate"><span class="pre">ObjectivePolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">aggregate_objective</span></code> with a deterministic tie-break. Pure structure for hosts such as an AI assistant project; evaluation reuses <code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> and the registry final-test gate.</p>
 </section>
-<section id="id775">
-<h4>Validation<a class="headerlink" href="#id775" title="Link to this heading"></a></h4>
+<section id="id778">
+<h4>Validation<a class="headerlink" href="#id778" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">recipe_evolution_candidates.yaml</span></code>: environment + graph + steps + complete expects.</p>
 </section>
-<section id="id776">
-<h4>Footnotes<a class="headerlink" href="#id776" title="Link to this heading"></a></h4>
+<section id="id779">
+<h4>Footnotes<a class="headerlink" href="#id779" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-recipe-final-test-gate-require-an-untouched-final-test-set-before-recipe-promotion">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_recipe_final_test_gate</span></code> — Require an untouched final test set before recipe promotion<a class="headerlink" href="#taloneth-insp-recipe-final-test-gate-require-an-untouched-final-test-set-before-recipe-promotion" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. A leading candidate must pass a separate untouched final test before it can be released, and that test must not be used as a tuning signal. Promotion is refused when no final-test result is supplied, when the result did not come from a held-out evaluator, or when it failed; only a passing held-out result opens the gate. The same rule guards both the research workflow and the recipe catalog’s active pointer. They walk product steps (recipe_plan) and verify completion from the structured observation expects on this scenario. <a class="footnote-reference brackets" href="#insp-sr-07" id="id777" role="doc-noteref"><span class="fn-bracket">[</span>157<span class="fn-bracket">]</span></a> Related: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_evaluator_compose</span></code>.</p>
-<section id="id778">
-<h4>Implementation<a class="headerlink" href="#id778" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. A leading candidate must pass a separate untouched final test before it can be released, and that test must not be used as a tuning signal. Promotion is refused when no final-test result is supplied, when the result did not come from a held-out evaluator, or when it failed; only a passing held-out result opens the gate. The same rule guards both the research workflow and the recipe catalog’s active pointer. They walk product steps (recipe_plan) and verify completion from the structured observation expects on this scenario. <a class="footnote-reference brackets" href="#insp-sr-07" id="id780" role="doc-noteref"><span class="fn-bracket">[</span>157<span class="fn-bracket">]</span></a> Related: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_evaluator_compose</span></code>.</p>
+<section id="id781">
+<h4>Implementation<a class="headerlink" href="#id781" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">require_held_out_final_test()</span></code> and <code class="docutils literal notranslate"><span class="pre">FinalTestGateError</span></code> in <code class="docutils literal notranslate"><span class="pre">evaluator.py</span></code>; <code class="docutils literal notranslate"><span class="pre">ResearchLab.promote(candidate,</span> <span class="pre">final_test=...)</span></code> enforces it whenever <code class="docutils literal notranslate"><span class="pre">EvalProtocol.held_out_protected</span></code> (the default); <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry.promote_with_final_test()</span></code> applies it before moving the active pointer and attaches the held-out result as an evaluation. Plain <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry.promote()</span></code> stays an ungated pointer move for hosts that run their own gate.</p>
 </section>
-<section id="id779">
-<h4>Validation<a class="headerlink" href="#id779" title="Link to this heading"></a></h4>
+<section id="id782">
+<h4>Validation<a class="headerlink" href="#id782" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">recipe_final_test_gate.yaml</span></code>: environment + graph + steps + complete expects.</p>
 </section>
-<section id="id780">
-<h4>Footnotes<a class="headerlink" href="#id780" title="Link to this heading"></a></h4>
+<section id="id783">
+<h4>Footnotes<a class="headerlink" href="#id783" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-rule-promotion-promote-review-feedback-into-a-hard-invariant-with-provenance">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_rule_promotion</span></code> — Promote review feedback into a hard invariant with provenance<a class="headerlink" href="#taloneth-insp-rule-promotion-promote-review-feedback-into-a-hard-invariant-with-provenance" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance<a class="footnote-reference brackets" href="#wl-l10-promo" id="id781" role="doc-noteref"><span class="fn-bracket">[</span>158<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-l12-promo" id="id782" role="doc-noteref"><span class="fn-bracket">[</span>159<span class="fn-bracket">]</span></a>. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (<code class="docutils literal notranslate"><span class="pre">taloneth_insp_correction_spec_debt</span></code>)<a class="footnote-reference brackets" href="#insp-pa-07-promo" id="id783" role="doc-noteref"><span class="fn-bracket">[</span>160<span class="fn-bracket">]</span></a> and self-revising MH-SR-05 (<code class="docutils literal notranslate"><span class="pre">fangore_insp_recipe_lineage_promote</span></code>)<a class="footnote-reference brackets" href="#insp-sr-05-promo" id="id784" role="doc-noteref"><span class="fn-bracket">[</span>161<span class="fn-bracket">]</span></a>.</p>
-<section id="id785">
-<h4>Implementation<a class="headerlink" href="#id785" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Repeated review feedback becomes an experiment, then a soft instruction, then a hard invariant — always with source permalink and rollback evidence. Accepts WalkingLabs L10 and L12 guidance<a class="footnote-reference brackets" href="#wl-l10-promo" id="id784" role="doc-noteref"><span class="fn-bracket">[</span>158<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#wl-l12-promo" id="id785" role="doc-noteref"><span class="fn-bracket">[</span>159<span class="fn-bracket">]</span></a>. Soft-to-hard promotion substrate for personal-agent MH-PA-07 (<code class="docutils literal notranslate"><span class="pre">taloneth_insp_correction_spec_debt</span></code>)<a class="footnote-reference brackets" href="#insp-pa-07-promo" id="id786" role="doc-noteref"><span class="fn-bracket">[</span>160<span class="fn-bracket">]</span></a> and self-revising MH-SR-05 (<code class="docutils literal notranslate"><span class="pre">fangore_insp_recipe_lineage_promote</span></code>)<a class="footnote-reference brackets" href="#insp-sr-05-promo" id="id787" role="doc-noteref"><span class="fn-bracket">[</span>161<span class="fn-bracket">]</span></a>.</p>
+<section id="id788">
+<h4>Implementation<a class="headerlink" href="#id788" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">PromotionRecord</span></code>, <code class="docutils literal notranslate"><span class="pre">promote_soft_to_hard</span></code>, and <code class="docutils literal notranslate"><span class="pre">rollback_promotion</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.rule_promotion</span></code> model the promotion chain.</p>
 </section>
-<section id="id786">
-<h4>Validation<a class="headerlink" href="#id786" title="Link to this heading"></a></h4>
+<section id="id789">
+<h4>Validation<a class="headerlink" href="#id789" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id787">
-<h4>Footnotes<a class="headerlink" href="#id787" title="Link to this heading"></a></h4>
+<section id="id790">
+<h4>Footnotes<a class="headerlink" href="#id790" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-run-parity-surface-material-train-and-eval-constraint-mismatches">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_run_parity</span></code> — Surface material train and eval constraint mismatches<a class="headerlink" href="#taloneth-insp-run-parity-surface-material-train-and-eval-constraint-mismatches" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs comparable runs to record and flag mismatches in output caps, tool budgets, timeouts, and sampling so train and eval behavior stay aligned. Accepts FineEnvs train/eval parity findings. They walk product steps (compare_run_parity) and verify completion from the structured observation expects on this scenario. <a class="footnote-reference brackets" href="#fineenvs-parity" id="id788" role="doc-noteref"><span class="fn-bracket">[</span>162<span class="fn-bracket">]</span></a></p>
-<section id="id789">
-<h4>Implementation<a class="headerlink" href="#id789" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs comparable runs to record and flag mismatches in output caps, tool budgets, timeouts, and sampling so train and eval behavior stay aligned. Accepts FineEnvs train/eval parity findings. They walk product steps (compare_run_parity) and verify completion from the structured observation expects on this scenario. <a class="footnote-reference brackets" href="#fineenvs-parity" id="id791" role="doc-noteref"><span class="fn-bracket">[</span>162<span class="fn-bracket">]</span></a></p>
+<section id="id792">
+<h4>Implementation<a class="headerlink" href="#id792" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">compare_parity</span></code> / <code class="docutils literal notranslate"><span class="pre">parity_from_harness_config</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.run_parity</span></code> compare harness constraint surfaces. <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">compare_run_parity</span></code> exposes the diagnostic.</p>
 </section>
-<section id="id790">
-<h4>Validation<a class="headerlink" href="#id790" title="Link to this heading"></a></h4>
+<section id="id793">
+<h4>Validation<a class="headerlink" href="#id793" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">parity_mismatch.yaml</span></code>: environment + graph + steps + complete expects.</p>
 </section>
-<section id="id791">
-<h4>Footnotes<a class="headerlink" href="#id791" title="Link to this heading"></a></h4>
+<section id="id794">
+<h4>Footnotes<a class="headerlink" href="#id794" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-safety-eval-recipes-ship-reusable-safety-evaluation-recipes-for-injection-and-scope-bleed">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_safety_eval_recipes</span></code> — Ship reusable safety evaluation recipes for injection and scope bleed<a class="headerlink" href="#taloneth-insp-safety-eval-recipes-ship-reusable-safety-evaluation-recipes-for-injection-and-scope-bleed" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. They run Agentic Recipe <code class="docutils literal notranslate"><span class="pre">safety_eval</span></code>: a fixture scenario is produced, an isolated reviewer judges without seeing agent reasoning, and a deterministic scorer reports outcome, severity, context, and model/recipe versions. Soft points are not evolvable. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_eval_matrix</span></code>. <a class="footnote-reference brackets" href="#insp-dots-08" id="id792" role="doc-noteref"><span class="fn-bracket">[</span>163<span class="fn-bracket">]</span></a></p>
-<section id="id793">
-<h4>Implementation<a class="headerlink" href="#id793" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. They run Agentic Recipe <code class="docutils literal notranslate"><span class="pre">safety_eval</span></code>: a fixture scenario is produced, an isolated reviewer judges without seeing agent reasoning, and a deterministic scorer reports outcome, severity, context, and model/recipe versions. Soft points are not evolvable. Related: <code class="docutils literal notranslate"><span class="pre">taloneth_insp_eval_matrix</span></code>. <a class="footnote-reference brackets" href="#insp-dots-08" id="id795" role="doc-noteref"><span class="fn-bracket">[</span>163<span class="fn-bracket">]</span></a></p>
+<section id="id796">
+<h4>Implementation<a class="headerlink" href="#id796" title="Link to this heading"></a></h4>
 <p>Agentic Recipe <code class="docutils literal notranslate"><span class="pre">safety_eval</span></code> via <code class="docutils literal notranslate"><span class="pre">SafetyEvalTemplate</span></code> / <code class="docutils literal notranslate"><span class="pre">safety_eval_runner</span></code> and product verb <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> (<code class="docutils literal notranslate"><span class="pre">SafetyEvalRecipeAdapter</span></code>).</p>
 </section>
-<section id="id794">
-<h4>Validation<a class="headerlink" href="#id794" title="Link to this heading"></a></h4>
+<section id="id797">
+<h4>Validation<a class="headerlink" href="#id797" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">safety_eval_recipe.yaml</span></code> drives <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>; expects shape keys plus outcome/severity.</p>
 </section>
-<section id="id795">
-<h4>Footnotes<a class="headerlink" href="#id795" title="Link to this heading"></a></h4>
+<section id="id798">
+<h4>Footnotes<a class="headerlink" href="#id798" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-scaffolding-retire-retire-scaffolding-that-loses-a-controlled-experiment">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_scaffolding_retire</span></code> — Retire scaffolding that loses a controlled experiment<a class="headerlink" href="#taloneth-insp-scaffolding-retire-retire-scaffolding-that-loses-a-controlled-experiment" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1<a class="footnote-reference brackets" href="#insp-r01" id="id796" role="doc-noteref"><span class="fn-bracket">[</span>164<span class="fn-bracket">]</span></a>.</p>
-<section id="id797">
-<h4>Implementation<a class="headerlink" href="#id797" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth treats an orchestration scaffold as temporary. When a with-versus-without experiment shows the scaffold hurts the primary metric, it is retired so task semantics stay the same without fossil prompts. Accepts inspiration requirement 1<a class="footnote-reference brackets" href="#insp-r01" id="id799" role="doc-noteref"><span class="fn-bracket">[</span>164<span class="fn-bracket">]</span></a>.</p>
+<section id="id800">
+<h4>Implementation<a class="headerlink" href="#id800" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">HarnessExperiment</span></code> / <code class="docutils literal notranslate"><span class="pre">HarnessExperimentRunner</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.harness_experiment</span></code> express interventions as hypotheses with expected metrics, compare with/without arms, and list retirement candidates. Integrates with <code class="docutils literal notranslate"><span class="pre">ResearchLab</span></code> for offline evaluation. Trace fields expose experiment id, harness version, and assignment.</p>
 </section>
-<section id="id798">
-<h4>Validation<a class="headerlink" href="#id798" title="Link to this heading"></a></h4>
+<section id="id801">
+<h4>Validation<a class="headerlink" href="#id801" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id799">
-<h4>Footnotes<a class="headerlink" href="#id799" title="Link to this heading"></a></h4>
+<section id="id802">
+<h4>Footnotes<a class="headerlink" href="#id802" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-scripted-driver-replay-replay-advisory-decisions-with-a-strict-scripted-driver">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_scripted_driver_replay</span></code> — Replay advisory decisions with a strict scripted driver<a class="headerlink" href="#taloneth-insp-scripted-driver-replay-replay-advisory-decisions-with-a-strict-scripted-driver" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>, loads the <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code> durable graph (controller <code class="docutils literal notranslate"><span class="pre">scripted</span></code>, store <code class="docutils literal notranslate"><span class="pre">memory</span></code>). Evaluation and CI need a first-class scripted driver that asserts expected yield kinds and fails when unexpected advice appears. Tracks R-IOC-REPLAY and R-IOC-OFFLINE. They walk product steps (start, answer) and verify completion from the structured observation expects on this scenario. <a class="footnote-reference brackets" href="#insp-ioc-04" id="id800" role="doc-noteref"><span class="fn-bracket">[</span>165<span class="fn-bracket">]</span></a></p>
-<section id="id801">
-<h4>Implementation<a class="headerlink" href="#id801" title="Link to this heading"></a></h4>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>, loads the <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code> durable graph (controller <code class="docutils literal notranslate"><span class="pre">scripted</span></code>, store <code class="docutils literal notranslate"><span class="pre">memory</span></code>). Evaluation and CI need a first-class scripted driver that asserts expected yield kinds and fails when unexpected advice appears. Tracks R-IOC-REPLAY and R-IOC-OFFLINE. They walk product steps (start, answer) and verify completion from the structured observation expects on this scenario. <a class="footnote-reference brackets" href="#insp-ioc-04" id="id803" role="doc-noteref"><span class="fn-bracket">[</span>165<span class="fn-bracket">]</span></a></p>
+<section id="id804">
+<h4>Implementation<a class="headerlink" href="#id804" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code> / <code class="docutils literal notranslate"><span class="pre">durable_generator_host.run_soft_point_session</span></code> run start/resume with soft-point bindings and <code class="docutils literal notranslate"><span class="pre">strict_unexpected_advice</span></code>.</p>
 </section>
-<section id="id802">
-<h4>Validation<a class="headerlink" href="#id802" title="Link to this heading"></a></h4>
+<section id="id805">
+<h4>Validation<a class="headerlink" href="#id805" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">session.yaml</span></code>: environment + graph + steps + complete expects.</p>
 </section>
-<section id="id803">
-<h4>Footnotes<a class="headerlink" href="#id803" title="Link to this heading"></a></h4>
+<section id="id806">
+<h4>Footnotes<a class="headerlink" href="#id806" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-insp-trial-reliability-separate-pass-k-capability-from-pass-k-reliability">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_insp_trial_reliability</span></code> — Separate pass&#64;k capability from pass^k reliability<a class="headerlink" href="#taloneth-insp-trial-reliability-separate-pass-k-capability-from-pass-k-reliability" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth records isolated trials with cost and latency, then reports pass&#64;k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, τ-bench, and HumanEval<a class="footnote-reference brackets" href="#anth-evals-trial" id="id804" role="doc-noteref"><span class="fn-bracket">[</span>166<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-taubench" id="id805" role="doc-noteref"><span class="fn-bracket">[</span>167<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-humaneval" id="id806" role="doc-noteref"><span class="fn-bracket">[</span>168<span class="fn-bracket">]</span></a>.</p>
-<section id="id807">
-<h4>Implementation<a class="headerlink" href="#id807" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">Trial</span></code>, <code class="docutils literal notranslate"><span class="pre">pass_at_k</span></code>, <code class="docutils literal notranslate"><span class="pre">pass_caret_k</span></code>, and <code class="docutils literal notranslate"><span class="pre">trial_cost_rollup</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.eval_trial</span></code> aggregate isolated attempts.</p>
-</section>
-<section id="id808">
-<h4>Validation<a class="headerlink" href="#id808" title="Link to this heading"></a></h4>
-<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
-</section>
-<section id="id809">
-<h4>Footnotes<a class="headerlink" href="#id809" title="Link to this heading"></a></h4>
-</section>
-</section>
-<section id="taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes">
-<h3><code class="docutils literal notranslate"><span class="pre">taloneth_offline_decision_export</span></code> — Export decision data without leaking future outcomes<a class="headerlink" href="#taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.</p>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth records isolated trials with cost and latency, then reports pass&#64;k for capability and pass^k for repeated-success reliability without conflating the two. Accepts Anthropic eval guidance, τ-bench, and HumanEval<a class="footnote-reference brackets" href="#anth-evals-trial" id="id807" role="doc-noteref"><span class="fn-bracket">[</span>166<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-taubench" id="id808" role="doc-noteref"><span class="fn-bracket">[</span>167<span class="fn-bracket">]</span></a><a class="footnote-reference brackets" href="#arxiv-humaneval" id="id809" role="doc-noteref"><span class="fn-bracket">[</span>168<span class="fn-bracket">]</span></a>.</p>
 <section id="id810">
 <h4>Implementation<a class="headerlink" href="#id810" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> / <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code> / <code class="docutils literal notranslate"><span class="pre">export_offline_dataset</span></code> persist append-only learning records and versioned exports without default future leakage.</p>
-<p>Covers: OBS-02.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Trial</span></code>, <code class="docutils literal notranslate"><span class="pre">pass_at_k</span></code>, <code class="docutils literal notranslate"><span class="pre">pass_caret_k</span></code>, and <code class="docutils literal notranslate"><span class="pre">trial_cost_rollup</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.eval_trial</span></code> aggregate isolated attempts.</p>
 </section>
 <section id="id811">
 <h4>Validation<a class="headerlink" href="#id811" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
+<section id="id812">
+<h4>Footnotes<a class="headerlink" href="#id812" title="Link to this heading"></a></h4>
 </section>
-<section id="taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals">
-<h3><code class="docutils literal notranslate"><span class="pre">taloneth_policy_replay</span></code> — Replay product policy from recorded facts and signals<a class="headerlink" href="#taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals" title="Link to this heading"></a></h3>
-<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: <code class="docutils literal notranslate"><span class="pre">nubble_insp_review_audit_reconstruct</span></code><a class="footnote-reference brackets" href="#insp-dots-09-replay" id="id812" role="doc-noteref"><span class="fn-bracket">[</span>169<span class="fn-bracket">]</span></a>.</p>
+</section>
+<section id="taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_offline_decision_export</span></code> — Export decision data without leaking future outcomes<a class="headerlink" href="#taloneth-offline-decision-export-export-decision-data-without-leaking-future-outcomes" title="Link to this heading"></a></h3>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.</p>
 <section id="id813">
 <h4>Implementation<a class="headerlink" href="#id813" title="Link to this heading"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">replay_verdict</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log</span></code> re-runs <code class="docutils literal notranslate"><span class="pre">decide()</span></code> on recorded facts/signals/policy for deterministic audits.</p>
-<p>Covers: OBS-03.</p>
+<p><code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> / <code class="docutils literal notranslate"><span class="pre">DecisionLog</span></code> / <code class="docutils literal notranslate"><span class="pre">export_offline_dataset</span></code> persist append-only learning records and versioned exports without default future leakage.</p>
+<p>Covers: OBS-02.</p>
 </section>
 <section id="id814">
 <h4>Validation<a class="headerlink" href="#id814" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
-<section id="id815">
-<h4>Footnotes<a class="headerlink" href="#id815" title="Link to this heading"></a></h4>
+</section>
+<section id="taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals">
+<h3><code class="docutils literal notranslate"><span class="pre">taloneth_policy_replay</span></code> — Replay product policy from recorded facts and signals<a class="headerlink" href="#taloneth-policy-replay-replay-product-policy-from-recorded-facts-and-signals" title="Link to this heading"></a></h3>
+<p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth needs deterministic policy replay from recorded facts and signals without re-running tools — so offline audits match live verdicts. Policy replay for Dots MH-DOTS-09; unified review audit: <code class="docutils literal notranslate"><span class="pre">nubble_insp_review_audit_reconstruct</span></code><a class="footnote-reference brackets" href="#insp-dots-09-replay" id="id815" role="doc-noteref"><span class="fn-bracket">[</span>169<span class="fn-bracket">]</span></a>.</p>
+<section id="id816">
+<h4>Implementation<a class="headerlink" href="#id816" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">replay_verdict</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.decision_log</span></code> re-runs <code class="docutils literal notranslate"><span class="pre">decide()</span></code> on recorded facts/signals/policy for deterministic audits.</p>
+<p>Covers: OBS-03.</p>
+</section>
+<section id="id817">
+<h4>Validation<a class="headerlink" href="#id817" title="Link to this heading"></a></h4>
+<p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
+</section>
+<section id="id818">
+<h4>Footnotes<a class="headerlink" href="#id818" title="Link to this heading"></a></h4>
 </section>
 </section>
 <section id="taloneth-shadow-decision-backends-compare-decision-backends-without-inventing-missing-results">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_shadow_decision_backends</span></code> — Compare decision backends without inventing missing results<a class="headerlink" href="#taloneth-shadow-decision-backends-compare-decision-backends-without-inventing-missing-results" title="Link to this heading"></a></h3>
 <p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Taloneth compares rules, local model, and System One on a matched ticket. When the decide profile is cold, System One must be marked unavailable — no fake latency or verdict. Related: <code class="docutils literal notranslate"><span class="pre">nubble_lane_load_hint</span></code>, <code class="docutils literal notranslate"><span class="pre">nubble_model_affinity</span></code>. They walk product steps (shadow_decision_backends) and verify completion from the structured observation expects on this scenario.</p>
-<section id="id816">
-<h4>Implementation<a class="headerlink" href="#id816" title="Link to this heading"></a></h4>
+<section id="id819">
+<h4>Implementation<a class="headerlink" href="#id819" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.routing</span></code> compares backends without inventing unavailable results. <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">shadow_decision_backends</span></code> exposes the diagnostic.</p>
 </section>
-<section id="id817">
-<h4>Validation<a class="headerlink" href="#id817" title="Link to this heading"></a></h4>
+<section id="id820">
+<h4>Validation<a class="headerlink" href="#id820" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenario <code class="docutils literal notranslate"><span class="pre">shadow_backends.yaml</span></code>: environment + graph + steps + complete expects.</p>
 </section>
 </section>
 <section id="taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_systemone_cassette</span></code> — Pin System One adapter behavior to a versioned cassette<a class="headerlink" href="#taloneth-systemone-cassette-pin-system-one-adapter-behavior-to-a-versioned-cassette" title="Link to this heading"></a></h3>
 <p>A new Laya build changes confidence fields. A versioned cassette must fail the story before silent adapter drift ships.</p>
-<section id="id818">
-<h4>Implementation<a class="headerlink" href="#id818" title="Link to this heading"></a></h4>
+<section id="id821">
+<h4>Implementation<a class="headerlink" href="#id821" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> maps System One HTTP JSON onto library judge types and provenance. Connection/provider binding uses Config hooks (<code class="docutils literal notranslate"><span class="pre">get_judge_connection</span></code>, <code class="docutils literal notranslate"><span class="pre">get_judge_provider</span></code>). <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">judge_route</span></code> runs the cassette through the real provider.</p>
 <p>Covers: JDG wire map (System One).</p>
 </section>
-<section id="id819">
-<h4>Validation<a class="headerlink" href="#id819" title="Link to this heading"></a></h4>
+<section id="id822">
+<h4>Validation<a class="headerlink" href="#id822" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">cli</span></code> scenario <code class="docutils literal notranslate"><span class="pre">billing_allow.yaml</span></code> on <code class="docutils literal notranslate"><span class="pre">systemone/laya</span></code> cassette: hard <code class="docutils literal notranslate"><span class="pre">route_selected</span></code>, <code class="docutils literal notranslate"><span class="pre">verdict</span></code>, <code class="docutils literal notranslate"><span class="pre">answer_count</span></code>. Live (<code class="docutils literal notranslate"><span class="pre">MECHA_STORY_BACKEND=live</span></code> + <code class="docutils literal notranslate"><span class="pre">MECHA_JUDGE_*</span></code>): same scenario via <code class="docutils literal notranslate"><span class="pre">SystemOneJudgeProvider</span></code> (cassette-exact token softens; behavioral expects hard).</p>
 </section>
 </section>
 <section id="taloneth-validator-qualification-qualify-validators-before-they-gate-completion">
 <h3><code class="docutils literal notranslate"><span class="pre">taloneth_validator_qualification</span></code> — Qualify validators before they gate completion<a class="headerlink" href="#taloneth-validator-qualification-qualify-validators-before-they-gate-completion" title="Link to this heading"></a></h3>
 <p>Taloneth starts the CLI host with family <code class="docutils literal notranslate"><span class="pre">pass_through</span></code> and backend <code class="docutils literal notranslate"><span class="pre">mock</span></code>. Before a schema validator gates done, known-good, known-bad, and missing fixtures must run — including a weak always-pass mutant that must fail qualification. Judge scores alone cannot complete a task (see <code class="docutils literal notranslate"><span class="pre">fangore_refund_verdict</span></code>).</p>
-<section id="id820">
-<h4>Implementation<a class="headerlink" href="#id820" title="Link to this heading"></a></h4>
+<section id="id823">
+<h4>Implementation<a class="headerlink" href="#id823" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">qualify_validator</span></code> / <code class="docutils literal notranslate"><span class="pre">validator_qualified</span></code> in <code class="docutils literal notranslate"><span class="pre">mechaharness.graph</span></code> (VER-04). <code class="docutils literal notranslate"><span class="pre">CliInstrumentor</span></code> verb <code class="docutils literal notranslate"><span class="pre">validator_qualification</span></code>.</p>
 </section>
-<section id="id821">
-<h4>Validation<a class="headerlink" href="#id821" title="Link to this heading"></a></h4>
+<section id="id824">
+<h4>Validation<a class="headerlink" href="#id824" title="Link to this heading"></a></h4>
 <p>Harness <code class="docutils literal notranslate"><span class="pre">user_story</span></code> drives product verb(s) with environment <code class="docutils literal notranslate"><span class="pre">pass_through</span></code>/<code class="docutils literal notranslate"><span class="pre">mock</span></code>; hard expects on declared observation keys.</p>
 </section>
 </section>
@@ -4345,152 +4363,152 @@ python<span class="w"> </span>-m<span class="w"> </span>tests.stories.commands<s
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md">Personal agent reliability map (MH-PA-03 verify_repair)</a> — Named recipe contract with budgets and outcomes</p>
 </aside>
 <aside class="footnote brackets" id="insp-sr-06-research" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id689">133</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id692">133</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md">Self-revising recipe map (MH-SR-06 research loop)</a> — Generic research loop; recipe evolution is taloneth_insp_recipe_evolution_loop</p>
 </aside>
 <aside class="footnote brackets" id="rc-dp-shadow-t" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>134<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id695">1</a>,<a role="doc-backlink" href="#id699">2</a>)</span>
+<span class="backrefs">(<a role="doc-backlink" href="#id698">1</a>,<a role="doc-backlink" href="#id702">2</a>)</span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md">Recipes requirements DP-07 / DP-08</a> — Shadow comparison for model promotion</p>
 </aside>
 <aside class="footnote brackets" id="wl-l02-ablation" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id704">135</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id707">135</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/">WalkingLabs L02 What a Harness Is</a> — Ablate components</p>
 </aside>
 <aside class="footnote brackets" id="wl-p01-ablation" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id705">136</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id708">136</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/">WalkingLabs P01 Baseline vs Minimal</a> — Matched corpus</p>
 </aside>
 <aside class="footnote brackets" id="insp-pa-07" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id709">137</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id712">137</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md">Personal agent reliability (MH-PA-07)</a> — Correction-to-test feedback</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-xharness" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id713">138</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id716">138</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#when-a-model-leaves-the-harness-it-was-trained-in">FineEnvs multi-harness RL — leaving native harness</a> — MH-MHRL-18</p>
 </aside>
 <aside class="footnote brackets" id="anth-evals-claims" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id717">139</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id720">139</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic Demystifying evals for AI agents</a> — Graders and assertions</p>
 </aside>
 <aside class="footnote brackets" id="arxiv-bineval" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id718">140</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id721">140</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://arxiv.org/abs/2606.27226">BINEVAL binary questions</a> — Atomic interpretable claims</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-matrix" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id722">141</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id725">141</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#accuracy">FineEnvs multi-harness RL — accuracy matrix</a> — MH-MHRL-17</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-outcome" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id726">142</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id729">142</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards">FineEnvs multi-harness RL — rewards</a> — MH-MHRL-06</p>
 </aside>
 <aside class="footnote brackets" id="anth-evals-evaluator" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id730">143</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id733">143</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic Demystifying evals for AI agents</a> — Deterministic then model graders</p>
 </aside>
 <aside class="footnote brackets" id="arxiv-verif-horizon" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id731">144</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id734">144</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://arxiv.org/abs/2606.26300">Verification Horizon</a> — Held-out evaluator versioning</p>
 </aside>
 <aside class="footnote brackets" id="insp-sr-07-eval" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id732">145</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id735">145</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md">Self-revising recipe map (MH-SR-07 held_out)</a> — held_out metadata; final-test gate is taloneth_insp_recipe_final_test_gate</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-dims" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id736">146</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id739">146</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-models-overfit-to-a-single-harness">FineEnvs multi-harness RL — harness overfitting</a> — MH-MHRL-02</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-lineage" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id740">147</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id743">147</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-the-two-harbor-runs-declined">FineEnvs multi-harness RL — resume contamination</a> — MH-MHRL-13</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-exposure" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id744">148</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id747">148</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#how-much-each-run-saw">FineEnvs multi-harness RL — how much each run saw</a> — MH-MHRL-14/15</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-gated" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id748">149</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id751">149</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#what-we-rewarded">FineEnvs multi-harness RL — what we rewarded</a> — MH-MHRL-08</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-fingerprint" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id752">150</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id755">150</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#benchmark-scores-now-come-with-a-harness-attached">FineEnvs multi-harness RL — harness-attached scores</a> — MH-MHRL-01</p>
 </aside>
 <aside class="footnote brackets" id="wl-l02-health" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id756">151</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id759">151</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/">WalkingLabs L02 What a Harness Is</a> — Harness debt</p>
 </aside>
 <aside class="footnote brackets" id="wl-l12-health" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id757">152</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id760">152</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/">WalkingLabs L12 Clean Session Handoffs</a> — Cleanup evidence</p>
 </aside>
 <aside class="footnote brackets" id="insp-r14" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id761">153</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id764">153</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 14: harness hypotheses)</a> — Req 14 — harness hypotheses</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-export" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id765">154</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id768">154</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#sft-vs-rl">FineEnvs multi-harness RL — SFT vs RL</a> — MH-MHRL-16</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-objective" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id769">155</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id772">155</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards">FineEnvs multi-harness RL — rewards aggregation</a> — MH-MHRL-07</p>
 </aside>
 <aside class="footnote brackets" id="insp-sr-06" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id773">156</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id776">156</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md">Self-revising recipe evolution (MH-SR-06)</a> — Candidate evolution loop</p>
 </aside>
 <aside class="footnote brackets" id="insp-sr-07" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id777">157</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id780">157</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md">Self-revising recipe evolution (MH-SR-07)</a> — Held-out final-test release gate</p>
 </aside>
 <aside class="footnote brackets" id="wl-l10-promo" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id781">158</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id784">158</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-10-why-end-to-end-testing-changes-results/">WalkingLabs L10 Full Pipeline Verification</a> — Promote feedback</p>
 </aside>
 <aside class="footnote brackets" id="wl-l12-promo" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id782">159</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id785">159</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/">WalkingLabs L12 Clean Session Handoffs</a> — Process changes</p>
 </aside>
 <aside class="footnote brackets" id="insp-pa-07-promo" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id783">160</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id786">160</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md">Personal agent reliability map (MH-PA-07 promotion)</a> — Soft-to-hard promotion substrate</p>
 </aside>
 <aside class="footnote brackets" id="insp-sr-05-promo" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id784">161</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id787">161</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md">Self-revising recipe map (MH-SR-05 promotion)</a> — Promotion pattern; recipe lineage is fangore_insp_recipe_lineage_promote</p>
 </aside>
 <aside class="footnote brackets" id="fineenvs-parity" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id788">162</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id791">162</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://fineenvs-multi-harness-rl.hf.space/?__theme=system#why-the-two-harbor-runs-declined">FineEnvs multi-harness RL — train/eval decline</a> — MH-MHRL-12</p>
 </aside>
 <aside class="footnote brackets" id="insp-dots-08" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id792">163</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id795">163</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md">OpenAI Dots agent safety (MH-DOTS-08)</a> — Safety evaluation recipes</p>
 </aside>
 <aside class="footnote brackets" id="insp-r01" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id796">164</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id799">164</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md">Inspiration requirements (req 1: revisable scaffolding)</a> — Req 1 — revisable scaffolding</p>
 </aside>
 <aside class="footnote brackets" id="insp-ioc-04" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id800">165</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id803">165</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/durable-graph-generators-inversion-of-control.md">Durable graph generators (R-IOC-REPLAY)</a> — R-IOC-REPLAY ScriptedDriver strict fixtures</p>
 </aside>
 <aside class="footnote brackets" id="anth-evals-trial" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id804">166</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id807">166</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic Demystifying evals for AI agents</a> — pass&#64;k vs pass^k</p>
 </aside>
 <aside class="footnote brackets" id="arxiv-taubench" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id805">167</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id808">167</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://arxiv.org/abs/2406.12045">τ-bench</a> — Reliability and end-state verification</p>
 </aside>
 <aside class="footnote brackets" id="arxiv-humaneval" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id806">168</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id809">168</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://arxiv.org/abs/2107.03374">Evaluating LLMs Trained on Code</a> — pass&#64;k definition</p>
 </aside>
 <aside class="footnote brackets" id="insp-dots-09-replay" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id812">169</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id815">169</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md">OpenAI Dots map (MH-DOTS-09 policy replay)</a> — Policy replay for review audit</p>
 </aside>
 <aside class="footnote brackets" id="loop-vs-graph-executor" role="doc-footnote">
