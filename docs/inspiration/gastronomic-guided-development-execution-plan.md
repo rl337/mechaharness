@@ -259,11 +259,14 @@ pytest -q tests/stories/test_user_story_suites.py -k 'fangore_bag_inference_cont
 pytest -q tests/stories
 pytest -q
 
-# Optional live Qwen integration, only when host has the endpoint:
+# Optional live integration (pick host; MECHA_MODEL = /v1/models served id):
 MECHA_STORY_BACKEND=live \
-MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
-MECHA_MODEL=qwen3-30b-thinking \
+MECHA_BASE_URL=http://192.168.1.21:8000/v1 \
+MECHA_MODEL=nemotron-3.5-super-vl \
+MECHA_MAX_TOKENS=2048 \
 pytest -q tests/stories/test_user_story_suites.py -k fangore_workspace_discovery
+
+# Laptop LM Studio remains at http://127.0.0.1:1234/v1 (e.g. qwen/qwen3.6-35b-a3b).
 ```
 
 Follow the repository's actual lint/typecheck/build commands and installed tooling instead of guessing flags. Report skips and unexpected collection counts. A targeted green suite is not a substitute for a full offline regression pass.

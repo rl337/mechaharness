@@ -31,13 +31,27 @@ pytest -q tests/stories
 # Full suite (unit + stories)
 pytest -q
 
-# Live — every model-using story against real reason + judge hosts
-# (HTTP twins + static infer/judge walks; softens cassette-exact token counts)
-MECHA_STORY_BACKEND=live   MECHA_BASE_URL=http://127.0.0.1:8000/v1   MECHA_MODEL=qwen3-30b-thinking   MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009   MECHA_JUDGE_MODEL=laya   MECHA_MAX_TOKENS=1024   pytest -q tests/stories
+# Live reason hosts (pick one). MECHA_MODEL must be the /v1/models served id.
+# Laptop LM Studio (default OpenAI port 1234):
+MECHA_STORY_BACKEND=live \
+  MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
+  MECHA_MODEL=qwen/qwen3.6-35b-a3b \
+  MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 \
+  MECHA_JUDGE_MODEL=laya \
+  MECHA_MAX_TOKENS=1024 \
+  pytest -q tests/stories
 
-# Live OpenAI-compat only
-MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen3-30b-thinking \
-  MECHA_BASE_URL=http://127.0.0.1:8000/v1 pytest -q tests/stories -k nubble_run_cost
+# LAN Nemotron Super VL (prefer higher max_tokens; reasoning can consume budget):
+MECHA_STORY_BACKEND=live \
+  MECHA_BASE_URL=http://192.168.1.21:8000/v1 \
+  MECHA_MODEL=nemotron-3.5-super-vl \
+  MECHA_MAX_TOKENS=2048 \
+  pytest -q tests/stories
+
+# Live OpenAI-compat filter only (cassette path filter ≠ served id)
+MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen-qwen3.6-35b-a3b \
+  MECHA_BASE_URL=http://127.0.0.1:1234/v1 MECHA_MODEL=qwen/qwen3.6-35b-a3b \
+  pytest -q tests/stories -k nubble_run_cost
 
 # Live System One only
 MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
