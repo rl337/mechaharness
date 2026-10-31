@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Graph templates and Agentic Recipes &mdash; MechaHarness 0.9.0 documentation</title>
+  <title>Graph templates and Agentic Recipes &mdash; MechaHarness 0.10.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=39bb1c6d"></script>
+      <script src="../_static/documentation_options.js?v=82662543"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -230,6 +230,16 @@ owning user stories):</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_workspace_discovery_found</span></code></p></td>
 <td><p>Read-only evidence inventory (<code class="docutils literal notranslate"><span class="pre">found</span></code>/<code class="docutils literal notranslate"><span class="pre">not_found</span></code>/…)</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/contract-extraction.html"><span class="std std-doc">contract_extraction</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">contract_extraction</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_contract_extraction_found</span></code></p></td>
+<td><p>Freeze inventory into typed <code class="docutils literal notranslate"><span class="pre">ChangeContract</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/gastronomic-guided-development.html"><span class="std std-doc">gastronomic_guided_development</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_gastronomic_guided_development_shape</span></code></p></td>
+<td><p>Product tile: discovery → contract (M6 skeleton)</p></td>
+</tr>
 </tbody>
 </table>
 <p>Composition helpers: <code class="docutils literal notranslate"><span class="pre">GraphTemplateParams.instance_key</span></code> (namespaced ids),
@@ -321,6 +331,12 @@ held-out gate guards <code class="docutils literal notranslate"><span class="pre
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">workspace_discovery</span></code></p></td>
 <td><p>Read-only workspace evidence → typed inventory</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">contract_extraction</span></code></p></td>
+<td><p>Freeze priors → typed ChangeContract</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
+<td><p>Product composition (discovery → contract; coding deferred)</p></td>
 </tr>
 </tbody>
 </table>
