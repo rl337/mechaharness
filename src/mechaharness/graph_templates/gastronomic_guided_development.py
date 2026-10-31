@@ -1,8 +1,8 @@
-"""Product recipe: discovery → contract → plan (gastronomic M6 skeleton).
+"""Product recipe: discovery → contract → plan → execute (gastronomic M6).
 
-Catalog id: ``gastronomic_guided_development``. Mutating coding stages are
-deferred; this increment tiles read-only discovery, contract extraction, and
-change decomposition. ``guided_coding`` remains the unchanged baseline.
+Catalog id: ``gastronomic_guided_development``. Verification and repair stages
+are deferred; this increment tiles through scoped change execution.
+``guided_coding`` remains the unchanged baseline.
 """
 
 from __future__ import annotations
@@ -17,13 +17,14 @@ from mechaharness.graph_templates.base import (
     make_node,
 )
 from mechaharness.graph_templates.change_decomposition import ChangeDecompositionTemplate
+from mechaharness.graph_templates.change_execution import ChangeExecutionTemplate
 from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
 from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 from mechaharness.isolation.isolation_contract import TemplateIOContract
 
 
 class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
-    """Seed → discovery → contract → plan tiles.
+    """Seed → discovery → contract → plan → execute tiles.
 
     Example:
         >>> from mechaharness.graph_templates import (
@@ -34,7 +35,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         ... )
         >>> graph.template_name
         'gastronomic_guided_development'
-        >>> "plan_tile" in graph.nodes
+        >>> "execute_tile" in graph.nodes
         True
     """
 
@@ -42,19 +43,22 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
     version = "1"
     category = "agentic_recipe"
     summary = (
-        "Read-only workspace discovery, ChangeContract freeze, then ChangePlan "
-        "decomposition before coding; later M6 stages add execute/verify."
+        "Workspace discovery, ChangeContract, ChangePlan, then scoped "
+        "ChangeExecution; later M6 stages add verify/diagnose."
     )
     io_contract = TemplateIOContract(
         inputs={
             "goal": "string",
             "workspace": "object",
             "constraints": "object",
+            "file_revisions": "object",
+            "approved_slice": "object",
         },
         outputs={
             "workspace_inventory": "object",
             "change_contract": "object",
             "change_plan": "object",
+            "change_execution": "object",
         },
     )
     soft_points = (
@@ -76,6 +80,13 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             name="plan_bindings",
             kind="task_state",
             description="Soft bindings forwarded to change_decomposition",
+            required=False,
+            default={},
+        ),
+        SoftPoint(
+            name="execution_bindings",
+            kind="task_state",
+            description="Soft bindings forwarded to change_execution",
             required=False,
             default={},
         ),
@@ -103,6 +114,12 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             description="Optional plan propose_payload soft point",
             required=False,
         ),
+        SoftPoint(
+            name="apply_payload",
+            kind="task_state",
+            description="Optional execution apply_payload soft point",
+            required=False,
+        ),
     )
 
     def build(self, params: GraphTemplateParams) -> ExecutionGraph:
@@ -118,6 +135,10 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             seed_put["in.workspace"] = inputs["workspace"]
         if "constraints" in inputs:
             seed_put["in.constraints"] = inputs["constraints"]
+        if "file_revisions" in inputs:
+            seed_put["in.file_revisions"] = inputs["file_revisions"]
+        if "approved_slice" in inputs:
+            seed_put["in.approved_slice"] = inputs["approved_slice"]
         graph.add_node(
             make_node(
                 id="seed",
@@ -215,11 +236,65 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         }
         graph.add_node(plan_embed)
 
+        execution_soft = dict(bindings.get("execution_bindings") or {})
+        if "apply_payload" in bindings and "apply_payload" not in execution_soft:
+            execution_soft["apply_payload"] = bindings["apply_payload"]
+        _exec_child, exec_embed = ChangeExecutionTemplate().tile(
+            GraphTemplateParams(
+                goal=f"{goal}:execute",
+                instance_key="execute",
+                inputs={"goal": seed_put.get("in.goal", goal)},
+                soft_bindings=execution_soft,
+            ),
+            parent_node_id="execute_tile",
+        )
+        del _exec_child
+        exec_embed.depends_on = ["plan_tile"]
+        exec_embed.payload = {
+            **dict(exec_embed.payload or {}),
+            "bag_inputs": {
+                "in.goal": "in.goal",
+                "in.change_plan": "acc.stages.plan",
+                "in.approved_slice": "in.approved_slice",
+                "in.file_revisions": "in.file_revisions",
+                "in.workspace": "in.workspace",
+            },
+            "bag_outputs": {
+                "acc.stages.changes": "out.change_execution",
+            },
+        }
+        graph.add_node(exec_embed)
+
         graph.add_node(
             make_node(
                 id="publish",
                 kind="bag_project",
-                depends_on=["plan_tile"],
+                depends_on=["execute_tile"],
+                payload={
+                    "reads": {"source": "acc.stages.changes"},
+                    "writes": {"destination": "out.change_execution"},
+                    "parameters": {
+                        "fields": [
+                            "version",
+                            "status",
+                            "slice_id",
+                            "changed_files",
+                            "diff",
+                            "scope_violations",
+                            "refused",
+                            "write_grants_required",
+                            "allowed_paths",
+                            "provenance",
+                        ]
+                    },
+                },
+            )
+        )
+        graph.add_node(
+            make_node(
+                id="publish_plan",
+                kind="bag_project",
+                depends_on=["publish"],
                 payload={
                     "reads": {"source": "acc.stages.plan"},
                     "writes": {"destination": "out.change_plan"},
@@ -240,7 +315,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             make_node(
                 id="publish_contract",
                 kind="bag_project",
-                depends_on=["publish"],
+                depends_on=["publish_plan"],
                 payload={
                     "reads": {"source": "acc.stages.contract"},
                     "writes": {"destination": "out.change_contract"},
@@ -289,8 +364,10 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             ("seed", "discovery_tile"),
             ("discovery_tile", "contract_tile"),
             ("contract_tile", "plan_tile"),
-            ("plan_tile", "publish"),
-            ("publish", "publish_contract"),
+            ("plan_tile", "execute_tile"),
+            ("execute_tile", "publish"),
+            ("publish", "publish_plan"),
+            ("publish_plan", "publish_contract"),
             ("publish_contract", "publish_inventory"),
         ):
             graph.add_dependency(

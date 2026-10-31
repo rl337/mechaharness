@@ -862,3 +862,33 @@ def test_project_coding_local_work_skips_other_recipes() -> None:
         )
     )
     assert out.get("skipped") is True
+
+
+def test_coding_writes_stub_rewrites_on_second_burst(tmp_path: Path) -> None:
+    """Verify-repair / escalate retries must not see an exhausted stub Completer."""
+    from pyiv.files import RealFilesystem
+
+    from tests.stories.harness.user_story import CodingWriteBlock, _coding_writes_stub
+
+    root = tmp_path
+    (root / "a.py").write_text("old\n", encoding="utf-8")
+    tools = build_coding_tool_registry(
+        workspace=WorkspacePaths(root),
+        filesystem=RealFilesystem(),
+    )
+    complete = _coding_writes_stub(
+        tools,
+        [CodingWriteBlock(path="a.py", content="new\n")],
+    )
+    first = complete([], None)
+    assert first.get("tool_calls")
+    tools.get("write_file").handler(
+        path="a.py",
+        content=first["tool_calls"][0]["function"]["arguments"]["content"],
+    )
+    done = complete([], None)
+    assert done.get("tool_calls") == []
+    # Second burst (repair/escalate) must offer write_file again.
+    second = complete([], None)
+    assert second.get("tool_calls")
+    assert second["tool_calls"][0]["function"]["arguments"]["content"] == "new\n"

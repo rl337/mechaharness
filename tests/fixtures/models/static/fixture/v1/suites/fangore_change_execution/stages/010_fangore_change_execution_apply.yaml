@@ -1,0 +1,136 @@
+id: fangore_change_execution_apply
+suite: fangore_change_execution
+persona: fangore
+title: Apply one approved slice with write grant and publish hashes
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a calculator
+  workspace, walks change_execution with an explicit `core:fs.write` grant, applies an in-scope revision
+  to arithmetic.py, and verifies `out.change_execution` carries before/after hashes and a non-empty diff.
+implementation: '`execution_constrain` / `execution_apply` / `execution_publish` / `execution_validate` in
+  `execution_hard_nodes`; Agentic Recipe `change_execution`.'
+validation: Suite stage `010_fangore_change_execution_apply` — status ok, slice_id arithmetic, empty
+  scope_violations.
+footnotes:
+- id: gastronomic-m6-execution-apply
+  label: Gastronomic M6 execution apply
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Real diff and changed-file hashes; no scope escape
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: ../assets/calc_slice/workspace.files.json
+graph:
+  inline:
+    goal: apply approved arithmetic slice
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: Add multiply helper
+          in.workspace:
+            root: .
+          in.approved_slice:
+            id: arithmetic
+            title: Add multiply helper
+            scope:
+              paths:
+              - src/calc/arithmetic.py
+            checks:
+            - pytest: true
+              path: tests/test_arithmetic.py
+            rollback: revert arithmetic.py
+          in.file_revisions:
+          - path: src/calc/arithmetic.py
+            content: "def add(a, b):\n    return a + b\n\ndef mul(a, b):\n    return a * b\n"
+    - id: constrain
+      kind: execution_constrain
+      depends_on:
+      - seed
+      payload:
+        reads:
+          approved_slice: in.approved_slice
+        writes:
+          destination: acc.execution.constraints
+    - id: apply
+      kind: execution_apply
+      depends_on:
+      - constrain
+      payload:
+        reads:
+          constraints: acc.execution.constraints
+          revisions: in.file_revisions
+          workspace: in.workspace
+        writes:
+          destination: acc.execution.apply_receipt
+    - id: publish
+      kind: execution_publish
+      depends_on:
+      - apply
+      payload:
+        reads:
+          constraints: acc.execution.constraints
+          receipt: acc.execution.apply_receipt
+        writes:
+          destination: out.change_execution
+    - id: validate
+      kind: execution_validate
+      depends_on:
+      - publish
+      payload:
+        reads:
+          source: out.change_execution
+        writes:
+          destination: acc.execution.validation
+        parameters:
+          fail_if_invalid: true
+steps:
+- do:
+    graph_walk:
+      action: start
+      grants:
+      - core:graph.execute
+      - core:fs.write
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: node_statuses.seed
+    value: succeeded
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.out.change_execution.status
+    value: ok
+  - kind: equals
+    key: bag.out.change_execution.version
+    value: '1'
+  - kind: equals
+    key: bag.out.change_execution.slice_id
+    value: arithmetic
+  - kind: equals
+    key: bag.acc.execution.validation.ok
+    value: true
+  - kind: equals
+    key: bag.out.change_execution.changed_files[0].path
+    value: src/calc/arithmetic.py
+  - kind: contains
+    key: bag.out.change_execution.diff
+    value: mul
+complete:
+  expect:
+  - kind: equals
+    key: bag.out.change_execution.status
+    value: ok
+  - kind: equals
+    key: bag.out.change_execution.write_grants_required[0]
+    value: core:fs.write
+cleanup: []

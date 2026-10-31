@@ -714,7 +714,12 @@ def _coding_writes_stub(
     tools: ToolRegistry,
     coding_writes: list[CodingWriteBlock],
 ) -> Any:
-    """Deterministic Completer that writes one or more workspace files then finishes."""
+    """Deterministic Completer that writes one or more workspace files then finishes.
+
+    After a full write pass, the index resets so verify_repair / escalate
+    retries (new tool-loop bursts) can rewrite the same stubs instead of
+    immediately yielding ``advice_requested`` with an exhausted Completer.
+    """
 
     pending = list(coding_writes)
     state = {"i": 0}
@@ -753,6 +758,8 @@ def _coding_writes_stub(
                     }
                 ],
             }
+        # End this burst; arm the same stubs for a later repair/escalate burst.
+        state["i"] = 0
         return {"role": "assistant", "content": "done", "tool_calls": []}
 
     return complete

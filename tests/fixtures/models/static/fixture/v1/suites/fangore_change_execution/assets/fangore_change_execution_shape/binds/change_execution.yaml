@@ -1,0 +1,14 @@
+name: change_execution
+summary: Instantiate change_execution for scoped slice apply.
+goal: Apply multiply helper
+inputs:
+  goal: Apply multiply helper
+  approved_slice:
+    id: arithmetic
+    title: Add multiply helper
+    scope:
+      paths:
+      - src/calc/arithmetic.py
+    rollback: revert arithmetic.py
+  workspace:
+    root: .
