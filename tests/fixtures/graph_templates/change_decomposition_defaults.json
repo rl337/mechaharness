@@ -1,0 +1,30 @@
+{
+  "id": "change_decomposition_defaults",
+  "description": "change_decomposition constrains contract then assembles ChangePlan",
+  "template": "change_decomposition",
+  "params": {
+    "goal": "Plan multiplication",
+    "inputs": {
+      "goal": "Plan multiplication",
+      "change_contract": {
+        "version": "1",
+        "status": "ok",
+        "objective": "Add multiplication",
+        "invariants": [{"id": "preserve:a.py"}],
+        "verification": [{"pytest": true}]
+      }
+    }
+  },
+  "expect": {
+    "template_name": "change_decomposition",
+    "template_status": "active",
+    "node_ids": ["seed", "constrain", "propose", "assemble", "validate"],
+    "edge_count": 4,
+    "nodes": {
+      "constrain": {"kind": "plan_constrain"},
+      "propose": {"kind": "infer"},
+      "assemble": {"kind": "plan_assemble"},
+      "validate": {"kind": "plan_validate"}
+    }
+  }
+}
