@@ -52,6 +52,7 @@ from mechaharness.graph_templates.change_decomposition import (
     ChangeDecompositionTemplate,
 )
 from mechaharness.graph_templates.change_execution import ChangeExecutionTemplate
+from mechaharness.graph_templates.change_verification import ChangeVerificationTemplate
 from mechaharness.graph_templates.context_pack import ContextPackTemplate
 from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
 from mechaharness.graph_templates.conversational_tool_loop import (
@@ -83,6 +84,7 @@ __all__ = [
     "ContextPackTemplate",
     "ChangeDecompositionTemplate",
     "ChangeExecutionTemplate",
+    "ChangeVerificationTemplate",
     "ContractExtractionTemplate",
     "ConversationalToolLoopTemplate",
     "DecisionPlaneTemplate",

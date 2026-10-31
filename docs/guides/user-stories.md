@@ -135,6 +135,12 @@ Persona **fangore**; execution `parallel`; 2 stage(s).
 
 Stories: `fangore_change_execution_apply`, `fangore_change_execution_shape`
 
+### `fangore_change_verification` — ChangeVerification host-observed checks and gastronomic verify tiling
+
+Persona **fangore**; execution `parallel`; 2 stage(s).
+
+Stories: `fangore_change_verification_host`, `fangore_change_verification_shape`
+
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
 Persona **fangore**; execution `parallel`; 6 stage(s).
@@ -918,6 +924,38 @@ Suite stage `005_fangore_change_execution_shape` — template_name and node ids.
 
 1. [Gastronomic M6 change_execution](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Scoped slice apply before verification
 
+### `fangore_change_verification_host` — Host-observe verify_runs and immutable invariants after a change
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a calculator workspace that already contains a multiply helper, walks change_verification against a ChangeExecution and ChangeContract, and verifies `out.verification_report` is host-observed green with preserved parser invariants.
+
+#### Implementation
+
+`verification_constrain` / `verification_run` / `verification_publish` / `verification_validate` in `verification_hard_nodes`; Agentic Recipe `change_verification`.
+
+#### Validation
+
+Suite stage `010_fangore_change_verification_host` — status ok, empty failures, invariants checked.
+
+#### Footnotes
+
+1. [Gastronomic M6 verification host](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Host-observed tests; old invariants remain green
+
+### `fangore_change_verification_shape` — Instantiate the change_verification Agentic Recipe
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `change_verification` and verifies constrain/run/publish/validate node ids.
+
+#### Implementation
+
+Agentic Recipe `change_verification` (`ChangeVerificationTemplate`) via `instantiate_recipe`.
+
+#### Validation
+
+Suite stage `005_fangore_change_verification_shape` — template_name and node ids.
+
+#### Footnotes
+
+1. [Gastronomic M6 change_verification](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Host-observed VerificationReport after scoped execution
+
 ### `fangore_coding_ci_diagnose` — Look up a failed CI check and write a diagnosis note from the job log
 
 Fangore's pull request checks job fails again. He starts guided coding and asks the local Completer to look up check runs for HEAD, download the failing Actions job log, and write a short diagnosis note naming the check, job id, and root-cause signals — without editing product source yet. GitHub stays mocked in static stories via RecordingGitHubClient so CI and Completer walks do not need forge credentials; the production path uses HttpGitHubClient when a token is bound. Complements `fangore_coding_ci_repair` (seeded-log repair) and `fangore_coding_git_open_pr`.
@@ -1421,13 +1459,13 @@ Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recip
 
 [^rc-env-repair]: [Recipes requirements (first-wave catalog)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — environment_repair owning story
 
-### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→contract→plan→execute tiles
+### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→…→verify tiles
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile, contract_tile, plan_tile, and execute_tile subgraphs without mutating guided_coding.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile, contract_tile, plan_tile, execute_tile, and verify_tile subgraphs without mutating guided_coding.
 
 #### Implementation
 
-Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, and `change_execution`.
+Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, `change_execution`, and `change_verification`.
 
 #### Validation
 
@@ -1435,7 +1473,7 @@ Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name
 
 #### Footnotes
 
-1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through execute before verify stages
+1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through verify before diagnose stages
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 

@@ -1,7 +1,7 @@
-"""Product recipe: discovery → contract → plan → execute (gastronomic M6).
+"""Product recipe: discovery → contract → plan → execute → verify (gastronomic M6).
 
-Catalog id: ``gastronomic_guided_development``. Verification and repair stages
-are deferred; this increment tiles through scoped change execution.
+Catalog id: ``gastronomic_guided_development``. Diagnosis/revision stages are
+deferred; this increment tiles through host-observed change verification.
 ``guided_coding`` remains the unchanged baseline.
 """
 
@@ -18,13 +18,14 @@ from mechaharness.graph_templates.base import (
 )
 from mechaharness.graph_templates.change_decomposition import ChangeDecompositionTemplate
 from mechaharness.graph_templates.change_execution import ChangeExecutionTemplate
+from mechaharness.graph_templates.change_verification import ChangeVerificationTemplate
 from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
 from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 from mechaharness.isolation.isolation_contract import TemplateIOContract
 
 
 class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
-    """Seed → discovery → contract → plan → execute tiles.
+    """Seed → discovery → contract → plan → execute → verify tiles.
 
     Example:
         >>> from mechaharness.graph_templates import (
@@ -35,7 +36,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         ... )
         >>> graph.template_name
         'gastronomic_guided_development'
-        >>> "execute_tile" in graph.nodes
+        >>> "verify_tile" in graph.nodes
         True
     """
 
@@ -43,8 +44,9 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
     version = "1"
     category = "agentic_recipe"
     summary = (
-        "Workspace discovery, ChangeContract, ChangePlan, then scoped "
-        "ChangeExecution; later M6 stages add verify/diagnose."
+        "Workspace discovery, ChangeContract, ChangePlan, scoped "
+        "ChangeExecution, then host-observed VerificationReport; later M6 "
+        "stages add diagnose/revise."
     )
     io_contract = TemplateIOContract(
         inputs={
@@ -53,12 +55,14 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             "constraints": "object",
             "file_revisions": "object",
             "approved_slice": "object",
+            "verify_runs": "object",
         },
         outputs={
             "workspace_inventory": "object",
             "change_contract": "object",
             "change_plan": "object",
             "change_execution": "object",
+            "verification_report": "object",
         },
     )
     soft_points = (
@@ -87,6 +91,13 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             name="execution_bindings",
             kind="task_state",
             description="Soft bindings forwarded to change_execution",
+            required=False,
+            default={},
+        ),
+        SoftPoint(
+            name="verification_bindings",
+            kind="task_state",
+            description="Soft bindings forwarded to change_verification",
             required=False,
             default={},
         ),
@@ -120,6 +131,12 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             description="Optional execution apply_payload soft point",
             required=False,
         ),
+        SoftPoint(
+            name="verify_payload",
+            kind="task_state",
+            description="Optional verification verify_payload soft point",
+            required=False,
+        ),
     )
 
     def build(self, params: GraphTemplateParams) -> ExecutionGraph:
@@ -139,6 +156,8 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             seed_put["in.file_revisions"] = inputs["file_revisions"]
         if "approved_slice" in inputs:
             seed_put["in.approved_slice"] = inputs["approved_slice"]
+        if "verify_runs" in inputs:
+            seed_put["in.verify_runs"] = inputs["verify_runs"]
         graph.add_node(
             make_node(
                 id="seed",
@@ -207,10 +226,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         graph.add_node(contract_embed)
 
         plan_soft = dict(bindings.get("plan_bindings") or {})
-        if (
-            "plan_propose_payload" in bindings
-            and "propose_payload" not in plan_soft
-        ):
+        if "plan_propose_payload" in bindings and "propose_payload" not in plan_soft:
             plan_soft["propose_payload"] = bindings["plan_propose_payload"]
         _plan_child, plan_embed = ChangeDecompositionTemplate().tile(
             GraphTemplateParams(
@@ -265,11 +281,61 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         }
         graph.add_node(exec_embed)
 
+        verification_soft = dict(bindings.get("verification_bindings") or {})
+        if "verify_payload" in bindings and "verify_payload" not in verification_soft:
+            verification_soft["verify_payload"] = bindings["verify_payload"]
+        _verify_child, verify_embed = ChangeVerificationTemplate().tile(
+            GraphTemplateParams(
+                goal=f"{goal}:verify",
+                instance_key="verify",
+                inputs={"goal": seed_put.get("in.goal", goal)},
+                soft_bindings=verification_soft,
+            ),
+            parent_node_id="verify_tile",
+        )
+        del _verify_child
+        verify_embed.depends_on = ["execute_tile"]
+        verify_embed.payload = {
+            **dict(verify_embed.payload or {}),
+            "bag_inputs": {
+                "in.goal": "in.goal",
+                "in.change_execution": "acc.stages.changes",
+                "in.change_contract": "acc.stages.contract",
+                "in.workspace": "in.workspace",
+                "in.verify_runs": "in.verify_runs",
+            },
+            "bag_outputs": {
+                "acc.stages.verification": "out.verification_report",
+            },
+        }
+        graph.add_node(verify_embed)
+
         graph.add_node(
             make_node(
                 id="publish",
                 kind="bag_project",
-                depends_on=["execute_tile"],
+                depends_on=["verify_tile"],
+                payload={
+                    "reads": {"source": "acc.stages.verification"},
+                    "writes": {"destination": "out.verification_report"},
+                    "parameters": {
+                        "fields": [
+                            "version",
+                            "status",
+                            "verify_runs",
+                            "failures",
+                            "regression",
+                            "provenance",
+                        ]
+                    },
+                },
+            )
+        )
+        graph.add_node(
+            make_node(
+                id="publish_execution",
+                kind="bag_project",
+                depends_on=["publish"],
                 payload={
                     "reads": {"source": "acc.stages.changes"},
                     "writes": {"destination": "out.change_execution"},
@@ -294,7 +360,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             make_node(
                 id="publish_plan",
                 kind="bag_project",
-                depends_on=["publish"],
+                depends_on=["publish_execution"],
                 payload={
                     "reads": {"source": "acc.stages.plan"},
                     "writes": {"destination": "out.change_plan"},
@@ -365,8 +431,10 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             ("discovery_tile", "contract_tile"),
             ("contract_tile", "plan_tile"),
             ("plan_tile", "execute_tile"),
-            ("execute_tile", "publish"),
-            ("publish", "publish_plan"),
+            ("execute_tile", "verify_tile"),
+            ("verify_tile", "publish"),
+            ("publish", "publish_execution"),
+            ("publish_execution", "publish_plan"),
             ("publish_plan", "publish_contract"),
             ("publish_contract", "publish_inventory"),
         ):

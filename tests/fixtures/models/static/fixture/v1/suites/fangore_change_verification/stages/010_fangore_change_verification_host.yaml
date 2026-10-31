@@ -1,0 +1,140 @@
+id: fangore_change_verification_host
+suite: fangore_change_verification
+persona: fangore
+title: Host-observe verify_runs and immutable invariants after a change
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a calculator
+  workspace that already contains a multiply helper, walks change_verification against a ChangeExecution
+  and ChangeContract, and verifies `out.verification_report` is host-observed green with preserved
+  parser invariants.
+implementation: '`verification_constrain` / `verification_run` / `verification_publish` /
+  `verification_validate` in `verification_hard_nodes`; Agentic Recipe `change_verification`.'
+validation: Suite stage `010_fangore_change_verification_host` — status ok, empty failures, invariants
+  checked.
+footnotes:
+- id: gastronomic-m6-verification-host
+  label: Gastronomic M6 verification host
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Host-observed tests; old invariants remain green
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: ../assets/calc_verified/workspace.files.json
+graph:
+  inline:
+    goal: verify approved arithmetic slice
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: Verify multiply helper
+          in.workspace:
+            root: .
+          in.change_execution:
+            version: '1'
+            status: ok
+            slice_id: arithmetic
+            diff: '+def mul'
+            changed_files:
+            - path: src/calc/arithmetic.py
+          in.change_contract:
+            version: '1'
+            status: ok
+            verification:
+            - path: src/calc/arithmetic.py
+              text_contains:
+              - def mul
+              python_parses: true
+            invariants:
+            - id: preserve:parser
+              path: src/calc/parser.py
+              immutable: true
+              sha256: 9adc70168a316352bd6c48d0f261d00c107aa1d14d140498975939b2e9ef7910
+    - id: constrain
+      kind: verification_constrain
+      depends_on:
+      - seed
+      payload:
+        reads:
+          contract: in.change_contract
+          execution: in.change_execution
+        writes:
+          destination: acc.verification.constraints
+    - id: run
+      kind: verification_run
+      depends_on:
+      - constrain
+      payload:
+        reads:
+          constraints: acc.verification.constraints
+          workspace: in.workspace
+        writes:
+          destination: acc.verification.run_receipt
+    - id: publish
+      kind: verification_publish
+      depends_on:
+      - run
+      payload:
+        reads:
+          constraints: acc.verification.constraints
+          receipt: acc.verification.run_receipt
+        writes:
+          destination: out.verification_report
+    - id: validate
+      kind: verification_validate
+      depends_on:
+      - publish
+      payload:
+        reads:
+          source: out.verification_report
+        writes:
+          destination: acc.verification.validation
+        parameters:
+          fail_if_invalid: true
+steps:
+- do:
+    graph_walk:
+      action: start
+      grants:
+      - core:graph.execute
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: node_statuses.seed
+    value: succeeded
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.out.verification_report.status
+    value: ok
+  - kind: equals
+    key: bag.out.verification_report.version
+    value: '1'
+  - kind: equals
+    key: bag.acc.verification.validation.ok
+    value: true
+  - kind: equals
+    key: bag.out.verification_report.failures
+    value: []
+  - kind: equals
+    key: bag.out.verification_report.regression.unchanged_invariants_ok
+    value: true
+complete:
+  expect:
+  - kind: equals
+    key: bag.out.verification_report.status
+    value: ok
+  - kind: equals
+    key: bag.out.verification_report.provenance.slice_id
+    value: arithmetic
+cleanup: []
