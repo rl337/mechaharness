@@ -1,0 +1,30 @@
+{
+  "id": "gastronomic_guided_development_defaults",
+  "description": "product recipe tiles discovery then contract",
+  "template": "gastronomic_guided_development",
+  "params": {
+    "goal": "Add multiplication safely",
+    "inputs": {
+      "goal": "Add multiplication safely",
+      "workspace": {"root": "."},
+      "constraints": {"read_only": true}
+    }
+  },
+  "expect": {
+    "template_name": "gastronomic_guided_development",
+    "template_status": "active",
+    "node_ids": [
+      "seed",
+      "discovery_tile",
+      "contract_tile",
+      "publish",
+      "publish_inventory"
+    ],
+    "edge_count": 4,
+    "nodes": {
+      "discovery_tile": {"kind": "subgraph"},
+      "contract_tile": {"kind": "subgraph"},
+      "publish": {"kind": "bag_project"}
+    }
+  }
+}

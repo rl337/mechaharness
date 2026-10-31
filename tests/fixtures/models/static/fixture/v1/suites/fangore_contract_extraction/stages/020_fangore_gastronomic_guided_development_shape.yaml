@@ -1,0 +1,46 @@
+id: fangore_gastronomic_guided_development_shape
+suite: fangore_contract_extraction
+persona: fangore
+title: Instantiate gastronomic_guided_development discovery→contract tiles
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `gastronomic_guided_development` and verifies discovery_tile and contract_tile subgraphs without
+  mutating guided_coding.
+implementation: Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`)
+  tiles `workspace_discovery` and `contract_extraction`.
+validation: Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name and tile node
+  ids.
+footnotes:
+- id: gastronomic-m6-product-shape
+  label: Gastronomic M6 product recipe
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Product recipe skeleton before mutating stages
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: gastronomic_guided_development
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/gastronomic_guided_development.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: gastronomic_guided_development
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - seed
+    - discovery_tile
+    - contract_tile
+    - publish
+    - publish_inventory
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: gastronomic_guided_development
+cleanup: []

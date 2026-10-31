@@ -129,6 +129,12 @@ Persona **fangore**; execution `parallel`; 6 stage(s).
 
 Stories: `fangore_context_compiler_deficit`, `fangore_context_observation_chain`, `fangore_derived_memory`, `fangore_insp_context_compaction`, `fangore_insp_context_layers`, `fangore_insp_context_provider`
 
+### `fangore_contract_extraction` — ChangeContract extraction and gastronomic product tiling
+
+Persona **fangore**; execution `parallel`; 3 stage(s).
+
+Stories: `fangore_contract_extraction_found`, `fangore_contract_extraction_shape`, `fangore_gastronomic_guided_development_shape`
+
 ### `fangore_decision_plane` — Decision plane policy, projection, and audited infer
 
 Persona **fangore**; execution `parallel`; 15 stage(s).
@@ -1006,6 +1012,38 @@ Covers: CTX-01, CTX-02, CTX-03, CTX-04.
 
 Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
+### `fangore_contract_extraction_found` — Freeze verified discovery invariants into a ChangeContract
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a found WorkspaceInventory, walks contract_extraction hard/infer nodes, and verifies `out.change_contract` keeps immutable preserve invariants while accepting additional proposed constraints.
+
+#### Implementation
+
+`invariant_freeze` / `contract_assemble` / `contract_validate` in `contract_hard_nodes`; Agentic Recipe `contract_extraction`.
+
+#### Validation
+
+Suite stage `010_fangore_contract_extraction_found` — status ok, immutable preserve id present once, validation ok.
+
+#### Footnotes
+
+1. [Gastronomic M6 contract found](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Immutable priors cannot be dropped by the model
+
+### `fangore_contract_extraction_shape` — Instantiate the contract_extraction Agentic Recipe
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `contract_extraction` and verifies freeze/propose/assemble/validate node ids.
+
+#### Implementation
+
+Agentic Recipe `contract_extraction` (`ContractExtractionTemplate`) via `instantiate_recipe`.
+
+#### Validation
+
+Suite stage `005_fangore_contract_extraction_shape` — template_name and node ids.
+
+#### Footnotes
+
+1. [Gastronomic M6 contract_extraction](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Contract freeze before mutating coding
+
 ### `fangore_convergence_ceiling` — Stop agent loops that make no progress
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`. Fangore’s repair loop keeps asking the same question and getting the same answer. A versioned ceiling must end as no-progress — never fake success — and nested repair must share parent budget. Graph repeating nodes additionally require an explicit stop contract at linkage (`fangore_graph_linkage_preflight`). See inspiration requirements for stop contracts[^insp-stop].
@@ -1306,6 +1344,22 @@ Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recip
 #### Footnotes
 
 [^rc-env-repair]: [Recipes requirements (first-wave catalog)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — environment_repair owning story
+
+### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→contract tiles
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile and contract_tile subgraphs without mutating guided_coding.
+
+#### Implementation
+
+Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery` and `contract_extraction`.
+
+#### Validation
+
+Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name and tile node ids.
+
+#### Footnotes
+
+1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe skeleton before mutating stages
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 

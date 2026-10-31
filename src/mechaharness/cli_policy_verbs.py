@@ -1298,6 +1298,10 @@ class GraphWalkVerb(CliVerb):
             # Subgraph kind is handled by the executor; still register leaf kinds.
             from pyiv.files import RealFilesystem
 
+            from mechaharness.contract_hard_nodes import (
+                CONTRACT_HARD_KINDS,
+                ContractHardNodeRunner,
+            )
             from mechaharness.discovery_hard_nodes import (
                 DISCOVERY_HARD_KINDS,
                 DiscoveryHardNodeRunner,
@@ -1305,11 +1309,14 @@ class GraphWalkVerb(CliVerb):
 
             infer_kind_set = set(DEFAULT_INFER_KINDS)
             judge_kind_set = set(DEFAULT_JUDGE_KINDS)
-            hard_kind_set = set(DISCOVERY_HARD_KINDS)
+            discovery_kind_set = set(DISCOVERY_HARD_KINDS)
+            contract_kind_set = set(CONTRACT_HARD_KINDS)
+            hard_kind_set = discovery_kind_set | contract_kind_set
             special_kinds = infer_kind_set | judge_kind_set | hard_kind_set
             leaf_kinds = [k for k in kinds if k != "subgraph"]
             compute_kinds = [k for k in leaf_kinds if k not in special_kinds]
-            hard_kinds = [k for k in leaf_kinds if k in hard_kind_set]
+            discovery_kinds = [k for k in leaf_kinds if k in discovery_kind_set]
+            contract_kinds = [k for k in leaf_kinds if k in contract_kind_set]
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
             needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
@@ -1318,21 +1325,25 @@ class GraphWalkVerb(CliVerb):
             infer_runner: CliInferRunner | None = None
             judge_runner: CliJudgeRunner | None = None
             runners: list[Any] = []
-            if compute_kinds or not (needs_infer or needs_judge or hard_kinds):
+            if compute_kinds or not (
+                needs_infer or needs_judge or discovery_kinds or contract_kinds
+            ):
                 runners.append(
                     CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
                 )
-            if hard_kinds:
+            if discovery_kinds:
                 host_fs = getattr(runtime, "filesystem", None)
                 runners.append(
                     DiscoveryHardNodeRunner(
-                        hard_kinds,
+                        discovery_kinds,
                         filesystem=host_fs
                         if host_fs is not None
                         else RealFilesystem(),
                         default_workspace=getattr(runtime, "workspace_root", None),
                     )
                 )
+            if contract_kinds:
+                runners.append(ContractHardNodeRunner(contract_kinds))
 
             # Bind Completer / EventLog first so runners are in the registry
             # snapshot when Config.configure registers GraphNodeRunnerRegistry.

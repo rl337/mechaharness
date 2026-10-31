@@ -1,0 +1,169 @@
+id: fangore_contract_extraction_found
+suite: fangore_contract_extraction
+persona: fangore
+title: Freeze verified discovery invariants into a ChangeContract
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a found
+  WorkspaceInventory, walks contract_extraction hard/infer nodes, and verifies `out.change_contract` keeps
+  immutable preserve invariants while accepting additional proposed constraints.
+implementation: '`invariant_freeze` / `contract_assemble` / `contract_validate` in `contract_hard_nodes`;
+  Agentic Recipe `contract_extraction`.'
+validation: Suite stage `010_fangore_contract_extraction_found` — status ok, immutable preserve id present
+  once, validation ok.
+footnotes:
+- id: gastronomic-m6-contract-found
+  label: Gastronomic M6 contract found
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Immutable priors cannot be dropped by the model
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: freeze change contract
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: Add multiplication while preserving division handling
+          in.workspace_inventory:
+            status: found
+            objective: Find division-by-zero handling
+            workspace_revision: fixture-rev
+            relevant_files:
+            - path: src/calc/arithmetic.py
+              sha256: abc123
+              evidence_id: verified:src/calc/arithmetic.py
+              start_line: 9
+              end_line: 11
+            - path: src/calc/cli.py
+              sha256: def456
+              evidence_id: verified:src/calc/cli.py
+            tests:
+            - path: tests/test_arithmetic.py
+              sha256: ghi789
+              evidence_id: verified:tests/test_arithmetic.py
+            unknowns: []
+            coverage:
+              status: sufficient
+              file_count: 9
+              truncated: false
+            rejected_claims: []
+          ctx.noise:
+            secret: omit
+    - id: freeze
+      kind: invariant_freeze
+      depends_on:
+      - seed
+      payload:
+        reads:
+          inventory: in.workspace_inventory
+          goal: in.goal
+        writes:
+          destination: acc.contract.frozen
+    - id: propose
+      kind: infer
+      depends_on:
+      - freeze
+      payload:
+        soft_point: propose_payload
+        completion:
+          requested_behavior: Add multiplication without breaking division-by-zero handling
+          invariants:
+          - id: preserve:src/calc/arithmetic.py
+            description: model overwrite attempt
+          - id: keep_parser
+            description: Parser API remains
+          prohibited_changes:
+          - eval()
+          - exec()
+          verification:
+          - pytest: true
+            path: tests/test_arithmetic.py
+          assumptions:
+          - division semantics stay identical
+          unknowns: []
+        context:
+          version: '1'
+          system: Propose ChangeContract semantics as JSON only.
+          reads:
+          - path: in.goal
+            required: true
+          - path: in.workspace_inventory
+            required: true
+          - path: acc.contract.frozen
+            required: true
+          response:
+            writes: acc.contract.proposed
+            parse: json
+    - id: assemble
+      kind: contract_assemble
+      depends_on:
+      - propose
+      payload:
+        reads:
+          goal: in.goal
+          inventory: in.workspace_inventory
+          proposed: acc.contract.proposed
+          frozen: acc.contract.frozen
+        writes:
+          destination: out.change_contract
+    - id: validate
+      kind: contract_validate
+      depends_on:
+      - assemble
+      payload:
+        reads:
+          source: out.change_contract
+        writes:
+          destination: acc.contract.validation
+        parameters:
+          fail_if_invalid: true
+steps:
+- do:
+    graph_walk:
+      action: start
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: node_statuses.seed
+    value: succeeded
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.out.change_contract.status
+    value: ok
+  - kind: equals
+    key: bag.out.change_contract.version
+    value: '1'
+  - kind: equals
+    key: bag.acc.contract.validation.ok
+    value: true
+  - kind: contains
+    key: bag.out.change_contract.invariants[0].id
+    value: preserve:src/calc/arithmetic.py
+  - kind: includes
+    key: model_inputs.propose.included_paths
+    value:
+    - in.goal
+    - in.workspace_inventory
+    - acc.contract.frozen
+complete:
+  expect:
+  - kind: equals
+    key: bag.out.change_contract.status
+    value: ok
+  - kind: contains
+    key: bag.out.change_contract.prohibited_changes[0]
+    value: eval()
+cleanup: []

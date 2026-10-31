@@ -1,0 +1,27 @@
+{
+  "id": "fangore_contract_extraction",
+  "title": "ChangeContract extraction and gastronomic product tiling",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_contract_extraction_shape",
+      "scenario": "005_fangore_contract_extraction_shape"
+    },
+    {
+      "story": "fangore_contract_extraction_found",
+      "scenario": "010_fangore_contract_extraction_found"
+    },
+    {
+      "story": "fangore_gastronomic_guided_development_shape",
+      "scenario": "020_fangore_gastronomic_guided_development_shape"
+    }
+  ]
+}

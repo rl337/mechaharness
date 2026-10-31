@@ -1,0 +1,20 @@
+# ChangeContract extraction shape bind.
+name: contract_extraction
+summary: Instantiate contract_extraction with a found inventory seed.
+goal: Add multiplication while preserving division handling
+inputs:
+  goal: Add multiplication while preserving division handling
+  workspace_inventory:
+    status: found
+    workspace_revision: fixture
+    relevant_files:
+      - path: src/calc/arithmetic.py
+        sha256: abc
+        evidence_id: verified:src/calc/arithmetic.py
+    tests:
+      - path: tests/test_arithmetic.py
+        sha256: def
+        evidence_id: verified:tests/test_arithmetic.py
+    unknowns: []
+    coverage:
+      status: sufficient
