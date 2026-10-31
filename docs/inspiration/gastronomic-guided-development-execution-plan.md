@@ -1,7 +1,7 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0–M6.2 on main; M6 increment 3 (`change_execution` + product
-execute tile) in progress.
+**Status:** M0–M6.3 on main; M6 increment 4 (`change_verification` + product
+verify tile) in progress.
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.

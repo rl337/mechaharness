@@ -1,0 +1,14 @@
+name: change_verification
+summary: Instantiate change_verification for host-observed checks.
+goal: Verify multiply helper
+inputs:
+  goal: Verify multiply helper
+  change_execution:
+    version: '1'
+    status: ok
+    slice_id: arithmetic
+  change_contract:
+    version: '1'
+    status: ok
+  workspace:
+    root: .
