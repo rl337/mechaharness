@@ -195,6 +195,12 @@ Persona **fangore**; execution `parallel`; 6 stage(s).
 
 Stories: `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_after_accept_recorded`, `fangore_tdr_crash_after_final_commit`, `fangore_tdr_crash_after_intent_before_call`, `fangore_tdr_crash_after_reduce_before_checkpoint`, `fangore_tdr_crash_before_intent`
 
+### `fangore_workspace_discovery` — Read-only workspace_discovery Agentic Recipe outcomes
+
+Persona **fangore**; execution `parallel`; 8 stage(s).
+
+Stories: `fangore_workspace_discovery_checkpoint`, `fangore_workspace_discovery_continuity`, `fangore_workspace_discovery_failed`, `fangore_workspace_discovery_found`, `fangore_workspace_discovery_inconclusive`, `fangore_workspace_discovery_negative_control`, `fangore_workspace_discovery_not_found`, `fangore_workspace_discovery_snapshot_tools`
+
 ### `nubble_observability` — Cost, trace, and audit observability
 
 Persona **nubble**; execution `parallel`; 13 stage(s).
@@ -3176,6 +3182,134 @@ Harness `user_story` scenario `verify_repair_recipe.yaml` drives `run_recipe`; e
 
 [^rc-verify-repair]: [Recipes requirements (verify_repair)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — verify_repair tiling story
 [^insp-pa-03-verify]: [Personal agent reliability map (MH-PA-03 verify_repair)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Named recipe contract with budgets and outcomes
+
+### `fangore_workspace_discovery_checkpoint` — Resume workspace discovery after pausing past hypotheses
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks discovery until after `search`, asserts hypotheses and matches are on the bag, then continues. Downstream interpret/publish must see the same checkpointed bag values.
+
+#### Implementation
+
+graph_walk start until/stop + continue; WalkBag checkpoint hydration.
+
+#### Validation
+
+Suite stage `050_fangore_workspace_discovery_checkpoint` — pause retains hypotheses/matches; resume publishes found.
+
+#### Footnotes
+
+1. [Gastronomic M5](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Checkpoint/resume continuity
+
+### `fangore_workspace_discovery_continuity` — Interpret ContextSpec sees hypotheses and matches, not bag noise
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds unrelated `ctx.noise`, runs discovery, and verifies the interpret Completer request includes goal/hypotheses/matches while omitting the noise register.
+
+#### Implementation
+
+ContextSpec reads on interpret; `graph_walk` surfaces `model_inputs`.
+
+#### Validation
+
+Suite stage `060_fangore_workspace_discovery_continuity` — model_inputs.interpret includes declared paths only.
+
+#### Footnotes
+
+1. [Gastronomic M5](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — I2 must see I1+H2 evidence
+
+### `fangore_workspace_discovery_failed` — Publish failed when discovery preflight rejects malformed inputs
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds an empty goal so `discovery_preflight` records `ok: false` without aborting the walk, then `inventory_publish` must emit typed `failed` status.
+
+#### Implementation
+
+`run_discovery_preflight` + `publish_workspace_inventory` failed branch.
+
+#### Validation
+
+Suite stage `040_fangore_workspace_discovery_failed` — inventory status `failed`.
+
+#### Footnotes
+
+1. [Gastronomic M5](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Fatal input errors are typed failed
+
+### `fangore_workspace_discovery_found` — Discover calculator division-by-zero evidence as found
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a read-only calculator workspace and objective only (no file paths), then walks the `workspace_discovery` graph: preflight, manifest, hypotheses inference, search/extract, interpret inference, evidence resolve, coverage, and inventory publish. Verified arithmetic/CLI/test spans must publish `out.workspace_inventory.status=found` without mutating workspace files.
+
+#### Implementation
+
+Agentic Recipe `workspace_discovery` (`WorkspaceDiscoveryTemplate`); `DiscoveryHardNodeRunner` kinds `discovery_preflight` / `inventory_publish` plus P0 hard nodes; bag-aware `CliInferRunner` for hypotheses/interpret soft points.
+
+#### Validation
+
+Suite stage `010_fangore_workspace_discovery_found` — inventory status `found`, relevant_files include arithmetic/cli/test paths, coverage sufficient.
+
+#### Footnotes
+
+1. [Gastronomic guided-development M5 (workspace_discovery)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Read-only discovery publishes typed WorkspaceInventory
+
+### `fangore_workspace_discovery_inconclusive` — Publish inconclusive when the file budget truncates the manifest
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs workspace discovery with `max_files: 1` so the manifest truncates. Even if interpret proposes a path, coverage must be inconclusive and the inventory must not claim a confident `found`.
+
+#### Implementation
+
+`coverage_measure` marks truncated manifests; `publish_workspace_inventory` maps that to `inconclusive`.
+
+#### Validation
+
+Suite stage `030_fangore_workspace_discovery_inconclusive` — inventory status `inconclusive`.
+
+#### Footnotes
+
+1. [Gastronomic M5](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Insufficient coverage is inconclusive
+
+### `fangore_workspace_discovery_negative_control` — Fail when interpret ContextSpec omits required prior evidence
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He deliberately configures interpret to require `acc.discovery.missing_required`. The walk must fail at interpret so the request-contract validator is proven — this stage passes by observing the expected failure.
+
+#### Implementation
+
+ContextSpec required-read validation in CliInferRunner / compile_context_spec.
+
+#### Validation
+
+Suite stage `080_fangore_workspace_discovery_negative_control` — status not ok; interpret failed.
+
+#### Footnotes
+
+1. [Gastronomic M5](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Negative control for missing prior context
+
+### `fangore_workspace_discovery_not_found` — Publish not_found after adequate coverage of an absent feature
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He asks discovery for a deliberately absent feature under a full file budget. After hypotheses/search yield no verified refs and coverage is sufficient, inventory publish must report `not_found` rather than inventing evidence.
+
+#### Implementation
+
+`publish_workspace_inventory` returns `not_found` only when verified is empty and coverage status is `sufficient`; Agentic Recipe `workspace_discovery`.
+
+#### Validation
+
+Suite stage `020_fangore_workspace_discovery_not_found` — status `not_found`, empty relevant_files.
+
+#### Footnotes
+
+1. [Gastronomic M5](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Well-supported negative discovery
+
+### `fangore_workspace_discovery_snapshot_tools` — Interpret may inspect the frozen discovery snapshot only
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. On the interpret soft point he permits snapshot inspection of matches and hypotheses, denies ctx.secret, and still publishes verified found inventory.
+
+#### Implementation
+
+SnapshotInspectionToolkit on CliInferRunner interpret node within workspace_discovery walk.
+
+#### Validation
+
+Suite stage `070_fangore_workspace_discovery_snapshot_tools` — inspection flags + found inventory.
+
+#### Footnotes
+
+1. [Gastronomic M5](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Bounded snapshot tools on I2
 
 ## Taloneth's stories
 
