@@ -1,0 +1,11 @@
+{
+  "pyproject.toml": "[project]\nname = \"calc\"\nversion = \"0.1.0\"\n",
+  "src/calc/__init__.py": "\"\"\"Tiny calculator package.\"\"\"\n",
+  "src/calc/parser.py": "\"\"\"Expression tokenizer (stub for discovery fixture).\"\"\"\n\n\ndef tokenize(expr: str) -> list[str]:\n    return expr.split()\n",
+  "src/calc/formatting.py": "\"\"\"Output formatting helpers.\"\"\"\n\n\ndef format_number(value: float) -> str:\n    return f\"{value:g}\"\n",
+  "src/calc/arithmetic.py": "\"\"\"Arithmetic helpers for the calculator.\"\"\"\n\n\ndef add(a: float, b: float) -> float:\n    return a + b\n\n\ndef div(a: float, b: float) -> float:\n    if b == 0:\n        raise ZeroDivisionError(\"division by zero\")\n    return a / b\n",
+  "src/calc/cli.py": "\"\"\"CLI entry for the calculator.\"\"\"\nfrom __future__ import annotations\n\nimport sys\n\nfrom calc.arithmetic import div\n\n\ndef main(argv: list[str] | None = None) -> int:\n    args = list(sys.argv[1:] if argv is None else argv)\n    if len(args) != 2:\n        print(\"usage: calc <a> <b>\", file=sys.stderr)\n        return 2\n    try:\n        print(div(float(args[0]), float(args[1])))\n        return 0\n    except ZeroDivisionError:\n        print(\"error: division by zero\", file=sys.stderr)\n        return 1\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n",
+  "tests/test_arithmetic.py": "import pytest\n\nfrom calc.arithmetic import div\n\n\ndef test_div_by_zero() -> None:\n    with pytest.raises(ZeroDivisionError):\n        div(1, 0)\n",
+  "tests/test_cli.py": "from calc.cli import main\n\n\ndef test_cli_div_by_zero(capsys) -> None:\n    assert main([\"1\", \"0\"]) == 1\n    assert \"division by zero\" in capsys.readouterr().err\n",
+  "tests/test_parser.py": "from calc.parser import tokenize\n\n\ndef test_tokenize_splits() -> None:\n    assert tokenize(\"1 2\") == [\"1\", \"2\"]\n"
+}

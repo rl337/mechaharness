@@ -1,8 +1,8 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0–M3 on main; M4 green on `feat/bag-discovery-hard-nodes-m4`
-(`DiscoveryHardNodeRunner` P0 + stage `060_fangore_bag_discovery_hard_nodes`).
-M5 (`workspace_discovery` recipe) still open.
+**Status:** M0–M4 on main; M5 (`workspace_discovery` recipe +
+`fangore_workspace_discovery` suite) in progress on
+`feat/workspace-discovery-m5`.
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.

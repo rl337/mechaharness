@@ -113,6 +113,7 @@ Pattern stories **must** name the recipe catalog id.
 | `guided_coding` | shipped | `fangore_guided_coding_recipe` |
 | `instruction_todo_plan` | shipped | `fangore_instruction_todo_plan` |
 | `audited_infer_accept` | shipped | `fangore_audited_infer_accept` |
+| `workspace_discovery` | shipped | `fangore_workspace_discovery_*` |
 | *(composition)* | `instance_key` / `tile` | `fangore_recipe_namespace_tile` |
 
 ## Anti-patterns

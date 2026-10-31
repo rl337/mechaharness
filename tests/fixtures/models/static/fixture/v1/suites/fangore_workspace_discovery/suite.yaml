@@ -1,0 +1,9 @@
+id: fangore_workspace_discovery
+title: Read-only workspace_discovery Agentic Recipe outcomes
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

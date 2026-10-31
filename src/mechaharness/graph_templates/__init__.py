@@ -66,6 +66,7 @@ from mechaharness.graph_templates.produce_critique_refine import (
 )
 from mechaharness.graph_templates.safety_eval import SafetyEvalTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
+from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 
 __all__ = [
     "AuditedInferAcceptTemplate",
@@ -90,6 +91,7 @@ __all__ = [
     "SoftPoint",
     "SubgraphNodeRunner",
     "VerifyRepairTemplate",
+    "WorkspaceDiscoveryTemplate",
     "append_audited_infer_accept",
     "default_graph_template_classes",
     "default_graph_templates",
