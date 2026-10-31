@@ -1,8 +1,7 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0–M5 on main; M6 increment 1 (`contract_extraction` +
-`gastronomic_guided_development` discovery→contract skeleton) in progress on
-`feat/gastronomic-contract-m6`.
+**Status:** M0–M6.1 on main; M6 increment 2 (`change_decomposition` + product
+plan tile) in progress.
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.

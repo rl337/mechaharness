@@ -1,8 +1,8 @@
 # Template: gastronomic_guided_development
 
-Product-level Agentic Recipe skeleton for gastronomic guided development.
-Increment 1 tiles read-only discovery then contract extraction. Mutating
-coding stages are deferred. `guided_coding` remains the baseline control.
+Product composition for gastronomic guided development. Read-only discovery,
+contract freeze, and plan decomposition are tiled; mutating coding stages are
+deferred. `guided_coding` remains the baseline control.
 
 | Item | Value |
 |------|-------|
@@ -14,13 +14,12 @@ coding stages are deferred. `guided_coding` remains the baseline control.
 ## Topology
 
 ```text
-seed → discovery_tile (workspace_discovery)
+seed
+  → discovery_tile (workspace_discovery)
   → contract_tile (contract_extraction)
-  → publish / publish_inventory
+  → plan_tile (change_decomposition)
+  → publish / publish_contract / publish_inventory
 ```
-
-Child bags use explicit `bag_inputs` / `bag_outputs` so discovery inventory
-lands on `acc.stages.discovery` and the contract on `acc.stages.contract`.
 
 ## Soft points
 
@@ -28,14 +27,19 @@ lands on `acc.stages.discovery` and the contract on `acc.stages.contract`.
 |------|------|-------|
 | `discovery_bindings` | task_state | Forwarded to `workspace_discovery` |
 | `contract_bindings` | task_state | Forwarded to `contract_extraction` |
-| `hypotheses_payload` / `interpret_payload` / `propose_payload` | task_state | Optional passthrough soft points |
+| `plan_bindings` | task_state | Forwarded to `change_decomposition` |
+| `hypotheses_payload` | task_state | Optional discovery soft point |
+| `interpret_payload` | task_state | Optional discovery soft point |
+| `propose_payload` | task_state | Optional contract soft point |
+| `plan_propose_payload` | task_state | Optional plan soft point |
 
 ## Node components
 
 | Graph node | Components |
 |------------|------------|
-| `discovery_tile` / `contract_tile` | `child_graph` |
-| soft points | `soft_point` on seed / tiles as derived |
+| `discovery_tile` | `child_graph` |
+| `contract_tile` | `child_graph` |
+| `plan_tile` | `child_graph` |
 
 ## Stories
 

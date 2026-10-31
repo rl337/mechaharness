@@ -1,0 +1,9 @@
+id: fangore_change_decomposition
+title: ChangePlan decomposition and gastronomic plan tiling
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

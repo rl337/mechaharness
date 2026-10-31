@@ -11,6 +11,9 @@ from mechaharness.graph_templates.audited_infer_accept import AuditedInferAccept
 from mechaharness.graph_templates.backend_describe import BackendDescribeTemplate
 from mechaharness.graph_templates.base import GraphTemplate, GraphTemplateRegistry
 from mechaharness.graph_templates.bounded_retry import BoundedRetryTemplate
+from mechaharness.graph_templates.change_decomposition import (
+    ChangeDecompositionTemplate,
+)
 from mechaharness.graph_templates.context_pack import ContextPackTemplate
 from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
 from mechaharness.graph_templates.conversational_tool_loop import (
@@ -44,6 +47,7 @@ def default_graph_template_classes() -> dict[str, type[GraphTemplate]]:
         VerifyRepairTemplate.name: VerifyRepairTemplate,
         WorkspaceDiscoveryTemplate.name: WorkspaceDiscoveryTemplate,
         ContractExtractionTemplate.name: ContractExtractionTemplate,
+        ChangeDecompositionTemplate.name: ChangeDecompositionTemplate,
         GastronomicGuidedDevelopmentTemplate.name: GastronomicGuidedDevelopmentTemplate,
         IndependentReviewTemplate.name: IndependentReviewTemplate,
         EnvironmentRepairTemplate.name: EnvironmentRepairTemplate,

@@ -1,12 +1,12 @@
 id: fangore_gastronomic_guided_development_shape
 suite: fangore_contract_extraction
 persona: fangore
-title: Instantiate gastronomic_guided_development discovery→contract tiles
+title: Instantiate gastronomic_guided_development discovery→contract→plan tiles
 narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
-  Recipe `gastronomic_guided_development` and verifies discovery_tile and contract_tile subgraphs without
-  mutating guided_coding.
+  Recipe `gastronomic_guided_development` and verifies discovery_tile, contract_tile, and plan_tile
+  subgraphs without mutating guided_coding.
 implementation: Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`)
-  tiles `workspace_discovery` and `contract_extraction`.
+  tiles `workspace_discovery`, `contract_extraction`, and `change_decomposition`.
 validation: Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name and tile node
   ids.
 footnotes:
@@ -36,7 +36,9 @@ steps:
     - seed
     - discovery_tile
     - contract_tile
+    - plan_tile
     - publish
+    - publish_contract
     - publish_inventory
 complete:
   expect:

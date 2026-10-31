@@ -1,5 +1,5 @@
 name: gastronomic_guided_development
-summary: Instantiate product recipe tiling discovery then contract.
+summary: Instantiate product recipe tiling discovery, contract, then plan.
 goal: Add multiplication safely
 inputs:
   goal: Add multiplication safely
