@@ -1,0 +1,23 @@
+{
+  "id": "fangore_change_decomposition",
+  "title": "ChangePlan decomposition and gastronomic plan tiling",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_change_decomposition_shape",
+      "scenario": "005_fangore_change_decomposition_shape"
+    },
+    {
+      "story": "fangore_change_decomposition_ordered",
+      "scenario": "010_fangore_change_decomposition_ordered"
+    }
+  ]
+}

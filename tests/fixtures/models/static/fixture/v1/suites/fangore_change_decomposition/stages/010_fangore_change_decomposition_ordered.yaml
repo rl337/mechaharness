@@ -1,0 +1,180 @@
+id: fangore_change_decomposition_ordered
+suite: fangore_change_decomposition
+persona: fangore
+title: Order ChangePlan slices from a ChangeContract with dependency checks
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds an ok
+  ChangeContract, walks change_decomposition hard/infer nodes, and verifies `out.change_plan` orders
+  slices by depends_on while inheriting contract verification onto slices that omit checks.
+implementation: '`plan_constrain` / `plan_assemble` / `plan_validate` in `plan_hard_nodes`; Agentic
+  Recipe `change_decomposition`.'
+validation: Suite stage `010_fangore_change_decomposition_ordered` — status ok, arithmetic before
+  parser, validation ok.
+footnotes:
+- id: gastronomic-m6-plan-ordered
+  label: Gastronomic M6 plan ordered
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Each slice has scope, checks, rollback, dependency order
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: decompose change plan
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: Add multiplication while preserving division handling
+          in.change_contract:
+            version: '1'
+            status: ok
+            objective: Add multiplication while preserving division handling
+            requested_behavior: Support * operator
+            invariants:
+            - id: preserve:src/calc/arithmetic.py
+              description: Preserve verified arithmetic evidence
+              immutable: true
+            prohibited_changes:
+            - eval()
+            verification:
+            - pytest: true
+              path: tests/test_arithmetic.py
+            provenance:
+              relevant_paths:
+              - src/calc/arithmetic.py
+              - src/calc/parser.py
+          in.workspace_inventory:
+            status: found
+            relevant_files:
+            - path: src/calc/arithmetic.py
+              sha256: abc
+            - path: src/calc/parser.py
+              sha256: def
+          ctx.noise:
+            secret: omit
+    - id: constrain
+      kind: plan_constrain
+      depends_on:
+      - seed
+      payload:
+        reads:
+          contract: in.change_contract
+        writes:
+          destination: acc.plan.constraints
+    - id: propose
+      kind: infer
+      depends_on:
+      - constrain
+      payload:
+        soft_point: propose_payload
+        completion:
+          slices:
+          - id: parser
+            title: Extend parser for multiplication
+            scope:
+              paths:
+              - src/calc/parser.py
+            checks:
+            - pytest: true
+              path: tests/test_parser.py
+            rollback: revert parser.py
+            depends_on:
+            - arithmetic
+          - id: arithmetic
+            title: Add multiply helper
+            scope:
+              paths:
+              - src/calc/arithmetic.py
+            rollback: revert arithmetic.py
+            depends_on: []
+        context:
+          version: '1'
+          system: Propose a ChangePlan as JSON only.
+          reads:
+          - path: in.goal
+            required: true
+          - path: in.change_contract
+            required: true
+          - path: acc.plan.constraints
+            required: true
+          response:
+            writes: acc.plan.proposed
+            parse: json
+    - id: assemble
+      kind: plan_assemble
+      depends_on:
+      - propose
+      payload:
+        reads:
+          contract: in.change_contract
+          proposed: acc.plan.proposed
+          constraints: acc.plan.constraints
+          inventory: in.workspace_inventory
+        writes:
+          destination: out.change_plan
+    - id: validate
+      kind: plan_validate
+      depends_on:
+      - assemble
+      payload:
+        reads:
+          source: out.change_plan
+        writes:
+          destination: acc.plan.validation
+        parameters:
+          fail_if_invalid: true
+steps:
+- do:
+    graph_walk:
+      action: start
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: node_statuses.seed
+    value: succeeded
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.out.change_plan.status
+    value: ok
+  - kind: equals
+    key: bag.out.change_plan.version
+    value: '1'
+  - kind: equals
+    key: bag.acc.plan.validation.ok
+    value: true
+  - kind: equals
+    key: bag.out.change_plan.slices[0].id
+    value: arithmetic
+  - kind: equals
+    key: bag.out.change_plan.slices[1].id
+    value: parser
+  - kind: includes
+    key: model_inputs.propose.included_paths
+    value:
+    - in.goal
+    - in.change_contract
+    - acc.plan.constraints
+complete:
+  expect:
+  - kind: equals
+    key: bag.out.change_plan.status
+    value: ok
+  - kind: equals
+    key: bag.out.change_plan.slices[0].order
+    value: 0
+  - kind: contains
+    key: bag.out.change_plan.constraints.invariant_ids[0]
+    value: preserve:src/calc/arithmetic.py
+cleanup: []
