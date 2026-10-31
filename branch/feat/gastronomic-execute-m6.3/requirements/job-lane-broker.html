@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job lanes and JobLaneBroker (JL-*) &mdash; MechaHarness 0.11.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f3b36f1a"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Job lanes and JobLaneBroker (JL-*)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/job-lane-broker.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="job-lanes-and-joblanebroker-jl">
+<h1>Job lanes and JobLaneBroker (JL-*)<a class="headerlink" href="#job-lanes-and-joblanebroker-jl" title="Link to this heading"></a></h1>
+<p>Normative product direction for <strong>lane-scoped run data</strong>, observability, and
+cross-lane authorization. Replaces the interim “cross-task isolation guard”
+framing (MH-DOTS-07) with an intrinsic broker: isolation is not a special
+CLI verb — every cross-run / cross-lane read goes through the broker.</p>
+<p><strong>Status:</strong> implemented (types, Config DI, CLI verbs, JL story matrix). Inspiration
+map MH-DOTS-07 remains the provenance link.</p>
+<section id="vocabulary">
+<h2>Vocabulary<a class="headerlink" href="#vocabulary" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Term</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>JobLane</strong></p></td>
+<td><p>Named pipeline identity (<code class="docutils literal notranslate"><span class="pre">assets.generate</span></code>, <code class="docutils literal notranslate"><span class="pre">billing.settle</span></code>). Not a schedule — cron, commit hook, and manual triggers all append to the same lane.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Run sequence</strong></p></td>
+<td><p>Ordered history of runs for one lane.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Run</strong></p></td>
+<td><p>One execution: <code class="docutils literal notranslate"><span class="pre">run_id</span></code>, timestamps, optional trigger metadata, WalkBag.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>JobLaneBroker</strong></p></td>
+<td><p>Config DI injectable that owns per-lane sequences, bags, exposure policy, inter-lane grants, and <code class="docutils literal notranslate"><span class="pre">observe</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Exposure policy</strong></p></td>
+<td><p>Per-lane rules for <code class="docutils literal notranslate"><span class="pre">meta</span></code> and bag keys: <code class="docutils literal notranslate"><span class="pre">open</span></code>, <code class="docutils literal notranslate"><span class="pre">deny_all</span></code>, or <code class="docutils literal notranslate"><span class="pre">allow_lanes{…}</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Lane grant</strong></p></td>
+<td><p>Standing permission for caller lane(s) to observe named keys/meta.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Handoff</strong></p></td>
+<td><p>Narrow one-shot share (<code class="docutils literal notranslate"><span class="pre">HandoffRecord</span></code>) of named refs — complements standing grants.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Same-lane lineage is shared by default (later runs may observe earlier runs in
+that lane). Cross-lane observe is deny-by-default unless exposure + grant (or
+handoff) allow it.</p>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ID</p></th>
+<th class="head"><p>Requirement</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>JL-01</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">JobLane</span></code> is a concrete type (id + exposure policy for meta and keys).</p></td>
+</tr>
+<tr class="row-odd"><td><p>JL-02</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code> is bound via Config (like <code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>); hosts inject it — no global singleton.</p></td>
+</tr>
+<tr class="row-even"><td><p>JL-03</p></td>
+<td><p>Each run has a WalkBag held by the broker under <code class="docutils literal notranslate"><span class="pre">(lane_id,</span> <span class="pre">run_id)</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>JL-04</p></td>
+<td><p>Run sequence supports selectors: exact <code class="docutils literal notranslate"><span class="pre">run_id</span></code>, <code class="docutils literal notranslate"><span class="pre">latest</span></code>, <code class="docutils literal notranslate"><span class="pre">before(t)</span></code> / <code class="docutils literal notranslate"><span class="pre">at_or_before(t)</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>JL-05</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">observe(caller_lane,</span> <span class="pre">target_lane,</span> <span class="pre">selector,</span> <span class="pre">key|meta)</span></code> is the only cross-run read path; deny is hard failure / typed deny outcome.</p></td>
+</tr>
+<tr class="row-odd"><td><p>JL-06</p></td>
+<td><p>Publisher lane policy and caller grants are both checked (meta vs key separately).</p></td>
+</tr>
+<tr class="row-even"><td><p>JL-07</p></td>
+<td><p>Same-lane observe of own sequence is allowed by default.</p></td>
+</tr>
+<tr class="row-odd"><td><p>JL-08</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FileArtifact</span></code> (path|url) values may be published under exposed keys (e.g. <code class="docutils literal notranslate"><span class="pre">asset_urls</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>JL-09</p></td>
+<td><p>Deprecate <code class="docutils literal notranslate"><span class="pre">CrossTaskIsolationGuard</span></code> via thin re-export shim; migrate call sites to <code class="docutils literal notranslate"><span class="pre">JobLaneBroker</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>JL-10</p></td>
+<td><p>User-story YAML declares lanes in <code class="docutils literal notranslate"><span class="pre">environment</span></code> and optional per-step <code class="docutils literal notranslate"><span class="pre">lane</span></code> / <code class="docutils literal notranslate"><span class="pre">run_id</span></code>; no dedicated <code class="docutils literal notranslate"><span class="pre">cross_task_isolation</span></code> verb.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="user-story-yaml-surface">
+<h2>User-story YAML surface<a class="headerlink" href="#user-story-yaml-surface" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user_story</span>
+<span class="nt">environment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">family</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pass_through</span>
+<span class="w">  </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mock</span>
+<span class="w">  </span><span class="nt">job_lanes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">assets.generate</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">meta</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> mode</span><span class="p">:</span><span class="w"> </span><span class="nv">allow_lanes</span><span class="p p-Indicator">,</span><span class="nt"> lanes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">billing.settle</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">      </span><span class="nt">keys</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">asset_urls</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> mode</span><span class="p">:</span><span class="w"> </span><span class="nv">allow_lanes</span><span class="p p-Indicator">,</span><span class="nt"> lanes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">billing.settle</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="nt">billing.settle</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">meta</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> mode</span><span class="p">:</span><span class="w"> </span><span class="nv">open</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">      </span><span class="nt">keys</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">  </span><span class="nt">lane_grants</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w">   </span><span class="c1"># optional standing grants beyond lane exposure</span>
+<span class="nt">steps</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">do</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">run_recipe</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">verify_repair</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">…</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w">   </span><span class="c1"># any product graph walk</span>
+<span class="w">  </span><span class="nt">lane</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">assets.generate</span>
+<span class="w">  </span><span class="nt">run_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gen-2026-10-21T15</span>
+<span class="w">  </span><span class="c1"># publishes asset_urls onto the run bag via normal nodes / out register</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">do</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">lane_observe</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">target_lane</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">assets.generate</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> latest</span><span class="p">:</span><span class="w"> </span><span class="nv">true</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w">             </span><span class="c1"># or run_id / before</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">asset_urls</span>
+<span class="w">  </span><span class="nt">lane</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">billing.settle</span><span class="w">                       </span><span class="c1"># caller identity</span>
+<span class="w">  </span><span class="nt">expect</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">equals</span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">status</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ok</span><span class="w">                                </span><span class="c1"># or denied</span>
+<span class="nt">complete</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">expect</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">…</span><span class="p p-Indicator">]</span>
+<span class="nt">cleanup</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</pre></div>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">environment.job_lanes</span></code> configures the broker catalog for the story Config.</p></li>
+<li><p>Step-level <code class="docutils literal notranslate"><span class="pre">lane</span></code> + optional <code class="docutils literal notranslate"><span class="pre">run_id</span></code> set the <strong>caller / writer</strong> identity for
+that verb (graph run appends to that lane’s sequence).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lane_observe</span></code> (name TBD; may be a thin product verb or graph node) always
+goes through the broker — this is how stories assert grant vs deny without an
+isolation-only façade.</p></li>
+<li><p>Multiple steps with different <code class="docutils literal notranslate"><span class="pre">lane:</span></code> values are how we prove cross-lane
+deny and same-lane lineage allow.</p></li>
+</ul>
+</section>
+<section id="planned-story-matrix-distinct-claims">
+<h2>Planned story matrix (distinct claims)<a class="headerlink" href="#planned-story-matrix-distinct-claims" title="Link to this heading"></a></h2>
+<p>Retire the single intervening-task bleed probe as the sole MH-DOTS-07 proof.
+Prefer focused stories (ids provisional):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Id</p></th>
+<th class="head"><p>Claim</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_job_lane_same_lane_lineage</span></code></p></td>
+<td><p>Later run in lane A observes earlier run’s exposed key</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_job_lane_cross_deny</span></code></p></td>
+<td><p>Lane B observe of A’s key denies without grant</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_job_lane_meta_allowlist</span></code></p></td>
+<td><p>Meta open only to listed lanes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_job_lane_key_expose_artifacts</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FileArtifact</span></code> / URL key observe after exposure + grant</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_job_lane_observe_before</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">before(t)</span></code> selector returns last eligible run</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_job_lane_handoff_oneshot</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">HandoffRecord</span></code> unlocks named refs once</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_cross_task_isolation</span></code></p></td>
+<td><p>Retargeted narrative → JobLaneBroker + matrix above</p></td>
+</tr>
+</tbody>
+</table>
+<p>Keep related stories distinct:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_isolation_io</span></code> — subgraph <code class="docutils literal notranslate"><span class="pre">IsolationContract</span></code> / <code class="docutils literal notranslate"><span class="pre">TemplateIOContract</span></code> (nest I/O), not lane broker.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_handoff_record</span></code> — schema of handoff payloads; broker <em>consumes</em> it for one-shot share.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nubble_insp_workspace_isolation</span></code> — host workspace provider seam (worktree/container), not lane bags.</p></li>
+</ul>
+</section>
+<section id="related">
+<h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../reference/job-lanes.html"><span class="std std-doc">Job lanes reference</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a> (grant analogy)</p></li>
+<li><p><a class="reference internal" href="../reference/job-lanes.html#walkbag"><span class="std std-ref">WalkBag</span></a> (per-run registers)</p></li>
+<li><p><a class="reference internal" href="../inspiration/openai-dots-agent-safety-requirements-map.html"><span class="std std-doc">OpenAI Dots map MH-DOTS-07</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
