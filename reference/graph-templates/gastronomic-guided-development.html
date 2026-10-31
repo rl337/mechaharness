@@ -110,9 +110,9 @@
              
   <section id="template-gastronomic-guided-development">
 <h1>Template: gastronomic_guided_development<a class="headerlink" href="#template-gastronomic-guided-development" title="Link to this heading"></a></h1>
-<p>Product-level Agentic Recipe skeleton for gastronomic guided development.
-Increment 1 tiles read-only discovery then contract extraction. Mutating
-coding stages are deferred. <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> remains the baseline control.</p>
+<p>Product composition for gastronomic guided development. Read-only discovery,
+contract freeze, and plan decomposition are tiled; mutating coding stages are
+deferred. <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> remains the baseline control.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Item</p></th>
@@ -136,13 +136,13 @@ coding stages are deferred. <code class="docutils literal notranslate"><span cla
 </table>
 <section id="topology">
 <h2>Topology<a class="headerlink" href="#topology" title="Link to this heading"></a></h2>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>seed → discovery_tile (workspace_discovery)
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>seed
+  → discovery_tile (workspace_discovery)
   → contract_tile (contract_extraction)
-  → publish / publish_inventory
+  → plan_tile (change_decomposition)
+  → publish / publish_contract / publish_inventory
 </pre></div>
 </div>
-<p>Child bags use explicit <code class="docutils literal notranslate"><span class="pre">bag_inputs</span></code> / <code class="docutils literal notranslate"><span class="pre">bag_outputs</span></code> so discovery inventory
-lands on <code class="docutils literal notranslate"><span class="pre">acc.stages.discovery</span></code> and the contract on <code class="docutils literal notranslate"><span class="pre">acc.stages.contract</span></code>.</p>
 </section>
 <section id="soft-points">
 <h2>Soft points<a class="headerlink" href="#soft-points" title="Link to this heading"></a></h2>
@@ -162,9 +162,25 @@ lands on <code class="docutils literal notranslate"><span class="pre">acc.stages
 <td><p>task_state</p></td>
 <td><p>Forwarded to <code class="docutils literal notranslate"><span class="pre">contract_extraction</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hypotheses_payload</span></code> / <code class="docutils literal notranslate"><span class="pre">interpret_payload</span></code> / <code class="docutils literal notranslate"><span class="pre">propose_payload</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plan_bindings</span></code></p></td>
 <td><p>task_state</p></td>
-<td><p>Optional passthrough soft points</p></td>
+<td><p>Forwarded to <code class="docutils literal notranslate"><span class="pre">change_decomposition</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hypotheses_payload</span></code></p></td>
+<td><p>task_state</p></td>
+<td><p>Optional discovery soft point</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interpret_payload</span></code></p></td>
+<td><p>task_state</p></td>
+<td><p>Optional discovery soft point</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">propose_payload</span></code></p></td>
+<td><p>task_state</p></td>
+<td><p>Optional contract soft point</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plan_propose_payload</span></code></p></td>
+<td><p>task_state</p></td>
+<td><p>Optional plan soft point</p></td>
 </tr>
 </tbody>
 </table>
@@ -178,11 +194,14 @@ lands on <code class="docutils literal notranslate"><span class="pre">acc.stages
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discovery_tile</span></code> / <code class="docutils literal notranslate"><span class="pre">contract_tile</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discovery_tile</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">child_graph</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>soft points</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> on seed / tiles as derived</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">contract_tile</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">child_graph</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plan_tile</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">child_graph</span></code></p></td>
 </tr>
 </tbody>
 </table>

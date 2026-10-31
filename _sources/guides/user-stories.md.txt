@@ -123,6 +123,12 @@ Persona **fangore**; execution `parallel`; 6 stage(s).
 
 Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_discovery_hard_nodes`, `fangore_bag_judge_no_tools`, `fangore_bag_snapshot_inspect`, `fangore_bag_subgraph_bindings`
 
+### `fangore_change_decomposition` — ChangePlan decomposition and gastronomic plan tiling
+
+Persona **fangore**; execution `parallel`; 2 stage(s).
+
+Stories: `fangore_change_decomposition_ordered`, `fangore_change_decomposition_shape`
+
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
 Persona **fangore**; execution `parallel`; 6 stage(s).
@@ -842,6 +848,38 @@ Fangore starts the CLI host with family `pass_through` and backend `mock`. He bi
 
 Harness `user_story` scenario `capability_envelope_narrow.yaml` drives `capability_envelope`; expects narrow_ok / child_grant_count / widen_raises / delegation_choice.
 
+### `fangore_change_decomposition_ordered` — Order ChangePlan slices from a ChangeContract with dependency checks
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds an ok ChangeContract, walks change_decomposition hard/infer nodes, and verifies `out.change_plan` orders slices by depends_on while inheriting contract verification onto slices that omit checks.
+
+#### Implementation
+
+`plan_constrain` / `plan_assemble` / `plan_validate` in `plan_hard_nodes`; Agentic Recipe `change_decomposition`.
+
+#### Validation
+
+Suite stage `010_fangore_change_decomposition_ordered` — status ok, arithmetic before parser, validation ok.
+
+#### Footnotes
+
+1. [Gastronomic M6 plan ordered](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Each slice has scope, checks, rollback, dependency order
+
+### `fangore_change_decomposition_shape` — Instantiate the change_decomposition Agentic Recipe
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `change_decomposition` and verifies constrain/propose/assemble/validate node ids.
+
+#### Implementation
+
+Agentic Recipe `change_decomposition` (`ChangeDecompositionTemplate`) via `instantiate_recipe`.
+
+#### Validation
+
+Suite stage `005_fangore_change_decomposition_shape` — template_name and node ids.
+
+#### Footnotes
+
+1. [Gastronomic M6 change_decomposition](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Ordered ChangePlan slices before mutating coding
+
 ### `fangore_coding_ci_diagnose` — Look up a failed CI check and write a diagnosis note from the job log
 
 Fangore's pull request checks job fails again. He starts guided coding and asks the local Completer to look up check runs for HEAD, download the failing Actions job log, and write a short diagnosis note naming the check, job id, and root-cause signals — without editing product source yet. GitHub stays mocked in static stories via RecordingGitHubClient so CI and Completer walks do not need forge credentials; the production path uses HttpGitHubClient when a token is bound. Complements `fangore_coding_ci_repair` (seeded-log repair) and `fangore_coding_git_open_pr`.
@@ -1345,13 +1383,13 @@ Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recip
 
 [^rc-env-repair]: [Recipes requirements (first-wave catalog)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — environment_repair owning story
 
-### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→contract tiles
+### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→contract→plan tiles
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile and contract_tile subgraphs without mutating guided_coding.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile, contract_tile, and plan_tile subgraphs without mutating guided_coding.
 
 #### Implementation
 
-Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery` and `contract_extraction`.
+Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, and `change_decomposition`.
 
 #### Validation
 
