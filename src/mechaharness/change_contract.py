@@ -9,7 +9,6 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-
 CHANGE_CONTRACT_VERSION = "1"
 
 

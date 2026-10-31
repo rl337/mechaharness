@@ -12,6 +12,7 @@ from mechaharness.graph_templates.backend_describe import BackendDescribeTemplat
 from mechaharness.graph_templates.base import GraphTemplate, GraphTemplateRegistry
 from mechaharness.graph_templates.bounded_retry import BoundedRetryTemplate
 from mechaharness.graph_templates.context_pack import ContextPackTemplate
+from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
 from mechaharness.graph_templates.conversational_tool_loop import (
     ConversationalToolLoopTemplate,
 )
@@ -19,6 +20,9 @@ from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
 from mechaharness.graph_templates.demo_guidance import DemoGuidanceTemplate
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
+from mechaharness.graph_templates.gastronomic_guided_development import (
+    GastronomicGuidedDevelopmentTemplate,
+)
 from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
@@ -29,10 +33,6 @@ from mechaharness.graph_templates.produce_critique_refine import (
 )
 from mechaharness.graph_templates.safety_eval import SafetyEvalTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
-from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
-from mechaharness.graph_templates.gastronomic_guided_development import (
-    GastronomicGuidedDevelopmentTemplate,
-)
 from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 
 
