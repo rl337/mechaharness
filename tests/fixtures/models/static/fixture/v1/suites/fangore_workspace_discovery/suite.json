@@ -12,6 +12,10 @@
   "workspace": null,
   "stages": [
     {
+      "story": "fangore_workspace_discovery_recipe_shape",
+      "scenario": "005_fangore_workspace_discovery_recipe_shape"
+    },
+    {
       "story": "fangore_workspace_discovery_found",
       "scenario": "010_fangore_workspace_discovery_found"
     },
