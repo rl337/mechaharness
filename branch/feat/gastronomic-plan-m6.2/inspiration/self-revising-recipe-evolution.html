@@ -1,0 +1,224 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspiration: Evaluation-driven evolution of composed recipes &mdash; MechaHarness 0.10.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=82662543"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inspiration: Evaluation-driven evolution of composed recipes</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-evolution.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="inspiration-evaluation-driven-evolution-of-composed-recipes">
+<h1>Inspiration: Evaluation-driven evolution of composed recipes<a class="headerlink" href="#inspiration-evaluation-driven-evolution-of-composed-recipes" title="Link to this heading"></a></h1>
+<p>Status: <strong>inspiration / proposal, not an accepted requirement</strong><br />
+Recorded: 2026-10-17<br />
+Source confidence: <strong>unverified screenshot and social-media account</strong></p>
+<section id="attribution-and-provenance">
+<h2>Attribution and provenance<a class="headerlink" href="#attribution-and-provenance" title="Link to this heading"></a></h2>
+<p>Inspired by a screenshot circulated by <strong>&#64;slash1sol</strong> in <a class="reference external" href="https://x.com/slash1sol/status/2111452863649944061/video/1?s=46">this X post</a>, depicting a purported manuscript titled <em>The End of Harness Engineering: Self-Revising Execution Programs and the Disappearance of the Agent Framework</em>, attributed on the image to <strong>Haoran Wei, Siyu Zhang, and Mingze Luo</strong>, <strong>Qianhe Agent Systems Laboratory</strong>, dated <strong>2026-09-19</strong>.</p>
+<p><strong>Important:</strong> The manuscript, author affiliations, reported experiment, and publication status have <strong>not been independently authenticated</strong>. The screenshot may depict an unpublished or fictional paper. Accordingly, cite it as a <strong>social-media screenshot depicting a purported paper</strong>, not as a peer-reviewed publication or verified research. Do not imply endorsement, originality, or validated performance. Preserve the post URL and date accessed, and update attribution if a genuine primary source is discovered.</p>
+<p>The screenshot <em>claims</em> a frozen solver, a 4B edit proposer, eight edits per round, 300 concurrent Kimi K3 workers, 41 rounds, 37 accepted revisions, and a held-out score change from 0.31 to 0.64. <strong>These are unverified claims, not MechaHarness benchmarks.</strong></p>
+</section>
+<section id="useful-idea-independent-of-the-source-s-authenticity">
+<h2>Useful idea independent of the source’s authenticity<a class="headerlink" href="#useful-idea-independent-of-the-source-s-authenticity" title="Link to this heading"></a></h2>
+<p>Treat the agent execution policy as a <strong>versioned, testable, replaceable artifact</strong>. Separate (1) workload execution and failure traces, (2) generation of candidates, (3) hidden candidate-selection evaluations, and (4) a final untouched test set. Promote changes only on measured improvements, with cost and safety constraints.</p>
+<p>The dramatic assertion that framework engineering is obsolete is <strong>not</strong> adopted. Evaluation design, trusted execution semantics, access controls, reproducibility, and rollback remain engineering responsibilities.</p>
+</section>
+<section id="mechaharness-specific-architectural-boundary">
+<h2>MechaHarness-specific architectural boundary<a class="headerlink" href="#mechaharness-specific-architectural-boundary" title="Link to this heading"></a></h2>
+<p><strong>Graphs must be composed dynamically from registered recipes, not synthesized from arbitrary nodes or handwritten free-form graphs.</strong> A recipe may itself compose other recipes. A successful composition may be proposed as a reusable recipe, but must pass registration, versioning, validation, and promotion controls before reuse.</p>
+<ul class="simple">
+<li><p><strong>Hard nodes / primitives:</strong> trusted contracts and deterministic graph-execution invariants; never silently rewritten by an optimizer.</p></li>
+<li><p><strong>Soft nodes / recipe parameters:</strong> eligible for controlled optimization (prompt templates, model/lane selection, bounded retries, ordering, thresholds, permitted connections).</p></li>
+<li><p><strong>Recipe compositions:</strong> eligible for candidate search using only registered, compatible recipes and typed ports; no arbitrary executable code generation in the production path.</p></li>
+<li><p><strong>New recipe versions:</strong> immutable artifacts with provenance, lineage, test results, and a reversible promotion pointer.</p></li>
+<li><p><strong>Hard-node implementation changes:</strong> separate, explicitly reviewed engineering changes with stricter tests; not automatically promoted by the recipe optimizer.</p></li>
+</ul>
+</section>
+<section id="candidate-evolution-loop-proposed-recipe">
+<h2>Candidate evolution loop (proposed recipe)<a class="headerlink" href="#candidate-evolution-loop-proposed-recipe" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Select an existing registered recipe or composition and an explicit objective.</p></li>
+<li><p>Collect immutable execution traces, errors, latency, token usage, costs, and task outcomes.</p></li>
+<li><p>Propose a bounded set of <strong>recipe configurations or recipe compositions</strong> using only allowlisted building blocks.</p></li>
+<li><p>Reject invalid candidates before execution: typed connectivity, DI bindings, permission scope, graph invariants, budget limits, and recursion/loop rules.</p></li>
+<li><p>Execute candidates in isolated environments on a development/evaluation split. Keep selection questions and answers inaccessible to the proposer; prevent evaluation leakage through traces.</p></li>
+<li><p>Compare task success, regressions, runtime cost, latency, tool reliability, and recovery performance. Apply a predeclared selection policy, not just raw accuracy.</p></li>
+<li><p>Evaluate the leading candidate against a separate untouched final test set at the designated release gate; do not reuse that set as a continuous tuning signal.</p></li>
+<li><p>Promote only after passing safety and performance gates; checkpoint the approved version and retain a rollback target.</p></li>
+<li><p>If a successful composition is generalizable, <strong>propose</strong> registration as a nested reusable recipe, with review and provenance.</p></li>
+</ol>
+</section>
+<section id="compatibility-with-existing-graph-resolution-decisions">
+<h2>Compatibility with existing graph-resolution decisions<a class="headerlink" href="#compatibility-with-existing-graph-resolution-decisions" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Conflict resolution should revisit neighbors of the recently resolved/locked node.</p></li>
+<li><p>Track nodes visited during conflict resolution and prevent cycles.</p></li>
+<li><p>After a decision has no remaining conflicts, record a <strong>checkpoint</strong> with recoverable state.</p></li>
+<li><p>Continue until all unresolved nodes are resolved and no conflicts remain.</p></li>
+<li><p>Candidate evaluation must never bypass these rules, resumability, or crash recovery.</p></li>
+</ul>
+</section>
+<section id="ownership-split">
+<h2>Ownership split<a class="headerlink" href="#ownership-split" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>MechaHarness:</strong> recipe registry and typed composition, validation, deterministic execution, evaluation recipe, versioning/checkpoints, rollback hooks, observability, safety gates.</p></li>
+<li><p><strong>the AI assistant host:</strong> workload selection, orchestration, scheduling, experiment budgets, evaluation campaigns, and promotion policy.</p></li>
+<li><p><strong>home_network:</strong> sandboxed workers, persistent experiment stores, telemetry, and service deployment on constrained hosts.</p></li>
+<li><p><strong>JuneSpark:</strong> inference for candidate proposals and evaluations where resource budgets permit; avoid assuming the screenshot’s 4B model or concurrency claims fit local hardware.</p></li>
+</ul>
+</section>
+<section id="open-questions-todo">
+<h2>Open questions / TODO<a class="headerlink" href="#open-questions-todo" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>[ ] Define canonical recipe schema, typed interfaces, compatibility rules, and nested recipe version pinning.</p></li>
+<li><p>[ ] Decide whether the AI assistant host may auto-register successful compositions or only submit them for review.</p></li>
+<li><p>[ ] Specify exactly which soft-node fields can evolve and how permission changes are prohibited.</p></li>
+<li><p>[ ] Define evaluator data splits, contamination checks, statistical confidence, regression corpus, and final-test release policy.</p></li>
+<li><p>[ ] Define multi-objective scoring and hard safety/cost budgets.</p></li>
+<li><p>[ ] Design candidate sandboxing, concurrency limits, resource-aware scheduling, and trace redaction.</p></li>
+<li><p>[ ] Test checkpoints, graph conflict resolution, crash recovery, rollback, and provenance across candidate runs.</p></li>
+<li><p>[ ] Locate and authenticate the purported paper or code, if they exist; update attribution without retroactively treating screenshot claims as facts.</p></li>
+</ul>
+</section>
+<section id="suggested-experiments">
+<h2>Suggested experiments<a class="headerlink" href="#suggested-experiments" title="Link to this heading"></a></h2>
+<p>Start with a fixed suite of known MechaHarness recipes. Compare a hand-selected baseline against automatically chosen <strong>compositions of existing recipes</strong>, under equal inference budgets and untouched evaluation data. Track correctness, costs, latency, tool policy violations, and checkpoint recovery. Only then consider optimizing individual recipe parameters or recursively registering winning compositions.</p>
+</section>
+<section id="related-inspirations">
+<h2>Related inspirations<a class="headerlink" href="#related-inspirations" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="durable-graph-generators-inversion-of-control.html"><span class="std std-doc">Durable graph generators (IoC)</span></a> — host-facing driven runs with ordered guidance yields; recipe evolution selects <em>which</em> registered recipe is active, while the generator drives <em>how</em> that run advances across drivers and process boundaries.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
