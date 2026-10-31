@@ -1,0 +1,51 @@
+{
+  "id": "fangore_workspace_discovery",
+  "title": "Read-only workspace_discovery Agentic Recipe outcomes",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_workspace_discovery_recipe_shape",
+      "scenario": "005_fangore_workspace_discovery_recipe_shape"
+    },
+    {
+      "story": "fangore_workspace_discovery_found",
+      "scenario": "010_fangore_workspace_discovery_found"
+    },
+    {
+      "story": "fangore_workspace_discovery_not_found",
+      "scenario": "020_fangore_workspace_discovery_not_found"
+    },
+    {
+      "story": "fangore_workspace_discovery_inconclusive",
+      "scenario": "030_fangore_workspace_discovery_inconclusive"
+    },
+    {
+      "story": "fangore_workspace_discovery_failed",
+      "scenario": "040_fangore_workspace_discovery_failed"
+    },
+    {
+      "story": "fangore_workspace_discovery_checkpoint",
+      "scenario": "050_fangore_workspace_discovery_checkpoint"
+    },
+    {
+      "story": "fangore_workspace_discovery_continuity",
+      "scenario": "060_fangore_workspace_discovery_continuity"
+    },
+    {
+      "story": "fangore_workspace_discovery_snapshot_tools",
+      "scenario": "070_fangore_workspace_discovery_snapshot_tools"
+    },
+    {
+      "story": "fangore_workspace_discovery_negative_control",
+      "scenario": "080_fangore_workspace_discovery_negative_control"
+    }
+  ]
+}

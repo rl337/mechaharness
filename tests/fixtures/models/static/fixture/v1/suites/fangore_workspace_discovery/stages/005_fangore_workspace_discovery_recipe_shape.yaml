@@ -1,0 +1,55 @@
+id: fangore_workspace_discovery_recipe_shape
+suite: fangore_workspace_discovery
+persona: fangore
+title: Instantiate the workspace_discovery Agentic Recipe shape
+narrative: Fangore starts the CLI host with family `pass_through` and backend
+  `mock`. He loads Agentic Recipe `workspace_discovery` from a RecipeBind, and
+  verifies the stamped graph exposes preflight through inventory publish node
+  ids so hosts can tile discovery before walking bag-backed stages.
+implementation: Agentic Recipe `workspace_discovery` via `WorkspaceDiscoveryTemplate`
+  / `instantiate_recipe` and catalog registration in `default_graph_template_classes`.
+validation: Suite stage `005_fangore_workspace_discovery_recipe_shape` — template_name
+  and subgraph node ids for the discovery topology.
+footnotes:
+- id: gastronomic-m5-recipe-shape
+  label: Gastronomic guided-development M5 (workspace_discovery shape)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Catalog recipe must instantiate with soft points
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: workspace_discovery
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/workspace_discovery.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: workspace_discovery
+  - kind: equals
+    key: template_status
+    value: active
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - seed
+    - preflight
+    - manifest
+    - hypotheses
+    - search
+    - extract
+    - interpret
+    - resolve
+    - coverage
+    - publish
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: workspace_discovery
+cleanup: []

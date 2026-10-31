@@ -1,0 +1,239 @@
+id: fangore_workspace_discovery_continuity
+suite: fangore_workspace_discovery
+persona: fangore
+title: Interpret ContextSpec sees hypotheses and matches, not bag noise
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds unrelated
+  `ctx.noise`, runs discovery, and verifies the interpret Completer request includes goal/hypotheses/matches
+  while omitting the noise register.
+implementation: ContextSpec reads on interpret; `graph_walk` surfaces `model_inputs`.
+validation: Suite stage `060_fangore_workspace_discovery_continuity` — model_inputs.interpret includes
+  declared paths only.
+footnotes:
+- id: gastronomic-m5-continuity
+  label: Gastronomic M5
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: I2 must see I1+H2 evidence
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: ../assets/calc_discovery/workspace.files.json
+graph:
+  inline:
+    goal: Find the calculator CLI division-by-zero handling and its tests.
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: Find the calculator CLI division-by-zero handling and its tests.
+          in.workspace:
+            root: .
+          in.constraints:
+            read_only: true
+            max_files: 100
+            max_search_results: 50
+            max_inference_invocations: 3
+            max_inspection_calls: 6
+          ctx.noise:
+            secret: do-not-send-to-model
+    - id: preflight
+      kind: discovery_preflight
+      depends_on:
+      - seed
+      payload:
+        reads:
+          goal: in.goal
+          workspace: in.workspace
+          constraints: in.constraints
+        writes:
+          destination: acc.discovery.preflight
+        parameters:
+          fail_if_invalid: true
+    - id: manifest
+      kind: workspace_manifest
+      depends_on:
+      - preflight
+      payload:
+        reads:
+          workspace: in.workspace
+        writes:
+          destination: acc.discovery.manifest
+        parameters:
+          max_files: 100
+    - id: hypotheses
+      kind: infer
+      depends_on:
+      - manifest
+      payload:
+        completion:
+          queries:
+          - id: zdiv
+            pattern: ZeroDivisionError
+            mode: literal
+          source_requests:
+          - path: src/calc/arithmetic.py
+            start_line: 9
+            end_line: 11
+          - path: src/calc/cli.py
+            start_line: 17
+            end_line: 19
+          - path: tests/test_arithmetic.py
+            start_line: 6
+            end_line: 8
+          rationale: Search for ZeroDivisionError across calc package and tests
+        soft_point: hypotheses_payload
+        context:
+          version: '1'
+          system: Propose search hypotheses as JSON only.
+          reads:
+          - path: in.goal
+            required: true
+          - path: acc.discovery.manifest.coverage
+            required: true
+          response:
+            writes: acc.discovery.hypotheses
+            parse: json
+    - id: search
+      kind: file_search
+      depends_on:
+      - hypotheses
+      payload:
+        reads:
+          workspace: in.workspace
+          manifest: acc.discovery.manifest
+          queries: acc.discovery.hypotheses
+        writes:
+          destination: acc.discovery.matches
+        parameters:
+          max_matches: 50
+    - id: extract
+      kind: source_extract
+      depends_on:
+      - search
+      payload:
+        reads:
+          workspace: in.workspace
+          manifest: acc.discovery.manifest
+          requests: acc.discovery.hypotheses
+          matches: acc.discovery.matches
+        writes:
+          destination: acc.discovery.excerpts
+        on_error:
+          destination: acc.discovery.excerpts
+          policy: report
+    - id: interpret
+      kind: infer
+      depends_on:
+      - extract
+      payload:
+        completion:
+          files:
+          - path: src/calc/arithmetic.py
+            start_line: 9
+            end_line: 11
+          - path: src/calc/cli.py
+            start_line: 17
+            end_line: 19
+          - path: tests/test_arithmetic.py
+            start_line: 6
+            end_line: 8
+          unknowns: []
+        soft_point: interpret_payload
+        context:
+          version: '1'
+          system: Propose verified findings as JSON only.
+          user_preamble: Use only the following bag evidence.
+          reads:
+          - path: in.goal
+            required: true
+          - path: acc.discovery.hypotheses
+            required: true
+          - path: acc.discovery.matches
+            required: true
+          - path: acc.discovery.excerpts
+            required: false
+          response:
+            writes: acc.discovery.proposed_findings
+            parse: json
+    - id: resolve
+      kind: evidence_resolve
+      depends_on:
+      - interpret
+      payload:
+        reads:
+          proposals: acc.discovery.proposed_findings
+          manifest: acc.discovery.manifest
+          excerpts: acc.discovery.excerpts
+        writes:
+          destination: acc.discovery.verified
+    - id: coverage
+      kind: coverage_measure
+      depends_on:
+      - resolve
+      payload:
+        reads:
+          manifest: acc.discovery.manifest
+          search: acc.discovery.matches
+        writes:
+          destination: acc.discovery.coverage
+        parameters:
+          min_files_scanned: 1
+    - id: publish
+      kind: inventory_publish
+      depends_on:
+      - coverage
+      payload:
+        reads:
+          goal: in.goal
+          manifest: acc.discovery.manifest
+          verified: acc.discovery.verified
+          coverage: acc.discovery.coverage
+          proposed: acc.discovery.proposed_findings
+          preflight: acc.discovery.preflight
+        writes:
+          destination: out.workspace_inventory
+steps:
+- do:
+    graph_walk:
+      action: start
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: node_statuses.seed
+    value: succeeded
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.out.workspace_inventory.status
+    value: found
+  - kind: includes
+    key: model_inputs.interpret.included_paths
+    value:
+    - in.goal
+    - acc.discovery.hypotheses
+    - acc.discovery.matches
+  - kind: contains
+    key: model_inputs.interpret.messages[1].content
+    value: ZeroDivisionError
+  - kind: equals
+    key: model_inputs.interpret.includes_unrelated_bag_data
+    value: false
+complete:
+  expect:
+  - kind: equals
+    key: bag.out.workspace_inventory.status
+    value: found
+  - kind: equals
+    key: model_inputs.interpret.includes_unrelated_bag_data
+    value: false
+cleanup: []
