@@ -197,9 +197,9 @@ Stories: `fangore_tdr_crash_after_accept_before_record`, `fangore_tdr_crash_afte
 
 ### `fangore_workspace_discovery` — Read-only workspace_discovery Agentic Recipe outcomes
 
-Persona **fangore**; execution `parallel`; 8 stage(s).
+Persona **fangore**; execution `parallel`; 9 stage(s).
 
-Stories: `fangore_workspace_discovery_checkpoint`, `fangore_workspace_discovery_continuity`, `fangore_workspace_discovery_failed`, `fangore_workspace_discovery_found`, `fangore_workspace_discovery_inconclusive`, `fangore_workspace_discovery_negative_control`, `fangore_workspace_discovery_not_found`, `fangore_workspace_discovery_snapshot_tools`
+Stories: `fangore_workspace_discovery_checkpoint`, `fangore_workspace_discovery_continuity`, `fangore_workspace_discovery_failed`, `fangore_workspace_discovery_found`, `fangore_workspace_discovery_inconclusive`, `fangore_workspace_discovery_negative_control`, `fangore_workspace_discovery_not_found`, `fangore_workspace_discovery_recipe_shape`, `fangore_workspace_discovery_snapshot_tools`
 
 ### `nubble_observability` — Cost, trace, and audit observability
 
@@ -3294,6 +3294,22 @@ Suite stage `020_fangore_workspace_discovery_not_found` — status `not_found`, 
 #### Footnotes
 
 1. [Gastronomic M5](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Well-supported negative discovery
+
+### `fangore_workspace_discovery_recipe_shape` — Instantiate the workspace_discovery Agentic Recipe shape
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `workspace_discovery` from a RecipeBind, and verifies the stamped graph exposes preflight through inventory publish node ids so hosts can tile discovery before walking bag-backed stages.
+
+#### Implementation
+
+Agentic Recipe `workspace_discovery` via `WorkspaceDiscoveryTemplate` / `instantiate_recipe` and catalog registration in `default_graph_template_classes`.
+
+#### Validation
+
+Suite stage `005_fangore_workspace_discovery_recipe_shape` — template_name and subgraph node ids for the discovery topology.
+
+#### Footnotes
+
+1. [Gastronomic guided-development M5 (workspace_discovery shape)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Catalog recipe must instantiate with soft points
 
 ### `fangore_workspace_discovery_snapshot_tools` — Interpret may inspect the frozen discovery snapshot only
 

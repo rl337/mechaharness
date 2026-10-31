@@ -1,0 +1,12 @@
+# Read-only workspace discovery Agentic Recipe shape bind.
+name: workspace_discovery
+summary: Instantiate workspace_discovery with seed inputs and default soft points.
+goal: Find calculator division-by-zero handling
+inputs:
+  goal: Find calculator division-by-zero handling
+  workspace:
+    root: .
+  constraints:
+    read_only: true
+    max_files: 40
+    max_search_results: 25

@@ -76,5 +76,6 @@ A model cannot force `found` without verified evidence.
 
 ## Stories
 
-Suite `fangore_workspace_discovery` (`010`–`080`): found, not_found,
-inconclusive, failed, checkpoint, continuity, snapshot tools, negative control.
+Suite `fangore_workspace_discovery` (`005`–`080`): recipe shape, found,
+not_found, inconclusive, failed, checkpoint, continuity, snapshot tools,
+negative control.
