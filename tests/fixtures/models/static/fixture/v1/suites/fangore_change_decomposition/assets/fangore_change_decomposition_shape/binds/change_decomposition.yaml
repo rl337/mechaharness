@@ -1,0 +1,14 @@
+name: change_decomposition
+summary: Instantiate change_decomposition for ordered ChangePlan slices.
+goal: Plan multiplication
+inputs:
+  goal: Plan multiplication
+  change_contract:
+    version: '1'
+    status: ok
+    objective: Add multiplication
+    invariants:
+    - id: preserve:src/calc/arithmetic.py
+    verification:
+    - pytest: true
+      path: tests/test_arithmetic.py

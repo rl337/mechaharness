@@ -1306,17 +1306,23 @@ class GraphWalkVerb(CliVerb):
                 DISCOVERY_HARD_KINDS,
                 DiscoveryHardNodeRunner,
             )
+            from mechaharness.plan_hard_nodes import (
+                PLAN_HARD_KINDS,
+                PlanHardNodeRunner,
+            )
 
             infer_kind_set = set(DEFAULT_INFER_KINDS)
             judge_kind_set = set(DEFAULT_JUDGE_KINDS)
             discovery_kind_set = set(DISCOVERY_HARD_KINDS)
             contract_kind_set = set(CONTRACT_HARD_KINDS)
-            hard_kind_set = discovery_kind_set | contract_kind_set
+            plan_kind_set = set(PLAN_HARD_KINDS)
+            hard_kind_set = discovery_kind_set | contract_kind_set | plan_kind_set
             special_kinds = infer_kind_set | judge_kind_set | hard_kind_set
             leaf_kinds = [k for k in kinds if k != "subgraph"]
             compute_kinds = [k for k in leaf_kinds if k not in special_kinds]
             discovery_kinds = [k for k in leaf_kinds if k in discovery_kind_set]
             contract_kinds = [k for k in leaf_kinds if k in contract_kind_set]
+            plan_kinds = [k for k in leaf_kinds if k in plan_kind_set]
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
             needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
@@ -1326,7 +1332,11 @@ class GraphWalkVerb(CliVerb):
             judge_runner: CliJudgeRunner | None = None
             runners: list[Any] = []
             if compute_kinds or not (
-                needs_infer or needs_judge or discovery_kinds or contract_kinds
+                needs_infer
+                or needs_judge
+                or discovery_kinds
+                or contract_kinds
+                or plan_kinds
             ):
                 runners.append(
                     CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
@@ -1344,6 +1354,8 @@ class GraphWalkVerb(CliVerb):
                 )
             if contract_kinds:
                 runners.append(ContractHardNodeRunner(contract_kinds))
+            if plan_kinds:
+                runners.append(PlanHardNodeRunner(plan_kinds))
 
             # Bind Completer / EventLog first so runners are in the registry
             # snapshot when Config.configure registers GraphNodeRunnerRegistry.

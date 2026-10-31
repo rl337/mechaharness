@@ -1,0 +1,44 @@
+id: fangore_change_decomposition_shape
+suite: fangore_change_decomposition
+persona: fangore
+title: Instantiate the change_decomposition Agentic Recipe
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `change_decomposition` and verifies constrain/propose/assemble/validate node ids.
+implementation: Agentic Recipe `change_decomposition` (`ChangeDecompositionTemplate`) via
+  `instantiate_recipe`.
+validation: Suite stage `005_fangore_change_decomposition_shape` — template_name and node ids.
+footnotes:
+- id: gastronomic-m6-plan-shape
+  label: Gastronomic M6 change_decomposition
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Ordered ChangePlan slices before mutating coding
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: change_decomposition
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/change_decomposition.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: change_decomposition
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - seed
+    - constrain
+    - propose
+    - assemble
+    - validate
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: change_decomposition
+cleanup: []

@@ -1,8 +1,8 @@
-"""Product recipe: discovery → contract (gastronomic M6 skeleton).
+"""Product recipe: discovery → contract → plan (gastronomic M6 skeleton).
 
 Catalog id: ``gastronomic_guided_development``. Mutating coding stages are
-deferred; this increment tiles read-only discovery and contract extraction.
-``guided_coding`` remains the unchanged baseline.
+deferred; this increment tiles read-only discovery, contract extraction, and
+change decomposition. ``guided_coding`` remains the unchanged baseline.
 """
 
 from __future__ import annotations
@@ -16,13 +16,14 @@ from mechaharness.graph_templates.base import (
     SoftPoint,
     make_node,
 )
+from mechaharness.graph_templates.change_decomposition import ChangeDecompositionTemplate
 from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
 from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 from mechaharness.isolation.isolation_contract import TemplateIOContract
 
 
 class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
-    """Seed → workspace_discovery tile → contract_extraction tile.
+    """Seed → discovery → contract → plan tiles.
 
     Example:
         >>> from mechaharness.graph_templates import (
@@ -33,7 +34,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         ... )
         >>> graph.template_name
         'gastronomic_guided_development'
-        >>> "discovery_tile" in graph.nodes and "contract_tile" in graph.nodes
+        >>> "plan_tile" in graph.nodes
         True
     """
 
@@ -41,8 +42,8 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
     version = "1"
     category = "agentic_recipe"
     summary = (
-        "Read-only workspace discovery then ChangeContract freeze before coding; "
-        "later M6 stages add plan/execute/verify."
+        "Read-only workspace discovery, ChangeContract freeze, then ChangePlan "
+        "decomposition before coding; later M6 stages add execute/verify."
     )
     io_contract = TemplateIOContract(
         inputs={
@@ -53,6 +54,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         outputs={
             "workspace_inventory": "object",
             "change_contract": "object",
+            "change_plan": "object",
         },
     )
     soft_points = (
@@ -67,6 +69,13 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             name="contract_bindings",
             kind="task_state",
             description="Soft bindings forwarded to contract_extraction",
+            required=False,
+            default={},
+        ),
+        SoftPoint(
+            name="plan_bindings",
+            kind="task_state",
+            description="Soft bindings forwarded to change_decomposition",
             required=False,
             default={},
         ),
@@ -86,6 +95,12 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             name="propose_payload",
             kind="task_state",
             description="Optional contract propose_payload soft point",
+            required=False,
+        ),
+        SoftPoint(
+            name="plan_propose_payload",
+            kind="task_state",
+            description="Optional plan propose_payload soft point",
             required=False,
         ),
     )
@@ -170,11 +185,62 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         }
         graph.add_node(contract_embed)
 
+        plan_soft = dict(bindings.get("plan_bindings") or {})
+        if (
+            "plan_propose_payload" in bindings
+            and "propose_payload" not in plan_soft
+        ):
+            plan_soft["propose_payload"] = bindings["plan_propose_payload"]
+        _plan_child, plan_embed = ChangeDecompositionTemplate().tile(
+            GraphTemplateParams(
+                goal=f"{goal}:plan",
+                instance_key="plan",
+                inputs={"goal": seed_put.get("in.goal", goal)},
+                soft_bindings=plan_soft,
+            ),
+            parent_node_id="plan_tile",
+        )
+        del _plan_child
+        plan_embed.depends_on = ["contract_tile"]
+        plan_embed.payload = {
+            **dict(plan_embed.payload or {}),
+            "bag_inputs": {
+                "in.goal": "in.goal",
+                "in.change_contract": "acc.stages.contract",
+                "in.workspace_inventory": "acc.stages.discovery",
+            },
+            "bag_outputs": {
+                "acc.stages.plan": "out.change_plan",
+            },
+        }
+        graph.add_node(plan_embed)
+
         graph.add_node(
             make_node(
                 id="publish",
                 kind="bag_project",
-                depends_on=["contract_tile"],
+                depends_on=["plan_tile"],
+                payload={
+                    "reads": {"source": "acc.stages.plan"},
+                    "writes": {"destination": "out.change_plan"},
+                    "parameters": {
+                        "fields": [
+                            "version",
+                            "status",
+                            "objective",
+                            "slices",
+                            "constraints",
+                            "provenance",
+                        ]
+                    },
+                },
+            )
+        )
+        graph.add_node(
+            make_node(
+                id="publish_contract",
+                kind="bag_project",
+                depends_on=["publish"],
                 payload={
                     "reads": {"source": "acc.stages.contract"},
                     "writes": {"destination": "out.change_contract"},
@@ -199,7 +265,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             make_node(
                 id="publish_inventory",
                 kind="bag_project",
-                depends_on=["publish"],
+                depends_on=["publish_contract"],
                 payload={
                     "reads": {"source": "acc.stages.discovery"},
                     "writes": {"destination": "out.workspace_inventory"},
@@ -222,8 +288,10 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         for left, right in (
             ("seed", "discovery_tile"),
             ("discovery_tile", "contract_tile"),
-            ("contract_tile", "publish"),
-            ("publish", "publish_inventory"),
+            ("contract_tile", "plan_tile"),
+            ("plan_tile", "publish"),
+            ("publish", "publish_contract"),
+            ("publish_contract", "publish_inventory"),
         ):
             graph.add_dependency(
                 DependencyEdge(
