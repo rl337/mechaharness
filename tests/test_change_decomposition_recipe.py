@@ -67,7 +67,9 @@ def test_gastronomic_tiles_plan_after_contract() -> None:
     assert "discovery_tile" in graph.nodes
     assert "contract_tile" in graph.nodes
     assert "plan_tile" in graph.nodes
+    assert "execute_tile" in graph.nodes
     assert graph.nodes["plan_tile"].subgraph
+    assert graph.nodes["execute_tile"].subgraph
     comps = node_components_for(graph, template=template)
     assert any(c.kind == "child_graph" for c in comps)
 
