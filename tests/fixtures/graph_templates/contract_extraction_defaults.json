@@ -1,0 +1,27 @@
+{
+  "id": "contract_extraction_defaults",
+  "description": "contract_extraction freezes inventory then assembles ChangeContract",
+  "template": "contract_extraction",
+  "params": {
+    "goal": "Add multiplication",
+    "inputs": {
+      "goal": "Add multiplication",
+      "workspace_inventory": {
+        "status": "found",
+        "relevant_files": [{"path": "a.py", "sha256": "x"}]
+      }
+    }
+  },
+  "expect": {
+    "template_name": "contract_extraction",
+    "template_status": "active",
+    "node_ids": ["seed", "freeze", "propose", "assemble", "validate"],
+    "edge_count": 4,
+    "nodes": {
+      "freeze": {"kind": "invariant_freeze"},
+      "propose": {"kind": "infer"},
+      "assemble": {"kind": "contract_assemble"},
+      "validate": {"kind": "contract_validate"}
+    }
+  }
+}

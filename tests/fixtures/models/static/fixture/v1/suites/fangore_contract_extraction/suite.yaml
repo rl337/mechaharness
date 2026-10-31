@@ -1,0 +1,9 @@
+id: fangore_contract_extraction
+title: ChangeContract extraction and gastronomic product tiling
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

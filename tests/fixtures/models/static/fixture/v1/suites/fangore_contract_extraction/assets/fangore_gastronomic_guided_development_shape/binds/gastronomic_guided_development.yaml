@@ -1,0 +1,10 @@
+name: gastronomic_guided_development
+summary: Instantiate product recipe tiling discovery then contract.
+goal: Add multiplication safely
+inputs:
+  goal: Add multiplication safely
+  workspace:
+    root: .
+  constraints:
+    read_only: true
+    max_files: 40

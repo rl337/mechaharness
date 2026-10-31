@@ -29,6 +29,10 @@ from mechaharness.graph_templates.produce_critique_refine import (
 )
 from mechaharness.graph_templates.safety_eval import SafetyEvalTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
+from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
+from mechaharness.graph_templates.gastronomic_guided_development import (
+    GastronomicGuidedDevelopmentTemplate,
+)
 from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 
 
@@ -39,6 +43,8 @@ def default_graph_template_classes() -> dict[str, type[GraphTemplate]]:
         DemoGuidanceTemplate.name: DemoGuidanceTemplate,
         VerifyRepairTemplate.name: VerifyRepairTemplate,
         WorkspaceDiscoveryTemplate.name: WorkspaceDiscoveryTemplate,
+        ContractExtractionTemplate.name: ContractExtractionTemplate,
+        GastronomicGuidedDevelopmentTemplate.name: GastronomicGuidedDevelopmentTemplate,
         IndependentReviewTemplate.name: IndependentReviewTemplate,
         EnvironmentRepairTemplate.name: EnvironmentRepairTemplate,
         InitializePreflightTemplate.name: InitializePreflightTemplate,
