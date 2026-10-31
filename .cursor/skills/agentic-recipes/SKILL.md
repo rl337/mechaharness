@@ -114,6 +114,8 @@ Pattern stories **must** name the recipe catalog id.
 | `instruction_todo_plan` | shipped | `fangore_instruction_todo_plan` |
 | `audited_infer_accept` | shipped | `fangore_audited_infer_accept` |
 | `workspace_discovery` | shipped | `fangore_workspace_discovery_*` |
+| `contract_extraction` | shipped | `fangore_contract_extraction_*` |
+| `gastronomic_guided_development` | shipped (M6 skeleton) | `fangore_gastronomic_guided_development_shape` |
 | *(composition)* | `instance_key` / `tile` | `fangore_recipe_namespace_tile` |
 
 ## Anti-patterns

@@ -49,6 +49,7 @@ from mechaharness.graph_templates.catalog import (
     default_graph_templates,
 )
 from mechaharness.graph_templates.context_pack import ContextPackTemplate
+from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
 from mechaharness.graph_templates.conversational_tool_loop import (
     ConversationalToolLoopTemplate,
 )
@@ -56,6 +57,9 @@ from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
 from mechaharness.graph_templates.demo_guidance import DemoGuidanceTemplate
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
+from mechaharness.graph_templates.gastronomic_guided_development import (
+    GastronomicGuidedDevelopmentTemplate,
+)
 from mechaharness.graph_templates.guided_coding import GuidedCodingTemplate
 from mechaharness.graph_templates.harness_run import HarnessRunTemplate
 from mechaharness.graph_templates.independent_review import IndependentReviewTemplate
@@ -73,11 +77,13 @@ __all__ = [
     "BackendDescribeTemplate",
     "BoundedRetryTemplate",
     "ContextPackTemplate",
+    "ContractExtractionTemplate",
     "ConversationalToolLoopTemplate",
     "DecisionPlaneTemplate",
     "DemoGuidanceTemplate",
     "EnvironmentRepairTemplate",
     "FanOutAggregateTemplate",
+    "GastronomicGuidedDevelopmentTemplate",
     "GraphTemplate",
     "GraphTemplateParams",
     "GraphTemplateRegistry",

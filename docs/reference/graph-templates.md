@@ -43,6 +43,8 @@ owning user stories):
 | [instruction_todo_plan](./graph-templates/instruction-todo-plan.md) | `instruction_todo_plan` | `fangore_instruction_todo_plan` | Oneshot vs list; refine; pre/item/post acceptance |
 | [audited_infer_accept](./graph-templates/audited-infer-accept.md) | `audited_infer_accept` | `fangore_audited_infer_accept` | Collect → freeze → decide → QA → deterministic → gate |
 | [workspace_discovery](./graph-templates/workspace-discovery.md) | `workspace_discovery` | `fangore_workspace_discovery_found` | Read-only evidence inventory (`found`/`not_found`/…) |
+| [contract_extraction](./graph-templates/contract-extraction.md) | `contract_extraction` | `fangore_contract_extraction_found` | Freeze inventory into typed `ChangeContract` |
+| [gastronomic_guided_development](./graph-templates/gastronomic-guided-development.md) | `gastronomic_guided_development` | `fangore_gastronomic_guided_development_shape` | Product tile: discovery → contract (M6 skeleton) |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
 `GraphTemplate.tile` (embed under a parent node). Story:
@@ -104,6 +106,8 @@ held-out gate guards `ResearchLab.promote`.
 | `safety_eval` | Produce → isolated review → deterministic score (measure-only) |
 | `decision_plane` | Bounded decision surfaces with policy / shadow / telemetry |
 | `workspace_discovery` | Read-only workspace evidence → typed inventory |
+| `contract_extraction` | Freeze priors → typed ChangeContract |
+| `gastronomic_guided_development` | Product composition (discovery → contract; coding deferred) |
 
 These are distinct Agentic Recipes on the same `GraphTemplate` substrate.
 
