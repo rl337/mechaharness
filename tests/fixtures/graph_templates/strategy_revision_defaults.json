@@ -1,0 +1,29 @@
+{
+  "id": "strategy_revision_defaults",
+  "description": "strategy_revision constrains then decides retry disposition",
+  "template": "strategy_revision",
+  "params": {
+    "goal": "Revise after verify failure",
+    "inputs": {
+      "goal": "Revise after verify failure",
+      "diagnosis": {
+        "version": "1",
+        "status": "ok",
+        "failure_class": "semantics",
+        "next_experiment": "adjust_behavior_to_satisfy_failing_check"
+      }
+    }
+  },
+  "expect": {
+    "template_name": "strategy_revision",
+    "template_status": "active",
+    "node_ids": ["seed", "constrain", "decide", "publish", "validate"],
+    "edge_count": 4,
+    "nodes": {
+      "constrain": {"kind": "revision_constrain"},
+      "decide": {"kind": "revision_decide"},
+      "publish": {"kind": "revision_publish"},
+      "validate": {"kind": "revision_validate"}
+    }
+  }
+}

@@ -1,0 +1,75 @@
+id: fangore_strategy_revision_yield
+suite: fangore_strategy_revision
+persona: fangore
+title: Unknown diagnosis yields guidance
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  strategy_revision against an unknown failure_class Diagnosis and verifies disposition
+  yield_guidance.
+implementation: '`revision_*` hard nodes; Agentic Recipe `strategy_revision`.'
+validation: Suite stage `030_fangore_strategy_revision_yield` — yield_guidance.
+footnotes:
+- id: gastronomic-m6-revision-yield
+  label: Gastronomic M6 revision yield
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Unknown host evidence escalates instead of inventing a repair
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: revise yield
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.diagnosis:
+            version: '1'
+            status: ok
+            failure_class: unknown
+            next_experiment: gather_more_host_evidence_before_retry
+            evidence: [{text: 'opaque checker signal'}]
+    - id: constrain
+      kind: revision_constrain
+      depends_on: [seed]
+      payload:
+        reads: {diagnosis: in.diagnosis}
+        writes: {destination: acc.revision.constraints}
+    - id: decide
+      kind: revision_decide
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.revision.constraints}
+        writes: {destination: acc.revision.decision}
+    - id: publish
+      kind: revision_publish
+      depends_on: [decide]
+      payload:
+        reads:
+          constraints: acc.revision.constraints
+          decision: acc.revision.decision
+        writes: {destination: out.strategy_revision}
+    - id: validate
+      kind: revision_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.strategy_revision}
+        writes: {destination: acc.revision.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.strategy_revision.disposition, value: yield_guidance}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.strategy_revision.disposition, value: yield_guidance}
+cleanup: []

@@ -117,7 +117,10 @@ Pattern stories **must** name the recipe catalog id.
 | `contract_extraction` | shipped | `fangore_contract_extraction_*` |
 | `change_decomposition` | shipped | `fangore_change_decomposition_*` |
 | `change_execution` | shipped | `fangore_change_execution_*` |
-| `gastronomic_guided_development` | shipped (M6.3 through execute) | `fangore_gastronomic_guided_development_shape` |
+| `change_verification` | shipped | `fangore_change_verification_*` |
+| `failure_diagnosis` | shipped | `fangore_failure_diagnosis_*` |
+| `strategy_revision` | shipped | `fangore_strategy_revision_*` |
+| `gastronomic_guided_development` | shipped (M6.6 through revise) | `fangore_gastronomic_guided_development_shape` |
 | *(composition)* | `instance_key` / `tile` | `fangore_recipe_namespace_tile` |
 
 ## Anti-patterns

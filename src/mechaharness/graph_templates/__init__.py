@@ -75,6 +75,7 @@ from mechaharness.graph_templates.produce_critique_refine import (
     ProduceCritiqueRefineTemplate,
 )
 from mechaharness.graph_templates.safety_eval import SafetyEvalTemplate
+from mechaharness.graph_templates.strategy_revision import StrategyRevisionTemplate
 from mechaharness.graph_templates.verify_repair import VerifyRepairTemplate
 from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 
@@ -94,6 +95,7 @@ __all__ = [
     "EnvironmentRepairTemplate",
     "FanOutAggregateTemplate",
     "GastronomicGuidedDevelopmentTemplate",
+    "StrategyRevisionTemplate",
     "GraphTemplate",
     "GraphTemplateParams",
     "GraphTemplateRegistry",

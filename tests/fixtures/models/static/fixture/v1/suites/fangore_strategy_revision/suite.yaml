@@ -1,0 +1,9 @@
+id: fangore_strategy_revision
+title: StrategyRevision gate and gastronomic revise tiling
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []
