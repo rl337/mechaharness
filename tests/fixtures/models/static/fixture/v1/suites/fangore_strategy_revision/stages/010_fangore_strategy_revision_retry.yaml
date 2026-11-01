@@ -1,0 +1,84 @@
+id: fangore_strategy_revision_retry
+suite: fangore_strategy_revision
+persona: fangore
+title: Retry disposition requires evidence delta
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  strategy_revision against a semantics Diagnosis with remaining retry budget, and verifies
+  disposition retry with evidence_delta_required true.
+implementation: '`revision_*` hard nodes; Agentic Recipe `strategy_revision`.'
+validation: Suite stage `010_fangore_strategy_revision_retry` — disposition retry.
+footnotes:
+- id: gastronomic-m6-revision-retry
+  label: Gastronomic M6 revision retry
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Every retry must add evidence
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: revise semantics
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.diagnosis:
+            version: '1'
+            status: ok
+            failure_class: semantics
+            next_experiment: adjust_behavior_to_satisfy_failing_check
+            evidence: [{text: 'pytest exit 1'}]
+            provenance: {slice_id: arithmetic}
+          in.change_plan:
+            status: ok
+            slices: [{id: arithmetic}]
+          in.retry_budget: {attempts_used: 0, attempts_max: 3}
+    - id: constrain
+      kind: revision_constrain
+      depends_on: [seed]
+      payload:
+        reads:
+          diagnosis: in.diagnosis
+          change_plan: in.change_plan
+          retry_budget: in.retry_budget
+        writes: {destination: acc.revision.constraints}
+    - id: decide
+      kind: revision_decide
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.revision.constraints}
+        writes: {destination: acc.revision.decision}
+    - id: publish
+      kind: revision_publish
+      depends_on: [decide]
+      payload:
+        reads:
+          constraints: acc.revision.constraints
+          decision: acc.revision.decision
+        writes: {destination: out.strategy_revision}
+    - id: validate
+      kind: revision_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.strategy_revision}
+        writes: {destination: acc.revision.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.strategy_revision.disposition, value: retry}
+  - {kind: equals, key: bag.out.strategy_revision.evidence_delta_required, value: true}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.strategy_revision.next_experiment, value: adjust_behavior_to_satisfy_failing_check}
+cleanup: []

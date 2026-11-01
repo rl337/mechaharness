@@ -1,0 +1,57 @@
+id: fangore_strategy_revision_validate_errors
+suite: fangore_strategy_revision
+persona: fangore
+title: revision_validate reports schema errors without failing the node
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a
+  malformed StrategyRevision into the bag, runs `revision_validate` with fail_if_invalid false, and
+  verifies the validation receipt lists errors while the walk stays ok.
+implementation: '`revision_validate` in `revision_hard_nodes`; `validate_strategy_revision`.'
+validation: Suite stage `035_fangore_strategy_revision_validate_errors` — validation.ok false.
+footnotes:
+- id: gastronomic-m6-revision-validate-errors
+  label: Gastronomic M6 revision validate errors
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Validate is a schema report; hosts decide whether to hard-fail
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: validate bad revision
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          out.strategy_revision:
+            version: '0'
+            status: weird
+            disposition: not_a_disposition
+            next_experiment: ''
+            reason: ''
+            retry_budget: nope
+            prior_attempts: nope
+    - id: validate
+      kind: revision_validate
+      depends_on: [seed]
+      payload:
+        reads: {source: out.strategy_revision}
+        writes: {destination: acc.revision.validation}
+        parameters: {fail_if_invalid: false}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.acc.revision.validation.ok, value: false}
+complete:
+  expect:
+  - {kind: equals, key: bag.acc.revision.validation.ok, value: false}
+cleanup: []

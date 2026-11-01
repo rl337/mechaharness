@@ -1,0 +1,43 @@
+id: fangore_strategy_revision_shape
+suite: fangore_strategy_revision
+persona: fangore
+title: Instantiate the strategy_revision Agentic Recipe
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `strategy_revision` and verifies constrain/decide/publish/validate node ids.
+implementation: Agentic Recipe `strategy_revision` (`StrategyRevisionTemplate`) via `instantiate_recipe`.
+validation: Suite stage `005_fangore_strategy_revision_shape` — template_name and node ids.
+footnotes:
+- id: gastronomic-m6-revision-shape
+  label: Gastronomic M6 strategy_revision
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Deterministic retry gate after diagnosis
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: strategy_revision
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/strategy_revision.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: strategy_revision
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - seed
+    - constrain
+    - decide
+    - publish
+    - validate
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: strategy_revision
+cleanup: []

@@ -70,9 +70,11 @@ def test_gastronomic_tiles_execute_after_plan() -> None:
     assert "execute_tile" in graph.nodes
     assert "verify_tile" in graph.nodes
     assert "diagnose_tile" in graph.nodes
+    assert "revise_tile" in graph.nodes
     assert graph.nodes["execute_tile"].subgraph
     assert graph.nodes["verify_tile"].subgraph
     assert graph.nodes["diagnose_tile"].subgraph
+    assert graph.nodes["revise_tile"].subgraph
 
 
 def test_apply_in_scope_publishes_diff_and_hashes() -> None:
