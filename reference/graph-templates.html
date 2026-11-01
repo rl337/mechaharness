@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Graph templates and Agentic Recipes &mdash; MechaHarness 0.11.0 documentation</title>
+  <title>Graph templates and Agentic Recipes &mdash; MechaHarness 0.12.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=f3b36f1a"></script>
+      <script src="../_static/documentation_options.js?v=61ccb1f1"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -255,10 +255,15 @@ owning user stories):</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_failure_diagnosis_classify</span></code></p></td>
 <td><p>Evidence-linked Diagnosis</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/gastronomic-guided-development.html"><span class="std std-doc">gastronomic_guided_development</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/strategy-revision.html"><span class="std std-doc">strategy_revision</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">strategy_revision</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_strategy_revision_retry</span></code></p></td>
+<td><p>Deterministic retry / stop / yield gate</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/gastronomic-guided-development.html"><span class="std std-doc">gastronomic_guided_development</span></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_gastronomic_guided_development_shape</span></code></p></td>
-<td><p>Product tile: discovery → … → diagnose</p></td>
+<td><p>Product tile: discovery → … → revise</p></td>
 </tr>
 </tbody>
 </table>
@@ -367,8 +372,11 @@ held-out gate guards <code class="docutils literal notranslate"><span class="pre
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">failure_diagnosis</span></code></p></td>
 <td><p>VerificationReport → typed Diagnosis + next experiment</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
-<td><p>Product composition (discovery → … → diagnose; revise deferred)</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">strategy_revision</span></code></p></td>
+<td><p>Diagnosis → StrategyRevision disposition (retry/stop/yield)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
+<td><p>Product composition (discovery → … → revise; accept deferred)</p></td>
 </tr>
 </tbody>
 </table>

@@ -219,6 +219,12 @@ Persona **fangore**; execution `parallel`; 12 stage(s).
 
 Stories: `fangore_bounded_repair_loop`, `fangore_bounded_retry_recipe`, `fangore_conversational_tool_loop`, `fangore_environment_repair_recipe`, `fangore_insp_fan_in_policy`, `fangore_insp_independent_review`, `fangore_insp_initialize_preflight`, `fangore_insp_produce_critique_refine`, `fangore_insp_stop_contract`, `fangore_recipe_as_tool`, `fangore_recipe_namespace_tile`, `fangore_verify_repair_recipe`
 
+### `fangore_strategy_revision` — StrategyRevision gate and gastronomic revise tiling
+
+Persona **fangore**; execution `parallel`; 7 stage(s).
+
+Stories: `fangore_strategy_revision_accept`, `fangore_strategy_revision_change`, `fangore_strategy_revision_retry`, `fangore_strategy_revision_shape`, `fangore_strategy_revision_stop`, `fangore_strategy_revision_validate_errors`, `fangore_strategy_revision_yield`
+
 ### `fangore_tdr_crash` — Transactionally durable crash recovery
 
 Persona **fangore**; execution `parallel`; 6 stage(s).
@@ -1657,13 +1663,13 @@ Suite stage `060_fangore_failure_diagnosis_validate_errors` — validation.ok fa
 
 1. [Gastronomic M6 diagnosis validate errors](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Validate is a schema report; hosts decide whether to hard-fail
 
-### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→…→diagnose tiles
+### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→…→revise tiles
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile through diagnose_tile subgraphs without mutating guided_coding.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile through revise_tile subgraphs without mutating guided_coding.
 
 #### Implementation
 
-Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, `change_execution`, `change_verification`, and `failure_diagnosis`.
+Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, `change_execution`, `change_verification`, `failure_diagnosis`, and `strategy_revision`.
 
 #### Validation
 
@@ -1671,7 +1677,7 @@ Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name
 
 #### Footnotes
 
-1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through diagnose before revise stages
+1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through revise before acceptance stage
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 
@@ -3436,6 +3442,118 @@ Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps 
 #### Footnotes
 
 1. [Jev decisions in a Pi harness](https://academy.dair.ai/resources/jev-decisions-in-a-pi-sdk-harness) — Routing, gating, batched questions, thresholds
+
+### `fangore_strategy_revision_accept` — Green diagnosis yields continue_or_accept
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks strategy_revision against a none-class Diagnosis and verifies disposition continue_or_accept.
+
+#### Implementation
+
+`revision_*` hard nodes; Agentic Recipe `strategy_revision`.
+
+#### Validation
+
+Suite stage `015_fangore_strategy_revision_accept` — continue_or_accept.
+
+#### Footnotes
+
+1. [Gastronomic M6 revision accept](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Green verify path continues without inventing a repair loop
+
+### `fangore_strategy_revision_change` — Repeat failure class forces change_strategy
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks strategy_revision against a Diagnosis whose next_experiment already marks a repeated class, and verifies disposition change_strategy with strategy_changed true.
+
+#### Implementation
+
+`revision_*` hard nodes; Agentic Recipe `strategy_revision`.
+
+#### Validation
+
+Suite stage `025_fangore_strategy_revision_change` — change_strategy.
+
+#### Footnotes
+
+1. [Gastronomic M6 revision change strategy](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Repeated identical failure cannot cause unbounded identical retries
+
+### `fangore_strategy_revision_retry` — Retry disposition requires evidence delta
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks strategy_revision against a semantics Diagnosis with remaining retry budget, and verifies disposition retry with evidence_delta_required true.
+
+#### Implementation
+
+`revision_*` hard nodes; Agentic Recipe `strategy_revision`.
+
+#### Validation
+
+Suite stage `010_fangore_strategy_revision_retry` — disposition retry.
+
+#### Footnotes
+
+1. [Gastronomic M6 revision retry](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Every retry must add evidence
+
+### `fangore_strategy_revision_shape` — Instantiate the strategy_revision Agentic Recipe
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `strategy_revision` and verifies constrain/decide/publish/validate node ids.
+
+#### Implementation
+
+Agentic Recipe `strategy_revision` (`StrategyRevisionTemplate`) via `instantiate_recipe`.
+
+#### Validation
+
+Suite stage `005_fangore_strategy_revision_shape` — template_name and node ids.
+
+#### Footnotes
+
+1. [Gastronomic M6 strategy_revision](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Deterministic retry gate after diagnosis
+
+### `fangore_strategy_revision_stop` — Exhausted retry budget stops the loop
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks strategy_revision with attempts_used equal to attempts_max and verifies disposition stop.
+
+#### Implementation
+
+`revision_*` hard nodes; Agentic Recipe `strategy_revision`.
+
+#### Validation
+
+Suite stage `020_fangore_strategy_revision_stop` — disposition stop.
+
+#### Footnotes
+
+1. [Gastronomic M6 revision stop](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Retry loops must terminate when budget is exhausted
+
+### `fangore_strategy_revision_validate_errors` — revision_validate reports schema errors without failing the node
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a malformed StrategyRevision into the bag, runs `revision_validate` with fail_if_invalid false, and verifies the validation receipt lists errors while the walk stays ok.
+
+#### Implementation
+
+`revision_validate` in `revision_hard_nodes`; `validate_strategy_revision`.
+
+#### Validation
+
+Suite stage `035_fangore_strategy_revision_validate_errors` — validation.ok false.
+
+#### Footnotes
+
+1. [Gastronomic M6 revision validate errors](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Validate is a schema report; hosts decide whether to hard-fail
+
+### `fangore_strategy_revision_yield` — Unknown diagnosis yields guidance
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks strategy_revision against an unknown failure_class Diagnosis and verifies disposition yield_guidance.
+
+#### Implementation
+
+`revision_*` hard nodes; Agentic Recipe `strategy_revision`.
+
+#### Validation
+
+Suite stage `030_fangore_strategy_revision_yield` — yield_guidance.
+
+#### Footnotes
+
+1. [Gastronomic M6 revision yield](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Unknown host evidence escalates instead of inventing a repair
 
 ### `fangore_tdr_crash_after_accept_before_record` — Resume after remote accept before the plan records the result
 
