@@ -1,0 +1,78 @@
+id: fangore_failure_diagnosis_regression
+suite: fangore_failure_diagnosis
+persona: fangore
+title: Classify regression when unchanged invariants fail
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  failure_diagnosis against a VerificationReport whose regression block marks unchanged invariants
+  false, and verifies `out.diagnosis.failure_class` is regression.
+implementation: '`diagnosis_*` hard nodes; Agentic Recipe `failure_diagnosis`.'
+validation: Suite stage `015_fangore_failure_diagnosis_regression` — failure_class regression.
+footnotes:
+- id: gastronomic-m6-diagnosis-regression
+  label: Gastronomic M6 diagnosis regression
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Old invariants remain green is an acceptance gate; failed invariants diagnose as regression
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: diagnose regression
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.verification_report:
+            version: '1'
+            status: failed
+            failures: []
+            verify_runs: []
+            regression:
+              unchanged_invariants_ok: false
+              invariants_checked: 1
+    - id: constrain
+      kind: diagnosis_constrain
+      depends_on: [seed]
+      payload:
+        reads: {verification_report: in.verification_report}
+        writes: {destination: acc.diagnosis.constraints}
+    - id: classify
+      kind: diagnosis_classify
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.diagnosis.constraints}
+        writes: {destination: acc.diagnosis.classification}
+    - id: publish
+      kind: diagnosis_publish
+      depends_on: [classify]
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+          classification: acc.diagnosis.classification
+        writes: {destination: out.diagnosis}
+    - id: validate
+      kind: diagnosis_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.diagnosis}
+        writes: {destination: acc.diagnosis.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: regression}
+  - {kind: equals, key: bag.out.diagnosis.next_experiment, value: restore_untouched_invariant_or_narrow_scope}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: regression}
+cleanup: []

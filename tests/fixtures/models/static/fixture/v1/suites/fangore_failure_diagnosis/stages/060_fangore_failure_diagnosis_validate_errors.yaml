@@ -1,0 +1,58 @@
+id: fangore_failure_diagnosis_validate_errors
+suite: fangore_failure_diagnosis
+persona: fangore
+title: diagnosis_validate reports schema errors without failing the node
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a
+  malformed Diagnosis into the bag, runs `diagnosis_validate` with fail_if_invalid false, and
+  verifies the validation receipt lists errors while the walk stays ok.
+implementation: '`diagnosis_validate` in `diagnosis_hard_nodes`; `validate_diagnosis`.'
+validation: Suite stage `060_fangore_failure_diagnosis_validate_errors` — validation.ok false.
+footnotes:
+- id: gastronomic-m6-diagnosis-validate-errors
+  label: Gastronomic M6 diagnosis validate errors
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Validate is a schema report; hosts decide whether to hard-fail
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: validate bad diagnosis
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          out.diagnosis:
+            version: '0'
+            status: weird
+            failure_class: not_a_class
+            evidence: not-a-list
+            suspected_cause: ''
+            next_experiment: ''
+            confidence: 2.5
+            prior_attempts: nope
+    - id: validate
+      kind: diagnosis_validate
+      depends_on: [seed]
+      payload:
+        reads: {source: out.diagnosis}
+        writes: {destination: acc.diagnosis.validation}
+        parameters: {fail_if_invalid: false}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.acc.diagnosis.validation.ok, value: false}
+complete:
+  expect:
+  - {kind: equals, key: bag.acc.diagnosis.validation.ok, value: false}
+cleanup: []

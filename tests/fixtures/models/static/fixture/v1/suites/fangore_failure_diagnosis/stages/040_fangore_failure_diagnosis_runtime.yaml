@@ -1,0 +1,76 @@
+id: fangore_failure_diagnosis_runtime
+suite: fangore_failure_diagnosis
+persona: fangore
+title: Classify runtime from traceback evidence
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  failure_diagnosis against VerificationReport failures that cite a Traceback ImportError, and
+  verifies `out.diagnosis.failure_class` is runtime.
+implementation: '`diagnosis_*` hard nodes; Agentic Recipe `failure_diagnosis`.'
+validation: Suite stage `040_fangore_failure_diagnosis_runtime` — failure_class runtime.
+footnotes:
+- id: gastronomic-m6-diagnosis-runtime
+  label: Gastronomic M6 diagnosis runtime
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Distinguish runtime exceptions from assertion semantics
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: diagnose runtime
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.verification_report:
+            version: '1'
+            status: failed
+            failures:
+            - 'Traceback: ImportError: No module named calc.missing'
+            verify_runs: []
+            regression: {unchanged_invariants_ok: true, invariants_checked: 0}
+    - id: constrain
+      kind: diagnosis_constrain
+      depends_on: [seed]
+      payload:
+        reads: {verification_report: in.verification_report}
+        writes: {destination: acc.diagnosis.constraints}
+    - id: classify
+      kind: diagnosis_classify
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.diagnosis.constraints}
+        writes: {destination: acc.diagnosis.classification}
+    - id: publish
+      kind: diagnosis_publish
+      depends_on: [classify]
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+          classification: acc.diagnosis.classification
+        writes: {destination: out.diagnosis}
+    - id: validate
+      kind: diagnosis_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.diagnosis}
+        writes: {destination: acc.diagnosis.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: runtime}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.diagnosis.next_experiment, value: fix_exception_at_cited_frame}
+cleanup: []
