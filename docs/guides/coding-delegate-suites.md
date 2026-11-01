@@ -50,18 +50,8 @@ Authoring: `suites/delegate_pkg/suite.yaml` + `stages/*.yaml` (+ optional
 # Static (provisional)
 pytest -s -q tests/stories/test_user_story_suites.py -k delegate_pkg
 
-# Live gate (required before trusting stubs) — LAN Nemotron
-MECHA_STORY_BACKEND=live \
-  MECHA_BASE_URL=http://192.168.1.21:8000/v1 \
-  MECHA_MODEL=nemotron-3.5-super-vl \
-  MECHA_MAX_TOKENS=2048 \
-  pytest -s -q tests/stories/test_user_story_suites.py -k delegate_pkg
-
-# Same against laptop LM Studio
-MECHA_STORY_BACKEND=live \
-  MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
-  MECHA_MODEL=qwen/qwen3.6-35b-a3b \
-  MECHA_MAX_TOKENS=1024 \
+# Live gate (required before trusting stubs)
+MECHA_STORY_BACKEND=live MECHA_BASE_URL=http://192.168.1.21:8000/v1 \
   pytest -s -q tests/stories/test_user_story_suites.py -k delegate_pkg
 ```
 

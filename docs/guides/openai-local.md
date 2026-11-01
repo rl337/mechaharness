@@ -9,23 +9,10 @@ Unlike `vllm` / `lmstudio`, this profile does **not** ship a default
 
 ## Backend
 
-Current lab hosts (OpenAI-compat `/v1`):
-
-| Host | URL | Served id (`MECHA_MODEL`) | Backend |
-|------|-----|---------------------------|---------|
-| Laptop LM Studio | `http://127.0.0.1:1234/v1` | `qwen/qwen3.6-35b-a3b` (load in LM Studio) | `lmstudio` |
-| LAN Nemotron Super VL | `http://192.168.1.21:8000/v1` | `nemotron-3.5-super-vl` | `openai_local` / `openai_compat` |
-
 ```bash
-# LAN Nemotron
-export MECHA_BASE_URL=http://192.168.1.21:8000/v1
-export MECHA_API_KEY=local
-export MECHA_MODEL=nemotron-3.5-super-vl
-
-# or laptop LM Studio (defaults also work with --backend lmstudio):
-# export MECHA_BASE_URL=http://127.0.0.1:1234/v1
-# export MECHA_API_KEY=lm-studio
-# export MECHA_MODEL=qwen/qwen3.6-35b-a3b
+export MECHA_BASE_URL=http://127.0.0.1:8000/v1   # or your host's OpenAI-compat URL
+export MECHA_API_KEY=local                       # placeholder is fine for local vLLM
+export MECHA_MODEL=<served-model-id>
 
 mechaharness run "Reply with ok." \
   --backend openai_local \
@@ -34,8 +21,7 @@ mechaharness run "Reply with ok." \
 ```
 
 Use the **served model id** your server advertises on `/v1/models`, not a
-Hugging Face repo id. Nemotron emits reasoning tokens before `content`; prefer
-`MECHA_MAX_TOKENS` ≥ 2048 so short replies are not truncated to empty content.
+Hugging Face repo id.
 
 Live and offline pytest use the dual-mode **user story** suite (see
 [User stories](./user-stories.md)). Offline CI always runs cassettes; live hits
@@ -44,31 +30,22 @@ real HTTP for cassette twins **and** static `infer` / `judge` /
 stay hard; cassette-exact token counts are soft.
 
 ```bash
-# Full model-using live suite against LAN Nemotron
+# Full model-using live suite (reason + judge)
 MECHA_STORY_BACKEND=live \
-  MECHA_BASE_URL=http://192.168.1.21:8000/v1 \
-  MECHA_MODEL=nemotron-3.5-super-vl \
-  MECHA_MAX_TOKENS=2048 \
-  pytest -q tests/stories
-
-# Same against laptop LM Studio (+ optional judge)
-MECHA_STORY_BACKEND=live \
-  MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
-  MECHA_MODEL=qwen/qwen3.6-35b-a3b \
+  MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
+  MECHA_MODEL=qwen3-30b-thinking \
   MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 \
   MECHA_JUDGE_MODEL=laya \
   MECHA_MAX_TOKENS=1024 \
   pytest -q tests/stories
 
-# Reason-lane filter only (cassette path filter ≠ served id)
-MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen-qwen3.6-35b-a3b \
-  MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
-  MECHA_MODEL=qwen/qwen3.6-35b-a3b \
+# Reason-lane filter only
+MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=openai_compat/qwen3-30b-thinking \
+  MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
   pytest -q tests/stories -k nubble_run_cost
 
-# shorthand (legacy alias still points at the Qwen cassette path)
-MECHA_LIVE_QWEN=1 MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
-  MECHA_MODEL=qwen/qwen3.6-35b-a3b \
+# shorthand
+MECHA_LIVE_OPENAI_COMPAT=1 MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
   pytest -q tests/stories -k nubble_run_cost
 ```
 
