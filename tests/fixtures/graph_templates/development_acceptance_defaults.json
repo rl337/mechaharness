@@ -1,0 +1,25 @@
+{
+  "id": "development_acceptance_defaults",
+  "description": "development_acceptance constrains then decides host outcome",
+  "template": "development_acceptance",
+  "params": {
+    "goal": "Accept multiply change",
+    "inputs": {
+      "goal": "Accept multiply change",
+      "verification_report": {"version": "1", "status": "ok"},
+      "strategy_revision": {"disposition": "continue_or_accept"}
+    }
+  },
+  "expect": {
+    "template_name": "development_acceptance",
+    "template_status": "active",
+    "node_ids": ["seed", "constrain", "decide", "publish", "validate"],
+    "edge_count": 4,
+    "nodes": {
+      "constrain": {"kind": "acceptance_constrain"},
+      "decide": {"kind": "acceptance_decide"},
+      "publish": {"kind": "acceptance_publish"},
+      "validate": {"kind": "acceptance_validate"}
+    }
+  }
+}

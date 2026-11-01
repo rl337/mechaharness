@@ -137,7 +137,10 @@ def test_gastronomic_tiles_revise_after_diagnose() -> None:
     )
     assert "diagnose_tile" in graph.nodes
     assert "revise_tile" in graph.nodes
+    assert "accept_tile" in graph.nodes
     assert graph.nodes["revise_tile"].subgraph
+    assert graph.nodes["accept_tile"].subgraph
+    assert "publish_outcome" in graph.nodes
     assert "publish_revision" in graph.nodes
 
 

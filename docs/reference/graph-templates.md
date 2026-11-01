@@ -49,7 +49,8 @@ owning user stories):
 | [change_verification](./graph-templates/change-verification.md) | `change_verification` | `fangore_change_verification_host` | Host-observed VerificationReport |
 | [failure_diagnosis](./graph-templates/failure-diagnosis.md) | `failure_diagnosis` | `fangore_failure_diagnosis_classify` | Evidence-linked Diagnosis |
 | [strategy_revision](./graph-templates/strategy-revision.md) | `strategy_revision` | `fangore_strategy_revision_retry` | Deterministic retry / stop / yield gate |
-| [gastronomic_guided_development](./graph-templates/gastronomic-guided-development.md) | `gastronomic_guided_development` | `fangore_gastronomic_guided_development_shape` | Product tile: discovery → … → revise |
+| [development_acceptance](./graph-templates/development-acceptance.md) | `development_acceptance` | `fangore_development_acceptance_completed` | Host DevelopmentOutcome gate |
+| [gastronomic_guided_development](./graph-templates/gastronomic-guided-development.md) | `gastronomic_guided_development` | `fangore_gastronomic_guided_development_shape` | Product tile: discovery → … → accept |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
 `GraphTemplate.tile` (embed under a parent node). Story:
@@ -117,7 +118,8 @@ held-out gate guards `ResearchLab.promote`.
 | `change_verification` | ChangeExecution + contract → host VerificationReport |
 | `failure_diagnosis` | VerificationReport → typed Diagnosis + next experiment |
 | `strategy_revision` | Diagnosis → StrategyRevision disposition (retry/stop/yield) |
-| `gastronomic_guided_development` | Product composition (discovery → … → revise; accept deferred) |
+| `development_acceptance` | Host gates → DevelopmentOutcome (completed/needs_guidance/failed) |
+| `gastronomic_guided_development` | Product composition (discovery → … → accept) |
 
 These are distinct Agentic Recipes on the same `GraphTemplate` substrate.
 

@@ -68,9 +68,11 @@ def test_gastronomic_tiles_verify_after_execute() -> None:
     assert "verify_tile" in graph.nodes
     assert "diagnose_tile" in graph.nodes
     assert "revise_tile" in graph.nodes
+    assert "accept_tile" in graph.nodes
     assert graph.nodes["verify_tile"].subgraph
     assert graph.nodes["diagnose_tile"].subgraph
     assert graph.nodes["revise_tile"].subgraph
+    assert graph.nodes["accept_tile"].subgraph
 
 
 def test_host_verify_runs_and_invariants(tmp_path: Path) -> None:
