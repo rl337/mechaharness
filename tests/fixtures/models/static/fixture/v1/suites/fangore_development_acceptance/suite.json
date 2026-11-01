@@ -1,0 +1,39 @@
+{
+  "id": "fangore_development_acceptance",
+  "title": "DevelopmentAcceptance outcome gate and gastronomic accept tiling",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_development_acceptance_shape",
+      "scenario": "005_fangore_development_acceptance_shape"
+    },
+    {
+      "story": "fangore_development_acceptance_completed",
+      "scenario": "010_fangore_development_acceptance_completed"
+    },
+    {
+      "story": "fangore_development_acceptance_guidance",
+      "scenario": "015_fangore_development_acceptance_guidance"
+    },
+    {
+      "story": "fangore_development_acceptance_failed",
+      "scenario": "020_fangore_development_acceptance_failed"
+    },
+    {
+      "story": "fangore_development_acceptance_judge_advisory",
+      "scenario": "025_fangore_development_acceptance_judge_advisory"
+    },
+    {
+      "story": "fangore_development_acceptance_validate_errors",
+      "scenario": "030_fangore_development_acceptance_validate_errors"
+    }
+  ]
+}

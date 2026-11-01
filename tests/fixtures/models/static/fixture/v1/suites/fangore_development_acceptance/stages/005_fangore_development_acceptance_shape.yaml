@@ -1,0 +1,44 @@
+id: fangore_development_acceptance_shape
+suite: fangore_development_acceptance
+persona: fangore
+title: Instantiate the development_acceptance Agentic Recipe
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `development_acceptance` and verifies constrain/decide/publish/validate node ids.
+implementation: Agentic Recipe `development_acceptance` (`DevelopmentAcceptanceTemplate`) via
+  `instantiate_recipe`.
+validation: Suite stage `005_fangore_development_acceptance_shape` — template_name and node ids.
+footnotes:
+- id: gastronomic-m6-acceptance-shape
+  label: Gastronomic M6 development_acceptance
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Final host outcome gate after revise
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: development_acceptance
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/development_acceptance.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: development_acceptance
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - seed
+    - constrain
+    - decide
+    - publish
+    - validate
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: development_acceptance
+cleanup: []

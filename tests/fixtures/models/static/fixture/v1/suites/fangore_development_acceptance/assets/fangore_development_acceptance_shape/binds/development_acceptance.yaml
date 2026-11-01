@@ -1,0 +1,17 @@
+name: development_acceptance
+summary: Instantiate development_acceptance for host outcome gating.
+goal: Accept multiply change
+inputs:
+  goal: Accept multiply change
+  change_contract:
+    status: ok
+  verification_report:
+    version: '1'
+    status: ok
+    failures: []
+    regression:
+      unchanged_invariants_ok: true
+  change_execution:
+    status: ok
+  strategy_revision:
+    disposition: continue_or_accept

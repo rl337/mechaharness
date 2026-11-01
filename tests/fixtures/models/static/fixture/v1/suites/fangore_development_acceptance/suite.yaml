@@ -1,0 +1,9 @@
+id: fangore_development_acceptance
+title: DevelopmentAcceptance outcome gate and gastronomic accept tiling
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

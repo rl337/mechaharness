@@ -1,0 +1,56 @@
+id: fangore_development_acceptance_validate_errors
+suite: fangore_development_acceptance
+persona: fangore
+title: acceptance_validate reports schema errors without failing the node
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a
+  malformed DevelopmentOutcome into the bag, runs `acceptance_validate` with fail_if_invalid false,
+  and verifies the validation receipt lists errors while the walk stays ok.
+implementation: '`acceptance_validate` in `acceptance_hard_nodes`; `validate_development_outcome`.'
+validation: Suite stage `030_fangore_development_acceptance_validate_errors` — validation.ok false.
+footnotes:
+- id: gastronomic-m6-acceptance-validate-errors
+  label: Gastronomic M6 acceptance validate errors
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Validate is a schema report; hosts decide whether to hard-fail
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: validate bad outcome
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          out.development_outcome:
+            version: '0'
+            status: weird
+            outcome: not_a_outcome
+            reason: ''
+            gates: nope
+            evidence: nope
+    - id: validate
+      kind: acceptance_validate
+      depends_on: [seed]
+      payload:
+        reads: {source: out.development_outcome}
+        writes: {destination: acc.acceptance.validation}
+        parameters: {fail_if_invalid: false}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.acc.acceptance.validation.ok, value: false}
+complete:
+  expect:
+  - {kind: equals, key: bag.acc.acceptance.validation.ok, value: false}
+cleanup: []
