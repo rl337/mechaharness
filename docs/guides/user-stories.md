@@ -177,6 +177,12 @@ Persona **fangore**; execution `parallel`; 12 stage(s).
 
 Stories: `fangore_failure_diagnosis_classify`, `fangore_failure_diagnosis_green`, `fangore_failure_diagnosis_incomplete`, `fangore_failure_diagnosis_regression`, `fangore_failure_diagnosis_repeat`, `fangore_failure_diagnosis_runtime`, `fangore_failure_diagnosis_scope`, `fangore_failure_diagnosis_shape`, `fangore_failure_diagnosis_syntax`, `fangore_failure_diagnosis_tool_protocol`, `fangore_failure_diagnosis_unknown`, `fangore_failure_diagnosis_validate_errors`
 
+### `fangore_gastronomic_comparison` — Gastronomic vs guided_coding comparison trial records
+
+Persona **fangore**; execution `parallel`; 3 stage(s).
+
+Stories: `fangore_gastronomic_comparison_shape`, `fangore_gastronomic_comparison_summary`, `fangore_gastronomic_comparison_trial`
+
 ### `fangore_graph_executor` — Graph executor, soft points, traversal, and budgets
 
 Persona **fangore**; execution `parallel`; 20 stage(s).
@@ -1764,6 +1770,54 @@ Suite stage `060_fangore_failure_diagnosis_validate_errors` — validation.ok fa
 #### Footnotes
 
 1. [Gastronomic M6 diagnosis validate errors](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Validate is a schema report; hosts decide whether to hard-fail
+
+### `fangore_gastronomic_comparison_shape` — Instantiate the gastronomic_comparison Agentic Recipe
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_comparison` and verifies assemble/validate node ids.
+
+#### Implementation
+
+Agentic Recipe `gastronomic_comparison` (`GastronomicComparisonTemplate`).
+
+#### Validation
+
+Suite stage `015_fangore_gastronomic_comparison_shape` — template_name and node ids.
+
+#### Footnotes
+
+1. [Gastronomic comparison recipe](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Trial-record recipe for fair A/B logging
+
+### `fangore_gastronomic_comparison_summary` — Summarize A/B trials without declaring a winner
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks comparison_summarize over one guided_coding arm-A trial and one gastronomic arm-B trial, and verifies comparable_ab true while winner stays null.
+
+#### Implementation
+
+`comparison_summarize` in `comparison_hard_nodes`; `summarize_gastronomic_comparison`.
+
+#### Validation
+
+Suite stage `010_fangore_gastronomic_comparison_summary` — winner null.
+
+#### Footnotes
+
+1. [Gastronomic comparison summary](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Aggregates never auto-declare a winner
+
+### `fangore_gastronomic_comparison_trial` — Assemble a gastronomic arm-B trial from DevelopmentOutcome
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks comparison_assemble against a completed DevelopmentOutcome and host metrics for arm B, validates the trial record, and verifies success with recipe gastronomic_guided_development.
+
+#### Implementation
+
+`comparison_assemble` / `comparison_validate`; Agentic Recipe `gastronomic_comparison`.
+
+#### Validation
+
+Suite stage `005_fangore_gastronomic_comparison_trial` — arm B success true.
+
+#### Footnotes
+
+1. [Gastronomic comparison trial](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Comparable trial records without inventing a winner
 
 ### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→…→accept tiles
 
