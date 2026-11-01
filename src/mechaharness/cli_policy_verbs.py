@@ -1302,6 +1302,10 @@ class GraphWalkVerb(CliVerb):
                 CONTRACT_HARD_KINDS,
                 ContractHardNodeRunner,
             )
+            from mechaharness.diagnosis_hard_nodes import (
+                DIAGNOSIS_HARD_KINDS,
+                DiagnosisHardNodeRunner,
+            )
             from mechaharness.discovery_hard_nodes import (
                 DISCOVERY_HARD_KINDS,
                 DiscoveryHardNodeRunner,
@@ -1314,6 +1318,10 @@ class GraphWalkVerb(CliVerb):
                 PLAN_HARD_KINDS,
                 PlanHardNodeRunner,
             )
+            from mechaharness.verification_hard_nodes import (
+                VERIFICATION_HARD_KINDS,
+                VerificationHardNodeRunner,
+            )
 
             infer_kind_set = set(DEFAULT_INFER_KINDS)
             judge_kind_set = set(DEFAULT_JUDGE_KINDS)
@@ -1321,11 +1329,15 @@ class GraphWalkVerb(CliVerb):
             contract_kind_set = set(CONTRACT_HARD_KINDS)
             plan_kind_set = set(PLAN_HARD_KINDS)
             execution_kind_set = set(EXECUTION_HARD_KINDS)
+            verification_kind_set = set(VERIFICATION_HARD_KINDS)
+            diagnosis_kind_set = set(DIAGNOSIS_HARD_KINDS)
             hard_kind_set = (
                 discovery_kind_set
                 | contract_kind_set
                 | plan_kind_set
                 | execution_kind_set
+                | verification_kind_set
+                | diagnosis_kind_set
             )
             special_kinds = infer_kind_set | judge_kind_set | hard_kind_set
             leaf_kinds = [k for k in kinds if k != "subgraph"]
@@ -1334,6 +1346,10 @@ class GraphWalkVerb(CliVerb):
             contract_kinds = [k for k in leaf_kinds if k in contract_kind_set]
             plan_kinds = [k for k in leaf_kinds if k in plan_kind_set]
             execution_kinds = [k for k in leaf_kinds if k in execution_kind_set]
+            verification_kinds = [
+                k for k in leaf_kinds if k in verification_kind_set
+            ]
+            diagnosis_kinds = [k for k in leaf_kinds if k in diagnosis_kind_set]
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
             needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
@@ -1349,6 +1365,8 @@ class GraphWalkVerb(CliVerb):
                 or contract_kinds
                 or plan_kinds
                 or execution_kinds
+                or verification_kinds
+                or diagnosis_kinds
             ):
                 runners.append(
                     CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
@@ -1389,6 +1407,15 @@ class GraphWalkVerb(CliVerb):
                             default_workspace=default_ws,
                         )
                     )
+            if verification_kinds:
+                runners.append(
+                    VerificationHardNodeRunner(
+                        verification_kinds,
+                        default_workspace=default_ws,
+                    )
+                )
+            if diagnosis_kinds:
+                runners.append(DiagnosisHardNodeRunner(diagnosis_kinds))
 
             # Bind Completer / EventLog first so runners are in the registry
             # snapshot when Config.configure registers GraphNodeRunnerRegistry.

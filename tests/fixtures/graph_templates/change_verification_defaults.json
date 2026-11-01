@@ -1,0 +1,26 @@
+{
+  "id": "change_verification_defaults",
+  "description": "change_verification constrains then host-runs verify checks",
+  "template": "change_verification",
+  "params": {
+    "goal": "Verify multiply helper",
+    "inputs": {
+      "goal": "Verify multiply helper",
+      "change_execution": {"version": "1", "status": "ok", "slice_id": "arithmetic"},
+      "change_contract": {"version": "1", "status": "ok"},
+      "workspace": {"root": "."}
+    }
+  },
+  "expect": {
+    "template_name": "change_verification",
+    "template_status": "active",
+    "node_ids": ["seed", "constrain", "run", "publish", "validate"],
+    "edge_count": 4,
+    "nodes": {
+      "constrain": {"kind": "verification_constrain"},
+      "run": {"kind": "verification_run"},
+      "publish": {"kind": "verification_publish"},
+      "validate": {"kind": "verification_validate"}
+    }
+  }
+}

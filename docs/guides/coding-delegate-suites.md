@@ -51,7 +51,8 @@ Authoring: `suites/delegate_pkg/suite.yaml` + `stages/*.yaml` (+ optional
 pytest -s -q tests/stories/test_user_story_suites.py -k delegate_pkg
 
 # Live gate (required before trusting stubs)
-MECHA_STORY_BACKEND=live MECHA_BASE_URL=http://192.168.1.21:8000/v1 \
+MECHA_STORY_BACKEND=live MECHA_BASE_URL=<openai-compat-base-url> \
+  MECHA_MODEL=<served-model-id> \
   pytest -s -q tests/stories/test_user_story_suites.py -k delegate_pkg
 ```
 
