@@ -71,6 +71,7 @@ def test_gastronomic_tiles_discovery_and_contract() -> None:
     assert "verify_tile" in graph.nodes
     assert "diagnose_tile" in graph.nodes
     assert "revise_tile" in graph.nodes
+    assert "accept_tile" in graph.nodes
     assert graph.nodes["discovery_tile"].subgraph
     assert graph.nodes["contract_tile"].subgraph
     assert graph.nodes["plan_tile"].subgraph
@@ -78,6 +79,7 @@ def test_gastronomic_tiles_discovery_and_contract() -> None:
     assert graph.nodes["verify_tile"].subgraph
     assert graph.nodes["diagnose_tile"].subgraph
     assert graph.nodes["revise_tile"].subgraph
+    assert graph.nodes["accept_tile"].subgraph
     comps = node_components_for(graph, template=template)
     assert any(c.kind == "soft_point" for c in comps)
     assert any(c.kind == "child_graph" for c in comps)

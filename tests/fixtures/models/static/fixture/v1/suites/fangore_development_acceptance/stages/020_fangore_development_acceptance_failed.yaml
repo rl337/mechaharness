@@ -1,0 +1,81 @@
+id: fangore_development_acceptance_failed
+suite: fangore_development_acceptance
+persona: fangore
+title: Failed verification yields failed DevelopmentOutcome
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  development_acceptance against a failed VerificationReport and stop revision, and verifies
+  outcome failed.
+implementation: '`acceptance_*` hard nodes; Agentic Recipe `development_acceptance`.'
+validation: Suite stage `020_fangore_development_acceptance_failed` — outcome failed.
+footnotes:
+- id: gastronomic-m6-acceptance-failed
+  label: Gastronomic M6 acceptance failed
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Host-observed failures mark failed, not completed
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: accept failed
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.change_contract: {status: ok}
+          in.verification_report:
+            version: '1'
+            status: failed
+            failures: ['pytest exit 1']
+            regression: {unchanged_invariants_ok: true}
+          in.change_execution: {status: ok}
+          in.strategy_revision: {disposition: stop}
+    - id: constrain
+      kind: acceptance_constrain
+      depends_on: [seed]
+      payload:
+        reads:
+          change_contract: in.change_contract
+          verification_report: in.verification_report
+          change_execution: in.change_execution
+          strategy_revision: in.strategy_revision
+        writes: {destination: acc.acceptance.constraints}
+    - id: decide
+      kind: acceptance_decide
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.acceptance.constraints}
+        writes: {destination: acc.acceptance.decision}
+    - id: publish
+      kind: acceptance_publish
+      depends_on: [decide]
+      payload:
+        reads:
+          constraints: acc.acceptance.constraints
+          decision: acc.acceptance.decision
+        writes: {destination: out.development_outcome}
+    - id: validate
+      kind: acceptance_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.development_outcome}
+        writes: {destination: acc.acceptance.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.development_outcome.outcome, value: failed}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.development_outcome.status, value: failed}
+cleanup: []

@@ -1,20 +1,20 @@
 id: fangore_gastronomic_guided_development_shape
 suite: fangore_contract_extraction
 persona: fangore
-title: Instantiate gastronomic_guided_development discovery→…→revise tiles
+title: Instantiate gastronomic_guided_development discovery→…→accept tiles
 narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
-  Recipe `gastronomic_guided_development` and verifies discovery_tile through revise_tile subgraphs
+  Recipe `gastronomic_guided_development` and verifies discovery_tile through accept_tile subgraphs
   without mutating guided_coding.
 implementation: Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`)
   tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, `change_execution`,
-  `change_verification`, `failure_diagnosis`, and `strategy_revision`.
+  `change_verification`, `failure_diagnosis`, `strategy_revision`, and `development_acceptance`.
 validation: Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name and tile node
   ids.
 footnotes:
 - id: gastronomic-m6-product-shape
   label: Gastronomic M6 product recipe
   url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
-  note: Product recipe through revise before acceptance stage
+  note: Product recipe through development_acceptance
 kind: user_story
 environment:
   family: pass_through
@@ -42,6 +42,8 @@ steps:
     - verify_tile
     - diagnose_tile
     - revise_tile
+    - accept_tile
+    - publish_outcome
     - publish_revision
     - publish
     - publish_verification
