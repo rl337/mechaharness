@@ -159,6 +159,12 @@ Persona **fangore**; execution `parallel`; 15 stage(s).
 
 Stories: `fangore_audited_infer_accept`, `fangore_decision_plane_model_policy`, `fangore_decision_plane_policy__accept_billing`, `fangore_decision_plane_policy__invalid_team`, `fangore_decision_plane_policy__low_confidence`, `fangore_decision_plane_projection`, `fangore_decision_plane_recipe`, `fangore_decision_plane_shadow`, `fangore_decision_plane_telemetry`, `fangore_decision_surface_reject`, `fangore_insp_anchor_evidence`, `fangore_insp_decision_conflict_checkpoint__cleared_at_c`, `fangore_insp_decision_conflict_checkpoint__cycle_never_cleared`, `fangore_insp_decision_conflict_checkpoint__no_conflicts`, `fangore_refund_verdict`
 
+### `fangore_development_acceptance` — DevelopmentAcceptance outcome gate and gastronomic accept tiling
+
+Persona **fangore**; execution `parallel`; 6 stage(s).
+
+Stories: `fangore_development_acceptance_completed`, `fangore_development_acceptance_failed`, `fangore_development_acceptance_guidance`, `fangore_development_acceptance_judge_advisory`, `fangore_development_acceptance_shape`, `fangore_development_acceptance_validate_errors`
+
 ### `fangore_durable_ioc` — Durable IoC, guidance yield, and local plan resume
 
 Persona **fangore**; execution `parallel`; 10 stage(s).
@@ -1455,6 +1461,102 @@ Covers: CTX-06, CTX-07.
 
 Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
+### `fangore_development_acceptance_completed` — Green host gates yield completed DevelopmentOutcome
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks development_acceptance against green contract/verify/execution and continue_or_accept revision, and verifies `out.development_outcome.outcome` is completed.
+
+#### Implementation
+
+`acceptance_*` hard nodes; Agentic Recipe `development_acceptance`.
+
+#### Validation
+
+Suite stage `010_fangore_development_acceptance_completed` — outcome completed.
+
+#### Footnotes
+
+1. [Gastronomic M6 acceptance completed](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — completed must be backed by host gates, not model text
+
+### `fangore_development_acceptance_failed` — Failed verification yields failed DevelopmentOutcome
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks development_acceptance against a failed VerificationReport and stop revision, and verifies outcome failed.
+
+#### Implementation
+
+`acceptance_*` hard nodes; Agentic Recipe `development_acceptance`.
+
+#### Validation
+
+Suite stage `020_fangore_development_acceptance_failed` — outcome failed.
+
+#### Footnotes
+
+1. [Gastronomic M6 acceptance failed](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Host-observed failures mark failed, not completed
+
+### `fangore_development_acceptance_guidance` — Yielding revision becomes needs_guidance
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks development_acceptance against a strategy_revision disposition yield_guidance and verifies outcome needs_guidance.
+
+#### Implementation
+
+`acceptance_*` hard nodes; Agentic Recipe `development_acceptance`.
+
+#### Validation
+
+Suite stage `015_fangore_development_acceptance_guidance` — needs_guidance.
+
+#### Footnotes
+
+1. [Gastronomic M6 acceptance guidance](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Open guidance must not mark completed
+
+### `fangore_development_acceptance_judge_advisory` — Advisory judge cannot override failed host gates
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks development_acceptance with failed verification and a judge_opinion verdict completed, and verifies the published outcome remains failed while provenance retains the advisory opinion.
+
+#### Implementation
+
+`acceptance_*` hard nodes; Agentic Recipe `development_acceptance`.
+
+#### Validation
+
+Suite stage `025_fangore_development_acceptance_judge_advisory` — judge advisory only.
+
+#### Footnotes
+
+1. [Gastronomic M6 acceptance judge advisory](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Optional independent judge never replaces host evidence
+
+### `fangore_development_acceptance_shape` — Instantiate the development_acceptance Agentic Recipe
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `development_acceptance` and verifies constrain/decide/publish/validate node ids.
+
+#### Implementation
+
+Agentic Recipe `development_acceptance` (`DevelopmentAcceptanceTemplate`) via `instantiate_recipe`.
+
+#### Validation
+
+Suite stage `005_fangore_development_acceptance_shape` — template_name and node ids.
+
+#### Footnotes
+
+1. [Gastronomic M6 development_acceptance](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Final host outcome gate after revise
+
+### `fangore_development_acceptance_validate_errors` — acceptance_validate reports schema errors without failing the node
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a malformed DevelopmentOutcome into the bag, runs `acceptance_validate` with fail_if_invalid false, and verifies the validation receipt lists errors while the walk stays ok.
+
+#### Implementation
+
+`acceptance_validate` in `acceptance_hard_nodes`; `validate_development_outcome`.
+
+#### Validation
+
+Suite stage `030_fangore_development_acceptance_validate_errors` — validation.ok false.
+
+#### Footnotes
+
+1. [Gastronomic M6 acceptance validate errors](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Validate is a schema report; hosts decide whether to hard-fail
+
 ### `fangore_environment_repair_recipe` — Run the environment repair Agentic Recipe
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`. Before dependent work continues, he runs Agentic Recipe `environment_repair`: diagnose missing substrate, attempt a bounded repair, then recheck until the environment is ok — without calling a model. Related linkage failures remain `nubble_insp_environment_linkage`. [^rc-env-repair]
@@ -1663,13 +1765,13 @@ Suite stage `060_fangore_failure_diagnosis_validate_errors` — validation.ok fa
 
 1. [Gastronomic M6 diagnosis validate errors](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Validate is a schema report; hosts decide whether to hard-fail
 
-### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→…→revise tiles
+### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→…→accept tiles
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile through revise_tile subgraphs without mutating guided_coding.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile through accept_tile subgraphs without mutating guided_coding.
 
 #### Implementation
 
-Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, `change_execution`, `change_verification`, `failure_diagnosis`, and `strategy_revision`.
+Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, `change_execution`, `change_verification`, `failure_diagnosis`, `strategy_revision`, and `development_acceptance`.
 
 #### Validation
 
@@ -1677,7 +1779,7 @@ Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name
 
 #### Footnotes
 
-1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through revise before acceptance stage
+1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through development_acceptance
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 

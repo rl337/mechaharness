@@ -60,6 +60,9 @@ from mechaharness.graph_templates.conversational_tool_loop import (
 )
 from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
 from mechaharness.graph_templates.demo_guidance import DemoGuidanceTemplate
+from mechaharness.graph_templates.development_acceptance import (
+    DevelopmentAcceptanceTemplate,
+)
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.failure_diagnosis import FailureDiagnosisTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
@@ -92,6 +95,7 @@ __all__ = [
     "ConversationalToolLoopTemplate",
     "DecisionPlaneTemplate",
     "DemoGuidanceTemplate",
+    "DevelopmentAcceptanceTemplate",
     "EnvironmentRepairTemplate",
     "FanOutAggregateTemplate",
     "GastronomicGuidedDevelopmentTemplate",

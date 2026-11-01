@@ -1298,6 +1298,10 @@ class GraphWalkVerb(CliVerb):
             # Subgraph kind is handled by the executor; still register leaf kinds.
             from pyiv.files import RealFilesystem
 
+            from mechaharness.acceptance_hard_nodes import (
+                ACCEPTANCE_HARD_KINDS,
+                AcceptanceHardNodeRunner,
+            )
             from mechaharness.contract_hard_nodes import (
                 CONTRACT_HARD_KINDS,
                 ContractHardNodeRunner,
@@ -1336,6 +1340,7 @@ class GraphWalkVerb(CliVerb):
             verification_kind_set = set(VERIFICATION_HARD_KINDS)
             diagnosis_kind_set = set(DIAGNOSIS_HARD_KINDS)
             revision_kind_set = set(REVISION_HARD_KINDS)
+            acceptance_kind_set = set(ACCEPTANCE_HARD_KINDS)
             hard_kind_set = (
                 discovery_kind_set
                 | contract_kind_set
@@ -1344,6 +1349,7 @@ class GraphWalkVerb(CliVerb):
                 | verification_kind_set
                 | diagnosis_kind_set
                 | revision_kind_set
+                | acceptance_kind_set
             )
             special_kinds = infer_kind_set | judge_kind_set | hard_kind_set
             leaf_kinds = [k for k in kinds if k != "subgraph"]
@@ -1357,6 +1363,7 @@ class GraphWalkVerb(CliVerb):
             ]
             diagnosis_kinds = [k for k in leaf_kinds if k in diagnosis_kind_set]
             revision_kinds = [k for k in leaf_kinds if k in revision_kind_set]
+            acceptance_kinds = [k for k in leaf_kinds if k in acceptance_kind_set]
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
             needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
@@ -1375,6 +1382,7 @@ class GraphWalkVerb(CliVerb):
                 or verification_kinds
                 or diagnosis_kinds
                 or revision_kinds
+                or acceptance_kinds
             ):
                 runners.append(
                     CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
@@ -1426,6 +1434,8 @@ class GraphWalkVerb(CliVerb):
                 runners.append(DiagnosisHardNodeRunner(diagnosis_kinds))
             if revision_kinds:
                 runners.append(RevisionHardNodeRunner(revision_kinds))
+            if acceptance_kinds:
+                runners.append(AcceptanceHardNodeRunner(acceptance_kinds))
 
             # Bind Completer / EventLog first so runners are in the registry
             # snapshot when Config.configure registers GraphNodeRunnerRegistry.

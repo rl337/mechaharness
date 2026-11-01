@@ -1,6 +1,6 @@
 {
   "id": "gastronomic_guided_development_defaults",
-  "description": "product recipe tiles discovery through revise",
+  "description": "product recipe tiles discovery through accept",
   "template": "gastronomic_guided_development",
   "params": {
     "goal": "Add multiplication safely",
@@ -22,6 +22,8 @@
       "verify_tile",
       "diagnose_tile",
       "revise_tile",
+      "accept_tile",
+      "publish_outcome",
       "publish_revision",
       "publish",
       "publish_verification",
@@ -30,7 +32,7 @@
       "publish_contract",
       "publish_inventory"
     ],
-    "edge_count": 14,
+    "edge_count": 16,
     "nodes": {
       "discovery_tile": {"kind": "subgraph"},
       "contract_tile": {"kind": "subgraph"},
@@ -39,7 +41,8 @@
       "verify_tile": {"kind": "subgraph"},
       "diagnose_tile": {"kind": "subgraph"},
       "revise_tile": {"kind": "subgraph"},
-      "publish_revision": {"kind": "bag_project"},
+      "accept_tile": {"kind": "subgraph"},
+      "publish_outcome": {"kind": "bag_project"},
       "publish": {"kind": "bag_project"}
     }
   }
