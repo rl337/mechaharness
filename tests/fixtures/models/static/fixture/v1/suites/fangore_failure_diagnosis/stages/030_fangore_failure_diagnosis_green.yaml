@@ -1,0 +1,78 @@
+id: fangore_failure_diagnosis_green
+suite: fangore_failure_diagnosis
+persona: fangore
+title: Green verification yields failure_class none
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  failure_diagnosis against an ok VerificationReport and verifies failure_class none with
+  next_experiment continue_or_accept.
+implementation: '`diagnosis_*` hard nodes; Agentic Recipe `failure_diagnosis`.'
+validation: Suite stage `030_fangore_failure_diagnosis_green` — failure_class none.
+footnotes:
+- id: gastronomic-m6-diagnosis-green
+  label: Gastronomic M6 diagnosis green
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Diagnosis must be honest when verification already passed
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: diagnose green
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.verification_report:
+            version: '1'
+            status: ok
+            failures: []
+            verify_runs:
+            - {ok: true, failures: []}
+            regression: {unchanged_invariants_ok: true, invariants_checked: 1}
+            provenance: {slice_id: arithmetic}
+    - id: constrain
+      kind: diagnosis_constrain
+      depends_on: [seed]
+      payload:
+        reads: {verification_report: in.verification_report}
+        writes: {destination: acc.diagnosis.constraints}
+    - id: classify
+      kind: diagnosis_classify
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.diagnosis.constraints}
+        writes: {destination: acc.diagnosis.classification}
+    - id: publish
+      kind: diagnosis_publish
+      depends_on: [classify]
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+          classification: acc.diagnosis.classification
+        writes: {destination: out.diagnosis}
+    - id: validate
+      kind: diagnosis_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.diagnosis}
+        writes: {destination: acc.diagnosis.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: none}
+  - {kind: equals, key: bag.out.diagnosis.next_experiment, value: continue_or_accept}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: none}
+cleanup: []

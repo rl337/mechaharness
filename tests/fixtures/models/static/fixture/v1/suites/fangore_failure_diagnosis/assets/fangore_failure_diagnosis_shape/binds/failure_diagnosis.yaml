@@ -1,0 +1,10 @@
+name: failure_diagnosis
+summary: Instantiate failure_diagnosis for host evidence classification.
+goal: Diagnose verify failure
+inputs:
+  goal: Diagnose verify failure
+  verification_report:
+    version: '1'
+    status: failed
+    failures:
+    - pytest exit 1

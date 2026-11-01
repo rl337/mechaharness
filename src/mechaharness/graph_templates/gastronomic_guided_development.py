@@ -1,7 +1,7 @@
-"""Product recipe: discovery → contract → plan → execute → verify (gastronomic M6).
+"""Product recipe: discovery → … → verify → diagnose (gastronomic M6).
 
-Catalog id: ``gastronomic_guided_development``. Diagnosis/revision stages are
-deferred; this increment tiles through host-observed change verification.
+Catalog id: ``gastronomic_guided_development``. Revision/acceptance stages are
+deferred; this increment tiles through host-observed failure diagnosis.
 ``guided_coding`` remains the unchanged baseline.
 """
 
@@ -20,12 +20,13 @@ from mechaharness.graph_templates.change_decomposition import ChangeDecompositio
 from mechaharness.graph_templates.change_execution import ChangeExecutionTemplate
 from mechaharness.graph_templates.change_verification import ChangeVerificationTemplate
 from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
+from mechaharness.graph_templates.failure_diagnosis import FailureDiagnosisTemplate
 from mechaharness.graph_templates.workspace_discovery import WorkspaceDiscoveryTemplate
 from mechaharness.isolation.isolation_contract import TemplateIOContract
 
 
 class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
-    """Seed → discovery → contract → plan → execute → verify tiles.
+    """Seed → discovery → contract → plan → execute → verify → diagnose tiles.
 
     Example:
         >>> from mechaharness.graph_templates import (
@@ -36,7 +37,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         ... )
         >>> graph.template_name
         'gastronomic_guided_development'
-        >>> "verify_tile" in graph.nodes
+        >>> "diagnose_tile" in graph.nodes
         True
     """
 
@@ -44,9 +45,8 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
     version = "1"
     category = "agentic_recipe"
     summary = (
-        "Workspace discovery, ChangeContract, ChangePlan, scoped "
-        "ChangeExecution, then host-observed VerificationReport; later M6 "
-        "stages add diagnose/revise."
+        "Workspace discovery through host-observed VerificationReport and "
+        "typed Diagnosis; later M6 stages add revise/accept."
     )
     io_contract = TemplateIOContract(
         inputs={
@@ -56,6 +56,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             "file_revisions": "object",
             "approved_slice": "object",
             "verify_runs": "object",
+            "prior_attempts": "object",
         },
         outputs={
             "workspace_inventory": "object",
@@ -63,6 +64,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             "change_plan": "object",
             "change_execution": "object",
             "verification_report": "object",
+            "diagnosis": "object",
         },
     )
     soft_points = (
@@ -102,6 +104,13 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             default={},
         ),
         SoftPoint(
+            name="diagnosis_bindings",
+            kind="task_state",
+            description="Soft bindings forwarded to failure_diagnosis",
+            required=False,
+            default={},
+        ),
+        SoftPoint(
             name="hypotheses_payload",
             kind="task_state",
             description="Optional discovery hypotheses_payload soft point",
@@ -137,6 +146,12 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             description="Optional verification verify_payload soft point",
             required=False,
         ),
+        SoftPoint(
+            name="diagnose_payload",
+            kind="task_state",
+            description="Optional diagnosis diagnose_payload soft point",
+            required=False,
+        ),
     )
 
     def build(self, params: GraphTemplateParams) -> ExecutionGraph:
@@ -158,6 +173,8 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             seed_put["in.approved_slice"] = inputs["approved_slice"]
         if "verify_runs" in inputs:
             seed_put["in.verify_runs"] = inputs["verify_runs"]
+        if "prior_attempts" in inputs:
+            seed_put["in.prior_attempts"] = inputs["prior_attempts"]
         graph.add_node(
             make_node(
                 id="seed",
@@ -310,11 +327,63 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         }
         graph.add_node(verify_embed)
 
+        diagnosis_soft = dict(bindings.get("diagnosis_bindings") or {})
+        if "diagnose_payload" in bindings and "diagnose_payload" not in diagnosis_soft:
+            diagnosis_soft["diagnose_payload"] = bindings["diagnose_payload"]
+        _diag_child, diag_embed = FailureDiagnosisTemplate().tile(
+            GraphTemplateParams(
+                goal=f"{goal}:diagnose",
+                instance_key="diagnose",
+                inputs={"goal": seed_put.get("in.goal", goal)},
+                soft_bindings=diagnosis_soft,
+            ),
+            parent_node_id="diagnose_tile",
+        )
+        del _diag_child
+        diag_embed.depends_on = ["verify_tile"]
+        diag_embed.payload = {
+            **dict(diag_embed.payload or {}),
+            "bag_inputs": {
+                "in.goal": "in.goal",
+                "in.verification_report": "acc.stages.verification",
+                "in.change_execution": "acc.stages.changes",
+                "in.prior_attempts": "in.prior_attempts",
+            },
+            "bag_outputs": {
+                "acc.stages.diagnosis": "out.diagnosis",
+            },
+        }
+        graph.add_node(diag_embed)
+
         graph.add_node(
             make_node(
                 id="publish",
                 kind="bag_project",
-                depends_on=["verify_tile"],
+                depends_on=["diagnose_tile"],
+                payload={
+                    "reads": {"source": "acc.stages.diagnosis"},
+                    "writes": {"destination": "out.diagnosis"},
+                    "parameters": {
+                        "fields": [
+                            "version",
+                            "status",
+                            "failure_class",
+                            "evidence",
+                            "suspected_cause",
+                            "next_experiment",
+                            "confidence",
+                            "prior_attempts",
+                            "provenance",
+                        ]
+                    },
+                },
+            )
+        )
+        graph.add_node(
+            make_node(
+                id="publish_verification",
+                kind="bag_project",
+                depends_on=["publish"],
                 payload={
                     "reads": {"source": "acc.stages.verification"},
                     "writes": {"destination": "out.verification_report"},
@@ -335,7 +404,7 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             make_node(
                 id="publish_execution",
                 kind="bag_project",
-                depends_on=["publish"],
+                depends_on=["publish_verification"],
                 payload={
                     "reads": {"source": "acc.stages.changes"},
                     "writes": {"destination": "out.change_execution"},
@@ -432,8 +501,10 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             ("contract_tile", "plan_tile"),
             ("plan_tile", "execute_tile"),
             ("execute_tile", "verify_tile"),
-            ("verify_tile", "publish"),
-            ("publish", "publish_execution"),
+            ("verify_tile", "diagnose_tile"),
+            ("diagnose_tile", "publish"),
+            ("publish", "publish_verification"),
+            ("publish_verification", "publish_execution"),
             ("publish_execution", "publish_plan"),
             ("publish_plan", "publish_contract"),
             ("publish_contract", "publish_inventory"),
