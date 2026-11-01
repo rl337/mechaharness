@@ -260,10 +260,15 @@ owning user stories):</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_strategy_revision_retry</span></code></p></td>
 <td><p>Deterministic retry / stop / yield gate</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/gastronomic-guided-development.html"><span class="std std-doc">gastronomic_guided_development</span></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/development-acceptance.html"><span class="std std-doc">development_acceptance</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">development_acceptance</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_development_acceptance_completed</span></code></p></td>
+<td><p>Host DevelopmentOutcome gate</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/gastronomic-guided-development.html"><span class="std std-doc">gastronomic_guided_development</span></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_gastronomic_guided_development_shape</span></code></p></td>
-<td><p>Product tile: discovery → … → revise</p></td>
+<td><p>Product tile: discovery → … → accept</p></td>
 </tr>
 </tbody>
 </table>
@@ -375,8 +380,11 @@ held-out gate guards <code class="docutils literal notranslate"><span class="pre
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">strategy_revision</span></code></p></td>
 <td><p>Diagnosis → StrategyRevision disposition (retry/stop/yield)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
-<td><p>Product composition (discovery → … → revise; accept deferred)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">development_acceptance</span></code></p></td>
+<td><p>Host gates → DevelopmentOutcome (completed/needs_guidance/failed)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
+<td><p>Product composition (discovery → … → accept)</p></td>
 </tr>
 </tbody>
 </table>

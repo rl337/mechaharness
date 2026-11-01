@@ -1,8 +1,8 @@
 # Template: gastronomic_guided_development
 
 Product composition for gastronomic guided development. Discovery through
-scoped execute, host verification, failure diagnosis, and strategy revision are
-tiled; acceptance is deferred. `guided_coding` remains the baseline control.
+scoped execute, host verification, failure diagnosis, strategy revision, and
+development acceptance are tiled. `guided_coding` remains the baseline control.
 
 | Item | Value |
 |------|-------|
@@ -22,8 +22,9 @@ seed
   → verify_tile (change_verification)
   → diagnose_tile (failure_diagnosis)
   → revise_tile (strategy_revision)
-  → publish_revision / publish / publish_verification / publish_execution /
-    publish_plan / publish_contract / publish_inventory
+  → accept_tile (development_acceptance)
+  → publish_outcome / publish_revision / publish / publish_verification /
+    publish_execution / publish_plan / publish_contract / publish_inventory
 ```
 
 ## Soft points
@@ -37,6 +38,7 @@ seed
 | `verification_bindings` | task_state | Forwarded to `change_verification` |
 | `diagnosis_bindings` | task_state | Forwarded to `failure_diagnosis` |
 | `revision_bindings` | task_state | Forwarded to `strategy_revision` |
+| `acceptance_bindings` | task_state | Forwarded to `development_acceptance` |
 | `hypotheses_payload` | task_state | Optional discovery soft point |
 | `interpret_payload` | task_state | Optional discovery soft point |
 | `propose_payload` | task_state | Optional contract soft point |
@@ -45,6 +47,7 @@ seed
 | `verify_payload` | task_state | Optional verification soft point |
 | `diagnose_payload` | task_state | Optional diagnosis soft point |
 | `revise_payload` | task_state | Optional revision soft point |
+| `accept_payload` | task_state | Optional acceptance soft point |
 
 ## Node components
 
@@ -57,6 +60,7 @@ seed
 | `verify_tile` | `child_graph` |
 | `diagnose_tile` | `child_graph` |
 | `revise_tile` | `child_graph` |
+| `accept_tile` | `child_graph` |
 
 ## Stories
 

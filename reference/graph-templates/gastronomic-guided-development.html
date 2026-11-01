@@ -111,8 +111,8 @@
   <section id="template-gastronomic-guided-development">
 <h1>Template: gastronomic_guided_development<a class="headerlink" href="#template-gastronomic-guided-development" title="Link to this heading"></a></h1>
 <p>Product composition for gastronomic guided development. Discovery through
-scoped execute, host verification, failure diagnosis, and strategy revision are
-tiled; acceptance is deferred. <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> remains the baseline control.</p>
+scoped execute, host verification, failure diagnosis, strategy revision, and
+development acceptance are tiled. <code class="docutils literal notranslate"><span class="pre">guided_coding</span></code> remains the baseline control.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Item</p></th>
@@ -144,8 +144,9 @@ tiled; acceptance is deferred. <code class="docutils literal notranslate"><span 
   → verify_tile (change_verification)
   → diagnose_tile (failure_diagnosis)
   → revise_tile (strategy_revision)
-  → publish_revision / publish / publish_verification / publish_execution /
-    publish_plan / publish_contract / publish_inventory
+  → accept_tile (development_acceptance)
+  → publish_outcome / publish_revision / publish / publish_verification /
+    publish_execution / publish_plan / publish_contract / publish_inventory
 </pre></div>
 </div>
 </section>
@@ -187,37 +188,45 @@ tiled; acceptance is deferred. <code class="docutils literal notranslate"><span 
 <td><p>task_state</p></td>
 <td><p>Forwarded to <code class="docutils literal notranslate"><span class="pre">strategy_revision</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hypotheses_payload</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">acceptance_bindings</span></code></p></td>
+<td><p>task_state</p></td>
+<td><p>Forwarded to <code class="docutils literal notranslate"><span class="pre">development_acceptance</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hypotheses_payload</span></code></p></td>
 <td><p>task_state</p></td>
 <td><p>Optional discovery soft point</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interpret_payload</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interpret_payload</span></code></p></td>
 <td><p>task_state</p></td>
 <td><p>Optional discovery soft point</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">propose_payload</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">propose_payload</span></code></p></td>
 <td><p>task_state</p></td>
 <td><p>Optional contract soft point</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plan_propose_payload</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plan_propose_payload</span></code></p></td>
 <td><p>task_state</p></td>
 <td><p>Optional plan soft point</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">apply_payload</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">apply_payload</span></code></p></td>
 <td><p>task_state</p></td>
 <td><p>Optional execution soft point</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verify_payload</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">verify_payload</span></code></p></td>
 <td><p>task_state</p></td>
 <td><p>Optional verification soft point</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">diagnose_payload</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">diagnose_payload</span></code></p></td>
 <td><p>task_state</p></td>
 <td><p>Optional diagnosis soft point</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">revise_payload</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">revise_payload</span></code></p></td>
 <td><p>task_state</p></td>
 <td><p>Optional revision soft point</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">accept_payload</span></code></p></td>
+<td><p>task_state</p></td>
+<td><p>Optional acceptance soft point</p></td>
 </tr>
 </tbody>
 </table>
@@ -250,6 +259,9 @@ tiled; acceptance is deferred. <code class="docutils literal notranslate"><span 
 <td><p><code class="docutils literal notranslate"><span class="pre">child_graph</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">revise_tile</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">child_graph</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">accept_tile</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">child_graph</span></code></p></td>
 </tr>
 </tbody>
