@@ -275,8 +275,11 @@ def validate_diagnosis(report: Mapping[str, Any]) -> dict[str, Any]:
         errors.append({"path": "suspected_cause", "message": "nonempty required"})
     if not str(report.get("next_experiment") or "").strip():
         errors.append({"path": "next_experiment", "message": "nonempty required"})
+    raw_confidence = report.get("confidence")
     try:
-        conf = float(report.get("confidence"))
+        if raw_confidence is None:
+            raise TypeError("confidence required")
+        conf = float(raw_confidence)
     except (TypeError, ValueError):
         errors.append({"path": "confidence", "message": "number required"})
     else:
