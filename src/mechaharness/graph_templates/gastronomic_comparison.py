@@ -22,6 +22,25 @@ class GastronomicComparisonTemplate(GraphTemplate):
     """Assemble → validate a gastronomic trial record.
 
     Catalog id: ``gastronomic_comparison``.
+
+    Example:
+        >>> from mechaharness.graph_templates import (
+        ...     GraphTemplateParams, GastronomicComparisonTemplate,
+        ... )
+        >>> graph = GastronomicComparisonTemplate().instantiate(
+        ...     GraphTemplateParams(
+        ...         goal="Record gastronomic trial",
+        ...         soft_bindings={
+        ...             "compare_payload": {
+        ...                 "trial_id": "b1",
+        ...                 "arm": "B",
+        ...                 "recipe_id": "gastronomic_guided_development",
+        ...             }
+        ...         },
+        ...     )
+        ... )
+        >>> graph.template_name
+        'gastronomic_comparison'
     """
 
     name = "gastronomic_comparison"
