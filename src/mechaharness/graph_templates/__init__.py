@@ -66,6 +66,9 @@ from mechaharness.graph_templates.development_acceptance import (
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.failure_diagnosis import FailureDiagnosisTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
+from mechaharness.graph_templates.gastronomic_comparison import (
+    GastronomicComparisonTemplate,
+)
 from mechaharness.graph_templates.gastronomic_guided_development import (
     GastronomicGuidedDevelopmentTemplate,
 )
@@ -98,6 +101,7 @@ __all__ = [
     "DevelopmentAcceptanceTemplate",
     "EnvironmentRepairTemplate",
     "FanOutAggregateTemplate",
+    "GastronomicComparisonTemplate",
     "GastronomicGuidedDevelopmentTemplate",
     "StrategyRevisionTemplate",
     "GraphTemplate",

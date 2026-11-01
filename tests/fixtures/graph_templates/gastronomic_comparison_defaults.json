@@ -1,0 +1,30 @@
+{
+  "id": "gastronomic_comparison_defaults",
+  "description": "gastronomic_comparison assembles then validates a trial",
+  "template": "gastronomic_comparison",
+  "params": {
+    "goal": "Record gastronomic trial",
+    "inputs": {
+      "goal": "Record gastronomic trial",
+      "development_outcome": {"outcome": "completed", "status": "ok"},
+      "metrics": {"model_calls": 1}
+    },
+    "soft_bindings": {
+      "compare_payload": {
+        "trial_id": "defaults-1",
+        "arm": "B",
+        "recipe_id": "gastronomic_guided_development"
+      }
+    }
+  },
+  "expect": {
+    "template_name": "gastronomic_comparison",
+    "template_status": "active",
+    "node_ids": ["seed", "assemble", "validate"],
+    "edge_count": 2,
+    "nodes": {
+      "assemble": {"kind": "comparison_assemble"},
+      "validate": {"kind": "comparison_validate"}
+    }
+  }
+}

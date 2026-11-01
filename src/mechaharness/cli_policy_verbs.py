@@ -1302,6 +1302,10 @@ class GraphWalkVerb(CliVerb):
                 ACCEPTANCE_HARD_KINDS,
                 AcceptanceHardNodeRunner,
             )
+            from mechaharness.comparison_hard_nodes import (
+                COMPARISON_HARD_KINDS,
+                ComparisonHardNodeRunner,
+            )
             from mechaharness.contract_hard_nodes import (
                 CONTRACT_HARD_KINDS,
                 ContractHardNodeRunner,
@@ -1341,6 +1345,7 @@ class GraphWalkVerb(CliVerb):
             diagnosis_kind_set = set(DIAGNOSIS_HARD_KINDS)
             revision_kind_set = set(REVISION_HARD_KINDS)
             acceptance_kind_set = set(ACCEPTANCE_HARD_KINDS)
+            comparison_kind_set = set(COMPARISON_HARD_KINDS)
             hard_kind_set = (
                 discovery_kind_set
                 | contract_kind_set
@@ -1350,6 +1355,7 @@ class GraphWalkVerb(CliVerb):
                 | diagnosis_kind_set
                 | revision_kind_set
                 | acceptance_kind_set
+                | comparison_kind_set
             )
             special_kinds = infer_kind_set | judge_kind_set | hard_kind_set
             leaf_kinds = [k for k in kinds if k != "subgraph"]
@@ -1364,6 +1370,7 @@ class GraphWalkVerb(CliVerb):
             diagnosis_kinds = [k for k in leaf_kinds if k in diagnosis_kind_set]
             revision_kinds = [k for k in leaf_kinds if k in revision_kind_set]
             acceptance_kinds = [k for k in leaf_kinds if k in acceptance_kind_set]
+            comparison_kinds = [k for k in leaf_kinds if k in comparison_kind_set]
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
             needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
@@ -1383,6 +1390,7 @@ class GraphWalkVerb(CliVerb):
                 or diagnosis_kinds
                 or revision_kinds
                 or acceptance_kinds
+                or comparison_kinds
             ):
                 runners.append(
                     CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
@@ -1436,6 +1444,8 @@ class GraphWalkVerb(CliVerb):
                 runners.append(RevisionHardNodeRunner(revision_kinds))
             if acceptance_kinds:
                 runners.append(AcceptanceHardNodeRunner(acceptance_kinds))
+            if comparison_kinds:
+                runners.append(ComparisonHardNodeRunner(comparison_kinds))
 
             # Bind Completer / EventLog first so runners are in the registry
             # snapshot when Config.configure registers GraphNodeRunnerRegistry.
