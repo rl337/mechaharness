@@ -1,0 +1,84 @@
+id: fangore_failure_diagnosis_scope
+suite: fangore_failure_diagnosis
+persona: fangore
+title: Classify scope escape from ChangeExecution refusals
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  failure_diagnosis with a green-looking verification report but a ChangeExecution that refused a
+  scope_escape write, and verifies failure_class scope.
+implementation: '`diagnosis_*` hard nodes; Agentic Recipe `failure_diagnosis`.'
+validation: Suite stage `025_fangore_failure_diagnosis_scope` — failure_class scope.
+footnotes:
+- id: gastronomic-m6-diagnosis-scope
+  label: Gastronomic M6 diagnosis scope
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Scope escape must surface as a distinct diagnosis class
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: diagnose scope
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.verification_report:
+            version: '1'
+            status: incomplete
+            failures: []
+            verify_runs: []
+            regression: {unchanged_invariants_ok: true, invariants_checked: 0}
+          in.change_execution:
+            version: '1'
+            status: failed
+            slice_id: arithmetic
+            scope_violations: [secrets/token.txt]
+            refused:
+            - {reason: scope_escape, path: secrets/token.txt}
+    - id: constrain
+      kind: diagnosis_constrain
+      depends_on: [seed]
+      payload:
+        reads:
+          verification_report: in.verification_report
+          execution: in.change_execution
+        writes: {destination: acc.diagnosis.constraints}
+    - id: classify
+      kind: diagnosis_classify
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.diagnosis.constraints}
+        writes: {destination: acc.diagnosis.classification}
+    - id: publish
+      kind: diagnosis_publish
+      depends_on: [classify]
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+          classification: acc.diagnosis.classification
+        writes: {destination: out.diagnosis}
+    - id: validate
+      kind: diagnosis_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.diagnosis}
+        writes: {destination: acc.diagnosis.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: scope}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.diagnosis.next_experiment, value: refuse_or_replan_within_allowed_paths}
+cleanup: []

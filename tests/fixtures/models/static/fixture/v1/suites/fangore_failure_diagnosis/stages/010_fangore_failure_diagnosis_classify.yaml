@@ -1,0 +1,126 @@
+id: fangore_failure_diagnosis_classify
+suite: fangore_failure_diagnosis
+persona: fangore
+title: Classify host-observed verify failures into a typed Diagnosis
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  failure_diagnosis against a failed VerificationReport whose evidence cites a pytest exit mismatch,
+  and verifies `out.diagnosis` names failure_class semantics with a distinct next_experiment.
+implementation: '`diagnosis_constrain` / `diagnosis_classify` / `diagnosis_publish` /
+  `diagnosis_validate` in `diagnosis_hard_nodes`; Agentic Recipe `failure_diagnosis`.'
+validation: Suite stage `010_fangore_failure_diagnosis_classify` — status ok, failure_class semantics.
+footnotes:
+- id: gastronomic-m6-diagnosis-classify
+  label: Gastronomic M6 diagnosis classify
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Evidence-linked failure classification and distinct next experiment
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: diagnose failed arithmetic verify
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: Diagnose verify failure
+          in.verification_report:
+            version: '1'
+            status: failed
+            failures:
+            - 'verify_runs[0] pytest tests/test_arithmetic.py: exit 1 != 0'
+            verify_runs: []
+            regression:
+              unchanged_invariants_ok: true
+              invariants_checked: 0
+            provenance:
+              slice_id: arithmetic
+          in.prior_attempts: []
+    - id: constrain
+      kind: diagnosis_constrain
+      depends_on:
+      - seed
+      payload:
+        reads:
+          verification_report: in.verification_report
+          prior_attempts: in.prior_attempts
+        writes:
+          destination: acc.diagnosis.constraints
+    - id: classify
+      kind: diagnosis_classify
+      depends_on:
+      - constrain
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+        writes:
+          destination: acc.diagnosis.classification
+    - id: publish
+      kind: diagnosis_publish
+      depends_on:
+      - classify
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+          classification: acc.diagnosis.classification
+        writes:
+          destination: out.diagnosis
+    - id: validate
+      kind: diagnosis_validate
+      depends_on:
+      - publish
+      payload:
+        reads:
+          source: out.diagnosis
+        writes:
+          destination: acc.diagnosis.validation
+        parameters:
+          fail_if_invalid: true
+steps:
+- do:
+    graph_walk:
+      action: start
+      grants:
+      - core:graph.execute
+  expect:
+  - kind: equals
+    key: status
+    value: paused
+  - kind: equals
+    key: node_statuses.seed
+    value: succeeded
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: bag.out.diagnosis.status
+    value: ok
+  - kind: equals
+    key: bag.out.diagnosis.version
+    value: '1'
+  - kind: equals
+    key: bag.out.diagnosis.failure_class
+    value: semantics
+  - kind: equals
+    key: bag.acc.diagnosis.validation.ok
+    value: true
+  - kind: equals
+    key: bag.out.diagnosis.next_experiment
+    value: adjust_behavior_to_satisfy_failing_check
+complete:
+  expect:
+  - kind: equals
+    key: bag.out.diagnosis.failure_class
+    value: semantics
+  - kind: equals
+    key: bag.out.diagnosis.provenance.slice_id
+    value: arithmetic
+cleanup: []

@@ -1,0 +1,81 @@
+id: fangore_failure_diagnosis_repeat
+suite: fangore_failure_diagnosis
+persona: fangore
+title: Repeat failure class forces a changed next experiment
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  failure_diagnosis with budget exhaustion evidence and a prior_attempts row already labeling
+  budget, and verifies next_experiment changes strategy instead of repeating the same fix.
+implementation: '`diagnosis_*` hard nodes; Agentic Recipe `failure_diagnosis`.'
+validation: Suite stage `035_fangore_failure_diagnosis_repeat` — change_strategy_after_repeat_budget.
+footnotes:
+- id: gastronomic-m6-diagnosis-repeat
+  label: Gastronomic M6 diagnosis repeat
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Repeated identical failure cannot cause unbounded retries
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: diagnose repeat budget
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.verification_report:
+            version: '1'
+            status: failed
+            failures:
+            - 'verify timeout: budget exhausted max_tokens'
+            verify_runs: []
+            regression: {unchanged_invariants_ok: true, invariants_checked: 0}
+          in.prior_attempts:
+          - {failure_class: budget, next_experiment: raise_budget_or_narrow_work}
+    - id: constrain
+      kind: diagnosis_constrain
+      depends_on: [seed]
+      payload:
+        reads:
+          verification_report: in.verification_report
+          prior_attempts: in.prior_attempts
+        writes: {destination: acc.diagnosis.constraints}
+    - id: classify
+      kind: diagnosis_classify
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.diagnosis.constraints}
+        writes: {destination: acc.diagnosis.classification}
+    - id: publish
+      kind: diagnosis_publish
+      depends_on: [classify]
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+          classification: acc.diagnosis.classification
+        writes: {destination: out.diagnosis}
+    - id: validate
+      kind: diagnosis_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.diagnosis}
+        writes: {destination: acc.diagnosis.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: budget}
+  - {kind: equals, key: bag.out.diagnosis.next_experiment, value: change_strategy_after_repeat_budget}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.diagnosis.next_experiment, value: change_strategy_after_repeat_budget}
+cleanup: []
