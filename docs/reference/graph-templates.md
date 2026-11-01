@@ -50,6 +50,7 @@ owning user stories):
 | [failure_diagnosis](./graph-templates/failure-diagnosis.md) | `failure_diagnosis` | `fangore_failure_diagnosis_classify` | Evidence-linked Diagnosis |
 | [strategy_revision](./graph-templates/strategy-revision.md) | `strategy_revision` | `fangore_strategy_revision_retry` | Deterministic retry / stop / yield gate |
 | [development_acceptance](./graph-templates/development-acceptance.md) | `development_acceptance` | `fangore_development_acceptance_completed` | Host DevelopmentOutcome gate |
+| [gastronomic_comparison](./graph-templates/gastronomic-comparison.md) | `gastronomic_comparison` | `fangore_gastronomic_comparison_trial` | Fair A/B trial records (no auto-winner) |
 | [gastronomic_guided_development](./graph-templates/gastronomic-guided-development.md) | `gastronomic_guided_development` | `fangore_gastronomic_guided_development_shape` | Product tile: discovery → … → accept |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
@@ -119,6 +120,7 @@ held-out gate guards `ResearchLab.promote`.
 | `failure_diagnosis` | VerificationReport → typed Diagnosis + next experiment |
 | `strategy_revision` | Diagnosis → StrategyRevision disposition (retry/stop/yield) |
 | `development_acceptance` | Host gates → DevelopmentOutcome (completed/needs_guidance/failed) |
+| `gastronomic_comparison` | Trial record assemble/validate for A/B/C/D arms |
 | `gastronomic_guided_development` | Product composition (discovery → … → accept) |
 
 These are distinct Agentic Recipes on the same `GraphTemplate` substrate.

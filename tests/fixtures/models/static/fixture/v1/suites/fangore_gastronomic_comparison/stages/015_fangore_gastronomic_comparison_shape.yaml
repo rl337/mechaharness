@@ -1,0 +1,41 @@
+id: fangore_gastronomic_comparison_shape
+suite: fangore_gastronomic_comparison
+persona: fangore
+title: Instantiate the gastronomic_comparison Agentic Recipe
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `gastronomic_comparison` and verifies assemble/validate node ids.
+implementation: Agentic Recipe `gastronomic_comparison` (`GastronomicComparisonTemplate`).
+validation: Suite stage `015_fangore_gastronomic_comparison_shape` — template_name and node ids.
+footnotes:
+- id: gastronomic-comparison-shape
+  label: Gastronomic comparison recipe
+  url: https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md
+  note: Trial-record recipe for fair A/B logging
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: gastronomic_comparison
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/gastronomic_comparison.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: gastronomic_comparison
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - seed
+    - assemble
+    - validate
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: gastronomic_comparison
+cleanup: []

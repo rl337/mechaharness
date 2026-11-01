@@ -1,0 +1,64 @@
+id: fangore_gastronomic_comparison_summary
+suite: fangore_gastronomic_comparison
+persona: fangore
+title: Summarize A/B trials without declaring a winner
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  comparison_summarize over one guided_coding arm-A trial and one gastronomic arm-B trial, and
+  verifies comparable_ab true while winner stays null.
+implementation: '`comparison_summarize` in `comparison_hard_nodes`; `summarize_gastronomic_comparison`.'
+validation: Suite stage `010_fangore_gastronomic_comparison_summary` — winner null.
+footnotes:
+- id: gastronomic-comparison-summary
+  label: Gastronomic comparison summary
+  url: https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md
+  note: Aggregates never auto-declare a winner
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: summarize comparison
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.trials:
+          - version: '1'
+            trial_id: a1
+            arm: A
+            recipe_id: guided_coding
+            success: false
+            outcome: failed
+            metrics: {model_calls: 20, wall_ms: 50000, repair_loops: 3}
+          - version: '1'
+            trial_id: b1
+            arm: B
+            recipe_id: gastronomic_guided_development
+            success: true
+            outcome: completed
+            metrics: {model_calls: 14, wall_ms: 42000, repair_loops: 1}
+    - id: summarize
+      kind: comparison_summarize
+      depends_on: [seed]
+      payload:
+        reads: {trials: in.trials}
+        writes: {destination: out.comparison_summary}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.comparison_summary.comparable_ab, value: true}
+  - {kind: equals, key: bag.out.comparison_summary.winner, value: null}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.comparison_summary.trial_count, value: 2}
+cleanup: []

@@ -29,6 +29,9 @@ from mechaharness.graph_templates.development_acceptance import (
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
 from mechaharness.graph_templates.failure_diagnosis import FailureDiagnosisTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
+from mechaharness.graph_templates.gastronomic_comparison import (
+    GastronomicComparisonTemplate,
+)
 from mechaharness.graph_templates.gastronomic_guided_development import (
     GastronomicGuidedDevelopmentTemplate,
 )
@@ -60,6 +63,7 @@ def default_graph_template_classes() -> dict[str, type[GraphTemplate]]:
         FailureDiagnosisTemplate.name: FailureDiagnosisTemplate,
         StrategyRevisionTemplate.name: StrategyRevisionTemplate,
         DevelopmentAcceptanceTemplate.name: DevelopmentAcceptanceTemplate,
+        GastronomicComparisonTemplate.name: GastronomicComparisonTemplate,
         GastronomicGuidedDevelopmentTemplate.name: GastronomicGuidedDevelopmentTemplate,
         IndependentReviewTemplate.name: IndependentReviewTemplate,
         EnvironmentRepairTemplate.name: EnvironmentRepairTemplate,

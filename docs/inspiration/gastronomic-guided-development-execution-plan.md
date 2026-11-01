@@ -1,7 +1,8 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0–M6.6 landed; M6 increment 7 (`development_acceptance` + product
-accept tile) completes the M6 stage chain.
+**Status:** M0–M6 landed (through `development_acceptance`). Post-M6 work is the
+fair `guided_coding` vs gastronomic comparison protocol (trial records; no
+single-run winners).
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.

@@ -99,6 +99,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat LAN backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
+| [Gastronomic comparison](./guides/gastronomic-comparison.md) | Fair guided_coding vs gastronomic trial protocol |
 | [User-story migration batches](./guides/user-story-migration-batches.md) | Convert remaining `cli` / probe stories to `user_story` YAML |
 | [User-story instrumentation migration](./guides/user-story-instrumentation-migration.md) | Wave 3: replace case-bag verbs with soft-bind + cassette/live stories |
 | [User-story recipe expansion](./guides/user-story-recipe-expansion.md) | Wave 4+: recipe-first groups G0–G7; re-eval of prior waves |

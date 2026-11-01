@@ -1,0 +1,9 @@
+id: fangore_gastronomic_comparison
+title: Gastronomic vs guided_coding comparison trial records
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []
