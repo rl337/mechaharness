@@ -1,0 +1,79 @@
+id: fangore_gastronomic_comparison_trial
+suite: fangore_gastronomic_comparison
+persona: fangore
+title: Assemble a gastronomic arm-B trial from DevelopmentOutcome
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  comparison_assemble against a completed DevelopmentOutcome and host metrics for arm B, validates
+  the trial record, and verifies success with recipe gastronomic_guided_development.
+implementation: '`comparison_assemble` / `comparison_validate`; Agentic Recipe
+  `gastronomic_comparison`.'
+validation: Suite stage `005_fangore_gastronomic_comparison_trial` — arm B success true.
+footnotes:
+- id: gastronomic-comparison-trial
+  label: Gastronomic comparison trial
+  url: https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md
+  note: Comparable trial records without inventing a winner
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: record gastronomic trial
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.development_outcome:
+            version: '1'
+            status: ok
+            outcome: completed
+            reason: host gates passed with no residual failures
+            provenance: {gates_passed: true}
+          in.metrics:
+            stages_passed: 6
+            stages_total: 6
+            model_calls: 12
+            wall_ms: 44000
+            repair_loops: 1
+            guidance_yields: 0
+    - id: assemble
+      kind: comparison_assemble
+      depends_on: [seed]
+      payload:
+        reads:
+          development_outcome: in.development_outcome
+          metrics: in.metrics
+        writes: {destination: out.trial}
+        parameters:
+          trial_id: calc-b-1
+          arm: B
+          recipe_id: gastronomic_guided_development
+          suite_id: calc_cli
+    - id: validate
+      kind: comparison_validate
+      depends_on: [assemble]
+      payload:
+        reads: {source: out.trial}
+        writes: {destination: acc.comparison.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.trial.arm, value: B}
+  - {kind: equals, key: bag.out.trial.recipe_id, value: gastronomic_guided_development}
+  - {kind: equals, key: bag.out.trial.success, value: true}
+  - {kind: equals, key: bag.acc.comparison.validation.ok, value: true}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.trial.outcome, value: completed}
+cleanup: []

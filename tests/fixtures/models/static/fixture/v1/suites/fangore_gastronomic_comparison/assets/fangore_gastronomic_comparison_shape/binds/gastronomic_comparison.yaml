@@ -1,0 +1,16 @@
+name: gastronomic_comparison
+summary: Instantiate gastronomic_comparison for A/B trial records.
+goal: Record gastronomic trial
+inputs:
+  goal: Record gastronomic trial
+  development_outcome:
+    version: '1'
+    status: ok
+    outcome: completed
+  metrics:
+    model_calls: 1
+soft_bindings:
+  compare_payload:
+    trial_id: shape-1
+    arm: B
+    recipe_id: gastronomic_guided_development
