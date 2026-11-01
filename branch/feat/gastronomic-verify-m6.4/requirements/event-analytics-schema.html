@@ -1,0 +1,290 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event analytics schema requirements &mdash; MechaHarness 0.11.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f3b36f1a"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Event analytics schema requirements</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/event-analytics-schema.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="event-analytics-schema-requirements">
+<h1>Event analytics schema requirements<a class="headerlink" href="#event-analytics-schema-requirements" title="Link to this heading"></a></h1>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">EventLog</span></code> is the observability substrate (<code class="docutils literal notranslate"><span class="pre">docs/reference/events.md</span></code>). Hosts load
+those events — plus <code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> lines and <code class="docutils literal notranslate"><span class="pre">TraceEnvelope</span></code> provenance — into a
+warehouse and need to answer questions like “which recipe version denied the most
+sends under epoch 3?” <strong>without</strong> opening checkpoints or replaying transcripts.</p>
+<p>This page is the contract between MechaHarness emitters and a warehouse
+consumer. It specifies the correlator fields every graph-run event carries and a
+near-3NF fact/dimension decomposition. It does not mandate a warehouse product,
+table DDL, or a second event bus: the substrate stays <code class="docutils literal notranslate"><span class="pre">Event</span></code> / <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>.</p>
+</section>
+<section id="ownership-boundary">
+<h2>Ownership boundary<a class="headerlink" href="#ownership-boundary" title="Link to this heading"></a></h2>
+<p>MechaHarness owns:</p>
+<ul class="simple">
+<li><p>stable correlator field names on <code class="docutils literal notranslate"><span class="pre">core:graph_*</span></code> lifecycle events;</p></li>
+<li><p>field-name parity across <code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code>, <code class="docutils literal notranslate"><span class="pre">TraceEnvelope</span></code>, and graph events;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">project_node_attempt_rows</span></code> as a reference projection of the node-attempt fact.</p></li>
+</ul>
+<p>Hosts own:</p>
+<ul class="simple">
+<li><p>warehouse DDL, partitioning, retention, and PII handling;</p></li>
+<li><p>host-namespaced correlators (<code class="docutils literal notranslate"><span class="pre">acme:ticket_id</span></code>) added to <code class="docutils literal notranslate"><span class="pre">payload</span></code>;</p></li>
+<li><p>any join to business entities.</p></li>
+</ul>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<section id="obs-a01-graph-identity-on-every-graph-lifecycle-event">
+<h3>OBS-A01: Graph identity on every graph lifecycle event<a class="headerlink" href="#obs-a01-graph-identity-on-every-graph-lifecycle-event" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code>, <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code>, <code class="docutils literal notranslate"><span class="pre">core:graph_node_start</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">core:graph_node_end</span></code> emitted by <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> MUST carry <code class="docutils literal notranslate"><span class="pre">graph_id</span></code> and
+<code class="docutils literal notranslate"><span class="pre">graph_goal</span></code> in <code class="docutils literal notranslate"><span class="pre">payload</span></code>, in addition to the envelope’s <code class="docutils literal notranslate"><span class="pre">run_id</span></code> and <code class="docutils literal notranslate"><span class="pre">agent_id</span></code>.
+Explicit payload keys MUST win over correlators on collision.</p>
+</section>
+<section id="obs-a02-recipe-identity-from-the-template-stamp">
+<h3>OBS-A02: Recipe identity from the template stamp<a class="headerlink" href="#obs-a02-recipe-identity-from-the-template-stamp" title="Link to this heading"></a></h3>
+<p>When the graph is stamped by an Agentic Recipe, the same events MUST carry
+<code class="docutils literal notranslate"><span class="pre">recipe_id</span></code> (the catalog id, <code class="docutils literal notranslate"><span class="pre">ExecutionGraph.template_name</span></code>) and <code class="docutils literal notranslate"><span class="pre">recipe_version</span></code>
+(<code class="docutils literal notranslate"><span class="pre">template_version</span></code>), and SHOULD carry <code class="docutils literal notranslate"><span class="pre">recipe_instance_id</span></code>. Unstamped graphs omit
+these keys; consumers MUST treat absence as “pure tiling container”, not an error.</p>
+</section>
+<section id="obs-a03-authorization-epoch">
+<h3>OBS-A03: Authorization epoch<a class="headerlink" href="#obs-a03-authorization-epoch" title="Link to this heading"></a></h3>
+<p>Graph lifecycle events MUST carry <code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code> — the epoch of the
+<code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code> the run executes under (falling back to the graph’s stamped
+epoch). When the host wires <code class="docutils literal notranslate"><span class="pre">executor.live_authorization_epoch</span></code>, events SHOULD also
+carry <code class="docutils literal notranslate"><span class="pre">live_authorization_epoch</span></code> so a revoked-then-resumed run is visible in the
+warehouse.</p>
+</section>
+<section id="obs-a04-nesting">
+<h3>OBS-A04: Nesting<a class="headerlink" href="#obs-a04-nesting" title="Link to this heading"></a></h3>
+<p>Events from a nested subgraph run MUST carry <code class="docutils literal notranslate"><span class="pre">parent_run_id</span></code> and <code class="docutils literal notranslate"><span class="pre">nest_depth</span></code>
+(1 for a direct child). The parent’s <code class="docutils literal notranslate"><span class="pre">core:graph_node_end</span></code> for the embedding node
+carries <code class="docutils literal notranslate"><span class="pre">child_run_id</span></code>, so the run tree is reconstructable from either direction.</p>
+</section>
+<section id="obs-a05-node-attempt-fact">
+<h3>OBS-A05: Node-attempt fact<a class="headerlink" href="#obs-a05-node-attempt-fact" title="Link to this heading"></a></h3>
+<p>One row per <code class="docutils literal notranslate"><span class="pre">(run_id,</span> <span class="pre">node_id,</span> <span class="pre">attempt)</span></code> MUST be derivable from node start/end
+events alone. <code class="docutils literal notranslate"><span class="pre">node_id</span></code>, <code class="docutils literal notranslate"><span class="pre">kind</span></code>, <code class="docutils literal notranslate"><span class="pre">attempt</span></code>, and <code class="docutils literal notranslate"><span class="pre">status</span></code> are payload fields of
+<code class="docutils literal notranslate"><span class="pre">core:graph_node_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_node_end</span></code>. <code class="docutils literal notranslate"><span class="pre">project_node_attempt_rows</span></code>
+(<code class="docutils literal notranslate"><span class="pre">mechaharness.event_correlators</span></code>) is the reference projection.</p>
+</section>
+<section id="obs-a06-decision-and-trace-alignment">
+<h3>OBS-A06: Decision and trace alignment<a class="headerlink" href="#obs-a06-decision-and-trace-alignment" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> and <code class="docutils literal notranslate"><span class="pre">TraceEnvelope</span></code> MUST use the same names as the graph
+correlators for shared dimensions: <code class="docutils literal notranslate"><span class="pre">run_id</span></code>, <code class="docutils literal notranslate"><span class="pre">node_id</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_id</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_id</span></code>,
+<code class="docutils literal notranslate"><span class="pre">recipe_version</span></code>, <code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code> (<code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code> also <code class="docutils literal notranslate"><span class="pre">parent_run_id</span></code>).
+A decision row joins to a node-attempt row on <code class="docutils literal notranslate"><span class="pre">(run_id,</span> <span class="pre">node_id)</span></code> and to the
+recipe dimension on <code class="docutils literal notranslate"><span class="pre">(recipe_id,</span> <span class="pre">recipe_version)</span></code> with no string parsing.</p>
+</section>
+</section>
+<section id="fact-dimension-decomposition">
+<h2>Fact / dimension decomposition<a class="headerlink" href="#fact-dimension-decomposition" title="Link to this heading"></a></h2>
+<p>Facts hold events and measures; dimensions hold slowly-changing descriptors keyed
+by the correlators above. Each non-key column depends on the key only.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Table</p></th>
+<th class="head"><p>Grain</p></th>
+<th class="head"><p>Key</p></th>
+<th class="head"><p>Source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fact_graph_run</span></code></p></td>
+<td><p>one graph run</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">run_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:graph_start</span></code> / <code class="docutils literal notranslate"><span class="pre">core:graph_end</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fact_node_attempt</span></code></p></td>
+<td><p>one node attempt</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">run_id,</span> <span class="pre">node_id,</span> <span class="pre">attempt</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:graph_node_start</span></code> / <code class="docutils literal notranslate"><span class="pre">_end</span></code> (<code class="docutils literal notranslate"><span class="pre">project_node_attempt_rows</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fact_decision</span></code></p></td>
+<td><p>one decision</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">event_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:decision</span></code> / <code class="docutils literal notranslate"><span class="pre">DecisionRecord</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fact_effect</span></code></p></td>
+<td><p>one external effect</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">effect_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">core:graph_node_end</span></code> effect fields, effect ledger</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dim_graph</span></code></p></td>
+<td><p>graph definition</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">graph_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">graph_id</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_goal</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dim_recipe</span></code></p></td>
+<td><p>recipe version</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">recipe_id,</span> <span class="pre">recipe_version</span></code></p></td>
+<td><p>template stamp</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dim_authority_epoch</span></code></p></td>
+<td><p>authority epoch</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dim_run_tree</span></code></p></td>
+<td><p>parent/child edge</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">run_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">parent_run_id</span></code>, <code class="docutils literal notranslate"><span class="pre">nest_depth</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">fact_graph_run</span></code> stores only keys (<code class="docutils literal notranslate"><span class="pre">graph_id</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_*</span></code>, <code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code>,
+<code class="docutils literal notranslate"><span class="pre">parent_run_id</span></code>) plus run measures (status, node count, budget spent); descriptive
+text such as <code class="docutils literal notranslate"><span class="pre">graph_goal</span></code> belongs on <code class="docutils literal notranslate"><span class="pre">dim_graph</span></code>.</p>
+</section>
+<section id="scope-notes">
+<h2>Scope notes<a class="headerlink" href="#scope-notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Checkpoint events (<code class="docutils literal notranslate"><span class="pre">core:graph_node</span></code>) carry the full graph snapshot, not
+correlators; warehouses SHOULD NOT load them as facts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">core:access_check</span></code> and <code class="docutils literal notranslate"><span class="pre">core:extension_applied</span></code> are emitted by their owners and
+join on <code class="docutils literal notranslate"><span class="pre">run_id</span></code> only.</p></li>
+</ul>
+</section>
+<section id="acceptance">
+<h2>Acceptance<a class="headerlink" href="#acceptance" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Story <code class="docutils literal notranslate"><span class="pre">nubble_graph_event_correlators</span></code> (multi-node graph with a nested subgraph).</p></li>
+<li><p>Unit: <code class="docutils literal notranslate"><span class="pre">tests/test_event_correlators.py</span></code>.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
