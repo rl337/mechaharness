@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Host integration requirements &mdash; MechaHarness 0.13.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1019fba8"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Host integration requirements</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/host-integration.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="host-integration-requirements">
+<h1>Host integration requirements<a class="headerlink" href="#host-integration-requirements" title="Link to this heading"></a></h1>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
+<p>MechaHarness is a <strong>library</strong>. Downstream products (consoles, warehouses,
+multi-tenant runtimes) must get full capability by subclassing and composing —
+never by forking this repo or patching closed enums, maps, or <code class="docutils literal notranslate"><span class="pre">match</span></code> lists.</p>
+<p>This page is the normative contract for <strong>host application code</strong> and for
+coding agents working in those repos. Customer-facing Cursor skills that
+encode the same rules live under <a class="reference internal" href="#../../agent-skills/"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">agent-skills/</span></code></span></a>
+(install guide: <a class="reference internal" href="../guides/agent-skills.html"><span class="std std-doc">Agent skills for your project</span></a>).</p>
+</section>
+<section id="ownership-boundary">
+<h2>Ownership boundary<a class="headerlink" href="#ownership-boundary" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>MechaHarness owns</p></th>
+<th class="head"><p>Host owns</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Emit contract, correlator names, typed event families</p></td>
+<td><p>Warehouse DDL, ETL, BI, console UI</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> hooks and default injectables</p></td>
+<td><p>Durable denial DB, campaign orchestration, tenant policy</p></td>
+</tr>
+<tr class="row-even"><td><p>Agentic Recipe catalog + soft-point substrate</p></td>
+<td><p>Soft-point bindings, effectful runners, node kinds</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">host_apis</span></code> / <code class="docutils literal notranslate"><span class="pre">host_kit</span></code> discovery surfaces</p></td>
+<td><p>Product opinion on when to promote / escalate</p></td>
+</tr>
+<tr class="row-even"><td><p>Open identity wire form (<code class="docutils literal notranslate"><span class="pre">ns:name</span></code>)</p></td>
+<td><p>Host namespaces and grant vocabularies</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<section id="host-01-config-first-wiring">
+<h3>HOST-01: Config-first wiring<a class="headerlink" href="#host-01-config-first-wiring" title="Link to this heading"></a></h3>
+<p>Hosts MUST subclass <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (or use <code class="docutils literal notranslate"><span class="pre">factory.run</span></code> / OpenAPI, which
+still constructs a Config) and obtain graph executors, gates, and policies via
+injection or <code class="docutils literal notranslate"><span class="pre">host_kit</span></code> helpers. Hosts MUST NOT grow a parallel string registry
+or service locator for harness families / inference backends.</p>
+</section>
+<section id="host-02-blessed-imports">
+<h3>HOST-02: Blessed imports<a class="headerlink" href="#host-02-blessed-imports" title="Link to this heading"></a></h3>
+<p>When discovering inspiration-era safety and recipe surfaces, hosts SHOULD
+prefer <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mechaharness.host_apis</span> <span class="pre">import</span> <span class="pre">…</span></code> over mining leaf modules.
+Maintainer leaf paths remain valid; <code class="docutils literal notranslate"><span class="pre">host_apis</span></code> is the catalog.</p>
+</section>
+<section id="host-03-promotion-path">
+<h3>HOST-03: Promotion path<a class="headerlink" href="#host-03-promotion-path" title="Link to this heading"></a></h3>
+<p>Product hosts MUST use <code class="docutils literal notranslate"><span class="pre">promote_recipe</span></code> (or <code class="docutils literal notranslate"><span class="pre">registry.promote_with_final_test</span></code>)
+when a catalog pointer move needs a held-out gate and/or host opinion.
+Ungated <code class="docutils literal notranslate"><span class="pre">registry.promote</span></code> is advanced / migration only. When
+<code class="docutils literal notranslate"><span class="pre">EvolutionCampaignHooks</span></code> are bound, hosts SHOULD pass them to <code class="docutils literal notranslate"><span class="pre">promote_recipe</span></code>
+so <code class="docutils literal notranslate"><span class="pre">on_promotion</span></code> is observed.</p>
+</section>
+<section id="host-04-open-identity">
+<h3>HOST-04: Open identity<a class="headerlink" href="#host-04-open-identity" title="Link to this heading"></a></h3>
+<p>Hosts MUST add new event types, grants, and similar concepts as classes /
+namespaced strings that round-trip without a central MechaHarness registry
+edit. Hosts MUST NOT require a PR to this library solely to register a host
+name.</p>
+</section>
+<section id="host-05-observability-export">
+<h3>HOST-05: Observability export<a class="headerlink" href="#host-05-observability-export" title="Link to this heading"></a></h3>
+<p>Hosts that load <code class="docutils literal notranslate"><span class="pre">EventLog</span></code> into a warehouse MUST treat OBS correlators
+(<code class="docutils literal notranslate"><span class="pre">graph_id</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_id</span></code> / <code class="docutils literal notranslate"><span class="pre">recipe_version</span></code>, <code class="docutils literal notranslate"><span class="pre">authorization_epoch</span></code>, nest
+<code class="docutils literal notranslate"><span class="pre">parent_run_id</span></code>, …) as foreign keys — see
+<a class="reference internal" href="event-analytics-schema.html"><span class="std std-doc">Event analytics schema</span></a>. Hosts MUST NOT strip
+those keys at ingest to “save space”; filter in queries instead. Payloads MUST
+NOT carry secrets.</p>
+</section>
+<section id="host-06-durability-stays-with-the-host">
+<h3>HOST-06: Durability stays with the host<a class="headerlink" href="#host-06-durability-stays-with-the-host" title="Link to this heading"></a></h3>
+<p>Default <code class="docutils literal notranslate"><span class="pre">InMemoryDenialStore</span></code> and no-op campaign hooks are NOT restart-durable
+product storage. Hosts that need multi-tenant denial equivalence, campaign
+ledgers, or warehouse tables MUST bind their own implementations via Config
+hooks.</p>
+</section>
+<section id="host-07-consumer-agent-skills-stay-current">
+<h3>HOST-07: Consumer agent skills stay current<a class="headerlink" href="#host-07-consumer-agent-skills-stay-current" title="Link to this heading"></a></h3>
+<p>When a host vendors or copies files from <code class="docutils literal notranslate"><span class="pre">agent-skills/</span></code>, it SHOULD re-fetch
+from GitHub <code class="docutils literal notranslate"><span class="pre">main</span></code> after MechaHarness releases that change public host APIs,
+correlators, or promote guidance. Stale copies are a host ops concern;
+upstream keeps <code class="docutils literal notranslate"><span class="pre">agent-skills/</span></code> accurate in the same change as API shifts.</p>
+</section>
+<section id="host-08-authorization-and-budget-on-recipe-runs">
+<h3>HOST-08: Authorization and budget on recipe runs<a class="headerlink" href="#host-08-authorization-and-budget-on-recipe-runs" title="Link to this heading"></a></h3>
+<p>Hosts MUST be able to supply both an <strong>authorization policy</strong> (<code class="docutils literal notranslate"><span class="pre">grants</span></code> /
+<code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> / <code class="docutils literal notranslate"><span class="pre">CapabilityEnvelope</span></code>) and a <strong>budget policy</strong> (or live
+<code class="docutils literal notranslate"><span class="pre">Budget</span></code>) when running recipes — via Config hooks and/or
+<code class="docutils literal notranslate"><span class="pre">run_recipe(...,</span> <span class="pre">grants=|access_policy=,</span> <span class="pre">budget_policy=,</span> <span class="pre">envelope=?)</span></code>.</p>
+<p>Defaults (host-kit permissive grants + <code class="docutils literal notranslate"><span class="pre">BudgetPolicy.unlimited()</span></code>) are
+intentional no-ops. Hosts that need deny-by-default or spend ceilings MUST
+pass policies; they MUST NOT assume unlimited spend when a ceiling is
+required. SoftPoint <code class="docutils literal notranslate"><span class="pre">kind=&quot;budget&quot;</span></code> is stop/turns, not <code class="docutils literal notranslate"><span class="pre">BudgetPolicy</span></code>.</p>
+<p>See <a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a> and <a class="reference internal" href="../reference/budget.html"><span class="std std-doc">Budget</span></a>.</p>
+</section>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../guides/agent-skills.html"><span class="std std-doc">Agent skills for your project</span></a></p></li>
+<li><p><a class="reference internal" href="../guides/dependency-injection.html"><span class="std std-doc">Dependency injection</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/inspiration-primitives.html"><span class="std std-doc">Inspiration primitives</span></a></p></li>
+<li><p><a class="reference internal" href="event-analytics-schema.html"><span class="std std-doc">Event analytics schema</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/access.html"><span class="std std-doc">Access control</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/budget.html"><span class="std std-doc">Budget</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
