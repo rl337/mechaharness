@@ -42,6 +42,8 @@ steps:
     - verify_tile
     - diagnose_tile
     - revise_tile
+    - accept_tile
+    - publish_outcome
     - publish_revision
     - publish
     - publish_verification
