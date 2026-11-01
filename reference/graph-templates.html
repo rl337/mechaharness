@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Graph templates and Agentic Recipes &mdash; MechaHarness 0.12.0 documentation</title>
+  <title>Graph templates and Agentic Recipes &mdash; MechaHarness 0.13.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=61ccb1f1"></script>
+      <script src="../_static/documentation_options.js?v=1019fba8"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -265,7 +265,12 @@ owning user stories):</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_development_acceptance_completed</span></code></p></td>
 <td><p>Host DevelopmentOutcome gate</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/gastronomic-guided-development.html"><span class="std std-doc">gastronomic_guided_development</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/gastronomic-comparison.html"><span class="std std-doc">gastronomic_comparison</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_comparison</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_gastronomic_comparison_trial</span></code></p></td>
+<td><p>Fair A/B trial records (no auto-winner)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/gastronomic-guided-development.html"><span class="std std-doc">gastronomic_guided_development</span></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_gastronomic_guided_development_shape</span></code></p></td>
 <td><p>Product tile: discovery → … → accept</p></td>
@@ -383,7 +388,10 @@ held-out gate guards <code class="docutils literal notranslate"><span class="pre
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">development_acceptance</span></code></p></td>
 <td><p>Host gates → DevelopmentOutcome (completed/needs_guidance/failed)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_comparison</span></code></p></td>
+<td><p>Trial record assemble/validate for A/B/C/D arms</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
 <td><p>Product composition (discovery → … → accept)</p></td>
 </tr>
 </tbody>
