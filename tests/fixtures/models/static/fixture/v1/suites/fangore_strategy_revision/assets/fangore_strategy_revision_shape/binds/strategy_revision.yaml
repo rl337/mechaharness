@@ -1,0 +1,10 @@
+name: strategy_revision
+summary: Instantiate strategy_revision for deterministic retry gating.
+goal: Revise after verify failure
+inputs:
+  goal: Revise after verify failure
+  diagnosis:
+    version: '1'
+    status: ok
+    failure_class: semantics
+    next_experiment: adjust_behavior_to_satisfy_failing_check
