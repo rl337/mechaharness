@@ -1298,13 +1298,13 @@ class GraphWalkVerb(CliVerb):
             # Subgraph kind is handled by the executor; still register leaf kinds.
             from pyiv.files import RealFilesystem
 
-            from mechaharness.contract_hard_nodes import (
-                CONTRACT_HARD_KINDS,
-                ContractHardNodeRunner,
-            )
             from mechaharness.acceptance_hard_nodes import (
                 ACCEPTANCE_HARD_KINDS,
                 AcceptanceHardNodeRunner,
+            )
+            from mechaharness.contract_hard_nodes import (
+                CONTRACT_HARD_KINDS,
+                ContractHardNodeRunner,
             )
             from mechaharness.diagnosis_hard_nodes import (
                 DIAGNOSIS_HARD_KINDS,

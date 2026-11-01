@@ -6,7 +6,7 @@ strategy revision. Model/judge text is advisory only — never host evidence.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from typing import Any
 
 OUTCOME_VERSION = "1"
@@ -113,7 +113,10 @@ def extract_acceptance_constraints(
         status = "incomplete"
     elif str(verify.get("status") or "") == "incomplete" and not evidence:
         status = "incomplete"
-    elif str(verify.get("status") or "") == "failed" or str(execution.get("status") or "") == "failed":
+    elif (
+        str(verify.get("status") or "") == "failed"
+        or str(execution.get("status") or "") == "failed"
+    ):
         status = "failed"
     else:
         status = "ok"
