@@ -245,10 +245,20 @@ owning user stories):</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_change_execution_apply</span></code></p></td>
 <td><p>Scoped slice apply with diff + hashes</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/change-verification.html"><span class="std std-doc">change_verification</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">change_verification</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_change_verification_host</span></code></p></td>
+<td><p>Host-observed VerificationReport</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="graph-templates/failure-diagnosis.html"><span class="std std-doc">failure_diagnosis</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">failure_diagnosis</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_failure_diagnosis_classify</span></code></p></td>
+<td><p>Evidence-linked Diagnosis</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="graph-templates/gastronomic-guided-development.html"><span class="std std-doc">gastronomic_guided_development</span></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fangore_gastronomic_guided_development_shape</span></code></p></td>
-<td><p>Product tile: discovery → contract → plan → execute</p></td>
+<td><p>Product tile: discovery → … → diagnose</p></td>
 </tr>
 </tbody>
 </table>
@@ -351,8 +361,14 @@ held-out gate guards <code class="docutils literal notranslate"><span class="pre
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">change_execution</span></code></p></td>
 <td><p>Approved slice → scoped writes → ChangeExecution</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">change_verification</span></code></p></td>
+<td><p>ChangeExecution + contract → host VerificationReport</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">failure_diagnosis</span></code></p></td>
+<td><p>VerificationReport → typed Diagnosis + next experiment</p></td>
+</tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gastronomic_guided_development</span></code></p></td>
-<td><p>Product composition (discovery → contract → plan → execute; verify deferred)</p></td>
+<td><p>Product composition (discovery → … → diagnose; revise deferred)</p></td>
 </tr>
 </tbody>
 </table>

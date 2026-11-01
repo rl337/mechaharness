@@ -192,7 +192,8 @@ tests, README; forbid leftover <code class="docutils literal notranslate"><span 
 pytest<span class="w"> </span>-s<span class="w"> </span>-q<span class="w"> </span>tests/stories/test_user_story_suites.py<span class="w"> </span>-k<span class="w"> </span>delegate_pkg
 
 <span class="c1"># Live gate (required before trusting stubs)</span>
-<span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>http://192.168.1.21:8000/v1<span class="w"> </span><span class="se">\</span>
+<span class="nv">MECHA_STORY_BACKEND</span><span class="o">=</span>live<span class="w"> </span><span class="nv">MECHA_BASE_URL</span><span class="o">=</span>&lt;openai-compat-base-url&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="nv">MECHA_MODEL</span><span class="o">=</span>&lt;served-model-id&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>pytest<span class="w"> </span>-s<span class="w"> </span>-q<span class="w"> </span>tests/stories/test_user_story_suites.py<span class="w"> </span>-k<span class="w"> </span>delegate_pkg
 </pre></div>
 </div>
