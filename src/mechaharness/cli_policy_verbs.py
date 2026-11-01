@@ -1318,6 +1318,10 @@ class GraphWalkVerb(CliVerb):
                 PLAN_HARD_KINDS,
                 PlanHardNodeRunner,
             )
+            from mechaharness.revision_hard_nodes import (
+                REVISION_HARD_KINDS,
+                RevisionHardNodeRunner,
+            )
             from mechaharness.verification_hard_nodes import (
                 VERIFICATION_HARD_KINDS,
                 VerificationHardNodeRunner,
@@ -1331,6 +1335,7 @@ class GraphWalkVerb(CliVerb):
             execution_kind_set = set(EXECUTION_HARD_KINDS)
             verification_kind_set = set(VERIFICATION_HARD_KINDS)
             diagnosis_kind_set = set(DIAGNOSIS_HARD_KINDS)
+            revision_kind_set = set(REVISION_HARD_KINDS)
             hard_kind_set = (
                 discovery_kind_set
                 | contract_kind_set
@@ -1338,6 +1343,7 @@ class GraphWalkVerb(CliVerb):
                 | execution_kind_set
                 | verification_kind_set
                 | diagnosis_kind_set
+                | revision_kind_set
             )
             special_kinds = infer_kind_set | judge_kind_set | hard_kind_set
             leaf_kinds = [k for k in kinds if k != "subgraph"]
@@ -1350,6 +1356,7 @@ class GraphWalkVerb(CliVerb):
                 k for k in leaf_kinds if k in verification_kind_set
             ]
             diagnosis_kinds = [k for k in leaf_kinds if k in diagnosis_kind_set]
+            revision_kinds = [k for k in leaf_kinds if k in revision_kind_set]
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
             needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
@@ -1367,6 +1374,7 @@ class GraphWalkVerb(CliVerb):
                 or execution_kinds
                 or verification_kinds
                 or diagnosis_kinds
+                or revision_kinds
             ):
                 runners.append(
                     CallableGraphNodeRunner(compute_kinds or ["compute"], run_node)
@@ -1416,6 +1424,8 @@ class GraphWalkVerb(CliVerb):
                 )
             if diagnosis_kinds:
                 runners.append(DiagnosisHardNodeRunner(diagnosis_kinds))
+            if revision_kinds:
+                runners.append(RevisionHardNodeRunner(revision_kinds))
 
             # Bind Completer / EventLog first so runners are in the registry
             # snapshot when Config.configure registers GraphNodeRunnerRegistry.

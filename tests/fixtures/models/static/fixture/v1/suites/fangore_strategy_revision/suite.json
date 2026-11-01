@@ -1,0 +1,43 @@
+{
+  "id": "fangore_strategy_revision",
+  "title": "StrategyRevision gate and gastronomic revise tiling",
+  "persona": "fangore",
+  "execution": {
+    "mode": "parallel",
+    "ordered": false
+  },
+  "vars": {},
+  "setup": [],
+  "cleanup": [],
+  "workspace": null,
+  "stages": [
+    {
+      "story": "fangore_strategy_revision_shape",
+      "scenario": "005_fangore_strategy_revision_shape"
+    },
+    {
+      "story": "fangore_strategy_revision_retry",
+      "scenario": "010_fangore_strategy_revision_retry"
+    },
+    {
+      "story": "fangore_strategy_revision_accept",
+      "scenario": "015_fangore_strategy_revision_accept"
+    },
+    {
+      "story": "fangore_strategy_revision_stop",
+      "scenario": "020_fangore_strategy_revision_stop"
+    },
+    {
+      "story": "fangore_strategy_revision_change",
+      "scenario": "025_fangore_strategy_revision_change"
+    },
+    {
+      "story": "fangore_strategy_revision_yield",
+      "scenario": "030_fangore_strategy_revision_yield"
+    },
+    {
+      "story": "fangore_strategy_revision_validate_errors",
+      "scenario": "035_fangore_strategy_revision_validate_errors"
+    }
+  ]
+}

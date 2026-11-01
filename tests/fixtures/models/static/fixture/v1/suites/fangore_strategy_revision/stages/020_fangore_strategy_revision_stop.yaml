@@ -1,0 +1,77 @@
+id: fangore_strategy_revision_stop
+suite: fangore_strategy_revision
+persona: fangore
+title: Exhausted retry budget stops the loop
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  strategy_revision with attempts_used equal to attempts_max and verifies disposition stop.
+implementation: '`revision_*` hard nodes; Agentic Recipe `strategy_revision`.'
+validation: Suite stage `020_fangore_strategy_revision_stop` — disposition stop.
+footnotes:
+- id: gastronomic-m6-revision-stop
+  label: Gastronomic M6 revision stop
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Retry loops must terminate when budget is exhausted
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: revise stop
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.diagnosis:
+            version: '1'
+            status: ok
+            failure_class: runtime
+            next_experiment: fix_exception_at_cited_frame
+            evidence: [{text: 'Traceback ImportError'}]
+          in.retry_budget: {attempts_used: 3, attempts_max: 3}
+    - id: constrain
+      kind: revision_constrain
+      depends_on: [seed]
+      payload:
+        reads:
+          diagnosis: in.diagnosis
+          retry_budget: in.retry_budget
+        writes: {destination: acc.revision.constraints}
+    - id: decide
+      kind: revision_decide
+      depends_on: [constrain]
+      payload:
+        reads: {constraints: acc.revision.constraints}
+        writes: {destination: acc.revision.decision}
+    - id: publish
+      kind: revision_publish
+      depends_on: [decide]
+      payload:
+        reads:
+          constraints: acc.revision.constraints
+          decision: acc.revision.decision
+        writes: {destination: out.strategy_revision}
+    - id: validate
+      kind: revision_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.strategy_revision}
+        writes: {destination: acc.revision.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.strategy_revision.disposition, value: stop}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.strategy_revision.next_experiment, value: stop_retry_budget_exhausted}
+cleanup: []
