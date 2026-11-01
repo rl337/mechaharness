@@ -1,0 +1,9 @@
+id: fangore_failure_diagnosis
+title: FailureDiagnosis classification and gastronomic diagnose tiling
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

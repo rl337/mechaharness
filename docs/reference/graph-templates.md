@@ -46,7 +46,9 @@ owning user stories):
 | [contract_extraction](./graph-templates/contract-extraction.md) | `contract_extraction` | `fangore_contract_extraction_found` | Freeze inventory into typed `ChangeContract` |
 | [change_decomposition](./graph-templates/change-decomposition.md) | `change_decomposition` | `fangore_change_decomposition_ordered` | Ordered ChangePlan slices from a contract |
 | [change_execution](./graph-templates/change-execution.md) | `change_execution` | `fangore_change_execution_apply` | Scoped slice apply with diff + hashes |
-| [gastronomic_guided_development](./graph-templates/gastronomic-guided-development.md) | `gastronomic_guided_development` | `fangore_gastronomic_guided_development_shape` | Product tile: discovery → contract → plan → execute |
+| [change_verification](./graph-templates/change-verification.md) | `change_verification` | `fangore_change_verification_host` | Host-observed VerificationReport |
+| [failure_diagnosis](./graph-templates/failure-diagnosis.md) | `failure_diagnosis` | `fangore_failure_diagnosis_classify` | Evidence-linked Diagnosis |
+| [gastronomic_guided_development](./graph-templates/gastronomic-guided-development.md) | `gastronomic_guided_development` | `fangore_gastronomic_guided_development_shape` | Product tile: discovery → … → diagnose |
 
 Composition helpers: `GraphTemplateParams.instance_key` (namespaced ids),
 `GraphTemplate.tile` (embed under a parent node). Story:
@@ -111,7 +113,9 @@ held-out gate guards `ResearchLab.promote`.
 | `contract_extraction` | Freeze priors → typed ChangeContract |
 | `change_decomposition` | Contract → ordered ChangePlan slices |
 | `change_execution` | Approved slice → scoped writes → ChangeExecution |
-| `gastronomic_guided_development` | Product composition (discovery → contract → plan → execute; verify deferred) |
+| `change_verification` | ChangeExecution + contract → host VerificationReport |
+| `failure_diagnosis` | VerificationReport → typed Diagnosis + next experiment |
+| `gastronomic_guided_development` | Product composition (discovery → … → diagnose; revise deferred) |
 
 These are distinct Agentic Recipes on the same `GraphTemplate` substrate.
 

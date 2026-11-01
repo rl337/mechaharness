@@ -52,6 +52,7 @@ from mechaharness.graph_templates.change_decomposition import (
     ChangeDecompositionTemplate,
 )
 from mechaharness.graph_templates.change_execution import ChangeExecutionTemplate
+from mechaharness.graph_templates.change_verification import ChangeVerificationTemplate
 from mechaharness.graph_templates.context_pack import ContextPackTemplate
 from mechaharness.graph_templates.contract_extraction import ContractExtractionTemplate
 from mechaharness.graph_templates.conversational_tool_loop import (
@@ -60,6 +61,7 @@ from mechaharness.graph_templates.conversational_tool_loop import (
 from mechaharness.graph_templates.decision_plane import DecisionPlaneTemplate
 from mechaharness.graph_templates.demo_guidance import DemoGuidanceTemplate
 from mechaharness.graph_templates.environment_repair import EnvironmentRepairTemplate
+from mechaharness.graph_templates.failure_diagnosis import FailureDiagnosisTemplate
 from mechaharness.graph_templates.fan_out_aggregate import FanOutAggregateTemplate
 from mechaharness.graph_templates.gastronomic_guided_development import (
     GastronomicGuidedDevelopmentTemplate,
@@ -83,7 +85,9 @@ __all__ = [
     "ContextPackTemplate",
     "ChangeDecompositionTemplate",
     "ChangeExecutionTemplate",
+    "ChangeVerificationTemplate",
     "ContractExtractionTemplate",
+    "FailureDiagnosisTemplate",
     "ConversationalToolLoopTemplate",
     "DecisionPlaneTemplate",
     "DemoGuidanceTemplate",
