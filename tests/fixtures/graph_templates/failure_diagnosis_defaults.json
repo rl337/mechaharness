@@ -1,0 +1,28 @@
+{
+  "id": "failure_diagnosis_defaults",
+  "description": "failure_diagnosis constrains then classifies host evidence",
+  "template": "failure_diagnosis",
+  "params": {
+    "goal": "Diagnose verify failure",
+    "inputs": {
+      "goal": "Diagnose verify failure",
+      "verification_report": {
+        "version": "1",
+        "status": "failed",
+        "failures": ["pytest exit 1"]
+      }
+    }
+  },
+  "expect": {
+    "template_name": "failure_diagnosis",
+    "template_status": "active",
+    "node_ids": ["seed", "constrain", "classify", "publish", "validate"],
+    "edge_count": 4,
+    "nodes": {
+      "constrain": {"kind": "diagnosis_constrain"},
+      "classify": {"kind": "diagnosis_classify"},
+      "publish": {"kind": "diagnosis_publish"},
+      "validate": {"kind": "diagnosis_validate"}
+    }
+  }
+}
