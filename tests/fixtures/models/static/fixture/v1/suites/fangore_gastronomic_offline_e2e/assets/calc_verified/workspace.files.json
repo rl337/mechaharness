@@ -1,0 +1,4 @@
+{
+  "src/calc/arithmetic.py": "def add(a, b):\n    return a + b\n\ndef mul(a, b):\n    return a * b\n",
+  "src/calc/parser.py": "def parse(expr):\n    return expr\n"
+}
