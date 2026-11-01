@@ -1,0 +1,43 @@
+id: fangore_failure_diagnosis_shape
+suite: fangore_failure_diagnosis
+persona: fangore
+title: Instantiate the failure_diagnosis Agentic Recipe
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic
+  Recipe `failure_diagnosis` and verifies constrain/classify/publish/validate node ids.
+implementation: Agentic Recipe `failure_diagnosis` (`FailureDiagnosisTemplate`) via `instantiate_recipe`.
+validation: Suite stage `005_fangore_failure_diagnosis_shape` — template_name and node ids.
+footnotes:
+- id: gastronomic-m6-diagnosis-shape
+  label: Gastronomic M6 failure_diagnosis
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md
+  note: Evidence-linked Diagnosis after verification
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  recipe: failure_diagnosis
+steps:
+- do:
+    instantiate_recipe:
+      path: binds/failure_diagnosis.yaml
+  expect:
+  - kind: equals
+    key: template_name
+    value: failure_diagnosis
+  - kind: includes
+    key: subgraph_node_ids
+    value:
+    - seed
+    - constrain
+    - classify
+    - publish
+    - validate
+complete:
+  expect:
+  - kind: equals
+    key: template_name
+    value: failure_diagnosis
+cleanup: []

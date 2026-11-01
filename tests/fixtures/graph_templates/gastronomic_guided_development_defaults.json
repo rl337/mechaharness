@@ -1,6 +1,6 @@
 {
   "id": "gastronomic_guided_development_defaults",
-  "description": "product recipe tiles discovery through verify",
+  "description": "product recipe tiles discovery through diagnose",
   "template": "gastronomic_guided_development",
   "params": {
     "goal": "Add multiplication safely",
@@ -20,19 +20,22 @@
       "plan_tile",
       "execute_tile",
       "verify_tile",
+      "diagnose_tile",
       "publish",
+      "publish_verification",
       "publish_execution",
       "publish_plan",
       "publish_contract",
       "publish_inventory"
     ],
-    "edge_count": 10,
+    "edge_count": 12,
     "nodes": {
       "discovery_tile": {"kind": "subgraph"},
       "contract_tile": {"kind": "subgraph"},
       "plan_tile": {"kind": "subgraph"},
       "execute_tile": {"kind": "subgraph"},
       "verify_tile": {"kind": "subgraph"},
+      "diagnose_tile": {"kind": "subgraph"},
       "publish": {"kind": "bag_project"}
     }
   }

@@ -165,6 +165,12 @@ Persona **fangore**; execution `parallel`; 10 stage(s).
 
 Stories: `fangore_insp_approval_interrupt`, `fangore_insp_driver_session_resume`, `fangore_insp_durable_graph_generator`, `fangore_insp_durable_resume`, `fangore_insp_graph_guidance_yield`, `fangore_insp_guidance_controller_auth`, `fangore_insp_guidance_resume_idempotent`, `fangore_insp_guidance_survive_restart`, `fangore_insp_sparse_advisor`, `fangore_local_plan_resume`
 
+### `fangore_failure_diagnosis` — FailureDiagnosis classification and gastronomic diagnose tiling
+
+Persona **fangore**; execution `parallel`; 2 stage(s).
+
+Stories: `fangore_failure_diagnosis_classify`, `fangore_failure_diagnosis_shape`
+
 ### `fangore_graph_executor` — Graph executor, soft points, traversal, and budgets
 
 Persona **fangore**; execution `parallel`; 20 stage(s).
@@ -1459,13 +1465,45 @@ Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recip
 
 [^rc-env-repair]: [Recipes requirements (first-wave catalog)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — environment_repair owning story
 
-### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→…→verify tiles
+### `fangore_failure_diagnosis_classify` — Classify host-observed verify failures into a typed Diagnosis
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile, contract_tile, plan_tile, execute_tile, and verify_tile subgraphs without mutating guided_coding.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks failure_diagnosis against a failed VerificationReport whose evidence cites a pytest exit mismatch, and verifies `out.diagnosis` names failure_class semantics with a distinct next_experiment.
 
 #### Implementation
 
-Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, `change_execution`, and `change_verification`.
+`diagnosis_constrain` / `diagnosis_classify` / `diagnosis_publish` / `diagnosis_validate` in `diagnosis_hard_nodes`; Agentic Recipe `failure_diagnosis`.
+
+#### Validation
+
+Suite stage `010_fangore_failure_diagnosis_classify` — status ok, failure_class semantics.
+
+#### Footnotes
+
+1. [Gastronomic M6 diagnosis classify](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Evidence-linked failure classification and distinct next experiment
+
+### `fangore_failure_diagnosis_shape` — Instantiate the failure_diagnosis Agentic Recipe
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `failure_diagnosis` and verifies constrain/classify/publish/validate node ids.
+
+#### Implementation
+
+Agentic Recipe `failure_diagnosis` (`FailureDiagnosisTemplate`) via `instantiate_recipe`.
+
+#### Validation
+
+Suite stage `005_fangore_failure_diagnosis_shape` — template_name and node ids.
+
+#### Footnotes
+
+1. [Gastronomic M6 failure_diagnosis](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Evidence-linked Diagnosis after verification
+
+### `fangore_gastronomic_guided_development_shape` — Instantiate gastronomic_guided_development discovery→…→diagnose tiles
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_guided_development` and verifies discovery_tile through diagnose_tile subgraphs without mutating guided_coding.
+
+#### Implementation
+
+Agentic Recipe `gastronomic_guided_development` (`GastronomicGuidedDevelopmentTemplate`) tiles `workspace_discovery`, `contract_extraction`, `change_decomposition`, `change_execution`, `change_verification`, and `failure_diagnosis`.
 
 #### Validation
 
@@ -1473,7 +1511,7 @@ Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name
 
 #### Footnotes
 
-1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through verify before diagnose stages
+1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through diagnose before revise stages
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 
