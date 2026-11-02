@@ -2,6 +2,9 @@
 
 Applies one approved ChangePlan slice with scoped file revisions and explicit
 write grants, then publishes a typed ChangeExecution (diff + hashes).
+
+Completer may propose revisions via soft point ``propose_payload``; host
+``in.file_revisions`` remain authoritative when non-empty.
 """
 
 from __future__ import annotations
@@ -19,7 +22,7 @@ from mechaharness.isolation.isolation_contract import TemplateIOContract
 
 
 class ChangeExecutionTemplate(GraphTemplate):
-    """Constrain → apply revisions → publish → validate.
+    """Constrain → propose → materialize → apply → publish → validate.
 
     Catalog id: ``change_execution``.
 
@@ -40,13 +43,15 @@ class ChangeExecutionTemplate(GraphTemplate):
         ... ))
         >>> graph.template_name
         'change_execution'
+        >>> "propose" in graph.nodes and "materialize" in graph.nodes
+        True
     """
 
     name = "change_execution"
     version = "1"
     summary = (
-        "Apply one approved ChangePlan slice with scoped writes and publish "
-        "diff plus changed-file hashes."
+        "Propose or host-seed scoped file revisions, apply with write grants, "
+        "and publish diff plus changed-file hashes."
     )
     io_contract = TemplateIOContract(
         inputs={
@@ -59,6 +64,15 @@ class ChangeExecutionTemplate(GraphTemplate):
         outputs={"change_execution": "object"},
     )
     soft_points = (
+        SoftPoint(
+            name="propose_payload",
+            kind="task_state",
+            description=(
+                "Completer ContextSpec for proposing scoped file revisions "
+                "(JSON list or {revisions:[...]})"
+            ),
+            required=False,
+        ),
         SoftPoint(
             name="apply_payload",
             kind="task_state",
@@ -107,10 +121,60 @@ class ChangeExecutionTemplate(GraphTemplate):
                 },
             )
         )
+        propose_payload = dict(bindings.get("propose_payload") or {})
+        propose_payload.setdefault("soft_point", "propose_payload")
+        propose_payload.setdefault(
+            "context",
+            {
+                "version": "1",
+                "system": (
+                    "Propose scoped file revisions as JSON only. Return either a "
+                    "list of {path, content} objects or "
+                    '{"revisions":[{"path":"...","content":"..."}]}. '
+                    "Stay inside the approved slice allowed_paths. "
+                    "Do not use eval/exec. Prefer extending existing files."
+                ),
+                "reads": [
+                    {"path": "in.goal", "required": True},
+                    {"path": "acc.execution.constraints", "required": True},
+                    {"path": "in.approved_slice", "required": False},
+                    {"path": "in.change_plan", "required": False},
+                    {"path": "in.workspace", "required": False},
+                    {"path": "in.file_revisions", "required": False},
+                ],
+                "response": {
+                    "writes": "acc.execution.proposed",
+                    "parse": "json",
+                },
+            },
+        )
+        graph.add_node(
+            make_node(
+                id="propose",
+                kind="infer",
+                depends_on=["constrain"],
+                payload=propose_payload,
+            )
+        )
+        graph.add_node(
+            make_node(
+                id="materialize",
+                kind="execution_materialize",
+                depends_on=["propose"],
+                payload={
+                    "reads": {
+                        "host_revisions": "in.file_revisions",
+                        "proposed": "acc.execution.proposed",
+                    },
+                    "writes": {"destination": "acc.execution.revisions"},
+                    "parameters": {"fail_if_incomplete": True},
+                },
+            )
+        )
         apply_payload = dict(bindings.get("apply_payload") or {})
         apply_reads = {
             "constraints": "acc.execution.constraints",
-            "revisions": "in.file_revisions",
+            "revisions": "acc.execution.revisions",
             "workspace": "in.workspace",
         }
         apply_parameters = dict(apply_payload.get("parameters") or {})
@@ -118,7 +182,7 @@ class ChangeExecutionTemplate(GraphTemplate):
             make_node(
                 id="apply",
                 kind="execution_apply",
-                depends_on=["constrain"],
+                depends_on=["materialize"],
                 payload={
                     "soft_point": "apply_payload",
                     "reads": apply_reads,
@@ -153,7 +217,15 @@ class ChangeExecutionTemplate(GraphTemplate):
                 },
             )
         )
-        order = ["seed", "constrain", "apply", "publish", "validate"]
+        order = [
+            "seed",
+            "constrain",
+            "propose",
+            "materialize",
+            "apply",
+            "publish",
+            "validate",
+        ]
         for left, right in zip(order, order[1:]):
             graph.add_dependency(
                 DependencyEdge(

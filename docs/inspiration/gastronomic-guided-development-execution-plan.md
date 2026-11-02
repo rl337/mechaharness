@@ -1,9 +1,9 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0–M6 + comparison protocol + offline late-stage e2e + arm-A suite
-timing→trial harness landed. Live arm B remains **`not_run`** until gastronomic
-execute can drive Completer coding comparable to `guided_coding` (never
-fabricate results).
+**Status:** M0–M6 + comparison protocol + offline e2e + arm-A live recorder +
+Completer propose on `change_execution` landed. Live arm B remains **`not_run`**
+until a gastronomic calc suite (or tool-loop parity) can replace `calc_cli`
+`guided_coding` stages (never fabricate results).
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.

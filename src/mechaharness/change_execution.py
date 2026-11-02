@@ -151,6 +151,58 @@ def apply_file_revisions(
     }
 
 
+def _revision_rows(raw: Any) -> list[dict[str, Any]]:
+    if isinstance(raw, Mapping) and "revisions" in raw:
+        rows = raw.get("revisions") or []
+    elif isinstance(raw, list):
+        rows = raw
+    else:
+        rows = []
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        if isinstance(row, Mapping) and str(row.get("path") or "").strip():
+            out.append(dict(row))
+    return out
+
+
+def materialize_file_revisions(
+    *,
+    host_revisions: Any = None,
+    proposed: Any = None,
+) -> dict[str, Any]:
+    """Prefer host ``file_revisions``; else Completer-proposed revisions.
+
+    Completer propose publishes JSON (list or ``{revisions:[...]}``). Host
+    seeds remain authoritative when non-empty so offline stories stay
+    Completer-free.
+    """
+    host_rows = _revision_rows(host_revisions)
+    if host_rows:
+        return {
+            "status": "ok",
+            "source": "host",
+            "revisions": host_rows,
+        }
+    proposed_rows = _revision_rows(proposed)
+    if proposed_rows:
+        return {
+            "status": "ok",
+            "source": "proposed",
+            "revisions": proposed_rows,
+        }
+    return {
+        "status": "incomplete",
+        "source": "none",
+        "revisions": [],
+        "errors": [
+            {
+                "path": "revisions",
+                "message": "host file_revisions or Completer propose required",
+            }
+        ],
+    }
+
+
 def assemble_change_execution(
     *,
     constraints: Mapping[str, Any],
@@ -258,5 +310,6 @@ __all__ = [
     "apply_file_revisions",
     "assemble_change_execution",
     "extract_execution_constraints",
+    "materialize_file_revisions",
     "validate_change_execution",
 ]

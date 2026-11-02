@@ -14,12 +14,12 @@ from typing import Any
 TRIAL_VERSION = "1"
 LIVE_STATUS_VERSION = "1"
 
-# Arm B needs Completer-driven edits inside gastronomic execute; calc_cli stages
-# still bind guided_coding + project_coding. Until that bridge lands, hosts must
-# mark B as not_run rather than fabricating a gastronomic coding trial.
+# Arm B: change_execution can Completer-propose revisions, but calc_cli stages
+# still bind guided_coding + project_coding (tool-loop). Until a gastronomic
+# calc suite (or tool-loop parity) lands, hosts must mark B as not_run.
 ARM_B_LIVE_BLOCKER = (
-    "gastronomic_guided_development execute applies host file_revisions; "
-    "calc_cli live coding still requires guided_coding + project_coding"
+    "calc_cli stages still bind guided_coding + project_coding; "
+    "need a gastronomic calc suite (or tool-loop parity) for fair arm B"
 )
 
 ARMS: frozenset[str] = frozenset({"A", "B", "C", "D"})
