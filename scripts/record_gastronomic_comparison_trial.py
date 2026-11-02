@@ -2,8 +2,8 @@
 """Record a gastronomic comparison trial from a suite run directory.
 
 Writes under ``.mechaharness/comparison_trials/<trial_id>/`` (gitignored via
-``.mechaharness/``). Does not invent live results: arm B stays ``not_run``
-until gastronomic can drive Completer coding comparable to ``guided_coding``.
+``.mechaharness/``). Does not invent live results: mark arm B ``not_run``
+until ``fangore_gastronomic_calc`` (static or live) has been recorded.
 
 Example::
 

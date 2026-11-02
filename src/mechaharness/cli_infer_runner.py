@@ -145,16 +145,24 @@ class CliInferRunner(GraphNodeRunner):
         *,
         model: str = "cli-default",
         kinds: Sequence[str] | None = None,
+        max_tokens: int | None = None,
     ) -> None:
         self._completer = completer
         self._cost = cost
         self._event_log = event_log
         self._model = model
         self._kinds = list(kinds) if kinds is not None else [CLI_INFER_KIND]
+        self._max_tokens = max_tokens
         self.last_model_inputs: dict[str, dict[str, Any]] = {}
         self.last_requests: dict[str, CompletionRequest] = {}
         self.last_inference: dict[str, dict[str, Any]] = {}
         self.prior_responses: dict[str, PriorResponseRecord] = {}
+
+    def _request_max_tokens(self, node: GraphNode) -> int | None:
+        raw = node.payload.get("max_tokens", self._max_tokens)
+        if raw is None:
+            return None
+        return int(raw)
 
     def kinds(self) -> Sequence[str]:
         return list(self._kinds)
@@ -182,6 +190,7 @@ class CliInferRunner(GraphNodeRunner):
         request = CompletionRequest(
             model=model,
             messages=messages,
+            max_tokens=self._request_max_tokens(node),
             extra={"node_id": node.id},
         )
         return await self._complete_and_finish(
@@ -244,6 +253,7 @@ class CliInferRunner(GraphNodeRunner):
             model=model,
             messages=list(compiled.messages),
             tools=tools,
+            max_tokens=self._request_max_tokens(node),
             extra={
                 "node_id": node.id,
                 "snapshot_id": snapshot_id,
@@ -434,6 +444,13 @@ class CliInferRunner(GraphNodeRunner):
 
         assistant = response.message
         text = assistant.content or ""
+        # Thinking models often burn the budget into reasoning_content and leave
+        # content empty (finish_reason=length). Prefer content; fall back so
+        # JSON ContextSpec publishes (e.g. change_execution propose) still work.
+        if not str(text).strip():
+            reasoning = getattr(assistant, "reasoning_content", None)
+            if isinstance(reasoning, str) and reasoning.strip():
+                text = reasoning
         published: Any = None
         publish_path: str | None = None
         if response_spec is not None:

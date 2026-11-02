@@ -596,13 +596,16 @@ class UserStoryHarness:
     ) -> TestHarnessCliConfig:
         from mechaharness.rag import RagRetriever
 
+        # Live graph_walk / Completer propose needs headroom for file JSON;
+        # thinking Completers still burn tokens into reasoning unless /no_think.
+        default_max = "8192" if backend.mode == "live" else "256"
         settings = Settings(
             inference_backend="openai_compat",
             harness_family=family,
             model=model,
             base_url=os.environ.get("MECHA_BASE_URL", "http://story.invalid/v1"),
             api_key=os.environ.get("MECHA_API_KEY", "story"),
-            max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "256")),
+            max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", default_max)),
         )
         base = (settings.base_url or "http://story.invalid/v1").rstrip("/")
         if backend.mode == "static":
@@ -622,6 +625,7 @@ class UserStoryHarness:
             harness_family=family,
             judge_provider=judge_provider,
             rag_retriever=rag_retriever if isinstance(rag_retriever, RagRetriever) else None,
+            max_tokens=settings.max_tokens,
             **(access_kw or {}),
         )
 

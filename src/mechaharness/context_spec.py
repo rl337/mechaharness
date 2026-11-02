@@ -183,13 +183,25 @@ def _parse_json_response(text: str) -> Any:
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        start = raw.find("{")
-        end = raw.rfind("}")
-        if start >= 0 and end > start:
+        decoder = json.JSONDecoder()
+        # Scan for the first decodable object/list. Prefer ``revisions`` payloads
+        # when thinking models bury JSON inside long reasoning prose.
+        candidates: list[Any] = []
+        for index, char in enumerate(raw):
+            if char not in "{[":
+                continue
             try:
-                return json.loads(raw[start : end + 1])
-            except json.JSONDecodeError as exc:
-                raise ContextSpecError(f"response is not valid JSON: {exc}") from exc
+                value, _end = decoder.raw_decode(raw, index)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(value, dict) and "revisions" in value:
+                return value
+            if isinstance(value, list):
+                candidates.append(value)
+            elif isinstance(value, dict):
+                candidates.append(value)
+        if candidates:
+            return candidates[0]
         raise ContextSpecError(f"response is not valid JSON: {raw[:120]!r}") from None
 
 
