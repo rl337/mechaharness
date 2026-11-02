@@ -1,10 +1,10 @@
 # Cursor execution plan: Gastronomic guided development
 
 **Status:** M0–M6 + comparison protocol + offline e2e + Completer propose +
-`fangore_gastronomic_calc` arm-B suite landed. Live LM Studio Qwen arm A
-(`calc_cli`) and arm B (Completer propose with `/no_think` + reasoning
-fallback) recorded under `.mechaharness/comparison_trials/`. Prefer multiple
-matched trials before claiming a winner; never fabricate results.
+`fangore_gastronomic_calc` arm-B suite (six calc stages matching `calc_cli`)
+landed. Live LM Studio Qwen arm A/B trials under `.mechaharness/comparison_trials/`.
+Prefer multiple matched trials before claiming a winner; never fabricate
+results.
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.

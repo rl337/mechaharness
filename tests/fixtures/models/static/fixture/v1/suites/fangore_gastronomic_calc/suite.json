@@ -20,6 +20,22 @@
     {
       "story": "fangore_gastronomic_calc_add_sub",
       "scenario": "020_fangore_gastronomic_calc_add_sub"
+    },
+    {
+      "story": "fangore_gastronomic_calc_mul_div",
+      "scenario": "030_fangore_gastronomic_calc_mul_div"
+    },
+    {
+      "story": "fangore_gastronomic_calc_exponent",
+      "scenario": "040_fangore_gastronomic_calc_exponent"
+    },
+    {
+      "story": "fangore_gastronomic_calc_grouping",
+      "scenario": "050_fangore_gastronomic_calc_grouping"
+    },
+    {
+      "story": "fangore_gastronomic_calc_functions",
+      "scenario": "060_fangore_gastronomic_calc_functions"
     }
   ]
 }
