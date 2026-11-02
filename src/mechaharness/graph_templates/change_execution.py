@@ -128,12 +128,12 @@ class ChangeExecutionTemplate(GraphTemplate):
             {
                 "version": "1",
                 "system": (
-                    "Keep reasoning under two sentences. Put JSON only in the "
-                    "answer content (not only in reasoning). Return exactly "
+                    "Do not think aloud. Put JSON only in answer content (not "
+                    "only in reasoning). Return exactly "
                     '{"revisions":[{"path":"...","content":"...full file..."}]} '
                     "with no markdown fences. Stay inside approved slice "
                     "allowed_paths. Do not use eval/exec. Prefer extending "
-                    "existing files."
+                    "existing files; keep evaluate and main(argv=None)."
                 ),
                 # Qwen-style thinking Completers honor /no_think in the user
                 # turn so JSON lands in content instead of burning the budget.

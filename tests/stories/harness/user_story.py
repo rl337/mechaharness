@@ -598,7 +598,7 @@ class UserStoryHarness:
 
         # Live graph_walk / Completer propose needs headroom for file JSON;
         # thinking Completers still burn tokens into reasoning unless /no_think.
-        default_max = "8192" if backend.mode == "live" else "256"
+        default_max = "16384" if backend.mode == "live" else "256"
         settings = Settings(
             inference_backend="openai_compat",
             harness_family=family,
