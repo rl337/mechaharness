@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
+import pytest
+
 from mechaharness.change_verification import (
     assemble_verification_report,
     check_immutable_invariants,
@@ -131,6 +133,56 @@ def test_host_verify_runs_and_invariants(tmp_path: Path) -> None:
     assert report["status"] == "ok"
     assert not report["failures"]
     assert validate_verification_report(report)["ok"] is True
+
+
+@pytest.mark.parametrize(
+    ("args", "stdout_contains", "want_ok"),
+    [
+        (["42"], "42", True),
+        (["1+2"], "3", True),
+        (["1+2"], "9", False),
+        (["nope"], "0", False),
+    ],
+)
+def test_host_verify_runs_cli_args(
+    tmp_path: Path,
+    args: list[str],
+    stdout_contains: str,
+    want_ok: bool,
+) -> None:
+    calc = tmp_path / "calc.py"
+    calc.write_text(
+        "import sys\n"
+        "def evaluate(expr):\n"
+        "    e = expr.strip()\n"
+        "    if e == '42': return 42.0\n"
+        "    if e == '1+2': return 3.0\n"
+        "    raise ValueError(e)\n"
+        "def main(argv=None):\n"
+        "    a = list(sys.argv[1:] if argv is None else argv)\n"
+        "    if len(a) != 1:\n"
+        "        return 2\n"
+        "    try:\n"
+        "        print(evaluate(a[0])); return 0\n"
+        "    except Exception as exc:\n"
+        "        print(exc, file=sys.stderr); return 1\n"
+        "if __name__ == '__main__':\n"
+        "    raise SystemExit(main())\n",
+        encoding="utf-8",
+    )
+    rows = run_host_verify_runs(
+        root=tmp_path,
+        specs=[
+            {
+                "path": "calc.py",
+                "args": args,
+                "exit_code": 0,
+                "stdout_contains": stdout_contains,
+            }
+        ],
+    )
+    assert len(rows) == 1
+    assert rows[0]["ok"] is want_ok
 
 
 def test_verify_fails_when_expected_text_missing(tmp_path: Path) -> None:

@@ -5,7 +5,7 @@ title: Gastronomic Completer propose bootstraps calc number literals
 narrative: Fangore starts the CLI host with family `pass_through` and backend `mock` on a shared suite
   workspace. He walks gastronomic change_execution Completer propose → materialize → apply for calc.py
   number literals, verifies evaluate/main on disk, runs 42 and 3.14, and records an arm-B trial.
-implementation: '`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`;
+implementation: '`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`;
   Agentic Recipe `change_execution` under gastronomic arm B; `comparison_assemble`.'
 validation: Suite stage `010_fangore_gastronomic_calc_parse_number` — arm B trial success.
 footnotes:
@@ -137,9 +137,66 @@ graph:
           constraints: acc.execution.constraints
           receipt: acc.execution.apply_receipt
         writes: {destination: out.change_execution}
-    - id: accept_seed
+    - id: seed_verify
       kind: compute
       depends_on: [publish]
+      payload:
+        bag_put:
+          in.change_contract:
+            version: '1'
+            status: ok
+          in.verify_runs:
+            - path: calc.py
+              text_contains:
+              - def evaluate
+              - def main
+              text_forbids:
+              - eval(
+              - exec(
+              python_parses: true
+            - path: calc.py
+              args:
+              - '42'
+              exit_code: 0
+              stdout_contains: '42'
+            - path: calc.py
+              args:
+              - '3.14'
+              exit_code: 0
+              stdout_contains: '3.14'
+    - id: v_constrain
+      kind: verification_constrain
+      depends_on: [seed_verify]
+      payload:
+        reads:
+          contract: in.change_contract
+          execution: out.change_execution
+          verify_runs: in.verify_runs
+        writes: {destination: acc.verification.constraints}
+    - id: v_run
+      kind: verification_run
+      depends_on: [v_constrain]
+      payload:
+        reads: {constraints: acc.verification.constraints, workspace: in.workspace}
+        writes: {destination: acc.verification.run_receipt}
+    - id: v_publish
+      kind: verification_publish
+      depends_on: [v_run]
+      payload:
+        reads:
+          constraints: acc.verification.constraints
+          receipt: acc.verification.run_receipt
+        writes: {destination: out.verification_report}
+    - id: v_validate
+      kind: verification_validate
+      depends_on: [v_publish]
+      payload:
+        reads: {source: out.verification_report}
+        writes: {destination: acc.verification.validation}
+        parameters: {fail_if_invalid: true}
+    - id: accept_seed
+      kind: compute
+      depends_on: [v_validate]
       payload:
         bag_put:
           in.development_outcome:
@@ -180,6 +237,7 @@ steps:
   - {kind: equals, key: bag.acc.execution.revisions.source, value: proposed}
   - {kind: equals, key: bag.out.change_execution.status, value: ok}
   - {kind: equals, key: bag.out.trial.arm, value: B}
+  - {kind: equals, key: bag.out.verification_report.status, value: ok}
   - {kind: equals, key: bag.out.trial.success, value: true}
 - do:
     workspace_read: {path: calc.py}

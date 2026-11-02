@@ -1805,7 +1805,7 @@ Fangore continues the shared gastronomic calc arc. He Completer-proposes an in-s
 
 #### Implementation
 
-`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`; Agentic Recipe `change_execution`; `comparison_assemble`.
 
 #### Validation
 
@@ -1821,7 +1821,7 @@ Fangore continues the shared gastronomic calc arc. He Completer-proposes right-a
 
 #### Implementation
 
-`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`; Agentic Recipe `change_execution`; `comparison_assemble`.
 
 #### Validation
 
@@ -1837,7 +1837,7 @@ Fangore finishes the gastronomic calc arc by Completer-proposing common function
 
 #### Implementation
 
-`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`; Agentic Recipe `change_execution`; `comparison_assemble`.
 
 #### Validation
 
@@ -1853,7 +1853,7 @@ Fangore continues the shared gastronomic calc arc. He Completer-proposes parenth
 
 #### Implementation
 
-`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`; Agentic Recipe `change_execution`; `comparison_assemble`.
 
 #### Validation
 
@@ -1869,7 +1869,7 @@ Fangore continues the shared gastronomic calc arc. He Completer-proposes multipl
 
 #### Implementation
 
-`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`; Agentic Recipe `change_execution`; `comparison_assemble`.
 
 #### Validation
 
@@ -1885,7 +1885,7 @@ Fangore starts the CLI host with family `pass_through` and backend `mock` on a s
 
 #### Implementation
 
-`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution` under gastronomic arm B; `comparison_assemble`.
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`; Agentic Recipe `change_execution` under gastronomic arm B; `comparison_assemble`.
 
 #### Validation
 

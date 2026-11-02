@@ -4,7 +4,7 @@ persona: fangore
 title: Gastronomic Completer propose adds parentheses grouping
 narrative: Fangore continues the shared gastronomic calc arc. He Completer-proposes parentheses that override
   precedence, applies the revision, verifies regressions, and records an arm-B trial.
-implementation: '`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`;
+implementation: '`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`;
   Agentic Recipe `change_execution`; `comparison_assemble`.'
 validation: Suite stage `050_fangore_gastronomic_calc_grouping` — arm B trial success.
 footnotes:
@@ -203,9 +203,71 @@ graph:
           constraints: acc.execution.constraints
           receipt: acc.execution.apply_receipt
         writes: {destination: out.change_execution}
-    - id: accept_seed
+    - id: seed_verify
       kind: compute
       depends_on: [publish]
+      payload:
+        bag_put:
+          in.change_contract:
+            version: '1'
+            status: ok
+          in.verify_runs:
+            - path: calc.py
+              text_contains:
+              - def evaluate
+              - def main
+              text_forbids:
+              - eval(
+              - exec(
+              python_parses: true
+            - path: calc.py
+              args:
+              - 2^3^2
+              exit_code: 0
+              stdout_contains: '512'
+            - path: calc.py
+              args:
+              - (1+2)*3
+              exit_code: 0
+              stdout_contains: '9'
+            - path: calc.py
+              args:
+              - 2^(1+1)
+              exit_code: 0
+              stdout_contains: '4'
+    - id: v_constrain
+      kind: verification_constrain
+      depends_on: [seed_verify]
+      payload:
+        reads:
+          contract: in.change_contract
+          execution: out.change_execution
+          verify_runs: in.verify_runs
+        writes: {destination: acc.verification.constraints}
+    - id: v_run
+      kind: verification_run
+      depends_on: [v_constrain]
+      payload:
+        reads: {constraints: acc.verification.constraints, workspace: in.workspace}
+        writes: {destination: acc.verification.run_receipt}
+    - id: v_publish
+      kind: verification_publish
+      depends_on: [v_run]
+      payload:
+        reads:
+          constraints: acc.verification.constraints
+          receipt: acc.verification.run_receipt
+        writes: {destination: out.verification_report}
+    - id: v_validate
+      kind: verification_validate
+      depends_on: [v_publish]
+      payload:
+        reads: {source: out.verification_report}
+        writes: {destination: acc.verification.validation}
+        parameters: {fail_if_invalid: true}
+    - id: accept_seed
+      kind: compute
+      depends_on: [v_validate]
       payload:
         bag_put:
           in.development_outcome:
@@ -244,6 +306,7 @@ steps:
   expect:
   - {kind: equals, key: status, value: ok}
   - {kind: equals, key: bag.out.trial.arm, value: B}
+  - {kind: equals, key: bag.out.verification_report.status, value: ok}
   - {kind: equals, key: bag.out.trial.success, value: true}
 - do:
     run_python: {path: calc.py, args: ["2^3^2"]}
