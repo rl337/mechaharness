@@ -196,6 +196,53 @@ def run_host_verify_runs(
                             f"stdout={completed.stdout.strip()!r}; "
                             f"stderr={completed.stderr.strip()!r}"
                         )
+        elif "args" in spec:
+            # Host CLI check (guided_coding / gastronomic calc parity):
+            # run ``python <path> *args`` and assert exit + stdout needles.
+            if not path:
+                failures.append(f"verify_runs[{index}]: CLI run requires path")
+            elif not target.is_file():
+                failures.append(f"verify_runs[{index}]: missing CLI path {path}")
+            else:
+                # Run relative to workspace root so suite/temp roots resolve
+                # the same way as story ``run_python`` verbs.
+                cmd = [
+                    sys.executable,
+                    path,
+                    *[str(a) for a in list(spec.get("args") or [])],
+                ]
+                expected_exit = int(spec.get("exit_code", 0))
+                try:
+                    completed = subprocess.run(
+                        cmd,
+                        cwd=str(workspace),
+                        capture_output=True,
+                        text=True,
+                        timeout=float(spec.get("timeout_seconds") or 60.0),
+                        check=False,
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    failures.append(f"verify_runs[{index}] cli {path}: {exc}")
+                else:
+                    if int(completed.returncode) != expected_exit:
+                        failures.append(
+                            f"verify_runs[{index}] cli {path}: exit "
+                            f"{completed.returncode} != {expected_exit}; "
+                            f"stdout={completed.stdout.strip()!r}; "
+                            f"stderr={completed.stderr.strip()!r}"
+                        )
+                    for needle in _as_str_list(spec.get("stdout_contains")):
+                        if needle not in completed.stdout:
+                            failures.append(
+                                f"verify_runs[{index}] cli {path}: expected stdout "
+                                f"to contain {needle!r}; got {completed.stdout.strip()!r}"
+                            )
+                    for needle in _as_str_list(spec.get("stderr_contains")):
+                        if needle not in completed.stderr:
+                            failures.append(
+                                f"verify_runs[{index}] cli {path}: expected stderr "
+                                f"to contain {needle!r}; got {completed.stderr.strip()!r}"
+                            )
         results.append(
             {
                 "index": index,
