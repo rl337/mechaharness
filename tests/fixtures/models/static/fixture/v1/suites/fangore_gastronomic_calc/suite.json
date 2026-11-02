@@ -1,0 +1,25 @@
+{
+  "id": "fangore_gastronomic_calc",
+  "title": "Gastronomic Completer-propose calc growth (arm B control)",
+  "persona": "fangore",
+  "execution": {
+    "mode": "sequential",
+    "ordered": true
+  },
+  "vars": {},
+  "setup": [
+    "ensure_workspace"
+  ],
+  "cleanup": [],
+  "workspace": "temp",
+  "stages": [
+    {
+      "story": "fangore_gastronomic_calc_parse_number",
+      "scenario": "010_fangore_gastronomic_calc_parse_number"
+    },
+    {
+      "story": "fangore_gastronomic_calc_add_sub",
+      "scenario": "020_fangore_gastronomic_calc_add_sub"
+    }
+  ]
+}

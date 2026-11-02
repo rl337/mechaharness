@@ -177,6 +177,12 @@ Persona **fangore**; execution `parallel`; 12 stage(s).
 
 Stories: `fangore_failure_diagnosis_classify`, `fangore_failure_diagnosis_green`, `fangore_failure_diagnosis_incomplete`, `fangore_failure_diagnosis_regression`, `fangore_failure_diagnosis_repeat`, `fangore_failure_diagnosis_runtime`, `fangore_failure_diagnosis_scope`, `fangore_failure_diagnosis_shape`, `fangore_failure_diagnosis_syntax`, `fangore_failure_diagnosis_tool_protocol`, `fangore_failure_diagnosis_unknown`, `fangore_failure_diagnosis_validate_errors`
 
+### `fangore_gastronomic_calc` — Gastronomic Completer-propose calc growth (arm B control)
+
+Persona **fangore**; execution `sequential` (ordered); 2 stage(s).
+
+Stories: `fangore_gastronomic_calc_add_sub`, `fangore_gastronomic_calc_parse_number`
+
 ### `fangore_gastronomic_comparison` — Gastronomic vs guided_coding comparison trial records
 
 Persona **fangore**; execution `parallel`; 5 stage(s).
@@ -1792,6 +1798,38 @@ Suite stage `060_fangore_failure_diagnosis_validate_errors` — validation.ok fa
 #### Footnotes
 
 1. [Gastronomic M6 diagnosis validate errors](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Validate is a schema report; hosts decide whether to hard-fail
+
+### `fangore_gastronomic_calc_add_sub` — Gastronomic Completer propose extends calc with add and sub
+
+Fangore continues the shared gastronomic calc arc. He Completer-proposes an in-scope revision that adds left-associative + and -, applies it, verifies regressions, and records an arm-B trial.
+
+#### Implementation
+
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+
+#### Validation
+
+Suite stage `020_fangore_gastronomic_calc_add_sub` — arm B trial success.
+
+#### Footnotes
+
+1. [Gastronomic calc arm B add/sub](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Sequential gastronomic execute on shared calc workspace
+
+### `fangore_gastronomic_calc_parse_number` — Gastronomic Completer propose bootstraps calc number literals
+
+Fangore starts the CLI host with family `pass_through` and backend `mock` on a shared suite workspace. He walks gastronomic change_execution Completer propose → materialize → apply for calc.py number literals, verifies evaluate/main on disk, runs 42 and 3.14, and records an arm-B trial.
+
+#### Implementation
+
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution` under gastronomic arm B; `comparison_assemble`.
+
+#### Validation
+
+Suite stage `010_fangore_gastronomic_calc_parse_number` — arm B trial success.
+
+#### Footnotes
+
+1. [Gastronomic calc arm B bootstrap](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Completer-propose execute path for fair calc comparison
 
 ### `fangore_gastronomic_comparison_live_status` — Live A/B status marks arm B not_run without fabricating results
 

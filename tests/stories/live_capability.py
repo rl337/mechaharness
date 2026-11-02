@@ -57,6 +57,23 @@ def scenario_local_work(case: StoryCase) -> str | None:
     return None
 
 
+def scenario_graph_has_infer(case: StoryCase) -> bool:
+    """True when the scenario inline/recipe graph declares an ``infer`` node."""
+    path = case.scenario_path()
+    if path is None or not path.is_file():
+        return False
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    graph = data.get("graph") if isinstance(data, dict) else None
+    if not isinstance(graph, dict):
+        return False
+    inline = graph.get("inline")
+    if isinstance(inline, dict):
+        for node in inline.get("nodes") or []:
+            if isinstance(node, dict) and str(node.get("kind") or "") == "infer":
+                return True
+    return False
+
+
 def live_eligible(case: StoryCase) -> bool:
     """Return True when this case should be collected / run in live mode."""
     if case.adapter != "in_process":
@@ -64,6 +81,9 @@ def live_eligible(case: StoryCase) -> bool:
     # Bag checkpoint continuity underpins multi-step live inference; always
     # collect so live suite runs prove pause/resume still carries WalkBag.
     if case.suite_id == "fangore_bag_inference_continuity":
+        return True
+    # Gastronomic calc arm B: Completer propose on change_execution.
+    if case.suite_id == "fangore_gastronomic_calc":
         return True
     verbs = scenario_verbs(case)
     if verbs & _LIVE_EXCLUDE_VERBS:
@@ -73,6 +93,9 @@ def live_eligible(case: StoryCase) -> bool:
         return False
     if scenario_local_work(case) == "project_coding":
         # Live upgrades ProjectCodingLocalWork onto a real Completer.
+        return True
+    # graph_walk + infer nodes upgrade onto the reason lane in live mode.
+    if "graph_walk" in verbs and scenario_graph_has_infer(case):
         return True
     return bool(verbs & _LIVE_MODEL_VERBS)
 

@@ -30,7 +30,8 @@ Mechanism / transport stay in existing parallel suites (not new coding suites):
 | MCP `generator_start` / `resume` | Same `guided_coding` graph via `MECHA_MCP_HOST=project_coding`; session semantics in `fangore_insp_driver_session_resume`. Dogfood: live MCP against `delegate_pkg` goals — **no fourth suite**. |
 | CI diagnose → repair → local verify | `fangore_guided_coding` → `fangore_coding_ci_diagnose` (`ci_checks` / `ci_job_log`) → `fangore_coding_static_checks` (ruff/mypy `verify_runs`) → `fangore_coding_ci_repair` |
 | Gastronomic late-stage offline e2e | `fangore_gastronomic_offline_e2e` (verify→diagnose→revise→accept→trial) |
-| Live comparison recording | Arm A from `calc_cli` suite `TIMING.jsonl` via `scripts/record_gastronomic_comparison_trial.py`; arm B `not_run` until Completer-driven gastronomic execute — [gastronomic-comparison](./gastronomic-comparison.md) |
+| Gastronomic calc arm B | `fangore_gastronomic_calc` (Completer propose → apply on shared calc.py; not a fourth coding-delegate suite) |
+| Live comparison recording | Arm A from `calc_cli`; arm B from `fangore_gastronomic_calc` via `scripts/record_gastronomic_comparison_trial.py` — [gastronomic-comparison](./gastronomic-comparison.md) |
 | StopContract / graph budgets | Soft point `max_iterations` on every coding stage; mechanism stories under `fangore_graph_executor` / `fangore_recipes_tiling` |
 | Workspace grants / escape | `fangore_access_authority` (+ `ProjectCodingConfig` grants) |
 
