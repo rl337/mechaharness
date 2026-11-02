@@ -1,0 +1,11 @@
+id: fangore_gastronomic_calc
+title: Gastronomic Completer-propose calc growth (arm B control)
+persona: fangore
+execution:
+  mode: sequential
+  ordered: true
+vars: {}
+setup:
+- ensure_workspace
+cleanup: []
+workspace: temp

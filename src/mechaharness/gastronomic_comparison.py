@@ -14,12 +14,11 @@ from typing import Any
 TRIAL_VERSION = "1"
 LIVE_STATUS_VERSION = "1"
 
-# Arm B: change_execution can Completer-propose revisions, but calc_cli stages
-# still bind guided_coding + project_coding (tool-loop). Until a gastronomic
-# calc suite (or tool-loop parity) lands, hosts must mark B as not_run.
+# Arm B suite `fangore_gastronomic_calc` records Completer-propose execute
+# trials. Hosts still mark B not_run when that suite has not been executed
+# (static or live) for the comparison batch.
 ARM_B_LIVE_BLOCKER = (
-    "calc_cli stages still bind guided_coding + project_coding; "
-    "need a gastronomic calc suite (or tool-loop parity) for fair arm B"
+    "run fangore_gastronomic_calc (static or live) and record arm B before comparing"
 )
 
 ARMS: frozenset[str] = frozenset({"A", "B", "C", "D"})
