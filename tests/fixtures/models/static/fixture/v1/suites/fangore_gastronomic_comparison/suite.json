@@ -22,6 +22,14 @@
     {
       "story": "fangore_gastronomic_comparison_shape",
       "scenario": "015_fangore_gastronomic_comparison_shape"
+    },
+    {
+      "story": "fangore_gastronomic_comparison_timing_metrics",
+      "scenario": "015_fangore_gastronomic_comparison_timing_metrics"
+    },
+    {
+      "story": "fangore_gastronomic_comparison_live_status",
+      "scenario": "020_fangore_gastronomic_comparison_live_status"
     }
   ]
 }

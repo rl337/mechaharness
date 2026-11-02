@@ -5,8 +5,12 @@ from __future__ import annotations
 import pytest
 
 from mechaharness.gastronomic_comparison import (
+    ARM_B_LIVE_BLOCKER,
     assemble_gastronomic_trial,
+    live_comparison_status,
+    metrics_from_suite_timing,
     summarize_gastronomic_comparison,
+    trial_from_suite_run,
     validate_gastronomic_trial,
 )
 from mechaharness.graph_templates import (
@@ -158,3 +162,95 @@ def test_valid_arm_recipe_pairs(arm: str, recipe: str) -> None:
         metrics={"success": True, "outcome": "completed"},
     )
     assert validate_gastronomic_trial(trial)["ok"] is True
+
+
+def test_metrics_from_suite_timing_counts_stages(tmp_path) -> None:
+    events = [
+        {"kind": "suite_start", "suite_id": "calc_cli", "backend": "live"},
+        {
+            "kind": "suite_stage",
+            "stage": "fangore_calc_parse_number/010",
+            "status": "ok",
+            "elapsed_s": 1.5,
+        },
+        {
+            "kind": "coding_burst",
+            "recipe_id": "guided_coding",
+            "verify_runs": 2,
+            "repair_rounds": 1,
+            "model_calls": 4,
+            "elapsed_s": 1.2,
+        },
+        {
+            "kind": "suite_stage",
+            "stage": "fangore_calc_add_sub/020",
+            "status": "failed",
+            "elapsed_s": 0.2,
+        },
+        {
+            "kind": "suite_stage",
+            "stage": "fangore_calc_add_sub/020",
+            "status": "ok",
+            "elapsed_s": 2.0,
+        },
+    ]
+    metrics = metrics_from_suite_timing(events, stages_total=6)
+    assert metrics["stages_passed"] == 2
+    assert metrics["stages_total"] == 6
+    assert metrics["wall_ms"] == 3700
+    assert metrics["repair_loops"] == 1
+    assert metrics["model_calls"] == 4
+    assert metrics["success"] is False
+    assert metrics["outcome"] == "failed"
+    assert metrics["first_failure_class"] is None
+
+    run = tmp_path / "calc_cli-run"
+    run.mkdir()
+    (run / "manifest.json").write_text(
+        '{"run_id":"r1","suite_id":"calc_cli","completed_stages":["a","b"],'
+        '"failed_stage":null}\n',
+        encoding="utf-8",
+    )
+    # Six ok stages → completed arm-A trial.
+    lines = [
+        '{"kind":"suite_start","suite_id":"calc_cli","backend":"live"}',
+        *[
+            (
+                f'{{"kind":"suite_stage","stage":"s{i}",'
+                f'"status":"ok","elapsed_s":0.5}}'
+            )
+            for i in range(6)
+        ],
+    ]
+    (run / "TIMING.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    trial = trial_from_suite_run(
+        run,
+        trial_id="calc-a-fixture",
+        arm="A",
+        recipe_id="guided_coding",
+        stages_total=6,
+        model={"id": "local-qwen"},
+    )
+    assert trial["success"] is True
+    assert trial["suite_id"] == "calc_cli"
+    assert trial["metrics"]["stages_passed"] == 6
+    assert validate_gastronomic_trial(trial)["ok"] is True
+
+
+def test_live_comparison_status_marks_arm_b_not_run() -> None:
+    arm_a = assemble_gastronomic_trial(
+        trial_id="a1",
+        arm="A",
+        recipe_id="guided_coding",
+        metrics={"success": True, "outcome": "completed", "stages_passed": 6},
+    )
+    status = live_comparison_status(
+        arm_a=arm_a,
+        arm_b=None,
+        endpoint_configured=True,
+    )
+    assert status["comparable_ab"] is False
+    assert status["winner"] is None
+    assert status["arms"]["A"]["status"] == "recorded"
+    assert status["arms"]["B"]["status"] == "not_run"
+    assert ARM_B_LIVE_BLOCKER in str(status["arms"]["B"]["blocker"])
