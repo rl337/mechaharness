@@ -41,6 +41,26 @@ Aggregate with `summarize_gastronomic_comparison`. The summary never sets a
   trials without a live model.
 - Live A/B runs are opt-in when the host has the configured endpoint. Mark
   **not run** rather than fabricating results.
+- Arm A (baseline): run sequential `calc_cli` under
+  `MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL` + `MECHA_MODEL`, then record a
+  trial from the suite run directory:
+
+```bash
+MECHA_STORY_BACKEND=live MECHA_BASE_URL=<openai-compat-base-url> \
+  MECHA_MODEL=<served-model-id> MECHA_MAX_TOKENS=8192 \
+  pytest -s -q tests/stories/test_user_story_suites.py -k calc_cli
+
+python scripts/record_gastronomic_comparison_trial.py \
+  --suite-run .mechaharness/suite_runs/$(cat .mechaharness/suite_runs/calc_cli.latest) \
+  --trial-id calc-a-1 --arm A --recipe guided_coding \
+  --model-id "$MECHA_MODEL"
+```
+
+- Arm B stays **`not_run`** until `gastronomic_guided_development` can drive
+  Completer coding comparable to `guided_coding` + `project_coding` (today
+  execute applies host `file_revisions` only). Use
+  `live_comparison_status` / `comparison_live_status` so status JSON never
+  invents a B trial.
 
 ## Related
 

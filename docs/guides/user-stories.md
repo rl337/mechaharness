@@ -179,9 +179,9 @@ Stories: `fangore_failure_diagnosis_classify`, `fangore_failure_diagnosis_green`
 
 ### `fangore_gastronomic_comparison` — Gastronomic vs guided_coding comparison trial records
 
-Persona **fangore**; execution `parallel`; 3 stage(s).
+Persona **fangore**; execution `parallel`; 5 stage(s).
 
-Stories: `fangore_gastronomic_comparison_shape`, `fangore_gastronomic_comparison_summary`, `fangore_gastronomic_comparison_trial`
+Stories: `fangore_gastronomic_comparison_live_status`, `fangore_gastronomic_comparison_shape`, `fangore_gastronomic_comparison_summary`, `fangore_gastronomic_comparison_timing_metrics`, `fangore_gastronomic_comparison_trial`
 
 ### `fangore_gastronomic_offline_e2e` — Offline gastronomic late-stage e2e to DevelopmentOutcome and trial
 
@@ -1777,6 +1777,22 @@ Suite stage `060_fangore_failure_diagnosis_validate_errors` — validation.ok fa
 
 1. [Gastronomic M6 diagnosis validate errors](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Validate is a schema report; hosts decide whether to hard-fail
 
+### `fangore_gastronomic_comparison_live_status` — Live A/B status marks arm B not_run without fabricating results
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds one recorded arm-A trial, walks comparison_live_status with endpoint configured, and verifies arm B status is not_run while winner stays null.
+
+#### Implementation
+
+`comparison_live_status`; `live_comparison_status` / `ARM_B_LIVE_BLOCKER`.
+
+#### Validation
+
+Suite stage `020_fangore_gastronomic_comparison_live_status` — B not_run.
+
+#### Footnotes
+
+1. [Gastronomic live comparison status](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Missing arms stay not_run until Completer-driven gastronomic execute exists
+
 ### `fangore_gastronomic_comparison_shape` — Instantiate the gastronomic_comparison Agentic Recipe
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `gastronomic_comparison` and verifies assemble/validate node ids.
@@ -1808,6 +1824,22 @@ Suite stage `010_fangore_gastronomic_comparison_summary` — winner null.
 #### Footnotes
 
 1. [Gastronomic comparison summary](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Aggregates never auto-declare a winner
+
+### `fangore_gastronomic_comparison_timing_metrics` — Derive arm-A trial metrics from suite TIMING events
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds suite TIMING events for a completed calc_cli arc, walks comparison_metrics_from_timing then comparison_assemble for arm A, and verifies stages_passed 6 with success true.
+
+#### Implementation
+
+`comparison_metrics_from_timing` / `comparison_assemble`; `metrics_from_suite_timing`.
+
+#### Validation
+
+Suite stage `015_fangore_gastronomic_comparison_timing_metrics` — arm A success.
+
+#### Footnotes
+
+1. [Gastronomic comparison from suite timing](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Hosts record arm A from TIMING.jsonl without inventing tokens
 
 ### `fangore_gastronomic_comparison_trial` — Assemble a gastronomic arm-B trial from DevelopmentOutcome
 
