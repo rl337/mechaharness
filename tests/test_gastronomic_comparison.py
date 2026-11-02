@@ -184,6 +184,12 @@ def test_metrics_from_suite_timing_counts_stages(tmp_path) -> None:
         {
             "kind": "suite_stage",
             "stage": "fangore_calc_add_sub/020",
+            "status": "failed",
+            "elapsed_s": 0.2,
+        },
+        {
+            "kind": "suite_stage",
+            "stage": "fangore_calc_add_sub/020",
             "status": "ok",
             "elapsed_s": 2.0,
         },
@@ -191,11 +197,12 @@ def test_metrics_from_suite_timing_counts_stages(tmp_path) -> None:
     metrics = metrics_from_suite_timing(events, stages_total=6)
     assert metrics["stages_passed"] == 2
     assert metrics["stages_total"] == 6
-    assert metrics["wall_ms"] == 3500
+    assert metrics["wall_ms"] == 3700
     assert metrics["repair_loops"] == 1
     assert metrics["model_calls"] == 4
     assert metrics["success"] is False
     assert metrics["outcome"] == "failed"
+    assert metrics["first_failure_class"] is None
 
     run = tmp_path / "calc_cli-run"
     run.mkdir()
