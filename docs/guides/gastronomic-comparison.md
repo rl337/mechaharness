@@ -41,26 +41,40 @@ Aggregate with `summarize_gastronomic_comparison`. The summary never sets a
   trials without a live model.
 - Live A/B runs are opt-in when the host has the configured endpoint. Mark
   **not run** rather than fabricating results.
-- Arm A (baseline): run sequential `calc_cli` under
-  `MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL` + `MECHA_MODEL`, then record a
-  trial from the suite run directory:
+- Arm A (baseline): run sequential `calc_cli` live against a local OpenAI-compat
+  Completer, then record a trial from the suite run directory. LM Studio’s
+  default listen address is already the `lmstudio` profile
+  (`http://127.0.0.1:1234/v1`). Use the **served** model id from
+  `GET /v1/models` (today’s local Qwen 3.x ~30B-class id is
+  `qwen/qwen3.6-35b-a3b`). Reasoning models need a high `MECHA_MAX_TOKENS` so
+  answer content is not truncated into `reasoning_content` only.
 
 ```bash
-MECHA_STORY_BACKEND=live MECHA_BASE_URL=<openai-compat-base-url> \
-  MECHA_MODEL=<served-model-id> MECHA_MAX_TOKENS=8192 \
+# Smoke Completer (optional)
+MECHA_BASE_URL=http://127.0.0.1:1234/v1 MECHA_API_KEY=lm-studio \
+  MECHA_MODEL=qwen/qwen3.6-35b-a3b MECHA_MAX_TOKENS=512 \
+  mechaharness run "Reply with exactly: ok" --backend lmstudio \
+  --family pass_through --model "$MECHA_MODEL"
+
+# Arm A — guided_coding calc_cli (scripted guidance answers in the stages)
+MECHA_STORY_BACKEND=live \
+  MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
+  MECHA_API_KEY=lm-studio \
+  MECHA_MODEL=qwen/qwen3.6-35b-a3b \
+  MECHA_MAX_TOKENS=8192 \
   pytest -s -q tests/stories/test_user_story_suites.py -k calc_cli
 
 python scripts/record_gastronomic_comparison_trial.py \
   --suite-run .mechaharness/suite_runs/$(cat .mechaharness/suite_runs/calc_cli.latest) \
-  --trial-id calc-a-1 --arm A --recipe guided_coding \
+  --trial-id calc-a-lmstudio-1 --arm A --recipe guided_coding \
   --model-id "$MECHA_MODEL"
 ```
 
 - Arm B stays **`not_run`** until `gastronomic_guided_development` can drive
   Completer coding comparable to `guided_coding` + `project_coding` (today
-  execute applies host `file_revisions` only). Use
-  `live_comparison_status` / `comparison_live_status` so status JSON never
-  invents a B trial.
+  execute applies host `file_revisions` only). The localhost Completer is not
+  the blocker — use `live_comparison_status` / `comparison_live_status` so
+  status JSON never invents a B trial.
 
 ## Related
 
