@@ -131,7 +131,12 @@ graph:
                   raise SystemExit(main())
         context:
           version: '1'
-          system: Propose scoped file revisions as JSON only.
+          system: >-
+            Keep reasoning under two sentences. Put JSON only in the answer
+            content. Return exactly
+            {"revisions":[{"path":"...","content":"...full file..."}]} with no
+            markdown fences.
+          user_preamble: "/no_think\nUse only the following bag evidence."
           reads:
           - {path: in.goal, required: true}
           - {path: acc.execution.constraints, required: true}
