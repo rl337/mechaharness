@@ -1,0 +1,9 @@
+id: fangore_gastronomic_offline_e2e
+title: Offline gastronomic late-stage e2e to DevelopmentOutcome and trial
+persona: fangore
+execution:
+  mode: parallel
+  ordered: false
+vars: {}
+setup: []
+cleanup: []

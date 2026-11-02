@@ -183,6 +183,12 @@ Persona **fangore**; execution `parallel`; 3 stage(s).
 
 Stories: `fangore_gastronomic_comparison_shape`, `fangore_gastronomic_comparison_summary`, `fangore_gastronomic_comparison_trial`
 
+### `fangore_gastronomic_offline_e2e` — Offline gastronomic late-stage e2e to DevelopmentOutcome and trial
+
+Persona **fangore**; execution `parallel`; 2 stage(s).
+
+Stories: `fangore_gastronomic_offline_e2e_completed`, `fangore_gastronomic_offline_e2e_failed`
+
 ### `fangore_graph_executor` — Graph executor, soft points, traversal, and budgets
 
 Persona **fangore**; execution `parallel`; 20 stage(s).
@@ -1834,6 +1840,38 @@ Suite stage `020_fangore_gastronomic_guided_development_shape` — template_name
 #### Footnotes
 
 1. [Gastronomic M6 product recipe](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Product recipe through development_acceptance
+
+### `fangore_gastronomic_offline_e2e_completed` — Offline late-stage gastronomic path yields completed trial
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a calculator workspace with a multiply helper, walks host verification through diagnosis, revision, acceptance, and comparison trial assemble, and verifies `out.development_outcome.outcome` is completed with an arm-B trial success true.
+
+#### Implementation
+
+`verification_*`, `diagnosis_*`, `revision_*`, `acceptance_*`, `comparison_*` hard nodes; recipes `change_verification`, `failure_diagnosis`, `strategy_revision`, `development_acceptance`, `gastronomic_comparison`.
+
+#### Validation
+
+Suite stage `010_fangore_gastronomic_offline_e2e_completed` — completed + trial success.
+
+#### Footnotes
+
+1. [Gastronomic offline e2e completed](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Machine-readable DevelopmentOutcome without live model
+
+### `fangore_gastronomic_offline_e2e_failed` — Offline late-stage gastronomic path yields failed trial
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks diagnosis through acceptance and comparison against a failed VerificationReport with exhausted retry budget, and verifies `out.development_outcome.outcome` is failed with trial success false.
+
+#### Implementation
+
+`diagnosis_*`, `revision_*`, `acceptance_*`, `comparison_*` hard nodes.
+
+#### Validation
+
+Suite stage `020_fangore_gastronomic_offline_e2e_failed` — failed + trial success false.
+
+#### Footnotes
+
+1. [Gastronomic offline e2e failed](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Failed host gates produce failed DevelopmentOutcome and unsuccessful trial
 
 ### `fangore_graph_executor` — Run a local plan through an authorized graph executor
 

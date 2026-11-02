@@ -1,0 +1,219 @@
+id: fangore_gastronomic_offline_e2e_completed
+suite: fangore_gastronomic_offline_e2e
+persona: fangore
+title: Offline late-stage gastronomic path yields completed trial
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a
+  calculator workspace with a multiply helper, walks host verification through diagnosis, revision,
+  acceptance, and comparison trial assemble, and verifies `out.development_outcome.outcome` is
+  completed with an arm-B trial success true.
+implementation: '`verification_*`, `diagnosis_*`, `revision_*`, `acceptance_*`, `comparison_*` hard
+  nodes; recipes `change_verification`, `failure_diagnosis`, `strategy_revision`,
+  `development_acceptance`, `gastronomic_comparison`.'
+validation: Suite stage `010_fangore_gastronomic_offline_e2e_completed` — completed + trial success.
+footnotes:
+- id: gastronomic-offline-e2e-completed
+  label: Gastronomic offline e2e completed
+  url: https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md
+  note: Machine-readable DevelopmentOutcome without live model
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: ../assets/calc_verified/workspace.files.json
+graph:
+  inline:
+    goal: offline gastronomic completed path
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: Verify multiply helper
+          in.workspace: {root: .}
+          in.change_execution:
+            version: '1'
+            status: ok
+            slice_id: arithmetic
+            diff: '+def mul'
+            changed_files: [{path: src/calc/arithmetic.py}]
+          in.change_contract:
+            version: '1'
+            status: ok
+            verification:
+            - path: src/calc/arithmetic.py
+              text_contains: [def mul]
+              python_parses: true
+            invariants:
+            - id: preserve:parser
+              path: src/calc/parser.py
+              immutable: true
+              sha256: 9adc70168a316352bd6c48d0f261d00c107aa1d14d140498975939b2e9ef7910
+          in.change_plan:
+            status: ok
+            slices: [{id: arithmetic}]
+          in.retry_budget: {attempts_used: 0, attempts_max: 3}
+          in.metrics:
+            stages_passed: 6
+            stages_total: 6
+            model_calls: 0
+            wall_ms: 1200
+            repair_loops: 0
+            guidance_yields: 0
+            prior_regressions: 0
+    - id: v_constrain
+      kind: verification_constrain
+      depends_on: [seed]
+      payload:
+        reads: {contract: in.change_contract, execution: in.change_execution}
+        writes: {destination: acc.verification.constraints}
+    - id: v_run
+      kind: verification_run
+      depends_on: [v_constrain]
+      payload:
+        reads: {constraints: acc.verification.constraints, workspace: in.workspace}
+        writes: {destination: acc.verification.run_receipt}
+    - id: v_publish
+      kind: verification_publish
+      depends_on: [v_run]
+      payload:
+        reads: {constraints: acc.verification.constraints, receipt: acc.verification.run_receipt}
+        writes: {destination: out.verification_report}
+    - id: v_validate
+      kind: verification_validate
+      depends_on: [v_publish]
+      payload:
+        reads: {source: out.verification_report}
+        writes: {destination: acc.verification.validation}
+        parameters: {fail_if_invalid: true}
+    - id: d_constrain
+      kind: diagnosis_constrain
+      depends_on: [v_validate]
+      payload:
+        reads:
+          verification_report: out.verification_report
+          execution: in.change_execution
+        writes: {destination: acc.diagnosis.constraints}
+    - id: d_classify
+      kind: diagnosis_classify
+      depends_on: [d_constrain]
+      payload:
+        reads: {constraints: acc.diagnosis.constraints}
+        writes: {destination: acc.diagnosis.classification}
+    - id: d_publish
+      kind: diagnosis_publish
+      depends_on: [d_classify]
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+          classification: acc.diagnosis.classification
+        writes: {destination: out.diagnosis}
+    - id: d_validate
+      kind: diagnosis_validate
+      depends_on: [d_publish]
+      payload:
+        reads: {source: out.diagnosis}
+        writes: {destination: acc.diagnosis.validation}
+        parameters: {fail_if_invalid: true}
+    - id: r_constrain
+      kind: revision_constrain
+      depends_on: [d_validate]
+      payload:
+        reads:
+          diagnosis: out.diagnosis
+          change_plan: in.change_plan
+          retry_budget: in.retry_budget
+        writes: {destination: acc.revision.constraints}
+    - id: r_decide
+      kind: revision_decide
+      depends_on: [r_constrain]
+      payload:
+        reads: {constraints: acc.revision.constraints}
+        writes: {destination: acc.revision.decision}
+    - id: r_publish
+      kind: revision_publish
+      depends_on: [r_decide]
+      payload:
+        reads:
+          constraints: acc.revision.constraints
+          decision: acc.revision.decision
+        writes: {destination: out.strategy_revision}
+    - id: r_validate
+      kind: revision_validate
+      depends_on: [r_publish]
+      payload:
+        reads: {source: out.strategy_revision}
+        writes: {destination: acc.revision.validation}
+        parameters: {fail_if_invalid: true}
+    - id: a_constrain
+      kind: acceptance_constrain
+      depends_on: [r_validate]
+      payload:
+        reads:
+          change_contract: in.change_contract
+          verification_report: out.verification_report
+          change_execution: in.change_execution
+          strategy_revision: out.strategy_revision
+        writes: {destination: acc.acceptance.constraints}
+    - id: a_decide
+      kind: acceptance_decide
+      depends_on: [a_constrain]
+      payload:
+        reads: {constraints: acc.acceptance.constraints}
+        writes: {destination: acc.acceptance.decision}
+    - id: a_publish
+      kind: acceptance_publish
+      depends_on: [a_decide]
+      payload:
+        reads:
+          constraints: acc.acceptance.constraints
+          decision: acc.acceptance.decision
+        writes: {destination: out.development_outcome}
+    - id: a_validate
+      kind: acceptance_validate
+      depends_on: [a_publish]
+      payload:
+        reads: {source: out.development_outcome}
+        writes: {destination: acc.acceptance.validation}
+        parameters: {fail_if_invalid: true}
+    - id: c_assemble
+      kind: comparison_assemble
+      depends_on: [a_validate]
+      payload:
+        reads:
+          development_outcome: out.development_outcome
+          metrics: in.metrics
+        writes: {destination: out.trial}
+        parameters:
+          trial_id: offline-b-1
+          arm: B
+          recipe_id: gastronomic_guided_development
+          suite_id: fangore_gastronomic_offline_e2e
+    - id: c_validate
+      kind: comparison_validate
+      depends_on: [c_assemble]
+      payload:
+        reads: {source: out.trial}
+        writes: {destination: acc.comparison.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.verification_report.status, value: ok}
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: none}
+  - {kind: equals, key: bag.out.strategy_revision.disposition, value: continue_or_accept}
+  - {kind: equals, key: bag.out.development_outcome.outcome, value: completed}
+  - {kind: equals, key: bag.out.trial.success, value: true}
+  - {kind: equals, key: bag.out.trial.arm, value: B}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.development_outcome.outcome, value: completed}
+  - {kind: equals, key: bag.acc.comparison.validation.ok, value: true}
+cleanup: []

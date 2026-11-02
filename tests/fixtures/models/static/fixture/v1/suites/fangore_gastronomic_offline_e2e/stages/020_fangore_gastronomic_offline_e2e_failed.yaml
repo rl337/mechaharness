@@ -1,0 +1,173 @@
+id: fangore_gastronomic_offline_e2e_failed
+suite: fangore_gastronomic_offline_e2e
+persona: fangore
+title: Offline late-stage gastronomic path yields failed trial
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He walks
+  diagnosis through acceptance and comparison against a failed VerificationReport with exhausted
+  retry budget, and verifies `out.development_outcome.outcome` is failed with trial success false.
+implementation: '`diagnosis_*`, `revision_*`, `acceptance_*`, `comparison_*` hard nodes.'
+validation: Suite stage `020_fangore_gastronomic_offline_e2e_failed` — failed + trial success false.
+footnotes:
+- id: gastronomic-offline-e2e-failed
+  label: Gastronomic offline e2e failed
+  url: https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md
+  note: Failed host gates produce failed DevelopmentOutcome and unsuccessful trial
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: offline gastronomic failed path
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.change_contract: {status: ok}
+          in.verification_report:
+            version: '1'
+            status: failed
+            failures: ['pytest exit 1']
+            verify_runs: []
+            regression: {unchanged_invariants_ok: true, invariants_checked: 0}
+            provenance: {slice_id: arithmetic}
+          in.change_execution: {status: ok, slice_id: arithmetic}
+          in.change_plan: {status: ok, slices: [{id: arithmetic}]}
+          in.retry_budget: {attempts_used: 3, attempts_max: 3}
+          in.metrics:
+            stages_passed: 4
+            stages_total: 6
+            model_calls: 8
+            wall_ms: 9000
+            repair_loops: 3
+            first_failure_class: semantics
+    - id: d_constrain
+      kind: diagnosis_constrain
+      depends_on: [seed]
+      payload:
+        reads:
+          verification_report: in.verification_report
+          execution: in.change_execution
+        writes: {destination: acc.diagnosis.constraints}
+    - id: d_classify
+      kind: diagnosis_classify
+      depends_on: [d_constrain]
+      payload:
+        reads: {constraints: acc.diagnosis.constraints}
+        writes: {destination: acc.diagnosis.classification}
+    - id: d_publish
+      kind: diagnosis_publish
+      depends_on: [d_classify]
+      payload:
+        reads:
+          constraints: acc.diagnosis.constraints
+          classification: acc.diagnosis.classification
+        writes: {destination: out.diagnosis}
+    - id: d_validate
+      kind: diagnosis_validate
+      depends_on: [d_publish]
+      payload:
+        reads: {source: out.diagnosis}
+        writes: {destination: acc.diagnosis.validation}
+        parameters: {fail_if_invalid: true}
+    - id: r_constrain
+      kind: revision_constrain
+      depends_on: [d_validate]
+      payload:
+        reads:
+          diagnosis: out.diagnosis
+          change_plan: in.change_plan
+          retry_budget: in.retry_budget
+        writes: {destination: acc.revision.constraints}
+    - id: r_decide
+      kind: revision_decide
+      depends_on: [r_constrain]
+      payload:
+        reads: {constraints: acc.revision.constraints}
+        writes: {destination: acc.revision.decision}
+    - id: r_publish
+      kind: revision_publish
+      depends_on: [r_decide]
+      payload:
+        reads:
+          constraints: acc.revision.constraints
+          decision: acc.revision.decision
+        writes: {destination: out.strategy_revision}
+    - id: r_validate
+      kind: revision_validate
+      depends_on: [r_publish]
+      payload:
+        reads: {source: out.strategy_revision}
+        writes: {destination: acc.revision.validation}
+        parameters: {fail_if_invalid: true}
+    - id: a_constrain
+      kind: acceptance_constrain
+      depends_on: [r_validate]
+      payload:
+        reads:
+          change_contract: in.change_contract
+          verification_report: in.verification_report
+          change_execution: in.change_execution
+          strategy_revision: out.strategy_revision
+        writes: {destination: acc.acceptance.constraints}
+    - id: a_decide
+      kind: acceptance_decide
+      depends_on: [a_constrain]
+      payload:
+        reads: {constraints: acc.acceptance.constraints}
+        writes: {destination: acc.acceptance.decision}
+    - id: a_publish
+      kind: acceptance_publish
+      depends_on: [a_decide]
+      payload:
+        reads:
+          constraints: acc.acceptance.constraints
+          decision: acc.acceptance.decision
+        writes: {destination: out.development_outcome}
+    - id: a_validate
+      kind: acceptance_validate
+      depends_on: [a_publish]
+      payload:
+        reads: {source: out.development_outcome}
+        writes: {destination: acc.acceptance.validation}
+        parameters: {fail_if_invalid: true}
+    - id: c_assemble
+      kind: comparison_assemble
+      depends_on: [a_validate]
+      payload:
+        reads:
+          development_outcome: out.development_outcome
+          metrics: in.metrics
+        writes: {destination: out.trial}
+        parameters:
+          trial_id: offline-b-fail-1
+          arm: B
+          recipe_id: gastronomic_guided_development
+          suite_id: fangore_gastronomic_offline_e2e
+    - id: c_validate
+      kind: comparison_validate
+      depends_on: [c_assemble]
+      payload:
+        reads: {source: out.trial}
+        writes: {destination: acc.comparison.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.diagnosis.failure_class, value: semantics}
+  - {kind: equals, key: bag.out.strategy_revision.disposition, value: stop}
+  - {kind: equals, key: bag.out.development_outcome.outcome, value: failed}
+  - {kind: equals, key: bag.out.trial.success, value: false}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.development_outcome.outcome, value: failed}
+cleanup: []
