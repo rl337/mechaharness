@@ -26,11 +26,13 @@ seed → constrain (execution_constrain)
   → publish (execution_publish) → validate (execution_validate)
 ```
 
-Host-seeded `in.file_revisions` win over Completer proposals when non-empty.
-Completer propose enables live arm-B style execute without pre-seeding revisions.
-Default propose `user_preamble` starts with `/no_think` so thinking Completers
-(e.g. Qwen 3) put JSON in answer content; empty content still falls back to
-`reasoning_content` in `CliInferRunner`.
+Host graphs may insert `execution_load_workspace` before propose to publish
+current scoped files on `in.workspace_files` (missing paths are listed, not
+fatal). Host-seeded `in.file_revisions` win over Completer proposals when
+non-empty. Completer propose enables live arm-B style execute without
+pre-seeding revisions. Default propose `user_preamble` starts with `/no_think`
+so thinking Completers (e.g. Qwen 3) put JSON in answer content; empty content
+still falls back to `reasoning_content` in `CliInferRunner`.
 
 ## Soft points
 

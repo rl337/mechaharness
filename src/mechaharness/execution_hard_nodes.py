@@ -12,6 +12,7 @@ from mechaharness.change_execution import (
     apply_file_revisions,
     assemble_change_execution,
     extract_execution_constraints,
+    load_workspace_files,
     materialize_file_revisions,
     validate_change_execution,
 )
@@ -28,6 +29,7 @@ from mechaharness.graph_executor import GraphNodeRunner, GraphRunContext, NodeOu
 from mechaharness.walk_bag import WalkBag, WalkBagPathError, WalkBagSerializeError
 
 EXECUTION_HARD_KINDS: tuple[str, ...] = (
+    "execution_load_workspace",
     "execution_constrain",
     "execution_materialize",
     "execution_apply",
@@ -98,6 +100,22 @@ class ExecutionHardNodeRunner(GraphNodeRunner):
         reads: Mapping[str, Any],
         parameters: Mapping[str, Any],
     ) -> Any:
+        if kind == "execution_load_workspace":
+            workspace_path = str(reads.get("workspace") or "in.workspace")
+            workspace_value = _read_path(bag, workspace_path, required=False)
+            root = _resolve_workspace_root(
+                workspace_value,
+                default_workspace=self._default_workspace,
+            )
+            raw_paths = parameters.get("paths")
+            if isinstance(raw_paths, str):
+                paths = [raw_paths]
+            elif isinstance(raw_paths, Sequence):
+                paths = [str(p) for p in raw_paths]
+            else:
+                paths = []
+            return load_workspace_files(fs=self._fs, root=root, paths=paths)
+
         if kind == "execution_constrain":
             slice_path = reads.get("approved_slice")
             plan_path = reads.get("change_plan")

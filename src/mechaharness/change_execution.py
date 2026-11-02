@@ -165,6 +165,46 @@ def _revision_rows(raw: Any) -> list[dict[str, Any]]:
     return out
 
 
+def load_workspace_files(
+    *,
+    fs: Filesystem,
+    root: Path,
+    paths: Sequence[str],
+) -> dict[str, Any]:
+    """Read scoped workspace files into bag evidence for Completer propose.
+
+    Missing paths are listed under ``missing`` (not an error) so bootstrap
+    stages can load before the first apply.
+    """
+    paths_obj = WorkspacePaths(root)
+    files: list[dict[str, Any]] = []
+    missing: list[str] = []
+    for raw in paths:
+        rel = str(raw or "").strip()
+        if not rel:
+            continue
+        try:
+            target = paths_obj.resolve(rel)
+        except ValueError:
+            missing.append(rel)
+            continue
+        target_s = str(target)
+        if not fs.exists(target_s) or not fs.is_file(target_s):
+            missing.append(rel)
+            continue
+        try:
+            content = fs.read_text(target_s)
+        except (OSError, UnicodeDecodeError):
+            missing.append(rel)
+            continue
+        files.append({"path": rel, "content": content})
+    return {
+        "status": "ok",
+        "files": files,
+        "missing": missing,
+    }
+
+
 def materialize_file_revisions(
     *,
     host_revisions: Any = None,
@@ -310,6 +350,7 @@ __all__ = [
     "apply_file_revisions",
     "assemble_change_execution",
     "extract_execution_constraints",
+    "load_workspace_files",
     "materialize_file_revisions",
     "validate_change_execution",
 ]

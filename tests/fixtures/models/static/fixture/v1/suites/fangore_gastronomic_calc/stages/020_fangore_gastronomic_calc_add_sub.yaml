@@ -28,7 +28,7 @@ graph:
         bag_put:
           in.goal: >-
             Update calc.py for left-associative + and - (1+2-3 → 0). Keep number
-            literals. Require evaluate/main. No eval/exec.
+            literals. Require evaluate/main. Extend the current calc.py from in.workspace_files (do not drop prior operators). No eval/exec.
           in.workspace: {root: .}
           in.approved_slice:
             id: add_sub
@@ -37,15 +37,22 @@ graph:
             rollback: restore prior calc.py
           in.metrics:
             stages_passed: 2
-            stages_total: 2
+            stages_total: 6
             model_calls: 2
             wall_ms: 2000
             repair_loops: 0
             guidance_yields: 0
             prior_regressions: 0
+    - id: load_workspace
+      kind: execution_load_workspace
+      depends_on: [seed]
+      payload:
+        reads: {workspace: in.workspace}
+        writes: {destination: in.workspace_files}
+        parameters: {paths: [calc.py]}
     - id: constrain
       kind: execution_constrain
-      depends_on: [seed]
+      depends_on: [load_workspace]
       payload:
         reads: {approved_slice: in.approved_slice}
         writes: {destination: acc.execution.constraints}
@@ -54,6 +61,7 @@ graph:
       depends_on: [constrain]
       payload:
         soft_point: propose_payload
+        max_tokens: 8192
         completion:
           revisions:
           - path: calc.py
@@ -132,14 +140,15 @@ graph:
         context:
           version: '1'
           system: >-
-            Keep reasoning under two sentences. Put JSON only in the answer
-            content. Return exactly
+            Do not think aloud. Put JSON only in answer content. Return exactly
             {"revisions":[{"path":"...","content":"...full file..."}]} with no
-            markdown fences.
+            markdown fences. Prefer extending the existing file; keep evaluate
+            and main(argv=None).
           user_preamble: "/no_think\nUse only the following bag evidence."
           reads:
           - {path: in.goal, required: true}
           - {path: acc.execution.constraints, required: true}
+          - {path: in.workspace_files, required: false}
           response:
             writes: acc.execution.proposed
             parse: json

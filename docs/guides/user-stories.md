@@ -179,9 +179,9 @@ Stories: `fangore_failure_diagnosis_classify`, `fangore_failure_diagnosis_green`
 
 ### `fangore_gastronomic_calc` — Gastronomic Completer-propose calc growth (arm B control)
 
-Persona **fangore**; execution `sequential` (ordered); 2 stage(s).
+Persona **fangore**; execution `sequential` (ordered); 6 stage(s).
 
-Stories: `fangore_gastronomic_calc_add_sub`, `fangore_gastronomic_calc_parse_number`
+Stories: `fangore_gastronomic_calc_add_sub`, `fangore_gastronomic_calc_exponent`, `fangore_gastronomic_calc_functions`, `fangore_gastronomic_calc_grouping`, `fangore_gastronomic_calc_mul_div`, `fangore_gastronomic_calc_parse_number`
 
 ### `fangore_gastronomic_comparison` — Gastronomic vs guided_coding comparison trial records
 
@@ -1814,6 +1814,70 @@ Suite stage `020_fangore_gastronomic_calc_add_sub` — arm B trial success.
 #### Footnotes
 
 1. [Gastronomic calc arm B add/sub](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Sequential gastronomic execute on shared calc workspace
+
+### `fangore_gastronomic_calc_exponent` — Gastronomic Completer propose adds right-associative exponent
+
+Fangore continues the shared gastronomic calc arc. He Completer-proposes right-associative ^ without breaking earlier precedence, applies it, and records an arm-B trial.
+
+#### Implementation
+
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+
+#### Validation
+
+Suite stage `040_fangore_gastronomic_calc_exponent` — arm B trial success.
+
+#### Footnotes
+
+1. [Gastronomic calc arm B exponent](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Sequential gastronomic execute on shared calc workspace
+
+### `fangore_gastronomic_calc_functions` — Gastronomic Completer propose adds calculator functions
+
+Fangore finishes the gastronomic calc arc by Completer-proposing common functions (sqrt, abs, sin/cos/tan, ln/log, min/max) composable with prior operators, applies the revision, and records an arm-B trial.
+
+#### Implementation
+
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+
+#### Validation
+
+Suite stage `060_fangore_gastronomic_calc_functions` — arm B trial success.
+
+#### Footnotes
+
+1. [Gastronomic calc arm B functions](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Sequential gastronomic execute on shared calc workspace
+
+### `fangore_gastronomic_calc_grouping` — Gastronomic Completer propose adds parentheses grouping
+
+Fangore continues the shared gastronomic calc arc. He Completer-proposes parentheses that override precedence, applies the revision, verifies regressions, and records an arm-B trial.
+
+#### Implementation
+
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+
+#### Validation
+
+Suite stage `050_fangore_gastronomic_calc_grouping` — arm B trial success.
+
+#### Footnotes
+
+1. [Gastronomic calc arm B grouping](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Sequential gastronomic execute on shared calc workspace
+
+### `fangore_gastronomic_calc_mul_div` — Gastronomic Completer propose adds mul and div precedence
+
+Fangore continues the shared gastronomic calc arc. He Completer-proposes multiplication and division that bind tighter than + and -, applies the revision, verifies regressions, and records an arm-B trial.
+
+#### Implementation
+
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`; `comparison_assemble`.
+
+#### Validation
+
+Suite stage `030_fangore_gastronomic_calc_mul_div` — arm B trial success.
+
+#### Footnotes
+
+1. [Gastronomic calc arm B mul/div](https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md) — Sequential gastronomic execute on shared calc workspace
 
 ### `fangore_gastronomic_calc_parse_number` — Gastronomic Completer propose bootstraps calc number literals
 
