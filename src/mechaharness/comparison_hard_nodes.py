@@ -13,6 +13,8 @@ from mechaharness.discovery_hard_nodes import (
 )
 from mechaharness.gastronomic_comparison import (
     assemble_gastronomic_trial,
+    live_comparison_status,
+    metrics_from_suite_timing,
     summarize_gastronomic_comparison,
     validate_gastronomic_trial,
 )
@@ -22,6 +24,8 @@ from mechaharness.walk_bag import WalkBag, WalkBagPathError, WalkBagSerializeErr
 
 COMPARISON_HARD_KINDS: tuple[str, ...] = (
     "comparison_assemble",
+    "comparison_metrics_from_timing",
+    "comparison_live_status",
     "comparison_summarize",
     "comparison_validate",
 )
@@ -117,6 +121,42 @@ class ComparisonHardNodeRunner(GraphNodeRunner):
                 suite_id=str(suite_id) if suite_id is not None else None,
                 notes=str(notes) if notes is not None else None,
             )
+
+        if kind == "comparison_metrics_from_timing":
+            events_path = str(reads.get("timing_events") or "in.timing_events")
+            raw = _read_path(bag, events_path)
+            if not isinstance(raw, list):
+                raise DiscoveryHardNodeError(
+                    "comparison_metrics_from_timing requires a timing_events list"
+                )
+            events = [row for row in raw if isinstance(row, Mapping)]
+            stages_total = parameters.get("stages_total")
+            total = int(stages_total) if stages_total is not None else None
+            return metrics_from_suite_timing(events, stages_total=total)
+
+        if kind == "comparison_live_status":
+            arm_a_path = reads.get("arm_a")
+            arm_b_path = reads.get("arm_b")
+            arm_a = None
+            arm_b = None
+            if isinstance(arm_a_path, str) and arm_a_path.strip():
+                raw_a = _read_path(bag, arm_a_path, required=False)
+                if isinstance(raw_a, Mapping):
+                    arm_a = _as_mapping(raw_a, label="arm_a")
+            if isinstance(arm_b_path, str) and arm_b_path.strip():
+                raw_b = _read_path(bag, arm_b_path, required=False)
+                if isinstance(raw_b, Mapping):
+                    arm_b = _as_mapping(raw_b, label="arm_b")
+            endpoint = bool(parameters.get("endpoint_configured", False))
+            blocker = parameters.get("arm_b_blocker")
+            kwargs: dict[str, Any] = {
+                "arm_a": arm_a,
+                "arm_b": arm_b,
+                "endpoint_configured": endpoint,
+            }
+            if isinstance(blocker, str) and blocker.strip():
+                kwargs["arm_b_blocker"] = blocker
+            return live_comparison_status(**kwargs)
 
         if kind == "comparison_summarize":
             trials_path = str(reads.get("trials") or "in.trials")

@@ -1,0 +1,74 @@
+id: fangore_gastronomic_comparison_live_status
+suite: fangore_gastronomic_comparison
+persona: fangore
+title: Live A/B status marks arm B not_run without fabricating results
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds
+  one recorded arm-A trial, walks comparison_live_status with endpoint configured, and verifies
+  arm B status is not_run while winner stays null.
+implementation: '`comparison_live_status`; `live_comparison_status` / `ARM_B_LIVE_BLOCKER`.'
+validation: Suite stage `020_fangore_gastronomic_comparison_live_status` — B not_run.
+footnotes:
+- id: gastronomic-comparison-live-status
+  label: Gastronomic live comparison status
+  url: https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md
+  note: Missing arms stay not_run until Completer-driven gastronomic execute exists
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: live comparison status
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.arm_a:
+            version: '1'
+            trial_id: calc-a-1
+            arm: A
+            recipe_id: guided_coding
+            suite_id: calc_cli
+            success: true
+            outcome: completed
+            metrics:
+              stages_passed: 6
+              stages_total: 6
+              model_calls: 10
+              wall_ms: 12000
+              repair_loops: 0
+              guidance_yields: 0
+              prior_regressions: 0
+              repeat_failure_loops: 0
+            development_outcome: null
+            model: {id: local-qwen}
+            budget: null
+            notes: null
+            provenance: {}
+    - id: status
+      kind: comparison_live_status
+      depends_on: [seed]
+      payload:
+        reads: {arm_a: in.arm_a}
+        writes: {destination: out.live_status}
+        parameters: {endpoint_configured: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.live_status.arms.A.status, value: recorded}
+  - {kind: equals, key: bag.out.live_status.arms.B.status, value: not_run}
+  - {kind: equals, key: bag.out.live_status.comparable_ab, value: false}
+  - {kind: equals, key: bag.out.live_status.winner, value: null}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.live_status.endpoint_configured, value: true}
+cleanup: []

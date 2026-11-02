@@ -1,0 +1,80 @@
+id: fangore_gastronomic_comparison_timing_metrics
+suite: fangore_gastronomic_comparison
+persona: fangore
+title: Derive arm-A trial metrics from suite TIMING events
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds
+  suite TIMING events for a completed calc_cli arc, walks comparison_metrics_from_timing then
+  comparison_assemble for arm A, and verifies stages_passed 6 with success true.
+implementation: '`comparison_metrics_from_timing` / `comparison_assemble`;
+  `metrics_from_suite_timing`.'
+validation: Suite stage `015_fangore_gastronomic_comparison_timing_metrics` — arm A success.
+footnotes:
+- id: gastronomic-comparison-timing
+  label: Gastronomic comparison from suite timing
+  url: https://github.com/rl337/mechaharness/blob/main/docs/guides/gastronomic-comparison.md
+  note: Hosts record arm A from TIMING.jsonl without inventing tokens
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+graph:
+  inline:
+    goal: timing metrics to trial
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.timing_events:
+          - {kind: suite_start, suite_id: calc_cli, backend: live}
+          - {kind: suite_stage, stage: s0, status: ok, elapsed_s: 1.0}
+          - {kind: suite_stage, stage: s1, status: ok, elapsed_s: 1.0}
+          - {kind: suite_stage, stage: s2, status: ok, elapsed_s: 1.0}
+          - {kind: suite_stage, stage: s3, status: ok, elapsed_s: 1.0}
+          - {kind: suite_stage, stage: s4, status: ok, elapsed_s: 1.0}
+          - {kind: suite_stage, stage: s5, status: ok, elapsed_s: 1.0}
+          - {kind: coding_burst, recipe_id: guided_coding, verify_runs: 3, repair_rounds: 0, model_calls: 8}
+    - id: metrics
+      kind: comparison_metrics_from_timing
+      depends_on: [seed]
+      payload:
+        reads: {timing_events: in.timing_events}
+        writes: {destination: in.metrics}
+        parameters: {stages_total: 6}
+    - id: assemble
+      kind: comparison_assemble
+      depends_on: [metrics]
+      payload:
+        reads: {metrics: in.metrics}
+        writes: {destination: out.trial}
+        parameters:
+          trial_id: calc-a-timing-1
+          arm: A
+          recipe_id: guided_coding
+          suite_id: calc_cli
+    - id: validate
+      kind: comparison_validate
+      depends_on: [assemble]
+      payload:
+        reads: {source: out.trial}
+        writes: {destination: acc.comparison.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.trial.arm, value: A}
+  - {kind: equals, key: bag.out.trial.success, value: true}
+  - {kind: equals, key: bag.out.trial.metrics.stages_passed, value: 6}
+  - {kind: equals, key: bag.acc.comparison.validation.ok, value: true}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.trial.outcome, value: completed}
+cleanup: []
