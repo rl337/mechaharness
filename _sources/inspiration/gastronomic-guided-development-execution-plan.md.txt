@@ -1,8 +1,8 @@
 # Cursor execution plan: Gastronomic guided development
 
-**Status:** M0–M6 landed (through `development_acceptance`). Post-M6 work is the
-fair `guided_coding` vs gastronomic comparison protocol (trial records; no
-single-run winners).
+**Status:** M0–M6 + comparison protocol + offline late-stage e2e
+(`fangore_gastronomic_offline_e2e`) landed. Next: live A/B on `calc_cli` when a
+host endpoint is available (never fabricate live results).
 **Repository:** `rl337/mechaharness`
 **Architecture and rulings:** [gastronomic-guided-development.md](gastronomic-guided-development.md)
 **Primary target:** A read-only `workspace_discovery` vertical slice whose two inference calls communicate through a durable WalkBag, with bounded snapshot-bound inspection tools.

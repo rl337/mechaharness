@@ -36,6 +36,9 @@ Aggregate with `summarize_gastronomic_comparison`. The summary never sets a
 ## Offline vs live
 
 - Offline Fangore stories prove trial-record shape and arm/recipe pairing.
+- Suite `fangore_gastronomic_offline_e2e` walks verify → diagnose → revise →
+  accept → comparison on a calculator fixture and records completed/failed
+  trials without a live model.
 - Live A/B runs are opt-in when the host has the configured endpoint. Mark
   **not run** rather than fabricating results.
 
