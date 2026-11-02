@@ -97,7 +97,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Durable graph generators requirements map](./inspiration/durable-graph-generators-requirements-map.md) | R-IOC / DG IDs → modules → user stories |
 | [Video production audited-infer migration](./inspiration/video-production-audited-infer-migration.md) | Host alias `ideation.infer.accept` → `audited_infer_accept` |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
-| [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat LAN backend + live tests |
+| [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat local backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
 | [Gastronomic comparison](./guides/gastronomic-comparison.md) | Fair guided_coding vs gastronomic trial protocol |
 | [User-story migration batches](./guides/user-story-migration-batches.md) | Convert remaining `cli` / probe stories to `user_story` YAML |

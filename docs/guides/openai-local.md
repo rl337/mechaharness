@@ -1,6 +1,6 @@
 # Local OpenAI-compat backend (`openai_local`)
 
-Convenience backend name for a LAN OpenAI-compatible server (same client as
+Convenience backend name for a local OpenAI-compatible server (same client as
 `vllm` / `lmstudio` / `openai_compat`). Profile load/unload and model inventory
 stay in the host app — MechaHarness only issues chat completions.
 
@@ -49,16 +49,20 @@ MECHA_LIVE_OPENAI_COMPAT=1 MECHA_BASE_URL=http://127.0.0.1:8000/v1 \
   pytest -q tests/stories -k nubble_run_cost
 ```
 
-## Cursor MCP (guided coding)
+## Cursor / Codex MCP (guided coding)
 
 For Agentic Recipe `guided_coding`, put the same `MECHA_*` endpoint knobs on the
-MCP server `env` in `.cursor/mcp.json` and set `MECHA_MCP_HOST=project_coding`.
-That loads `ProjectCodingConfig` (workspace tools + local-work burst). See
+MCP server `env` in a **local** `.cursor/mcp.json` (gitignored) or
+`.codex/config.toml` (gitignored; see
+[`codex-mcp.config.toml.example`](./codex-mcp.config.toml.example)) and set
+`MECHA_MCP_HOST=project_coding`. That loads `ProjectCodingConfig` (workspace
+tools + local-work burst). See
 [Durable graph generators](../reference/durable-graph-generators.md) and
 [guided coding](../reference/graph-templates/guided-coding.md).
 
-A project `.env` is optional and mainly for CLI/`mechaharness run` — hosts need
-not create one for MCP.
+Optional CLI/pytest convenience: copy [`.env.example`](../../.env.example) to
+``.env/env.sh`` (gitignored). Do not commit tokens, LAN IPs, or absolute home
+paths.
 
 ## Host Config
 

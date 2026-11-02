@@ -121,7 +121,14 @@ separate MCP-only virtualenv.
 Inference endpoints and model id belong on the MCP server ``env`` block
 (primary). An optional project ``.env`` is only a convenience for CLI/pytest.
 
-Project-local `.cursor/mcp.json` (gitignored; absolute paths are machine-local)::
+Project-local agent MCP configs are **gitignored** (absolute paths and lab
+endpoints stay machine-local):
+
+- Cursor: ``.cursor/mcp.json``
+- Codex: ``.codex/config.toml`` (template:
+  [`codex-mcp.config.toml.example`](../guides/codex-mcp.config.toml.example))
+
+Cursor example::
 
     {
       "mcpServers": {
