@@ -70,12 +70,29 @@ python scripts/record_gastronomic_comparison_trial.py \
   --model-id "$MECHA_MODEL"
 ```
 
-- Arm B stays **`not_run`** until a gastronomic calc suite (or tool-loop parity)
-  can replace `calc_cli`'s `guided_coding` + `project_coding` stages.
-  `change_execution` can Completer-propose scoped revisions now; the remaining
-  gap is suite binding / tool-loop parity, not localhost Completer availability.
-  Use `live_comparison_status` / `comparison_live_status` so status JSON never
-  invents a B trial.
+- Arm B: sequential suite `fangore_gastronomic_calc` grows the same calculator
+  via gastronomic `change_execution` Completer propose → hard apply (not
+  `guided_coding` tool-loop). Record after a static or live suite run:
+
+```bash
+pytest -s -q tests/stories/test_user_story_suites.py -k fangore_gastronomic_calc
+
+# Live Completer propose (optional; same LM Studio knobs as arm A)
+MECHA_STORY_BACKEND=live \
+  MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
+  MECHA_API_KEY=lm-studio \
+  MECHA_MODEL=qwen/qwen3.6-35b-a3b \
+  MECHA_MAX_TOKENS=8192 \
+  pytest -s -q tests/stories/test_user_story_suites.py -k fangore_gastronomic_calc
+
+python scripts/record_gastronomic_comparison_trial.py \
+  --suite-run .mechaharness/suite_runs/$(cat .mechaharness/suite_runs/fangore_gastronomic_calc.latest) \
+  --trial-id calc-b-lmstudio-1 --arm B --recipe gastronomic_guided_development \
+  --model-id "$MECHA_MODEL"
+```
+
+  Mark B **`not_run`** when that suite has not been executed for the batch —
+  never invent a trial.
 
 ## Related
 
