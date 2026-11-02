@@ -1,0 +1,111 @@
+id: fangore_change_execution_propose
+suite: fangore_change_execution
+persona: fangore
+title: Completer proposes revisions then hard apply publishes hashes
+narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a calculator
+  workspace without host file_revisions, walks constrain → Completer propose → materialize → apply, and
+  verifies `acc.execution.revisions.source` is proposed with an ok ChangeExecution.
+implementation: '`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`;
+  Agentic Recipe `change_execution`.'
+validation: Suite stage `015_fangore_change_execution_propose` — source proposed, status ok.
+footnotes:
+- id: gastronomic-execute-propose
+  label: Gastronomic execute Completer propose
+  url: https://github.com/rl337/mechaharness/blob/main/docs/reference/graph-templates/change-execution.md
+  note: Completer proposes revisions; hard materialize and apply remain authoritative
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: ../assets/calc_slice/workspace.files.json
+graph:
+  inline:
+    goal: propose then apply arithmetic slice
+    nodes:
+    - id: seed
+      kind: compute
+      payload:
+        bag_put:
+          in.goal: Add multiply helper
+          in.workspace: {root: .}
+          in.approved_slice:
+            id: arithmetic
+            title: Add multiply helper
+            scope: {paths: [src/calc/arithmetic.py]}
+            rollback: revert arithmetic.py
+    - id: constrain
+      kind: execution_constrain
+      depends_on: [seed]
+      payload:
+        reads: {approved_slice: in.approved_slice}
+        writes: {destination: acc.execution.constraints}
+    - id: propose
+      kind: infer
+      depends_on: [constrain]
+      payload:
+        soft_point: propose_payload
+        completion:
+          revisions:
+          - path: src/calc/arithmetic.py
+            content: "def add(a, b):\n    return a + b\n\ndef mul(a, b):\n    return a * b\n"
+        context:
+          version: '1'
+          system: Propose scoped file revisions as JSON only.
+          reads:
+          - {path: in.goal, required: true}
+          - {path: acc.execution.constraints, required: true}
+          response:
+            writes: acc.execution.proposed
+            parse: json
+    - id: materialize
+      kind: execution_materialize
+      depends_on: [propose]
+      payload:
+        reads:
+          host_revisions: in.file_revisions
+          proposed: acc.execution.proposed
+        writes: {destination: acc.execution.revisions}
+        parameters: {fail_if_incomplete: true}
+    - id: apply
+      kind: execution_apply
+      depends_on: [materialize]
+      payload:
+        reads:
+          constraints: acc.execution.constraints
+          revisions: acc.execution.revisions
+          workspace: in.workspace
+        writes: {destination: acc.execution.apply_receipt}
+    - id: publish
+      kind: execution_publish
+      depends_on: [apply]
+      payload:
+        reads:
+          constraints: acc.execution.constraints
+          receipt: acc.execution.apply_receipt
+        writes: {destination: out.change_execution}
+    - id: validate
+      kind: execution_validate
+      depends_on: [publish]
+      payload:
+        reads: {source: out.change_execution}
+        writes: {destination: acc.execution.validation}
+        parameters: {fail_if_invalid: true}
+steps:
+- do:
+    graph_walk: {action: start, grants: [core:graph.execute, core:fs.write]}
+  expect:
+  - {kind: equals, key: status, value: paused}
+- do:
+    graph_walk: {action: continue}
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.acc.execution.revisions.source, value: proposed}
+  - {kind: equals, key: bag.out.change_execution.status, value: ok}
+  - {kind: equals, key: bag.out.change_execution.slice_id, value: arithmetic}
+  - {kind: equals, key: bag.acc.execution.validation.ok, value: true}
+complete:
+  expect:
+  - {kind: equals, key: bag.out.change_execution.status, value: ok}
+cleanup: []

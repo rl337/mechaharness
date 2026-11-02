@@ -70,11 +70,12 @@ python scripts/record_gastronomic_comparison_trial.py \
   --model-id "$MECHA_MODEL"
 ```
 
-- Arm B stays **`not_run`** until `gastronomic_guided_development` can drive
-  Completer coding comparable to `guided_coding` + `project_coding` (today
-  execute applies host `file_revisions` only). The localhost Completer is not
-  the blocker — use `live_comparison_status` / `comparison_live_status` so
-  status JSON never invents a B trial.
+- Arm B stays **`not_run`** until a gastronomic calc suite (or tool-loop parity)
+  can replace `calc_cli`'s `guided_coding` + `project_coding` stages.
+  `change_execution` can Completer-propose scoped revisions now; the remaining
+  gap is suite binding / tool-loop parity, not localhost Completer availability.
+  Use `live_comparison_status` / `comparison_live_status` so status JSON never
+  invents a B trial.
 
 ## Related
 
