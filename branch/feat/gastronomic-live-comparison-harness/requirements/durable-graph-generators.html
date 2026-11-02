@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Durable graph generators (driven execution) &mdash; MechaHarness 0.14.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=9e420a66"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Durable graph generators (driven execution)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/durable-graph-generators.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="durable-graph-generators-driven-execution">
+<h1>Durable graph generators (driven execution)<a class="headerlink" href="#durable-graph-generators-driven-execution" title="Link to this heading"></a></h1>
+<p>Normative library requirements for <strong>durable graph-generator inversion of
+control</strong>: the primary host-facing execution model for long-running,
+judgment-bearing graphs.</p>
+<p>Inspiration provenance (non-normative):
+<a class="reference internal" href="../inspiration/durable-graph-generators-inversion-of-control.html"><span class="std std-doc">Durable graph generators inversion of control</span></a>.
+Story map:
+<a class="reference internal" href="../inspiration/durable-graph-generators-requirements-map.html"><span class="std std-doc">durable-graph-generators-requirements-map.md</span></a>.</p>
+<section id="thesis">
+<h2>Thesis<a class="headerlink" href="#thesis" title="Link to this heading"></a></h2>
+<p>A frontier agent, human operator, or scripted test <strong>drives</strong> a MechaHarness
+run through ordered yields. Inexpensive local inference and deterministic tools
+perform token-heavy work. When the graph needs higher-level judgment, the run
+<strong>yields</strong> a structured guidance request as the result of the driver call. The
+same driver session interprets the request and calls again with guidance. The
+graph resumes from its durable checkpoint.</p>
+<p>This is inversion of control at the <em>execution</em> boundary — not pyiv dependency
+injection, not model-to-model callbacks, and not a requirement for the local
+worker to call a frontier model API.</p>
+</section>
+<section id="non-goals">
+<h2>Non-goals<a class="headerlink" href="#non-goals" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Do <strong>not</strong> build a second harness or graph engine around MCP.</p></li>
+<li><p>Do <strong>not</strong> serialize live coroutine stacks; use explicit persisted
+suspension/continuation records.</p></li>
+<li><p>Do <strong>not</strong> collapse advisory guidance into human approval
+(<code class="docutils literal notranslate"><span class="pre">ApprovalInterrupt</span></code>) or in-process sparse advisor consults (<code class="docutils literal notranslate"><span class="pre">Advisor</span></code>).</p></li>
+<li><p>Video production / studio host artistic semantics stay in host apps.</p></li>
+</ul>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<section id="dg-01-transport-neutral-durable-generator-contract">
+<h3>DG-01: Transport-neutral durable generator contract<a class="headerlink" href="#dg-01-transport-neutral-durable-generator-contract" title="Link to this heading"></a></h3>
+<p>MechaHarness MUST expose a transport-neutral API with at least:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">start(recipe_id,</span> <span class="pre">inputs,</span> <span class="pre">*,</span> <span class="pre">controller_id)</span> <span class="pre">→</span> <span class="pre">GraphYield</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resume(run_id,</span> <span class="pre">response?,</span> <span class="pre">*,</span> <span class="pre">expected_sequence,</span> <span class="pre">…)</span> <span class="pre">→</span> <span class="pre">GraphYield</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inspect(run_id)</span> <span class="pre">→</span> <span class="pre">RunInspection</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cancel(run_id,</span> <span class="pre">…)</span> <span class="pre">→</span> <span class="pre">GraphYield</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">list_recipes()</span> <span class="pre">→</span> <span class="pre">list[RecipeDescriptor]</span></code></p></li>
+</ul>
+<p>Wire form: <code class="docutils literal notranslate"><span class="pre">mechaharness.durable_graph_generator.DurableGraphGenerator</span></code>.
+Host ergonomics: <code class="docutils literal notranslate"><span class="pre">host_kit.host_durable_graph_generator</span></code>, <code class="docutils literal notranslate"><span class="pre">durable_generator_host</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">recipe_id</span></code> MUST resolve through <code class="docutils literal notranslate"><span class="pre">GraphTemplateRegistry</span></code> (registered recipes
+only). Free-form executable graph synthesis is out of scope for this contract.</p>
+</section>
+<section id="dg-02-ordered-immutable-yields">
+<h3>DG-02: Ordered immutable yields<a class="headerlink" href="#dg-02-ordered-immutable-yields" title="Link to this heading"></a></h3>
+<p>Each externally visible yield MUST be an ordered, immutable envelope
+(<code class="docutils literal notranslate"><span class="pre">GraphYield</span></code>) carrying at least <code class="docutils literal notranslate"><span class="pre">run_id</span></code>, <code class="docutils literal notranslate"><span class="pre">sequence</span></code>, <code class="docutils literal notranslate"><span class="pre">kind</span></code>, and optional
+<code class="docutils literal notranslate"><span class="pre">request_id</span></code> / <code class="docutils literal notranslate"><span class="pre">checkpoint_id</span></code> / <code class="docutils literal notranslate"><span class="pre">recipe_id</span></code> / <code class="docutils literal notranslate"><span class="pre">graph_id</span></code>.</p>
+<p>Kinds MUST include <code class="docutils literal notranslate"><span class="pre">advice_requested</span></code>, <code class="docutils literal notranslate"><span class="pre">completed</span></code>, <code class="docutils literal notranslate"><span class="pre">failed</span></code>, <code class="docutils literal notranslate"><span class="pre">cancelled</span></code>, and
+MAY include <code class="docutils literal notranslate"><span class="pre">progress</span></code> (off by default) and <code class="docutils literal notranslate"><span class="pre">running</span></code> (poll/wait — not a demand
+for model reasoning).</p>
+</section>
+<section id="dg-03-typed-guidance-continuation">
+<h3>DG-03: Typed guidance continuation<a class="headerlink" href="#dg-03-typed-guidance-continuation" title="Link to this heading"></a></h3>
+<p>Nodes / soft points MAY request typed external guidance
+(<code class="docutils literal notranslate"><span class="pre">GuidanceRequest</span></code> / soft point kind <code class="docutils literal notranslate"><span class="pre">guidance</span></code> / node component
+<code class="docutils literal notranslate"><span class="pre">guidance_request</span></code>). The runtime MUST persist the pending request and resume
+only through an authorized <code class="docutils literal notranslate"><span class="pre">resume</span></code> that matches <code class="docutils literal notranslate"><span class="pre">request_id</span></code> and schema.</p>
+<p>Ordinary guidance MUST NOT satisfy <code class="docutils literal notranslate"><span class="pre">requested_authority=final_approval</span></code>; that
+path remains <code class="docutils literal notranslate"><span class="pre">ApprovalInterrupt</span></code>.</p>
+</section>
+<section id="dg-04-driver-session-resume-no-recursive-callback">
+<h3>DG-04: Driver-session resume (no recursive callback)<a class="headerlink" href="#dg-04-driver-session-resume-no-recursive-callback" title="Link to this heading"></a></h3>
+<p>Guidance MUST be returnable as an ordinary call/tool result. Completing the
+guidance MUST NOT require reentering a model session during a pending MCP tool
+call. A subsequent <code class="docutils literal notranslate"><span class="pre">resume</span></code> in the same driving session is the required path.</p>
+</section>
+<section id="dg-05-mcp-is-an-adapter">
+<h3>DG-05: MCP is an adapter<a class="headerlink" href="#dg-05-mcp-is-an-adapter" title="Link to this heading"></a></h3>
+<p>A piped stdio MCP server MAY map tools to DG-01 ops. Core MUST NOT depend on
+MCP, curses, or a model SDK. Stdio adapters MUST keep protocol on stdout and
+diagnostics on stderr.</p>
+</section>
+<section id="dg-06-shared-driver-contract">
+<h3>DG-06: Shared driver contract<a class="headerlink" href="#dg-06-shared-driver-contract" title="Link to this heading"></a></h3>
+<p>Agent, human CLI/TUI, and <code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code> MUST use the same core ops and
+recipe definitions. Presentation differs; graph semantics must not.</p>
+</section>
+<section id="dg-07-scripted-replay-and-offline-tests">
+<h3>DG-07: Scripted replay and offline tests<a class="headerlink" href="#dg-07-scripted-replay-and-offline-tests" title="Link to this heading"></a></h3>
+<p>MechaHarness MUST ship <code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code> supporting expected-yield assertions,
+typed response fixtures, and strict unexpected-advice failure. Contract,
+recovery, and driver tests MUST run without live models or media backends.</p>
+</section>
+<section id="dg-08-survive-restart">
+<h3>DG-08: Survive restart<a class="headerlink" href="#dg-08-survive-restart" title="Link to this heading"></a></h3>
+<p>Pending guidance and run phase MUST survive process restart when a durable
+<code class="docutils literal notranslate"><span class="pre">GeneratorRunStore</span></code> / <code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code> is bound. Rehydrate MUST present the
+identical pending <code class="docutils literal notranslate"><span class="pre">request_id</span></code> and question. Guidance suspension MUST compose
+with <a class="reference internal" href="transactional-durable-resume.html"><span class="std std-doc">transactional durable resume</span></a> rather
+than inventing a second recovery protocol.</p>
+</section>
+<section id="dg-09-sequence-and-idempotency">
+<h3>DG-09: Sequence and idempotency<a class="headerlink" href="#dg-09-sequence-and-idempotency" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">resume</span></code> MUST enforce <code class="docutils literal notranslate"><span class="pre">expected_sequence</span></code>. An identical idempotency key MUST
+return the previously committed yield; a conflicting repeat MUST fail safely.
+External side effects keep the recovery guarantees of the durable-resume
+requirements.</p>
+</section>
+<section id="dg-10-controller-ownership">
+<h3>DG-10: Controller ownership<a class="headerlink" href="#dg-10-controller-ownership" title="Link to this heading"></a></h3>
+<p>Each run MUST associate a controller identity. Possession of <code class="docutils literal notranslate"><span class="pre">run_id</span></code> alone
+MUST NOT confer control. Inspect-only clients MUST NOT race the controlling
+driver for mutating ops. Lease transfer MAY be added later; M1 requires
+rejecting foreign controllers on resume/cancel.</p>
+</section>
+<section id="dg-11-cost-and-guidance-frequency">
+<h3>DG-11: Cost and guidance frequency<a class="headerlink" href="#dg-11-cost-and-guidance-frequency" title="Link to this heading"></a></h3>
+<p>Runs MUST expose counters for local steps, guidance yields, resumes, and
+rejected resumes (<code class="docutils literal notranslate"><span class="pre">inspect().cost</span></code>) so hosts can optimize verified useful work
+per frontier intervention.</p>
+</section>
+<section id="dg-12-events-and-node-components">
+<h3>DG-12: Events and node components<a class="headerlink" href="#dg-12-events-and-node-components" title="Link to this heading"></a></h3>
+<p>Yield publish, guidance resume, and cancel MUST emit warehouse-joinable
+<code class="docutils literal notranslate"><span class="pre">core:*</span></code> events with <code class="docutils literal notranslate"><span class="pre">run_id</span></code>, <code class="docutils literal notranslate"><span class="pre">graph_id</span></code>, <code class="docutils literal notranslate"><span class="pre">recipe_id</span></code>, and sequence /
+<code class="docutils literal notranslate"><span class="pre">request_id</span></code> when applicable. Guidance soft points MUST project
+<code class="docutils literal notranslate"><span class="pre">guidance_request</span></code> node components (kinds ⊆ real surfaces).</p>
+</section>
+<section id="dg-13-relationship-to-graphexecutor">
+<h3>DG-13: Relationship to GraphExecutor<a class="headerlink" href="#dg-13-relationship-to-graphexecutor" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> remains the internal node walker. The generator drives
+execution to the next committed yield; it MUST NOT replace the walker with a
+parallel graph engine.</p>
+</section>
+</section>
+<section id="milestones">
+<h2>Milestones<a class="headerlink" href="#milestones" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Milestone</p></th>
+<th class="head"><p>Scope</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>M1</p></td>
+<td><p>In-process generator, ScriptedDriver, stories, docs/API (this change)</p></td>
+</tr>
+<tr class="row-odd"><td><p>M2</p></td>
+<td><p>Stdio MCP adapter</p></td>
+</tr>
+<tr class="row-even"><td><p>M3</p></td>
+<td><p>Recording/replay polish and crash-location matrix expansion</p></td>
+</tr>
+<tr class="row-odd"><td><p>M4</p></td>
+<td><p>Human plain-text CLI (curses optional)</p></td>
+</tr>
+<tr class="row-even"><td><p>M5</p></td>
+<td><p>Parallel advisory batching, leases, ownership transfer</p></td>
+</tr>
+<tr class="row-odd"><td><p>M6</p></td>
+<td><p>Host production pilots (video production / studio apps)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="definition-of-done-m1">
+<h2>Definition of done (M1)<a class="headerlink" href="#definition-of-done-m1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DurableGraphGenerator</span></code> + <code class="docutils literal notranslate"><span class="pre">ScriptedDriver</span></code> exported and Config-bound</p></li>
+<li><p>Persona stories for DG-01..11 (MCP/CLI as explicit gap stories)</p></li>
+<li><p>Architecture and reference docs describe the generator as a primary pillar</p></li>
+<li><p>Unit + story acceptance green offline</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

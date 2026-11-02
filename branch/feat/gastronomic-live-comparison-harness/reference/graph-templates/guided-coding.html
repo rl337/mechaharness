@@ -1,0 +1,259 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guided coding (guided_coding) &mdash; MechaHarness 0.14.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=9e420a66"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/reference/graph-templates/guided-coding.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="guided-coding-guided-coding">
+<h1>Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)<a class="headerlink" href="#guided-coding-guided-coding" title="Link to this heading"></a></h1>
+<p><strong>Agentic Recipe.</strong> Frontier driver (Cursor MCP) answers short engineering
+guidance; local <code class="docutils literal notranslate"><span class="pre">openai_local</span></code> inference classifies <strong>oneshot vs todo list</strong>,
+implements under workspace tools with pre/item/post acceptance, then an
+<strong>audited infer-accept</strong> tile gates quality (RDG-aligned). Token-heavy coding
+stays off the Cursor account.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Surface</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Catalog id</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">guided_coding</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Module</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.graph_templates.guided_coding</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Host Config</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mechaharness.project_coding.ProjectCodingConfig</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Substrate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> (tiles <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code> + <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Owning stories</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_guided_coding_recipe</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="when-to-use">
+<h2>When to use<a class="headerlink" href="#when-to-use" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Cursor (or another MCP client) should guide approach/constraints only</p></li>
+<li><p>Local OpenAI-compat models should edit files and run tests in the project tree</p></li>
+<li><p>Instructions may be a oneshot or an ordered list (with conflict refine + post-list AC)</p></li>
+<li><p>Quality gate needs distinct decide/QA principals + frozen criteria (not only <code class="docutils literal notranslate"><span class="pre">verify_repair</span></code>)</p></li>
+</ul>
+</section>
+<section id="soft-points">
+<h2>Soft points<a class="headerlink" href="#soft-points" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Kind</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">external_guidance</span></code></p></td>
+<td><p>guidance (required)</p></td>
+<td><p>Frontier engineering direction (<code class="docutils literal notranslate"><span class="pre">advice_requested</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_iterations</span></code> / <code class="docutils literal notranslate"><span class="pre">max_items</span></code> / <code class="docutils literal notranslate"><span class="pre">stop_contract</span></code></p></td>
+<td><p>budget</p></td>
+<td><p>Bound per-item tool loops and todo count</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">acceptance</span></code></p></td>
+<td><p>policy</p></td>
+<td><p>Criteria forwarded to plan + <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">decide_principal</span></code> / <code class="docutils literal notranslate"><span class="pre">qa_principal</span></code></p></td>
+<td><p>policy</p></td>
+<td><p>Audit tile principals (must differ)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Optional plan refinement (<code class="docutils literal notranslate"><span class="pre">scope_refinement</span></code> / <code class="docutils literal notranslate"><span class="pre">list_refinement</span></code>) lives on the
+tiled <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code> and is requested dynamically when needed.</p>
+<p>Before the Completer runs, local work <strong>preflights</strong> <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code>. If they
+already pass, it reports <code class="docutils literal notranslate"><span class="pre">already_satisfied</span></code> / <code class="docutils literal notranslate"><span class="pre">changes_expected=false</span></code> and
+skips implementation (Python validate is the proof). Stories that assert
+<code class="docutils literal notranslate"><span class="pre">written_files</span></code> should use <code class="docutils literal notranslate"><span class="pre">includes_if</span></code> gated on <code class="docutils literal notranslate"><span class="pre">changes_expected</span></code>.</p>
+<p>After coding <code class="docutils literal notranslate"><span class="pre">verify_runs</span></code> / work-item failure, local work may <strong>restore the
+pre-burst workspace</strong>, retry once with a consolidated restore-and-finish brief,
+and if that still fails yield <code class="docutils literal notranslate"><span class="pre">decompose</span></code> guidance so the frontier driver can
+clarify (see
+<a class="reference internal" href="instruction-todo-plan.html#failure-escalate-restore--consolidated-retry--guidance"><span class="std std-ref">Instruction todo plan</span></a>).</p>
+</section>
+<section id="node-components">
+<h2>Node components<a class="headerlink" href="#node-components" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parent graph node</p></th>
+<th class="head"><p>Components</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">brief</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_point</span></code> (<code class="docutils literal notranslate"><span class="pre">external_guidance</span></code> / <code class="docutils literal notranslate"><span class="pre">guidance_request</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plan_tile</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">child_graph</span></code> (tiled <code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">audit_tile</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">child_graph</span></code> (tiled <code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+<p>See <a class="reference internal" href="../node-components.html"><span class="std std-doc">Node components</span></a>,
+<a class="reference internal" href="instruction-todo-plan.html"><span class="std std-doc">Instruction todo plan</span></a>, and
+<a class="reference internal" href="audited-infer-accept.html"><span class="std std-doc">Audited infer-accept</span></a>.</p>
+</section>
+<section id="mcp-wiring">
+<h2>MCP wiring<a class="headerlink" href="#mcp-wiring" title="Link to this heading"></a></h2>
+<p>Inference endpoints belong on the Cursor MCP server <code class="docutils literal notranslate"><span class="pre">env</span></code> block (not a required
+project <code class="docutils literal notranslate"><span class="pre">.env</span></code>). Set <code class="docutils literal notranslate"><span class="pre">MECHA_MCP_HOST=project_coding</span></code> so the stdio adapter builds
+<code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig</span></code>. See <a class="reference internal" href="../durable-graph-generators.html"><span class="std std-doc">Durable graph generators</span></a>.</p>
+</section>
+<section id="related">
+<h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="instruction-todo-plan.html"><span class="std std-doc">Instruction todo plan</span></a></p></li>
+<li><p><a class="reference internal" href="audited-infer-accept.html"><span class="std std-doc">Audited infer-accept</span></a></p></li>
+<li><p><a class="reference internal" href="../../guides/openai-local.html"><span class="std std-doc">Local OpenAI-compat</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
