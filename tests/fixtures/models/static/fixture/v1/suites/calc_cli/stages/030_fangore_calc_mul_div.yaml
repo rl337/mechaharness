@@ -159,6 +159,6 @@ complete:
     value:
     - core:graph_yield
     - core:guidance_resume
-    - core:graph_start
-    - core:graph_end
+  # Do not require core:graph_start/end here: live already_satisfied bursts
+  # (prior stage met verify_runs) skip nested Completer GraphExecutor emits.
 cleanup: []
