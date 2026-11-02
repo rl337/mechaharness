@@ -73,6 +73,7 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         job_lane_broker: JobLaneBroker | None = None,
         generator_local_work: GeneratorLocalWork | type[GeneratorLocalWork] | None = None,
         workspace_root: object | None = None,
+        max_tokens: int | None = None,
     ) -> None:
         self._completer = completer
         self._datetime_service = datetime_service
@@ -89,6 +90,7 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         self._job_lane_broker = job_lane_broker
         self._generator_local_work = generator_local_work
         self._workspace_root = workspace_root
+        self._max_tokens = max_tokens
         super().__init__()
 
     def get_generator_local_work(
@@ -175,6 +177,7 @@ class TestHarnessCliConfig(MechaHarnessConfig):
         rag = self._rag_retriever
         life = self._lifecycle_extensions
         budget = self._budget_policy
+        max_tokens = self._max_tokens
         grants = self.get_grants() if (
             self._grants is not None or self._access_policy is not None
         ) else None
@@ -203,6 +206,7 @@ class TestHarnessCliConfig(MechaHarnessConfig):
                 job_lane_broker=injector.inject(JobLaneBroker),
                 generator_local_work=injector.inject(GeneratorLocalWork),
                 workspace_root=workspace_root,
+                max_tokens=max_tokens,
             )
 
         self.register(CliInstrumentor, make_cli)

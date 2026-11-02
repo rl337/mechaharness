@@ -43,6 +43,26 @@ class _FixedCompleter(MockInferenceStrategy):
         )
 
 
+class _ReasoningOnlyCompleter(MockInferenceStrategy):
+    """Thinking Completer: empty content, JSON only in reasoning_content."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.last_request: CompletionRequest | None = None
+
+    async def complete(self, request: CompletionRequest) -> CompletionResponse:
+        self.last_request = request
+        return CompletionResponse(
+            message=ChatMessage(
+                role=Role.ASSISTANT,
+                content="",
+                reasoning_content='{"status":"found","files":["via-reasoning.py"]}',
+            ),
+            finish_reason="length",
+            usage=Usage(prompt_tokens=1, completion_tokens=8, total_tokens=9),
+        )
+
+
 @pytest.mark.asyncio
 async def test_legacy_prompt_still_works() -> None:
     log = InMemoryEventLog()
@@ -79,6 +99,40 @@ async def test_bag_aware_compiles_and_publishes() -> None:
     assert "discover" in runner.last_model_inputs
     assert runner.last_model_inputs["discover"]["included_paths"] == ["in.goal"]
     assert "calc" in runner.last_model_inputs["discover"]["messages"][-1]["content"]
+
+
+@pytest.mark.asyncio
+async def test_empty_content_falls_back_to_reasoning_content() -> None:
+    log = InMemoryEventLog()
+    completer = _ReasoningOnlyCompleter()
+    runner = CliInferRunner(
+        completer,
+        InMemoryCostAccountant(log),
+        log,
+        kinds=["infer"],
+        max_tokens=4096,
+    )
+    bag = WalkBag()
+    bag.path_put("in.goal", "calc")
+    node = GraphNode(
+        id="discover",
+        kind="infer",
+        payload={
+            "max_tokens": 2048,
+            "context": {
+                "reads": [{"path": "in.goal", "required": True}],
+                "response": {"writes": "out.discovery", "parse": "json"},
+            },
+        },
+    )
+    outcome = await runner.run(node, context=_ctx(bag=bag))
+    assert outcome.status == NodeStatus.SUCCEEDED
+    assert bag.path_get("out.discovery") == {
+        "status": "found",
+        "files": ["via-reasoning.py"],
+    }
+    assert completer.last_request is not None
+    assert completer.last_request.max_tokens == 2048
 
 
 @pytest.mark.asyncio

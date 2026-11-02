@@ -306,6 +306,7 @@ class CliInstrumentor:
         job_lane_broker: JobLaneBroker | None = None,
         generator_local_work: Any | None = None,
         workspace_root: Any | None = None,
+        max_tokens: int | None = None,
     ) -> None:
         self._completer = completer
         self._model = model
@@ -326,6 +327,7 @@ class CliInstrumentor:
         self._job_lane_broker = job_lane_broker
         self._generator_local_work = generator_local_work
         self.workspace_root = workspace_root
+        self._max_tokens = max_tokens
         store = event_log or InMemoryEventLog()
         stamped = StampingEventLog(store, self._datetime)
         self._log: EventLog = tapping_event_log(
@@ -338,6 +340,7 @@ class CliInstrumentor:
             self._cost,
             self._log,
             model=self._model,
+            max_tokens=self._max_tokens,
         )
         self._executor = host_graph_executor(
             runners=GraphNodeRunnerRegistry([self._runner]),
@@ -359,6 +362,10 @@ class CliInstrumentor:
     @property
     def model(self) -> str:
         return self._model
+
+    @property
+    def max_tokens(self) -> int | None:
+        return self._max_tokens
 
     @property
     def agent_id(self) -> str:
