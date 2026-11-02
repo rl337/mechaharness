@@ -102,6 +102,40 @@ async def test_bag_aware_compiles_and_publishes() -> None:
 
 
 @pytest.mark.asyncio
+async def test_skip_when_publishes_without_completer() -> None:
+    log = InMemoryEventLog()
+
+    class _Boom(MockInferenceStrategy):
+        async def complete(self, request: CompletionRequest) -> CompletionResponse:
+            raise AssertionError("Completer must not run when skip_when matches")
+
+    runner = CliInferRunner(
+        _Boom(), InMemoryCostAccountant(log), log, kinds=["infer"]
+    )
+    bag = WalkBag()
+    bag.path_put("out.verification_report", {"status": "ok", "failures": []})
+    node = GraphNode(
+        id="repair_propose",
+        kind="infer",
+        payload={
+            "skip_when": {
+                "path": "out.verification_report",
+                "equals": {"status": "ok"},
+                "publish": {"revisions": []},
+            },
+            "context": {
+                "reads": [{"path": "out.verification_report", "required": True}],
+                "response": {"writes": "acc.execution.repair_proposed", "parse": "json"},
+            },
+        },
+    )
+    outcome = await runner.run(node, context=_ctx(bag=bag))
+    assert outcome.status == NodeStatus.SUCCEEDED
+    assert outcome.payload.get("skipped") is True
+    assert bag.path_get("acc.execution.repair_proposed") == {"revisions": []}
+
+
+@pytest.mark.asyncio
 async def test_empty_content_falls_back_to_reasoning_content() -> None:
     log = InMemoryEventLog()
     completer = _ReasoningOnlyCompleter()

@@ -97,8 +97,9 @@ Later stages raise propose `max_tokens` (up to 32768 for functions). Each stage
 loads current `calc.py` via `execution_load_workspace` so Completer propose
 extends prior grammar instead of rewriting from a cold prompt. After apply,
 host `verification_*` runs the same CLI checks as the story `run_python` steps
-(`verify_runs` with `args` / `stdout_contains`) and fails the graph before
-trial assemble when Completer output is wrong.
+(`verify_runs` with `args` / `stdout_contains`). When verify fails, a
+conditional repair propose (`skip_when` green verify → no Completer call)
+applies a fix and re-verifies before trial assemble.
 
 
   Mark B **`not_run`** when that suite has not been executed for the batch —

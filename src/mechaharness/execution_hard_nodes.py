@@ -142,6 +142,7 @@ class ExecutionHardNodeRunner(GraphNodeRunner):
             report = materialize_file_revisions(
                 host_revisions=host_raw,
                 proposed=proposed_raw,
+                allow_empty=bool(parameters.get("allow_empty")),
             )
             if parameters.get("fail_if_incomplete") and report.get("status") != "ok":
                 raise DiscoveryHardNodeError(
@@ -172,6 +173,13 @@ class ExecutionHardNodeRunner(GraphNodeRunner):
                 revisions = revisions_raw
             else:
                 revisions = list(parameters.get("revisions") or [])
+            if parameters.get("skip_if_empty") and not revisions:
+                return {
+                    "status": "ok",
+                    "written": [],
+                    "refused": [],
+                    "skipped": True,
+                }
             workspace_value = _read_path(bag, workspace_path, required=False)
             root = _resolve_workspace_root(
                 workspace_value,

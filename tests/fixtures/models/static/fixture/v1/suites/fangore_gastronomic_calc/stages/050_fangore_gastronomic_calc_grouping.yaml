@@ -4,7 +4,7 @@ persona: fangore
 title: Gastronomic Completer propose adds parentheses grouping
 narrative: Fangore continues the shared gastronomic calc arc. He Completer-proposes parentheses that override
   precedence, applies the revision, verifies regressions, and records an arm-B trial.
-implementation: '`execution_constrain` / infer propose / `execution_materialize` / `execution_apply` / `verification_*`;
+implementation: '`execution_*` / `verification_*` / conditional repair propose / re-verify;
   Agentic Recipe `change_execution`; `comparison_assemble`.'
 validation: Suite stage `050_fangore_gastronomic_calc_grouping` — arm B trial success.
 footnotes:
@@ -264,17 +264,101 @@ graph:
       payload:
         reads: {source: out.verification_report}
         writes: {destination: acc.verification.validation}
+        parameters: {fail_if_invalid: false}
+    - id: repair_load
+      kind: execution_load_workspace
+      depends_on: [v_validate]
+      payload:
+        reads: {workspace: in.workspace}
+        writes: {destination: in.workspace_files}
+        parameters: {paths: [calc.py]}
+    - id: repair_propose
+      kind: infer
+      depends_on: [repair_load]
+      payload:
+        soft_point: repair_propose_payload
+        max_tokens: 16384
+        skip_when:
+          path: out.verification_report
+          equals: {status: ok}
+          publish: {revisions: []}
+        completion: {revisions: []}
+        context:
+          version: '1'
+          system: >-
+            Do not think aloud. Host verification failed. Put JSON only in
+            answer content. Return exactly
+            {"revisions":[{"path":"calc.py","content":"...full file..."}]}
+            fixing the failures. Keep evaluate and main(argv=None). No eval/exec.
+            Prefer extending the file in in.workspace_files.
+          user_preamble: "/no_think\nUse only the following bag evidence."
+          reads:
+          - {path: in.goal, required: true}
+          - {path: out.verification_report, required: true}
+          - {path: in.workspace_files, required: false}
+          - {path: acc.execution.constraints, required: false}
+          response:
+            writes: acc.execution.repair_proposed
+            parse: json
+    - id: repair_materialize
+      kind: execution_materialize
+      depends_on: [repair_propose]
+      payload:
+        reads:
+          host_revisions: in.file_revisions
+          proposed: acc.execution.repair_proposed
+        writes: {destination: acc.execution.repair_revisions}
+        parameters: {allow_empty: true, fail_if_incomplete: true}
+    - id: repair_apply
+      kind: execution_apply
+      depends_on: [repair_materialize]
+      payload:
+        reads:
+          constraints: acc.execution.constraints
+          revisions: acc.execution.repair_revisions
+          workspace: in.workspace
+        writes: {destination: acc.execution.repair_apply_receipt}
+        parameters: {skip_if_empty: true}
+    - id: v2_constrain
+      kind: verification_constrain
+      depends_on: [repair_apply]
+      payload:
+        reads:
+          contract: in.change_contract
+          execution: out.change_execution
+          verify_runs: in.verify_runs
+        writes: {destination: acc.verification.constraints}
+    - id: v2_run
+      kind: verification_run
+      depends_on: [v2_constrain]
+      payload:
+        reads: {constraints: acc.verification.constraints, workspace: in.workspace}
+        writes: {destination: acc.verification.run_receipt}
+    - id: v2_publish
+      kind: verification_publish
+      depends_on: [v2_run]
+      payload:
+        reads:
+          constraints: acc.verification.constraints
+          receipt: acc.verification.run_receipt
+        writes: {destination: out.verification_report}
+    - id: v2_validate
+      kind: verification_validate
+      depends_on: [v2_publish]
+      payload:
+        reads: {source: out.verification_report}
+        writes: {destination: acc.verification.validation}
         parameters: {fail_if_invalid: true}
     - id: accept_seed
       kind: compute
-      depends_on: [v_validate]
+      depends_on: [v2_validate]
       payload:
         bag_put:
           in.development_outcome:
             version: '1'
             status: ok
             outcome: completed
-            reason: host verify after gastronomic execute
+            reason: host verify after gastronomic execute (with optional repair)
             provenance: {gates_passed: true}
     - id: assemble
       kind: comparison_assemble

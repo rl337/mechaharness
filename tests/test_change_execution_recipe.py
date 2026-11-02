@@ -23,6 +23,13 @@ from mechaharness.graph_templates import (
 from mechaharness.node_component import node_components_for
 
 
+def test_materialize_allow_empty_skips_without_revisions() -> None:
+    report = materialize_file_revisions(proposed={"revisions": []}, allow_empty=True)
+    assert report["status"] == "ok"
+    assert report["skipped"] is True
+    assert report["revisions"] == []
+
+
 def test_load_workspace_files_reads_present_and_lists_missing() -> None:
     fs = MemoryFilesystem()
     fs.write_text("/ws/calc.py", "def evaluate(x): return float(x)\n")

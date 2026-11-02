@@ -164,6 +164,54 @@ class CliInferRunner(GraphNodeRunner):
             return None
         return int(raw)
 
+    def _maybe_skip_infer(
+        self, node: GraphNode, *, context: GraphRunContext
+    ) -> NodeOutcome | None:
+        """Skip Completer when ``skip_when`` bag predicate matches.
+
+        Used for repair proposes that should no-op after a green host verify
+        (``skip_when.path`` + ``equals``), publishing ``publish`` (default
+        ``{"revisions": []}``) to the ContextSpec response path when present.
+        """
+        raw = node.payload.get("skip_when")
+        if not isinstance(raw, Mapping):
+            return None
+        path = str(raw.get("path") or "").strip()
+        equals = raw.get("equals")
+        if not path or not isinstance(equals, Mapping) or not equals:
+            return None
+        try:
+            observed = context.bag.path_get(path)
+        except Exception:  # noqa: BLE001 — missing path ⇒ do not skip
+            return None
+        if not isinstance(observed, Mapping):
+            return None
+        for key, expected in equals.items():
+            if observed.get(key) != expected:
+                return None
+        publish = raw.get("publish", {"revisions": []})
+        context_raw = node.payload.get("context")
+        publish_path: str | None = None
+        if isinstance(context_raw, Mapping):
+            response = context_raw.get("response")
+            if isinstance(response, Mapping):
+                writes = response.get("writes")
+                if isinstance(writes, str) and writes.strip():
+                    publish_path = writes.strip()
+        if publish_path is not None:
+            context.bag.path_put(publish_path, publish)
+        flags = {
+            "skipped": True,
+            "skip_when_path": path,
+            "bag_write": publish_path,
+            "published": publish,
+        }
+        self.last_inference[node.id] = flags
+        return NodeOutcome(
+            status=NodeStatus.SUCCEEDED,
+            payload={"text": "", "finish_reason": "skipped", **flags},
+        )
+
     def kinds(self) -> Sequence[str]:
         return list(self._kinds)
 
@@ -206,6 +254,9 @@ class CliInferRunner(GraphNodeRunner):
     async def _run_bag_aware(
         self, node: GraphNode, *, context: GraphRunContext
     ) -> NodeOutcome:
+        skipped = self._maybe_skip_infer(node, context=context)
+        if skipped is not None:
+            return skipped
         try:
             spec = context_spec_from_mapping(node.payload["context"])
         except Exception as exc:  # noqa: BLE001 — surface as node failure

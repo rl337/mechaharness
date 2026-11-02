@@ -209,12 +209,14 @@ def materialize_file_revisions(
     *,
     host_revisions: Any = None,
     proposed: Any = None,
+    allow_empty: bool = False,
 ) -> dict[str, Any]:
     """Prefer host ``file_revisions``; else Completer-proposed revisions.
 
     Completer propose publishes JSON (list or ``{revisions:[...]}``). Host
     seeds remain authoritative when non-empty so offline stories stay
-    Completer-free.
+    Completer-free. ``allow_empty`` treats a skipped repair propose
+    (``{revisions: []}``) as ok with ``skipped: true``.
     """
     host_rows = _revision_rows(host_revisions)
     if host_rows:
@@ -229,6 +231,13 @@ def materialize_file_revisions(
             "status": "ok",
             "source": "proposed",
             "revisions": proposed_rows,
+        }
+    if allow_empty:
+        return {
+            "status": "ok",
+            "source": "none",
+            "revisions": [],
+            "skipped": True,
         }
     return {
         "status": "incomplete",
