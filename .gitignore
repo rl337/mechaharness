@@ -149,7 +149,8 @@ activemq-data/
 *.sage.py
 
 # Environments
-# Local operator secrets / MCP launcher (see .env.example at repo root)
+# Local operator secrets / MCP launcher (see .env.example at repo root).
+# Normative: docs/requirements/repository-secrets-hygiene.md (SEC-01..03).
 .env/
 .envrc
 .venv

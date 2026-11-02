@@ -56,6 +56,7 @@ should start here — not in the maintainer `.cursor/skills/` tree.
 |------|-------------|
 | [Agent skills for your project](./guides/agent-skills.md) | Install `use-mechaharness` / observability skills + `mechaharness.mdc` from GitHub `main` |
 | [Host integration requirements](./requirements/host-integration.md) | HOST-01..07: Config-first, `host_apis`, promote path, open identity, OBS export |
+| [Repository secrets hygiene](./requirements/repository-secrets-hygiene.md) | SEC-01..05: no auth / personal paths / lab endpoints in git |
 | [`agent-skills/` on GitHub](https://github.com/rl337/mechaharness/tree/main/agent-skills) | Copy-paste skill sources for Cursor/Codex in *your* repo |
 
 Related: [Dependency injection](./guides/dependency-injection.md),
@@ -76,6 +77,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Stepped graph execution](./requirements/stepped-graph-execution.md) | Pause/continue between nodes; until/before; soft enter (SG-01..10) |
 | [Event analytics schema](./requirements/event-analytics-schema.md) | Near-3NF fact/dim contract for warehouse reconstruction of graph decisions |
 | [Host integration](./requirements/host-integration.md) | Normative contract for apps that consume MechaHarness (HOST-01..07) |
+| [Repository secrets hygiene](./requirements/repository-secrets-hygiene.md) | No auth, personal paths, or lab-private endpoints in git (SEC-01..05) |
 | [Agent skills (downstream)](./guides/agent-skills.md) | Customer-facing Cursor skills for host repos |
 | [Inspiration primitives](./reference/inspiration-primitives.md) | Leaf → map ID → DI? → blessed import |
 | [AI assistant host-friction inspiration](./inspiration/ai-assistant-host-friction-inspiration.md) | AI assistant host HF pack provenance; console consumer vs MH ownership |

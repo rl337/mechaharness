@@ -160,7 +160,7 @@ Before finishing:
 - [ ] Internal links resolve
 - [ ] `docs/index.md` lists new/changed pages
 - [ ] Logo path is correct for the file's location
-- [ ] No secrets or live API keys in examples
+- [ ] No secrets or live API keys in examples ([repository-secrets-hygiene](../../../docs/requirements/repository-secrets-hygiene.md) SEC-01..04)
 - [ ] If host-facing APIs changed: `agent-skills/` + guide + HOST requirements match
 
 ## Additional resources
