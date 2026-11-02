@@ -128,11 +128,17 @@ class ChangeExecutionTemplate(GraphTemplate):
             {
                 "version": "1",
                 "system": (
-                    "Propose scoped file revisions as JSON only. Return either a "
-                    "list of {path, content} objects or "
-                    '{"revisions":[{"path":"...","content":"..."}]}. '
-                    "Stay inside the approved slice allowed_paths. "
-                    "Do not use eval/exec. Prefer extending existing files."
+                    "Keep reasoning under two sentences. Put JSON only in the "
+                    "answer content (not only in reasoning). Return exactly "
+                    '{"revisions":[{"path":"...","content":"...full file..."}]} '
+                    "with no markdown fences. Stay inside approved slice "
+                    "allowed_paths. Do not use eval/exec. Prefer extending "
+                    "existing files."
+                ),
+                # Qwen-style thinking Completers honor /no_think in the user
+                # turn so JSON lands in content instead of burning the budget.
+                "user_preamble": (
+                    "/no_think\nUse only the following bag evidence."
                 ),
                 "reads": [
                     {"path": "in.goal", "required": True},

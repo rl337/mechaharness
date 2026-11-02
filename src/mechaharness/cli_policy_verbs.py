@@ -8,6 +8,7 @@ case bags. See ``docs/reference/access.md`` and ``docs/reference/budget.md``.
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Callable
 from typing import Any, Literal
 
@@ -1486,12 +1487,21 @@ class GraphWalkVerb(CliVerb):
                 host_model = getattr(runtime, "model", None)
                 shared_priors: dict[str, Any] = {}
                 if needs_infer:
+                    host_max_tokens = getattr(runtime, "max_tokens", None)
+                    if host_max_tokens is None:
+                        raw_max = os.environ.get("MECHA_MAX_TOKENS")
+                        host_max_tokens = int(raw_max) if raw_max else None
                     infer_runner = CliInferRunner(
                         completer,
                         cost,
                         event_log,
                         model=str(host_model or "cli-default"),
                         kinds=list(DEFAULT_INFER_KINDS),
+                        max_tokens=(
+                            int(host_max_tokens)
+                            if host_max_tokens is not None
+                            else None
+                        ),
                     )
                     infer_runner.prior_responses = shared_priors
                     runners.append(infer_runner)

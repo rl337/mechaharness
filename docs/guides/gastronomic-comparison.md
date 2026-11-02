@@ -77,7 +77,8 @@ python scripts/record_gastronomic_comparison_trial.py \
 ```bash
 pytest -s -q tests/stories/test_user_story_suites.py -k fangore_gastronomic_calc
 
-# Live Completer propose (optional; same LM Studio knobs as arm A)
+# Live Completer propose (optional; same LM Studio knobs as arm A).
+# Propose prompts prefix /no_think so thinking Completers emit JSON in content.
 MECHA_STORY_BACKEND=live \
   MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
   MECHA_API_KEY=lm-studio \

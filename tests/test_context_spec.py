@@ -101,3 +101,32 @@ def test_publish_rejects_invalid_json() -> None:
             ContextResponseSpec(writes="out.plan", parse="json"),
             "not-json",
         )
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        (
+            'noise {"other":1} then {"revisions":[{"path":"a.py","content":"x"}]}',
+            {"revisions": [{"path": "a.py", "content": "x"}]},
+        ),
+        (
+            'preamble\n[{"path":"b.py","content":"y"}]\ntrailer',
+            [{"path": "b.py", "content": "y"}],
+        ),
+        (
+            'thinking… {"status":"ok"}',
+            {"status": "ok"},
+        ),
+    ],
+)
+def test_publish_json_prefers_revisions_or_first_object(
+    text: str, expected: object
+) -> None:
+    bag = WalkBag()
+    publish_response_to_bag(
+        bag,
+        ContextResponseSpec(writes="acc.execution.proposed", parse="json"),
+        text,
+    )
+    assert bag.path_get("acc.execution.proposed") == expected
