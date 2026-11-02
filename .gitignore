@@ -149,6 +149,7 @@ activemq-data/
 *.sage.py
 
 # Environments
+# Local operator secrets / MCP launcher (see .env.example at repo root)
 .env/
 .envrc
 .venv
@@ -234,3 +235,6 @@ docs/plans/
 
 # Local Cursor MCP overrides (absolute paths)
 .cursor/mcp.json
+
+# Local Codex / other agent MCP configs (absolute paths, local models)
+.codex/
