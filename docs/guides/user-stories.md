@@ -131,9 +131,9 @@ Stories: `fangore_change_decomposition_ordered`, `fangore_change_decomposition_s
 
 ### `fangore_change_execution` — ChangeExecution scoped apply and gastronomic execute tiling
 
-Persona **fangore**; execution `parallel`; 2 stage(s).
+Persona **fangore**; execution `parallel`; 3 stage(s).
 
-Stories: `fangore_change_execution_apply`, `fangore_change_execution_shape`
+Stories: `fangore_change_execution_apply`, `fangore_change_execution_propose`, `fangore_change_execution_shape`
 
 ### `fangore_change_verification` — ChangeVerification host-observed checks and gastronomic verify tiling
 
@@ -938,9 +938,25 @@ Suite stage `010_fangore_change_execution_apply` — status ok, slice_id arithme
 
 1. [Gastronomic M6 execution apply](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/gastronomic-guided-development-execution-plan.md) — Real diff and changed-file hashes; no scope escape
 
+### `fangore_change_execution_propose` — Completer proposes revisions then hard apply publishes hashes
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He seeds a calculator workspace without host file_revisions, walks constrain → Completer propose → materialize → apply, and verifies `acc.execution.revisions.source` is proposed with an ok ChangeExecution.
+
+#### Implementation
+
+`execution_constrain` / infer propose / `execution_materialize` / `execution_apply`; Agentic Recipe `change_execution`.
+
+#### Validation
+
+Suite stage `015_fangore_change_execution_propose` — source proposed, status ok.
+
+#### Footnotes
+
+1. [Gastronomic execute Completer propose](https://github.com/rl337/mechaharness/blob/main/docs/reference/graph-templates/change-execution.md) — Completer proposes revisions; hard materialize and apply remain authoritative
+
 ### `fangore_change_execution_shape` — Instantiate the change_execution Agentic Recipe
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `change_execution` and verifies constrain/apply/publish/validate node ids.
+Fangore starts the CLI host with family `pass_through` and backend `mock`. He loads Agentic Recipe `change_execution` and verifies constrain/propose/materialize/apply/publish/validate node ids.
 
 #### Implementation
 

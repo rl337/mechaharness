@@ -43,6 +43,7 @@ seed
 | `interpret_payload` | task_state | Optional discovery soft point |
 | `propose_payload` | task_state | Optional contract soft point |
 | `plan_propose_payload` | task_state | Optional plan soft point |
+| `execution_propose_payload` | task_state | Optional execution Completer propose soft point |
 | `apply_payload` | task_state | Optional execution soft point |
 | `verify_payload` | task_state | Optional verification soft point |
 | `diagnose_payload` | task_state | Optional diagnosis soft point |
