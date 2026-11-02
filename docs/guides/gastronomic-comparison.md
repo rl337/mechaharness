@@ -95,7 +95,10 @@ python scripts/record_gastronomic_comparison_trial.py \
 
 Later stages raise propose `max_tokens` (up to 32768 for functions). Each stage
 loads current `calc.py` via `execution_load_workspace` so Completer propose
-extends prior grammar instead of rewriting from a cold prompt.
+extends prior grammar instead of rewriting from a cold prompt. After apply,
+host `verification_*` runs the same CLI checks as the story `run_python` steps
+(`verify_runs` with `args` / `stdout_contains`) and fails the graph before
+trial assemble when Completer output is wrong.
 
 
   Mark B **`not_run`** when that suite has not been executed for the batch —

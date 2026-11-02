@@ -3,6 +3,11 @@
 Host-observe a `ChangeExecution` against `ChangeContract` checks and publish a
 typed `VerificationReport` (verify_runs + immutable hash invariants).
 
+`verify_runs` entries may check file text (`text_contains` /
+`text_forbids` / `python_parses`), run `pytest`, or run a CLI script via
+`path` + `args` with `exit_code` / `stdout_contains` / `stderr_contains`
+(guided_coding / gastronomic calc parity).
+
 | Item | Value |
 |------|-------|
 | Name | `change_verification` |
