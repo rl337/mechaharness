@@ -164,8 +164,14 @@ def metrics_from_suite_timing(
     stage_rows = [e for e in events if e.get("kind") == "suite_stage"]
     burst_rows = [e for e in events if e.get("kind") == "coding_burst"]
     work_rows = [e for e in events if e.get("kind") == "coding_work_item"]
-    stages_passed = sum(1 for e in stage_rows if e.get("status") == "ok")
-    failed = next((e for e in stage_rows if e.get("status") != "ok"), None)
+    # Resumes rewrite the same stage key; keep the last status per stage.
+    latest_by_stage: dict[str, Mapping[str, Any]] = {}
+    for e in stage_rows:
+        key = str(e.get("stage") or f"anon-{len(latest_by_stage)}")
+        latest_by_stage[key] = e
+    final_stages = list(latest_by_stage.values())
+    stages_passed = sum(1 for e in final_stages if e.get("status") == "ok")
+    failed = next((e for e in final_stages if e.get("status") != "ok"), None)
     wall_s = 0.0
     for e in stage_rows:
         raw = e.get("elapsed_s")
