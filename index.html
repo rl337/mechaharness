@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MechaHarness documentation &mdash; MechaHarness 0.1.0 documentation</title>
+  <title>MechaHarness documentation &mdash; MechaHarness 0.17.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/documentation_options.js?v=0c3dd48d"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -47,8 +47,11 @@
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a></li>
@@ -57,7 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/access.html">Access control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a></li>
@@ -73,6 +76,10 @@
 <li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -111,7 +118,7 @@ models and policies without rewriting the run path, and so agents cannot
 quietly burn unbounded spend.</p>
 <div class="hero-meta docutils container">
 <div class="version-badge docutils container">
-<p>0.1.0</p>
+<p>0.17.0</p>
 </div>
 <p>pyiv Config · multi-lane inference · cost + EventLog on every run · Python 3.9+</p>
 </div>
@@ -127,8 +134,7 @@ quietly burn unbounded spend.</p>
 Wiring is pyiv <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> and constructor injection. Hosts
 subclass Config hooks to bind strategies, harnesses, connections, and
 providers — they do not fork closed enums or grow string registries.
-See <a class="reference internal" href="guides/dependency-injection.html"><span class="doc">Dependency injection</span></a>, <a class="reference internal" href="adr/0001-pyiv-config.html"><span class="doc">0001. pyiv Config instead of string registries</span></a>, and
-<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>.</p></li>
+See <a class="reference internal" href="guides/dependency-injection.html"><span class="doc">Dependency injection</span></a> and <a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>.</p></li>
 <li><p><strong>Multi-model and lanes are native.</strong>
 Reason, judge, and media (plus host-named lanes) are first-class via
 <code class="docutils literal notranslate"><span class="pre">InferenceEnvironment.active_lane()</span></code>. Generative work yields a
@@ -148,9 +154,10 @@ every run. Telemetry is part of the product surface, not a bolt-on sink.
 See <a class="reference internal" href="reference/events.html"><span class="doc">Event log</span></a>.</p></li>
 </ol>
 <p><strong>Also in the core model:</strong> deny-by-default tool grants and
-<code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> (<a class="reference internal" href="reference/access.html"><span class="doc">Access control</span></a>), plus host-extendable open
-identity for events and grants so third parties compose without patching this
-package (<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>).</p>
+<code class="docutils literal notranslate"><span class="pre">CompoundPolicy</span></code> (<a class="reference internal" href="reference/access.html"><span class="doc">Access control</span></a>); host-extendable open identity
+for events and grants (<a class="reference internal" href="architecture.html"><span class="doc">Architecture</span></a>); and <strong>Agentic Recipes</strong> —
+reusable control subgraphs on a <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code> substrate
+(<a class="reference internal" href="reference/graph-templates.html"><span class="doc">Graph templates and Agentic Recipes</span></a>).</p>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
@@ -164,6 +171,8 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#dependency-injection">Dependency injection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#durable-graph-generator-driven-execution">Durable graph generator (driven execution)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#execution-graph">Execution graph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#host-extension">Host extension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#inference-strategy">Inference Strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="architecture.html#judge">Judge</a></li>
@@ -188,18 +197,52 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="guides/dependency-injection.html#next">Next</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guides/junespark.html#backend">Backend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/junespark.html#host-config">Host Config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/openai-local.html#backend">Backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/openai-local.html#cursor-codex-mcp-guided-coding">Cursor / Codex MCP (guided coding)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/openai-local.html#host-config">Host Config</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#personas">Personas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#running-the-suite">Running the suite</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#models">Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#nubbles-stories">Nubble’s stories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#fangores-stories">Fangore’s stories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#taloneths-stories">Taloneth’s stories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#suites">Suites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#nubble-s-stories">Nubble’s stories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#fangore-s-stories">Fangore’s stories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-stories.html#taloneth-s-stories">Taloneth’s stories</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#goal">Goal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#counts">Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#wave-order">Wave order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#product-batches-af-done-wave-1">Product batches (A–F) — <strong>done</strong> (Wave 1)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#probe-batches-p1p10-historical-inventory">Probe batches (P1–P10) — historical inventory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/user-story-migration-batches.html#related">Related</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#definition">Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#ownership-boundary">Ownership boundary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#first-wave-catalog-candidates">First-wave catalog candidates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#reference-recipe-typed-decision-plane">Reference recipe: typed decision plane</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#reference-recipe-bounded-retry">Reference recipe: bounded retry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#candidate-future-recipes">Candidate future recipes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#testing-requirements">Testing requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#initial-implementation-scope">Initial implementation scope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/recipes-and-decision-plane.html#design-principle">Design principle</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#ownership-boundary">Ownership boundary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#compatibility-and-migration">Compatibility and migration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#composition-with-durable-graph-generators">Composition with durable graph generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements/transactional-durable-resume.html#definition-of-done">Definition of done</a></li>
 </ul>
 </li>
 </ul>
@@ -212,6 +255,7 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="reference/cli.html#commands">Commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/cli.html#run"><code class="docutils literal notranslate"><span class="pre">run</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/cli.html#recipes"><code class="docutils literal notranslate"><span class="pre">recipes</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/cli.html#serve"><code class="docutils literal notranslate"><span class="pre">serve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/cli.html#describe"><code class="docutils literal notranslate"><span class="pre">describe</span></code></a></li>
 </ul>
@@ -225,6 +269,7 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#surface">Surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#envelope">Envelope</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#event-types">Event types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/events.html#required-correlators">Required correlators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#eventlog"><code class="docutils literal notranslate"><span class="pre">EventLog</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/events.html#implementations">Implementations</a></li>
 </ul>
@@ -232,6 +277,7 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="reference/cost.html#surface">Surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/cost.html#ability-units">Ability units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/cost.html#graph-budgets">Graph budgets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/cost.html#harness">Harness</a></li>
 </ul>
 </li>
@@ -239,6 +285,7 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="reference/access.html#surface">Surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/access.html#grants">Grants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/access.html#policy-and-checks">Policy and checks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/access.html#host-recipe-run-pattern">Host recipe-run pattern</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/access.html#tools">Tools</a></li>
 </ul>
 </li>
@@ -251,10 +298,14 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="reference/judge.html#lanes">Lanes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="adr/0001-pyiv-config.html#context">Context</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0001-pyiv-config.html#decision">Decision</a></li>
-<li class="toctree-l2"><a class="reference internal" href="adr/0001-pyiv-config.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#catalog">Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#soft-points">Soft points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#versions-promotion-and-evolution-allowlist">Versions, promotion, and evolution allowlist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#recipe-comparison-do-not-merge">Recipe comparison (do not merge)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#typed-ports-and-candidate-search">Typed ports and candidate search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#usage-sketch">Usage sketch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates.html#ownership-incubation">Ownership / incubation</a></li>
 </ul>
 </li>
 </ul>
@@ -280,6 +331,7 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.SettingsConfig"><code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.apply_backend_defaults"><code class="docutils literal notranslate"><span class="pre">apply_backend_defaults()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.build_injector"><code class="docutils literal notranslate"><span class="pre">build_injector()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.get_injector"><code class="docutils literal notranslate"><span class="pre">get_injector()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.list_harness_families"><code class="docutils literal notranslate"><span class="pre">list_harness_families()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/di.html#mechaharness.di.list_inference_backends"><code class="docutils literal notranslate"><span class="pre">list_inference_backends()</span></code></a></li>
 </ul>
@@ -321,6 +373,10 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.EventLog"><code class="docutils literal notranslate"><span class="pre">EventLog</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.EventType"><code class="docutils literal notranslate"><span class="pre">EventType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.FanoutEventLog"><code class="docutils literal notranslate"><span class="pre">FanoutEventLog</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.GraphEnd"><code class="docutils literal notranslate"><span class="pre">GraphEnd</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.GraphNodeEnd"><code class="docutils literal notranslate"><span class="pre">GraphNodeEnd</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.GraphNodeStart"><code class="docutils literal notranslate"><span class="pre">GraphNodeStart</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.GraphStart"><code class="docutils literal notranslate"><span class="pre">GraphStart</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.InMemoryEventLog"><code class="docutils literal notranslate"><span class="pre">InMemoryEventLog</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.Inference"><code class="docutils literal notranslate"><span class="pre">Inference</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/events.html#mechaharness.core.events.LoggingEventLog"><code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code></a></li>
@@ -346,15 +402,22 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.CostAccountant"><code class="docutils literal notranslate"><span class="pre">CostAccountant</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.CostEntry"><code class="docutils literal notranslate"><span class="pre">CostEntry</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.CostReport"><code class="docutils literal notranslate"><span class="pre">CostReport</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.ExtensionBlock"><code class="docutils literal notranslate"><span class="pre">ExtensionBlock</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.ExtensionObserve"><code class="docutils literal notranslate"><span class="pre">ExtensionObserve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.ExtensionReplace"><code class="docutils literal notranslate"><span class="pre">ExtensionReplace</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.ExtensionRewrite"><code class="docutils literal notranslate"><span class="pre">ExtensionRewrite</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.FsRead"><code class="docutils literal notranslate"><span class="pre">FsRead</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.FsWrite"><code class="docutils literal notranslate"><span class="pre">FsWrite</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.Grant"><code class="docutils literal notranslate"><span class="pre">Grant</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.GraphEscalate"><code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.GraphExecute"><code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.InMemoryAccessControl"><code class="docutils literal notranslate"><span class="pre">InMemoryAccessControl</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.InMemoryCostAccountant"><code class="docutils literal notranslate"><span class="pre">InMemoryCostAccountant</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.MediaAudio"><code class="docutils literal notranslate"><span class="pre">MediaAudio</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.MediaImage"><code class="docutils literal notranslate"><span class="pre">MediaImage</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.MediaVideo"><code class="docutils literal notranslate"><span class="pre">MediaVideo</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.NetHttp"><code class="docutils literal notranslate"><span class="pre">NetHttp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.ProcessExec"><code class="docutils literal notranslate"><span class="pre">ProcessExec</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.default_capability_profile"><code class="docutils literal notranslate"><span class="pre">default_capability_profile()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.grant_key"><code class="docutils literal notranslate"><span class="pre">grant_key()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/access.html#mechaharness.core.access.inference_cost_entry"><code class="docutils literal notranslate"><span class="pre">inference_cost_entry()</span></code></a></li>
@@ -380,6 +443,47 @@ package (<a class="reference internal" href="architecture.html"><span class="doc
 <li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/tools.html#mechaharness.tools.base.Tool"><code class="docutils literal notranslate"><span class="pre">Tool</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/tools.html#mechaharness.tools.base.ToolRegistry"><code class="docutils literal notranslate"><span class="pre">ToolRegistry</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/graph_executor.html">mechaharness.graph_executor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.CallableGraphNodeRunner"><code class="docutils literal notranslate"><span class="pre">CallableGraphNodeRunner</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.DefaultGraphFailurePolicy"><code class="docutils literal notranslate"><span class="pre">DefaultGraphFailurePolicy</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner"><code class="docutils literal notranslate"><span class="pre">EffectfulGraphNodeRunner</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphEscalation"><code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphExecutor"><code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphFailureAction"><code class="docutils literal notranslate"><span class="pre">GraphFailureAction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphFailurePolicy"><code class="docutils literal notranslate"><span class="pre">GraphFailurePolicy</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunner"><code class="docutils literal notranslate"><span class="pre">GraphNodeRunner</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunnerRegistry"><code class="docutils literal notranslate"><span class="pre">GraphNodeRunnerRegistry</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphResult"><code class="docutils literal notranslate"><span class="pre">GraphResult</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext"><code class="docutils literal notranslate"><span class="pre">GraphRunContext</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome"><code class="docutils literal notranslate"><span class="pre">NodeOutcome</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.RejectGraphEscalation"><code class="docutils literal notranslate"><span class="pre">RejectGraphEscalation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.RunControl"><code class="docutils literal notranslate"><span class="pre">RunControl</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/graph_executor.html#mechaharness.graph_executor.registry_from_mapping"><code class="docutils literal notranslate"><span class="pre">registry_from_mapping()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/checkpoint_store.html">mechaharness.checkpoint_store</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore"><code class="docutils literal notranslate"><span class="pre">CheckpointStore</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/checkpoint_store.html#mechaharness.checkpoint_store.EventLogCheckpointStore"><code class="docutils literal notranslate"><span class="pre">EventLogCheckpointStore</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/checkpoint_store.html#mechaharness.checkpoint_store.GraphEffectEvent"><code class="docutils literal notranslate"><span class="pre">GraphEffectEvent</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/checkpoint_store.html#mechaharness.checkpoint_store.effect_from_mapping"><code class="docutils literal notranslate"><span class="pre">effect_from_mapping()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore"><code class="docutils literal notranslate"><span class="pre">SqliteCheckpointStore</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/external_effect.html">mechaharness.external_effect</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.ArmedCrashProbe"><code class="docutils literal notranslate"><span class="pre">ArmedCrashProbe</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.CrashProbe"><code class="docutils literal notranslate"><span class="pre">CrashProbe</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.EffectDispatchResult"><code class="docutils literal notranslate"><span class="pre">EffectDispatchResult</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation"><code class="docutils literal notranslate"><span class="pre">EffectReconciliation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction"><code class="docutils literal notranslate"><span class="pre">EffectReconciliationAction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.EffectRecord"><code class="docutils literal notranslate"><span class="pre">EffectRecord</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.EffectState"><code class="docutils literal notranslate"><span class="pre">EffectState</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.InjectedProcessCrash"><code class="docutils literal notranslate"><span class="pre">InjectedProcessCrash</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/external_effect.html#mechaharness.external_effect.NoopCrashProbe"><code class="docutils literal notranslate"><span class="pre">NoopCrashProbe</span></code></a></li>
 </ul>
 </li>
 </ul>

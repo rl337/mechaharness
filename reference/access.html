@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Access control &mdash; MechaHarness 0.1.0 documentation</title>
+  <title>Access control &mdash; MechaHarness 0.17.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -48,8 +48,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI reference</a></li>
@@ -58,7 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cost.html">Cost</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Access control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph-templates.html">Graph templates and Agentic Recipes</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
@@ -74,6 +77,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
@@ -134,8 +141,9 @@ Stability: evolving.</p>
 <code class="docutils literal notranslate"><span class="pre">namespace</span></code>; leaves set <code class="docutils literal notranslate"><span class="pre">name</span></code>. The wire form is <code class="docutils literal notranslate"><span class="pre">namespace:name</span></code>. Unknown
 namespaced keys round-trip; bare names (<code class="docutils literal notranslate"><span class="pre">fs.write</span></code>) are rejected.</p>
 <p>Built-in <code class="docutils literal notranslate"><span class="pre">CoreGrant</span></code> leaves (<code class="docutils literal notranslate"><span class="pre">FsRead</span></code>, <code class="docutils literal notranslate"><span class="pre">FsWrite</span></code>, <code class="docutils literal notranslate"><span class="pre">NetHttp</span></code>, <code class="docutils literal notranslate"><span class="pre">MediaImage</span></code>,
-<code class="docutils literal notranslate"><span class="pre">MediaVideo</span></code>, <code class="docutils literal notranslate"><span class="pre">MediaAudio</span></code>) are conveniences. Hosts add types without editing
-this package:</p>
+<code class="docutils literal notranslate"><span class="pre">MediaVideo</span></code>, <code class="docutils literal notranslate"><span class="pre">MediaAudio</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code>, <code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ExtensionObserve</span></code>, <code class="docutils literal notranslate"><span class="pre">ExtensionRewrite</span></code>, <code class="docutils literal notranslate"><span class="pre">ExtensionBlock</span></code>, <code class="docutils literal notranslate"><span class="pre">ExtensionReplace</span></code>)
+are conveniences. Hosts add types without editing this package:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="n">Grant</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Widget</span><span class="p">(</span><span class="n">Grant</span><span class="p">):</span>
@@ -176,10 +184,44 @@ media-allowed, …) without rewriting lists. It is unrelated to
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">get_access_control()</span></code> uses <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> (default: <code class="docutils literal notranslate"><span class="pre">AccessPolicy</span></code> from
-<code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>). Or pass
-<code class="docutils literal notranslate"><span class="pre">access=InMemoryAccessControl(policy=CompoundPolicy.of(...),</span> <span class="pre">event_log=log)</span></code>
-into <code class="docutils literal notranslate"><span class="pre">AbstractHarness</span></code>. Denied tools return an error <code class="docutils literal notranslate"><span class="pre">ToolResult</span></code> and are not
-priced.</p>
+<code class="docutils literal notranslate"><span class="pre">get_grants()</span></code>) and requires an <code class="docutils literal notranslate"><span class="pre">EventLog</span></code>. Bind access only through Config —
+do not hand-wire <code class="docutils literal notranslate"><span class="pre">AbstractHarness(...,</span> <span class="pre">access=...)</span></code>. Denied tools return an
+error <code class="docutils literal notranslate"><span class="pre">ToolResult</span></code> and are not priced.</p>
+<p><code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> checks <code class="docutils literal notranslate"><span class="pre">core:graph.execute</span></code> before walking a plan and
+<code class="docutils literal notranslate"><span class="pre">core:graph.escalate</span></code> before calling <code class="docutils literal notranslate"><span class="pre">GraphEscalation</span></code>. Node runners may declare
+extra grants via <code class="docutils literal notranslate"><span class="pre">GraphNodeRunner.required_grants()</span></code>.</p>
+</section>
+<section id="host-recipe-run-pattern">
+<h2>Host recipe-run pattern<a class="headerlink" href="#host-recipe-run-pattern" title="Link to this heading"></a></h2>
+<p>Hosts choose <strong>one</strong> of these surfaces (omit → host-kit defaults:
+<code class="docutils literal notranslate"><span class="pre">GraphExecute</span></code> + <code class="docutils literal notranslate"><span class="pre">GraphEscalate</span></code> on <code class="docutils literal notranslate"><span class="pre">host_graph_executor</span></code>; Config
+<code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">[]</span></code>):</p>
+<ol class="arabic simple">
+<li><p><strong>Config DI</strong> — override <code class="docutils literal notranslate"><span class="pre">get_grants()</span></code> / <code class="docutils literal notranslate"><span class="pre">get_access_policy()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">get_capability_envelope()</span></code> on a <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> subclass.</p></li>
+<li><p><strong>Per-run kwargs</strong> — <code class="docutils literal notranslate"><span class="pre">run_recipe(...,</span> <span class="pre">grants=|access_policy=,</span> <span class="pre">envelope=?)</span></code>
+(and optional <code class="docutils literal notranslate"><span class="pre">budget_policy=</span></code> — see <a class="reference internal" href="budget.html"><span class="std std-doc">Budget</span></a>).</p></li>
+<li><p><strong>Story / fixture YAML</strong> — <code class="docutils literal notranslate"><span class="pre">environment.grants</span></code> /
+<code class="docutils literal notranslate"><span class="pre">environment.access_policy</span></code> / <code class="docutils literal notranslate"><span class="pre">environment.capability_envelope</span></code> /
+<code class="docutils literal notranslate"><span class="pre">environment.authorization_epoch</span></code> on <code class="docutils literal notranslate"><span class="pre">user_story</span></code> scenarios bind (1)/(2).</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">access_policy</span></code> YAML shapes (parsed by
+<code class="docutils literal notranslate"><span class="pre">mechaharness.host_run_policies.access_policy_from_mapping</span></code>):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">grants</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">fs.read</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">fs.write</span><span class="p p-Indicator">]</span>
+<span class="c1"># or compound layers</span>
+<span class="nt">access_policy</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">layers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">fs.read</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">core</span><span class="p p-Indicator">:</span><span class="nv">fs.write</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Product verbs for walks: <code class="docutils literal notranslate"><span class="pre">access_check</span></code>, <code class="docutils literal notranslate"><span class="pre">capability_envelope</span></code>,
+<code class="docutils literal notranslate"><span class="pre">authority_gate</span></code>, <code class="docutils literal notranslate"><span class="pre">auth_epoch_resume</span></code>, <code class="docutils literal notranslate"><span class="pre">approval_interrupt</span></code>. Verb-scoped
+<code class="docutils literal notranslate"><span class="pre">grants:</span></code> on <code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> is <strong>not</strong> the Config/environment
+bridge.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">environment.grants</span></code> / <code class="docutils literal notranslate"><span class="pre">access_policy</span></code> is set it <strong>replaces</strong> Config
+grants for that story (empty list = deny-all). Omit the field to keep
+defaults. Host-kit stays permissive until a host passes a tighter pack.</p>
 </section>
 <section id="tools">
 <h2>Tools<a class="headerlink" href="#tools" title="Link to this heading"></a></h2>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.core.access &mdash; MechaHarness 0.1.0 documentation</title>
+  <title>mechaharness.core.access &mdash; MechaHarness 0.17.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/documentation_options.js?v=0c3dd48d"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -45,8 +45,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/cli.html">CLI reference</a></li>
@@ -55,7 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/access.html">Access control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/mechaharness.html">mechaharness</a></li>
@@ -71,6 +74,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -290,6 +297,69 @@
 <a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.MediaAudio">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MediaAudio</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">"media.audio"</span></div>
+
+
+
+<div class="viewcode-block" id="ProcessExec">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ProcessExec">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProcessExec</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Run a subprocess (tests / shell) under host workspace policy."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"process.exec"</span></div>
+
+
+
+<div class="viewcode-block" id="GraphExecute">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.GraphExecute">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GraphExecute</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Run an :class:`~mechaharness.graph_executor.GraphExecutor` over a plan."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"graph.execute"</span></div>
+
+
+
+<div class="viewcode-block" id="GraphEscalate">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.GraphEscalate">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GraphEscalate</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Invoke escalation after a node exhausts retries."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"graph.escalate"</span></div>
+
+
+
+<div class="viewcode-block" id="ExtensionObserve">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ExtensionObserve">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtensionObserve</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Run observe-mode lifecycle extensions at declared boundaries."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"extension.observe"</span></div>
+
+
+
+<div class="viewcode-block" id="ExtensionRewrite">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ExtensionRewrite">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtensionRewrite</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Rewrite arguments / tool name for a single pending action."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"extension.rewrite"</span></div>
+
+
+
+<div class="viewcode-block" id="ExtensionBlock">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ExtensionBlock">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtensionBlock</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Block a single pending action at a lifecycle boundary."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"extension.block"</span></div>
+
+
+
+<div class="viewcode-block" id="ExtensionReplace">
+<a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.ExtensionReplace">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtensionReplace</span><span class="p">(</span><span class="n">CoreGrant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Replace a single pending action with a one-step structured outcome."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"extension.replace"</span></div>
 
 
 
@@ -550,15 +620,10 @@
 <a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryAccessControl.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">event_log</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">grants</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">policy</span><span class="p">:</span> <span class="n">GrantPolicyLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">event_log</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">EventLog</span><span class="p">,</span>
+        <span class="n">policy</span><span class="p">:</span> <span class="n">GrantPolicyLike</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">policy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">grant_key</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">(</span><span class="n">grants</span> <span class="ow">or</span> <span class="p">[])]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">policy</span> <span class="o">=</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="n">keys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">policy</span> <span class="o">=</span> <span class="n">AccessPolicy</span><span class="p">(</span><span class="n">grants</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">grants</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span> <span class="o">=</span> <span class="n">event_log</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span></div>
 
@@ -607,7 +672,7 @@
 
 <div class="viewcode-block" id="InMemoryCostAccountant.__init__">
 <a class="viewcode-back" href="../../../api/access.html#mechaharness.core.access.InMemoryCostAccountant.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_log</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_log</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">EventLog</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_event_log</span> <span class="o">=</span> <span class="n">event_log</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_report</span> <span class="o">=</span> <span class="n">CostReport</span><span class="p">()</span></div>
 

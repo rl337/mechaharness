@@ -1,0 +1,50 @@
+# RED acceptance story: runner must expose compiled model inputs and bag state.
+# Uses existing graph_walk verb; missing bag/model-input observation wiring is a product gap.
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+graph:
+  inline:
+    goal: carry discovery evidence between inference nodes
+    nodes:
+    - id: discover
+      kind: infer
+    - id: validate
+      kind: compute
+      depends_on: [discover]
+    - id: plan
+      kind: infer
+      depends_on: [validate]
+steps:
+- do:
+    graph_walk:
+      action: start
+      until: plan
+      stop: before
+  expect:
+  - kind: equals
+    key: stopped_before
+    value: plan
+  - kind: equals
+    key: bag.out.discovery.status
+    value: found
+- do:
+    graph_walk:
+      action: continue
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+  - kind: equals
+    key: model_inputs.plan.includes_verified_discovery
+    value: true
+  - kind: equals
+    key: model_inputs.plan.includes_unrelated_bag_data
+    value: false
+complete:
+  expect:
+  - kind: equals
+    key: status
+    value: ok
+cleanup: []

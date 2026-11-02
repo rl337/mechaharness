@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.harness.base &mdash; MechaHarness 0.1.0 documentation</title>
+  <title>mechaharness.harness.base &mdash; MechaHarness 0.17.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/documentation_options.js?v=0c3dd48d"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -45,8 +45,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/dependency-injection.html">Dependency injection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../guides/junespark.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">junespark</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/cli.html">CLI reference</a></li>
@@ -55,7 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/cost.html">Cost</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/access.html">Access control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../adr/0001-pyiv-config.html">0001. pyiv Config instead of string registries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/mechaharness.html">mechaharness</a></li>
@@ -71,6 +74,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../api/inference.html">mechaharness.inference.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/external_effect.html">mechaharness.external_effect</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -119,6 +126,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.capability_envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">CapabilityEnvelope</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">events</span> <span class="k">as</span> <span class="n">core_events</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.access</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AccessControl</span><span class="p">,</span>
@@ -126,12 +134,10 @@
     <span class="n">CapabilityProfile</span><span class="p">,</span>
     <span class="n">CostAccountant</span><span class="p">,</span>
     <span class="n">CostReport</span><span class="p">,</span>
-    <span class="n">InMemoryAccessControl</span><span class="p">,</span>
-    <span class="n">InMemoryCostAccountant</span><span class="p">,</span>
     <span class="n">grant_key</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.completer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceEnvironment</span><span class="p">,</span> <span class="n">NoOpInferenceEnvironment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceEnvironment</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AgentEnd</span><span class="p">,</span>
     <span class="n">AgentStart</span><span class="p">,</span>
@@ -143,7 +149,6 @@
     <span class="n">RunEnd</span><span class="p">,</span>
     <span class="n">RunStart</span><span class="p">,</span>
     <span class="n">TurnStart</span><span class="p">,</span>
-    <span class="n">default_event_log</span><span class="p">,</span>
     <span class="n">event_type_key</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">HarnessError</span>
@@ -154,6 +159,26 @@
     <span class="n">Role</span><span class="p">,</span>
     <span class="n">ToolCall</span><span class="p">,</span>
     <span class="n">ToolResult</span><span class="p">,</span>
+    <span class="n">Usage</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.lifecycle_extension</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AfterInference</span><span class="p">,</span>
+    <span class="n">AfterTool</span><span class="p">,</span>
+    <span class="n">AfterTurn</span><span class="p">,</span>
+    <span class="n">BeforeInference</span><span class="p">,</span>
+    <span class="n">BeforeTool</span><span class="p">,</span>
+    <span class="n">BeforeTurn</span><span class="p">,</span>
+    <span class="n">Block</span><span class="p">,</span>
+    <span class="n">ExtensionEffect</span><span class="p">,</span>
+    <span class="n">InterceptionMode</span><span class="p">,</span>
+    <span class="n">LifecycleBoundary</span><span class="p">,</span>
+    <span class="n">LifecycleExtensionContext</span><span class="p">,</span>
+    <span class="n">LifecycleExtensionRegistry</span><span class="p">,</span>
+    <span class="n">ObserveAfter</span><span class="p">,</span>
+    <span class="n">ObserveBefore</span><span class="p">,</span>
+    <span class="n">Replace</span><span class="p">,</span>
+    <span class="n">Rewrite</span><span class="p">,</span>
+    <span class="n">empty_lifecycle_extension_registry</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.tools.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mechaharness.tools.subagents</span><span class="w"> </span><span class="kn">import</span> <span class="n">install_subagent_tools</span>
@@ -169,6 +194,7 @@
     <span class="n">max_turns</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span>
     <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">max_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">subagent_tools</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
 
 
@@ -198,29 +224,34 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inference</span><span class="p">:</span> <span class="n">Completer</span><span class="p">,</span>
-        <span class="n">tools</span><span class="p">:</span> <span class="n">ToolRegistry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tools</span><span class="p">:</span> <span class="n">ToolRegistry</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">config</span><span class="p">:</span> <span class="n">HarnessConfig</span><span class="p">,</span>
-        <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">access</span><span class="p">:</span> <span class="n">AccessControl</span> <span class="o">|</span> <span class="n">AccessPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">cost</span><span class="p">:</span> <span class="n">CostAccountant</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">environment</span><span class="p">:</span> <span class="n">InferenceEnvironment</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">event_log</span><span class="p">:</span> <span class="n">EventLog</span><span class="p">,</span>
+        <span class="n">access</span><span class="p">:</span> <span class="n">AccessControl</span><span class="p">,</span>
+        <span class="n">cost</span><span class="p">:</span> <span class="n">CostAccountant</span><span class="p">,</span>
+        <span class="n">environment</span><span class="p">:</span> <span class="n">InferenceEnvironment</span><span class="p">,</span>
+        <span class="n">lifecycle_extensions</span><span class="p">:</span> <span class="n">LifecycleExtensionRegistry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">capability_envelope</span><span class="p">:</span> <span class="n">CapabilityEnvelope</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">parent_agent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">subagent_tools</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inference</span> <span class="o">=</span> <span class="n">inference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="o">=</span> <span class="n">tools</span> <span class="ow">or</span> <span class="n">ToolRegistry</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="o">=</span> <span class="n">tools</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">event_log</span> <span class="o">=</span> <span class="n">event_log</span> <span class="ow">or</span> <span class="n">default_event_log</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_log</span> <span class="o">=</span> <span class="n">event_log</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span> <span class="o">=</span> <span class="n">agent_id</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid4</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_agent_id</span> <span class="o">=</span> <span class="n">parent_agent_id</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">access</span><span class="p">,</span> <span class="n">AccessPolicy</span><span class="p">):</span>
-            <span class="n">access</span> <span class="o">=</span> <span class="n">InMemoryAccessControl</span><span class="p">(</span><span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">event_log</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">access</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">access</span> <span class="o">=</span> <span class="n">access</span> <span class="ow">or</span> <span class="n">InMemoryAccessControl</span><span class="p">(</span><span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">event_log</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span> <span class="ow">or</span> <span class="n">InMemoryCostAccountant</span><span class="p">(</span><span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">event_log</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">environment</span> <span class="ow">or</span> <span class="n">NoOpInferenceEnvironment</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">subagent_tools</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">access</span> <span class="o">=</span> <span class="n">access</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">environment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lifecycle_extensions</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">lifecycle_extensions</span>
+            <span class="k">if</span> <span class="n">lifecycle_extensions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">empty_lifecycle_extension_registry</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">capability_envelope</span> <span class="o">=</span> <span class="n">capability_envelope</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">subagent_tools</span><span class="p">:</span>
             <span class="n">install_subagent_tools</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_log</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">)</span></div>
 
 
@@ -351,11 +382,34 @@
         <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bootstrap_messages</span><span class="p">(</span><span class="n">user_input</span><span class="p">,</span> <span class="n">history</span><span class="p">)</span>
         <span class="n">turns</span> <span class="o">=</span> <span class="mi">0</span>
 
+        <span class="n">observe_only</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">ObserveBefore</span><span class="p">,</span> <span class="n">ObserveAfter</span><span class="p">})</span>
         <span class="k">while</span> <span class="n">turns</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_turns</span><span class="p">:</span>
             <span class="n">turns</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span><span class="n">TurnStart</span><span class="p">,</span> <span class="p">{</span><span class="s2">"turn"</span><span class="p">:</span> <span class="n">turns</span><span class="p">},</span> <span class="n">run_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span>
+                <span class="n">TurnStart</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">"turn"</span><span class="p">:</span> <span class="n">turns</span><span class="p">,</span>
+                    <span class="s2">"parent_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                    <span class="s2">"component_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"harness/turn_start:</span><span class="si">{</span><span class="n">turns</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="s2">"execution_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="n">run_id</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                <span class="n">BeforeTurn</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="n">turn</span><span class="o">=</span><span class="n">turns</span><span class="p">,</span>
+                <span class="n">allow_modes</span><span class="o">=</span><span class="n">observe_only</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_request</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                <span class="n">BeforeInference</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="n">turn</span><span class="o">=</span><span class="n">turns</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s2">"model"</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">model</span><span class="p">},</span>
+                <span class="n">allow_modes</span><span class="o">=</span><span class="n">observe_only</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
             <span class="n">nested_cost</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">cost</span>
             <span class="k">if</span> <span class="n">nested_cost</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nested_cost</span><span class="p">,</span> <span class="s2">"entries"</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
@@ -379,14 +433,29 @@
                 <span class="s2">"finish_reason"</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">finish_reason</span><span class="p">,</span>
                 <span class="s2">"content"</span><span class="p">:</span> <span class="n">assistant</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
                 <span class="s2">"tool_calls"</span><span class="p">:</span> <span class="p">[</span><span class="n">tc</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="p">(</span><span class="n">assistant</span><span class="o">.</span><span class="n">tool_calls</span> <span class="ow">or</span> <span class="p">[])],</span>
+                <span class="s2">"parent_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                <span class="s2">"component_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"harness/inference:</span><span class="si">{</span><span class="n">turns</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="s2">"execution_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="n">assistant</span><span class="o">.</span><span class="n">reasoning_content</span><span class="p">:</span>
                 <span class="n">inference_payload</span><span class="p">[</span><span class="s2">"reasoning_content"</span><span class="p">]</span> <span class="o">=</span> <span class="n">assistant</span><span class="o">.</span><span class="n">reasoning_content</span>
-            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">usage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">inference_payload</span><span class="p">[</span><span class="s2">"usage"</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">usage</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+            <span class="n">inference_payload</span><span class="p">[</span><span class="s2">"usage"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Usage</span><span class="o">.</span><span class="n">for_event</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">usage</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span><span class="n">Inference</span><span class="p">,</span> <span class="n">inference_payload</span><span class="p">,</span> <span class="n">run_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                <span class="n">AfterInference</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="n">turn</span><span class="o">=</span><span class="n">turns</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="n">inference_payload</span><span class="p">,</span>
+                <span class="n">allow_modes</span><span class="o">=</span><span class="n">observe_only</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_stop</span><span class="p">(</span><span class="n">assistant</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">finish_reason</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                    <span class="n">AfterTurn</span><span class="p">,</span>
+                    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                    <span class="n">turn</span><span class="o">=</span><span class="n">turns</span><span class="p">,</span>
+                    <span class="n">allow_modes</span><span class="o">=</span><span class="n">observe_only</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="k">return</span> <span class="n">HarnessResult</span><span class="p">(</span>
                     <span class="n">final_text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">final_text</span><span class="p">(</span><span class="n">assistant</span><span class="p">),</span>
                     <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
@@ -398,6 +467,13 @@
             <span class="n">tool_results</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">execute_tools</span><span class="p">(</span><span class="n">tool_calls</span><span class="p">,</span> <span class="n">cost</span><span class="o">=</span><span class="n">cost</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">tool_results</span><span class="p">:</span>
                 <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tool_result_message</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                <span class="n">AfterTurn</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="n">turn</span><span class="o">=</span><span class="n">turns</span><span class="p">,</span>
+                <span class="n">allow_modes</span><span class="o">=</span><span class="n">observe_only</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">tool_results</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_continue_without_tools</span><span class="p">(</span><span class="n">assistant</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">HarnessResult</span><span class="p">(</span>
@@ -472,6 +548,59 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">tool_calls</span> <span class="ow">or</span> <span class="p">[])</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_lifecycle_context</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">boundary</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">LifecycleBoundary</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tool_call_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">arguments</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">turn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifecycleExtensionContext</span><span class="p">:</span>
+        <span class="n">envelope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capability_envelope</span>
+        <span class="k">return</span> <span class="n">LifecycleExtensionContext</span><span class="p">(</span>
+            <span class="n">boundary</span><span class="o">=</span><span class="n">boundary</span><span class="o">.</span><span class="n">key</span><span class="p">(),</span>
+            <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+            <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+            <span class="n">parent_agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_agent_id</span><span class="p">,</span>
+            <span class="n">tool_name</span><span class="o">=</span><span class="n">tool_name</span><span class="p">,</span>
+            <span class="n">tool_call_id</span><span class="o">=</span><span class="n">tool_call_id</span><span class="p">,</span>
+            <span class="n">arguments</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arguments</span> <span class="ow">or</span> <span class="p">{}),</span>
+            <span class="n">turn</span><span class="o">=</span><span class="n">turn</span><span class="p">,</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">payload</span> <span class="ow">or</span> <span class="p">{}),</span>
+            <span class="n">envelope_grants</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">envelope</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span> <span class="k">if</span> <span class="n">envelope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[],</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dispatch_lifecycle</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">boundary</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">LifecycleBoundary</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tool_call_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">arguments</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">turn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_modes</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">InterceptionMode</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtensionEffect</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lifecycle_extensions</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span>
+            <span class="n">boundary</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lifecycle_context</span><span class="p">(</span>
+                <span class="n">boundary</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="n">tool_name</span><span class="o">=</span><span class="n">tool_name</span><span class="p">,</span>
+                <span class="n">tool_call_id</span><span class="o">=</span><span class="n">tool_call_id</span><span class="p">,</span>
+                <span class="n">arguments</span><span class="o">=</span><span class="n">arguments</span><span class="p">,</span>
+                <span class="n">turn</span><span class="o">=</span><span class="n">turn</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">event_log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">event_log</span><span class="p">,</span>
+            <span class="n">envelope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">capability_envelope</span><span class="p">,</span>
+            <span class="n">allow_modes</span><span class="o">=</span><span class="n">allow_modes</span><span class="p">,</span>
+        <span class="p">)</span>
+
 <div class="viewcode-block" id="AbstractHarness.execute_tools">
 <a class="viewcode-back" href="../../../api/harness.html#mechaharness.harness.base.AbstractHarness.execute_tools">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">execute_tools</span><span class="p">(</span>
@@ -482,22 +611,83 @@
         <span class="n">cost</span><span class="p">:</span> <span class="n">CostReport</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ToolResult</span><span class="p">]:</span>
         <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ToolResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tool_modes</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">ObserveBefore</span><span class="p">,</span> <span class="n">ObserveAfter</span><span class="p">,</span> <span class="n">Rewrite</span><span class="p">,</span> <span class="n">Block</span><span class="p">,</span> <span class="n">Replace</span><span class="p">})</span>
+        <span class="n">observe_after</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">ObserveBefore</span><span class="p">,</span> <span class="n">ObserveAfter</span><span class="p">})</span>
         <span class="k">for</span> <span class="n">call</span> <span class="ow">in</span> <span class="n">tool_calls</span><span class="p">:</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                <span class="n">BeforeTool</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="n">tool_name</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">tool_call_id</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">arguments</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">call</span><span class="o">.</span><span class="n">arguments</span> <span class="ow">or</span> <span class="p">{}),</span>
+                <span class="n">allow_modes</span><span class="o">=</span><span class="n">tool_modes</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">effective_name</span> <span class="o">=</span> <span class="n">before</span><span class="o">.</span><span class="n">rewrite_tool_name</span> <span class="ow">or</span> <span class="n">call</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">effective_args</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">before</span><span class="o">.</span><span class="n">rewrite_arguments</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">before</span><span class="o">.</span><span class="n">rewrite_arguments</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">call</span><span class="o">.</span><span class="n">arguments</span> <span class="ow">or</span> <span class="p">{})</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_emit</span><span class="p">(</span>
                 <span class="n">core_events</span><span class="o">.</span><span class="n">ToolCall</span><span class="p">,</span>
-                <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">call</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"tool_call_id"</span><span class="p">:</span> <span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"arguments"</span><span class="p">:</span> <span class="n">call</span><span class="o">.</span><span class="n">arguments</span><span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">"name"</span><span class="p">:</span> <span class="n">effective_name</span><span class="p">,</span>
+                    <span class="s2">"tool_name"</span><span class="p">:</span> <span class="n">effective_name</span><span class="p">,</span>
+                    <span class="s2">"tool_call_id"</span><span class="p">:</span> <span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="s2">"arguments"</span><span class="p">:</span> <span class="n">effective_args</span><span class="p">,</span>
+                    <span class="s2">"parent_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                    <span class="s2">"component_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"harness/tool_call:</span><span class="si">{</span><span class="n">effective_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="s2">"execution_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                <span class="p">},</span>
                 <span class="n">run_id</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">call</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">before</span><span class="o">.</span><span class="n">block</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">ToolResult</span><span class="p">(</span>
                     <span class="n">tool_call_id</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                    <span class="n">content</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Unknown tool: </span><span class="si">{</span><span class="n">call</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="n">content</span><span class="o">=</span><span class="n">before</span><span class="o">.</span><span class="n">block_message</span>
+                    <span class="ow">or</span> <span class="sa">f</span><span class="s2">"Blocked by lifecycle extension: </span><span class="si">{</span><span class="n">effective_name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                     <span class="n">is_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_emit_tool_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_emit_tool_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">effective_name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                    <span class="n">AfterTool</span><span class="p">,</span>
+                    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                    <span class="n">tool_name</span><span class="o">=</span><span class="n">effective_name</span><span class="p">,</span>
+                    <span class="n">tool_call_id</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="n">arguments</span><span class="o">=</span><span class="n">effective_args</span><span class="p">,</span>
+                    <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s2">"blocked"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+                    <span class="n">allow_modes</span><span class="o">=</span><span class="n">observe_after</span><span class="p">,</span>
+                <span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="n">tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">call</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">before</span><span class="o">.</span><span class="n">replace_content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">ToolResult</span><span class="p">(</span>
+                    <span class="n">tool_call_id</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="n">content</span><span class="o">=</span><span class="n">before</span><span class="o">.</span><span class="n">replace_content</span><span class="p">,</span>
+                    <span class="n">is_error</span><span class="o">=</span><span class="n">before</span><span class="o">.</span><span class="n">replace_is_error</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_emit_tool_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">effective_name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                    <span class="n">AfterTool</span><span class="p">,</span>
+                    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                    <span class="n">tool_name</span><span class="o">=</span><span class="n">effective_name</span><span class="p">,</span>
+                    <span class="n">tool_call_id</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="n">arguments</span><span class="o">=</span><span class="n">effective_args</span><span class="p">,</span>
+                    <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s2">"replaced"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+                    <span class="n">allow_modes</span><span class="o">=</span><span class="n">observe_after</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">effective_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">ToolResult</span><span class="p">(</span>
+                    <span class="n">tool_call_id</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="n">content</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Unknown tool: </span><span class="si">{</span><span class="n">effective_name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="n">is_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_emit_tool_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">effective_name</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">effective_name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tool</span><span class="o">.</span><span class="n">grants</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">assert_compatible</span><span class="p">(</span><span class="n">required_grants</span><span class="o">=</span><span class="n">tool</span><span class="o">.</span><span class="n">grants</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">grant_key</span><span class="p">(</span><span class="n">g</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"core:media."</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">tool</span><span class="o">.</span><span class="n">grants</span><span class="p">):</span>
@@ -518,7 +708,7 @@
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_emit_tool_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">call</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">call</span><span class="o">.</span><span class="n">arguments</span><span class="p">,</span> <span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">effective_name</span><span class="p">,</span> <span class="n">effective_args</span><span class="p">,</span> <span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
             <span class="n">cost</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">price_tool</span><span class="p">(</span>
                     <span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
@@ -530,6 +720,15 @@
             <span class="p">)</span>
             <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_emit_tool_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_lifecycle</span><span class="p">(</span>
+                <span class="n">AfterTool</span><span class="p">,</span>
+                <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+                <span class="n">tool_name</span><span class="o">=</span><span class="n">tool</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">tool_call_id</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">arguments</span><span class="o">=</span><span class="n">effective_args</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="p">{</span><span class="s2">"is_error"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">is_error</span><span class="p">},</span>
+                <span class="n">allow_modes</span><span class="o">=</span><span class="n">observe_after</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">results</span></div>
 
 
@@ -538,9 +737,13 @@
             <span class="n">core_events</span><span class="o">.</span><span class="n">ToolResult</span><span class="p">,</span>
             <span class="p">{</span>
                 <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                <span class="s2">"tool_name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
                 <span class="s2">"tool_call_id"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">tool_call_id</span><span class="p">,</span>
                 <span class="s2">"is_error"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">is_error</span><span class="p">,</span>
                 <span class="s2">"content"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
+                <span class="s2">"parent_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
+                <span class="s2">"component_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"harness/tool_result:</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">tool_call_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="s2">"execution_node_id"</span><span class="p">:</span> <span class="s2">"harness"</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">run_id</span><span class="p">,</span>
         <span class="p">)</span>
