@@ -216,8 +216,8 @@ def test_metrics_from_suite_timing_counts_stages(tmp_path) -> None:
         '{"kind":"suite_start","suite_id":"calc_cli","backend":"live"}',
         *[
             (
-                '{"kind":"suite_stage","stage":"s%d","status":"ok","elapsed_s":0.5}'
-                % i
+                f'{{"kind":"suite_stage","stage":"s{i}",'
+                f'"status":"ok","elapsed_s":0.5}}'
             )
             for i in range(6)
         ],
