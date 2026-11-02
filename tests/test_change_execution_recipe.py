@@ -10,6 +10,7 @@ from mechaharness.change_execution import (
     apply_file_revisions,
     assemble_change_execution,
     extract_execution_constraints,
+    load_workspace_files,
     materialize_file_revisions,
     validate_change_execution,
 )
@@ -20,6 +21,19 @@ from mechaharness.graph_templates import (
     default_graph_templates,
 )
 from mechaharness.node_component import node_components_for
+
+
+def test_load_workspace_files_reads_present_and_lists_missing() -> None:
+    fs = MemoryFilesystem()
+    fs.write_text("/ws/calc.py", "def evaluate(x): return float(x)\n")
+    report = load_workspace_files(
+        fs=fs, root=Path("/ws"), paths=["calc.py", "gone.py", ""]
+    )
+    assert report["status"] == "ok"
+    assert report["files"] == [
+        {"path": "calc.py", "content": "def evaluate(x): return float(x)\n"}
+    ]
+    assert report["missing"] == ["gone.py"]
 
 
 def test_change_execution_in_default_catalog() -> None:

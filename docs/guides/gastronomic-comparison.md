@@ -70,9 +70,10 @@ python scripts/record_gastronomic_comparison_trial.py \
   --model-id "$MECHA_MODEL"
 ```
 
-- Arm B: sequential suite `fangore_gastronomic_calc` grows the same calculator
-  via gastronomic `change_execution` Completer propose → hard apply (not
-  `guided_coding` tool-loop). Record after a static or live suite run:
+- Arm B: sequential suite `fangore_gastronomic_calc` grows the same six-stage
+  calculator arc via gastronomic `change_execution` Completer propose → hard
+  apply (not `guided_coding` tool-loop). Record after a static or live suite
+  run (`--stages-total 6`):
 
 ```bash
 pytest -s -q tests/stories/test_user_story_suites.py -k fangore_gastronomic_calc
@@ -83,14 +84,19 @@ MECHA_STORY_BACKEND=live \
   MECHA_BASE_URL=http://127.0.0.1:1234/v1 \
   MECHA_API_KEY=lm-studio \
   MECHA_MODEL=qwen/qwen3.6-35b-a3b \
-  MECHA_MAX_TOKENS=8192 \
+  MECHA_MAX_TOKENS=32768 \
   pytest -s -q tests/stories/test_user_story_suites.py -k fangore_gastronomic_calc
 
 python scripts/record_gastronomic_comparison_trial.py \
   --suite-run .mechaharness/suite_runs/$(cat .mechaharness/suite_runs/fangore_gastronomic_calc.latest) \
   --trial-id calc-b-lmstudio-1 --arm B --recipe gastronomic_guided_development \
-  --model-id "$MECHA_MODEL"
+  --model-id "$MECHA_MODEL" --stages-total 6
 ```
+
+Later stages raise propose `max_tokens` (up to 32768 for functions). Each stage
+loads current `calc.py` via `execution_load_workspace` so Completer propose
+extends prior grammar instead of rewriting from a cold prompt.
+
 
   Mark B **`not_run`** when that suite has not been executed for the batch —
   never invent a trial.
