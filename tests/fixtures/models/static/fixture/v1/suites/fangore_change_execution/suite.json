@@ -18,6 +18,10 @@
     {
       "story": "fangore_change_execution_apply",
       "scenario": "010_fangore_change_execution_apply"
+    },
+    {
+      "story": "fangore_change_execution_propose",
+      "scenario": "015_fangore_change_execution_propose"
     }
   ]
 }

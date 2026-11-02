@@ -12,6 +12,7 @@ from mechaharness.change_execution import (
     apply_file_revisions,
     assemble_change_execution,
     extract_execution_constraints,
+    materialize_file_revisions,
     validate_change_execution,
 )
 from mechaharness.core.access import FsWrite
@@ -28,6 +29,7 @@ from mechaharness.walk_bag import WalkBag, WalkBagPathError, WalkBagSerializeErr
 
 EXECUTION_HARD_KINDS: tuple[str, ...] = (
     "execution_constrain",
+    "execution_materialize",
     "execution_apply",
     "execution_publish",
     "execution_validate",
@@ -114,11 +116,28 @@ class ExecutionHardNodeRunner(GraphNodeRunner):
                 change_plan=plan,
             )
 
+        if kind == "execution_materialize":
+            host_path = str(reads.get("host_revisions") or "in.file_revisions")
+            proposed_path = str(reads.get("proposed") or "acc.execution.proposed")
+            host_raw = _read_path(bag, host_path, required=False)
+            proposed_raw = _read_path(bag, proposed_path, required=False)
+            report = materialize_file_revisions(
+                host_revisions=host_raw,
+                proposed=proposed_raw,
+            )
+            if parameters.get("fail_if_incomplete") and report.get("status") != "ok":
+                raise DiscoveryHardNodeError(
+                    "execution_materialize incomplete: host or proposed revisions required"
+                )
+            return report
+
         if kind == "execution_apply":
             constraints_path = str(
                 reads.get("constraints") or "acc.execution.constraints"
             )
-            revisions_path = str(reads.get("revisions") or "in.file_revisions")
+            revisions_path = str(
+                reads.get("revisions") or "acc.execution.revisions"
+            )
             workspace_path = str(reads.get("workspace") or "in.workspace")
             constraints = _as_mapping(
                 _read_path(bag, constraints_path), label="execution constraints"

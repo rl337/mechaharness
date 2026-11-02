@@ -10,6 +10,7 @@ from mechaharness.change_execution import (
     apply_file_revisions,
     assemble_change_execution,
     extract_execution_constraints,
+    materialize_file_revisions,
     validate_change_execution,
 )
 from mechaharness.graph_templates import (
@@ -45,6 +46,8 @@ def test_change_execution_topology() -> None:
     assert sorted(graph.nodes) == [
         "apply",
         "constrain",
+        "materialize",
+        "propose",
         "publish",
         "seed",
         "validate",
@@ -52,6 +55,7 @@ def test_change_execution_topology() -> None:
     comps = node_components_for(graph, template=template)
     soft = {c.soft_point_name for c in comps if c.kind == "soft_point"}
     assert "apply_payload" in soft
+    assert "propose_payload" in soft
 
 
 def test_gastronomic_tiles_execute_after_plan() -> None:
@@ -137,3 +141,27 @@ def test_apply_refuses_scope_escape() -> None:
     result = assemble_change_execution(constraints=constraints, apply_receipt=receipt)
     assert result["status"] == "failed"
     assert result["scope_violations"]
+
+
+def test_materialize_prefers_host_over_proposed() -> None:
+    host = [{"path": "src/calc/arithmetic.py", "content": "def mul(a, b):\n    return a * b\n"}]
+    proposed = {
+        "revisions": [
+            {"path": "src/calc/arithmetic.py", "content": "def mul(a, b):\n    return 0\n"}
+        ]
+    }
+    report = materialize_file_revisions(host_revisions=host, proposed=proposed)
+    assert report["status"] == "ok"
+    assert report["source"] == "host"
+    assert report["revisions"][0]["content"].startswith("def mul")
+
+
+def test_materialize_uses_proposed_when_host_empty() -> None:
+    proposed = [
+        {"path": "src/calc/arithmetic.py", "content": "def mul(a, b):\n    return a * b\n"}
+    ]
+    report = materialize_file_revisions(host_revisions=[], proposed=proposed)
+    assert report["source"] == "proposed"
+    assert len(report["revisions"]) == 1
+    empty = materialize_file_revisions(host_revisions=None, proposed=None)
+    assert empty["status"] == "incomplete"

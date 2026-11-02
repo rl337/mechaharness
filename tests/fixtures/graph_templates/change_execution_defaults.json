@@ -1,6 +1,6 @@
 {
   "id": "change_execution_defaults",
-  "description": "change_execution constrains slice then applies scoped revisions",
+  "description": "change_execution constrains, Completer-proposes, materializes, then applies",
   "template": "change_execution",
   "params": {
     "goal": "Apply multiply helper",
@@ -16,10 +16,20 @@
   "expect": {
     "template_name": "change_execution",
     "template_status": "active",
-    "node_ids": ["seed", "constrain", "apply", "publish", "validate"],
-    "edge_count": 4,
+    "node_ids": [
+      "seed",
+      "constrain",
+      "propose",
+      "materialize",
+      "apply",
+      "publish",
+      "validate"
+    ],
+    "edge_count": 6,
     "nodes": {
       "constrain": {"kind": "execution_constrain"},
+      "propose": {"kind": "infer"},
+      "materialize": {"kind": "execution_materialize"},
       "apply": {"kind": "execution_apply"},
       "publish": {"kind": "execution_publish"},
       "validate": {"kind": "execution_validate"}

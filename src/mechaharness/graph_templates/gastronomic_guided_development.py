@@ -158,6 +158,12 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
             required=False,
         ),
         SoftPoint(
+            name="execution_propose_payload",
+            kind="task_state",
+            description="Optional execution propose_payload soft point (Completer revisions)",
+            required=False,
+        ),
+        SoftPoint(
             name="apply_payload",
             kind="task_state",
             description="Optional execution apply_payload soft point",
@@ -306,6 +312,11 @@ class GastronomicGuidedDevelopmentTemplate(GraphTemplate):
         graph.add_node(plan_embed)
 
         execution_soft = dict(bindings.get("execution_bindings") or {})
+        if (
+            "execution_propose_payload" in bindings
+            and "propose_payload" not in execution_soft
+        ):
+            execution_soft["propose_payload"] = bindings["execution_propose_payload"]
         if "apply_payload" in bindings and "apply_payload" not in execution_soft:
             execution_soft["apply_payload"] = bindings["apply_payload"]
         _exec_child, exec_embed = ChangeExecutionTemplate().tile(
