@@ -41,6 +41,24 @@ def test_live_eligible_bag_inference_continuity_suite() -> None:
     assert live_eligible(case)
 
 
+def test_live_eligible_gastronomic_calc_suite() -> None:
+    root = Path(
+        "tests/fixtures/models/static/fixture/v1/suites/"
+        "fangore_gastronomic_calc/stages"
+    )
+    case = StoryCase(
+        family="static",
+        model="fixture",
+        version="v1",
+        story_id="fangore_gastronomic_calc_parse_number",
+        adapter="in_process",
+        root=root,
+        scenario_relpath="010_fangore_gastronomic_calc_parse_number.yaml",
+        suite_id="fangore_gastronomic_calc",
+    )
+    assert live_eligible(case)
+
+
 def test_live_eligible_anthropic_static_excluded() -> None:
     root = Path(
         "tests/fixtures/models/static/fixture/v1/suites/nubble_observability/stages"
