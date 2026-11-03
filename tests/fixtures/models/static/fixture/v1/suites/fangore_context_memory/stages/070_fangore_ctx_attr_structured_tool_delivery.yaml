@@ -1,0 +1,75 @@
+id: fangore_ctx_attr_structured_tool_delivery
+suite: fangore_context_memory
+persona: fangore
+title: Disclose structured tool truncation instead of silent JSON slices
+narrative: >
+  Fangore starts the CLI host with family `pass_through` and backend `mock`. A
+  large structured tool result carries an early noise array and a late required
+  `culprit` finding. Under a tight character budget the model-facing delivery must
+  remain honest — either valid JSON that still contains required fields, or an
+  explicit deficit naming omitted fields — never a prefix-sliced JSON fragment
+  treated as success. Extends `fangore_context_compiler_deficit` /
+  `fangore_insp_context_compaction` for Trouble MH-CTX-ATTR-01 (S1 produced→delivered).
+implementation: >
+  `context_structured_tool_delivery` in `mechaharness.context_surface`
+  applies distill-style character budgets then fail-closes invalid structured
+  delivery. Authoritative produced payload stays addressable via `observation_id`.
+
+  Covers: MH-CTX-ATTR-01 / TR-20261029-CONTEXT-ATTRITION S1.
+validation: >
+  Harness `user_story` drives `context_structured_tool_delivery` with a
+  synthetic oversized JSON tool payload; hard expects on deficit disclosure and
+  `silent_truncate=false`. Unit coverage in `tests/test_context_attrition_surface.py`.
+footnotes:
+- id: trouble-ctx-attr
+  label: Trouble TR-20261029-CONTEXT-ATTRITION
+  url: https://rl337.org/trouble/posts/2115618251023536321.html
+  note: Context attrition across inference boundaries
+- id: arxiv-ctx-pipeline
+  label: Context Is a Pipeline, Not a Window (arXiv:2610.36114)
+  url: https://arxiv.org/abs/2610.36114
+  note: Structured tool-result truncation evidence
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    context_structured_tool_delivery:
+      observation_id: obs:tool-listing-1
+      structured: true
+      max_chars: 600
+      required_fields:
+      - culprit
+      produced:
+        early:
+        - {id: e0, note: warmup}
+        - {id: e1, note: warmup}
+        noise: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        culprit:
+          id: late-culprit
+          finding: root-cause-record
+complete:
+  expect:
+  - kind: 'true'
+    key: truncated
+  - kind: 'false'
+    key: payload_valid
+  - kind: 'true'
+    key: deficit
+  - kind: 'true'
+    key: incomplete
+  - kind: 'false'
+    key: silent_truncate
+  - kind: 'false'
+    key: delivery_ok
+  - kind: includes
+    key: omitted_fields
+    value:
+    - culprit
+  - kind: equals
+    key: observation_id
+    value: obs:tool-listing-1
+cleanup: []

@@ -1,8 +1,15 @@
 # Trouble inspiration: evidence attrition across inference boundaries
 
-Status: **research and candidate user-story extensions**, not a new normative API or implementation.
+Status: **inspiration accepted as Fangore stories** (MH-CTX-ATTR-01/02 under
+`fangore_context_memory`); surface probes disclose S1/S4 gaps. Schema-aware
+projection / paging remain follow-up runtime work — not claimed done here.
 Discovery date: 2026-10-29. Capability ID: **TR-20261029-CONTEXT-ATTRITION**.
 Owner: **MechaHarness** (generic context compilation, compaction, inference envelopes, observability and acceptance).
+
+**Landed stories:** `fangore_ctx_attr_structured_tool_delivery` (070),
+`fangore_ctx_attr_evidence_survival` (080). Product verbs:
+`context_structured_tool_delivery`, `context_evidence_survival` in
+`mechaharness.context_surface`.
 
 ## Source map and claims
 

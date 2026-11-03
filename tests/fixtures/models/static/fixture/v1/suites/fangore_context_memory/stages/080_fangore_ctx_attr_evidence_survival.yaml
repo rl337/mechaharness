@@ -1,0 +1,72 @@
+id: fangore_ctx_attr_evidence_survival
+suite: fangore_context_memory
+persona: fangore
+title: Count produced vs transferred evidence without false transfers
+narrative: >
+  Fangore starts the CLI host with family `pass_through` and backend `mock`. Two
+  workers produce identifiable findings; only one is delivered and transferred
+  downstream. The survival report must distinguish produced, delivered, retained,
+  transferred, and persisted counts, refuse to mark a never-produced id as
+  transferred, and expose a narrow transfer yield. Extends context observation
+  telemetry for Trouble MH-CTX-ATTR-02 (S4 transfer boundary).
+implementation: >
+  `context_evidence_survival` in `mechaharness.context_surface` aggregates
+  unique observation ids per boundary and flags false transfers.
+
+  Covers: MH-CTX-ATTR-02 / TR-20261029-CONTEXT-ATTRITION S4.
+validation: >
+  Harness `user_story` drives `context_evidence_survival` with deterministic
+  id lists; hard expects on counts, `false_transfer=false`, and transfer yield.
+  Unit coverage in `tests/test_context_attrition_surface.py`.
+footnotes:
+- id: trouble-ctx-attr-s4
+  label: Trouble TR-20261029-CONTEXT-ATTRITION
+  url: https://rl337.org/trouble/posts/2115618251023536321.html
+  note: Evidence survival across graph boundaries
+- id: arxiv-ctx-pipeline-s4
+  label: Context Is a Pipeline, Not a Window (arXiv:2610.36114)
+  url: https://arxiv.org/abs/2610.36114
+  note: Produced vs delivered vs transferred metrics
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    context_evidence_survival:
+      produced_ids: [find-a, find-b, find-a]
+      delivered_ids: [find-a]
+      retained_ids: [find-a]
+      transferred_ids: [find-a]
+      persisted_ids: [find-a]
+      payload_valid: true
+      required_field_survival: true
+complete:
+  expect:
+  - kind: equals
+    key: produced_count
+    value: 2
+  - kind: equals
+    key: delivered_count
+    value: 1
+  - kind: equals
+    key: retained_count
+    value: 1
+  - kind: equals
+    key: transferred_count
+    value: 1
+  - kind: equals
+    key: persisted_count
+    value: 1
+  - kind: 'false'
+    key: false_transfer
+  - kind: equals
+    key: transfer_yield
+    value: 0.5
+  - kind: 'true'
+    key: payload_valid
+  - kind: 'true'
+    key: required_field_survival
+cleanup: []

@@ -143,9 +143,9 @@ Stories: `fangore_change_verification_host`, `fangore_change_verification_shape`
 
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
-Persona **fangore**; execution `parallel`; 6 stage(s).
+Persona **fangore**; execution `parallel`; 8 stage(s).
 
-Stories: `fangore_context_compiler_deficit`, `fangore_context_observation_chain`, `fangore_derived_memory`, `fangore_insp_context_compaction`, `fangore_insp_context_layers`, `fangore_insp_context_provider`
+Stories: `fangore_context_compiler_deficit`, `fangore_context_observation_chain`, `fangore_ctx_attr_evidence_survival`, `fangore_ctx_attr_structured_tool_delivery`, `fangore_derived_memory`, `fangore_insp_context_compaction`, `fangore_insp_context_layers`, `fangore_insp_context_provider`
 
 ### `fangore_contract_extraction` — ChangeContract extraction and gastronomic product tiling
 
@@ -1291,6 +1291,42 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 #### Validation
 
 Harness `user_story` scenario `persist.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.
+
+### `fangore_ctx_attr_evidence_survival` — Count produced vs transferred evidence without false transfers
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Two workers produce identifiable findings; only one is delivered and transferred downstream. The survival report must distinguish produced, delivered, retained, transferred, and persisted counts, refuse to mark a never-produced id as transferred, and expose a narrow transfer yield. Extends context observation telemetry for Trouble MH-CTX-ATTR-02 (S4 transfer boundary).
+
+#### Implementation
+
+`context_evidence_survival` in `mechaharness.context_surface` aggregates unique observation ids per boundary and flags false transfers.
+Covers: MH-CTX-ATTR-02 / TR-20261029-CONTEXT-ATTRITION S4.
+
+#### Validation
+
+Harness `user_story` drives `context_evidence_survival` with deterministic id lists; hard expects on counts, `false_transfer=false`, and transfer yield. Unit coverage in `tests/test_context_attrition_surface.py`.
+
+#### Footnotes
+
+1. [Trouble TR-20261029-CONTEXT-ATTRITION](https://rl337.org/trouble/posts/2115618251023536321.html) — Evidence survival across graph boundaries
+2. [Context Is a Pipeline, Not a Window (arXiv:2610.36114)](https://arxiv.org/abs/2610.36114) — Produced vs delivered vs transferred metrics
+
+### `fangore_ctx_attr_structured_tool_delivery` — Disclose structured tool truncation instead of silent JSON slices
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. A large structured tool result carries an early noise array and a late required `culprit` finding. Under a tight character budget the model-facing delivery must remain honest — either valid JSON that still contains required fields, or an explicit deficit naming omitted fields — never a prefix-sliced JSON fragment treated as success. Extends `fangore_context_compiler_deficit` / `fangore_insp_context_compaction` for Trouble MH-CTX-ATTR-01 (S1 produced→delivered).
+
+#### Implementation
+
+`context_structured_tool_delivery` in `mechaharness.context_surface` applies distill-style character budgets then fail-closes invalid structured delivery. Authoritative produced payload stays addressable via `observation_id`.
+Covers: MH-CTX-ATTR-01 / TR-20261029-CONTEXT-ATTRITION S1.
+
+#### Validation
+
+Harness `user_story` drives `context_structured_tool_delivery` with a synthetic oversized JSON tool payload; hard expects on deficit disclosure and `silent_truncate=false`. Unit coverage in `tests/test_context_attrition_surface.py`.
+
+#### Footnotes
+
+1. [Trouble TR-20261029-CONTEXT-ATTRITION](https://rl337.org/trouble/posts/2115618251023536321.html) — Context attrition across inference boundaries
+2. [Context Is a Pipeline, Not a Window (arXiv:2610.36114)](https://arxiv.org/abs/2610.36114) — Structured tool-result truncation evidence
 
 ### `fangore_decision_plane_model_policy` — Bind a decision model flavor without baking size into the recipe
 

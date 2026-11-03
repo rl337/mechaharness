@@ -34,6 +34,14 @@
     {
       "story": "fangore_insp_context_provider",
       "scenario": "060_fangore_insp_context_provider"
+    },
+    {
+      "story": "fangore_ctx_attr_structured_tool_delivery",
+      "scenario": "070_fangore_ctx_attr_structured_tool_delivery"
+    },
+    {
+      "story": "fangore_ctx_attr_evidence_survival",
+      "scenario": "080_fangore_ctx_attr_evidence_survival"
     }
   ]
 }

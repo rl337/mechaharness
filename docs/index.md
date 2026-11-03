@@ -98,6 +98,7 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Durable graph generators inspiration](./inspiration/durable-graph-generators-inversion-of-control.md) | Frontier/human/scripted drivers, ordered yields, MCP as adapter |
 | [Durable graph generators requirements map](./inspiration/durable-graph-generators-requirements-map.md) | R-IOC / DG IDs → modules → user stories |
 | [Video production audited-infer migration](./inspiration/video-production-audited-infer-migration.md) | Host alias `ideation.infer.accept` → `audited_infer_accept` |
+| [Trouble context attrition](./inspiration/trouble-context-attrition-2026-10-29.md) | Structured tool evidence loss at S1/S4; Fangore MH-CTX-ATTR-01/02 |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat local backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
