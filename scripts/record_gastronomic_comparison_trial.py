@@ -49,6 +49,7 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=ROOT / ".mechaharness" / "comparison_trials",
     )
+    parser.add_argument("--budget-json", help="JSON object with the applied token, repair and time limits")
     parser.add_argument("--stages-total", type=int, default=6)
     parser.add_argument(
         "--notes",
@@ -57,6 +58,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    budget = None
+    if args.budget_json is not None:
+        try:
+            budget = json.loads(args.budget_json)
+        except ValueError as exc:
+            parser.error(f"invalid --budget-json: {exc}")
+        if not isinstance(budget, dict) or not budget:
+            parser.error("--budget-json requires a nonempty JSON object")
+
     model = {"id": args.model_id} if args.model_id else None
     trial = trial_from_suite_run(
         args.suite_run,
@@ -64,6 +74,7 @@ def main(argv: list[str] | None = None) -> int:
         arm=args.arm,
         recipe_id=args.recipe,
         model=model,
+        budget=budget,
         stages_total=args.stages_total,
         notes=args.notes,
     )

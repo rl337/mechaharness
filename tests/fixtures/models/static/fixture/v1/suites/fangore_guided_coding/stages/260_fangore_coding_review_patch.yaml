@@ -1,0 +1,40 @@
+id: fangore_coding_review_patch
+suite: fangore_guided_coding
+persona: fangore
+title: Review a patch against a dirty checkout after concurrent MCP replay
+narrative: >
+  Fangore has an uncommitted change and an untracked draft. He delegates a fix,
+  reconnects two drivers to the same stored run and submits the same guidance
+  answer from both. He reads the private result, checks that its patch applies
+  against his original dirty checkout and finds his draft intact.
+implementation: >
+  GeneratorMcpServer and FileGeneratorRunStore drive RepositoryCodingLocalWork
+  with CodingRepositoryIsolation. The story supplies a deterministic Completer.
+validation: >
+  Require a shared terminal response and one edit round, a matching HEAD, an
+  applicable one-file patch and independent reads of both workspaces.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem: {type: temp}
+steps:
+- do:
+    review_repository_patch:
+      path: label.txt
+      original: "items\n"
+      dirty: "items (draft)\n"
+      replacement: "item (draft)\n"
+complete:
+  expect:
+  - {kind: equals, key: terminal, value: completed}
+  - {kind: equals, key: replayed, value: true}
+  - {kind: equals, key: model_calls, value: 2}
+  - {kind: equals, key: written_files, value: [label.txt]}
+  - {kind: equals, key: base_revision_matches, value: true}
+  - {kind: equals, key: patch_applies, value: true}
+  - {kind: equals, key: private_file, value: "item (draft)\n"}
+  - {kind: equals, key: source_file, value: "items (draft)\n"}
+  - {kind: equals, key: source_draft, value: untracked draft}
+cleanup: []

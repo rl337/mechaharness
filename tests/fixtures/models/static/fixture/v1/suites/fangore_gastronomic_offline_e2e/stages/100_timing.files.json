@@ -1,0 +1,4 @@
+{
+  "manifest.json": "{\"suite_id\": \"package-issue\"}",
+  "TIMING.jsonl": "{\"kind\": \"suite_stage\", \"stage\": \"repair\", \"status\": \"ok\", \"elapsed_s\": 2}\n{\"kind\": \"coding_burst\", \"verify_runs\": 3, \"repair_rounds\": 1, \"model_calls\": 2, \"tool_calls\": 3, \"prompt_tokens\": 120, \"completion_tokens\": 24, \"written_files\": [\"labels.py\"]}\n{\"kind\": \"suite_stage\", \"stage\": \"reopen\", \"status\": \"ok\", \"elapsed_s\": 1}\n{\"kind\": \"coding_already_satisfied\", \"verify_runs\": 2}\n"
+}

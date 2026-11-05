@@ -33,6 +33,14 @@ Use `mechaharness.gastronomic_comparison.assemble_gastronomic_trial`:
 Aggregate with `summarize_gastronomic_comparison`. The summary never sets a
 `winner`; hosts interpret under matched budgets.
 
+Pass `--budget-json` to the recording script with the limits actually used by
+the run, for example `'{"tokens":8192,"repair_rounds":2,"wall_s":600}'`.
+The comparison summary requires matching model and budget records across arms.
+Unknown model or budget data leaves `comparable_ab` false. Historical timing
+logs without measured edit or token evidence can still be read; missing counters
+remain null. The recorder counts changed files in verified bursts separately
+from already-satisfied stages.
+
 ## Offline vs live
 
 - Offline Fangore stories prove trial-record shape and arm/recipe pairing.

@@ -121,6 +121,8 @@ def test_summarize_does_not_declare_winner() -> None:
             metrics={"model_calls": 16, "wall_ms": 48000, "repair_loops": 2},
         ),
     ]
+    for trial in trials:
+        trial.update(suite_id="shared", model={"id": "test-model"}, budget={"max_tokens": 8192})
     summary = summarize_gastronomic_comparison(trials)
     assert summary["comparable_ab"] is True
     assert summary["winner"] is None
@@ -202,7 +204,7 @@ def test_metrics_from_suite_timing_counts_stages(tmp_path) -> None:
     assert metrics["model_calls"] == 4
     assert metrics["success"] is False
     assert metrics["outcome"] == "failed"
-    assert metrics["first_failure_class"] is None
+    assert metrics["first_failure_class"] == "failed"
 
     run = tmp_path / "calc_cli-run"
     run.mkdir()

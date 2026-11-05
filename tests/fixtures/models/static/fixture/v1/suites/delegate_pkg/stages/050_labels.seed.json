@@ -1,0 +1,5 @@
+{
+  "labels.py": "def display_count(value):\n    return f\"{value} items\"\n",
+  "tests/test_labels.py": "from labels import display_count\n\n\ndef test_singular():\n    assert display_count(1) == \"1 item\"\n\n\ndef test_plural():\n    assert display_count(2) == \"2 items\"\n",
+  "release-notes.txt": "editor draft\n"
+}

@@ -1,0 +1,45 @@
+id: fangore_coding_task_specific_repair
+suite: fangore_guided_coding
+persona: fangore
+title: Repair a failed package check with evidence from that package
+narrative: Fangore delegates a counter bug. The first edit is wrong. He runs the package tests, allows
+  one repair and inspects the instruction the host sent to the Completer for that repair.
+implementation: ProjectCodingLocalWork runs the independent package checks and composes the repair instruction.
+  A scripted Completer supplies a wrong edit followed by a correction.
+validation: Require a real repair brief, a completed run and passing tests. The brief must identify the
+  check without teaching an unrelated calculator API.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: 240_counts.files.json
+steps:
+- do:
+    repair_package_after_failed_check: {}
+  expect:
+  - kind: equals
+    key: terminal
+    value: completed
+  - kind: equals
+    key: repair_observed
+    value: true
+  - kind: equals
+    key: check_identified
+    value: true
+  - kind: equals
+    key: calculator_advice
+    value: false
+- do:
+    run_python:
+      code: |-
+        import sys, pytest
+        sys.exit(pytest.main(["-q", "tests"]))
+complete:
+  expect:
+  - kind: equals
+    key: exit_code
+    value: 0
+cleanup: []

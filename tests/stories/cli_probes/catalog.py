@@ -20,6 +20,17 @@ from tests.stories.cli_probes.acceptance_verbs import (
 from tests.stories.cli_probes.access_authority_probes import (
     access_authority_cli_probe_classes,
 )
+from tests.stories.cli_probes.coding_release import (
+    ComparisonProbe,
+    DeniedEffectsProbe,
+    OverlappingRunsProbe,
+    ProviderProbe,
+    RepairPromptProbe,
+    RestoreProbe,
+    TrialMetricsProbe,
+    VerifyBoundaryProbe,
+)
+from tests.stories.cli_probes.coding_repository import RepositoryHandoffProbe
 from tests.stories.cli_probes.context_management_probes import (
     context_management_cli_probe_classes,
 )
@@ -229,6 +240,18 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
             run_decision_plane_shadow_compare,
         ),
     }
+    for probe in (
+        ComparisonProbe,
+        DeniedEffectsProbe,
+        OverlappingRunsProbe,
+        ProviderProbe,
+        RepairPromptProbe,
+        RepositoryHandoffProbe,
+        RestoreProbe,
+        TrialMetricsProbe,
+        VerifyBoundaryProbe,
+    ):
+        probes[probe.name] = probe
     probes.update(pure_api_cli_probe_classes())
     probes.update(context_management_cli_probe_classes())
     probes.update(evaluation_research_cli_probe_classes())

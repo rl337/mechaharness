@@ -1,0 +1,40 @@
+id: fangore_coding_run_scoped_recovery
+suite: fangore_guided_coding
+persona: fangore
+title: Isolate the checkpoints of overlapping coding runs
+narrative: "Fangore starts a repair. After its first wrong edit lands and before verification, a second\
+  \ driver edits a draft and creates a file. When the repair stops for guidance, Fangore needs the original\
+  \ source and both of the second driver\u2019s changes."
+implementation: Two guided_coding runs use separate project coding hosts on one workspace. Their scripted
+  tool calls interleave deterministically at the write and verify boundary.
+validation: Require the second run to complete, the first to stop, its broken edit to disappear and both
+  verified draft edits to survive.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: 250_sessions.files.json
+steps:
+- do:
+    interleave_coding_sessions: {}
+complete:
+  expect:
+  - kind: equals
+    key: first_stopped
+    value: true
+  - kind: equals
+    key: second_completed
+    value: true
+  - kind: equals
+    key: note
+    value: second session edit
+  - kind: equals
+    key: addition
+    value: new draft
+  - kind: equals
+    key: source
+    value: starting revision
+cleanup: []

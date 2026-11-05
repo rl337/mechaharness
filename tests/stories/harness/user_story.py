@@ -30,6 +30,7 @@ from mechaharness.inference.judge import FixtureJudgeProvider, JudgeProvider
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
 from mechaharness.project_coding_tools import WorkspacePaths, build_coding_tool_registry
+from mechaharness.run_timing import append_timing
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
 from tests.stories.backend import StoryBackend
@@ -86,6 +87,25 @@ class UserStoryHarness:
             label=case.label,
             relax_cassette_exact=backend.mode == "live",
         )
+        if suite_workspace is not None:
+            self._record_verified_graph_edits(result, suite_workspace)
+
+    @staticmethod
+    def _record_verified_graph_edits(result: Any, workspace: Path) -> None:
+        # The last graph step with both receipts owns this stage's proof.
+        for step in reversed(result.steps):
+            bag = step.fields.get("bag") or {}
+            out = bag.get("out") or {}
+            execution = out.get("change_execution") or {}
+            report = out.get("verification_report") or {}
+            if execution.get("status") != "ok" or report.get("status") != "ok":
+                continue
+            changed = {
+                row["path"] for row in execution["changed_files"]
+                if row.get("sha256_before") != row.get("sha256_after")
+            }
+            append_timing(workspace, kind="verified_graph_edits", paths=sorted(changed))
+            break
 
     def _build_config(
         self,
@@ -217,32 +237,22 @@ class UserStoryHarness:
         return (base / path).resolve()
 
     def _seed_workspace_files(
-        self,
-        env: EnvironmentBlock,
-        scenario_path: Path | None,
-        workspace_root: Path,
+        self, filename: str | None, scenario_path: Path | None, workspace_root: Path
     ) -> None:
-        """Materialize ``filesystem.contents`` onto ``workspace_root``."""
-        for block in self._load_coding_writes(env, scenario_path):
-            target = workspace_root / block.path
+        paths = WorkspacePaths(workspace_root)
+        for block in self._load_coding_writes(filename, scenario_path):
+            target = paths.resolve(block.path)
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(block.content, encoding="utf-8")
 
     def _load_coding_writes(
-        self,
-        env: EnvironmentBlock,
-        scenario_path: Path | None,
+        self, filename: str | None, scenario_path: Path | None
     ) -> list[CodingWriteBlock]:
-        fs = env.filesystem
-        if fs is None or not fs.contents:
+        if not filename:
             return []
         if scenario_path is None:
-            raise AssertionError(
-                "environment.filesystem.contents requires a scenario path"
-            )
-        path = (scenario_path.parent / fs.contents).resolve()
-        if not path.is_file():
-            raise AssertionError(f"filesystem.contents missing: {path}")
+            raise AssertionError("workspace fixture requires a scenario path")
+        path = scenario_path.parent / filename
         raw = json.loads(path.read_text(encoding="utf-8"))
         if isinstance(raw, dict):
             return [
@@ -270,12 +280,15 @@ class UserStoryHarness:
         scenario_path: Path | None = None,
     ) -> dict[str, Any]:
         kwargs: dict[str, Any] = {}
+        fs = env.filesystem
+        contents = fs.contents if fs else None
         if workspace_root is not None:
+            self._seed_workspace_files(fs.seed if fs else None, scenario_path, workspace_root)
             kwargs["workspace_root"] = workspace_root
             # Hard-node / non-coding stories still need files.json on disk.
             # project_coding seeds via its Completer write stub instead.
             if env.local_work != "project_coding":
-                self._seed_workspace_files(env, scenario_path, workspace_root)
+                self._seed_workspace_files(contents, scenario_path, workspace_root)
         if env.local_work == "plan_classify":
             kwargs["generator_local_work"] = PlanClassifyLocalWork
         elif env.local_work == "project_coding":
@@ -284,7 +297,7 @@ class UserStoryHarness:
                     "environment.local_work=project_coding requires "
                     "environment.filesystem"
                 )
-            writes = self._load_coding_writes(env, scenario_path)
+            writes = self._load_coding_writes(contents, scenario_path)
             if env.git_seed == "feature_branch":
                 _seed_feature_branch_git_repo(workspace_root)
             if env.ci_seed == "failing_check":
@@ -349,7 +362,7 @@ class UserStoryHarness:
             # Ignore offline stubs; drive tools with a real Completer.
             # Pull requests stay on RecordingPullRequestCodingGit when
             # coding_git=local_mock_pr (no forge).
-            complete = self._live_coding_complete(tools, model=model)
+            complete = self._live_coding_complete(tools, model=model, workspace=workspace_root)
             max_iterations = int(os.environ.get("MECHA_CODING_MAX_ITERATIONS", "24"))
         elif coding_tool_script:
             steps = _coding_tool_script_steps(coding_tool_script)
@@ -371,7 +384,7 @@ class UserStoryHarness:
             max_iterations=max_iterations,
         )
 
-    def _live_coding_complete(self, tools: ToolRegistry, *, model: str) -> Any:
+    def _live_coding_complete(self, tools: ToolRegistry, *, model: str, workspace: Path) -> Any:
         """OpenAI-compat Completer adapted for ProjectCodingLocalWork tool loops."""
         from mechaharness.project_coding import completer_as_tool_loop_complete
 
@@ -393,7 +406,7 @@ class UserStoryHarness:
         from mechaharness.inference_progress import inference_timeout_seconds
 
         http_timeout = float(inference_timeout_seconds())
-        client = CountingLiveHttpClient(timeout=http_timeout)
+        client = CountingLiveHttpClient(timeout=http_timeout, workspace=workspace)
         strategy = OpenAICompatStrategy(settings, client=client, timeout=http_timeout)
         return completer_as_tool_loop_complete(
             strategy,
@@ -616,7 +629,9 @@ class UserStoryHarness:
                 raise AssertionError(
                     "MECHA_BASE_URL is required for live openai_compat stories"
                 )
-            client = AsyncUrllibHttpClient(timeout=180.0)
+            client = CountingLiveHttpClient(
+                timeout=180.0, workspace=(access_kw or {}).get("workspace_root")
+            )
         strategy = OpenAICompatStrategy(settings, client=client, timeout=180.0)
         return TestHarnessCliConfig(
             strategy,
@@ -678,9 +693,9 @@ class CountingLiveHttpClient(AsyncUrllibHttpClient):
 
     post_count: int = 0
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, workspace: Path | None = None, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        type(self).post_count = 0
+        self.workspace = workspace
 
     async def request(
         self,
@@ -693,17 +708,24 @@ class CountingLiveHttpClient(AsyncUrllibHttpClient):
         json: Any = None,
         timeout: float | None = None,
     ) -> Any:
-        if str(method).upper() == "POST":
+        is_call = method.upper() == "POST"
+        if is_call:
             type(self).post_count += 1
-        return await super().request(
-            method,
-            url,
-            headers=headers,
-            params=params,
-            data=data,
-            json=json,
-            timeout=timeout,
-        )
+        usage = {}
+        try:
+            response = await super().request(
+                method, url, headers=headers, params=params, data=data, json=json, timeout=timeout
+            )
+            if is_call and response.status_code == 200:
+                payload = response.json()
+                raw = payload.get("usage") if isinstance(payload, dict) else None
+                if isinstance(raw, dict):
+                    usage = {key: raw[key] for key in ("prompt_tokens", "completion_tokens")
+                             if isinstance(raw.get(key), int)}
+            return response
+        finally:
+            if is_call:
+                append_timing(self.workspace, kind="live_model_call", model_calls=1, **usage)
 
 
 def reset_live_http_post_count() -> None:

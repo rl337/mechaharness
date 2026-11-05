@@ -1,79 +1,106 @@
-"""Filesystem checkpoints of a coding workspace for escalate / suite handoff.
-
-Copies every file under the workspace into a sibling directory keyed by the
-workspace path. Suite runners refresh this after each successful stage so
-restore never rewinds to an empty pre-010 tree. Coding local work refreshes at
-burst start (and on success) so mid-stage escalate undoes trash writes only.
-"""
+"""Checkpoint and undo coding edits with explicit file ownership."""
 
 from __future__ import annotations
 
 import hashlib
+import os
 import shutil
+from collections.abc import Mapping
 from pathlib import Path
+from tempfile import NamedTemporaryFile, TemporaryDirectory
+
+from mechaharness.file_lock import file_lock
+from mechaharness.project_coding_tools import WorkspacePaths
 
 
 def coding_workspace_checkpoint_dir(workspace_root: str | Path) -> Path:
-    """Sibling dir for the checkpoint of *workspace_root*."""
     root = Path(workspace_root).expanduser().resolve()
     digest = hashlib.sha256(str(root).encode("utf-8")).hexdigest()[:16]
     return root.parent / f".mechaharness_coding_ws_checkpoint_{digest}"
 
 
-def _iter_files(root: Path) -> list[Path]:
-    if not root.is_dir():
-        return []
-    return [path for path in root.rglob("*") if path.is_file()]
-
-
 def save_coding_workspace_checkpoint(workspace_root: str | Path) -> Path:
-    """Overwrite the checkpoint with the current workspace file tree.
-
-    Always replaces a prior checkpoint so suite stage success and coding bursts
-    advance the restore baseline. Returns the checkpoint directory.
-    """
-    src = Path(workspace_root).expanduser().resolve()
-    dest = coding_workspace_checkpoint_dir(src)
-    if dest.exists():
-        shutil.rmtree(dest)
-    dest.mkdir(parents=True, exist_ok=True)
-    if not src.is_dir():
-        return dest
-    for path in _iter_files(src):
-        rel = path.relative_to(src)
-        target = dest / rel
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(path, target)
+    """Save the current baseline for sequential suite handoff."""
+    root = Path(workspace_root).resolve()
+    dest = coding_workspace_checkpoint_dir(root)
+    with file_lock(dest.with_suffix(".lock")), TemporaryDirectory(dir=dest.parent) as directory:
+        staged = Path(directory) / "new"
+        staged.mkdir()
+        if root.exists():
+            for current, dirs, names in os.walk(root):
+                parent = Path(current)
+                dirs[:] = [d for d in dirs if d != ".git" and not (parent / d).is_symlink()]
+                for name in names:
+                    path = parent / name
+                    if path.is_symlink() or not path.is_file():
+                        continue
+                    target = staged / path.relative_to(root)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(path, target)
+        previous = dest.with_suffix(".previous")
+        if dest.exists():
+            if previous.exists():
+                shutil.rmtree(previous)
+            dest.rename(previous)
+        try:
+            staged.rename(dest)
+        except OSError:
+            if previous.exists() and not dest.exists():
+                previous.rename(dest)
+            raise
+        if previous.exists():
+            shutil.rmtree(previous)
     return dest
 
 
-def restore_coding_workspace_checkpoint(workspace_root: str | Path) -> bool:
-    """Replace workspace contents from the checkpoint.
-
-    Returns ``False`` when there is no checkpoint, or when the checkpoint is
-    empty while the workspace still has files (refuses to gut a good tree).
-    """
-    dest = Path(workspace_root).expanduser().resolve()
-    src = coding_workspace_checkpoint_dir(dest)
-    if not src.is_dir():
+def restore_edit(path: Path, before: bytes | None, written: bytes | None) -> bool:
+    """Undo exactly one known write while preserving a later editor's version."""
+    if path.is_symlink() or (path.exists() and not path.is_file()):
         return False
-    ck_files = _iter_files(src)
-    ws_files = _iter_files(dest) if dest.is_dir() else []
-    if not ck_files and ws_files:
+    current = path.read_bytes() if path.exists() else None
+    if current != written:
         return False
-    dest.mkdir(parents=True, exist_ok=True)
-    for path in _iter_files(dest):
+    if before == current:
+        return True
+    if before is None:
         path.unlink()
-    for path in ck_files:
-        rel = path.relative_to(src)
-        target = dest / rel
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(path, target)
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with NamedTemporaryFile(dir=path.parent, delete=False) as tmp:
+            tmp.write(before)
+        replacement = Path(tmp.name)
+        try:
+            if path.exists():
+                shutil.copymode(path, replacement)
+            replacement.replace(path)
+        finally:
+            replacement.unlink(missing_ok=True)
     return True
 
 
-__all__ = [
-    "coding_workspace_checkpoint_dir",
-    "restore_coding_workspace_checkpoint",
-    "save_coding_workspace_checkpoint",
-]
+def restore_coding_workspace_checkpoint(
+    workspace_root: str | Path, *, writes: Mapping[str, bytes] | None = None
+) -> bool:
+    """Restore only supplied agent writes whose current bytes still match."""
+    root = WorkspacePaths(workspace_root)
+    snapshot = coding_workspace_checkpoint_dir(root.root)
+    if not writes:
+        return False
+    with file_lock(snapshot.with_suffix(".lock")):
+        if not snapshot.is_dir():
+            # Recover the last complete snapshot if the saving process exited
+            # between the two renames.
+            snapshot = snapshot.with_suffix(".previous")
+        if not snapshot.is_dir():
+            return False
+        restored = True
+        for name, written in writes.items():
+            path = root.resolve(name)
+            if root.root / name != path:
+                restored = False
+                continue
+            original = snapshot / path.relative_to(root.root)
+            before = original.read_bytes() if original.is_file() else None
+            if not restore_edit(path, before, written):
+                restored = False
+        return restored

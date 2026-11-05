@@ -98,8 +98,6 @@ steps:
     key: written_files
     value:
     - counter_cli.py
-    - counter/__init__.py
-    - tests/test_counter.py
 - do:
     workspace_read:
       path: counter_cli.py

@@ -165,6 +165,39 @@ burst (oneshot or todo list with acceptance) + audited gate payload on
 answers. See [guided coding](./graph-templates/guided-coding.md) and
 [instruction todo plan](./graph-templates/instruction-todo-plan.md).
 
+### Reviewing a coding handoff
+
+Set `MECHA_WORKSPACE` to the source checkout. Set `MECHA_GENERATOR_STORE` to
+a durable location outside it when the source tree must stay byte-for-byte
+unchanged. The project coding MCP host copies the working tree into a private
+directory for each run. In Git repositories it includes tracked edits and
+non-ignored untracked files. Nested repositories and outbound symlinks require
+a different workspace provider. For a plain directory the host starts a private
+Git repository to compute the review diff.
+
+1. Call `generator_start` with `recipe_id="guided_coding"`, a goal and
+   `inputs.verify_runs`, for example `[{"path":"tests","pytest":true}]`.
+2. Pass the returned `run_id`, `sequence` (as `expected_sequence`) and
+   `request_id` to `generator_resume` with `choice_id="minimal"`, the same
+   controller and an idempotency key. Reuse the key if the response is lost.
+3. Read `payload.result`, `checks`, `already_satisfied`, `base_revision`,
+   `base_tree`, `written_files` and `patch_path`. Each check records its spec,
+   pass state and failures. A run with edits and zero checks reports
+   `unverified`. A green preflight reports `already_satisfied=true`.
+4. From the original working tree, run `git apply --check /path/to/changes.patch`.
+   Inspect the diff and apply it when ready. The staged patch is relative to
+   the original dirty tree. The private checkout and patch stay available in
+   the run's temporary directory for review. Remove that directory after the
+   handoff is finished.
+
+The MCP host runs shell and verification commands with a private home, restricted
+filesystem access and networking disabled. macOS uses `sandbox-exec`; Linux
+requires Bubblewrap (`bwrap`) with namespaces enabled. A missing process
+sandbox prevents command execution. Hosts embedding `ProjectCodingConfig`
+directly can supply a trusted workspace. Tool dispatch uses the host's
+`AccessControl`; push and pull-request operations require both process and
+network grants.
+
 ### MCP progress (stdio keep-alive)
 
 When the client sends ``_meta.progressToken`` on ``tools/call``, the driver

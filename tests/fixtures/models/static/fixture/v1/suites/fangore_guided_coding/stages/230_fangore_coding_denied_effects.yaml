@@ -1,0 +1,28 @@
+id: fangore_coding_denied_effects
+suite: fangore_guided_coding
+persona: fangore
+title: Keep denied process and publish actions out of a read-only run
+narrative: Fangore allows repository inspection and guidance. The model asks to run a shell command and
+  open a pull request. He inspects the shell marker and the recording forge for side effects.
+implementation: ProjectCodingConfig supplies a read-only grant set to the guided coding host. The story
+  uses RecordingPullRequestCodingGit so a publish attempt stays local.
+validation: Submit the tool requests through the generator. Assert that neither side effect occurred.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    attempt_denied_coding_tools: {}
+complete:
+  expect:
+  - kind: equals
+    key: shell_executed
+    value: false
+  - kind: equals
+    key: published
+    value: 0
+cleanup: []

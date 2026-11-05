@@ -25,6 +25,7 @@ from mechaharness.job_lane_broker import JobLaneBroker
 from mechaharness.rag import RagRetriever
 from tests.stories.cli_probes.catalog import story_cli_probe_classes
 from tests.stories.cli_probes.clock_verbs import clock_cli_verb_classes
+from tests.stories.cli_probes.coding_handoff import mcp_handoff_verb
 from tests.stories.cli_probes.probe_verb import ProbeVerb
 
 
@@ -146,6 +147,9 @@ class TestHarnessCliConfig(MechaHarnessConfig):
     def cli_verb_classes(self) -> dict[str, type[CliVerb]]:
         verbs = dict(super().cli_verb_classes())
         verbs.update(clock_cli_verb_classes())
+        if isinstance(self._generator_local_work, GeneratorLocalWork):
+            handoff = mcp_handoff_verb(self._generator_local_work)
+            verbs[handoff.name] = handoff
         verbs[ProbeVerb.name] = ProbeVerb
         # Promote remaining probes so migrated user_story YAML can call them
         # without the ``probe:`` wrapper (G2/G5/G7). Prefer src product verbs

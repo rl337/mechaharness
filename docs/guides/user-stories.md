@@ -107,9 +107,9 @@ Stories: `fangore_counter_bootstrap`, `fangore_counter_cli`, `fangore_counter_mu
 
 ### `delegate_pkg` — Delegate coding arcs on a shared Widget package
 
-Persona **fangore**; execution `sequential` (ordered); 4 stage(s).
+Persona **fangore**; execution `sequential` (ordered); 6 stage(s).
 
-Stories: `fangore_delegate_guidance_thorough`, `fangore_delegate_list_bootstrap`, `fangore_delegate_red_green`, `fangore_delegate_refactor`
+Stories: `fangore_delegate_guidance_thorough`, `fangore_delegate_list_bootstrap`, `fangore_delegate_mcp_repair`, `fangore_delegate_red_green`, `fangore_delegate_refactor`, `fangore_delegate_verified_noop`
 
 ### `fangore_access_authority` — Grants, capability envelopes, and authority gates
 
@@ -191,9 +191,9 @@ Stories: `fangore_gastronomic_comparison_live_status`, `fangore_gastronomic_comp
 
 ### `fangore_gastronomic_offline_e2e` — Offline gastronomic late-stage e2e to DevelopmentOutcome and trial
 
-Persona **fangore**; execution `parallel`; 2 stage(s).
+Persona **fangore**; execution `parallel`; 4 stage(s).
 
-Stories: `fangore_gastronomic_offline_e2e_completed`, `fangore_gastronomic_offline_e2e_failed`
+Stories: `fangore_delegate_matched_trials`, `fangore_delegate_trial_cost`, `fangore_gastronomic_offline_e2e_completed`, `fangore_gastronomic_offline_e2e_failed`
 
 ### `fangore_graph_executor` — Graph executor, soft points, traversal, and budgets
 
@@ -203,9 +203,9 @@ Stories: `fangore_convergence_ceiling`, `fangore_graph_executor`, `fangore_graph
 
 ### `fangore_guided_coding` — Guided coding recipe and instruction todo plan
 
-Persona **fangore**; execution `parallel`; 16 stage(s).
+Persona **fangore**; execution `parallel`; 26 stage(s).
 
-Stories: `fangore_coding_ci_diagnose`, `fangore_coding_ci_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_static_checks__mypy`, `fangore_coding_static_checks__ruff`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe__helper_run_python`, `fangore_guided_coding_recipe__session`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan__conflict_list_refinement`, `fangore_instruction_todo_plan__explicit_list_mode`, `fangore_instruction_todo_plan__numbered_list`, `fangore_instruction_todo_plan__oneshot_from_goal`, `fangore_instruction_todo_plan__session`
+Stories: `fangore_coding_ci_diagnose`, `fangore_coding_ci_repair`, `fangore_coding_denied_effects`, `fangore_coding_exhausted_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_interleaved_restore`, `fangore_coding_missing_provider`, `fangore_coding_no_check`, `fangore_coding_refused_diff`, `fangore_coding_review_patch`, `fangore_coding_run_scoped_recovery`, `fangore_coding_static_checks__mypy`, `fangore_coding_static_checks__ruff`, `fangore_coding_task_specific_repair`, `fangore_coding_verify_boundary`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe__helper_run_python`, `fangore_guided_coding_recipe__session`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan__conflict_list_refinement`, `fangore_instruction_todo_plan__explicit_list_mode`, `fangore_instruction_todo_plan__numbered_list`, `fangore_instruction_todo_plan__oneshot_from_goal`, `fangore_instruction_todo_plan__session`
 
 ### `fangore_host_kit` — Host kit, completer flavors, and harness families
 
@@ -1032,6 +1032,30 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 
 Harness `user_story` scenario `repair.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_repair` against `ci_seed: failing_check`. Asserts `widget.py` contains the repaired function and `.mechaharness/ci_fix.md` cites the failure. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`.
 
+### `fangore_coding_denied_effects` — Keep denied process and publish actions out of a read-only run
+
+Fangore allows repository inspection and guidance. The model asks to run a shell command and open a pull request. He inspects the shell marker and the recording forge for side effects.
+
+#### Implementation
+
+ProjectCodingConfig supplies a read-only grant set to the guided coding host. The story uses RecordingPullRequestCodingGit so a publish attempt stays local.
+
+#### Validation
+
+Submit the tool requests through the generator. Assert that neither side effect occurred.
+
+### `fangore_coding_exhausted_repair` — Stop after the repair budget is exhausted
+
+Fangore requests a fix that still fails its host check after decomposition. He expects a terminal failure with the failing check attached.
+
+#### Implementation
+
+The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+
+#### Validation
+
+Start the real generator, answer its guidance request and inspect the host result.
+
 ### `fangore_coding_git_inspect` — Inspect a feature branch against main with local git tools
 
 Fangore hands guided coding a workspace that already has a feature branch ahead of main. He wants the local agent to inspect status, commit history, and the diff against main using the machine's git, then leave a short inspect note on disk. Complements `fangore_guided_coding_recipe` and `fangore_coding_git_open_pr`.
@@ -1056,6 +1080,78 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 
 Harness `user_story` scenario `open_pr.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: git_open_pr`. Live Completer may draft title/body but still uses the mock PR publisher under `local_mock_pr`. Asserts `.mechaharness/pr_url.txt` contains the mock URL. Unit coverage in `tests/test_github_client.py` and `tests/test_coding_git.py`.
 
+### `fangore_coding_interleaved_restore` — Recover a failed edit while a second session is writing
+
+Fangore checkpoints a repository before repair. Another editor changes an existing note and adds an untracked file. Fangore rolls back the failed source edit and reads all three files.
+
+#### Implementation
+
+mechaharness.coding_workspace_checkpoint saves and restores the checkout.
+
+#### Validation
+
+Assert the restored source, newer note content and survival of the added file together.
+
+### `fangore_coding_missing_provider` — Stop a production handoff when inference is unavailable
+
+Fangore starts the project coding host with no inference endpoint or bound model. He expects a failed handoff and checks that a demo file never appeared.
+
+#### Implementation
+
+ProjectCodingConfig binds the local-work Completer used by GeneratorMcpServer.
+
+#### Validation
+
+Use an explicitly empty base URL and a temporary checkout. Inspect the public terminal kind and the actual filesystem.
+
+### `fangore_coding_no_check` — Distinguish an unchecked edit from verified completion
+
+Fangore delegates a note edit without an acceptance command. The driver must disclose that verification is missing.
+
+#### Implementation
+
+The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+
+#### Validation
+
+Start the real generator, answer its guidance request and inspect the host result.
+
+### `fangore_coding_refused_diff` — Report only files whose content actually changed
+
+Fangore attempts a guarded write, then records its refusal in a note. He compares the reported changed files with the one permitted edit.
+
+#### Implementation
+
+The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+
+#### Validation
+
+Start the real generator, answer its guidance request and inspect the host result.
+
+### `fangore_coding_review_patch` — Review a patch against a dirty checkout after concurrent MCP replay
+
+Fangore has an uncommitted change and an untracked draft. He delegates a fix, reconnects two drivers to the same stored run and submits the same guidance answer from both. He reads the private result, checks that its patch applies against his original dirty checkout and finds his draft intact.
+
+#### Implementation
+
+GeneratorMcpServer and FileGeneratorRunStore drive RepositoryCodingLocalWork with CodingRepositoryIsolation. The story supplies a deterministic Completer.
+
+#### Validation
+
+Require a shared terminal response and one edit round, a matching HEAD, an applicable one-file patch and independent reads of both workspaces.
+
+### `fangore_coding_run_scoped_recovery` — Isolate the checkpoints of overlapping coding runs
+
+Fangore starts a repair. After its first wrong edit lands and before verification, a second driver edits a draft and creates a file. When the repair stops for guidance, Fangore needs the original source and both of the second driver’s changes.
+
+#### Implementation
+
+Two guided_coding runs use separate project coding hosts on one workspace. Their scripted tool calls interleave deterministically at the write and verify boundary.
+
+#### Validation
+
+Require the second run to complete, the first to stop, its broken edit to disappear and both verified draft edits to survive.
+
 ### `fangore_coding_static_checks__mypy` — Diagnose and repair local Ruff and Mypy failures the way CI runs them (mypy)
 
 Fangore's PR checks keep dying on Ruff import order and Mypy untyped defs before pytest even matters. He starts guided coding against a temp workspace that already has a CI-shaped failure log and a broken module, asks the local Completer to read the static-check output (or re-run the same tool), repair the file, and leave a short fix note. Host `verify_runs` re-check with `ruff: true` / `mypy: true` so the story proves the cheap Completer lane can clear the same static gates CI uses. Complements `fangore_coding_ci_diagnose` (forge log lookup) and `fangore_coding_ci_repair` (seeded runtime/pytest repair). This stage covers the `mypy` scenario.
@@ -1079,6 +1175,30 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 #### Validation
 
 Harness `user_story` scenarios `ruff.yaml` and `mypy.yaml` in suite `fangore_guided_coding`. Static mode uses the named coding_tool_scripts. Asserts the repaired module and `.mechaharness/ci_fix.md` cite Ruff I001 or Mypy no-untyped-def, and start inputs include matching `verify_runs`. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`. Stage id `fangore_coding_static_checks__ruff` (scenario `ruff`).
+
+### `fangore_coding_task_specific_repair` — Repair a failed package check with evidence from that package
+
+Fangore delegates a counter bug. The first edit is wrong. He runs the package tests, allows one repair and inspects the instruction the host sent to the Completer for that repair.
+
+#### Implementation
+
+ProjectCodingLocalWork runs the independent package checks and composes the repair instruction. A scripted Completer supplies a wrong edit followed by a correction.
+
+#### Validation
+
+Require a real repair brief, a completed run and passing tests. The brief must identify the check without teaching an unrelated calculator API.
+
+### `fangore_coding_verify_boundary` — Reject verification evidence outside the workspace
+
+Fangore submits two checks against a sibling canary, one through a parent path and one through a symlink. Neither check may complete his coding task.
+
+#### Implementation
+
+ProjectCodingConfig and GeneratorMcpServer drive guided_coding host verification.
+
+#### Validation
+
+Submit each path through the public driver and compare terminal results. The canary exists only in the temporary fixture.
 
 ### `fangore_coding_write_guard` — Refuse catastrophic gutting of an existing workspace module
 
@@ -1493,6 +1613,30 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 
 Harness `user_story` scenario `list_bootstrap.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.
 
+### `fangore_delegate_matched_trials` — Compare repeated package trials only under matching budgets
+
+Fangore records a successful repair and a regression for each recipe. He compares the batch at equal budgets, then increases only the second arm’s token ceiling. The summary must reject the second comparison.
+
+#### Implementation
+
+assemble_gastronomic_trial and summarize_gastronomic_comparison aggregate host trial records.
+
+#### Validation
+
+Use the same model, suite and outcomes in both batches. Require two trials, a half-success rate, correct comparability and no automatic winner. Fixture records exercise offline accounting.
+
+### `fangore_delegate_mcp_repair` — Resume a package bug through MCP and replay the answer
+
+Fangore receives an existing Gadget checkout and an issue about singular item labels. He reproduces the failure, restarts the MCP driver at guidance, submits an answer, and repeats that same answer after the edit. He reruns every package test and reads the editor’s draft.
+
+#### Implementation
+
+GeneratorMcpServer, FileGeneratorRunStore and ProjectCodingLocalWork drive the handoff with a file-backed store. Static uses scripted writes. Live uses the configured Completer.
+
+#### Validation
+
+Require red before the handoff and green after applying the actual diff to a fresh copy of the starting tree. Compare response and file versions across replay, and preserve the editor’s draft.
+
 ### `fangore_delegate_red_green` — Add a failing test then implement until pytest is green
 
 Fangore asks the delegate to fix from a red test: pin `double()` in pytest first, then implement until the suite is green under verify_repair — the classic expensive coding handoff.
@@ -1516,6 +1660,30 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 #### Validation
 
 Harness `user_story` scenario `refactor.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.
+
+### `fangore_delegate_trial_cost` — Count verified edits separately from the checks that passed
+
+Fangore records a package repair with three checks and one changed file. He reopens the package, finds the second stage already satisfied, and audits the run’s edits and inference cost.
+
+#### Implementation
+
+trial_from_suite_run reads a manifest and timing stream and returns the host comparison record.
+
+#### Validation
+
+Read the recorded fields from a file-backed fixture. Require one verified edit, one repair and the measured model calls, tool calls and tokens.
+
+### `fangore_delegate_verified_noop` — Reopen the verified package without a second edit
+
+Fangore starts a fresh session against the preceding checkpoint. He asks for the same label fix, runs the full package checks and expects an already-satisfied handoff with an empty change list.
+
+#### Implementation
+
+ProjectCodingLocalWork runs verify_runs on the shared workspace before invoking inference.
+
+#### Validation
+
+Stage 060 has no seed or scripted patch. It can only pass after the repaired package survives the preceding checkpoint.
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 

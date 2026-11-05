@@ -1,0 +1,49 @@
+id: fangore_coding_exhausted_repair
+suite: fangore_guided_coding
+persona: fangore
+title: Stop after the repair budget is exhausted
+narrative: Fangore requests a fix that still fails its host check after decomposition. He expects a terminal
+  failure with the failing check attached.
+implementation: The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+validation: Start the real generator, answer its guidance request and inspect the host result.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: temp
+    contents: 190_note.files.json
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: shared
+steps:
+- do:
+    start:
+      run_id: fangore_coding_exhausted_repair
+      inputs:
+        goal: Write note.txt with the required phrase
+        verify_runs:
+        - path: note.txt
+          text_contains: required phrase
+        max_repair_rounds: 0
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: minimal
+      on_decompose: accept_proposed
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: failed
+  - kind: contains
+    key: error
+    value: verify_runs_failed
+cleanup: []

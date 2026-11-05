@@ -22,9 +22,10 @@ from mechaharness.coding_write_guard import (
     DEFAULT_CODING_WRITE_GUARD,
     CodingWriteGuard,
 )
-from mechaharness.core.access import FsRead, FsWrite, ProcessExec
+from mechaharness.core.access import FsRead, FsWrite, NetHttp, ProcessExec
 from mechaharness.github_client import GitHubClient, parse_github_owner_repo
 from mechaharness.github_connection import GitHubConnectionConfig
+from mechaharness.isolation.coding_process import run_coding_process
 from mechaharness.tools.base import Tool, ToolRegistry
 
 
@@ -68,6 +69,7 @@ def build_coding_tool_registry(
     github: GitHubClient | None = None,
     github_connection: GitHubConnectionConfig | None = None,
     write_guard: CodingWriteGuard | None = None,
+    isolated_process: bool = False,
 ) -> ToolRegistry:
     """Register read/write/list/grep/run_tests/run_shell/git_*/ci_* under *workspace*.
 
@@ -91,6 +93,8 @@ def build_coding_tool_registry(
     def write_file(path: str, content: str) -> str:
         target = paths.resolve(path)
         rel = str(target.relative_to(paths.root))
+        if isolated_process and ".git" in Path(rel).parts:
+            return json.dumps({"ok": False, "error": "protected Git metadata", "path": rel})
         existing: str | None = None
         if fs.exists(str(target)) and fs.is_file(str(target)):
             try:
@@ -133,15 +137,11 @@ def build_coding_tool_registry(
         return _run_process(
             paths,
             [sys.executable, "-m", "pytest", *args.split()],
-            grant_label="run_tests",
+            isolated=isolated_process,
         )
 
     def run_shell(command: str) -> str:
-        # Host policy: shell only via cwd=workspace; no absolute redirection.
-        if ".." in command.split() or command.strip().startswith("/"):
-            # Still allow flags; block obvious absolute/upward tokens as argv[0].
-            pass
-        return _run_process(paths, command, grant_label="run_shell", shell=True)
+        return _run_process(paths, command, isolated=isolated_process)
 
     def git_status() -> str:
         return git.status().to_tool_json()
@@ -311,7 +311,7 @@ def build_coding_tool_registry(
                     "set_upstream": {"type": "boolean"},
                 },
             },
-            grants=[ProcessExec],
+            grants=[ProcessExec, NetHttp],
         )
     )
     registry.register(
@@ -329,7 +329,7 @@ def build_coding_tool_registry(
                 },
                 "required": ["title", "body"],
             },
-            grants=[ProcessExec],
+            grants=[ProcessExec, NetHttp],
         )
     )
 
@@ -415,7 +415,7 @@ def build_coding_tool_registry(
                     "type": "object",
                     "properties": {"ref": {"type": "string"}},
                 },
-                grants=[ProcessExec],
+                grants=[ProcessExec, NetHttp],
             )
         )
         registry.register(
@@ -431,7 +431,7 @@ def build_coding_tool_registry(
                     },
                     "required": ["job_id"],
                 },
-                grants=[ProcessExec],
+                grants=[ProcessExec, NetHttp],
             )
         )
     return registry
@@ -446,6 +446,7 @@ def _grep_file(
     max_matches: int,
 ) -> None:
     try:
+        file_path = paths.resolve(file_path)
         text = fs.read_text(str(file_path))
     except Exception:  # noqa: BLE001 - skip unreadable binaries
         return
@@ -461,23 +462,18 @@ def _run_process(
     paths: WorkspacePaths,
     command: str | list[str],
     *,
-    grant_label: str,
-    shell: bool = False,
+    isolated: bool,
     timeout: float = 300,
     max_stdout: int = 8000,
     max_stderr: int = 4000,
 ) -> str:
-    del grant_label
     try:
-        completed = subprocess.run(
-            command,
-            cwd=str(paths.root),
-            shell=shell,
-            capture_output=True,
-            text=True,
-            timeout=float(timeout),
-            check=False,
-        )
+        if isinstance(command, str):
+            shell = [os.environ.get("COMSPEC", "cmd.exe"), "/c"] if os.name == "nt" else [
+                "/bin/sh", "-c"
+            ]
+            command = [*shell, command]
+        completed = run_coding_process(command, paths.root, isolated=isolated, timeout=timeout)
     except Exception as exc:  # noqa: BLE001
         return json.dumps({"ok": False, "error": str(exc)})
     stdout = completed.stdout or ""

@@ -26,6 +26,7 @@ from mechaharness.coding_git import (
 )
 from mechaharness.config import Settings
 from mechaharness.core.access import (
+    AccessControl,
     FsRead,
     FsWrite,
     GraphEscalate,
@@ -78,6 +79,7 @@ class ProjectCodingConfig(SettingsConfig):
         tools: ToolRegistry | None = None,
         *,
         workspace: Path | str | None = None,
+        isolated_process: bool = False,
         filesystem: Filesystem | None = None,
         completer: Completer | None = None,
         coding_git: CodingGit | None = None,
@@ -85,6 +87,7 @@ class ProjectCodingConfig(SettingsConfig):
         github_client: GitHubClient | None = None,
     ) -> None:
         self._workspace_root = resolve_workspace_root(workspace)
+        self._isolated_process = isolated_process
         self._filesystem_override = filesystem
         self._completer_override = completer
         self._coding_git_override = coding_git
@@ -144,6 +147,7 @@ class ProjectCodingConfig(SettingsConfig):
         )
         return build_coding_tool_registry(
             workspace=WorkspacePaths(self._workspace_root),
+            isolated_process=self._isolated_process,
             filesystem=fs,
             coding_git=coding_git,
             github=None,
@@ -223,6 +227,7 @@ class ProjectCodingConfig(SettingsConfig):
                         github = None
                 return build_coding_tool_registry(
                     workspace=WorkspacePaths(workspace),
+                    isolated_process=self._isolated_process,
                     filesystem=fs,
                     coding_git=injector.inject(CodingGit),
                     github=github,
@@ -237,14 +242,17 @@ class ProjectCodingConfig(SettingsConfig):
         def make_local_work(injector: Any) -> GeneratorLocalWork:
             complete = completer
             settings = injector.inject(Settings)
-            if complete is None and settings.base_url:
+            requires_key = settings.base_url in {
+                "https://api.openai.com/v1", "https://api.anthropic.com",
+            }
+            if complete is None and settings.base_url and (settings.api_key or not requires_key):
                 try:
                     complete = injector.inject(Completer)
                 except Exception:  # noqa: BLE001
                     complete = None
             tool_reg = injector.inject(ToolRegistry)
             if complete is None:
-                fn: Any = _offline_stub_complete(tool_reg)
+                fn: Any = None
             else:
                 fn = _as_complete_fn(
                     complete,
@@ -254,6 +262,8 @@ class ProjectCodingConfig(SettingsConfig):
             return ProjectCodingLocalWork(
                 tools=tool_reg,
                 complete=fn,
+                access_control=injector.inject(AccessControl),
+                isolated_process=self._isolated_process,
                 max_iterations=max_turns,
                 workspace_root=workspace,
             )
@@ -311,19 +321,10 @@ def _as_complete_fn(
             tools=list(tool_defs) if use_native else None,
             max_tokens=token_budget,
         )
-        try:
-            result = completer.complete(request)
-            if inspect.isawaitable(result):
-                return _awaitable_to_assistant(
-                    result, parse_prompt_tools=not use_native
-                )
-            return _normalize_assistant(result, parse_prompt_tools=not use_native)
-        except Exception as exc:  # noqa: BLE001 - keep tool loop from aborting mid-run
-            return {
-                "role": "assistant",
-                "content": f"Inference error: {exc}. Stop and summarize.",
-                "tool_calls": [],
-            }
+        result = completer.complete(request)
+        if inspect.isawaitable(result):
+            return _awaitable_to_assistant(result, parse_prompt_tools=not use_native)
+        return _normalize_assistant(result, parse_prompt_tools=not use_native)
 
     return complete
 
@@ -331,14 +332,7 @@ def _as_complete_fn(
 async def _awaitable_to_assistant(
     result: Any, *, parse_prompt_tools: bool = False
 ) -> dict[str, Any]:
-    try:
-        return _normalize_assistant(await result, parse_prompt_tools=parse_prompt_tools)
-    except Exception as exc:  # noqa: BLE001
-        return {
-            "role": "assistant",
-            "content": f"Inference error: {exc}. Stop and summarize.",
-            "tool_calls": [],
-        }
+    return _normalize_assistant(await result, parse_prompt_tools=parse_prompt_tools)
 
 
 def _prompt_tools_system(tool_defs: list[Any]) -> str:
@@ -664,6 +658,7 @@ def _normalize_assistant(
             "role": "assistant",
             "content": out_content,
             "tool_calls": wired,
+            "usage": result.usage.model_dump() if result.usage else {},
         }
     content = getattr(result, "content", None)
     if content is None and hasattr(result, "message"):

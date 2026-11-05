@@ -227,15 +227,6 @@ _EXTEND_PREAMBLE = (
 # Cap how many failure lines we paste into the consolidated escalate brief.
 _DECOMPOSE_FAILURE_LINE_CAP = 12
 
-# Fixed block kept outside any goal paste so hard bans never fall off a clip.
-_ESCALATE_HARD_CONSTRAINTS = (
-    "Non-negotiables: implement a real expression parser — do not call the "
-    "eval, exec, or ast.literal_eval functions on the user expression; keep "
-    "`def evaluate` / `def main`; extend prior green behavior (do not replace "
-    "a working file with a stub)."
-)
-
-
 def decompose_instructions_from_failures(
     goal: str, failures: list[str]
 ) -> list[str]:
@@ -259,7 +250,7 @@ def decompose_instructions_from_failures(
     text = (
         f"{_EXTEND_PREAMBLE} Re-establish every previously green host check, "
         "then finish the remaining requested work without dropping working "
-        f"behavior.\n{_ESCALATE_HARD_CONSTRAINTS}\n"
+        "behavior. Preserve all task-specific constraints in the original goal.\n"
         f"Failing checks:\n{failure_block}"
     )
     if goal_bit:

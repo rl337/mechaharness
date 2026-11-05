@@ -1,0 +1,48 @@
+id: fangore_delegate_trial_cost
+suite: fangore_gastronomic_offline_e2e
+persona: fangore
+title: Count verified edits separately from the checks that passed
+narrative: "Fangore records a package repair with three checks and one changed file. He reopens the package,\
+  \ finds the second stage already satisfied, and audits the run\u2019s edits and inference cost."
+implementation: trial_from_suite_run reads a manifest and timing stream and returns the host comparison
+  record.
+validation: Read the recorded fields from a file-backed fixture. Require one verified edit, one repair
+  and the measured model calls, tool calls and tokens.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: 100_timing.files.json
+steps:
+- do:
+    record_coding_trial_metrics: {}
+complete:
+  expect:
+  - kind: equals
+    key: stages_passed
+    value: 2
+  - kind: equals
+    key: wall_ms
+    value: 3000
+  - kind: equals
+    key: repair_loops
+    value: 1
+  - kind: equals
+    key: model_calls
+    value: 2
+  - kind: equals
+    key: verified_edits
+    value: 1
+  - kind: equals
+    key: tool_calls
+    value: 3
+  - kind: equals
+    key: prompt_tokens
+    value: 120
+  - kind: equals
+    key: completion_tokens
+    value: 24
+cleanup: []

@@ -18,6 +18,14 @@
     {
       "story": "fangore_gastronomic_offline_e2e_failed",
       "scenario": "020_fangore_gastronomic_offline_e2e_failed"
+    },
+    {
+      "story": "fangore_delegate_matched_trials",
+      "scenario": "090_fangore_delegate_matched_trials"
+    },
+    {
+      "story": "fangore_delegate_trial_cost",
+      "scenario": "100_fangore_delegate_trial_cost"
     }
   ]
 }
