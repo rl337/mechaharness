@@ -1,0 +1,222 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trouble inspiration: cache-miss attribution and request-shape regression acceptance &mdash; MechaHarness 0.17.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a8455094"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Trouble inspiration: cache-miss attribution and request-shape regression acceptance</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-prefixwise-cache-regression-2026-11-10.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trouble-inspiration-cache-miss-attribution-and-request-shape-regression-acceptance">
+<h1>Trouble inspiration: cache-miss attribution and request-shape regression acceptance<a class="headerlink" href="#trouble-inspiration-cache-miss-attribution-and-request-shape-regression-acceptance" title="Link to this heading"></a></h1>
+<p><strong>Research date:</strong> 2026-11-10. <strong>Status:</strong> non-normative engineering research and candidate extension to existing MechaHarness CTX-09 acceptance. <strong>Capability:</strong> TR-20261110-PREFIX-CACHE. <strong>Research domains:</strong> models/inference/efficiency; context/memory/knowledge; verification/evaluation. <strong>Inspiration type:</strong> test/evaluation and implementation improvement. <strong>Owner:</strong> MechaHarness for generic request-shape and evaluation contracts; concrete vLLM/engine instrumentation belongs to the selected inference-provider host, not an invented SparkStation deployment inside this library.</p>
+<section id="source-dossier-motivating-failure-and-concrete-mechanism">
+<h2>Source dossier: motivating failure and concrete mechanism<a class="headerlink" href="#source-dossier-motivating-failure-and-concrete-mechanism" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Trouble discovery, post 2119334518549365220 (archived November 7, posted Nov 8 UTC): https://rl337.org/trouble/posts/2119334518549365220.html</p></li>
+<li><p>Original open-source research project: https://github.com/tejachavali/prefixwise ; <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/README.md">README</a>, <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/docs/GUIDE.md">technical guide</a>, <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/tests/test_classifier.py">classifier tests</a>, <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/tests/test_check.py">CI regression tests</a>, <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/tests/test_optimize.py">optimisation tests</a>.</p></li>
+<li><p>Reproducible upstream evidence: <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/experiments/demo/2026-11-10-optimize-real-run.md">2026-11-10 real-run demonstration</a>; <a class="reference external" href="https://github.com/tejachavali/prefixwise/tree/main/experiments/e1_open">vLLM/open-model experiments</a>; <a class="reference external" href="https://github.com/tejachavali/prefixwise/tree/main/experiments/e_evict">KV eviction/restore experiments</a>. Pin upstream commit before adapting its internals; current default-branch links are not immutable.</p></li>
+<li><p>Existing MechaHarness CTX-09 story: <a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/tests/fixtures/models/static/fixture/v1/suites/taloneth_harness_research/stages/020_taloneth_cache_layout_experiment.yaml"><code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code></a>, generated narrative in <a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/guides/user-stories.md">user-stories guide</a>. <strong>Do not modify the generated guide directly</strong>.</p></li>
+</ul>
+<p><strong>Mechanism, not headline:</strong> A prompt can be semantically identical but serialized differently across turns. If a tool catalog changes order, a dynamic timestamp enters a stable prefix, or earlier history is rewritten, prefix caching can miss and the provider may redo substantial prefill. <code class="docutils literal notranslate"><span class="pre">prefixwise</span></code> records prompt-shape block fingerprints/hashes, input/cached token counts and first changed block rather than raw prompt content. It classifies misses as avoidable vs legitimate, with reasons such as <code class="docutils literal notranslate"><span class="pre">tool_reserialize</span></code>, <code class="docutils literal notranslate"><span class="pre">volatile_system</span></code>, <code class="docutils literal notranslate"><span class="pre">history_edit</span></code>, <code class="docutils literal notranslate"><span class="pre">breakpoint_misplaced</span></code>, <code class="docutils literal notranslate"><span class="pre">ttl_expired</span></code>, and <code class="docutils literal notranslate"><span class="pre">evicted</span></code>. The tool-order fix <code class="docutils literal notranslate"><span class="pre">canonical_tools</span></code> deterministically sorts tool definitions and keys; it is off by default and enabled only when proven safe by replay. A <code class="docutils literal notranslate"><span class="pre">check</span></code> mode fails CI on synthetic shuffled tools or dynamic system-prompt regressions; e.g. <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/tests/test_check.py"><code class="docutils literal notranslate"><span class="pre">tests/test_check.py</span></code></a> checks <code class="docutils literal notranslate"><span class="pre">tool_reserialize</span></code> and <code class="docutils literal notranslate"><span class="pre">volatile_system</span></code> have named changed blocks and separates passing scenarios. For vLLM/SGLang, KV-cache events can confirm eviction; without evidence the classifier should use <code class="docutils literal notranslate"><span class="pre">unknown</span></code>, not guess.</p>
+<p><strong>Source-reported performance, not locally reproduced:</strong> Its documented eight-request demo saw cache-served tokens increase from 74.6% to 87.1%, with reported cost $0.0356 to $0.0250 after canonical tool-order remediation, on one specific hosted-model scenario. Reported 32/32 agreement on named hosted misses and 120/120 injected open-engine cases are the project’s own results. Such numbers are <strong>not</strong> MechaHarness benchmarks or portable savings predictions. Cache provider prices, retention, support and success criteria vary. Never transform an efficiency experiment into an unconditional production fix.</p>
+</section>
+<section id="mechaharness-coverage-audit">
+<h2>MechaHarness coverage audit<a class="headerlink" href="#mechaharness-coverage-audit" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Existing surface</p></th>
+<th class="head"><p>What it does</p></th>
+<th class="head"><p>Remaining measurable gap</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/context_experiments.py"><code class="docutils literal notranslate"><span class="pre">src/mechaharness/context_experiments.py</span></code></a> <code class="docutils literal notranslate"><span class="pre">CtxFlags.cache_aware_layout</span></code>, <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code>, <code class="docutils literal notranslate"><span class="pre">compile_cache_aware_layout</span></code></p></td>
+<td><p>CTX-09 explicitly divides stable <code class="docutils literal notranslate"><span class="pre">policy_blocks</span></code>, semi-stable <code class="docutils literal notranslate"><span class="pre">relevant</span></code>, and <code class="docutils literal notranslate"><span class="pre">dynamic</span></code> tail with <code class="docutils literal notranslate"><span class="pre">prefix_identity</span></code>; opt-in toggle</p></td>
+<td><p>It constructs a layout. Inspected logic does <strong>not</strong> canonicalize provider tool schema serialization, measure prefix divergence or distinguish cache misses due to eviction from avoidable changes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/tests/test_context_experiments.py"><code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code></a> <code class="docutils literal notranslate"><span class="pre">test_topology_and_cache_layout</span></code></p></td>
+<td><p>Checks stable prefix and version identity, default-off behaviour</p></td>
+<td><p>No paired, multi-turn request-shape/cost regression test for tool order, timestamped instructions, resumed context or honest unknown cause</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/tests/fixtures/models/static/fixture/v1/suites/taloneth_harness_research/stages/020_taloneth_cache_layout_experiment.yaml"><code class="docutils literal notranslate"><span class="pre">tests/fixtures/models/static/fixture/v1/suites/taloneth_harness_research/stages/020_taloneth_cache_layout_experiment.yaml</span></code></a></p></td>
+<td><p>Existing <strong>native</strong> acceptance story, <code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code>, covers CTX-09</p></td>
+<td><p>Extend its behaviour or add an appropriately related stage, not an unrelated competing story nor handwritten generated Markdown</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/efficiency_scorecard.py"><code class="docutils literal notranslate"><span class="pre">src/mechaharness/efficiency_scorecard.py</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">build_efficiency_scorecard</span></code> records <code class="docutils literal notranslate"><span class="pre">tokens_in</span></code>, <code class="docutils literal notranslate"><span class="pre">tokens_out</span></code>, <code class="docutils literal notranslate"><span class="pre">cost_usd</span></code>, <code class="docutils literal notranslate"><span class="pre">latency_ms</span></code>, coordination/resume dimensions, optional extras</p></td>
+<td><p>No standard <code class="docutils literal notranslate"><span class="pre">cached_tokens</span></code>, first-prefix divergence, evidence-backed miss cause, estimated avoidable cost or task-success-normalized comparison</p></td>
+</tr>
+<tr class="row-even"><td><p>Existing inference adapters / provider hosts</p></td>
+<td><p>Own actual request wire formats and provider measurements</p></td>
+<td><p>Must inspect actual wire shape and model capability before applying a transformation; input manifest/context layout alone is insufficient</p></td>
+</tr>
+</tbody>
+</table>
+<p>Do <strong>not</strong> propose a new cache-aware context compiler: it already exists. This is an <strong>acceptance gap (partial coverage)</strong> in attribution, regression evidence and safety of changes at the actual request boundary. Any proposed implementation must integrate existing CTX-09 and efficiency metrics, and keep host-specific model-server data at the edge.</p>
+</section>
+<section id="proposed-extension-mh-cache-01-prove-stable-request-prefixes-without-changing-task-meaning">
+<h2>Proposed extension MH-CACHE-01: Prove stable request prefixes without changing task meaning<a class="headerlink" href="#proposed-extension-mh-cache-01-prove-stable-request-prefixes-without-changing-task-meaning" title="Link to this heading"></a></h2>
+<p><strong>Persona:</strong> Taloneth, ML engineer benchmarking local and hosted model adapters; optionally Nubble operating inference workers.</p>
+<p><strong>User story:</strong> As an ML engineer, I want an experiment to attribute avoidable prompt-cache misses to concrete changes in the request’s stable tool/policy/context prefix, and to compare a baseline with an opt-in correction under equal task fixtures, so I can reduce inference work without silently changing tool behaviour, evidence authority, or task outcomes.</p>
+<p><strong>Why:</strong> A provider can report a low cache-hit ratio even though the system is semantically unchanged. An optimisation based only on cached-token percentage may bias toward a cheaper but failing agent, or falsely blame the harness for cache evictions it does not control. In MechaHarness, <code class="docutils literal notranslate"><span class="pre">cache_aware_layout</span></code> already expresses layout intent but has no test that the <em>serialized requests</em> preserve stable bytes across identical turns.</p>
+<p><strong>Acceptance tests and observable outcomes:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Baseline versus shuffle:</strong> Given two equivalent inference calls with equal sorted tool capabilities but shuffled tool-definition ordering, an opt-in observer produces a deterministic, privacy-safe canonical fingerprint for the <em>stable prefix</em> and records the changed block. The baseline fixture detects <code class="docutils literal notranslate"><span class="pre">tool_reserialize</span></code> or a typed equivalent; optional canonicalisation makes matching stable prefixes. Preserve each tool’s name, parameters, schema constraints, allowed operations and semantics. Never discard tools to fake a hit.</p></li>
+<li><p><strong>Dynamic content isolation:</strong> Given a timestamp or request ID injected into a stable instruction prefix, the test locates the first changed block rather than claiming a generic miss. A provider-safe strategy for moving volatile context into the dynamic tail is tested against equivalent model-visible instructions; no change to instruction priority or provenance is allowed.</p></li>
+<li><p><strong>Legitimate changes:</strong> If policy version, approved tool grant, actual source evidence, model or safety envelope changes, the correct behaviour is a new prefix identity and (where applicable) a miss. A policy change must never be hidden behind a stale cache key, even if expensive.</p></li>
+<li><p><strong>Provider attribution and privacy:</strong> Measurements include <code class="docutils literal notranslate"><span class="pre">tokens_in</span></code>, cached/prefill token counts where provider supports them, <code class="docutils literal notranslate"><span class="pre">latency_ms</span></code>, <code class="docutils literal notranslate"><span class="pre">cost_usd</span></code>, miss-cause enum, evidence level <code class="docutils literal notranslate"><span class="pre">provider|engine|inferred|unknown</span></code>, and tool/catalog revision. When provider counters/KV events are unavailable, mark cause <code class="docutils literal notranslate"><span class="pre">unknown</span></code> and estimates unverified. Do not log raw instructions, secrets, retrieved evidence, or tool arguments; hashes must be scoped/rotated where linkability is sensitive.</p></li>
+<li><p><strong>Success-preserving comparison:</strong> Repeat representative tool-use and context-sensitive acceptance fixtures for baseline vs candidate, with matched seeds/settings when possible. Promotion requires zero new authorization violations or acceptance regressions, and any claimed savings must report task success denominator and confidence/sample size. If not provable, optimization remains disabled.</p></li>
+<li><p><strong>Resume and concurrency:</strong> The same logical policy prefix can be reconstructed after a checkpoint/restart with the same authority version and stable serialization. Different agents/sessions must not be assumed to share a KV cache; do not conflate session-level cached tokens with scheduler-wide savings.</p></li>
+<li><p><strong>CI gate:</strong> An offline deterministic suite uses a mock provider to inject shuffled tools, changed system date, legitimate policy revision, missing provider cache metrics, TTL expiry and simulated engine eviction. Regressions in unnecessary prefix stability cause a reviewable failure. Cache eviction remains a valid/expected miss when evidence confirms it. Default-off behaviour continues to pass current CTX-09 tests.</p></li>
+</ol>
+<p><strong>Test fixture matrix:</strong> static tool list; permutations of dictionary keys; two-tool vs three-tool legitimate change; volatile system vs volatile latest-user-tail; trim/compact at semantic boundary; old checkpoint replay; two independent sessions; engine KV eviction; idle TTL expiration; provider does not support cache counters; deliberately poisoned memory injecting tool grants; price missing. Require <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">raw</span> <span class="pre">prompt</span> <span class="pre">stored</span></code>, <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">fabricated</span> <span class="pre">cache</span> <span class="pre">evidence</span></code>, equal accepted task outcomes and stable policy authority.</p>
+<p><strong>Implementation / proof anchors:</strong> <code class="docutils literal notranslate"><span class="pre">ContextCompiler</span></code> and <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code> define logical content, but a separate inference request adapter or observation hook must examine its actual serialized request after tool assembly; <code class="docutils literal notranslate"><span class="pre">EfficiencyScorecard.extra</span></code> can carry experimental fields until an accepted typed schema exists. The acceptance-stage YAML is the canonical story. Run <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-q</span> <span class="pre">tests/stories</span></code> and targeted <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code> after adoption; live provider benchmarking is separately labeled, never implied by an offline fixture.</p>
+</section>
+<section id="options-caveats-and-follow-up-for-an-implementing-agent">
+<h2>Options, caveats and follow-up for an implementing agent<a class="headerlink" href="#options-caveats-and-follow-up-for-an-implementing-agent" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Canonical serialisation at the adapter</strong> avoids changing graph semantics but cannot repair providers that reorder internally. Keep provider-aware injection at the edge and stable prefix <em>validation</em> in the generic harness.</p></li>
+<li><p><strong>Hash-only passive tracing</strong> is lower risk than rewriting requests; prefer as phase one. Use first-changed-block attribution and classify unknowns honestly.</p></li>
+<li><p><strong>Optional optimiser</strong> should be behind a flag, permitted only after parity/eval gates. Do not mutate tool schemas or add/remove instructions for savings.</p></li>
+<li><p><strong>Provider KV-cache events</strong> may be unavailable; ingest them only via capability-discovered telemetry and avoid requiring any specific server configuration.</p></li>
+<li><p><strong>Economic accounting</strong> distinguishes prompt prefill, cache writes/reads, tool costs and latency, as well as tokens per successful task. Report when hosted price assumptions don’t transfer to a self-hosted server.</p></li>
+</ul>
+<p>Before implementation, locate and read all current inference-provider serialization code and story fixtures, inspect open PRs for CTX-09 or performance overlap, pin Prefixwise upstream commit, reproduce synthetic test cases, select actual source of cache counters, and state explicitly which cases prove a violation vs only indicate a likely optimization. Extend native YAML stage and regenerate generated guide <strong>only when accepted</strong>. This PR changes no runtime or canonical acceptance fixture and contains no benchmark result from local hardware.</p>
+</section>
+<section id="research-completeness">
+<h2>Research completeness<a class="headerlink" href="#research-completeness" title="Link to this heading"></a></h2>
+<p>Read upstream README, technical guide and <code class="docutils literal notranslate"><span class="pre">tests/test_check.py</span></code> examples, plus local cache compiler, unit tests, scorecard and story. Did <strong>not</strong> execute upstream experiments, self-host a model, or inspect every local inference adapter. Upstream claimed performance is attributed; no guarantees are inferred.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
