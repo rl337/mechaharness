@@ -42,7 +42,8 @@ class PackageDiff:
             "--",
             ".",
             ":(exclude).mechaharness",
-            ":(exclude)**/__pycache__/**",
+            ":(exclude,glob)**/__pycache__/**",
+            ":(exclude,glob)**/*.pyc",
             ":(exclude).pytest_cache",
         )
         return self.git("write-tree").decode().strip()
