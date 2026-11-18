@@ -98,6 +98,9 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 | [Durable graph generators inspiration](./inspiration/durable-graph-generators-inversion-of-control.md) | Frontier/human/scripted drivers, ordered yields, MCP as adapter |
 | [Durable graph generators requirements map](./inspiration/durable-graph-generators-requirements-map.md) | R-IOC / DG IDs → modules → user stories |
 | [Video production audited-infer migration](./inspiration/video-production-audited-infer-migration.md) | Host alias `ideation.infer.accept` → `audited_infer_accept` |
+| [Trouble resource scope and memory safety](./inspiration/trouble-realm-resource-scope-and-memory-safety-2026-11-03.md) | MH-REALM-01 resource-bound grants; MH-EAL-01 memory is not authority |
+| [Trouble prefix-cache regression](./inspiration/trouble-prefixwise-cache-regression-2026-11-10.md) | MH-CACHE-01 request-shape miss attribution on CTX-09 |
+| [Trouble trace and requirement integrity](./inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md) | MH-TRACE-01 layered scores; MH-REQ-01 source-anchored requirements |
 | [Install & quick start](./guides/install.md) | Environment setup and first run |
 | [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat local backend + live tests |
 | [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
