@@ -44,6 +44,7 @@ MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
   MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 pytest -q tests/stories -k refund_verdict
 
 # Shorthand aliases (still dual-mode stories, not separate skipif modules)
+MECHA_LIVE_OPENAI=1 MECHA_MODEL=gpt-6-luna pytest -q tests/stories -k nubble_run_cost
 MECHA_LIVE_OPENAI_COMPAT=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost
 MECHA_LIVE_QWEN=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost
 MECHA_LIVE_JUDGE=1 pytest -q tests/stories -k 'refund_verdict or systemone_cassette'

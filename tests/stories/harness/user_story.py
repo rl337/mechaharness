@@ -29,11 +29,18 @@ from mechaharness.inference.anthropic import AnthropicStrategy
 from mechaharness.inference.judge import FixtureJudgeProvider, JudgeProvider
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
+from mechaharness.inference_progress import inference_timeout_seconds
 from mechaharness.project_coding_tools import WorkspacePaths, build_coding_tool_registry
 from mechaharness.run_timing import append_timing
 from mechaharness.tools.base import ToolRegistry
 from tests.fakes import ScriptedInference
-from tests.stories.backend import StoryBackend
+from tests.stories.backend import (
+    STATIC_OPENAI_COMPAT_API_KEY,
+    STATIC_OPENAI_COMPAT_BASE_URL,
+    StoryBackend,
+    resolve_live_openai_compat_endpoint,
+    resolve_live_openai_compat_model,
+)
 from tests.stories.catalog import StoryCase
 from tests.stories.cli_probes.config import TestHarnessCliConfig
 from tests.stories.scenarios.user_story_scenario import (
@@ -388,23 +395,19 @@ class UserStoryHarness:
         """OpenAI-compat Completer adapted for ProjectCodingLocalWork tool loops."""
         from mechaharness.project_coding import completer_as_tool_loop_complete
 
-        if not os.environ.get("MECHA_BASE_URL"):
-            raise AssertionError(
-                "MECHA_BASE_URL is required for live project_coding stories"
-            )
+        base_url, api_key = resolve_live_openai_compat_endpoint()
+        model = resolve_live_openai_compat_model(model)
         settings = Settings(
             inference_backend="openai_compat",
             harness_family="pass_through",
             model=model,
-            base_url=os.environ.get("MECHA_BASE_URL"),
-            api_key=os.environ.get("MECHA_API_KEY", "local"),
+            base_url=base_url,
+            api_key=api_key,
             max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "2048")),
         )
         # Keep HTTP ceiling aligned with MECHA_INFERENCE_TIMEOUT_SECONDS so a
         # stuck thinking-model Completer fails the node instead of hanging the
         # suite (cancel alone may not interrupt urllib promptly).
-        from mechaharness.inference_progress import inference_timeout_seconds
-
         http_timeout = float(inference_timeout_seconds())
         client = CountingLiveHttpClient(timeout=http_timeout, workspace=workspace)
         strategy = OpenAICompatStrategy(settings, client=client, timeout=http_timeout)
@@ -612,27 +615,32 @@ class UserStoryHarness:
         # Live graph_walk / Completer propose needs headroom for file JSON;
         # thinking Completers still burn tokens into reasoning unless /no_think.
         default_max = "16384" if backend.mode == "live" else "256"
+        if backend.mode == "live":
+            base_url, api_key = resolve_live_openai_compat_endpoint()
+            model = resolve_live_openai_compat_model(model)
+        else:
+            # Cassette / Memory client only — ignore operator MECHA_BASE_URL /
+            # OPENAI_API_KEY so offline runs never touch a real host.
+            base_url = STATIC_OPENAI_COMPAT_BASE_URL
+            api_key = STATIC_OPENAI_COMPAT_API_KEY
         settings = Settings(
             inference_backend="openai_compat",
             harness_family=family,
             model=model,
-            base_url=os.environ.get("MECHA_BASE_URL", "http://story.invalid/v1"),
-            api_key=os.environ.get("MECHA_API_KEY", "story"),
+            base_url=base_url,
+            api_key=api_key,
             max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", default_max)),
         )
-        base = (settings.base_url or "http://story.invalid/v1").rstrip("/")
+        http_timeout = inference_timeout_seconds() if backend.mode == "live" else 180.0
+        base = (settings.base_url or STATIC_OPENAI_COMPAT_BASE_URL).rstrip("/")
         if backend.mode == "static":
             client = MemoryAsyncHttpClient()
             client.add("POST", f"{base}/chat/completions", json=response)
         else:
-            if not os.environ.get("MECHA_BASE_URL"):
-                raise AssertionError(
-                    "MECHA_BASE_URL is required for live openai_compat stories"
-                )
             client = CountingLiveHttpClient(
-                timeout=180.0, workspace=(access_kw or {}).get("workspace_root")
+                timeout=http_timeout, workspace=(access_kw or {}).get("workspace_root")
             )
-        strategy = OpenAICompatStrategy(settings, client=client, timeout=180.0)
+        strategy = OpenAICompatStrategy(settings, client=client, timeout=http_timeout)
         return TestHarnessCliConfig(
             strategy,
             clock,

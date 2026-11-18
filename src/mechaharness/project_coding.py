@@ -61,12 +61,33 @@ from mechaharness.project_coding_tools import (
 from mechaharness.tools.base import ToolRegistry
 
 
+def _is_local_openai_compat_base_url(base_url: str) -> bool:
+    """True for loopback / localhost OpenAI-compat URLs (not api.openai.com)."""
+    lowered = base_url.strip().lower()
+    if "api.openai.com" in lowered:
+        return False
+    return any(
+        host in lowered
+        for host in (
+            "://127.0.0.1",
+            "://localhost",
+            "://[::1]",
+            "://0.0.0.0",
+        )
+    )
+
+
 def _settings_for_project_coding() -> Settings:
     """Load Settings from process env (MCP / ``.env/env.sh`` primary)."""
     raw = Settings()
-    if raw.base_url and not os.environ.get("MECHA_INFERENCE_BACKEND"):
-        if raw.inference_backend in {"openai"}:
-            raw = raw.model_copy(update={"inference_backend": "openai_local"})
+    if (
+        raw.base_url
+        and not os.environ.get("MECHA_INFERENCE_BACKEND")
+        and raw.inference_backend in {"openai"}
+        and _is_local_openai_compat_base_url(raw.base_url)
+    ):
+        # Bare ``openai`` + local base_url usually means openai_local dogfood.
+        raw = raw.model_copy(update={"inference_backend": "openai_local"})
     return apply_backend_defaults(raw)
 
 

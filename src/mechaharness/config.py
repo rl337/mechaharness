@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     inference_backend: str = "openai"
     harness_family: str = "tool_loop"
-    model: str = "gpt-4o-mini"
+    model: str = "gpt-6-luna"
     api_key: str | None = None
     base_url: str | None = None
     system_prompt: str | None = None

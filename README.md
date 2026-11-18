@@ -47,9 +47,9 @@ mechaharness run "What is 2+2?" \
   --family tool_loop \
   --model local-model
 
-# OpenAI
+# OpenAI (OPENAI_API_KEY also works when MECHA_API_KEY is unset)
 export MECHA_API_KEY=sk-...
-mechaharness run "Hello" --backend openai --model gpt-4o-mini
+mechaharness run "Hello" --backend openai --model gpt-6-luna
 
 # HTTP API
 mechaharness serve --port 8080

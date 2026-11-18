@@ -129,6 +129,47 @@ def _wire_message_to_domain(message: OpenAIResponseMessage) -> ChatMessage:
     )
 
 
+# Completer ``extra`` keys used by MechaHarness runners — never forward to HTTP.
+_MH_COMPLETION_EXTRA_DENY = frozenset(
+    {
+        "node_id",
+        "script_key",
+        "snapshot_id",
+        "invocation_id",
+        "parent_node_id",
+        "execution_node_id",
+        "run_id",
+    }
+)
+
+# OpenAI Chat Completions params commonly set via ``request.extra``.
+_OPENAI_BODY_EXTRA_ALLOW = frozenset(
+    {
+        "reasoning_effort",
+        "max_completion_tokens",
+        "response_format",
+        "tool_choice",
+        "parallel_tool_calls",
+        "stream_options",
+        "user",
+        "seed",
+        "top_p",
+        "n",
+        "frequency_penalty",
+        "presence_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs",
+        "modalities",
+        "audio",
+        "prediction",
+        "store",
+        "metadata",
+        "service_tier",
+    }
+)
+
+
 def domain_request_to_wire(
     request: CompletionRequest,
     *,
@@ -211,8 +252,37 @@ class OpenAICompatStrategy(InferenceStrategy):
             request, default_model=self.default_model, stream=stream
         )
         body = wire.model_dump(mode="json", exclude_none=True)
+        model_id = str(body.get("model") or self.default_model)
+        model_l = model_id.lower()
+        cloud_openai = "api.openai.com" in (self.base_url or "").lower()
+        luna = "luna" in model_l
         if request.extra:
-            body.update(request.extra)
+            extras = {
+                k: v
+                for k, v in request.extra.items()
+                if k not in _MH_COMPLETION_EXTRA_DENY
+            }
+            # Cloud OpenAI rejects unknown fields; local compat servers often ignore.
+            if luna or cloud_openai:
+                extras = {
+                    k: v for k, v in extras.items() if k in _OPENAI_BODY_EXTRA_ALLOW
+                }
+            body.update(extras)
+        # Luna Chat Completions allows function calling only with
+        # reasoning_effort=none; do not override an explicit extra.
+        if (
+            request.tools
+            and luna
+            and "reasoning_effort" not in body
+        ):
+            body["reasoning_effort"] = "none"
+        # Newer OpenAI models (incl. Luna) reject max_tokens on Chat Completions.
+        if (
+            (luna or cloud_openai)
+            and "max_tokens" in body
+            and "max_completion_tokens" not in body
+        ):
+            body["max_completion_tokens"] = body.pop("max_tokens")
         return body
 
     async def complete(self, request: CompletionRequest) -> CompletionResponse:
