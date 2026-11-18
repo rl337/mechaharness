@@ -53,3 +53,19 @@ caller after a bounded advance while preserving checkpoints.
 - [Transactional durable resume](./transactional-durable-resume.md)
 - [Job lane broker](./job-lane-broker.md) (orthogonal: data observe, not dispatch authority)
 - OpenAI Dots MH-DOTS-02 via `fangore_insp_effect_revalidation`
+
+## Nested calls and result return
+
+The executor pushes the root through the same frame loop used for every child.
+A running or paused invocation has a root-to-active run ID path. Stepping into a
+child projects its declared inputs into an independent bag. The waiting parent's
+checkpoint identifies the child run and the call site. A paused result exposes
+the active path as `GraphResult.frame_path`.
+
+At completion the executor checkpoints the terminal status, remaining result
+data in the bag, and an empty frame path together. When resuming an entered
+child, the executor can consume that receipt without repeating the child's
+work. Only a successful child publishes its declared output bindings. Parent
+acceptance nodes still run before the parent returns. The shared budget carries
+accumulated spend across levels and checkpoint reopen. Older checkpoints without
+frame metadata resume through their existing entered-child links.

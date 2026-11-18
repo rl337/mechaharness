@@ -120,9 +120,9 @@ Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_g
 
 ### `fangore_bag_inference_continuity` — Walk bag continuity, ContextSpec inference, snapshot inspect, and judge
 
-Persona **fangore**; execution `parallel`; 6 stage(s).
+Persona **fangore**; execution `parallel`; 8 stage(s).
 
-Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_discovery_hard_nodes`, `fangore_bag_judge_no_tools`, `fangore_bag_snapshot_inspect`, `fangore_bag_subgraph_bindings`
+Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_discovery_hard_nodes`, `fangore_bag_judge_no_tools`, `fangore_bag_snapshot_inspect`, `fangore_bag_subgraph_bindings`, `fangore_inference_frame_return`, `fangore_recursive_return`
 
 ### `fangore_change_decomposition` — ChangePlan decomposition and gastronomic plan tiling
 
@@ -2461,6 +2461,18 @@ Harness `user_story` walks `human_review_gate` with `expect: human_review` + inj
 [^insp-dots-02-review]: [OpenAI Dots map (MH-DOTS-02 approval pending)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Approval interrupt path
 [^insp-dots-04-pending]: [OpenAI Dots map (MH-DOTS-04 ask-human)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — ASK_HUMAN path of independent review
 
+### `fangore_inference_frame_return` — Return an inferred decision through two callers
+
+Fangore sends a project verification result through a planning child to a model in a grandchild. The middle frame publishes the decision to the root. Fangore checks that the decision survived both returns while a private root note stayed intact.
+
+#### Implementation
+
+CliInferRunner writes a parsed model response to the grandchild WalkBag. GraphExecutor projects declared outputs at both returns.
+
+#### Validation
+
+The returned verdict must say pass. Static inference uses a fixture; live inference calls the configured reason model.
+
 ### `fangore_insp_alert_escalation_rules` — Escalate alerts by deterministic once, repeated, and persistent rules
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`. He runs `alert_escalation`: occurrence counts map to log → surface → propose with per-alert overrides; unordered thresholds are refused. No model participates. Decision-plane policy already separates model proposal from code decision (`fangore_decision_plane_policy`). Tracks MH-PA-06[^insp-pa-06].
@@ -3973,6 +3985,18 @@ Harness `user_story` scenario `recipe_namespace_tile.yaml`: environment + graph 
 
 [^rc-namespace]: [Recipes requirements (RC-01/04/05/08)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Namespaced multi-instance tiling
 [^insp-sr-02-tile]: [Self-revising recipe map (MH-SR-02 tile)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Recipe tiling; registry-only constraint is fangore_insp_registry_only_compose
+
+### `fangore_recursive_return` — Resume a project from its committed grandchild result
+
+Fangore opens a project graph. Each planning step discovers whether its slice needs a smaller child. The worker stops immediately after the grandchild commits its proof. Fangore reopens the SQLite checkpoints, continues the original project, and checks the acceptance result produced by each returning caller.
+
+#### Implementation
+
+GraphExecutor drives root and nested frames through the same call loop.
+
+#### Validation
+
+Three levels enter in order. One leaf runs. Each parent accepts once and private child edits stay scoped.
 
 ### `fangore_refund_verdict` — Keep billing authority in product rules, not the model
 

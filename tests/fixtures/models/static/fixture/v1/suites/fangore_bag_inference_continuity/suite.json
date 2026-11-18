@@ -34,6 +34,14 @@
     {
       "story": "fangore_bag_discovery_hard_nodes",
       "scenario": "060_fangore_bag_discovery_hard_nodes"
+    },
+    {
+      "story": "fangore_recursive_return",
+      "scenario": "070_fangore_recursive_return"
+    },
+    {
+      "story": "fangore_inference_frame_return",
+      "scenario": "080_fangore_inference_frame_return"
     }
   ]
 }

@@ -1,0 +1,53 @@
+id: fangore_inference_frame_return
+suite: fangore_bag_inference_continuity
+persona: fangore
+title: Return an inferred decision through two callers
+narrative: >
+  Fangore sends a project verification result through a planning child to a model in a
+  grandchild. The middle frame publishes the decision to the root. Fangore checks that the
+  decision survived both returns while a private root note stayed intact.
+implementation: CliInferRunner writes a parsed model response to the grandchild WalkBag. GraphExecutor projects declared outputs at both returns.
+validation: The returned verdict must say pass. Static inference uses a fixture; live inference calls the configured reason model.
+footnotes: []
+kind: user_story
+environment: {family: pass_through, backend: mock, filesystem: {type: temp}}
+graph:
+  inline:
+    goal: publish the nested verification decision
+    nodes:
+    - id: seed
+      kind: compute
+      payload: {bag_put: {in.evidence: "All seven acceptance checks passed.", ctx.private: "root only"}}
+    - id: plan
+      kind: subgraph
+      depends_on: [seed]
+      payload: {bag_inputs: {in.evidence: in.evidence}, bag_outputs: {out.decision: out.accepted}}
+      subgraph:
+        goal: plan verification
+        nodes:
+          inspect:
+            id: inspect
+            kind: subgraph
+            payload: {bag_inputs: {in.evidence: in.evidence}, bag_outputs: {out.accepted: out.response}}
+            subgraph:
+              goal: interpret evidence
+              nodes:
+                decide:
+                  id: decide
+                  kind: infer
+                  payload:
+                    completion: {verdict: pass}
+                    context:
+                      version: "1"
+                      system: 'Read the evidence. Return exactly one JSON object with verdict "pass" or "fail".'
+                      reads: [{path: in.evidence, required: true}]
+                      response: {writes: out.response, parse: json}
+steps:
+- do: {graph_walk: {action: start}}
+- do: {graph_walk: {action: continue}}
+complete:
+  expect:
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: bag.out.decision.verdict, value: pass}
+  - {kind: equals, key: bag.ctx.private, value: root only}
+cleanup: []

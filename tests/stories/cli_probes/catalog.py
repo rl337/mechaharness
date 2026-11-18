@@ -85,6 +85,7 @@ from tests.stories.cli_probes.graph_verbs import (
     run_validator_qualification,
     run_wake_reresolve_resume,
 )
+from tests.stories.cli_probes.project_frames import ProjectFrameProbe
 from tests.stories.cli_probes.pure_api_probes import pure_api_cli_probe_classes
 
 ParamsT = TypeVar("ParamsT", bound=BaseModel)
@@ -245,6 +246,7 @@ def story_cli_probe_classes() -> dict[str, type[CliProbe]]:
         DeniedEffectsProbe,
         OverlappingRunsProbe,
         ProviderProbe,
+        ProjectFrameProbe,
         RepairPromptProbe,
         RepositoryHandoffProbe,
         RestoreProbe,

@@ -9,6 +9,7 @@ from mechaharness.bag_inspect import PriorResponseRecord, new_invocation_id
 from mechaharness.cli_infer_runner import (
     _includes_unrelated_bag_data,
     _includes_verified_discovery,
+    node_request_identity,
 )
 from mechaharness.context_spec import (
     ContextSpecError,
@@ -94,7 +95,7 @@ class CliJudgeRunner(GraphNodeRunner):
             messages=list(compiled.messages),
             tools=None,
             extra={
-                "node_id": node.id,
+                **node_request_identity(self._completer, node, context),
                 "snapshot_id": snapshot_id,
                 "invocation_id": invocation_id,
                 "judge": True,

@@ -88,7 +88,7 @@ from __future__ import annotations
 
 import inspect
 from abc import ABC, abstractmethod
-from collections.abc import Awaitable, Callable, Mapping, Sequence
+from collections.abc import AsyncGenerator, Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Literal, Union
@@ -237,6 +237,16 @@ class GraphResult(BaseModel):
     stopped_before: str | None = None
     entered_node_id: str | None = None
     active_run_id: str | None = None
+    frame_path: list[str] = Field(default_factory=list)
+
+
+@dataclass
+class _FrameCall:
+    graph: ExecutionGraph
+    run_id: str
+    resume: bool
+    control: RunControl
+    skip_linkage: bool
 
 
 NodeHandler = Callable[
@@ -584,7 +594,13 @@ class GraphExecutor:
         entered_node_id: str | None = None,
         active_run_id: str | None = None,
     ) -> GraphResult:
+        active = graph
+        if status == "paused" and active_run_id and active_run_id != run_id:
+            active = self.store.latest(run_id=active_run_id) or graph
+        if status != "paused":
+            graph.frame_path = []
         return GraphResult(
+            frame_path=list(active.frame_path) if status == "paused" else [],
             status=status,
             graph=graph,
             run_id=run_id,
@@ -630,31 +646,57 @@ class GraphExecutor:
         return ``status=paused`` without a terminal ``GraphEnd``.
         """
         rid = run_id or graph.id
-        parent_context = self._trace_contexts.get(parent_run_id) if parent_run_id else None
-        self._trace_contexts[rid] = graph_trace_context(
-            graph,
-            envelope=envelope,
-            live_authorization_epoch=(
-                self.live_authorization_epoch()
-                if self.live_authorization_epoch is not None
-                else None
-            ),
-            parent_run_id=parent_run_id,
-            nest_depth=int(parent_context.get("nest_depth", 0)) + 1 if parent_context else 1,
-        )
-        try:
-            return await self._run_graph(
-                graph,
-                rid=rid,
-                budget_policy=budget_policy,
-                budget=budget,
-                resume=resume,
-                envelope=envelope,
-                skip_linkage=skip_linkage,
-                control=control or RunControl(),
+        ledger = budget if budget is not None else Budget(budget_policy)
+        frames: list[tuple[str, AsyncGenerator[_FrameCall | GraphResult, GraphResult]]] = []
+
+        def push(call: _FrameCall, parent: str | None) -> None:
+            parent_trace = self._trace_contexts.get(parent) if parent else None
+            self._trace_contexts[call.run_id] = graph_trace_context(
+                call.graph, envelope=envelope, parent_run_id=parent,
+                live_authorization_epoch=(
+                    self.live_authorization_epoch() if self.live_authorization_epoch else None
+                ),
+                nest_depth=int(parent_trace.get("nest_depth", 0)) + 1 if parent_trace else 1,
             )
+            frame = self._run_graph(
+                call.graph, rid=call.run_id, budget_policy=budget_policy, budget=ledger,
+                resume=call.resume, envelope=envelope, skip_linkage=call.skip_linkage,
+                control=call.control, frame_path=[key for key, _ in frames] + [call.run_id],
+            )
+            frames.append((call.run_id, frame))
+
+        previous_spend = 0.0
+        if resume and budget is None:
+            checkpoint = self.store.latest(run_id=rid)
+            previous_spend = checkpoint.frame_spent if checkpoint else 0.0
+        push(_FrameCall(graph, rid, resume, control or RunControl(), skip_linkage), parent_run_id)
+        returned: GraphResult | None = None
+        try:
+            while frames:
+                current, frame = frames[-1]
+                if returned is None:
+                    outcome = await frame.__anext__()
+                else:
+                    outcome = await frame.asend(returned)
+                if isinstance(outcome, _FrameCall):
+                    push(outcome, current)
+                    returned = None
+                else:
+                    returned = outcome
+                    await frame.aclose()
+                    frames.pop()
+                    self._trace_contexts.pop(current, None)
+            assert returned is not None
+            # The durable ledger enforces lifetime limits. Existing callers that
+            # resume with a fresh budget report only spend from this invocation.
+            if previous_spend:
+                returned.budget_spent = max(0.0, returned.budget_spent - previous_spend)
+            return returned
         finally:
-            self._trace_contexts.pop(rid, None)
+            while frames:
+                current, frame = frames.pop()
+                await frame.aclose()
+                self._trace_contexts.pop(current, None)
 
     async def _run_graph(
         self,
@@ -667,7 +709,8 @@ class GraphExecutor:
         envelope: CapabilityEnvelope | None,
         skip_linkage: bool,
         control: RunControl,
-    ) -> GraphResult:
+        frame_path: list[str],
+    ) -> AsyncGenerator[_FrameCall | GraphResult, GraphResult]:
         ledger = budget if budget is not None else Budget(budget_policy)
         self._diagnostics = {
             "reconciliation_invoked": False,
@@ -681,6 +724,7 @@ class GraphExecutor:
             restored = self.store.latest(run_id=rid)
             if restored is not None:
                 graph = restored
+                ledger.spent = max(ledger.spent, graph.frame_spent)
             # Interrupted mid-node work is re-queued; effect reconciliation
             # prevents duplicate external dispatch (DR-06 / DR-07).
             # Soft/subgraph call frames that are entered-but-paused stay RUNNING
@@ -691,6 +735,7 @@ class GraphExecutor:
                         continue
                     node.status = NodeStatus.READY
 
+        graph.frame_path = frame_path
         if not self._allows([GraphExecute], tool_name="graph_executor", run_id=rid):
             self._emit(
                 GraphStart,
@@ -702,13 +747,14 @@ class GraphExecutor:
                 {"status": "denied", "error": "missing_grant:core:graph.execute"},
                 rid,
             )
-            return self._result(
+            yield self._result(
                 status="denied",
                 graph=graph,
                 run_id=rid,
                 budget=ledger,
                 error="missing_grant:core:graph.execute",
             )
+            return
 
         if restored is not None and envelope is not None:
             # Fail closed when authority was revoked/advanced since the checkpoint.
@@ -720,9 +766,10 @@ class GraphExecutor:
                 )
                 self._emit(GraphStart, {"goal": graph.goal, "status": "failed"}, rid)
                 self._emit(GraphEnd, {"status": "failed", "error": err}, rid)
-                return self._result(
+                yield self._result(
                     status="failed", graph=graph, run_id=rid, budget=ledger, error=err
                 )
+                return
 
         if envelope is not None:
             graph.authorization_epoch = envelope.authorization_epoch
@@ -742,9 +789,10 @@ class GraphExecutor:
                     err = f"incompatible_checkpoint_fingerprint:{prior}!={fingerprint}"
                     self._emit(GraphStart, {"goal": graph.goal, "status": "failed"}, rid)
                     self._emit(GraphEnd, {"status": "failed", "error": err}, rid)
-                    return self._result(
+                    yield self._result(
                         status="failed", graph=graph, run_id=rid, budget=ledger, error=err
                     )
+                    return
             if not report.ok:
                 err = f"linkage_failed:{';'.join(e.code for e in report.edges)}"
                 self._emit(
@@ -758,13 +806,23 @@ class GraphExecutor:
                     rid,
                 )
                 self._emit(GraphEnd, {"status": "failed", "error": err}, rid)
-                return self._result(
+                yield self._result(
                     status="failed", graph=graph, run_id=rid, budget=ledger, error=err
                 )
+                return
 
         if fingerprint:
             graph.config_fingerprint = fingerprint
 
+        if resume and graph.frame_return is not None and (
+            len(frame_path) > 1 or not graph.ready_nodes()
+        ):
+            receipt = graph.frame_return
+            graph.frame_path = []
+            yield self._result(status=receipt["status"], graph=graph, run_id=rid,
+                               budget=ledger, error=receipt.get("error"))
+            return
+        graph.frame_return = None
         context = GraphRunContext(
             graph=graph,
             run_id=rid,
@@ -790,7 +848,7 @@ class GraphExecutor:
         )
         self._save_checkpoint(
             graph,
-            context.bag,
+            context.bag, budget=ledger,
             run_id=rid,
             boundary="dispatch",
             fingerprint=fingerprint,
@@ -809,26 +867,20 @@ class GraphExecutor:
                     if control.mode == "until"
                     else RunControl()
                 )
-                child_result = await self.run(
-                    child_graph,
-                    budget_policy=budget_policy,
-                    budget=ledger,
-                    run_id=child_run_id,
-                    resume=True,
-                    envelope=envelope,
-                    skip_linkage=True,
-                    parent_run_id=rid,
-                    control=child_control,
+                parent_diagnostics = self._diagnostics
+                child_result = yield _FrameCall(
+                    child_graph, child_run_id, True, child_control, True
                 )
+                self._diagnostics = parent_diagnostics
                 if child_result.status == "paused":
                     self._save_checkpoint(
                         graph,
-                        context.bag,
+                        context.bag, budget=ledger,
                         run_id=rid,
                         boundary="reduce",
                         fingerprint=fingerprint,
                     )
-                    return self._result(
+                    yield self._result(
                         status="paused",
                         graph=graph,
                         run_id=rid,
@@ -838,48 +890,21 @@ class GraphExecutor:
                         or self._entered_parent_id(graph),
                         active_run_id=child_result.active_run_id or child_run_id,
                     )
+                    return
                 # Child terminal: close the soft call site on the parent.
                 parent_id = self._entered_parent_id(graph)
                 if parent_id is not None:
                     parent = graph.nodes[parent_id]
-                    if child_result.status == "ok":
-                        parent.status = NodeStatus.SUCCEEDED
-                        parent.error = None
-                        self._merge_child_bag_outputs(
-                            parent, context.bag, child_result.graph
-                        )
-                    elif child_result.status == "soft_exhausted":
-                        parent.status = NodeStatus.SUCCEEDED
-                        parent.error = None
-                    else:
-                        parent.status = NodeStatus.FAILED
-                        parent.error = (
-                            child_result.error or f"subgraph_{child_result.status}"
-                        )
-                    parent.payload = {
-                        **parent.payload,
-                        "child_status": child_result.status,
-                        "entered": False,
-                    }
-                    self._emit(
-                        GraphNodeEnd,
-                        {
-                            "node_id": parent.id,
-                            "kind": parent.kind,
-                            "status": parent.status.value,
-                            "child_run_id": child_run_id,
-                        },
-                        rid,
-                    )
+                    self._return_child(parent, context, child_result)
                 if control.mode == "one_step":
                     self._save_checkpoint(
                         graph,
-                        context.bag,
+                        context.bag, budget=ledger,
                         run_id=rid,
                         boundary="reduce",
                         fingerprint=fingerprint,
                     )
-                    return self._result(
+                    yield self._result(
                         status="paused",
                         graph=graph,
                         run_id=rid,
@@ -888,110 +913,78 @@ class GraphExecutor:
                         entered_node_id=None,
                         active_run_id=rid,
                     )
+                    return
                 # Fall through: continue parent after soft child completed.
                 control = RunControl() if control.mode == "to_completion" else control
 
         try:
-            paused = await self._run_loop(graph, context, control=control)
+            loop = self._run_loop(graph, context, control=control)
+            try:
+                transition = await loop.__anext__()
+                while isinstance(transition, _FrameCall):
+                    parent_diagnostics = self._diagnostics
+                    child_result = yield transition
+                    self._diagnostics = parent_diagnostics
+                    transition = await loop.asend(child_result)
+                paused = transition
+            finally:
+                await loop.aclose()
         except InjectedProcessCrash:
             raise
-        except GraphExecutorError as exc:
-            self._save_checkpoint(
-                graph,
-                context.bag,
-                run_id=rid,
-                boundary="commit",
-                fingerprint=fingerprint,
-            )
+        except (GraphExecutorError, LinkageError) as exc:
             if str(exc) == "hard_budget_exceeded":
-                self._fail_open_nodes(graph, reason="hard_budget_exceeded")
-                self._emit(
-                    GraphEnd,
-                    {
-                        "status": "failed",
-                        "error": str(exc),
-                        "budget_spent": ledger.spent,
-                        "budget_level": ledger.status().value,
-                    },
-                    rid,
-                )
-                return self._result(
-                    status="failed",
-                    graph=graph,
-                    run_id=rid,
-                    budget=ledger,
-                    error="hard_budget_exceeded",
-                )
+                self._fail_open_nodes(graph, reason=str(exc))
+                yield self._finish_graph(context, "failed", str(exc))
+                return
             status = self._terminal_status(graph)
-            self._emit(GraphEnd, {"status": status, "error": str(exc)}, rid)
-            return self._result(
-                status=status if status != "ok" else "failed",
-                graph=graph,
-                run_id=rid,
-                budget=ledger,
-                error=str(exc),
-            )
-        except LinkageError as exc:
-            self._save_checkpoint(
-                graph,
-                context.bag,
-                run_id=rid,
-                boundary="commit",
-                fingerprint=fingerprint,
-            )
-            self._emit(GraphEnd, {"status": "failed", "error": str(exc)}, rid)
-            return self._result(
-                status="failed", graph=graph, run_id=rid, budget=ledger, error=str(exc)
-            )
+            yield self._finish_graph(context, status if status != "ok" else "failed", str(exc))
+            return
 
         if paused:
             self._save_checkpoint(
-                graph,
-                context.bag,
-                run_id=rid,
-                boundary="reduce",
-                fingerprint=fingerprint,
+                graph, context.bag, budget=ledger, run_id=rid,
+                boundary="reduce", fingerprint=fingerprint,
             )
-            return self._result(
-                status="paused",
-                graph=graph,
-                run_id=rid,
-                budget=ledger,
+            yield self._result(
+                status="paused", graph=graph, run_id=rid, budget=ledger,
                 stopped_before=context.pause.stopped_before,
                 entered_node_id=context.pause.entered_node_id,
                 active_run_id=context.pause.active_run_id or rid,
             )
+            return
 
-        self._save_checkpoint(
-            graph,
-            context.bag,
-            run_id=rid,
-            boundary="commit",
-            fingerprint=fingerprint,
-        )
-        self.crash_probe.maybe_crash(
-            "after_final_commit",
-            run_id=rid,
-            revision=self.store.latest_revision(run_id=rid),
-        )
         status = self._terminal_status(graph)
-        end_payload: dict[str, Any] = {
-            "status": status,
-            "node_count": len(graph.nodes),
-            "budget_spent": ledger.spent,
-            "budget_level": ledger.status().value,
-        }
         error = None
         if status == "soft_exhausted":
             error = "soft_budget_exceeded"
-            end_payload["error"] = error
         elif status != "ok":
             error = "graph_incomplete"
+        yield self._finish_graph(context, status, error)
+
+    def _finish_graph(
+        self, context: GraphRunContext,
+        status: Literal["ok", "failed", "stalled", "soft_exhausted"], error: str | None,
+    ) -> GraphResult:
+        graph = context.graph
+        rid = context.run_id
+        ledger = context.budget
+        graph.frame_return = {"status": status, "error": error}
+        graph.frame_path = []
+        self._save_checkpoint(
+            graph, context.bag, budget=ledger, run_id=rid,
+            boundary="commit", fingerprint=context.config_fingerprint,
+        )
+        self.crash_probe.maybe_crash(
+            "after_final_commit", run_id=rid, revision=self.store.latest_revision(run_id=rid),
+        )
+        end_payload: dict[str, Any] = {
+            "status": status, "node_count": len(graph.nodes),
+            "budget_spent": ledger.spent, "budget_level": ledger.status().value,
+        }
+        if error:
             end_payload["error"] = error
         self._emit(GraphEnd, end_payload, rid)
-        return self._result(
-            status=status, graph=graph, run_id=rid, budget=ledger, error=error
-        )
+        return self._result(status=status, graph=graph, run_id=rid, budget=ledger, error=error)
 
     def _save_checkpoint(
         self,
@@ -999,10 +992,12 @@ class GraphExecutor:
         bag: WalkBag,
         *,
         run_id: str,
+        budget: Budget,
         boundary: RecoveryBoundary | None = None,
         fingerprint: str | None = None,
     ) -> None:
         """Persist graph + serialized walk bag at a recovery boundary."""
+        graph.frame_spent = budget.spent
         graph.walk_bag = bag.serialize()
         self.store.save(
             graph, run_id=run_id, boundary=boundary, fingerprint=fingerprint
@@ -1059,7 +1054,7 @@ class GraphExecutor:
             return None
         child = self.store.latest(run_id=child_run_id)
         if child is None:
-            return None
+            raise GraphExecutorError(f"missing_child_checkpoint:{child_run_id}")
         return child, child_run_id
 
     async def _run_loop(
@@ -1068,7 +1063,7 @@ class GraphExecutor:
         context: GraphRunContext,
         *,
         control: RunControl,
-    ) -> bool:
+    ) -> AsyncGenerator[_FrameCall | bool, GraphResult]:
         """Walk ready nodes. Returns True when paused under stepped control."""
         # Bound iterations: each node may attempt up to max_attempts (+ escalation).
         loop_budget = (
@@ -1080,10 +1075,12 @@ class GraphExecutor:
                 raise GraphExecutorError("hard_budget_exceeded")
             if level is BudgetLevel.SOFT:
                 self._cancel_open_nodes(graph, reason="soft_budget_exceeded")
-                return False
+                yield False
+                return
             ready = graph.ready_nodes()
             if not ready:
-                return False
+                yield False
+                return
             conflicts = graph.concurrent_write_conflicts([n.id for n in ready])
             if conflicts and len(ready) > 1:
                 # Sequential safety: pick one non-conflicting node; if all conflict, run first.
@@ -1099,7 +1096,8 @@ class GraphExecutor:
             ):
                 context.pause.stopped_before = node.id
                 context.pause.active_run_id = context.run_id
-                return True
+                yield True
+                return
 
             if control.mode == "one_step" and is_soft:
                 await self._enter_subgraph_node(graph, node, context)
@@ -1113,15 +1111,32 @@ class GraphExecutor:
                         child_ready[0].id if child_ready else None
                     )
                 self._save_checkpoint(
-                    graph, context.bag, run_id=context.run_id, boundary="reduce"
+                    graph, context.bag, budget=context.budget,
+                    run_id=context.run_id, boundary="reduce"
                 )
-                return True
+                yield True
+                return
 
-            await self._run_node(graph, node, context)
+            if is_soft:
+                await self._enter_subgraph_node(graph, node, context)
+                if node.payload.get("entered"):
+                    self._save_checkpoint(
+                        graph, context.bag, budget=context.budget,
+                        run_id=context.run_id, boundary="reduce"
+                    )
+                    target = self._entered_child_target(graph)
+                    if target is None:
+                        raise GraphExecutorError("missing_child_checkpoint")
+                    child, child_id = target
+                    child_result = yield _FrameCall(child, child_id, False, RunControl(), False)
+                    self._return_child(node, context, child_result)
+            else:
+                await self._run_node(graph, node, context)
             if context.budget.status() is BudgetLevel.HARD:
                 raise GraphExecutorError("hard_budget_exceeded")
             self._save_checkpoint(
-                graph, context.bag, run_id=context.run_id, boundary="reduce"
+                graph, context.bag, budget=context.budget, run_id=context.run_id,
+                boundary="reduce"
             )
 
             if (
@@ -1131,14 +1146,17 @@ class GraphExecutor:
             ):
                 context.pause.stopped_before = None
                 context.pause.active_run_id = context.run_id
-                return True
+                yield True
+                return
 
             if control.mode == "one_step":
                 # Last frontier node finished the graph — do not report paused.
                 if not graph.ready_nodes() and self._terminal_status(graph) == "ok":
-                    return False
+                    yield False
+                    return
                 context.pause.active_run_id = context.run_id
-                return True
+                yield True
+                return
         raise GraphExecutorError("exceeded graph execution budget")
 
     async def _enter_subgraph_node(
@@ -1148,7 +1166,6 @@ class GraphExecutor:
         context: GraphRunContext,
     ) -> None:
         """Open a soft/subgraph call frame without running the first child (SG-05)."""
-        del graph
         node.attempt += 1
         node.status = NodeStatus.RUNNING
         self._emit(
@@ -1180,10 +1197,22 @@ class GraphExecutor:
             return
         child = ExecutionGraph.resume(raw)
         child_run_id = f"{context.run_id}:{node.id}"
-        child_bag = self._project_child_bag(node, context.bag)
+        if node.attempt > 1:
+            child_run_id += f"@{node.attempt}"
+        child.authorization_epoch = graph.authorization_epoch
+        child.frame_path = [*graph.frame_path, child_run_id]
+        try:
+            child_bag = self._project_child_bag(node, context.bag)
+        except (KeyError, ValueError, GraphExecutorError) as exc:
+            node.status = NodeStatus.FAILED
+            node.error = f"child_input_binding: {exc}"
+            self._emit(GraphNodeEnd, {"node_id": node.id, "kind": node.kind,
+                                     "status": node.status.value, "error": node.error},
+                       context.run_id)
+            return
         self._save_checkpoint(
             child,
-            child_bag,
+            child_bag, budget=context.budget,
             run_id=child_run_id,
             boundary="dispatch",
             fingerprint=child.config_fingerprint,
@@ -1195,65 +1224,25 @@ class GraphExecutor:
             "entered": True,
         }
 
-    async def _run_subgraph_node(
-        self,
-        graph: ExecutionGraph,
-        node: GraphNode,
-        context: GraphRunContext,
+    def _return_child(
+        self, node: GraphNode, context: GraphRunContext, child_result: GraphResult
     ) -> None:
-        """Execute an embedded child graph as an observable nested graph run."""
-        del graph
-        node.attempt += 1
-        node.status = NodeStatus.RUNNING
-        self._emit(
-            GraphNodeStart,
-            {
-                "node_id": node.id,
-                "kind": node.kind,
-                "attempt": node.attempt,
-                "subgraph": True,
-            },
-            context.run_id,
+        child_run_id = child_result.run_id
+        node.payload.update(
+            child_status=child_result.status,
+            child_run_id=child_run_id,
+            child_graph_id=child_result.graph.id,
+            entered=False,
+            budget_spent=context.budget.spent,
         )
-        raw = node.subgraph or node.payload.get("subgraph")
-        if not isinstance(raw, dict):
-            node.status = NodeStatus.FAILED
-            node.error = "missing_subgraph"
-            self._charge_node(node, None, context.budget, subgraph=True)
-            self._emit(
-                GraphNodeEnd,
-                {
-                    "node_id": node.id,
-                    "kind": node.kind,
-                    "status": node.status.value,
-                    "error": node.error,
-                },
-                context.run_id,
-            )
-            return
-        child = ExecutionGraph.resume(raw)
-        child.walk_bag = self._project_child_bag(node, context.bag).serialize()
-        child_run_id = f"{context.run_id}:{node.id}"
-        # Share the parent ledger so nested spend aggregates.
-        child_result = await self.run(
-            child,
-            budget_policy=context.budget.policy,
-            budget=context.budget,
-            run_id=child_run_id,
-            envelope=context.envelope,
-            parent_run_id=context.run_id,
-        )
-        node.payload = {
-            **node.payload,
-            "child_status": child_result.status,
-            "child_run_id": child_run_id,
-            "child_graph_id": child.id,
-            "budget_spent": child_result.budget_spent,
-        }
         if child_result.status == "ok":
             node.status = NodeStatus.SUCCEEDED
             node.error = None
-            self._merge_child_bag_outputs(node, context.bag, child_result.graph)
+            try:
+                self._merge_child_bag_outputs(node, context.bag, child_result.graph)
+            except (KeyError, ValueError, GraphExecutorError) as exc:
+                node.status = NodeStatus.FAILED
+                node.error = f"child_output_binding: {exc}"
         elif child_result.status == "soft_exhausted":
             # Parent soft wind-down already reflected on shared budget.
             node.status = NodeStatus.SUCCEEDED
@@ -1282,8 +1271,7 @@ class GraphExecutor:
         context: GraphRunContext,
     ) -> None:
         if node.kind == "subgraph" or node.subgraph:
-            await self._run_subgraph_node(graph, node, context)
-            return
+            raise GraphExecutorError("subgraph must execute through its call frame")
         runner = self.runners.get(node.kind)
         if runner is None:
             node.status = NodeStatus.FAILED

@@ -114,6 +114,10 @@ class ExecutionGraph(BaseModel):
     # Serialized WalkBag (JSON-safe + tagged FileArtifact). Empty on legacy
     # checkpoints; GraphExecutor hydrates GraphRunContext.bag on resume.
     walk_bag: dict[str, Any] = Field(default_factory=dict)
+    # Root-to-frame run IDs while active. Legacy checkpoints have no frame metadata.
+    frame_spent: float = 0.0
+    frame_path: list[str] = Field(default_factory=list)
+    frame_return: dict[str, Any] | None = None
 
     def add_node(self, node: GraphNode) -> GraphNode:
         self.nodes[node.id] = node
