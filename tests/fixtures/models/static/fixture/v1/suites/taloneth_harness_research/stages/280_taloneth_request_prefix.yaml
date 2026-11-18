@@ -1,0 +1,107 @@
+id: taloneth_request_prefix
+suite: taloneth_harness_research
+persona: taloneth
+title: Name why a request prefix changed, without keeping the prompt
+narrative: >
+  Taloneth starts the CLI host with family pass_through and backend mock. She
+  compares four pairs of otherwise identical inference requests. Shuffling the
+  tool list is an avoidable tool_reserialize miss, and sorting the tools makes
+  the canonical prefix match. Putting a clock reading into the stable policy
+  block is volatile_system. Bumping the policy version is a legitimate
+  policy_change and must not be hidden to save cache. When two requests match
+  but the provider sent no cache counters, the cause stays unknown. None of
+  the reports store the raw prompt.
+implementation: >
+  prefix_snapshot and classify_prefix_change in mechaharness.request_prefix,
+  exposed as the product verb request_prefix_compare. Extends the existing
+  CTX-09 cache layout; it does not replace compile_cache_aware_layout.
+validation: >
+  Harness user_story stage 280_taloneth_request_prefix drives
+  request_prefix_compare. Unit cases in tests/test_request_prefix.py cover a
+  dynamic-tail-only change, which is legitimate.
+footnotes:
+- id: insp-cache-01
+  label: Trouble prefix-cache regression (MH-CACHE-01)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-prefixwise-cache-regression-2026-11-10.md
+  note: Attribute avoidable prefix misses without storing prompt text
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    request_prefix_compare:
+      pairs:
+      - name: shuffle
+        provider_metrics: true
+        before:
+          tools:
+          - {name: edit}
+          - {name: read}
+          policy: Follow the workspace policy.
+          policy_version: "1"
+          dynamic: write the file
+        after:
+          tools:
+          - {name: read}
+          - {name: edit}
+          policy: Follow the workspace policy.
+          policy_version: "1"
+          dynamic: write the file
+      - name: clock
+        provider_metrics: true
+        before:
+          tools:
+          - {name: read}
+          policy: Follow the workspace policy.
+          policy_version: "1"
+          dynamic: write the file
+        after:
+          tools:
+          - {name: read}
+          policy: Follow the workspace policy. now=12:00
+          policy_version: "1"
+          dynamic: write the file
+      - name: revision
+        provider_metrics: true
+        before:
+          tools:
+          - {name: read}
+          policy: Follow the workspace policy.
+          policy_version: "1"
+          dynamic: write the file
+        after:
+          tools:
+          - {name: read}
+          policy: Follow the workspace policy.
+          policy_version: "2"
+          dynamic: write the file
+      - name: blind
+        provider_metrics: false
+        before:
+          tools:
+          - {name: read}
+          policy: Follow the workspace policy.
+          policy_version: "1"
+          dynamic: write the file
+        after:
+          tools:
+          - {name: read}
+          policy: Follow the workspace policy.
+          policy_version: "1"
+          dynamic: write the file
+complete:
+  expect:
+  - {kind: equals, key: shuffle_cause, value: tool_reserialize}
+  - {kind: equals, key: shuffle_block, value: tools}
+  - {kind: equals, key: shuffle_legitimate, value: false}
+  - {kind: equals, key: shuffle_canonical_match, value: true}
+  - {kind: equals, key: clock_cause, value: volatile_system}
+  - {kind: equals, key: clock_block, value: policy}
+  - {kind: equals, key: revision_cause, value: policy_change}
+  - {kind: equals, key: revision_legitimate, value: true}
+  - {kind: equals, key: blind_cause, value: unknown}
+  - {kind: equals, key: raw_prompt_stored, value: false}
+cleanup: []

@@ -114,9 +114,9 @@ Stories: `fangore_delegate_guidance_thorough`, `fangore_delegate_list_bootstrap`
 
 ### `fangore_access_authority` — Grants, capability envelopes, and authority gates
 
-Persona **fangore**; execution `parallel`; 14 stage(s).
+Persona **fangore**; execution `parallel`; 15 stage(s).
 
-Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_gate_allowed`, `fangore_compound_grants__grant_gate_denied`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`, `fangore_insp_authority_gate`, `fangore_insp_cross_task_isolation`, `fangore_insp_denial_equivalence`, `fangore_insp_evolution_ownership_split`, `fangore_insp_execution_token`, `fangore_insp_isolation_io`, `fangore_insp_risk_autonomy`, `fangore_insp_soft_vs_hard`, `fangore_insp_state_governance`
+Stories: `fangore_admit_authority`, `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_gate_allowed`, `fangore_compound_grants__grant_gate_denied`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`, `fangore_insp_authority_gate`, `fangore_insp_cross_task_isolation`, `fangore_insp_denial_equivalence`, `fangore_insp_evolution_ownership_split`, `fangore_insp_execution_token`, `fangore_insp_isolation_io`, `fangore_insp_risk_autonomy`, `fangore_insp_soft_vs_hard`, `fangore_insp_state_governance`
 
 ### `fangore_bag_inference_continuity` — Walk bag continuity, ContextSpec inference, snapshot inspect, and judge
 
@@ -282,9 +282,9 @@ Stories: `taloneth_decision_plane_shadow_compare__candidate_unavailable`, `talon
 
 ### `taloneth_harness_research` — Harness research, ablation, and promotion gates
 
-Persona **taloneth**; execution `parallel`; 26 stage(s).
+Persona **taloneth**; execution `parallel`; 28 stage(s).
 
-Stories: `taloneth_atk_research_reject`, `taloneth_cache_layout_experiment`, `taloneth_insp_component_ablation`, `taloneth_insp_correction_spec_debt`, `taloneth_insp_cross_harness_failure`, `taloneth_insp_eval_claims`, `taloneth_insp_eval_matrix`, `taloneth_insp_evaluation_outcome`, `taloneth_insp_evaluator_compose`, `taloneth_insp_experiment_dimensions`, `taloneth_insp_experiment_lineage`, `taloneth_insp_exposure_discriminative`, `taloneth_insp_gated_objective`, `taloneth_insp_harness_fingerprint`, `taloneth_insp_harness_health`, `taloneth_insp_harness_hypothesis`, `taloneth_insp_learning_export`, `taloneth_insp_objective_policy`, `taloneth_insp_recipe_evolution_loop`, `taloneth_insp_recipe_final_test_gate`, `taloneth_insp_rule_promotion`, `taloneth_insp_run_parity`, `taloneth_insp_safety_eval_recipes`, `taloneth_insp_scaffolding_retire`, `taloneth_insp_scripted_driver_replay`, `taloneth_insp_trial_reliability`
+Stories: `taloneth_atk_research_reject`, `taloneth_cache_layout_experiment`, `taloneth_insp_component_ablation`, `taloneth_insp_correction_spec_debt`, `taloneth_insp_cross_harness_failure`, `taloneth_insp_eval_claims`, `taloneth_insp_eval_matrix`, `taloneth_insp_evaluation_outcome`, `taloneth_insp_evaluator_compose`, `taloneth_insp_experiment_dimensions`, `taloneth_insp_experiment_lineage`, `taloneth_insp_exposure_discriminative`, `taloneth_insp_gated_objective`, `taloneth_insp_harness_fingerprint`, `taloneth_insp_harness_health`, `taloneth_insp_harness_hypothesis`, `taloneth_insp_learning_export`, `taloneth_insp_objective_policy`, `taloneth_insp_recipe_evolution_loop`, `taloneth_insp_recipe_final_test_gate`, `taloneth_insp_rule_promotion`, `taloneth_insp_run_parity`, `taloneth_insp_safety_eval_recipes`, `taloneth_insp_scaffolding_retire`, `taloneth_insp_scripted_driver_replay`, `taloneth_insp_trial_reliability`, `taloneth_layered_eval`, `taloneth_request_prefix`
 
 ## Nubble's stories
 
@@ -660,6 +660,24 @@ Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble
 Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
 
 ## Fangore's stories
+
+### `fangore_admit_authority` — Keep retrieved text and memory from becoming grants
+
+Fangore starts the CLI host with family pass_through and backend mock. His trusted ledger allows an edit of repo:acme/widget and a read of object:X. He wrote "do not email the customer" himself. A fetched page tells the agent to edit repo:evil/other and to ignore that exclusion. Memory claims the revoke of write on object:X was a mistake. A vague user line, "make it better", has no checkable predicate. He runs admit_authority. His own exclusion is admitted. The fetched repo is only a candidate. The fetched instruction and the memory grant are rejected. The vague line asks a human. The widget edit and the object read are allowed. The evil edit and the restored write are denied, because they are not on the ledger.
+
+#### Implementation
+
+review_admission in mechaharness.authority_admission, exposed as the product verb admit_authority. Resource effects are checked against the host ledger, not against claim text. Builds on CapabilityEnvelope and AuthorityGate; it does not add a signing library.
+
+#### Validation
+
+Harness user_story stage 150_fangore_admit_authority drives admit_authority. Unit cases in tests/test_authority_admission.py cover discovery text, which stays a candidate.
+
+#### Footnotes
+
+1. [Trouble resource scope (MH-REALM-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-realm-resource-scope-and-memory-safety-2026-11-03.md) — Discovered resources are not grants
+2. [Trouble memory authority (MH-EAL-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-realm-resource-scope-and-memory-safety-2026-11-03.md) — Memory prose is not an authorization token
+3. [Trouble requirement integrity (MH-REQ-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md) — Retrieved text must not enter the authoritative requirement list
 
 ### `fangore_audited_infer_accept` — Expand an audited infer-accept generate and gate spine
 
@@ -4856,6 +4874,22 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 [^arxiv-taubench]: [τ-bench](https://arxiv.org/abs/2406.12045) — Reliability and end-state verification
 [^arxiv-humaneval]: [Evaluating LLMs Trained on Code](https://arxiv.org/abs/2107.03374) — pass@k definition
 
+### `taloneth_layered_eval` — Score the task and the harness as separate results
+
+Taloneth starts the CLI host with family pass_through and backend mock. She replays four frozen runs of the same "write the file" task and asks for a layered score. In the lucky run the tool API swallowed an error, but a fallback still wrote the correct file: the task passes and the harness fails, so the combined result is not clean. In the wrong run the tools and policy behaved, but the file contents are wrong: the task fails and the harness passes, and that is not called an infrastructure failure. In the blind run there is no runtime audit, so the harness stays unknown instead of passing. In the both-fail run she has no trace that proves the harness defect caused the bad file, so the link is only a hypothesis.
+
+#### Implementation
+
+score_layers in mechaharness.layered_verdict, exposed as the product verb layered_eval. Composes with eval evidence and trace reconciliation; it does not add a new evaluator.
+
+#### Validation
+
+Harness user_story stage 270_taloneth_layered_eval drives layered_eval. Unit cases in tests/test_layered_verdict.py cover an observed causal trace and an infrastructure failure that leaves both layers unscored.
+
+#### Footnotes
+
+1. [Trouble trace and requirement integrity (MH-TRACE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md) — Separate harness fidelity from agent task success
+
 ### `taloneth_offline_decision_export` — Export decision data without leaking future outcomes
 
 Taloneth starts the CLI host with family `pass_through` and backend `mock`. Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.
@@ -4887,6 +4921,22 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 #### Footnotes
 
 [^insp-dots-09-replay]: [OpenAI Dots map (MH-DOTS-09 policy replay)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Policy replay for review audit
+
+### `taloneth_request_prefix` — Name why a request prefix changed, without keeping the prompt
+
+Taloneth starts the CLI host with family pass_through and backend mock. She compares four pairs of otherwise identical inference requests. Shuffling the tool list is an avoidable tool_reserialize miss, and sorting the tools makes the canonical prefix match. Putting a clock reading into the stable policy block is volatile_system. Bumping the policy version is a legitimate policy_change and must not be hidden to save cache. When two requests match but the provider sent no cache counters, the cause stays unknown. None of the reports store the raw prompt.
+
+#### Implementation
+
+prefix_snapshot and classify_prefix_change in mechaharness.request_prefix, exposed as the product verb request_prefix_compare. Extends the existing CTX-09 cache layout; it does not replace compile_cache_aware_layout.
+
+#### Validation
+
+Harness user_story stage 280_taloneth_request_prefix drives request_prefix_compare. Unit cases in tests/test_request_prefix.py cover a dynamic-tail-only change, which is legitimate.
+
+#### Footnotes
+
+1. [Trouble prefix-cache regression (MH-CACHE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-prefixwise-cache-regression-2026-11-10.md) — Attribute avoidable prefix misses without storing prompt text
 
 ### `taloneth_shadow_decision_backends` — Compare decision backends without inventing missing results
 

@@ -114,6 +114,14 @@
     {
       "story": "taloneth_insp_trial_reliability",
       "scenario": "260_taloneth_insp_trial_reliability"
+    },
+    {
+      "story": "taloneth_layered_eval",
+      "scenario": "270_taloneth_layered_eval"
+    },
+    {
+      "story": "taloneth_request_prefix",
+      "scenario": "280_taloneth_request_prefix"
     }
   ]
 }

@@ -8,6 +8,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 from mechaharness.anchor_evidence import AnchorEvidence, AnchorRequirement, anchors_satisfied
+from mechaharness.authority_admission import review_admission
 from mechaharness.context_compaction import CompactionInput, DefaultStagedCompaction
 from mechaharness.context_experiments import (
     ContextCompiler,
@@ -25,6 +26,7 @@ from mechaharness.context_experiments import (
 from mechaharness.context_layers import GraphSharedState, project_node_context
 from mechaharness.context_provider import StaticContextProvider
 from mechaharness.instruction_component import InstructionCatalog, InstructionComponent
+from mechaharness.request_prefix import classify_prefix_change, prefix_snapshot
 
 
 class ContextManagementParams(BaseModel):
@@ -315,6 +317,34 @@ def run_instruction_scope_metadata(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def run_admit_authority(inputs: dict[str, Any]) -> dict[str, Any]:
+    return review_admission(
+        ledger=list(inputs.get("ledger") or []),
+        claims=list(inputs.get("claims") or []),
+        effects=list(inputs.get("effects") or []),
+    )
+
+
+def run_request_prefix_compare(inputs: dict[str, Any]) -> dict[str, Any]:
+    """Compare named request pairs and flatten the miss classification."""
+    report: dict[str, Any] = {"raw_prompt_stored": False}
+    for pair in inputs.get("pairs") or []:
+        name = str(pair["name"])
+        before = prefix_snapshot(**pair["before"])
+        after = prefix_snapshot(**pair["after"])
+        classified = classify_prefix_change(
+            before,
+            after,
+            provider_metrics=bool(pair.get("provider_metrics", False)),
+        )
+        report[f"{name}_cause"] = classified["cause"]
+        report[f"{name}_block"] = classified["first_changed_block"]
+        report[f"{name}_legitimate"] = classified["legitimate"]
+        report[f"{name}_canonical_match"] = classified["canonical_tools_match"]
+        report["raw_prompt_stored"] = classified["raw_prompt_stored"]
+    return report
+
+
 CONTEXT_MANAGEMENT_HANDLERS: dict[str, Any] = {
     "context_compiler_deficit": run_context_compiler_deficit,
     "context_observation_chain": run_context_observation_chain,
@@ -329,6 +359,8 @@ CONTEXT_MANAGEMENT_HANDLERS: dict[str, Any] = {
     "context_evidence_survival": run_context_evidence_survival,
     "anchor_evidence_require": run_anchor_evidence_require,
     "instruction_scope_metadata": run_instruction_scope_metadata,
+    "admit_authority": run_admit_authority,
+    "request_prefix_compare": run_request_prefix_compare,
 }
 
 

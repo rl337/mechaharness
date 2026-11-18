@@ -66,6 +66,10 @@
     {
       "story": "fangore_insp_state_governance",
       "scenario": "140_fangore_insp_state_governance"
+    },
+    {
+      "story": "fangore_admit_authority",
+      "scenario": "150_fangore_admit_authority"
     }
   ]
 }
