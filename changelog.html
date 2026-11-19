@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Changelog &mdash; MechaHarness 0.17.1 documentation</title>
+  <title>Changelog &mdash; MechaHarness 0.18.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=a8455094"></script>
+      <script src="_static/documentation_options.js?v=ba2e7b09"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -192,6 +192,9 @@
 and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <section id="unreleased">
 <h2>[Unreleased]<a class="headerlink" href="#unreleased" title="Link to this heading"></a></h2>
+</section>
+<section id="0180---2026-11-19">
+<span id="id1"></span><h2>[0.18.0] - 2026-11-19<a class="headerlink" href="#0180---2026-11-19" title="Link to this heading"></a></h2>
 <section id="changed">
 <h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
 <ul class="simple">
@@ -370,12 +373,12 @@ from the video production host <code class="docutils literal notranslate"><span 
 </section>
 </section>
 <section id="070--2026-10-22">
-<span id="id1"></span><h2>[0.7.0] — 2026-10-22<a class="headerlink" href="#070--2026-10-22" title="Link to this heading"></a></h2>
+<span id="id2"></span><h2>[0.7.0] — 2026-10-22<a class="headerlink" href="#070--2026-10-22" title="Link to this heading"></a></h2>
 <p>Job lanes, stepped graph execution, user-story migration / recipe execute,
 live model verification against reason + judge hosts, and pyiv ≥ 1.1.1 (#32,
 #33). Tip auto-bumped past unreleased <code class="docutils literal notranslate"><span class="pre">0.6.0</span></code> after the #33 merge.</p>
 <section id="changed-1">
-<span id="id2"></span><h3>Changed<a class="headerlink" href="#changed-1" title="Link to this heading"></a></h3>
+<span id="id3"></span><h3>Changed<a class="headerlink" href="#changed-1" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Floor <strong>pyiv ≥ 1.1.1</strong>.</p></li>
 <li><p>Live story mode collects HTTP twins <strong>and</strong> static <code class="docutils literal notranslate"><span class="pre">infer</span></code> / <code class="docutils literal notranslate"><span class="pre">judge</span></code> /
@@ -388,7 +391,7 @@ with expanded live story collection (#32 / #33).</p></li>
 </ul>
 </section>
 <section id="added-1">
-<span id="id3"></span><h3>Added<a class="headerlink" href="#added-1" title="Link to this heading"></a></h3>
+<span id="id4"></span><h3>Added<a class="headerlink" href="#added-1" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Stepped graph execution (SG-01..10):</strong> <code class="docutils literal notranslate"><span class="pre">RunControl</span></code> on <code class="docutils literal notranslate"><span class="pre">GraphExecutor.run</span></code>
 (<code class="docutils literal notranslate"><span class="pre">one_step</span></code> / <code class="docutils literal notranslate"><span class="pre">until</span></code> / <code class="docutils literal notranslate"><span class="pre">paused</span></code>); soft subgraph enter-before-first-child;
@@ -441,7 +444,7 @@ walks (Wave 3).</p></li>
 </ul>
 </section>
 <section id="changed-2">
-<span id="id4"></span><h3>Changed<a class="headerlink" href="#changed-2" title="Link to this heading"></a></h3>
+<span id="id5"></span><h3>Changed<a class="headerlink" href="#changed-2" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>User-story litmus (recipe expansion):</strong> missing graph path ⇒ add Agentic
 Recipe / runners, do not demote valid persona claims. Wave 3 demotion of
@@ -462,7 +465,7 @@ over structs instead of near-clone functions.</p></li>
 </ul>
 </section>
 <section id="added-2">
-<span id="id5"></span><h3>Added<a class="headerlink" href="#added-2" title="Link to this heading"></a></h3>
+<span id="id6"></span><h3>Added<a class="headerlink" href="#added-2" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Customer-facing agent skills</strong> under <code class="docutils literal notranslate"><span class="pre">agent-skills/</span></code> (<code class="docutils literal notranslate"><span class="pre">use-mechaharness</span></code>,
 <code class="docutils literal notranslate"><span class="pre">mechaharness-observability</span></code>, <code class="docutils literal notranslate"><span class="pre">mechaharness.mdc</span></code>) plus
@@ -526,7 +529,7 @@ of envelope reason codes for <code class="docutils literal notranslate"><span cl
 </ul>
 </section>
 <section id="changed-3">
-<span id="id6"></span><h3>Changed<a class="headerlink" href="#changed-3" title="Link to this heading"></a></h3>
+<span id="id7"></span><h3>Changed<a class="headerlink" href="#changed-3" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Module layout (shims keep old imports working):</strong> <code class="docutils literal notranslate"><span class="pre">isolation/</span></code> package
 (<code class="docutils literal notranslate"><span class="pre">isolation_contract</span></code>, <code class="docutils literal notranslate"><span class="pre">workspace_isolation</span></code>, <code class="docutils literal notranslate"><span class="pre">cross_task_isolation</span></code>),
@@ -551,11 +554,11 @@ eight 5–9 line unit tests that only duplicated insp stories.</p></li>
 </section>
 </section>
 <section id="050--2026-10-18">
-<span id="id7"></span><h2>[0.5.0] — 2026-10-18<a class="headerlink" href="#050--2026-10-18" title="Link to this heading"></a></h2>
+<span id="id8"></span><h2>[0.5.0] — 2026-10-18<a class="headerlink" href="#050--2026-10-18" title="Link to this heading"></a></h2>
 <p>pyiv 1.1 HTTP + stdlib DI cut (#30). Manual minor after a squash merge
 auto-bumped the tip to <code class="docutils literal notranslate"><span class="pre">0.4.2</span></code>.</p>
 <section id="changed-4">
-<span id="id8"></span><h3>Changed<a class="headerlink" href="#changed-4" title="Link to this heading"></a></h3>
+<span id="id9"></span><h3>Changed<a class="headerlink" href="#changed-4" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Floor <strong>pyiv ≥ 1.1.0</strong>. Register use-case stdlib injectables on
 <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> (<code class="docutils literal notranslate"><span class="pre">Environment</span></code>, <code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>, <code class="docutils literal notranslate"><span class="pre">Filesystem</span></code>,
@@ -590,11 +593,11 @@ explicitly in tests, or bind Memory*/Mock* doubles through Config /
 </section>
 </section>
 <section id="041--2026-10-14">
-<span id="id9"></span><h2>[0.4.1] — 2026-10-14<a class="headerlink" href="#041--2026-10-14" title="Link to this heading"></a></h2>
+<span id="id10"></span><h2>[0.4.1] — 2026-10-14<a class="headerlink" href="#041--2026-10-14" title="Link to this heading"></a></h2>
 <p>Node components, recipe CLI/SVG render, and pyiv catalog multibinds (#26).
 Patch tip auto-bumped to <code class="docutils literal notranslate"><span class="pre">0.4.1</span></code> before this PyPI publish.</p>
 <section id="added-3">
-<span id="id10"></span><h3>Added<a class="headerlink" href="#added-3" title="Link to this heading"></a></h3>
+<span id="id11"></span><h3>Added<a class="headerlink" href="#added-3" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Node components</strong> (<code class="docutils literal notranslate"><span class="pre">mechaharness.node_component</span></code>): queryable sub-node
 elements that must render within a parent graph node; kinds project existing
@@ -623,7 +626,7 @@ skill/rule require declaring node components on new recipes.</p></li>
 </ul>
 </section>
 <section id="changed-5">
-<span id="id11"></span><h3>Changed<a class="headerlink" href="#changed-5" title="Link to this heading"></a></h3>
+<span id="id12"></span><h3>Changed<a class="headerlink" href="#changed-5" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Floor <strong>pyiv ≥ 0.4.3</strong> (catalog introspection / <code class="docutils literal notranslate"><span class="pre">contribute_map</span></code>).</p></li>
 <li><p>Agentic Recipe / backend / harness <strong>membership</strong> is a pyiv map multibind:
@@ -634,10 +637,10 @@ the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</
 </section>
 </section>
 <section id="040--2026-10-11">
-<span id="id12"></span><h2>[0.4.0] — 2026-10-11<a class="headerlink" href="#040--2026-10-11" title="Link to this heading"></a></h2>
+<span id="id13"></span><h2>[0.4.0] — 2026-10-11<a class="headerlink" href="#040--2026-10-11" title="Link to this heading"></a></h2>
 <p>Host kit cut (#25). Merge tip auto-bumped to <code class="docutils literal notranslate"><span class="pre">0.4.0</span></code> before this PyPI publish.</p>
 <section id="added-4">
-<span id="id13"></span><h3>Added<a class="headerlink" href="#added-4" title="Link to this heading"></a></h3>
+<span id="id14"></span><h3>Added<a class="headerlink" href="#added-4" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Host kit (<code class="docutils literal notranslate"><span class="pre">mechaharness.host_kit</span></code>): <code class="docutils literal notranslate"><span class="pre">host_graph_executor()</span></code> builds a
 Config-injected <code class="docutils literal notranslate"><span class="pre">GraphExecutor</span></code> with runners + optional SQLite durability;
@@ -650,12 +653,12 @@ Owning story <code class="docutils literal notranslate"><span class="pre">fangor
 </section>
 </section>
 <section id="032--2026-10-10">
-<span id="id14"></span><h2>[0.3.2] — 2026-10-10<a class="headerlink" href="#032--2026-10-10" title="Link to this heading"></a></h2>
+<span id="id15"></span><h2>[0.3.2] — 2026-10-10<a class="headerlink" href="#032--2026-10-10" title="Link to this heading"></a></h2>
 <p>Agentic Recipes / typed decision-plane cut (#23) plus Jev typed-judgment
 domain stories (#24). GitHub tagged <code class="docutils literal notranslate"><span class="pre">v0.3.2</span></code> from the merge tip before this
 PyPI publish.</p>
 <section id="added-5">
-<span id="id15"></span><h3>Added<a class="headerlink" href="#added-5" title="Link to this heading"></a></h3>
+<span id="id16"></span><h3>Added<a class="headerlink" href="#added-5" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Agentic Recipes</strong> as a top-level product concept on the <code class="docutils literal notranslate"><span class="pre">GraphTemplate</span></code>
 substrate: composition helpers (<code class="docutils literal notranslate"><span class="pre">instance_key</span></code>, <code class="docutils literal notranslate"><span class="pre">tile</span></code>), catalog docs, and
@@ -673,16 +676,16 @@ stories: <code class="docutils literal notranslate"><span class="pre">fangore_je
 </section>
 </section>
 <section id="031--2026-10-06">
-<span id="id16"></span><h2>[0.3.1] — 2026-10-06<a class="headerlink" href="#031--2026-10-06" title="Link to this heading"></a></h2>
+<span id="id17"></span><h2>[0.3.1] — 2026-10-06<a class="headerlink" href="#031--2026-10-06" title="Link to this heading"></a></h2>
 <p>PyPI cut of the 0.3.0 library (GitHub also tagged <code class="docutils literal notranslate"><span class="pre">v0.3.0</span></code> before auto-bump
 raced the publish).</p>
 </section>
 <section id="030--2026-10-06">
-<span id="id17"></span><h2>[0.3.0] — 2026-10-06<a class="headerlink" href="#030--2026-10-06" title="Link to this heading"></a></h2>
+<span id="id18"></span><h2>[0.3.0] — 2026-10-06<a class="headerlink" href="#030--2026-10-06" title="Link to this heading"></a></h2>
 <p>Evaluation/rollout provenance cut inspired by FineEnvs multi-harness RL,
 plus transactional durable resume and WalkingLabs eval substrate.</p>
 <section id="added-6">
-<span id="id18"></span><h3>Added<a class="headerlink" href="#added-6" title="Link to this heading"></a></h3>
+<span id="id19"></span><h3>Added<a class="headerlink" href="#added-6" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>FineEnvs <code class="docutils literal notranslate"><span class="pre">MH-MHRL-*</span></code> library surfaces: <code class="docutils literal notranslate"><span class="pre">HarnessFingerprint</span></code>,
 <code class="docutils literal notranslate"><span class="pre">EvaluationOutcome</span></code>, <code class="docutils literal notranslate"><span class="pre">ObjectivePolicy</span></code>, run parity, experiment lineage,
@@ -704,7 +707,7 @@ and related surfaces). Map:
 </ul>
 </section>
 <section id="changed-6">
-<span id="id19"></span><h3>Changed<a class="headerlink" href="#changed-6" title="Link to this heading"></a></h3>
+<span id="id20"></span><h3>Changed<a class="headerlink" href="#changed-6" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Rename inference backend <code class="docutils literal notranslate"><span class="pre">junespark</span></code> → <code class="docutils literal notranslate"><span class="pre">openai_local</span></code> (same OpenAI-compat
 client, no baked-in <code class="docutils literal notranslate"><span class="pre">base_url</span></code>; set <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code>). Live story shorthand
@@ -713,11 +716,11 @@ is <code class="docutils literal notranslate"><span class="pre">MECHA_LIVE_OPENA
 </section>
 </section>
 <section id="020--2026-09-30">
-<span id="id20"></span><h2>[0.2.0] — 2026-09-30<a class="headerlink" href="#020--2026-09-30" title="Link to this heading"></a></h2>
+<span id="id21"></span><h2>[0.2.0] — 2026-09-30<a class="headerlink" href="#020--2026-09-30" title="Link to this heading"></a></h2>
 <p>Inspiration-aligned library cut for client orchestrators (graph templates,
 budgets, linkage, and related primitives).</p>
 <section id="added-7">
-<span id="id21"></span><h3>Added<a class="headerlink" href="#added-7" title="Link to this heading"></a></h3>
+<span id="id22"></span><h3>Added<a class="headerlink" href="#added-7" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Parameterized <code class="docutils literal notranslate"><span class="pre">graph_templates</span></code> package (fan-out/aggregate, verify/repair,
 independent review, environment repair) with soft points, provenance stamp,
@@ -736,7 +739,7 @@ sets) and host <code class="docutils literal notranslate"><span class="pre">Anno
 </ul>
 </section>
 <section id="changed-7">
-<span id="id22"></span><h3>Changed<a class="headerlink" href="#changed-7" title="Link to this heading"></a></h3>
+<span id="id23"></span><h3>Changed<a class="headerlink" href="#changed-7" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>pyiv ≥ 0.4.2</strong> — floor bumped for <code class="docutils literal notranslate"><span class="pre">Named</span></code> / <code class="docutils literal notranslate"><span class="pre">Matched</span></code> / <code class="docutils literal notranslate"><span class="pre">Key</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Annotated[...]</span></code> constructor injection. Constructor injection for
@@ -758,12 +761,12 @@ is not a concrete optional type).</p></li>
 </section>
 </section>
 <section id="012--2026-09-25">
-<span id="id23"></span><h2>[0.1.2] — 2026-09-25<a class="headerlink" href="#012--2026-09-25" title="Link to this heading"></a></h2>
+<span id="id24"></span><h2>[0.1.2] — 2026-09-25<a class="headerlink" href="#012--2026-09-25" title="Link to this heading"></a></h2>
 <p>PyPI cut of the #12 requirements-addendum library (GitHub also tagged <code class="docutils literal notranslate"><span class="pre">v0.1.1</span></code>
 for the intermediate TestPyPI upload; production skipped that number after
 auto-bump raced the publish).</p>
 <section id="added-8">
-<span id="id24"></span><h3>Added<a class="headerlink" href="#added-8" title="Link to this heading"></a></h3>
+<span id="id25"></span><h3>Added<a class="headerlink" href="#added-8" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>REQUIREMENTS.md addendum incorporation: decision plane, convergence, context
 experiments, graph resume/fan-in, validator qualification, OBS export/metrics,
@@ -778,7 +781,7 @@ paths; story <code class="docutils literal notranslate"><span class="pre">footno
 </ul>
 </section>
 <section id="changed-8">
-<span id="id25"></span><h3>Changed<a class="headerlink" href="#changed-8" title="Link to this heading"></a></h3>
+<span id="id26"></span><h3>Changed<a class="headerlink" href="#changed-8" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Keep <code class="docutils literal notranslate"><span class="pre">docs/adr/</span></code> and <code class="docutils literal notranslate"><span class="pre">REQUIREMENTS.md</span></code> local-only (gitignored; not published)</p></li>
 <li><p>Story acceptance is story-id primary; former INF/POL codes retired to local
@@ -787,11 +790,11 @@ archaeology mapping</p></li>
 </section>
 </section>
 <section id="010--2026-09-25">
-<span id="id26"></span><h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#010--2026-09-25" title="Link to this heading"></a></h2>
+<span id="id27"></span><h2>[0.1.0] — 2026-09-25<a class="headerlink" href="#010--2026-09-25" title="Link to this heading"></a></h2>
 <p>First public library cut: DI-first agent harness with native lanes, cost on the
 run path, built-in EventLog, judge/decide outcomes, and persona user stories.</p>
 <section id="added-9">
-<span id="id27"></span><h3>Added<a class="headerlink" href="#added-9" title="Link to this heading"></a></h3>
+<span id="id28"></span><h3>Added<a class="headerlink" href="#added-9" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>pyiv DI</strong> — <code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig</span></code> / <code class="docutils literal notranslate"><span class="pre">SettingsConfig</span></code>; hosts subclass hooks
 (<code class="docutils literal notranslate"><span class="pre">get_inference_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_harness_class</span></code>, <code class="docutils literal notranslate"><span class="pre">get_access_policy</span></code>, judge
@@ -818,7 +821,7 @@ principles on the home page; packaging, Trusted Publishing, and auto version bum
 </ul>
 </section>
 <section id="changed-9">
-<span id="id28"></span><h3>Changed<a class="headerlink" href="#changed-9" title="Link to this heading"></a></h3>
+<span id="id29"></span><h3>Changed<a class="headerlink" href="#changed-9" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">junespark</span></code> backend no longer ships a private LAN <code class="docutils literal notranslate"><span class="pre">base_url</span></code> default; set
 <code class="docutils literal notranslate"><span class="pre">MECHA_BASE_URL</span></code></p></li>
