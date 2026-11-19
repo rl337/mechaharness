@@ -1,0 +1,28 @@
+id: fangore_coding_missing_provider
+suite: fangore_guided_coding
+persona: fangore
+title: Stop a production handoff when inference is unavailable
+narrative: Fangore starts the project coding host with no inference endpoint or bound model. He expects
+  a failed handoff and checks that a demo file never appeared.
+implementation: ProjectCodingConfig binds the local-work Completer used by GeneratorMcpServer.
+validation: Use an explicitly empty base URL and a temporary checkout. Inspect the public terminal kind
+  and the actual filesystem.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    start_without_coding_provider: {}
+complete:
+  expect:
+  - kind: equals
+    key: terminal
+    value: failed
+  - kind: equals
+    key: demo_file_created
+    value: false
+cleanup: []

@@ -1,0 +1,4 @@
+{
+  "counts.py": "def increment(value):\n    return value\n",
+  "tests/test_counts.py": "from counts import increment\n\ndef test_increment():\n    assert increment(4) == 5\n\ndef test_zero():\n    assert increment(0) == 1\n"
+}

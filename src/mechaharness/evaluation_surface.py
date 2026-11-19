@@ -29,6 +29,7 @@ from mechaharness.harness_fingerprint import (
     build_harness_fingerprint,
     require_eval_provenance,
 )
+from mechaharness.layered_verdict import score_layers
 from mechaharness.learning_export import build_learning_export
 from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
 from mechaharness.research import EvalProtocol, ResearchLab
@@ -284,6 +285,26 @@ def run_efficiency_scorecard_build(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def run_layered_eval(inputs: dict[str, Any]) -> dict[str, Any]:
+    """Flatten paired task/harness scores for one story walk."""
+    report: dict[str, Any] = {}
+    for case in inputs.get("cases") or []:
+        name = str(case["name"])
+        scored = score_layers(
+            task=case["task"],
+            harness=case.get("harness"),
+            harness_observed=bool(case.get("harness_observed", True)),
+            infrastructure_failure=bool(case.get("infrastructure_failure", False)),
+            trace_supports_cause=bool(case.get("trace_supports_cause", False)),
+        )
+        report[f"{name}_task"] = scored["task"]
+        report[f"{name}_harness"] = scored["harness"]
+        report[f"{name}_clean"] = scored["clean"]
+        report[f"{name}_infrastructure"] = scored["infrastructure_failure"]
+        report[f"{name}_attribution"] = scored["attribution"]
+    return report
+
+
 EVALUATION_RESEARCH_HANDLERS: dict[str, Any] = {
     "atk_research_reject": run_atk_research_reject,
     "harness_experiment_retire": run_harness_experiment_retire,
@@ -305,6 +326,7 @@ EVALUATION_RESEARCH_HANDLERS: dict[str, Any] = {
     "gated_objective_evaluate": run_gated_objective_evaluate,
     "exposure_discriminative_report": run_exposure_discriminative_report,
     "efficiency_scorecard_build": run_efficiency_scorecard_build,
+    "layered_eval": run_layered_eval,
 }
 
 

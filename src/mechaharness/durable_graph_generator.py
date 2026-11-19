@@ -17,10 +17,15 @@ See ``docs/requirements/durable-graph-generators.md`` and
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from contextlib import AbstractContextManager, nullcontext
 from copy import deepcopy
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any, Literal
 from uuid import uuid4
 
@@ -29,6 +34,7 @@ from pyiv.time import DateTimeService
 
 from mechaharness.checkpoint_store import CheckpointStore
 from mechaharness.core.events import CoreEvent, Event, EventLog, event_type_key
+from mechaharness.file_lock import file_lock
 from mechaharness.graph import ExecutionGraph, GraphNode
 from mechaharness.graph_templates import GraphTemplateRegistry
 from mechaharness.graph_templates.base import GraphTemplate
@@ -181,11 +187,15 @@ class GeneratorRunRecord(BaseModel):
     idempotency: dict[str, GraphYield] = Field(default_factory=dict)
     cost: GeneratorCostCounters = Field(default_factory=GeneratorCostCounters)
     artifact_refs: list[str] = Field(default_factory=list)
+    coding_checkout: dict[str, Any] | None = None
     error: str | None = None
 
 
 class GeneratorRunStore(ABC):
     """Persistence for generator run records (process-restart capable when durable)."""
+
+    def operation(self, run_id: str) -> AbstractContextManager[None]:
+        return nullcontext()
 
     @abstractmethod
     def save(self, record: GeneratorRunRecord) -> None: ...
@@ -214,23 +224,38 @@ class FileGeneratorRunStore(GeneratorRunStore):
     def __init__(self, path: str | Path) -> None:
         self._path = Path(path)
         self._path.parent.mkdir(parents=True, exist_ok=True)
-        if not self._path.exists():
-            self._path.write_text("{}", encoding="utf-8")
+        with self._lock("records"):
+            if not self._path.exists():
+                self._path.write_text("{}", encoding="utf-8")
+
+    def _lock(self, name: str) -> AbstractContextManager[None]:
+        return file_lock(self._path.with_name(f".{self._path.name}.{name}.lock"))
+
+    def operation(self, run_id: str) -> AbstractContextManager[None]:
+        digest = hashlib.sha256(run_id.encode()).hexdigest()
+        return self._lock(digest)
 
     def save(self, record: GeneratorRunRecord) -> None:
-        import json
-
-        data = json.loads(self._path.read_text(encoding="utf-8") or "{}")
-        if not isinstance(data, dict):
-            data = {}
-        data[record.run_id] = record.model_dump(mode="json")
-        self._path.write_text(
-            json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
+        with self._lock("records"):
+            data = json.loads(self._path.read_text(encoding="utf-8"))
+            data[record.run_id] = record.model_dump(mode="json")
+            with NamedTemporaryFile(
+                dir=self._path.parent, mode="w", encoding="utf-8", delete=False
+            ) as out:
+                pending = Path(out.name)
+                try:
+                    json.dump(data, out, indent=2, sort_keys=True)
+                    out.flush()
+                    os.fsync(out.fileno())
+                except BaseException:
+                    pending.unlink(missing_ok=True)
+                    raise
+            try:
+                pending.replace(self._path)
+            finally:
+                pending.unlink(missing_ok=True)
 
     def load(self, run_id: str) -> GeneratorRunRecord | None:
-        import json
-
         data = json.loads(self._path.read_text(encoding="utf-8") or "{}")
         if not isinstance(data, dict):
             return None
@@ -363,6 +388,10 @@ class DurableGraphGenerator:
             )
         return out
 
+    def operation(self, run_id: str) -> AbstractContextManager[None]:
+        """Serialize one external driver's operation across store-backed processes."""
+        return self._runs.operation(run_id)
+
     def start(
         self,
         recipe_id: str,
@@ -377,6 +406,8 @@ class DurableGraphGenerator:
             raise KeyError(f"unknown recipe {recipe_id!r}")
         inputs = dict(inputs or {})
         run_id = run_id or str(uuid4())
+        if self._runs.load(run_id) is not None:
+            raise ValueError(f"run already exists: {run_id}")
         graph_id = graph_id or f"graph-{run_id}"
         record = GeneratorRunRecord(
             run_id=run_id,
@@ -418,14 +449,14 @@ class DurableGraphGenerator:
         controller_id: str | None = None,
     ) -> GraphYield:
         record = self._require(run_id)
-        if idempotency_key and idempotency_key in record.idempotency:
-            return record.idempotency[idempotency_key]
         try:
             self._auth.authorize(record, controller_id=controller_id, operation="resume")
         except PermissionError:
             record.cost.rejected_resumes += 1
             self._runs.save(record)
             raise
+        if idempotency_key and idempotency_key in record.idempotency:
+            return record.idempotency[idempotency_key]
         if record.phase in {"completed", "failed", "cancelled"}:
             raise ValueError(f"run {run_id} is already {record.phase}")
         if expected_sequence != record.sequence:
@@ -462,29 +493,23 @@ class DurableGraphGenerator:
                 record.phase = "failed"
                 record.error = "guidance_refused"
                 record.pending_request = None
-                y = self._publish(
+                return self._publish(
                     record,
+                    idempotency_key=idempotency_key,
                     kind="failed",
                     payload={"error": "guidance_refused"},
                     summary="guidance refused",
                 )
-                if idempotency_key:
-                    record.idempotency[idempotency_key] = y
-                    self._runs.save(record)
-                return y
             if response.deferred:
                 record.phase = "suspended"
-                y = self._publish(
+                return self._publish(
                     record,
+                    idempotency_key=idempotency_key,
                     kind="running",
                     payload={"deferred": True, "request_id": pending.request_id},
                     summary="guidance deferred",
                     request_id=pending.request_id,
                 )
-                if idempotency_key:
-                    record.idempotency[idempotency_key] = y
-                    self._runs.save(record)
-                return y
             if pending.choices and response.choice_id:
                 allowed = {c.id for c in pending.choices}
                 if response.choice_id not in allowed:
@@ -515,11 +540,7 @@ class DurableGraphGenerator:
             record.cost.rejected_resumes += 1
             self._runs.save(record)
             raise ValueError("no pending guidance for this resume")
-        y = self._advance(record)
-        if idempotency_key:
-            record.idempotency[idempotency_key] = y
-            self._runs.save(record)
-        return y
+        return self._advance(record, idempotency_key=idempotency_key)
 
     def inspect(self, run_id: str) -> RunInspection:
         record = self._require(run_id)
@@ -572,7 +593,8 @@ class DurableGraphGenerator:
         return record
 
     def _advance(
-        self, record: GeneratorRunRecord, *, emit_start: bool = False
+        self, record: GeneratorRunRecord, *, emit_start: bool = False,
+        idempotency_key: str | None = None,
     ) -> GraphYield:
         if emit_start:
             self._runs.save(record)
@@ -585,6 +607,7 @@ class DurableGraphGenerator:
             record.cost.guidance_yields += 1
             return self._publish(
                 record,
+                idempotency_key=idempotency_key,
                 kind="advice_requested",
                 payload=req.model_dump(mode="json"),
                 summary=req.question,
@@ -608,13 +631,13 @@ class DurableGraphGenerator:
                             GuidanceRequest.model_validate(item)
                         )
                 record.phase = "running"
-                self._runs.save(record)
-                return self._advance(record)
+                return self._advance(record, idempotency_key=idempotency_key)
             if work_payload.get("result") == "failed":
                 record.phase = "failed"
                 record.error = str(work_payload.get("error") or "local_work_failed")
                 return self._publish(
                     record,
+                    idempotency_key=idempotency_key,
                     kind="failed",
                     payload={
                         **work_payload,
@@ -625,6 +648,7 @@ class DurableGraphGenerator:
         record.phase = "completed"
         return self._publish(
             record,
+            idempotency_key=idempotency_key,
             kind="completed",
             payload={
                 "result": work_payload.get("result", record.inputs.get("result", "ok")),
@@ -642,6 +666,7 @@ class DurableGraphGenerator:
         payload: dict[str, Any],
         summary: str,
         request_id: str | None = None,
+        idempotency_key: str | None = None,
     ) -> GraphYield:
         record.sequence += 1
         if self._checkpoints is not None:
@@ -679,6 +704,8 @@ class DurableGraphGenerator:
             summary=summary,
         )
         record.last_yield = y
+        if idempotency_key:
+            record.idempotency[idempotency_key] = y
         self._runs.save(record)
         self._emit(
             GraphYieldPublished,

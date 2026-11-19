@@ -33,6 +33,9 @@ graph:
             recipe_id: guided_coding
             success: false
             outcome: failed
+            suite_id: shared
+            model: {id: fixture-model}
+            budget: {max_tokens: 8192}
             metrics: {model_calls: 20, wall_ms: 50000, repair_loops: 3}
           - version: '1'
             trial_id: b1
@@ -40,6 +43,9 @@ graph:
             recipe_id: gastronomic_guided_development
             success: true
             outcome: completed
+            suite_id: shared
+            model: {id: fixture-model}
+            budget: {max_tokens: 8192}
             metrics: {model_calls: 14, wall_ms: 42000, repair_loops: 1}
     - id: summarize
       kind: comparison_summarize

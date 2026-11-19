@@ -19,7 +19,7 @@ Three sequential coding-delegate suites — no more for the current roadmap:
 |-------|---------|----------------|
 | **`calc_cli`** | `fangore_calc_*` (6) | Single-file CLI growth, `evaluate`/`main`, ban `eval`, resume/snapshots |
 | **`counter_pkg`** | `fangore_counter_*` (4) | Multi-file package + pytest verify + CLI |
-| **`delegate_pkg`** | `fangore_delegate_*` (4) | List-mode coding, thorough guidance fork, red-green, rename refactor |
+| **`delegate_pkg`** | `fangore_delegate_*` (6) | List-mode coding, guidance, red-green, refactoring, MCP replay and verified reopening |
 
 Mechanism / transport stay in existing parallel suites (not new coding suites):
 
@@ -45,6 +45,23 @@ Mechanism / transport stay in existing parallel suites (not new coding suites):
    until pytest green under verify/repair.
 4. **`fangore_delegate_refactor`** — rename `Widget` → `Gadget` across package,
    tests, README; forbid leftover `class Widget`.
+5. **`fangore_delegate_mcp_repair`** reproduces a label bug in the refactored package,
+   resumes through a rebuilt MCP server and replays the answer. The story applies the
+   resulting Git diff to a fresh copy of the starting tree and reruns pytest there.
+6. **`fangore_delegate_verified_noop`** reopens that checkpoint, reruns the label and
+   Gadget checks and requires an empty change list.
+
+Coding stories can declare `environment.filesystem.seed` for the starting files.
+The host materializes this tree in both static and live runs. For project coding,
+`filesystem.contents` supplies the static Completer's scripted edits. Stage 050
+keeps the failing test in the seed and the proposed fix in the scripted answer.
+
+Release-contract stories are grouped by the behavior they exercise. The
+`fangore_guided_coding` stages beginning at 170 cover rollback, overlapping runs,
+path and tool permissions, completion evidence, and bounded repair. The
+`fangore_gastronomic_offline_e2e` stages beginning at 090 cover matched budgets
+and trial accounting. Stage 260 also drives the production MCP host against a dirty Git checkout
+and replays a concurrent resume.
 
 Authoring: `suites/delegate_pkg/suite.yaml` + `stages/*.yaml` (+ optional
 `sources/` / `materialize-stage-files`).

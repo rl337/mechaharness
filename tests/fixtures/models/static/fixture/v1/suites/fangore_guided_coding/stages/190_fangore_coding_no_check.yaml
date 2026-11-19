@@ -1,0 +1,43 @@
+id: fangore_coding_no_check
+suite: fangore_guided_coding
+persona: fangore
+title: Distinguish an unchecked edit from verified completion
+narrative: Fangore delegates a note edit without an acceptance command. The driver must disclose that
+  verification is missing.
+implementation: The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+validation: Start the real generator, answer its guidance request and inspect the host result.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: temp
+    contents: 190_note.files.json
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: shared
+steps:
+- do:
+    start:
+      run_id: fangore_coding_no_check
+      inputs:
+        goal: Write note.txt
+        max_iterations: 4
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: minimal
+      on_decompose: accept_proposed
+complete:
+  expect:
+  - kind: equals
+    key: result
+    value: unverified
+cleanup: []

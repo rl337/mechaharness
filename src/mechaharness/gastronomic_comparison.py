@@ -91,6 +91,7 @@ def assemble_gastronomic_trial(
             "guidance_yields": _num("guidance_yields", 0),
             "repeat_failure_loops": _num("repeat_failure_loops", 0),
             "verified_edits": _num("verified_edits"),
+            "already_satisfied_stages": _num("already_satisfied_stages"),
         },
         "model": model_info or None,
         "budget": budget_info or None,
@@ -165,8 +166,11 @@ def metrics_from_suite_timing(
     work_rows = [e for e in events if e.get("kind") == "coding_work_item"]
     # Resumes rewrite the same stage key; keep the last status per stage.
     latest_by_stage: dict[str, Mapping[str, Any]] = {}
+    prior_regressions = 0
     for e in stage_rows:
         key = str(e.get("stage") or f"anon-{len(latest_by_stage)}")
+        if latest_by_stage.get(key, {}).get("status") == "ok" and e.get("status") == "failed":
+            prior_regressions += 1
         latest_by_stage[key] = e
     final_stages = list(latest_by_stage.values())
     stages_passed = sum(1 for e in final_stages if e.get("status") == "ok")
@@ -180,55 +184,55 @@ def metrics_from_suite_timing(
             wall_s += float(raw)
         except (TypeError, ValueError):
             continue
-    repair_loops = 0
-    verify_runs = 0
-    for e in burst_rows:
-        raw_repair = e.get("max_repair_rounds")
-        # Prefer explicit repair count when hosts log it; else leave 0.
-        if "repair_rounds" in e:
-            try:
-                repair_loops += int(e.get("repair_rounds") or 0)
-            except (TypeError, ValueError):
-                pass
-        elif raw_repair is not None:
-            # Budget ceiling is not loops used; ignore unless repair_rounds set.
-            pass
-        if "verify_runs" in e:
-            try:
-                verify_runs += int(e.get("verify_runs") or 0)
-            except (TypeError, ValueError):
-                pass
-    model_calls = None
-    for e in burst_rows + work_rows:
-        if "model_calls" in e:
-            try:
-                model_calls = (model_calls or 0) + int(e.get("model_calls") or 0)
-            except (TypeError, ValueError):
-                continue
+    repair_loops = sum(int(row.get("repair_rounds") or 0) for row in burst_rows)
+    verified_edits = 0
+    edit_evidence = False
+    for row in burst_rows:
+        paths = row.get("written_files")
+        if isinstance(paths, list):
+            edit_evidence = True
+            if row.get("verify_runs") and row.get("result", "ok") == "ok":
+                verified_edits += len(set(paths))
+    for row in events:
+        if row.get("kind") == "verified_graph_edits":
+            edit_evidence = True
+            verified_edits += len(set(row["paths"]))
     total = stages_total
     if total is None:
-        total = len(stage_rows) if stage_rows else None
+        total = len(final_stages) if final_stages else None
     success = failed is None and bool(stage_rows) and (
         total is None or stages_passed >= int(total)
     )
     first_failure_class = None
-    if isinstance(failed, Mapping):
-        first_failure_class = failed.get("failure_class") or failed.get("status")
+    first = next((row for row in stage_rows if row.get("status") == "failed"), None)
+    if first is not None:
+        first_failure_class = first.get("failure_class") or first["status"]
     out: dict[str, Any] = {
         "stages_passed": stages_passed,
         "stages_total": total,
-        "prior_regressions": 0,
+        "prior_regressions": prior_regressions,
         "first_failure_class": first_failure_class,
         "wall_ms": int(round(wall_s * 1000.0)),
         "repair_loops": repair_loops,
         "guidance_yields": 0,
         "repeat_failure_loops": 0,
-        "verified_edits": verify_runs if verify_runs else None,
+        "verified_edits": verified_edits if edit_evidence else None,
         "success": success,
         "outcome": "completed" if success else "failed",
     }
-    if model_calls is not None:
-        out["model_calls"] = model_calls
+    live_calls = [row for row in events if row.get("kind") == "live_model_call"]
+    for key in ("model_calls", "tool_calls", "prompt_tokens", "completion_tokens"):
+        # Burst totals already include their work items. Older logs may only
+        # carry item-level counters.
+        rows = burst_rows if any(key in row for row in burst_rows) else work_rows
+        if live_calls and key != "tool_calls":
+            rows = live_calls
+        values = [row[key] for row in rows if row.get(key) is not None]
+        if values and len(values) == len(rows):
+            out[key] = sum(int(value) for value in values)
+    out["already_satisfied_stages"] = sum(
+        row.get("kind") == "coding_already_satisfied" for row in events
+    )
     return out
 
 
@@ -285,6 +289,21 @@ def trial_from_suite_run(
     )
 
 
+def _matched_arms(trials: Sequence[Mapping[str, Any]]) -> bool:
+    arms = {trial.get("arm") for trial in trials}
+    if arms != {"A", "B"}:
+        return False
+    first = trials[0]
+    for key in ("model", "budget"):
+        if not first.get(key) or any(row.get(key) != first[key] for row in trials):
+            return False
+    # The two calculator suites are intentionally paired by the protocol.
+    suites = {row.get("suite_id") for row in trials}
+    return bool(all(suites)) and (
+        len(suites) == 1 or suites == {"calc_cli", "fangore_gastronomic_calc"}
+    )
+
+
 def live_comparison_status(
     *,
     arm_a: Mapping[str, Any] | None = None,
@@ -313,7 +332,7 @@ def live_comparison_status(
                 blocker=None if arm_b is not None else arm_b_blocker,
             ),
         },
-        "comparable_ab": bool(arm_a is not None and arm_b is not None),
+        "comparable_ab": _matched_arms([row for row in (arm_a, arm_b) if row is not None]),
         "winner": None,
         "caveats": [
             "Do not claim reliability improvement from a single stochastic run",
@@ -346,6 +365,9 @@ def summarize_gastronomic_comparison(
                 "n": 0,
                 "success_rate": None,
                 "mean_model_calls": None,
+                "mean_tool_calls": None,
+                "mean_prompt_tokens": None,
+                "mean_completion_tokens": None,
                 "mean_wall_ms": None,
                 "mean_repair_loops": None,
             }
@@ -372,12 +394,15 @@ def summarize_gastronomic_comparison(
             "n": n,
             "success_rate": successes / n,
             "mean_model_calls": _mean("model_calls"),
+            "mean_tool_calls": _mean("tool_calls"),
+            "mean_prompt_tokens": _mean("prompt_tokens"),
+            "mean_completion_tokens": _mean("completion_tokens"),
             "mean_wall_ms": _mean("wall_ms"),
             "mean_repair_loops": _mean("repair_loops"),
         }
 
     arms = {arm: _arm_summary(rows) for arm, rows in by_arm.items()}
-    comparable = bool(arms["A"]["n"] and arms["B"]["n"])
+    comparable = _matched_arms(by_arm["A"] + by_arm["B"])
     # Never auto-declare a winner; hosts interpret under matched budgets.
     return {
         "version": TRIAL_VERSION,

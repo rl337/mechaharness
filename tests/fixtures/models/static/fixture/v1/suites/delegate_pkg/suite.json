@@ -28,6 +28,14 @@
     {
       "story": "fangore_delegate_refactor",
       "scenario": "040_fangore_delegate_refactor"
+    },
+    {
+      "story": "fangore_delegate_mcp_repair",
+      "scenario": "050_fangore_delegate_mcp_repair"
+    },
+    {
+      "story": "fangore_delegate_verified_noop",
+      "scenario": "060_fangore_delegate_verified_noop"
     }
   ]
 }

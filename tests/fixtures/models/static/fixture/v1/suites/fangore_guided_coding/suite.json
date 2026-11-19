@@ -74,6 +74,46 @@
     {
       "story": "fangore_instruction_todo_plan__session",
       "scenario": "160_fangore_instruction_todo_plan_session"
+    },
+    {
+      "story": "fangore_coding_interleaved_restore",
+      "scenario": "170_fangore_coding_interleaved_restore"
+    },
+    {
+      "story": "fangore_coding_verify_boundary",
+      "scenario": "180_fangore_coding_verify_boundary"
+    },
+    {
+      "story": "fangore_coding_no_check",
+      "scenario": "190_fangore_coding_no_check"
+    },
+    {
+      "story": "fangore_coding_refused_diff",
+      "scenario": "200_fangore_coding_refused_diff"
+    },
+    {
+      "story": "fangore_coding_exhausted_repair",
+      "scenario": "210_fangore_coding_exhausted_repair"
+    },
+    {
+      "story": "fangore_coding_missing_provider",
+      "scenario": "220_fangore_coding_missing_provider"
+    },
+    {
+      "story": "fangore_coding_denied_effects",
+      "scenario": "230_fangore_coding_denied_effects"
+    },
+    {
+      "story": "fangore_coding_task_specific_repair",
+      "scenario": "240_fangore_coding_task_specific_repair"
+    },
+    {
+      "story": "fangore_coding_run_scoped_recovery",
+      "scenario": "250_fangore_coding_run_scoped_recovery"
+    },
+    {
+      "story": "fangore_coding_review_patch",
+      "scenario": "260_fangore_coding_review_patch"
     }
   ]
 }

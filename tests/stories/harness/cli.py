@@ -224,23 +224,33 @@ class CliHarness:
         harness_family: str,
         judge_provider: JudgeProvider | None,
     ) -> TestHarnessCliConfig:
+        from tests.stories.backend import (
+            STATIC_OPENAI_COMPAT_API_KEY,
+            STATIC_OPENAI_COMPAT_BASE_URL,
+            resolve_live_openai_compat_endpoint,
+            resolve_live_openai_compat_model,
+        )
+
+        if backend.mode == "live":
+            base_url, api_key = resolve_live_openai_compat_endpoint()
+            model = resolve_live_openai_compat_model(model)
+        else:
+            # Cassette / Memory client only — never read operator secrets/URLs.
+            base_url = STATIC_OPENAI_COMPAT_BASE_URL
+            api_key = STATIC_OPENAI_COMPAT_API_KEY
         settings = Settings(
             inference_backend="openai_compat",
             harness_family=harness_family,
             model=model,
-            base_url=os.environ.get("MECHA_BASE_URL", "http://story.invalid/v1"),
-            api_key=os.environ.get("MECHA_API_KEY", "story"),
+            base_url=base_url,
+            api_key=api_key,
             max_tokens=int(os.environ.get("MECHA_MAX_TOKENS", "256")),
         )
-        base = (settings.base_url or "http://story.invalid/v1").rstrip("/")
+        base = (settings.base_url or STATIC_OPENAI_COMPAT_BASE_URL).rstrip("/")
         if backend.mode == "static":
             client = MemoryAsyncHttpClient()
             client.add("POST", f"{base}/chat/completions", json=response)
         else:
-            if not os.environ.get("MECHA_BASE_URL"):
-                raise AssertionError(
-                    "MECHA_BASE_URL is required for live openai_compat stories"
-                )
             client = AsyncUrllibHttpClient(timeout=180.0)
         strategy = OpenAICompatStrategy(settings, client=client, timeout=180.0)
         return TestHarnessCliConfig(

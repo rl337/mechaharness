@@ -1,0 +1,34 @@
+id: fangore_coding_interleaved_restore
+suite: fangore_guided_coding
+persona: fangore
+title: Recover a failed edit while a second session is writing
+narrative: Fangore checkpoints a repository before repair. Another editor changes an existing note and
+  adds an untracked file. Fangore rolls back the failed source edit and reads all three files.
+implementation: mechaharness.coding_workspace_checkpoint saves and restores the checkout.
+validation: Assert the restored source, newer note content and survival of the added file together.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: 170_checkpoint.files.json
+steps:
+- do:
+    recover_coding_checkout: {}
+complete:
+  expect:
+  - kind: equals
+    key: restored
+    value: true
+  - kind: equals
+    key: source
+    value: baseline
+  - kind: equals
+    key: note
+    value: second session edit
+  - kind: equals
+    key: addition
+    value: true
+cleanup: []

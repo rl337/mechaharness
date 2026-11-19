@@ -1,0 +1,50 @@
+id: fangore_coding_refused_diff
+suite: fangore_guided_coding
+persona: fangore
+title: Report only files whose content actually changed
+narrative: Fangore attempts a guarded write, then records its refusal in a note. He compares the reported
+  changed files with the one permitted edit.
+implementation: The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+validation: Start the real generator, answer its guidance request and inspect the host result.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: temp
+  write_guard_seed: healthy_module
+  coding_tool_script: write_gutting_attempt
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: shared
+steps:
+- do:
+    start:
+      run_id: fangore_coding_refused_diff
+      inputs:
+        goal: Try the guarded edit and write the refusal note
+        verify_runs:
+        - path: .mechaharness/write_guard_note.md
+          text_contains: blocked
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: minimal
+      on_decompose: accept_proposed
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: written_files
+    value:
+    - .mechaharness/write_guard_note.md
+cleanup: []

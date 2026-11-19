@@ -48,6 +48,8 @@ class FilesystemBlock(BaseModel):
 
     type: str = "temp"
     path: str | None = None
+    # Starting tree, also materialized when live inference replaces scripted writes.
+    seed: str | None = None
     contents: str | None = None
 
 

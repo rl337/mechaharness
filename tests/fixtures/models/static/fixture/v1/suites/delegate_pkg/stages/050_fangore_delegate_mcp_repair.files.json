@@ -1,0 +1,3 @@
+{
+  "labels.py": "def display_count(value):\n    unit = \"item\" if value == 1 else \"items\"\n    return f\"{value} {unit}\"\n"
+}

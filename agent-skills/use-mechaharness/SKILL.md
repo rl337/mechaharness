@@ -53,6 +53,15 @@ injector = get_injector(HostConfig())
 - Do **not** stuff lane/provider knobs into `Settings`.
 - Prefer `host_kit.host_graph_executor(...)` for readable GraphExecutor wiring.
 
+## Delegate a repository change
+
+Set `MECHA_MCP_HOST=project_coding`, a workspace and a configured model.
+Start `guided_coding` with the issue and host-owned `verify_runs`. Resume with
+the same controller and an idempotency key. Inspect `result`, `checks` and
+`written_files`, then review `patch_path` against the original dirty checkout.
+The MCP host keeps its private working directory available for that review.
+See the [MCP handoff procedure](https://rl337.org/mechaharness/reference/durable-graph-generators.html).
+
 ## Agentic Recipes
 
 - Catalog ids are stable leaf names (`verify_repair`, `decision_plane`,

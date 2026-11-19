@@ -26,8 +26,7 @@ from mechaharness.instruction_plan import (
                 "a failed",
                 "b failed",
                 "do NOT use eval()",
-                "Non-negotiables",
-                "do not call the eval, exec, or ast.literal_eval functions",
+                "Preserve all task-specific constraints",
             ],
         ),
         (
@@ -35,7 +34,7 @@ from mechaharness.instruction_plan import (
             ["only one"],
             1,
             "Failing checks:",
-            ["only one", "Non-negotiables"],
+            ["only one", "Preserve all task-specific constraints"],
         ),
         ("goal only", [], 1, "goal only", None),
         ("", [], 0, None, None),

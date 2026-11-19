@@ -1,0 +1,51 @@
+id: fangore_delegate_verified_noop
+suite: delegate_pkg
+persona: fangore
+title: Reopen the verified package without a second edit
+narrative: Fangore starts a fresh session against the preceding checkpoint. He asks for the same label
+  fix, runs the full package checks and expects an already-satisfied handoff with an empty change list.
+implementation: ProjectCodingLocalWork runs verify_runs on the shared workspace before invoking inference.
+validation: Stage 060 has no seed or scripted patch. It can only pass after the repaired package survives
+  the preceding checkpoint.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: suite
+graph:
+  recipe: guided_coding
+  durable:
+    controller: story
+    store: shared
+steps:
+- do:
+    start:
+      inputs:
+        goal: Fix singular item labels
+        verify_runs:
+        - pytest: true
+          path: tests/test_labels.py
+        - pytest: true
+          path: tests/test_widget.py
+  expect:
+  - kind: equals
+    key: kind
+    value: advice_requested
+- do:
+    answer:
+      choose: minimal
+complete:
+  expect:
+  - kind: equals
+    key: kind
+    value: completed
+  - kind: equals
+    key: already_satisfied
+    value: true
+  - kind: equals
+    key: written_files
+    value: []
+cleanup: []

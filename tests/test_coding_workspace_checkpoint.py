@@ -34,7 +34,9 @@ def test_restore_replaces_workspace_from_checkpoint(tmp_path: Path) -> None:
     (ws / "calc.py").write_text("trash\n", encoding="utf-8")
     (ws / "extra.py").write_text("x\n", encoding="utf-8")
 
-    assert restore_coding_workspace_checkpoint(ws) is True
+    assert restore_coding_workspace_checkpoint(
+        ws, writes={"calc.py": b"trash\n", "extra.py": b"x\n"}
+    )
     assert (ws / "calc.py").read_text(encoding="utf-8") == "good\n"
     assert not (ws / "extra.py").exists()
 
@@ -62,5 +64,5 @@ def test_suite_style_success_advances_baseline(tmp_path: Path) -> None:
     save_coding_workspace_checkpoint(ws)  # after successful stage
 
     (ws / "calc.py").write_text("return eval(e)\n", encoding="utf-8")
-    assert restore_coding_workspace_checkpoint(ws) is True
+    assert restore_coding_workspace_checkpoint(ws, writes={"calc.py": b"return eval(e)\n"})
     assert "evaluate" in (ws / "calc.py").read_text(encoding="utf-8")

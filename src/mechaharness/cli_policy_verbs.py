@@ -1295,7 +1295,16 @@ class GraphWalkVerb(CliVerb):
             from mechaharness.core.completer import Completer
             from mechaharness.core.events import EventLog
 
-            kinds = sorted({str(n.get("kind") or "compute") for n in nodes_spec})
+            all_specs = []
+            pending = [(node, "") for node in nodes_spec]
+            while pending:
+                node_spec, prefix = pending.pop()
+                key = prefix + str(node_spec["id"])
+                all_specs.append({**node_spec, "id": key})
+                embedded = node_spec.get("subgraph") or {}
+                for child in embedded.get("nodes", {}).values():
+                    pending.append((child, key + ":"))
+            kinds = sorted({str(n.get("kind") or "compute") for n in all_specs})
             # Subgraph kind is handled by the executor; still register leaf kinds.
             from pyiv.files import RealFilesystem
 
@@ -1375,8 +1384,8 @@ class GraphWalkVerb(CliVerb):
             needs_infer = any(k in infer_kind_set for k in leaf_kinds)
             needs_judge = any(k in judge_kind_set for k in leaf_kinds)
 
-            scripts = _completion_scripts(nodes_spec)
-            turns = _completion_turns(nodes_spec)
+            scripts = _completion_scripts(all_specs)
+            turns = _completion_turns(all_specs)
             infer_runner: CliInferRunner | None = None
             judge_runner: CliJudgeRunner | None = None
             runners: list[Any] = []

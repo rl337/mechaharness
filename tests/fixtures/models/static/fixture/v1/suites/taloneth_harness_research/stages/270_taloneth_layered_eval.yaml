@@ -1,0 +1,66 @@
+id: taloneth_layered_eval
+suite: taloneth_harness_research
+persona: taloneth
+title: Score the task and the harness as separate results
+narrative: >
+  Taloneth starts the CLI host with family pass_through and backend mock. She
+  replays four frozen runs of the same "write the file" task and asks for a
+  layered score. In the lucky run the tool API swallowed an error, but a
+  fallback still wrote the correct file: the task passes and the harness fails,
+  so the combined result is not clean. In the wrong run the tools and policy
+  behaved, but the file contents are wrong: the task fails and the harness
+  passes, and that is not called an infrastructure failure. In the blind run
+  there is no runtime audit, so the harness stays unknown instead of passing.
+  In the both-fail run she has no trace that proves the harness defect caused
+  the bad file, so the link is only a hypothesis.
+implementation: >
+  score_layers in mechaharness.layered_verdict, exposed as the product verb
+  layered_eval. Composes with eval evidence and trace reconciliation; it does
+  not add a new evaluator.
+validation: >
+  Harness user_story stage 270_taloneth_layered_eval drives layered_eval.
+  Unit cases in tests/test_layered_verdict.py cover an observed causal trace
+  and an infrastructure failure that leaves both layers unscored.
+footnotes:
+- id: insp-trace-01
+  label: Trouble trace and requirement integrity (MH-TRACE-01)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md
+  note: Separate harness fidelity from agent task success
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    layered_eval:
+      cases:
+      - name: lucky
+        task: pass
+        harness: fail
+        harness_observed: true
+      - name: wrong
+        task: fail
+        harness: pass
+        harness_observed: true
+      - name: blind
+        task: pass
+        harness_observed: false
+      - name: both
+        task: fail
+        harness: fail
+        harness_observed: true
+        trace_supports_cause: false
+complete:
+  expect:
+  - {kind: equals, key: lucky_task, value: pass}
+  - {kind: equals, key: lucky_harness, value: fail}
+  - {kind: equals, key: lucky_clean, value: false}
+  - {kind: equals, key: wrong_task, value: fail}
+  - {kind: equals, key: wrong_harness, value: pass}
+  - {kind: equals, key: wrong_infrastructure, value: false}
+  - {kind: equals, key: blind_harness, value: unknown}
+  - {kind: equals, key: blind_clean, value: false}
+  - {kind: equals, key: both_attribution, value: hypothesis}
+cleanup: []

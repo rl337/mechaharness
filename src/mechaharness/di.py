@@ -19,6 +19,7 @@ share identity with ``InferenceStrategy``.
 from __future__ import annotations
 
 import inspect
+import os
 import sys
 from collections.abc import Callable, Sequence
 from typing import (
@@ -217,14 +218,23 @@ _INFERENCE_DEFAULTS: dict[str, dict[str, Any]] = {
 
 
 def apply_backend_defaults(settings: Settings) -> Settings:
-    """Fill ``base_url`` / ``api_key`` from the named backend when unset."""
+    """Fill ``base_url`` / ``api_key`` from the named backend when unset.
+
+    When ``api_key`` is still unset after backend defaults, fall back to the
+    conventional ``OPENAI_API_KEY`` process env (not a Settings field).
+    """
     defaults = _INFERENCE_DEFAULTS.get(settings.inference_backend.lower(), {})
     updates: dict[str, Any] = {}
     if settings.base_url is None and "base_url" in defaults:
         updates["base_url"] = defaults["base_url"]
     if settings.api_key is None and "api_key" in defaults:
         updates["api_key"] = defaults["api_key"]
-    return settings.model_copy(update=updates) if updates else settings
+    resolved = settings.model_copy(update=updates) if updates else settings
+    if resolved.api_key is None:
+        openai_key = os.environ.get("OPENAI_API_KEY", "").strip()
+        if openai_key:
+            return resolved.model_copy(update={"api_key": openai_key})
+    return resolved
 
 
 def _is_union_origin(origin: Any) -> bool:

@@ -1,0 +1,91 @@
+id: fangore_delegate_mcp_repair
+suite: delegate_pkg
+persona: fangore
+title: Resume a package bug through MCP and replay the answer
+narrative: "Fangore receives an existing Gadget checkout and an issue about singular item labels. He reproduces\
+  \ the failure, restarts the MCP driver at guidance, submits an answer, and repeats that same answer\
+  \ after the edit. He reruns every package test and reads the editor\u2019s draft."
+implementation: GeneratorMcpServer, FileGeneratorRunStore and ProjectCodingLocalWork drive the handoff
+  with a file-backed store. Static uses scripted writes. Live uses the configured Completer.
+validation: "Require red before the handoff and green after applying the actual diff to a fresh copy of\
+  \ the starting tree. Compare response and file versions across replay, and preserve the editor\u2019\
+  s draft."
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  local_work: project_coding
+  filesystem:
+    type: suite
+    seed: 050_labels.seed.json
+    contents: 050_fangore_delegate_mcp_repair.files.json
+steps:
+- do:
+    run_python:
+      code: |-
+        import pytest, sys
+        sys.exit(pytest.main(["-q", "tests"]))
+  expect:
+  - kind: equals
+    key: exit_code
+    value: 1
+  - kind: contains
+    key: stdout
+    value: test_singular
+  - {kind: contains, key: stdout, value: "1 items"}
+  - {kind: contains, key: stdout, value: "1 failed"}
+- do:
+    mcp_coding_handoff:
+      inputs:
+        goal: Correct singular item labels in labels.py. Preserve plural labels and Gadget behavior. Do
+          not edit tests or release notes.
+        verify_runs:
+        - pytest: true
+          path: tests
+  expect:
+  - kind: equals
+    key: start
+    value: advice_requested
+  - kind: equals
+    key: recovered_request
+    value: true
+  - kind: equals
+    key: terminal
+    value: completed
+  - kind: equals
+    key: written_files
+    value:
+    - labels.py
+  - kind: equals
+    key: replay_equal
+    value: true
+  - kind: equals
+    key: replay_changed_files
+    value: false
+  - kind: equals
+    key: diff_paths
+    value:
+    - labels.py
+  - kind: equals
+    key: clean_exit
+    value: 0
+- do:
+    run_python:
+      code: |-
+        import pytest, sys
+        sys.exit(pytest.main(["-q", "tests"]))
+  expect:
+  - kind: equals
+    key: exit_code
+    value: 0
+- do:
+    workspace_read:
+      path: release-notes.txt
+complete:
+  expect:
+  - kind: equals
+    key: text
+    value: |
+      editor draft
+cleanup: []

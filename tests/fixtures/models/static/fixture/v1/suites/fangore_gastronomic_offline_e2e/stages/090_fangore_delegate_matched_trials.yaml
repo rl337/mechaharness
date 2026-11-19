@@ -1,0 +1,44 @@
+id: fangore_delegate_matched_trials
+suite: fangore_gastronomic_offline_e2e
+persona: fangore
+title: Compare repeated package trials only under matching budgets
+narrative: "Fangore records a successful repair and a regression for each recipe. He compares the batch\
+  \ at equal budgets, then increases only the second arm\u2019s token ceiling. The summary must reject\
+  \ the second comparison."
+implementation: assemble_gastronomic_trial and summarize_gastronomic_comparison aggregate host trial records.
+validation: Use the same model, suite and outcomes in both batches. Require two trials, a half-success
+  rate, correct comparability and no automatic winner. Fixture records exercise offline accounting.
+footnotes: []
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+    contents: 090_batch.files.json
+steps:
+- do:
+    compare_coding_trials:
+      budget_key: budget
+  expect:
+  - kind: equals
+    key: comparable
+    value: true
+  - kind: equals
+    key: arm_a_count
+    value: 2
+  - kind: equals
+    key: arm_b_success_rate
+    value: 0.5
+- do:
+    compare_coding_trials:
+      budget_key: larger_budget
+complete:
+  expect:
+  - kind: equals
+    key: comparable
+    value: false
+  - kind: equals
+    key: automatic_winner
+    value: false
+cleanup: []

@@ -188,9 +188,31 @@ def build_generator(
 
         store = FileGeneratorRunStore(path)
 
-        class _McpHostConfig(host_cls):  # type: ignore[misc,valid-type]
+        coding_config = host_cls
+
+        class _McpHostConfig(coding_config):  # type: ignore[misc,valid-type]
             def get_generator_run_store(self) -> FileGeneratorRunStore:
                 return store
+
+            def configure(self) -> None:
+                super().configure()
+                from mechaharness.generator_local_work import GeneratorLocalWork
+                from mechaharness.isolation.coding_repository import (
+                    CodingRepositoryIsolation,
+                    RepositoryCodingLocalWork,
+                )
+                from mechaharness.project_coding_tools import resolve_workspace_root
+
+                source = resolve_workspace_root()
+
+                def make_worker(root: Path) -> GeneratorLocalWork:
+                    config = coding_config(workspace=root, isolated_process=True)
+                    return cast(GeneratorLocalWork, get_injector(config).inject(GeneratorLocalWork))
+
+                self.register_instance(
+                    GeneratorLocalWork,
+                    RepositoryCodingLocalWork(CodingRepositoryIsolation(source), make_worker),
+                )
 
         return cast(
             DurableGraphGenerator,
@@ -521,6 +543,13 @@ class GeneratorMcpServer:
 
     def call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         """Invoke a tool by name (also used by offline trial clients)."""
+        run_id = arguments.get("run_id")
+        if run_id and name in {"generator_start", "generator_resume", "generator_cancel"}:
+            with self._gen.operation(str(run_id)):
+                return self._call_tool(name, arguments)
+        return self._call_tool(name, arguments)
+
+    def _call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         if name == "generator_list_recipes":
             return {
                 "recipes": [r.model_dump(mode="json") for r in self._gen.list_recipes()]

@@ -1,0 +1,26 @@
+id: fangore_recursive_return
+suite: fangore_bag_inference_continuity
+persona: fangore
+title: Resume a project from its committed grandchild result
+narrative: >
+  Fangore opens a project graph. Each planning step discovers whether its slice needs a
+  smaller child. The worker stops immediately after the grandchild commits its proof.
+  Fangore reopens the SQLite checkpoints, continues the original project, and checks the
+  acceptance result produced by each returning caller.
+implementation: GraphExecutor drives root and nested frames through the same call loop.
+validation: Three levels enter in order. One leaf runs. Each parent accepts once and private child edits stay scoped.
+footnotes: []
+kind: user_story
+environment: {family: pass_through, backend: mock, filesystem: {type: temp}}
+steps:
+- do: {resume_project_frames: {depth: 3}}
+complete:
+  expect:
+  - {kind: equals, key: recovered, value: true}
+  - {kind: equals, key: status, value: ok}
+  - {kind: equals, key: visited, value: [1, 2, 3]}
+  - {kind: equals, key: accepted, value: [3, 2, 1]}
+  - {kind: equals, key: leaf_calls, value: 1}
+  - {kind: equals, key: root_bag, value: {in: {goal: project}, acc: {proof: 2}, out: {proof: 3}}}
+  - {kind: equals, key: root_stack, value: []}
+cleanup: []

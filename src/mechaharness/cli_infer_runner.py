@@ -45,6 +45,16 @@ INFER_KIND = "infer"
 DEFAULT_INFER_KINDS: tuple[str, ...] = (CLI_INFER_KIND, INFER_KIND)
 
 
+def node_request_identity(
+    completer: Completer, node: GraphNode, context: GraphRunContext
+) -> dict[str, str]:
+    identity = {"node_id": node.id}
+    if isinstance(completer, NodeScriptedCompleter) and context.graph.frame_path:
+        prefix = context.run_id.removeprefix(context.graph.frame_path[0]).lstrip(":")
+        identity["script_key"] = f"{prefix}:{node.id}" if prefix else node.id
+    return identity
+
+
 class NodeScriptedCompleter(Completer):
     """Completer that returns scripted text keyed by ``request.extra['node_id']``.
 
@@ -76,7 +86,7 @@ class NodeScriptedCompleter(Completer):
 
     async def complete(self, request: CompletionRequest) -> CompletionResponse:
         self.requests.append(request)
-        node_id = request.extra.get("node_id")
+        node_id = request.extra.get("script_key", request.extra.get("node_id"))
         if isinstance(node_id, str) and self._turns.get(node_id):
             turn = self._turns[node_id].pop(0)
             return _response_from_turn(turn)
@@ -191,7 +201,7 @@ class CliInferRunner(GraphNodeRunner):
             model=model,
             messages=messages,
             max_tokens=self._request_max_tokens(node),
-            extra={"node_id": node.id},
+            extra=node_request_identity(self._completer, node, context),
         )
         return await self._complete_and_finish(
             node,
@@ -255,7 +265,7 @@ class CliInferRunner(GraphNodeRunner):
             tools=tools,
             max_tokens=self._request_max_tokens(node),
             extra={
-                "node_id": node.id,
+                **node_request_identity(self._completer, node, context),
                 "snapshot_id": snapshot_id,
                 "invocation_id": invocation_id,
             },

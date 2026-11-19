@@ -203,7 +203,7 @@ def test_guided_coding_local_work_writes_file(tmp_path: Path) -> None:
         idempotency_key="guided-unit-1:1",
     )
     assert y2.kind == "completed"
-    assert y2.payload.get("result") == "ok"
+    assert y2.payload.get("result") == "unverified"
     assert ".mechaharness/guided_coding_stub.txt" in (
         y2.payload.get("written_files") or []
     )
@@ -837,7 +837,7 @@ def test_project_coding_write_recovery_nudge(tmp_path: Path) -> None:
             guidance_history=[{"response": {"choice_id": "minimal"}}],
         )
     )
-    assert out.get("result") == "ok"
+    assert out.get("result") == "unverified"
     assert "calc.py" in (out.get("written_files") or [])
     assert (tmp_path / "calc.py").read_text() == "print(1)\n"
     assert state["round"] >= 2

@@ -10,22 +10,21 @@ tool loop with workspace tools, optionally after building an
 from __future__ import annotations
 
 import asyncio
+import inspect
 import json
-import subprocess
 import sys
 from abc import ABC, abstractmethod
+from collections.abc import Callable
+from copy import copy
 from pathlib import Path
 from typing import Any
 
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
-from mechaharness.coding_workspace_checkpoint import (
-    restore_coding_workspace_checkpoint,
-    save_coding_workspace_checkpoint,
-)
+from mechaharness.coding_workspace_checkpoint import restore_edit
 from mechaharness.coding_write_guard import find_forbidden_dynamic_exec_calls
 from mechaharness.conversational_tool_loop_runner import ConversationalToolLoopRunner
-from mechaharness.core.access import FsRead, FsWrite, GraphExecute, ProcessExec
+from mechaharness.core.access import AccessControl, FsRead, FsWrite, GraphExecute, ProcessExec
 from mechaharness.durable_graph_generator import GeneratorRunRecord
 from mechaharness.graph_templates.base import GraphTemplateParams
 from mechaharness.graph_templates.conversational_tool_loop import (
@@ -42,11 +41,13 @@ from mechaharness.instruction_plan import (
     has_answered_decompose,
     verify_acceptance,
 )
+from mechaharness.isolation.coding_process import CodingProcessUnavailable, run_coding_process
 from mechaharness.mcp_progress import (
     coding_progress_prefix,
     get_mcp_progress,
     report_mcp_progress,
 )
+from mechaharness.project_coding_tools import WorkspacePaths
 from mechaharness.run_timing import TimingSpan, append_timing, inference_budget_fields
 from mechaharness.tools.base import ToolRegistry
 
@@ -124,6 +125,8 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         max_iterations: int = 8,
         workspace_root: str | Path | None = None,
         event_log: Any | None = None,
+        access_control: AccessControl | None = None,
+        isolated_process: bool = False,
     ) -> None:
         self._tools = tools
         self._complete = complete
@@ -134,7 +137,19 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             else None
         )
         self._event_log = event_log
+        self._access_control = access_control
+        self._isolated_process = isolated_process
+        self._edits: dict[str, tuple[bytes | None, bytes | None]] = {}
         self._written_files: list[str] = []
+        self._checks: list[dict[str, Any]] = []
+        self._write_count = 0
+        self._rewind: Callable[[], None] | None = None
+        self._run_id = ""
+        self._counts: dict[str, int] = {}
+
+    def bind_workspace_recovery(self, rewind: Callable[[], None]) -> None:
+        """Restore the isolated working tree, including subprocess changes."""
+        self._rewind = rewind
 
     def bind_event_log(self, event_log: Any) -> None:
         """Share the host/CLI EventLog so coding graph emits are observable."""
@@ -144,7 +159,17 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         if record.recipe_id not in _PLAN_RECIPES:
             return {"result": "ok", "skipped": True, "recipe_id": record.recipe_id}
         try:
-            return self._run_sync(record)
+            burst = copy(self)
+            burst._run_id = record.run_id
+            burst._counts = {"model_calls": 0, "tool_calls": 0, "repair_rounds": 0}
+            burst._edits = {}
+            burst._checks = []
+            try:
+                return burst._run_sync(record)
+            except Exception as exc:
+                burst._restore_baseline_checkpoint()
+                return {"result": "failed", "error": str(exc), "checks": burst._checks,
+                        **burst._artifact_fields()}
         except Exception as exc:  # noqa: BLE001 - surface into completed/failed payload
             return {"result": "failed", "error": str(exc)}
 
@@ -174,25 +199,20 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         if rel and rel not in self._written_files:
             self._written_files.append(rel)
 
-    def _refresh_baseline_checkpoint(self) -> None:
-        """Snapshot current workspace so escalate restore undoes this burst only."""
-        if self._workspace_root:
-            save_coding_workspace_checkpoint(self._workspace_root)
-
-    def _restore_baseline_checkpoint(self) -> bool:
-        """Replace workspace from the latest coding checkpoint (suite or burst)."""
-        if not self._workspace_root:
-            return False
-        return restore_coding_workspace_checkpoint(self._workspace_root)
+    def _restore_baseline_checkpoint(self) -> None:
+        if self._rewind:
+            self._rewind()
+        elif self._workspace_root:
+            paths = WorkspacePaths(self._workspace_root)
+            for name, (before, written) in self._edits.items():
+                path = paths.resolve(name)
+                if path == paths.root / name:
+                    restore_edit(path, before, written)
+        self._edits.clear()
+        self._written_files.clear()
 
     async def _run_async(self, record: GeneratorRunRecord) -> dict[str, Any]:
         self._written_files = []
-        # After a decompose answer, prefer the last successful / burst baseline
-        # over a prior attempt's broken writes — then refresh so this attempt's
-        # escalate restores here, not an older empty suite-start tree.
-        if has_answered_decompose(list(record.guidance_history)):
-            self._restore_baseline_checkpoint()
-        self._refresh_baseline_checkpoint()
         burst = TimingSpan(
             self._workspace_root,
             kind="coding_burst",
@@ -216,7 +236,12 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             auto_escalated=False,
             prior_item_results=[],
         )
+        if out.get("result") in {"failed", "needs_guidance"}:
+            self._restore_baseline_checkpoint()
+            out.update(self._artifact_fields())
+        out["checks"] = self._checks
         burst.end(
+            **self._counts,
             result=out.get("result"),
             decompose_auto_applied=out.get("decompose_auto_applied"),
             plan_phase=out.get("plan_phase"),
@@ -224,8 +249,6 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             item_result_count=len(out.get("item_results") or []),
             written_files=out.get("written_files"),
         )
-        if out.get("result") == "ok" and self._workspace_root:
-            save_coding_workspace_checkpoint(self._workspace_root)
         return out
 
     async def _run_async_body(
@@ -268,7 +291,15 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         # Host ask: do verify_runs already pass? If so, report already-exists and
         # skip the Completer — Python validate is the proof; no write required.
         force_implement = bool(inputs.get("force_implement"))
-        verify_runs = _normalize_verify_runs(inputs.get("verify_runs"))
+        raw_checks = inputs.get("verify_runs")
+        verify_runs = _normalize_verify_runs(raw_checks)
+        if raw_checks is not None and (
+            not isinstance(raw_checks, list) or len(verify_runs) != len(raw_checks)
+        ):
+            return {"result": "failed", "error": "invalid_verify_runs"}
+        if force_implement:
+            for spec in verify_runs:
+                self._verification_target(spec)
         if verify_runs and not force_implement:
             preflight_failures = self._execute_verify_runs(verify_runs)
             if not preflight_failures:
@@ -293,6 +324,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                     ),
                     **self._artifact_fields(),
                 }
+
+        if self._complete is None:
+            return {"result": "failed", "error": "coding_provider_unavailable"}
 
         item_results: list[dict[str, Any]] = list(prior_item_results)
         prefix = coding_progress_prefix(record.recipe_id)
@@ -383,9 +417,10 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         while (
             verify_failures
             and "write_file" in self._tools
-            and repair_rounds < max_repair_rounds
+            and self._counts["repair_rounds"] < max_repair_rounds
         ):
             repair_rounds += 1
+            self._counts["repair_rounds"] += 1
             repair_goal = _verify_repair_instruction(
                 verify_failures,
                 round_i=repair_rounds,
@@ -429,7 +464,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             )
 
         return {
-            "result": "ok",
+            "result": "ok" if verify_runs else "unverified",
             "already_satisfied": False,
             "changes_expected": True,
             "mode": plan.mode,
@@ -537,9 +572,33 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             **self._artifact_fields(),
         }
 
-    def _execute_verify_runs(
-        self, verify_runs: list[dict[str, Any]]
-    ) -> list[str]:
+    def _execute_verify_runs(self, verify_runs: list[dict[str, Any]]) -> list[str]:
+        failures = []
+        for index, spec in enumerate(verify_runs):
+            try:
+                errors = self._check_workspace(index, spec)
+            except (ValueError, PermissionError, RuntimeError) as exc:
+                self._checks.append({"spec": spec, "passed": False, "errors": [str(exc)]})
+                raise
+            self._checks.append({"spec": spec, "passed": not errors, "errors": errors})
+            failures.extend(errors)
+        return failures
+
+    def _verification_target(self, spec: dict[str, Any]) -> Path:
+        if self._workspace_root is None:
+            raise ValueError("verify_runs require workspace_root")
+        target = WorkspacePaths(self._workspace_root).resolve(spec.get("path") or ".")
+        executes = any(spec.get(k) for k in ("pytest", "ruff", "mypy")) or any(
+            k in spec for k in ("args", "exit_code", "stdout_contains")
+        )
+        required = [FsRead, ProcessExec] if executes else [FsRead]
+        if self._access_control and not self._access_control.allows(
+            required, tool_name="verify_runs", run_id=self._run_id
+        ):
+            raise PermissionError("verify_runs: permission denied")
+        return target
+
+    def _check_workspace(self, index: int, spec: dict[str, Any]) -> list[str]:
         """Run host-side workspace checks; return human-readable failure lines.
 
         Spec keys:
@@ -554,182 +613,175 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         - ``ruff``: truthy → run ``python -m ruff check <path|.>`` (static lint).
         - ``mypy``: truthy → run ``python -m mypy <path|.>`` (static types).
         """
-        if not verify_runs:
-            return []
         if self._workspace_root is None:
             return ["verify_runs require workspace_root"]
         root = Path(self._workspace_root)
         failures: list[str] = []
-        for index, spec in enumerate(verify_runs):
-            path = str(spec.get("path") or "").strip()
-            use_pytest = bool(spec.get("pytest"))
-            use_ruff = bool(spec.get("ruff"))
-            use_mypy = bool(spec.get("mypy"))
-            if not path and not (use_pytest or use_ruff or use_mypy):
-                failures.append(f"verify_runs[{index}]: missing path")
-                continue
-            target = root / path if path else root
-            text_needles = _as_str_list(spec.get("text_contains"))
-            text_forbids = _as_str_list(spec.get("text_forbids"))
-            min_bytes = spec.get("min_bytes")
-            python_parses = bool(spec.get("python_parses"))
-            needs_body = bool(
-                text_needles or text_forbids or min_bytes is not None or python_parses
-            )
-            body = ""
-            if needs_body:
-                if not target.is_file():
-                    failures.append(f"verify_runs[{index}]: missing file {path}")
-                    continue
-                try:
-                    body = target.read_text(encoding="utf-8")
-                except OSError as exc:
-                    failures.append(f"verify_runs[{index}] {path}: read failed: {exc}")
-                    continue
-                if min_bytes is not None:
-                    size = len(body.encode("utf-8"))
-                    floor = int(min_bytes)
-                    if size < floor:
-                        failures.append(
-                            f"verify_runs[{index}] {path}: file too small "
-                            f"({size} < {floor} bytes) — possible gutting"
-                        )
-                if python_parses:
-                    import ast
-
-                    try:
-                        ast.parse(body, filename=path)
-                    except SyntaxError as exc:
-                        failures.append(
-                            f"verify_runs[{index}] {path}: python_parses "
-                            f"failed: {exc}"
-                        )
-                for text_needle in text_needles:
-                    if text_needle not in body:
-                        failures.append(
-                            f"verify_runs[{index}] {path}: expected file text to "
-                            f"contain {text_needle!r}"
-                        )
-                for banned in text_forbids:
-                    if banned in body:
-                        failures.append(
-                            f"verify_runs[{index}] {path}: file text must not "
-                            f"contain {banned!r}"
-                        )
-                # Stronger than substring when stories ban eval/exec cheats.
-                if path.lower().endswith(".py") and _forbids_dynamic_exec(
-                    text_forbids
-                ):
-                    hits = find_forbidden_dynamic_exec_calls(body)
-                    if hits:
-                        failures.append(
-                            f"verify_runs[{index}] {path}: do not call "
-                            f"{', '.join(hits)} on user input — implement a "
-                            "real parser (eval/exec/literal_eval are banned)"
-                        )
-            if use_pytest or use_ruff or use_mypy:
-                if path and not target.exists():
-                    tool = (
-                        "pytest" if use_pytest else ("ruff" if use_ruff else "mypy")
-                    )
-                    failures.append(
-                        f"verify_runs[{index}]: missing {tool} path {path}"
-                    )
-                    continue
-                extra = [str(a) for a in list(spec.get("args") or [])]
-                if use_pytest:
-                    cmd = [sys.executable, "-m", "pytest", "-q"]
-                    if path:
-                        cmd.append(path)
-                    tool_label = "pytest"
-                    timeout_default = 60.0
-                elif use_ruff:
-                    cmd = [sys.executable, "-m", "ruff", "check"]
-                    cmd.append(path if path else ".")
-                    tool_label = "ruff"
-                    timeout_default = 60.0
-                else:
-                    # Match CI-shaped strictness for isolated story workspaces
-                    # that lack a pyproject mypy stanza.
-                    cmd = [sys.executable, "-m", "mypy"]
-                    cmd.append(path if path else ".")
-                    has_flag = any(
-                        str(a).startswith("-") for a in list(spec.get("args") or [])
-                    )
-                    has_config = (root / "mypy.ini").is_file() or (
-                        root / "pyproject.toml"
-                    ).is_file()
-                    if not has_flag and not has_config:
-                        cmd.append("--disallow-untyped-defs")
-                    tool_label = "mypy"
-                    timeout_default = 120.0
-                cmd.extend(extra)
-                expected_exit = int(spec.get("exit_code", 0))
-                try:
-                    completed = subprocess.run(
-                        cmd,
-                        cwd=str(root),
-                        capture_output=True,
-                        text=True,
-                        timeout=float(
-                            spec.get("timeout_seconds") or timeout_default
-                        ),
-                        check=False,
-                    )
-                except Exception as exc:  # noqa: BLE001
-                    failures.append(
-                        f"verify_runs[{index}] {tool_label} {path}: {exc}"
-                    )
-                    continue
-                if int(completed.returncode) != expected_exit:
-                    failures.append(
-                        f"verify_runs[{index}] {tool_label} {path}: exit "
-                        f"{completed.returncode} != {expected_exit}; "
-                        f"stdout={completed.stdout.strip()!r}; "
-                        f"stderr={completed.stderr.strip()!r}"
-                    )
-                continue
-            # Process check only when the row asks for argv / stdout / exit.
-            run_process = (
-                "args" in spec
-                or spec.get("stdout_contains") is not None
-                or "exit_code" in spec
-            )
-            if not run_process:
-                continue
+        path = str(spec.get("path") or "").strip()
+        use_pytest = bool(spec.get("pytest"))
+        use_ruff = bool(spec.get("ruff"))
+        use_mypy = bool(spec.get("mypy"))
+        if not path and not (use_pytest or use_ruff or use_mypy):
+            failures.append(f"verify_runs[{index}]: missing path")
+            return failures
+        target = self._verification_target(spec)
+        text_needles = _as_str_list(spec.get("text_contains"))
+        text_forbids = _as_str_list(spec.get("text_forbids"))
+        min_bytes = spec.get("min_bytes")
+        python_parses = bool(spec.get("python_parses"))
+        needs_body = bool(
+            text_needles or text_forbids or min_bytes is not None or python_parses
+        )
+        body = ""
+        if needs_body:
             if not target.is_file():
                 failures.append(f"verify_runs[{index}]: missing file {path}")
-                continue
-            args = [str(a) for a in list(spec.get("args") or [])]
-            expected_exit = int(spec.get("exit_code", 0))
-            stdout_needle = spec.get("stdout_contains")
+                return failures
             try:
-                completed = subprocess.run(
-                    [sys.executable, str(target), *args],
-                    cwd=str(root),
-                    capture_output=True,
-                    text=True,
-                    timeout=float(spec.get("timeout_seconds") or 30),
-                    check=False,
+                body = target.read_text(encoding="utf-8")
+            except OSError as exc:
+                failures.append(f"verify_runs[{index}] {path}: read failed: {exc}")
+                return failures
+            if min_bytes is not None:
+                size = len(body.encode("utf-8"))
+                floor = int(min_bytes)
+                if size < floor:
+                    failures.append(
+                        f"verify_runs[{index}] {path}: file too small "
+                        f"({size} < {floor} bytes) — possible gutting"
+                    )
+            if python_parses:
+                import ast
+
+                try:
+                    ast.parse(body, filename=path)
+                except SyntaxError as exc:
+                    failures.append(
+                        f"verify_runs[{index}] {path}: python_parses "
+                        f"failed: {exc}"
+                    )
+            for text_needle in text_needles:
+                if text_needle not in body:
+                    failures.append(
+                        f"verify_runs[{index}] {path}: expected file text to "
+                        f"contain {text_needle!r}"
+                    )
+            for banned in text_forbids:
+                if banned in body:
+                    failures.append(
+                        f"verify_runs[{index}] {path}: file text must not "
+                        f"contain {banned!r}"
+                    )
+            # Stronger than substring when stories ban eval/exec cheats.
+            if path.lower().endswith(".py") and _forbids_dynamic_exec(
+                text_forbids
+            ):
+                hits = find_forbidden_dynamic_exec_calls(body)
+                if hits:
+                    failures.append(
+                        f"verify_runs[{index}] {path}: do not call "
+                        f"{', '.join(hits)} on user input — implement a "
+                        "real parser (eval/exec/literal_eval are banned)"
+                    )
+        if use_pytest or use_ruff or use_mypy:
+            if path and not target.exists():
+                tool = (
+                    "pytest" if use_pytest else ("ruff" if use_ruff else "mypy")
                 )
+                failures.append(
+                    f"verify_runs[{index}]: missing {tool} path {path}"
+                )
+                return failures
+            extra = [str(a) for a in list(spec.get("args") or [])]
+            if use_pytest:
+                cmd = [sys.executable, "-m", "pytest", "-q"]
+                if path:
+                    cmd.append(path)
+                tool_label = "pytest"
+                timeout_default = 60.0
+            elif use_ruff:
+                cmd = [sys.executable, "-m", "ruff", "check"]
+                cmd.append(path if path else ".")
+                tool_label = "ruff"
+                timeout_default = 60.0
+            else:
+                # Match CI-shaped strictness for isolated story workspaces
+                # that lack a pyproject mypy stanza.
+                cmd = [sys.executable, "-m", "mypy"]
+                cmd.append(path if path else ".")
+                has_flag = any(
+                    str(a).startswith("-") for a in list(spec.get("args") or [])
+                )
+                has_config = (root / "mypy.ini").is_file() or (
+                    root / "pyproject.toml"
+                ).is_file()
+                if not has_flag and not has_config:
+                    cmd.append("--disallow-untyped-defs")
+                tool_label = "mypy"
+                timeout_default = 120.0
+            cmd.extend(extra)
+            expected_exit = int(spec.get("exit_code", 0))
+            try:
+                completed = run_coding_process(
+                    cmd, root, isolated=self._isolated_process,
+                    timeout=float(spec.get("timeout_seconds") or timeout_default),
+                )
+            except CodingProcessUnavailable:
+                raise
             except Exception as exc:  # noqa: BLE001
-                failures.append(f"verify_runs[{index}] {path} {args}: {exc}")
-                continue
+                failures.append(
+                    f"verify_runs[{index}] {tool_label} {path}: {exc}"
+                )
+                return failures
             if int(completed.returncode) != expected_exit:
                 failures.append(
-                    f"verify_runs[{index}] {path} {args}: exit "
+                    f"verify_runs[{index}] {tool_label} {path}: exit "
                     f"{completed.returncode} != {expected_exit}; "
+                    f"stdout={completed.stdout.strip()!r}; "
                     f"stderr={completed.stderr.strip()!r}"
                 )
-                continue
-            if (
-                stdout_needle is not None
-                and str(stdout_needle) not in (completed.stdout or "")
-            ):
-                failures.append(
-                    f"verify_runs[{index}] {path} {args}: expected stdout to "
-                    f"contain {stdout_needle!r}, got {completed.stdout!r}"
-                )
+            return failures
+        # Process check only when the row asks for argv / stdout / exit.
+        run_process = (
+            "args" in spec
+            or spec.get("stdout_contains") is not None
+            or "exit_code" in spec
+        )
+        if not run_process:
+            if not target.exists():
+                failures.append(f"verify_runs[{index}]: missing path {path}")
+            return failures
+        if not target.is_file():
+            failures.append(f"verify_runs[{index}]: missing file {path}")
+            return failures
+        args = [str(a) for a in list(spec.get("args") or [])]
+        expected_exit = int(spec.get("exit_code", 0))
+        stdout_needle = spec.get("stdout_contains")
+        try:
+            completed = run_coding_process(
+                [sys.executable, str(target), *args], root, isolated=self._isolated_process,
+                timeout=float(spec.get("timeout_seconds") or 30),
+            )
+        except CodingProcessUnavailable:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            failures.append(f"verify_runs[{index}] {path} {args}: {exc}")
+            return failures
+        if int(completed.returncode) != expected_exit:
+            failures.append(
+                f"verify_runs[{index}] {path} {args}: exit "
+                f"{completed.returncode} != {expected_exit}; "
+                f"stderr={completed.stderr.strip()!r}"
+            )
+            return failures
+        if (
+            stdout_needle is not None
+            and str(stdout_needle) not in (completed.stdout or "")
+        ):
+            failures.append(
+                f"verify_runs[{index}] {path} {args}: expected stdout to "
+                f"contain {stdout_needle!r}, got {completed.stdout!r}"
+            )
         return failures
 
     async def _run_item(
@@ -795,18 +847,46 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
                 tool = self._tools.get(name)
             except KeyError:
                 return json.dumps({"ok": False, "error": f"unknown tool {name}"})
-            arguments = args if isinstance(args, dict) else {}
-            if isinstance(arguments, str):
-                try:
-                    arguments = json.loads(arguments)
-                except json.JSONDecodeError:
-                    arguments = {"raw": arguments}
-            if name == "write_file" and isinstance(arguments, dict):
-                path = arguments.get("path")
-                if path is not None:
-                    self._note_write(str(path))
+            self._counts["tool_calls"] += 1
+            if self._access_control and not self._access_control.allows(
+                tool.grants, tool_name=name, run_id=record.run_id
+            ):
+                return json.dumps({"ok": False, "error": f"permission denied: {name}"})
+            arguments = json.loads(args) if isinstance(args, str) else args
+            if not isinstance(arguments, dict):
+                return json.dumps({"ok": False, "error": "expected object arguments"})
+            if name != "write_file" or not self._workspace_root:
+                return str(tool.handler(**arguments))
+            paths = WorkspacePaths(self._workspace_root)
+            path = paths.resolve(arguments["path"])
+            relative = str(path.relative_to(paths.root))
+            before = path.read_bytes() if path.is_file() else None
             result = tool.handler(**arguments)
+            after = path.read_bytes() if path.is_file() else None
+            if after != before:
+                self._write_count += 1
+                original, previous = self._edits.get(relative, (before, before))
+                # An intervening edit becomes the new restore point.
+                if previous != before:
+                    original = before
+                self._edits[relative] = original, after
+                if after != original:
+                    self._note_write(relative)
+                elif relative in self._written_files:
+                    self._written_files.remove(relative)
             return str(result)
+
+        async def measured_complete(messages: Any, meta: Any) -> Any:
+            self._counts["model_calls"] += 1
+            result = self._complete(messages, meta)
+            if inspect.isawaitable(result):
+                result = await result
+            usage = result.get("usage") if isinstance(result, dict) else None
+            if isinstance(usage, dict):
+                for key in ("prompt_tokens", "completion_tokens"):
+                    if usage.get(key) is not None:
+                        self._counts[key] = self._counts.get(key, 0) + int(usage[key])
+            return result
 
         root = list(path_prefix or coding_progress_prefix(record.recipe_id))
         work_seg = f"work_item {work_item_index}"
@@ -829,7 +909,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             progress.base_segments = list(root)
 
         loop_runner = ConversationalToolLoopRunner(
-            complete=self._complete,
+            complete=measured_complete,
             dispatch_tool=dispatch_tool,
             on_progress=on_progress,
         )
@@ -862,7 +942,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             grants=grants,
             event_log=self._event_log,
         )
-        writes_before = len(self._written_files)
+        writes_before = self._write_count
         result = await executor.run(
             graph,
             budget_policy=BudgetPolicy.unlimited(),
@@ -874,7 +954,7 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
         # Live / thinking models often burn the round on reasoning (or time out)
         # without write_file — recover even when the loop status is failed.
         needs_write_recovery = (
-            len(self._written_files) == writes_before
+            self._write_count == writes_before
             and _instruction_expects_write(goal)
             and "write_file" in self._tools
         )
@@ -927,9 +1007,9 @@ class ProjectCodingLocalWork(GeneratorLocalWork):
             }
             if recover_result.status == "ok":
                 result = recover_result
-            elif len(self._written_files) <= writes_before:
+            elif self._write_count <= writes_before:
                 result = recover_result
-        wrote = len(self._written_files) > writes_before
+        wrote = self._write_count > writes_before
         # A landed write during verify_repair is enough to re-run host checks
         # even if the tool loop timed out afterward.
         item_ok = result.status == "ok" or (
@@ -985,7 +1065,9 @@ def _normalize_verify_runs(raw: Any) -> list[dict[str, Any]]:
         return []
     out: list[dict[str, Any]] = []
     for item in raw:
-        if isinstance(item, dict) and item.get("path"):
+        if isinstance(item, dict) and (
+            item.get("path") or any(item.get(k) for k in ("pytest", "mypy", "ruff"))
+        ):
             out.append(dict(item))
     return out
 
@@ -1082,15 +1164,8 @@ def _verify_repair_instruction(
         "1) Call read_file on the target file(s).\n"
         "2) Emit one <tool_call> write_file with the FULL fixed file contents "
         "in the answer content (not only in reasoning).\n"
-        "Extend the working parser — do not replace it with a stub or drop "
-        "operators that already passed (^ right-assoc, * / over + -, parens, "
-        "fn(args)). Prefer `def evaluate(expr)` and `def main(argv=None) -> int`. "
-        "Do not call the eval, exec, or ast.literal_eval functions on the "
-        "user expression — implement a real parser (write_file will refuse "
-        "those calls). "
-        "If * or / cases fail: tokenize them as operators and give * / "
-        "tighter precedence than + - (e.g. 2+3*4 → 14, 8/2*2 → 8). "
-        "If ^ fails: keep right-associative power (2^3^2 → 512).\n"
+        "Use the failing host checks below to identify the smallest change. "
+        "Preserve working behavior and rerun the same checks.\n"
         "Failures:\n"
         f"{failure_block}"
     )
