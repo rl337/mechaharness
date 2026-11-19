@@ -31,18 +31,22 @@ def _render_footnotes(story: dict[str, Any]) -> list[str]:
     if not footnotes:
         return []
     lines = ["#### Footnotes", ""]
-    narrative = str(story.get("narrative") or "")
-    cited = set(re.findall(r"\[\^([A-Za-z0-9_-]+)\]", narrative))
-    for i, item in enumerate(footnotes, start=1):
+    prose = "\n".join(
+        str(story.get(field) or "") for field in ("narrative", "implementation", "validation")
+    )
+    cited = set(re.findall(r"\[\^([A-Za-z0-9_-]+)\]", prose))
+    listed = 0
+    for item in footnotes:
         fid = str(item["id"])
         label = str(item["label"])
         url = str(item["url"])
         note = item.get("note")
         suffix = f" — {note}" if isinstance(note, str) and note.strip() else ""
-        if cited:
+        if fid in cited:
             lines.append(f"[^{fid}]: [{label}]({url}){suffix}")
         else:
-            lines.append(f"{i}. [{label}]({url}){suffix}")
+            listed += 1
+            lines.append(f"{listed}. [{label}]({url}){suffix}")
     lines.append("")
     return lines
 

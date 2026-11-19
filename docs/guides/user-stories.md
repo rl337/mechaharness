@@ -2258,7 +2258,7 @@ Harness `user_story` walks the promoted product/test verb (no `probe:` wrapper);
 
 #### Footnotes
 
-[^loop-vs-graph-executor]: [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Executor advances durable plans hosts define
+1. [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Executor advances durable plans hosts define
 [^insp-executor]: [Inspiration requirements (graph execution)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Reqs 2 and 12 — linkage then execute; durable checkpoints
 
 ### `fangore_graph_linkage_preflight` — Fail closed on missing graph linkage before work starts
@@ -3695,7 +3695,7 @@ Harness `user_story` stage `080_fangore_jev_context_budget_pack.yaml`: environme
 #### Footnotes
 
 [^jev-us05]: [Jev typed-judgment inspiration (MH-JEV-US05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/jev-typed-judgment-inspiration.md) — RAG context selection
-[^insp-pa-01-picker]: [Personal agent reliability map (MH-PA-01 context freshness)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Native context freshness scoring; typed tool-result TTL is fangore_insp_tool_result_freshness
+1. [Personal agent reliability map (MH-PA-01 context freshness)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Native context freshness scoring; typed tool-result TTL is fangore_insp_tool_result_freshness
 
 ### `fangore_jev_context_exclude_injection` — Exclude injection-tainted snippets from the pack
 
@@ -3947,7 +3947,7 @@ Harness `user_story` walks `local_plan_resume`; expects first_status=failed (mis
 
 #### Footnotes
 
-[^loop-vs-graph]: [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Explicit control flow; MechaHarness extends into execution graphs
+1. [Loop vs graph engineering](https://medium.com/@neuraldev/loop-engineering-vs-graph-engineering-the-architecture-shift-quietly-reshaping-ai-agents-c83488435d23) — Explicit control flow; MechaHarness extends into execution graphs
 [^insp-resume]: [Inspiration requirements (durable resume)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 12 — resumable external state; incompatible fingerprint refuse
 
 ### `fangore_node_components` — Query node components inside each graph node for pre-layout
@@ -3997,7 +3997,7 @@ Harness `user_story` stage `110_fangore_recipe_namespace_tile.yaml`: environment
 
 #### Footnotes
 
-[^rc-namespace]: [Recipes requirements (RC-01/04/05/08)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Namespaced multi-instance tiling
+1. [Recipes requirements (RC-01/04/05/08)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Namespaced multi-instance tiling
 [^insp-sr-02-tile]: [Self-revising recipe map (MH-SR-02 tile)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Recipe tiling; registry-only constraint is fangore_insp_registry_only_compose
 
 ### `fangore_recursive_return` — Resume a project from its committed grandchild result
@@ -4218,8 +4218,8 @@ Harness `user_story` stage `060_fangore_tdr_crash_before_intent.yaml` drives pro
 
 [^tdr-req]: [Transactional durable graph resume requirements](https://github.com/rl337/mechaharness/blob/main/docs/requirements/transactional-durable-resume.md) — DR-01..DR-12 — checkpoint seam, SQLite, effect reconciliation, crash matrix
 [^insp-pa-05]: [Personal agent reliability (MH-PA-05)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-inspiration.md) — Checkpoint-compatible execution
-[^insp-dots-06-tdr]: [OpenAI Dots map (MH-DOTS-06 effect ledger)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Effect ledger native; auth epoch is fangore_insp_auth_epoch_resume
-[^insp-sr-08-tdr]: [Self-revising recipe map (MH-SR-08 checkpoints)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Durable checkpoints; neighbor CR algorithm is separate delta
+1. [OpenAI Dots map (MH-DOTS-06 effect ledger)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Effect ledger native; auth epoch is fangore_insp_auth_epoch_resume
+2. [Self-revising recipe map (MH-SR-08 checkpoints)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Durable checkpoints; neighbor CR algorithm is separate delta
 
 ### `fangore_traversal_contract` — Align live traversal with node-component ids from existing events
 
@@ -4251,7 +4251,7 @@ Harness `user_story` stage `120_fangore_verify_repair_recipe.yaml` drives `run_r
 
 #### Footnotes
 
-[^rc-verify-repair]: [Recipes requirements (verify_repair)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — verify_repair tiling story
+1. [Recipes requirements (verify_repair)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — verify_repair tiling story
 [^insp-pa-03-verify]: [Personal agent reliability map (MH-PA-03 verify_repair)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/personal-agent-reliability-requirements-map.md) — Named recipe contract with budgets and outcomes
 
 ### `fangore_workspace_discovery_checkpoint` — Resume workspace discovery after pausing past hypotheses
