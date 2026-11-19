@@ -1,0 +1,24 @@
+# Example Codex MCP config for MechaHarness (copy to ``.codex/config.toml``).
+# ``.codex/`` is gitignored — keep absolute paths and local model ids out of git.
+#
+# Replace /ABS/PATH/to/project with your checkout. Prefer sourcing secrets from
+# the environment rather than embedding tokens here.
+
+[mcp_servers.mechaharness-generator]
+command = "/ABS/PATH/to/project/.venv/bin/python"
+args = [
+    "-m",
+    "mechaharness.mcp_graph_driver",
+]
+
+[mcp_servers.mechaharness-generator.env]
+MECHA_MCP_HOST = "project_coding"
+MECHA_WORKSPACE = "/ABS/PATH/to/project"
+MECHA_GENERATOR_STORE = "/ABS/PATH/to/project/.mechaharness/generator-runs.json"
+MECHA_GENERATOR_CONTROLLER = "cursor-agent"
+MECHA_INFERENCE_BACKEND = "openai_local"
+MECHA_BASE_URL = "http://127.0.0.1:8000/v1"
+MECHA_MODEL = "<served-model-id>"
+MECHA_API_KEY = "local"
+PYTHONPATH = "/ABS/PATH/to/project/src"
+PYTHONUNBUFFERED = "1"

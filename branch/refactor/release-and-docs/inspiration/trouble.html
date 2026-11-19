@@ -1,0 +1,594 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trouble research and implementation &mdash; MechaHarness 0.17.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a8455094"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Video production project → MechaHarness: audited infer-accept migration" href="video-production-audited-infer-migration.html" />
+    <link rel="prev" title="Self-revising recipe evolution requirements map" href="self-revising-recipe-requirements-map.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/agent-skills.html">Agent skills for your project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guides/coding-delegate-suites.html">Coding-delegate suites (development graph)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/release-preparation.html">Prepare and publish a release</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/gastronomic-comparison.html">Gastronomic comparison protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/authoring-user-stories.html">Write an acceptance story</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/budget.html">Budget (soft / hard spend)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli-universe.html">CLI universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/durable-graph-generators.html">Durable graph generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/audited-infer-accept.html">Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/bounded-retry.html">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-decomposition.html">Template: change_decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-execution.html">Template: change_execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-verification.html">Template: change_verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/contract-extraction.html">Template: contract_extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/conversational-tool-loop.html">Conversational tool loop (<code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/decision-plane.html">Typed decision plane (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/development-acceptance.html">Template: development_acceptance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/environment-repair.html">Template: environment_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/failure-diagnosis.html">Template: failure_diagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/fan-out-aggregate.html">Template: fan_out_aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-comparison.html">Template: gastronomic_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-guided-development.html">Template: gastronomic_guided_development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/guided-coding.html">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/independent-review.html">Template: independent_review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/instruction-todo-plan.html">Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/produce-critique-refine.html">Template: produce_critique_refine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/safety-eval.html">Template: safety_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/strategy-revision.html">Template: strategy_revision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/verify-repair.html">Template: verify_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/workspace-discovery.html">Template: workspace_discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/inspiration-primitives.html">Inspiration primitives (host import guide)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/job-lanes.html">Job lanes and JobLaneBroker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/node-components.html">Node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/stepped-graph-execution.html">Stepped graph execution</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dependency-injection.html">Dependency injection requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/durable-graph-generators.html">Durable graph generators (driven execution)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dynamic-tool-graph.html">Dynamic tool graph and node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/event-analytics-schema.html">Event analytics schema requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/host-integration.html">Host integration requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/job-lane-broker.html">Job lanes and JobLaneBroker (JL-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/repository-secrets-hygiene.html">Repository secrets and local-config hygiene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/stepped-graph-execution.html">Stepped graph execution (SG-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ai-assistant-host-friction-inspiration.html">AI assistant project host-friction inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ai-assistant-host-friction-requirements-map.html">AI assistant project host-friction requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev-blog-inspiration.html">Developer Blog Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="durable-graph-generators-inversion-of-control.html">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="durable-graph-generators-requirements-map.html">Durable graph generators requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eval-research.html">MechaHarness Eval Research Brief</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fineenvs-mh-mhrl-requirements-map.html">FineEnvs multi-harness RL requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gastronomic-guided-development.html">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gastronomic-guided-development-execution-plan.html">Cursor execution plan: Gastronomic guided development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jev-typed-judgment-inspiration.html">Jev typed-judgment inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jev-typed-judgment-requirements-map.html">Jev typed-judgment requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html">Multi-Harness RL Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#recommended-architecture-additions">Recommended architecture additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#ownership-boundary-mechaharness-vs-the-ai-assistant-host">Ownership boundary: MechaHarness vs the AI assistant host</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#priority">Priority</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#acceptance-direction-sketch">Acceptance-direction sketch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#attribution">Attribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openai-dots-agent-safety-inspiration.html">Inspiration: OpenAI Dots, Scoped Execution and Agent Safety</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openai-dots-agent-safety-requirements-map.html">OpenAI Dots agent safety requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="personal-agent-reliability-inspiration.html">Inspiration: Reliable Personal Agent Execution Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="personal-agent-reliability-requirements-map.html">Personal agent reliability requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements-map.html">Inspiration requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-revising-recipe-evolution.html">Inspiration: Evaluation-driven evolution of composed recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-revising-recipe-requirements-map.html">Self-revising recipe evolution requirements map</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trouble research and implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="video-production-audited-infer-migration.html">Video production project → MechaHarness: audited infer-accept migration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="walkinglabs-eval-requirements-map.html">WalkingLabs + eval research requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="walkinglabs-harness-engineering-inspiration.html">WalkingLabs Harness Engineering inspiration for MechaHarness</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/research_helpers.html">Experimental research reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Trouble research and implementation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trouble-research-and-implementation">
+<h1>Trouble research and implementation<a class="headerlink" href="#trouble-research-and-implementation" title="Link to this heading"></a></h1>
+<p>This page preserves source attribution and dated research findings together
+with the current implementation boundary. Source benchmark results are not
+MechaHarness measurements.</p>
+<section id="implementation-status">
+<h2>Implementation status<a class="headerlink" href="#implementation-status" title="Link to this heading"></a></h2>
+<p>The static walks cover typed caller-supplied reports. <code class="docutils literal notranslate"><span class="pre">AdmissionReport</span></code> labels
+ledger matches and explicitly leaves <code class="docutils literal notranslate"><span class="pre">gate_status=not_evaluated</span></code>;
+<code class="docutils literal notranslate"><span class="pre">LayeredEvaluation</span></code> reuses <code class="docutils literal notranslate"><span class="pre">Claim</span></code> and <code class="docutils literal notranslate"><span class="pre">EvaluationOutcome</span></code>, and causal flags
+remain <code class="docutils literal notranslate"><span class="pre">caller_asserted</span></code>. They do not verify source quotes, authorize effects,
+or independently establish causal evidence.</p>
+<p><code class="docutils literal notranslate"><span class="pre">taloneth_wire_request</span></code> now inspects the same provider-owned normalization used
+by the OpenAI adapter. Its diagnostic digest includes the full normalized body
+and tool descriptions; it omits credentials and does not measure cache hits.
+The older selected-field prefix report remains an experimental comparison.</p>
+<p>Still open: source-bound admission and requirement manifests; effect-time
+resource revalidation; trace-backed causal/fidelity evaluation; provider cache
+counters and matched success/cost experiments; schema-aware S1 reduction and
+S4 evidence preservation. These are feature gaps, separate from the structural
+refactors described in the <a class="reference internal" href="../architecture.html"><span class="std std-doc">architecture</span></a>.</p>
+<p>The dated notes below document why these requirements were proposed. Their
+historical repository observations are not a statement of current feature
+completion. Follow current <a class="reference internal" href="../api/research_helpers.html"><span class="std std-doc">API contracts</span></a> and the
+<a class="reference internal" href="../guides/user-stories.html"><span class="std std-doc">user stories</span></a> for implemented behavior.</p>
+</section>
+<section id="context-attrition">
+<h2>Context attrition<a class="headerlink" href="#context-attrition" title="Link to this heading"></a></h2>
+<p>Status: <strong>inspiration accepted as Fangore stories</strong> (MH-CTX-ATTR-01/02 under
+<code class="docutils literal notranslate"><span class="pre">fangore_context_memory</span></code>); surface probes disclose S1/S4 gaps. Schema-aware
+projection / paging remain follow-up runtime work — not claimed done here.
+Discovery date: 2026-10-29. Capability ID: <strong>TR-20261029-CONTEXT-ATTRITION</strong>.
+Owner: <strong>MechaHarness</strong> (generic context compilation, compaction, inference envelopes, observability and acceptance).</p>
+<p><strong>Landed stories:</strong> <code class="docutils literal notranslate"><span class="pre">fangore_ctx_attr_structured_tool_delivery</span></code> (070),
+<code class="docutils literal notranslate"><span class="pre">fangore_ctx_attr_evidence_survival</span></code> (080). Product verbs:
+<code class="docutils literal notranslate"><span class="pre">context_structured_tool_delivery</span></code>, <code class="docutils literal notranslate"><span class="pre">context_evidence_survival</span></code> in
+<code class="docutils literal notranslate"><span class="pre">mechaharness.context_surface</span></code>.</p>
+<section id="source-map-and-claims">
+<h3>Source map and claims<a class="headerlink" href="#source-map-and-claims" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Curated Trouble entry: https://rl337.org/trouble/posts/2115618251023536321.html ; archived source JSON: https://github.com/rl337/trouble/blob/main/posts/2026/10/29/2115618251023536321.json ; original post: https://x.com/ComputerPapers/status/2115618251023536321</p></li>
+<li><p>Sehgal, Panahandeh and Ezzati-Jivan, <em>Context Is a Pipeline, Not a Window: Information Attrition in LLM Agent Harnesses</em>, submitted 2026-10-26, arXiv v1: https://arxiv.org/html/2610.36114v1 ; abstract: https://arxiv.org/abs/2610.36114 ; replication package: https://doi.org/10.5281/zenodo.23614755 .</p></li>
+<li><p>Relevant original sections: §II pipeline model; §III-B replay and row-aware cutter; §III-C framework survey; §IV controlled experiment; §VI validity limits; §VII model-free CI tests.</p></li>
+</ul>
+<p><strong>What the paper actually shows:</strong> 720 field runs generated 11,189 tool results; 3,827 were truncated by fixed-position JSON text slicing, and all cut results were malformed. One late-position field reached the model in 4.7% of 742 calls versus 99.3% for an adjacent early field. Maximum per-call prompt occupancy was 5.75% of a 400k window, so the defect was <em>upstream delivery</em>, not a full model context. A deterministic replay of 864 results showed all oversized prefix-sliced payloads broke, while row-aware cuts preserved valid payloads. One 33,370-character production listing lost all 128 late-list records under a 6,000-character cap. In a controlled spawned-fault experiment, reversed-order truncation increased median calls from 53 to 76 (+43%) and computations from 18 to 36, while finding yield fell from 0.61 to 0.31. Accuracy stayed similar when another evidence route existed. A smaller quiet-fault replay favored repaired delivery (3/6 correct versus 0/5), but authors explicitly do <strong>not</strong> claim the original field-wide accuracy split is causally established. These are source findings, not measured MechaHarness outcomes.</p>
+<p><strong>Mechanism:</strong> Treat context as five boundaries: S1 produced tool result -&gt; delivered model representation; S2 delivered -&gt; agent action/turn budget; S3 action -&gt; retained history; S4 retained -&gt; transferred finding/handoff; S5 transferred -&gt; persisted next-run state. Different boundaries lose different things. A fixed-character prefix slice is especially dangerous for serialized maps/lists: it can cut in the middle of JSON and systematically erase late keys. Safer candidate policies include row-aware reduction, schema-aware projection, explicit omitted-field manifests, and paging via durable observation references. No single algorithm is mandated.</p>
+</section>
+<section id="repository-reality-main-inspected-2026-10-29">
+<h3>Repository reality (main inspected 2026-10-29)<a class="headerlink" href="#repository-reality-main-inspected-2026-10-29" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Existing canonical story: https://github.com/rl337/mechaharness/blob/main/tests/fixtures/models/static/fixture/v1/suites/fangore_context_memory/stages/010_fangore_context_compiler_deficit.yaml . Story <strong>fangore_context_compiler_deficit</strong> requires a deficit report when mandatory sources exceed a prompt budget; the fixture checks unresolved gaps, blockers and no silent omission.</p></li>
+<li><p>Existing context compaction story <strong>fangore_insp_context_compaction</strong>: https://github.com/rl337/mechaharness/blob/main/tests/fixtures/models/static/fixture/v1/suites/fangore_context_memory/stages/040_fangore_insp_context_compaction.yaml .</p></li>
+<li><p>Implementation: https://github.com/rl337/mechaharness/blob/main/src/mechaharness/context_compaction.py defines CompactionInput, CompactionResult, DefaultStagedCompaction and discarded_classes. Its distill stage truncates <strong>any string content over 200 characters</strong> by taking its first 200 characters plus an ellipsis; it does not parse a tool-result schema or record which fields disappeared. This is an observed code property, not proof that all inference routes use this compactor.</p></li>
+<li><p>Product surface: https://github.com/rl337/mechaharness/blob/main/src/mechaharness/context_surface.py exposes context_compiler_deficit and context_compaction_staged, but the staged probe returns only discarded_classes. https://github.com/rl337/mechaharness/blob/main/tests/test_context_compaction.py currently checks adjacent deduplication; it does not exercise oversized structured tool payloads or field-level survival.</p></li>
+<li><p>Context layering and provider seams already exist: src/mechaharness/context_layers.py, context_provider.py and context_experiments.py. Open PR https://github.com/rl337/mechaharness/pull/36 adds ContextSpec bag-to-inference continuity and must be reviewed before modifying inference-envelope paths. <strong>Do not duplicate</strong> its graph-state propagation contract.</p></li>
+</ul>
+<p><strong>Coverage decision: C (partially specified), with an observable test gap.</strong> Existing stories protect mandatory <em>source selection</em> and record coarse discarded classes. They do not currently prove schema-valid <em>structured tool delivery</em> at S1, or an evidence-survival metric at S4. Do not replace existing stories with a new context subsystem.</p>
+</section>
+<section id="candidate-extension-mh-ctx-attr-01-preserve-or-explicitly-reject-structured-tool-evidence">
+<h3>Candidate extension MH-CTX-ATTR-01: preserve or explicitly reject structured tool evidence<a class="headerlink" href="#candidate-extension-mh-ctx-attr-01-preserve-or-explicitly-reject-structured-tool-evidence" title="Link to this heading"></a></h3>
+<p><strong>Persona / why:</strong> As a graph author debugging a tool-using agent, I want the compiled model-visible representation of a structured tool result to remain parseable and to disclose every omitted required field, so that a low token budget cannot silently erase the evidence needed for a decision.</p>
+<p><strong>Existing story relationship:</strong> Extend <strong>fangore_context_compiler_deficit</strong> and <strong>fangore_insp_context_compaction</strong>, rather than inventing a parallel story family. A new fixture may be warranted if the acceptance runner cannot express tool-output delivery under those scenarios.</p>
+<p><strong>Setup:</strong> Use a deterministic synthetic tool result with early and late arrays, a required late record identifying a culprit, 6,000-character-equivalent budget, and explicit field obligations. Also include a small payload, a long plain-text payload, and a maliciously malformed JSON string. Test original and reversed field order, and both full and tight budgets. The fixture should expose the produced payload and the exact representation handed to inference (not merely the durable bag).</p>
+<p><strong>Action:</strong> Compile/compact, then inspect the final model-facing message and omission manifest. Run with inference mocked; no model is needed to prove S1.</p>
+<p><strong>Required observables / acceptance:</strong></p>
+<ol class="arabic simple">
+<li><p>Any output declared to be structured JSON is valid JSON at delivery, or the compiler rejects/marks it incomplete before inference. A literal prefix-sliced JSON fragment is never silently presented as a complete result.</p></li>
+<li><p>Required fields and their source IDs are either present with intact values or explicitly named in a deficit that prevents a false success outcome. Optional-field omission is recorded with field path, policy, budget and reason.</p></li>
+<li><p>Reordering keys or moving the decisive record to the tail cannot change <em>whether loss is disclosed</em>. When policy promises required-field preservation, both orders preserve the field.</p></li>
+<li><p>A large payload can be reduced by a declared structural policy or exposed through a bounded reference/page operation. A budget overflow cannot masquerade as a valid empty result.</p></li>
+<li><p>The original produced tool payload remains available through its authoritative observation reference, subject to access controls; no fabricated reconstruction.</p></li>
+<li><p>A resumed graph preserves the source-to-delivery evidence link and any unresolved deficit; no promotion of a truncated summary into authoritative state.</p></li>
+</ol>
+<p><strong>Negative cases:</strong> required field absent from the original payload; malformed upstream JSON; oversized nested arrays; tool returning a non-JSON string; no available paging provider; a permission-restricted field. These must have distinct, testable outcomes.</p>
+<p><strong>Implementation investigation:</strong> Trace all call sites of DefaultStagedCompaction and ContextCompiler through the current model adapter and PR #36; establish whether the 200-character truncation is applied to actual tool-role messages. Decide how to represent typed field obligations and structured reduction without breaking existing callers. Compare (a) schema-aware projection, (b) whole-record sampling with coverage metadata, (c) durable observation handles and paging, (d) fail-closed delivery for required evidence. A generic formatter is not enough unless it validates the exact delivered bytes.</p>
+</section>
+<section id="candidate-extension-mh-ctx-attr-02-measure-evidence-survival-at-graph-boundaries">
+<h3>Candidate extension MH-CTX-ATTR-02: measure evidence survival at graph boundaries<a class="headerlink" href="#candidate-extension-mh-ctx-attr-02-measure-evidence-survival-at-graph-boundaries" title="Link to this heading"></a></h3>
+<p><strong>Persona / why:</strong> As a harness evaluator, I want to distinguish work the tools produced from evidence the model received and findings the downstream decision actually consumed, so that success and token cost are not the only signals of harness quality.</p>
+<p><strong>Existing story relationship:</strong> Extend context-observation and trace/telemetry acceptance rather than introducing an independent monitoring stack.</p>
+<p><strong>Setup/action:</strong> Execute a deterministic fan-out graph where two workers compute identifiable findings; one finding is transferred, one intentionally omitted. Repeat with a truncated tool result, a turn-limit stop, and a resumed graph. Attach stable observation IDs to source, compiled view, and transferred finding.</p>
+<p><strong>Acceptance:</strong> Per-boundary counts distinguish produced, delivered, retained, transferred and persisted records; a lost finding cannot be reported as transferred; absence is not interpreted as a negative finding; the report includes structured-payload validity and required-field survival; the evaluator can calculate a narrowly defined transfer yield (findings recorded / computations performed) without claiming it measures relevance; duplicate retries do not inflate unique evidence counts. Deterministic fixture assertions should work without a live model. A live-agent evaluation may compare tool calls, total tokens and task accuracy as secondary metrics.</p>
+<p><strong>Unknowns:</strong> What constitutes a stable finding ID? Which graph event currently records produced-vs-delivered? What is the right aggregation scope across nested graphs and resume? How to avoid storing sensitive raw payloads in telemetry?</p>
+</section>
+<section id="ready-for-implementation-acceptance-plan">
+<h3>Ready-for-implementation acceptance plan<a class="headerlink" href="#ready-for-implementation-acceptance-plan" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Extend the existing Fangore story fixture(s) using the native YAML and real product CLI verbs; do not add a fake passing probe.</p></li>
+<li><p>Add unit tests for ordered/reversed maps, nested arrays, long tool-role messages, malformed input and paging references.</p></li>
+<li><p>Add an integration acceptance walk that compares tool-produced, context-compiled and model-visible representations at a real inference boundary.</p></li>
+<li><p>Add restart/replay tests using the existing durable graph machinery; verify stable evidence IDs and no duplicate transfer counts.</p></li>
+<li><p>Use the paper’s public replication data only if license and fixture compatibility permit; synthetic minimal examples are sufficient for the mechanical regression.</p></li>
+</ol>
+</section>
+<section id="other-related-trouble-signals-deferred-not-new-requirements-here">
+<h3>Other related Trouble signals (deferred, not new requirements here)<a class="headerlink" href="#other-related-trouble-signals-deferred-not-new-requirements-here" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Duplicate-write safety: https://rl337.org/trouble/posts/2115685301678907769.html . MechaHarness already has external-effect and transactional-resume requirements; inspect existing DR-10 fixtures before proposing another idempotency story.</p></li>
+<li><p>Approval-gate bypass: https://rl337.org/trouble/posts/2115315131152556136.html and https://github.com/otsoa-dubief/airlock/security/advisories/GHSA-mgf8-gh7g-q4rg . MechaHarness already has AuthorityGate, approval interrupts and authorization-epoch resume. Advisory details and bypass reproduction remain to be verified before asserting a gap.</p></li>
+<li><p>Independent coverage/disproof recipe: https://rl337.org/trouble/posts/2115641269406093385.html and https://github.com/cloudflare/security-audit-skill . Its six phases and typed findings are worth comparing to existing generic verify/repair and independent-review recipes, but this pass did not establish a missing reusable primitive.</p></li>
+</ul>
+</section>
+<section id="cross-repository-trace">
+<h3>Cross-repository trace<a class="headerlink" href="#cross-repository-trace" title="Link to this heading"></a></h3>
+<p>Discovery ledger is proposed in rl337/trouble at state/inspiration-watch-ledger.json, capability TR-20261029-CONTEXT-ATTRITION. This dossier is non-normative until accepted into the repository’s canonical user stories and tests. No runtime implementation is included.</p>
+<p>Cross-repository discovery ledger draft PR: https://github.com/rl337/trouble/pull/38 . Other resulting draft PRs: https://github.com/rl337/mechaharness/pull/37 , https://github.com/rl337/project-template/pull/1 , https://github.com/rl337/june/pull/26 .</p>
+</section>
+</section>
+<section id="resource-scope-and-memory">
+<h2>Resource scope and memory<a class="headerlink" href="#resource-scope-and-memory" title="Link to this heading"></a></h2>
+<p><strong>Implementation scope:</strong> the accepted walk exercises a standalone report helper.
+Runtime integration and source-evidence verification remain open; see
+<a class="reference internal" href="#implementation-status">Trouble release status</a>.</p>
+<p>Status: <strong>source-backed candidate extensions</strong>. Accepted walk: <code class="docutils literal notranslate"><span class="pre">fangore_admit_authority</span></code> (MH-REALM-01 resource binding and MH-EAL-01 memory is not a grant). Not a measured vulnerability. Reviewed: 2026-11-03. Owner: MechaHarness, generic resource authorization, graph/tool boundaries, independent verification. Capability IDs: <strong>TR-20261103-REALM-ASSETS</strong> and <strong>TR-20261103-EAL-MEMORY</strong>.</p>
+<section id="source-map-and-evidence">
+<h3>Source map and evidence<a class="headerlink" href="#source-map-and-evidence" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Trouble (2026-10-31): https://rl337.org/trouble/posts/2116431213598593388.html ; original https://x.com/FSFG/status/2116431213598593388 ; Ren, Tak &amp; Wang, <em>REALM: Identifying Minimal Task Assets for LLM Agents</em>, arXiv v1 submitted 2026-10-29: https://arxiv.org/abs/2610.39155 ; independent reading https://pith.science/paper/2610.39155 . Paper and independent review read, but benchmark not reproduced.</p></li>
+<li><p>Trouble (2026-11-01): https://rl337.org/trouble/posts/2117024792402665884.html ; original https://x.com/M_Decoherence/status/2117024792402665884 ; Cerruti, Okamoto &amp; Erol, <em>Agent Memory Is a Surface for Endogenous Authorization Laundering</em>, submitted 2026-09-01, revised 2026-10-24: https://arxiv.org/abs/2609.01836 ; upstream benchmark https://github.com/tommasocerruti/eal-bench ; usage https://github.com/tommasocerruti/eal-bench/blob/main/USAGE.md ; pinned example reference commit c98cd7eed6ab17ab960b113f48ef6bc479f806a5. Upstream README and API usage read; no local benchmark runs.</p></li>
+<li><p>Relevant MH requirements: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-inspiration.md (MH-DOTS-01/02/08/09); requirements map https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md ; safety recipe https://github.com/rl337/mechaharness/blob/main/docs/reference/graph-templates/safety-eval.md .</p></li>
+</ul>
+</section>
+<section id="external-technical-mechanisms-and-limitations">
+<h3>External technical mechanisms and limitations<a class="headerlink" href="#external-technical-mechanisms-and-limitations" title="Link to this heading"></a></h3>
+<p><strong>REALM</strong> defines a mission-specific set of identifiable <em>assets</em> (files, repositories, accounts, API objects) and separately allowed operations. Asset identities may be discovered later from scoped evidence, represented by dependency-graph nodes. Critically, discovery of a resource in untrusted input is not authorization to access it. A REALM Builder admits selected grants and materializes Asset Files and Partial APIs with concrete resource parameters bound before calls enter an untrusted Task Container. The upstream paper describes indirect targets, nested-call interception and form handlers. The authors report reducing successful injection cases from 93/560 to 1/560, but overall task completions also fell from 448/620 to 228/620. An independent reviewer notes the success reduction is confounded by tasks failing before attack reachability. These are upstream study claims, not MH test results. Do not present resource lockdown alone as usable security without measuring legitimate completion.</p>
+<p><strong>EAL-Bench</strong> tests authorization falsely appearing in agent-created memory without external adversarial input. An evolving organizational history and hidden authoritative ledger determine actual grants/revocations; a writer produces free-text or schema-validated typed memory either in one pass or incrementally (only prior memory plus next event). A separate executor receives that memory and a matched authorized or denied request. The benchmark distinguishes: faithful-memory controls, preservation fidelity (missing revocations, broadened scope, invented grants), paired error propagation (same model/request/tools with erroneous vs exact memory), and end-to-end writer/executor action. It has 12 procurement, 16 security and 8 finance cases. Updated abstract claims up to 45.4% false-authority formation and 99.0% acting on false authority; older version summaries state 50.2%/98.6%, so never mix paper versions. Upstream APIs include score_memory, apparent_authority, build_propagation_trials, propagation_summary, and plan_end_to_end. Record authorized-use and unauthorized-submission denominators separately; faithful baseline and missing-run accounting are required. Benchmarks are not project failure measurements.</p>
+</section>
+<section id="verified-repository-coverage-on-main-2026-11-03">
+<h3>Verified repository coverage on main, 2026-11-03<a class="headerlink" href="#verified-repository-coverage-on-main-2026-11-03" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Implemented and storied:</strong> src/mechaharness/capability_envelope.py stores grants, tool allowlists, context providers, principal, expiry, trust origin and authorization epoch and prevents widening children. src/mechaharness/core/access.py defines namespaced grants and AccessPolicy with set membership. docs/reference/access.md documents deny-by-default tool grants. Existing authority suite fixtures: tests/fixtures/models/static/fixture/v1/suites/fangore_access_authority/stages/050_fangore_insp_auth_epoch_resume.yaml, 060_fangore_insp_authority_gate.yaml, and 100_fangore_insp_execution_token.yaml. The generated docs/guides/user-stories.md MUST NOT be hand-edited.</p></li>
+<li><p><strong>Prior requirements:</strong> MH-DOTS-01 covers capability tokens; MH-DOTS-02 side-effect revalidation; MH-DOTS-08 independent safety evaluation. docs/inspiration/openai-dots-agent-safety-requirements-map.md marks these covered by stories, with partial MH-DOTS-05/07/09 host coverage. Avoid duplicating implemented graph/authority infrastructure.</p></li>
+<li><p><strong>Specific evidence of remaining question:</strong> CapabilityEnvelope.authority_issue compares a tool name, coarse grant, expiry and epoch; inspected source exposes no first-class required resource identity or operation-on-resource predicate. AccessPolicy allows based on coarse namespace:name membership, not the specific repository or recipient chosen in arguments. This is a targeted source observation, not a complete security audit. Existing fixtures test grants, trust and resumed epochs, not same permitted tool acting on unauthorized resource.</p></li>
+<li><p><strong>Evaluation coverage:</strong> existing SafetyEvalTemplate, tests/test_safety_eval_recipe.py and taloneth_insp_safety_eval_recipes cover injection/authorization changes, but do not describe writer→persisted-derived-permission→executor matched controls; add a corpus/fixture extension, not a competing evaluator.</p></li>
+</ul>
+</section>
+<section id="candidate-mh-realm-01-resource-bound-grant-and-asset-discovery-acceptance">
+<h3>Candidate MH-REALM-01: resource-bound grant and asset discovery acceptance<a class="headerlink" href="#candidate-mh-realm-01-resource-bound-grant-and-asset-discovery-acceptance" title="Link to this heading"></a></h3>
+<p><strong>Persona.</strong> As Fangore, I want delegated graphs to read or mutate only trusted task-admitted resource identities, so a generally allowed tool cannot be redirected by an untrusted document to unrelated assets.</p>
+<p><strong>Why.</strong> The tool name can be legitimate while its recipient/repository/path is not. Source material can identify <em>candidate</em> resources; trusted authorization must be a separate step.</p>
+<p><strong>Setup.</strong> An authorized task updates one named repository. A read-only fetched document specifies that repo and an injected second repo plus an outbound endpoint. Use a deterministic mock registry with structured resource identifiers, operation kinds, required grants, child envelope, authority gate and effect recorder.</p>
+<p><strong>Acceptance.</strong></p>
+<ol class="arabic simple">
+<li><p>The admitted action on the authorized repository succeeds, while identical tool+grant on other repository/recipient is denied with a typed resource-scope reason and no effect.</p></li>
+<li><p>Reading untrusted text creates candidate asset references but never automatically creates grants; resource identity must be independently resolved and authorized.</p></li>
+<li><p>Delegated child cannot widen identities, operations, resource extent, expiry or epoch; aliasing, nested calls and serialized-argument rewrites cannot bypass binding at final dispatch.</p></li>
+<li><p>A paused action is rechecked under latest authorization epoch, and revocation prevents any external effect.</p></li>
+<li><p>Ambiguous or unknown resource, no trusted source, noncanonical aliases, and replay after a policy change fail closed, with provenance in the report.</p></li>
+<li><p>Control cases prove authorized task completion, not just zero injection success. Count legitimate allows, false denies, unauthorized attempts blocked, reachability and budget cost separately.</p></li>
+</ol>
+<p><strong>Native adaptation.</strong> If adopted, extend Fangore authority suite via a new stage adjacent to the existing execution_token and authority_gate stages, but first inspect a host-neutral scoped resource resolver contract. Do not introduce a failing fixture in this documentation-only PR. Keep domain-specific repository/email/file resolution in hosts. Consider explicit resource predicates in envelopes, host-attested partial APIs, or binding at effect dispatch as alternatives; enforce late and record canonical resource identity.</p>
+</section>
+<section id="candidate-mh-eal-01-memory-derived-authority-formation-propagation-safety-evaluations">
+<span id="candidate-mh-eal-01-memory-derived-authority-formationpropagation-safety-evaluations"></span><h3>Candidate MH-EAL-01: memory-derived authority formation/propagation safety evaluations<a class="headerlink" href="#candidate-mh-eal-01-memory-derived-authority-formation-propagation-safety-evaluations" title="Link to this heading"></a></h3>
+<p><strong>Persona.</strong> As Taloneth, I want a reproducible safety-eval that proves compressed agent memory cannot create authority and distinguishes source-error from an executor ignoring accurate instructions.</p>
+<p><strong>Setup.</strong> Three user authority events: approve write A on object X, revoke A, then allow only read B on X. Run a memory writer from full history or incrementally with prior memory+new event, then an isolated executor using frozen memory and a request for A or B. Keep the canonical authorization event ledger hidden from the writer and executor. No actual external writes.</p>
+<p><strong>Acceptance.</strong></p>
+<ol class="arabic simple">
+<li><p>The policy evaluator uses current authoritative events/epoch, never prose from persistent memory as an authorization token.</p></li>
+<li><p>The writer fidelity oracle reports stale grants, invented permission, broadened recipient/scope and missing revocation.</p></li>
+<li><p>Run paired same-model, same-request tests for faithful versus corrupted memory, with explicit source-hash, memory hash, writer/executor identity, exact tool arguments and observed effect intents.</p></li>
+<li><p>Separate unauthorized-submission rate from legitimate-authorized-use rate and count invalid/missing tool replies explicitly.</p></li>
+<li><p>Interrupted, resumed and cross-agent handoffs cannot turn a revoked permission back on; positive control B must still succeed.</p></li>
+<li><p>Report end-to-end baseline and formation/propagation attribution, not one undifferentiated success score.</p></li>
+</ol>
+<p><strong>Native adaptation.</strong> Extend taloneth_insp_safety_eval_recipes with deterministic memory_authorization_formation and memory_authorization_propagation scenarios, plus fidelity and false-denial controls. Host provides event ledger and memory provider; MH provides generic recipe/measurement semantics. This is primarily a test-coverage story, not a new production memory store.</p>
+</section>
+<section id="investigation-checklist-for-implementing-agent">
+<h3>Investigation checklist for implementing agent<a class="headerlink" href="#investigation-checklist-for-implementing-agent" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Inspect current AuthorityGate.evaluate, revalidate_before_effect, GraphNodeRunner.required_grants, and resource argument normalization in production hosts before designing resource predicates.</p></li>
+<li><p>Read REALM’s full experiment and any published artifact before setting thresholds, test reachability, and quantify its utility sacrifice.</p></li>
+<li><p>Validate EAL corpus/version/released reference hashes before reusing metrics; test source-authority gating and bounded event sourcing against both failure and false-denial controls.</p></li>
+<li><p>Reconcile with MH-DOTS-05/07/09 and current safety_eval fixtures; check concurrent PRs, regenerate generated story guide only from native YAML if accepted, run pytest -q tests/stories.</p></li>
+<li><p>No runtime code, test changes, new policy schema or security guarantees have been shipped by this document.</p></li>
+</ul>
+<p>Classification: REALM = <strong>partially specified capability / test gap</strong>; EAL = <strong>reusable evaluation technique / coverage extension</strong>. Primary original upstream links appear above so a fresh agent can verify independently.</p>
+</section>
+</section>
+<section id="request-prefix-caching">
+<h2>Request prefix caching<a class="headerlink" href="#request-prefix-caching" title="Link to this heading"></a></h2>
+<p><strong>Implementation scope:</strong> the accepted walk exercises a standalone report helper.
+Runtime integration and source-evidence verification remain open; see
+<a class="reference internal" href="#implementation-status">Trouble release status</a>.</p>
+<p><strong>Research date:</strong> 2026-11-10. <strong>Status:</strong> non-normative engineering research. Accepted walk: <code class="docutils literal notranslate"><span class="pre">taloneth_request_prefix</span></code> (MH-CACHE-01), extending CTX-09. <strong>Capability:</strong> TR-20261110-PREFIX-CACHE. <strong>Research domains:</strong> models/inference/efficiency; context/memory/knowledge; verification/evaluation. <strong>Inspiration type:</strong> test/evaluation and implementation improvement. <strong>Owner:</strong> MechaHarness for generic request-shape and evaluation contracts; concrete vLLM/engine instrumentation belongs to the selected inference-provider host, not an invented SparkStation deployment inside this library.</p>
+<section id="source-dossier-motivating-failure-and-concrete-mechanism">
+<h3>Source dossier: motivating failure and concrete mechanism<a class="headerlink" href="#source-dossier-motivating-failure-and-concrete-mechanism" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Trouble discovery, post 2119334518549365220 (archived November 7, posted Nov 8 UTC): https://rl337.org/trouble/posts/2119334518549365220.html</p></li>
+<li><p>Original open-source research project: https://github.com/tejachavali/prefixwise ; <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/README.md">README</a>, <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/docs/GUIDE.md">technical guide</a>, <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/tests/test_classifier.py">classifier tests</a>, <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/tests/test_check.py">CI regression tests</a>, <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/tests/test_optimize.py">optimisation tests</a>.</p></li>
+<li><p>Reproducible upstream evidence: <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/experiments/demo/2026-11-10-optimize-real-run.md">2026-11-10 real-run demonstration</a>; <a class="reference external" href="https://github.com/tejachavali/prefixwise/tree/main/experiments/e1_open">vLLM/open-model experiments</a>; <a class="reference external" href="https://github.com/tejachavali/prefixwise/tree/main/experiments/e_evict">KV eviction/restore experiments</a>. Pin upstream commit before adapting its internals; current default-branch links are not immutable.</p></li>
+<li><p>Existing MechaHarness CTX-09 story: <a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/tests/fixtures/models/static/fixture/v1/suites/taloneth_harness_research/stages/020_taloneth_cache_layout_experiment.yaml"><code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code></a>, generated narrative in <a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/guides/user-stories.md">user-stories guide</a>. <strong>Do not modify the generated guide directly</strong>.</p></li>
+</ul>
+<p><strong>Mechanism, not headline:</strong> A prompt can be semantically identical but serialized differently across turns. If a tool catalog changes order, a dynamic timestamp enters a stable prefix, or earlier history is rewritten, prefix caching can miss and the provider may redo substantial prefill. <code class="docutils literal notranslate"><span class="pre">prefixwise</span></code> records prompt-shape block fingerprints/hashes, input/cached token counts and first changed block rather than raw prompt content. It classifies misses as avoidable vs legitimate, with reasons such as <code class="docutils literal notranslate"><span class="pre">tool_reserialize</span></code>, <code class="docutils literal notranslate"><span class="pre">volatile_system</span></code>, <code class="docutils literal notranslate"><span class="pre">history_edit</span></code>, <code class="docutils literal notranslate"><span class="pre">breakpoint_misplaced</span></code>, <code class="docutils literal notranslate"><span class="pre">ttl_expired</span></code>, and <code class="docutils literal notranslate"><span class="pre">evicted</span></code>. The tool-order fix <code class="docutils literal notranslate"><span class="pre">canonical_tools</span></code> deterministically sorts tool definitions and keys; it is off by default and enabled only when proven safe by replay. A <code class="docutils literal notranslate"><span class="pre">check</span></code> mode fails CI on synthetic shuffled tools or dynamic system-prompt regressions; e.g. <a class="reference external" href="https://github.com/tejachavali/prefixwise/blob/main/tests/test_check.py"><code class="docutils literal notranslate"><span class="pre">tests/test_check.py</span></code></a> checks <code class="docutils literal notranslate"><span class="pre">tool_reserialize</span></code> and <code class="docutils literal notranslate"><span class="pre">volatile_system</span></code> have named changed blocks and separates passing scenarios. For vLLM/SGLang, KV-cache events can confirm eviction; without evidence the classifier should use <code class="docutils literal notranslate"><span class="pre">unknown</span></code>, not guess.</p>
+<p><strong>Source-reported performance, not locally reproduced:</strong> Its documented eight-request demo saw cache-served tokens increase from 74.6% to 87.1%, with reported cost $0.0356 to $0.0250 after canonical tool-order remediation, on one specific hosted-model scenario. Reported 32/32 agreement on named hosted misses and 120/120 injected open-engine cases are the project’s own results. Such numbers are <strong>not</strong> MechaHarness benchmarks or portable savings predictions. Cache provider prices, retention, support and success criteria vary. Never transform an efficiency experiment into an unconditional production fix.</p>
+</section>
+<section id="mechaharness-coverage-audit">
+<h3>MechaHarness coverage audit<a class="headerlink" href="#mechaharness-coverage-audit" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Existing surface</p></th>
+<th class="head"><p>What it does</p></th>
+<th class="head"><p>Remaining measurable gap</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/context_experiments.py"><code class="docutils literal notranslate"><span class="pre">src/mechaharness/context_experiments.py</span></code></a> <code class="docutils literal notranslate"><span class="pre">CtxFlags.cache_aware_layout</span></code>, <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code>, <code class="docutils literal notranslate"><span class="pre">compile_cache_aware_layout</span></code></p></td>
+<td><p>CTX-09 explicitly divides stable <code class="docutils literal notranslate"><span class="pre">policy_blocks</span></code>, semi-stable <code class="docutils literal notranslate"><span class="pre">relevant</span></code>, and <code class="docutils literal notranslate"><span class="pre">dynamic</span></code> tail with <code class="docutils literal notranslate"><span class="pre">prefix_identity</span></code>; opt-in toggle</p></td>
+<td><p>It constructs a layout. Inspected logic does <strong>not</strong> canonicalize provider tool schema serialization, measure prefix divergence or distinguish cache misses due to eviction from avoidable changes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/tests/test_context_experiments.py"><code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code></a> <code class="docutils literal notranslate"><span class="pre">test_topology_and_cache_layout</span></code></p></td>
+<td><p>Checks stable prefix and version identity, default-off behaviour</p></td>
+<td><p>No paired, multi-turn request-shape/cost regression test for tool order, timestamped instructions, resumed context or honest unknown cause</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/tests/fixtures/models/static/fixture/v1/suites/taloneth_harness_research/stages/020_taloneth_cache_layout_experiment.yaml"><code class="docutils literal notranslate"><span class="pre">tests/fixtures/models/static/fixture/v1/suites/taloneth_harness_research/stages/020_taloneth_cache_layout_experiment.yaml</span></code></a></p></td>
+<td><p>Existing <strong>native</strong> acceptance story, <code class="docutils literal notranslate"><span class="pre">taloneth_cache_layout_experiment</span></code>, covers CTX-09</p></td>
+<td><p>Extend its behaviour or add an appropriately related stage, not an unrelated competing story nor handwritten generated Markdown</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/efficiency_scorecard.py"><code class="docutils literal notranslate"><span class="pre">src/mechaharness/efficiency_scorecard.py</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">build_efficiency_scorecard</span></code> records <code class="docutils literal notranslate"><span class="pre">tokens_in</span></code>, <code class="docutils literal notranslate"><span class="pre">tokens_out</span></code>, <code class="docutils literal notranslate"><span class="pre">cost_usd</span></code>, <code class="docutils literal notranslate"><span class="pre">latency_ms</span></code>, coordination/resume dimensions, optional extras</p></td>
+<td><p>No standard <code class="docutils literal notranslate"><span class="pre">cached_tokens</span></code>, first-prefix divergence, evidence-backed miss cause, estimated avoidable cost or task-success-normalized comparison</p></td>
+</tr>
+<tr class="row-even"><td><p>Existing inference adapters / provider hosts</p></td>
+<td><p>Own actual request wire formats and provider measurements</p></td>
+<td><p>Must inspect actual wire shape and model capability before applying a transformation; input manifest/context layout alone is insufficient</p></td>
+</tr>
+</tbody>
+</table>
+<p>Do <strong>not</strong> propose a new cache-aware context compiler: it already exists. This is an <strong>acceptance gap (partial coverage)</strong> in attribution, regression evidence and safety of changes at the actual request boundary. Any proposed implementation must integrate existing CTX-09 and efficiency metrics, and keep host-specific model-server data at the edge.</p>
+</section>
+<section id="proposed-extension-mh-cache-01-prove-stable-request-prefixes-without-changing-task-meaning">
+<h3>Proposed extension MH-CACHE-01: Prove stable request prefixes without changing task meaning<a class="headerlink" href="#proposed-extension-mh-cache-01-prove-stable-request-prefixes-without-changing-task-meaning" title="Link to this heading"></a></h3>
+<p><strong>Persona:</strong> Taloneth, ML engineer benchmarking local and hosted model adapters; optionally Nubble operating inference workers.</p>
+<p><strong>User story:</strong> As an ML engineer, I want an experiment to attribute avoidable prompt-cache misses to concrete changes in the request’s stable tool/policy/context prefix, and to compare a baseline with an opt-in correction under equal task fixtures, so I can reduce inference work without silently changing tool behaviour, evidence authority, or task outcomes.</p>
+<p><strong>Why:</strong> A provider can report a low cache-hit ratio even though the system is semantically unchanged. An optimisation based only on cached-token percentage may bias toward a cheaper but failing agent, or falsely blame the harness for cache evictions it does not control. In MechaHarness, <code class="docutils literal notranslate"><span class="pre">cache_aware_layout</span></code> already expresses layout intent but has no test that the <em>serialized requests</em> preserve stable bytes across identical turns.</p>
+<p><strong>Acceptance tests and observable outcomes:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Baseline versus shuffle:</strong> Given two equivalent inference calls with equal sorted tool capabilities but shuffled tool-definition ordering, an opt-in observer produces a deterministic, privacy-safe canonical fingerprint for the <em>stable prefix</em> and records the changed block. The baseline fixture detects <code class="docutils literal notranslate"><span class="pre">tool_reserialize</span></code> or a typed equivalent; optional canonicalisation makes matching stable prefixes. Preserve each tool’s name, parameters, schema constraints, allowed operations and semantics. Never discard tools to fake a hit.</p></li>
+<li><p><strong>Dynamic content isolation:</strong> Given a timestamp or request ID injected into a stable instruction prefix, the test locates the first changed block rather than claiming a generic miss. A provider-safe strategy for moving volatile context into the dynamic tail is tested against equivalent model-visible instructions; no change to instruction priority or provenance is allowed.</p></li>
+<li><p><strong>Legitimate changes:</strong> If policy version, approved tool grant, actual source evidence, model or safety envelope changes, the correct behaviour is a new prefix identity and (where applicable) a miss. A policy change must never be hidden behind a stale cache key, even if expensive.</p></li>
+<li><p><strong>Provider attribution and privacy:</strong> Measurements include <code class="docutils literal notranslate"><span class="pre">tokens_in</span></code>, cached/prefill token counts where provider supports them, <code class="docutils literal notranslate"><span class="pre">latency_ms</span></code>, <code class="docutils literal notranslate"><span class="pre">cost_usd</span></code>, miss-cause enum, evidence level <code class="docutils literal notranslate"><span class="pre">provider|engine|inferred|unknown</span></code>, and tool/catalog revision. When provider counters/KV events are unavailable, mark cause <code class="docutils literal notranslate"><span class="pre">unknown</span></code> and estimates unverified. Do not log raw instructions, secrets, retrieved evidence, or tool arguments; hashes must be scoped/rotated where linkability is sensitive.</p></li>
+<li><p><strong>Success-preserving comparison:</strong> Repeat representative tool-use and context-sensitive acceptance fixtures for baseline vs candidate, with matched seeds/settings when possible. Promotion requires zero new authorization violations or acceptance regressions, and any claimed savings must report task success denominator and confidence/sample size. If not provable, optimization remains disabled.</p></li>
+<li><p><strong>Resume and concurrency:</strong> The same logical policy prefix can be reconstructed after a checkpoint/restart with the same authority version and stable serialization. Different agents/sessions must not be assumed to share a KV cache; do not conflate session-level cached tokens with scheduler-wide savings.</p></li>
+<li><p><strong>CI gate:</strong> An offline deterministic suite uses a mock provider to inject shuffled tools, changed system date, legitimate policy revision, missing provider cache metrics, TTL expiry and simulated engine eviction. Regressions in unnecessary prefix stability cause a reviewable failure. Cache eviction remains a valid/expected miss when evidence confirms it. Default-off behaviour continues to pass current CTX-09 tests.</p></li>
+</ol>
+<p><strong>Test fixture matrix:</strong> static tool list; permutations of dictionary keys; two-tool vs three-tool legitimate change; volatile system vs volatile latest-user-tail; trim/compact at semantic boundary; old checkpoint replay; two independent sessions; engine KV eviction; idle TTL expiration; provider does not support cache counters; deliberately poisoned memory injecting tool grants; price missing. Require <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">raw</span> <span class="pre">prompt</span> <span class="pre">stored</span></code>, <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">fabricated</span> <span class="pre">cache</span> <span class="pre">evidence</span></code>, equal accepted task outcomes and stable policy authority.</p>
+<p><strong>Implementation / proof anchors:</strong> <code class="docutils literal notranslate"><span class="pre">ContextCompiler</span></code> and <code class="docutils literal notranslate"><span class="pre">CacheLayout</span></code> define logical content, but a separate inference request adapter or observation hook must examine its actual serialized request after tool assembly; <code class="docutils literal notranslate"><span class="pre">EfficiencyScorecard.extra</span></code> can carry experimental fields until an accepted typed schema exists. The acceptance-stage YAML is the canonical story. Run <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-q</span> <span class="pre">tests/stories</span></code> and targeted <code class="docutils literal notranslate"><span class="pre">tests/test_context_experiments.py</span></code> after adoption; live provider benchmarking is separately labeled, never implied by an offline fixture.</p>
+</section>
+<section id="options-caveats-and-follow-up-for-an-implementing-agent">
+<h3>Options, caveats and follow-up for an implementing agent<a class="headerlink" href="#options-caveats-and-follow-up-for-an-implementing-agent" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Canonical serialisation at the adapter</strong> avoids changing graph semantics but cannot repair providers that reorder internally. Keep provider-aware injection at the edge and stable prefix <em>validation</em> in the generic harness.</p></li>
+<li><p><strong>Hash-only passive tracing</strong> is lower risk than rewriting requests; prefer as phase one. Use first-changed-block attribution and classify unknowns honestly.</p></li>
+<li><p><strong>Optional optimiser</strong> should be behind a flag, permitted only after parity/eval gates. Do not mutate tool schemas or add/remove instructions for savings.</p></li>
+<li><p><strong>Provider KV-cache events</strong> may be unavailable; ingest them only via capability-discovered telemetry and avoid requiring any specific server configuration.</p></li>
+<li><p><strong>Economic accounting</strong> distinguishes prompt prefill, cache writes/reads, tool costs and latency, as well as tokens per successful task. Report when hosted price assumptions don’t transfer to a self-hosted server.</p></li>
+</ul>
+<p>Before implementation, locate and read all current inference-provider serialization code and story fixtures, inspect open PRs for CTX-09 or performance overlap, pin Prefixwise upstream commit, reproduce synthetic test cases, select actual source of cache counters, and state explicitly which cases prove a violation vs only indicate a likely optimization. Extend native YAML stage and regenerate generated guide <strong>only when accepted</strong>. This PR changes no runtime or canonical acceptance fixture and contains no benchmark result from local hardware.</p>
+</section>
+<section id="research-completeness">
+<h3>Research completeness<a class="headerlink" href="#research-completeness" title="Link to this heading"></a></h3>
+<p>Read upstream README, technical guide and <code class="docutils literal notranslate"><span class="pre">tests/test_check.py</span></code> examples, plus local cache compiler, unit tests, scorecard and story. Did <strong>not</strong> execute upstream experiments, self-host a model, or inspect every local inference adapter. Upstream claimed performance is attributed; no guarantees are inferred.</p>
+</section>
+</section>
+<section id="trace-and-requirement-integrity">
+<h2>Trace and requirement integrity<a class="headerlink" href="#trace-and-requirement-integrity" title="Link to this heading"></a></h2>
+<p><strong>Implementation scope:</strong> the accepted walk exercises a standalone report helper.
+Runtime integration and source-evidence verification remain open; see
+<a class="reference internal" href="#implementation-status">Trouble release status</a>.</p>
+<blockquote>
+<div><p>Research and <strong>candidate</strong> acceptance extensions only. This document is not a claim that source benchmarks have been reproduced.</p>
+<p>Accepted walks: <code class="docutils literal notranslate"><span class="pre">taloneth_layered_eval</span></code> (MH-TRACE-01) and the requirement-admission half of <code class="docutils literal notranslate"><span class="pre">fangore_admit_authority</span></code> (MH-REQ-01).</p>
+<p>Reviewed: 2026-11-17. Local baseline: <a class="reference external" href="https://github.com/rl337/mechaharness/tree/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3">MechaHarness main &#64; 2420dfe</a>.</p>
+</div></blockquote>
+<section id="source-map-and-capability-identity">
+<h3>Source map and capability identity<a class="headerlink" href="#source-map-and-capability-identity" title="Link to this heading"></a></h3>
+<p><strong>TR-20261117-TRACETRIAL</strong> (verification/evaluation/self-improvement; test/evaluation)</p>
+<ul class="simple">
+<li><p>Trouble: https://rl337.org/trouble/posts/2122354299191660973.html (2026-11-16); originating post https://x.com/traceliteai/status/2122354299191660973</p></li>
+<li><p>Primary code: <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/tree/98a381307184fa4212db3466b21b4c92a031940b">TraceTrial-Bench &#64; 98a3813</a>, especially <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/blob/98a381307184fa4212db3466b21b4c92a031940b/README.md">README</a>, <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/tree/98a381307184fa4212db3466b21b4c92a031940b/harness_tracer">harness_tracer</a>, <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/tree/98a381307184fa4212db3466b21b4c92a031940b/verifier">verifier</a>, <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/tree/98a381307184fa4212db3466b21b4c92a031940b/Task">Task</a>; paper https://arxiv.org/abs/2610.32285; report https://tracelite.ai/trial-by-trace.html.</p></li>
+<li><p>Upstream claims: 95 mechanism-focused tasks, seven harness-reliability dimensions (context, execution, governance, lifecycle, observability, tools, verification), 4 harnesses × 9 models × 95 selected runs. 31.1% of selected runs succeeded on agent deliverables despite at least one harness-criterion failure; 8.4% passed both layers completely. These are <strong>source-reported</strong>, model/harness-specific, one retained run per cell, not local measurements.</p></li>
+<li><p>Mechanism: trace native behaviour without modifying the harness, normalize observations, collect independent runtime/context/harness evidence, score <strong>Agent</strong> task outcomes separately from <strong>Harness</strong> contract fidelity, and attribute failures using explicit event chains. A model may work around a harness defect; a correctly functioning harness may deliver an unsuccessful model task. Correlation or a plausible attribution path alone does not prove causality.</p></li>
+</ul>
+<p><strong>TR-20261117-SIGNED-REQ</strong> (context/memory/knowledge and agent orchestration; acceptance/security)</p>
+<ul class="simple">
+<li><p>Trouble: https://rl337.org/trouble/posts/2120138872872956039.html (2026-11-10); original https://x.com/andriibbarabash/status/2120138872872956039</p></li>
+<li><p>Primary preprint: <a class="reference external" href="https://arxiv.org/abs/2611.07483">Signed but Not Safe: Requirement Integrity in Multi-Agent LLM Handoffs</a>, Chen et al., 2026-11-05. Code/task banks reportedly available from authors on request, <strong>not independently inspected</strong>.</p></li>
+<li><p>Mechanism: author extracts each source requirement as a verbatim quote and checkable predicate, signs a structured manifest using HMAC-SHA256, verifies later handoff integrity and deterministic merge decisions. In the paper’s synthetic preregistered experiment with Qwen3-8B, unsafe commits decreased from 69.4% for a plain handoff to 9.0% for signed manifests. Crucial caveat: a pre-sign injection raised the signed system’s violations from 14.6% to 37.5%; a signature preserves an already corrupted extraction. These numbers are attributed research claims, <strong>not a reason to prescribe HMAC as the only valid design</strong>.</p></li>
+</ul>
+</section>
+<section id="repository-coverage-audit-read-only">
+<h3>Repository coverage audit (read-only)<a class="headerlink" href="#repository-coverage-audit-read-only" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Existing surface</p></th>
+<th class="head"><p>Verified behaviour in inspected source</p></th>
+<th class="head"><p>Specific missing/partial guarantee</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3/src/mechaharness/trace_reconciliation.py">trace_reconciliation.py</a></p></td>
+<td><p>Reconciles event identifiers and hashes from independent observation surfaces, reporting agree/missing/conflict</p></td>
+<td><p>Does not itself declare paired task/harness acceptance scores or evidence-backed attribution</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3/src/mechaharness/eval_evidence.py">eval_evidence.py</a></p></td>
+<td><p>Evidence refs and atomic claims with pass/fail/unknown</p></td>
+<td><p>No inspected typed outcome linking a failed harness obligation to an observed, independently verified user outcome</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3/src/mechaharness/eval_matrix.py">eval_matrix.py</a></p></td>
+<td><p>Preserves model × harness × task-family cells and task success; prevents average-only collapse (MH-MHRL-17)</p></td>
+<td><p>Cell aggregates currently reflect task-trial success, not explicitly two independently evaluated layers</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/evaluation_outcome.py">evaluation_outcome.py</a>, <a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/cross_harness_failure.py">cross_harness_failure.py</a>, <a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/trace_envelope.py">trace_envelope.py</a></p></td>
+<td><p>Already distinguish evaluator/infrastructure failures and hold failure/trace records</p></td>
+<td><p>Reuse these primitives; confirm full story-fixture coverage before implementation</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3/src/mechaharness/handoff_record.py">handoff_record.py</a></p></td>
+<td><p>Goals, exclusions, rationale, evidence refs, verdict and progress preserved in typed record</p></td>
+<td><p>Inspected model has no explicit <em>quoted-origin requirement + checkable predicate + source-authority</em> extraction record</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md">stepped-graph-execution.md</a></p></td>
+<td><p>Pauses and resumes with authority revalidation (SG-01..10)</p></td>
+<td><p>Supports tests of altered requirements between steps; do not duplicate its resume contract</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/guides/user-stories.md">user stories guide</a></p></td>
+<td><p>Generated from suites and stages under tests/fixtures/models; Fangore, Taloneth, Nubble personas</p></td>
+<td><p>Candidate stories below require acceptance fixture selection and specification refinement before normative promotion</p></td>
+</tr>
+</tbody>
+</table>
+<p>This is <strong>partial specification / test coverage</strong>, not an allegation that MechaHarness has no tracing, evaluation or handoff machinery. Existing open draft <a class="reference external" href="https://github.com/rl337/mechaharness/pull/58">PR #58</a> covers resource-scoped grants and memory authority; <a class="reference external" href="https://github.com/rl337/mechaharness/pull/59">PR #59</a> covers prompt-cache attribution. Neither is replaced here.</p>
+</section>
+<section id="candidate-mh-trace-01-separate-harness-fidelity-from-agent-task-success">
+<span id="candidate-mh-trace-01-separate-harness-fidelity-from-agenttask-success"></span><h3>Candidate MH-TRACE-01: separate harness fidelity from agent/task success<a class="headerlink" href="#candidate-mh-trace-01-separate-harness-fidelity-from-agent-task-success" title="Link to this heading"></a></h3>
+<p><strong>Persona / outcome.</strong> As Taloneth, an ML engineer comparing models and graph recipes, I need each evaluation to report both whether the requested task succeeded and whether the harness faithfully executed its obligations, so that a lucky task result does not hide a transport, context, governance or lifecycle defect.</p>
+<p><strong>Scope.</strong> Extend existing eval-matrix, atomic-evidence, trace-reconciliation and evaluation-outcome acceptance. A new generic evaluator is not required if the existing types can be composed. Preserve the independent evidence stream used for every verdict and record missing/contested observations as unknown.</p>
+<p><strong>Offline acceptance specification (fixtures planned, not created):</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Task passes, harness fails:</strong> simulated tool API discards an error but worker produces a correct file through a fallback. Independent oracle verifies file; harness obligation fails; both results survive in reports and the combined result is not clean.</p></li>
+<li><p><strong>Task fails, harness passes:</strong> valid tool delivery and policy enforcement but wrong output; score agent fail/harness pass. Do not blame infrastructure.</p></li>
+<li><p><strong>Both fail:</strong> executor drops required context and final output is wrong; each judgement backed by distinct refs. Mark causal attribution <em>hypothesis</em> unless trace sequence plus mechanism-specific evidence supports it.</p></li>
+<li><p><strong>Insufficient observation:</strong> missing runtime audit or unreconciled hash prevents a hard harness-pass; no empty trace is interpreted as compliant. Infrastructure/evaluator failure remains unscored rather than task failure.</p></li>
+<li><p><strong>Restart/retry:</strong> one run with two attempts retains attempt IDs; repeated events and escaped errors are not counted twice. Claim evidence points to the exact attempt/observation surface.</p></li>
+<li><p><strong>Cross model/recipe:</strong> compare identical frozen tasks and criteria across two harness fingerprints; report model and harness metrics independently, per-cell coverage, unknown rates and missing evidence, not one opaque rank.</p></li>
+<li><p><strong>Negative controls:</strong> tamper one event digest and omit one required event; require conflict/missing state with inspectable evidence, without changing the user outcome oracle.</p></li>
+</ol>
+<p><strong>Proposed tests:</strong> use Taloneth’s static fixture suite in tests/fixtures/models; add compositional unit tests to existing eval/trace tests; require a pinned task manifest and verifier-only fixtures. For live comparisons keep matched budgets, models, task sources and judge versions, and label non-equivalent runs. No benchmark results are asserted until executed.</p>
+<p><strong>Design questions:</strong> Should a paired result be a view derived from Claim refs, or a new typed record? Is failure attribution a separately reviewed record? Which runtime effects can be independently verified by hosts without vendor-specific adapters? Preserve the current evaluation_outcome failure taxonomy, do not collapse unknown to fail.</p>
+</section>
+<section id="candidate-mh-req-01-preserve-source-authoritative-requirements-across-handoffs">
+<h3>Candidate MH-REQ-01: preserve source-authoritative requirements across handoffs<a class="headerlink" href="#candidate-mh-req-01-preserve-source-authoritative-requirements-across-handoffs" title="Link to this heading"></a></h3>
+<p><strong>Persona / outcome.</strong> As Fangore, an app developer delegating graph work to agents, I need a transferred or compacted requirement to remain linked to the actual trusted request and retain its testable constraints, so that a reviewer cannot be persuaded by a perfectly valid signature on a false requirement.</p>
+<p><strong>Coverage classification.</strong> Partially covered by HandoffRecord goals/exclusions, provenance, source-authority and MH-DOTS approval invariants. The gap is <em>admission of requirements before they enter a signed/checkable manifest</em>, not generic provenance or another signing library.</p>
+<p><strong>Offline acceptance specification:</strong></p>
+<ol class="arabic simple">
+<li><p>The user supplies a requirement and exclusion. The extraction stage records a source ID, exact supporting span/quote, trust class, checkable predicate and explicit uncertainty for each requirement. The handoff presents both a concise summary and these anchored assertions.</p></li>
+<li><p>Retrieved research contains an instruction to remove a user exclusion. Such text is evidence, never promoted into the authoritative requirement list, even if later signed.</p></li>
+<li><p>An attacker changes a requirement <strong>after</strong> manifest creation. Integrity verification rejects the mutated handoff; benign reserialization that preserves canonical semantics remains valid.</p></li>
+<li><p>A malformed or ambiguous source instruction causes an unresolved/ask-human outcome; do not manufacture a predicate or silently weaken it.</p></li>
+<li><p>A downstream reviewer receives a syntactically valid but source-mismatched manifest. Source fidelity check rejects it before the reviewer can approve an effect.</p></li>
+<li><p>Restart/compaction preserves anchors and original authority; revoked or changed instructions trigger new validation rather than reusing prior approval.</p></li>
+<li><p>Positive control: legitimate user-authorized requirement update proceeds, preserves version history and does not trigger permanent false veto.</p></li>
+</ol>
+<p><strong>Design alternatives:</strong> structured source-bound claims plus deterministic verifier; content hashes of immutable original user request; signed manifests for transport integrity; authority-typed envelopes. <strong>Signing is optional</strong> if trusted storage and integrity checks provide equivalent guarantees. Risk is specifically extraction contamination prior to any transport-signature check.</p>
+<p><strong>Implementation investigation:</strong> map current HandoffRecord and context authority envelopes to source anchors; find nearest Fangore story fixture and existing tests for authorization epoch and source provenance; distinguish one-shot handoff from June’s durable application state. Do not add HMAC key lifecycle to MH without an explicit host need.</p>
+</section>
+<section id="adoption-boundaries">
+<span id="adoption--boundaries"></span><h3>Adoption / boundaries<a class="headerlink" href="#adoption-boundaries" title="Link to this heading"></a></h3>
+<p>Stories are <strong>candidate requirements</strong>. Existing canonical MechaHarness user stories are YAML suite stages under tests/fixtures/models and generated docs/guides/user-stories.md. An implementation agent should inspect actual fixture IDs, refine one relevant Fangore and one Taloneth acceptance stage, run the story guide sync commands and offline suite, then separately evaluate live adapters; do not hand-edit the generated guide. The original research note proposed these stages; the accepted offline walks and their remaining runtime gaps are listed in the release-status page.</p>
+<p>No external benchmarks, Docker tasks, signed-manifest attacks or media generators were run. Reassess repo state and upstream releases before adopting.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="self-revising-recipe-requirements-map.html" class="btn btn-neutral float-left" title="Self-revising recipe evolution requirements map" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="video-production-audited-infer-migration.html" class="btn btn-neutral float-right" title="Video production project → MechaHarness: audited infer-accept migration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
