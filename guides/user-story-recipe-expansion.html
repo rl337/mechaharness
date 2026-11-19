@@ -3,10 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User-story → recipe expansion waves &mdash; MechaHarness 0.17.1 documentation</title>
+  <title> &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -47,19 +46,94 @@
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent-skills.html">Agent skills for your project</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-stories.html">User stories</a></li>
-<li class="toctree-l1"><a class="reference internal" href="user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding-delegate-suites.html">Coding-delegate suites (development graph)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-preparation.html">Prepare and publish a release</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gastronomic-comparison.html">Gastronomic comparison protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authoring-user-stories.html">Write an acceptance story</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/budget.html">Budget (soft / hard spend)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli-universe.html">CLI universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/durable-graph-generators.html">Durable graph generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/audited-infer-accept.html">Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/bounded-retry.html">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-decomposition.html">Template: change_decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-execution.html">Template: change_execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-verification.html">Template: change_verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/contract-extraction.html">Template: contract_extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/conversational-tool-loop.html">Conversational tool loop (<code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/decision-plane.html">Typed decision plane (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/development-acceptance.html">Template: development_acceptance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/environment-repair.html">Template: environment_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/failure-diagnosis.html">Template: failure_diagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/fan-out-aggregate.html">Template: fan_out_aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-comparison.html">Template: gastronomic_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-guided-development.html">Template: gastronomic_guided_development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/guided-coding.html">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/independent-review.html">Template: independent_review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/instruction-todo-plan.html">Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/produce-critique-refine.html">Template: produce_critique_refine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/safety-eval.html">Template: safety_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/strategy-revision.html">Template: strategy_revision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/verify-repair.html">Template: verify_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/workspace-discovery.html">Template: workspace_discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/inspiration-primitives.html">Inspiration primitives (host import guide)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/job-lanes.html">Job lanes and JobLaneBroker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/node-components.html">Node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/stepped-graph-execution.html">Stepped graph execution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dependency-injection.html">Dependency injection requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/durable-graph-generators.html">Durable graph generators (driven execution)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dynamic-tool-graph.html">Dynamic tool graph and node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/event-analytics-schema.html">Event analytics schema requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/host-integration.html">Host integration requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/job-lane-broker.html">Job lanes and JobLaneBroker (JL-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/repository-secrets-hygiene.html">Repository secrets and local-config hygiene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/stepped-graph-execution.html">Stepped graph execution (SG-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/ai-assistant-host-friction-inspiration.html">AI assistant project host-friction inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/ai-assistant-host-friction-requirements-map.html">AI assistant project host-friction requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/dev-blog-inspiration.html">Developer Blog Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/durable-graph-generators-inversion-of-control.html">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/durable-graph-generators-requirements-map.html">Durable graph generators requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/eval-research.html">MechaHarness Eval Research Brief</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/fineenvs-mh-mhrl-requirements-map.html">FineEnvs multi-harness RL requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/gastronomic-guided-development.html">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/gastronomic-guided-development-execution-plan.html">Cursor execution plan: Gastronomic guided development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/jev-typed-judgment-inspiration.html">Jev typed-judgment inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/jev-typed-judgment-requirements-map.html">Jev typed-judgment requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html">Multi-Harness RL Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#recommended-architecture-additions">Recommended architecture additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#ownership-boundary-mechaharness-vs-the-ai-assistant-host">Ownership boundary: MechaHarness vs the AI assistant host</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#priority">Priority</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#acceptance-direction-sketch">Acceptance-direction sketch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#attribution">Attribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/openai-dots-agent-safety-inspiration.html">Inspiration: OpenAI Dots, Scoped Execution and Agent Safety</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/openai-dots-agent-safety-requirements-map.html">OpenAI Dots agent safety requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/personal-agent-reliability-inspiration.html">Inspiration: Reliable Personal Agent Execution Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/personal-agent-reliability-requirements-map.html">Personal agent reliability requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/requirements-map.html">Inspiration requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/self-revising-recipe-evolution.html">Inspiration: Evaluation-driven evolution of composed recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/self-revising-recipe-requirements-map.html">Self-revising recipe evolution requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/trouble.html">Trouble research and implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/video-production-audited-infer-migration.html">Video production project → MechaHarness: audited infer-accept migration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/walkinglabs-eval-requirements-map.html">WalkingLabs + eval research requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/walkinglabs-harness-engineering-inspiration.html">WalkingLabs Harness Engineering inspiration for MechaHarness</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
@@ -73,6 +147,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/research_helpers.html">Experimental research reports</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
@@ -98,9 +173,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">User-story → recipe expansion waves</li>
+      <li class="breadcrumb-item active"></li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/rl337/mechaharness/blob/main/docs/guides/user-story-recipe-expansion.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -108,258 +182,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="user-story-recipe-expansion-waves">
-<h1>User-story → recipe expansion waves<a class="headerlink" href="#user-story-recipe-expansion-waves" title="Link to this heading"></a></h1>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Surface</p></th>
-<th class="head"><p>Value</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Status</p></td>
-<td><p>living plan (post Wave 3 clarification)</p></td>
-</tr>
-<tr class="row-odd"><td><p>Litmus</p></td>
-<td><p>Valid story ⇒ graph/recipe path exists; if missing, <strong>add the recipe</strong>, then instrument</p></td>
-</tr>
-</tbody>
-</table>
-<section id="litmus-corrected">
-<h2>Litmus (corrected)<a class="headerlink" href="#litmus-corrected" title="Link to this heading"></a></h2>
-<p>If a persona claim is a valid MechaHarness user story, there must be an
-<strong>execution graph</strong> (Agentic Recipe + runners + DI seams) that can carry it,
-and a CLI/<code class="docutils literal notranslate"><span class="pre">user_story</span></code> walk that exercises that graph.</p>
-<ul class="simple">
-<li><p>Missing path ⇒ <strong>expand inventory</strong> (<code class="docutils literal notranslate"><span class="pre">RagRetriever</span></code> + <code class="docutils literal notranslate"><span class="pre">context_pack</span></code> was the
-model).</p></li>
-<li><p>Do <strong>not</strong> demote a valid story to unit-only because the graph is unfinished.</p></li>
-<li><p>Unit/doctest still covers helpers; stories own the product walk.</p></li>
-</ul>
-</section>
-<section id="do-we-re-evaluate-waves-13">
-<h2>Do we re-evaluate Waves 1–3?<a class="headerlink" href="#do-we-re-evaluate-waves-13" title="Link to this heading"></a></h2>
-<p><strong>Yes, selectively — not a rewrite of everything.</strong></p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Wave</p></th>
-<th class="head"><p>Keep?</p></th>
-<th class="head"><p>Re-eval?</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><strong>Wave 1 A</strong> durable IoC (<code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">answer</span></code>/…)</p></td>
-<td><p>Keep</p></td>
-<td><p>Light: already execute graphs</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Wave 1 B/C</strong> recipe shape (<code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> / <code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code>)</p></td>
-<td><p>Keep as interim</p></td>
-<td><p><strong>Yes — promote many to execute</strong> when runners exist (verify_repair, bounded_retry, independent_review, …)</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Wave 1 D</strong> <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> / <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code></p></td>
-<td><p>Keep</p></td>
-<td><p>OK where adapters execute</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Wave 1 E/F</strong> judge_route / infer</p></td>
-<td><p>Keep</p></td>
-<td><p>OK; judge twin already landed</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Wave 2 P1</strong> <code class="docutils literal notranslate"><span class="pre">transactional_resume</span></code></p></td>
-<td><p>Keep</p></td>
-<td><p>OK (real crash/resume graph); optional later fold into durable CLI</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Wave 2/3 P2</strong> JEV domain</p></td>
-<td><p>Keep</p></td>
-<td><p>OK after <code class="docutils literal notranslate"><span class="pre">judge</span></code> + <code class="docutils literal notranslate"><span class="pre">context_pack</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Wave 2/3 P3</strong> decision-plane substrate</p></td>
-<td><p><strong>Reopen</strong></p></td>
-<td><p>Wrongly demoted projection/policy/shadow/telemetry — <strong>restore via plane execute runners</strong></p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Wave 2/3 P4</strong> lifecycle</p></td>
-<td><p>Keep interim</p></td>
-<td><p>Prefer eventual <code class="docutils literal notranslate"><span class="pre">tool_loop</span></code> + Config extensions; <code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> is fine until then</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>P5–P10</strong> still <code class="docutils literal notranslate"><span class="pre">probe:</span></code></p></td>
-<td><p><strong>Yes</strong></p></td>
-<td><p>Group by <strong>recipe to invent</strong>, not by “thin verb then YAML wrap”</p></td>
-</tr>
-</tbody>
-</table>
-<p>Wave 1/2 mechanical <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migrations stay valid harness shape. What we
-re-evaluate is <strong>whether the claim runs a graph</strong> or only inspects shape /
-helpers.</p>
-</section>
-<section id="inventory-snapshot-fixture-v1">
-<h2>Inventory snapshot (fixture v1)<a class="headerlink" href="#inventory-snapshot-fixture-v1" title="Link to this heading"></a></h2>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Bucket</p></th>
-<th class="head text-right"><p>Count</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">user_story</span></code></p></td>
-<td class="text-right"><p>~73</p></td>
-<td><p>Mixed: execute vs shape-only</p></td>
-</tr>
-<tr class="row-odd"><td><p>Still <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">cli</span></code> + probe</p></td>
-<td class="text-right"><p>~96</p></td>
-<td><p>Need recipe/verb expansion</p></td>
-</tr>
-<tr class="row-even"><td><p>Shape-only recipe walks</p></td>
-<td class="text-right"><p>~24</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> / <code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code> only</p></td>
-</tr>
-<tr class="row-odd"><td><p>Demoted plane stories to restore</p></td>
-<td class="text-right"><p><strong>4</strong></p></td>
-<td><p>projection, policy, shadow, telemetry</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="working-groups-recipe-first">
-<h2>Working groups (recipe-first)<a class="headerlink" href="#working-groups-recipe-first" title="Link to this heading"></a></h2>
-<p>Work each group by: name/extend recipe → runners + DI → restore/migrate
-stories → regenerate guide → green checks.</p>
-<section id="g0-decision-plane-execute-restore-demotions-done">
-<h3>G0 — Decision-plane execute (restore demotions) · <strong>done</strong><a class="headerlink" href="#g0-decision-plane-execute-restore-demotions-done" title="Link to this heading"></a></h3>
-<p><strong>Landed:</strong> <code class="docutils literal notranslate"><span class="pre">decision_plane_runner</span></code> (<code class="docutils literal notranslate"><span class="pre">ProjectStateRunner</span></code>, <code class="docutils literal notranslate"><span class="pre">AskBatchRunner</span></code>,
-<code class="docutils literal notranslate"><span class="pre">ApplyPolicyRunner</span></code>, <code class="docutils literal notranslate"><span class="pre">EscalateRunner</span></code>, <code class="docutils literal notranslate"><span class="pre">ShadowAskRunner</span></code>) +
-<code class="docutils literal notranslate"><span class="pre">DecisionPlaneRecipeAdapter</span></code> on <code class="docutils literal notranslate"><span class="pre">run_recipe</span></code>. Fixture answers live on bind
-<code class="docutils literal notranslate"><span class="pre">inputs</span></code> (rules backend); live <code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code> ask is a later deepen.</p>
-<p><strong>Restored / promoted stories:</strong> projection, policy (×3), shadow, telemetry,
-recipe, model_policy.</p>
-</section>
-<section id="g1-control-recipes-that-already-exist-execute-dont-demote">
-<h3>G1 — Control recipes that already exist (execute, don’t demote)<a class="headerlink" href="#g1-control-recipes-that-already-exist-execute-dont-demote" title="Link to this heading"></a></h3>
-<p>Catalog already has templates; stories only instantiate. Add runners +
-<code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> / durable walks:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Recipe</p></th>
-<th class="head"><p>Stories</p></th>
-<th class="head"><p>Status</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_verify_repair_recipe</span></code></p></td>
-<td><p><strong>done</strong> (batch 1)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_retry_recipe</span></code></p></td>
-<td><p><strong>done</strong> (batch 1)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verify_repair</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_bounded_repair_loop</span></code></p></td>
-<td><p><strong>done</strong> (batch 2; was probe)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">independent_review</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_independent_review</span></code>, req-review shape</p></td>
-<td><p><strong>done</strong> (batch 3)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">environment_repair</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_environment_repair_recipe</span></code></p></td>
-<td><p><strong>done</strong> (batch 4)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">initialize_preflight</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_initialize_preflight</span></code></p></td>
-<td><p><strong>done</strong> (batch 4)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">produce_critique_refine</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_produce_critique_refine</span></code></p></td>
-<td><p><strong>done</strong> (batch 5)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">safety_eval</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">taloneth_insp_safety_eval_recipes</span></code></p></td>
-<td><p><strong>done</strong> (batch 5)</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="g2-context-rag-lane-extend-g0-pattern">
-<h3>G2 — Context / RAG lane (extend G0 pattern)<a class="headerlink" href="#g2-context-rag-lane-extend-g0-pattern" title="Link to this heading"></a></h3>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Piece</p></th>
-<th class="head"><p>Stories</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Deepen <code class="docutils literal notranslate"><span class="pre">context_pack</span></code> (judge scores inside retrieve)</p></td>
-<td><p>context_* siblings</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ContextProvider</span></code> discovery → pack</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_insp_context_provider</span></code> + P6 context probes</p></td>
-</tr>
-<tr class="row-even"><td><p>Compaction / layers / compiler</p></td>
-<td><p>P6 remainder</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="g3-access-authority-as-graph-gates">
-<h3>G3 — Access / authority as graph gates<a class="headerlink" href="#g3-access-authority-as-graph-gates" title="Link to this heading"></a></h3>
-<p>Not a grab-bag of probes: recipes or durable envelopes that <strong>deny/narrow</strong> on
-the product path (capability envelope, auth epoch resume, soft vs hard,
-approval interrupt). Former P5.</p>
-</section>
-<section id="g4-graph-executor-budget-resume">
-<h3>G4 — Graph executor / budget / resume<a class="headerlink" href="#g4-graph-executor-budget-resume" title="Link to this heading"></a></h3>
-<p>Durable + budget recipes; migrate P8 probes onto <code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">answer</span></code> or
-<code class="docutils literal notranslate"><span class="pre">run_recipe</span></code> with real budget/effect runners. TDR stays; align crash stories
-with the same façade where practical.</p>
-</section>
-<section id="g5-eval-research-packs">
-<h3>G5 — Eval / research packs<a class="headerlink" href="#g5-eval-research-packs" title="Link to this heading"></a></h3>
-<p>Taloneth P7: prefer eval <strong>recipes</strong> / export graphs over probe bags
-(<code class="docutils literal notranslate"><span class="pre">policy_replay</span></code>, shadow compare, eval matrix). Compose with G0 shadow/telemetry.</p>
-</section>
-<section id="g6-recipe-lifecycle-recipe-plan">
-<h3>G6 — Recipe lifecycle (<code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code>)<a class="headerlink" href="#g6-recipe-lifecycle-recipe-plan" title="Link to this heading"></a></h3>
-<p>Keep <code class="docutils literal notranslate"><span class="pre">recipe_plan</span></code> for evolution/port/compose <strong>if</strong> the claim is registry
-lifecycle. When the claim is “run the evolved recipe,” promote to execute
-(G1). Do not invent another <code class="docutils literal notranslate"><span class="pre">*_case</span></code> bag.</p>
-</section>
-<section id="g7-diagnostics-that-stay-thin-verbs">
-<h3>G7 — Diagnostics that stay thin verbs<a class="headerlink" href="#g7-diagnostics-that-stay-thin-verbs" title="Link to this heading"></a></h3>
-<p>Replay / routing / parity / affinity may remain one-shot verbs (like <code class="docutils literal notranslate"><span class="pre">infer</span></code>)
-when they are not subgraph control stories. Still need honest narratives and
-cassettes; no probe wrapper.</p>
-</section>
-</section>
-<section id="anti-patterns-do-not-repeat">
-<h2>Anti-patterns (do not repeat)<a class="headerlink" href="#anti-patterns-do-not-repeat" title="Link to this heading"></a></h2>
-<ol class="arabic simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">*_case</span></code> product verbs that dispatch on <code class="docutils literal notranslate"><span class="pre">case:</span></code> with baked answers.</p></li>
-<li><p>Marking a story green for <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> alone when the inspiration
-claim is an <strong>outcome</strong> of running the recipe.</p></li>
-<li><p>Demoting a persona claim to unit tests because runners are missing.</p></li>
-<li><p>Migrating probe → <code class="docutils literal notranslate"><span class="pre">user_story</span></code> before the graph exists (YAML churn without
-product path).</p></li>
-</ol>
-</section>
-<section id="suggested-order">
-<h2>Suggested order<a class="headerlink" href="#suggested-order" title="Link to this heading"></a></h2>
-<ol class="arabic simple">
-<li><p><strong>G0</strong> — restore four plane stories (blocks honesty of P3).</p></li>
-<li><p><strong>G1</strong> — verify_repair / bounded_retry execute (high reuse).</p></li>
-<li><p><strong>G3</strong> or <strong>G4</strong> — whichever unblocks more P5/P8 hosts.</p></li>
-<li><p><strong>G2</strong> deepen RAG; <strong>G5</strong> eval; <strong>G6</strong> lifecycle plans as needed.</p></li>
-</ol>
-</section>
-<section id="related">
-<h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="user-story-migration-batches.html"><span class="std std-doc">User-story migration batches</span></a> (Wave 1–2 checklist; P5+ superseded by groups above)</p></li>
-<li><p><a class="reference internal" href="user-story-instrumentation-migration.html"><span class="std std-doc">Instrumentation migration</span></a> (Wave 3 case-bag removal)</p></li>
-<li><p><span class="xref myst">Agentic Recipes skill</span></p></li>
-</ul>
-</section>
-</section>
-
+<meta http-equiv="refresh" content="0; url=authoring-user-stories.html">
+<p>This page has moved to <a href="authoring-user-stories.html">the consolidated documentation</a>.</p>
 
            </div>
           </div>

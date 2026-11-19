@@ -3,10 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trouble inspiration: evidence-layered harness evaluation and requirement-integrity handoffs &mdash; MechaHarness 0.17.1 documentation</title>
+  <title> &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -47,19 +46,94 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/agent-skills.html">Agent skills for your project</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/coding-delegate-suites.html">Coding-delegate suites (development graph)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/release-preparation.html">Prepare and publish a release</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/gastronomic-comparison.html">Gastronomic comparison protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/authoring-user-stories.html">Write an acceptance story</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/budget.html">Budget (soft / hard spend)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli-universe.html">CLI universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/durable-graph-generators.html">Durable graph generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/audited-infer-accept.html">Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/bounded-retry.html">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-decomposition.html">Template: change_decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-execution.html">Template: change_execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-verification.html">Template: change_verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/contract-extraction.html">Template: contract_extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/conversational-tool-loop.html">Conversational tool loop (<code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/decision-plane.html">Typed decision plane (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/development-acceptance.html">Template: development_acceptance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/environment-repair.html">Template: environment_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/failure-diagnosis.html">Template: failure_diagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/fan-out-aggregate.html">Template: fan_out_aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-comparison.html">Template: gastronomic_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-guided-development.html">Template: gastronomic_guided_development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/guided-coding.html">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/independent-review.html">Template: independent_review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/instruction-todo-plan.html">Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/produce-critique-refine.html">Template: produce_critique_refine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/safety-eval.html">Template: safety_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/strategy-revision.html">Template: strategy_revision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/verify-repair.html">Template: verify_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/workspace-discovery.html">Template: workspace_discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/inspiration-primitives.html">Inspiration primitives (host import guide)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/job-lanes.html">Job lanes and JobLaneBroker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/node-components.html">Node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/stepped-graph-execution.html">Stepped graph execution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dependency-injection.html">Dependency injection requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/durable-graph-generators.html">Durable graph generators (driven execution)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dynamic-tool-graph.html">Dynamic tool graph and node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/event-analytics-schema.html">Event analytics schema requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/host-integration.html">Host integration requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/job-lane-broker.html">Job lanes and JobLaneBroker (JL-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/repository-secrets-hygiene.html">Repository secrets and local-config hygiene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/stepped-graph-execution.html">Stepped graph execution (SG-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ai-assistant-host-friction-inspiration.html">AI assistant project host-friction inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ai-assistant-host-friction-requirements-map.html">AI assistant project host-friction requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev-blog-inspiration.html">Developer Blog Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="durable-graph-generators-inversion-of-control.html">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="durable-graph-generators-requirements-map.html">Durable graph generators requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eval-research.html">MechaHarness Eval Research Brief</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fineenvs-mh-mhrl-requirements-map.html">FineEnvs multi-harness RL requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gastronomic-guided-development.html">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gastronomic-guided-development-execution-plan.html">Cursor execution plan: Gastronomic guided development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jev-typed-judgment-inspiration.html">Jev typed-judgment inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jev-typed-judgment-requirements-map.html">Jev typed-judgment requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html">Multi-Harness RL Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#recommended-architecture-additions">Recommended architecture additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#ownership-boundary-mechaharness-vs-the-ai-assistant-host">Ownership boundary: MechaHarness vs the AI assistant host</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#priority">Priority</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#acceptance-direction-sketch">Acceptance-direction sketch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#attribution">Attribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openai-dots-agent-safety-inspiration.html">Inspiration: OpenAI Dots, Scoped Execution and Agent Safety</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openai-dots-agent-safety-requirements-map.html">OpenAI Dots agent safety requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="personal-agent-reliability-inspiration.html">Inspiration: Reliable Personal Agent Execution Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="personal-agent-reliability-requirements-map.html">Personal agent reliability requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements-map.html">Inspiration requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-revising-recipe-evolution.html">Inspiration: Evaluation-driven evolution of composed recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-revising-recipe-requirements-map.html">Self-revising recipe evolution requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble.html">Trouble research and implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="video-production-audited-infer-migration.html">Video production project → MechaHarness: audited infer-accept migration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="walkinglabs-eval-requirements-map.html">WalkingLabs + eval research requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="walkinglabs-harness-engineering-inspiration.html">WalkingLabs Harness Engineering inspiration for MechaHarness</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
@@ -73,6 +147,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/research_helpers.html">Experimental research reports</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
@@ -98,9 +173,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Trouble inspiration: evidence-layered harness evaluation and requirement-integrity handoffs</li>
+      <li class="breadcrumb-item active"></li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -108,112 +182,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="trouble-inspiration-evidence-layered-harness-evaluation-and-requirement-integrity-handoffs">
-<h1>Trouble inspiration: evidence-layered harness evaluation and requirement-integrity handoffs<a class="headerlink" href="#trouble-inspiration-evidence-layered-harness-evaluation-and-requirement-integrity-handoffs" title="Link to this heading"></a></h1>
-<blockquote>
-<div><p>Research and <strong>candidate</strong> acceptance extensions only. This document is not a claim that source benchmarks have been reproduced.</p>
-<p>Accepted walks: <code class="docutils literal notranslate"><span class="pre">taloneth_layered_eval</span></code> (MH-TRACE-01) and the requirement-admission half of <code class="docutils literal notranslate"><span class="pre">fangore_admit_authority</span></code> (MH-REQ-01).</p>
-<p>Reviewed: 2026-11-17. Local baseline: <a class="reference external" href="https://github.com/rl337/mechaharness/tree/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3">MechaHarness main &#64; 2420dfe</a>.</p>
-</div></blockquote>
-<section id="source-map-and-capability-identity">
-<h2>Source map and capability identity<a class="headerlink" href="#source-map-and-capability-identity" title="Link to this heading"></a></h2>
-<p><strong>TR-20261117-TRACETRIAL</strong> (verification/evaluation/self-improvement; test/evaluation)</p>
-<ul class="simple">
-<li><p>Trouble: https://rl337.org/trouble/posts/2122354299191660973.html (2026-11-16); originating post https://x.com/traceliteai/status/2122354299191660973</p></li>
-<li><p>Primary code: <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/tree/98a381307184fa4212db3466b21b4c92a031940b">TraceTrial-Bench &#64; 98a3813</a>, especially <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/blob/98a381307184fa4212db3466b21b4c92a031940b/README.md">README</a>, <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/tree/98a381307184fa4212db3466b21b4c92a031940b/harness_tracer">harness_tracer</a>, <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/tree/98a381307184fa4212db3466b21b4c92a031940b/verifier">verifier</a>, <a class="reference external" href="https://github.com/TraceLite-AI/TraceTrial-Bench/tree/98a381307184fa4212db3466b21b4c92a031940b/Task">Task</a>; paper https://arxiv.org/abs/2610.32285; report https://tracelite.ai/trial-by-trace.html.</p></li>
-<li><p>Upstream claims: 95 mechanism-focused tasks, seven harness-reliability dimensions (context, execution, governance, lifecycle, observability, tools, verification), 4 harnesses × 9 models × 95 selected runs. 31.1% of selected runs succeeded on agent deliverables despite at least one harness-criterion failure; 8.4% passed both layers completely. These are <strong>source-reported</strong>, model/harness-specific, one retained run per cell, not local measurements.</p></li>
-<li><p>Mechanism: trace native behaviour without modifying the harness, normalize observations, collect independent runtime/context/harness evidence, score <strong>Agent</strong> task outcomes separately from <strong>Harness</strong> contract fidelity, and attribute failures using explicit event chains. A model may work around a harness defect; a correctly functioning harness may deliver an unsuccessful model task. Correlation or a plausible attribution path alone does not prove causality.</p></li>
-</ul>
-<p><strong>TR-20261117-SIGNED-REQ</strong> (context/memory/knowledge and agent orchestration; acceptance/security)</p>
-<ul class="simple">
-<li><p>Trouble: https://rl337.org/trouble/posts/2120138872872956039.html (2026-11-10); original https://x.com/andriibbarabash/status/2120138872872956039</p></li>
-<li><p>Primary preprint: <a class="reference external" href="https://arxiv.org/abs/2611.07483">Signed but Not Safe: Requirement Integrity in Multi-Agent LLM Handoffs</a>, Chen et al., 2026-11-05. Code/task banks reportedly available from authors on request, <strong>not independently inspected</strong>.</p></li>
-<li><p>Mechanism: author extracts each source requirement as a verbatim quote and checkable predicate, signs a structured manifest using HMAC-SHA256, verifies later handoff integrity and deterministic merge decisions. In the paper’s synthetic preregistered experiment with Qwen3-8B, unsafe commits decreased from 69.4% for a plain handoff to 9.0% for signed manifests. Crucial caveat: a pre-sign injection raised the signed system’s violations from 14.6% to 37.5%; a signature preserves an already corrupted extraction. These numbers are attributed research claims, <strong>not a reason to prescribe HMAC as the only valid design</strong>.</p></li>
-</ul>
-</section>
-<section id="repository-coverage-audit-read-only">
-<h2>Repository coverage audit (read-only)<a class="headerlink" href="#repository-coverage-audit-read-only" title="Link to this heading"></a></h2>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Existing surface</p></th>
-<th class="head"><p>Verified behaviour in inspected source</p></th>
-<th class="head"><p>Specific missing/partial guarantee</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3/src/mechaharness/trace_reconciliation.py">trace_reconciliation.py</a></p></td>
-<td><p>Reconciles event identifiers and hashes from independent observation surfaces, reporting agree/missing/conflict</p></td>
-<td><p>Does not itself declare paired task/harness acceptance scores or evidence-backed attribution</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3/src/mechaharness/eval_evidence.py">eval_evidence.py</a></p></td>
-<td><p>Evidence refs and atomic claims with pass/fail/unknown</p></td>
-<td><p>No inspected typed outcome linking a failed harness obligation to an observed, independently verified user outcome</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3/src/mechaharness/eval_matrix.py">eval_matrix.py</a></p></td>
-<td><p>Preserves model × harness × task-family cells and task success; prevents average-only collapse (MH-MHRL-17)</p></td>
-<td><p>Cell aggregates currently reflect task-trial success, not explicitly two independently evaluated layers</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/evaluation_outcome.py">evaluation_outcome.py</a>, <a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/cross_harness_failure.py">cross_harness_failure.py</a>, <a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/src/mechaharness/trace_envelope.py">trace_envelope.py</a></p></td>
-<td><p>Already distinguish evaluator/infrastructure failures and hold failure/trace records</p></td>
-<td><p>Reuse these primitives; confirm full story-fixture coverage before implementation</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/2420dfe01febbc11b18fd42cf0d7d18bcc7f43e3/src/mechaharness/handoff_record.py">handoff_record.py</a></p></td>
-<td><p>Goals, exclusions, rationale, evidence refs, verdict and progress preserved in typed record</p></td>
-<td><p>Inspected model has no explicit <em>quoted-origin requirement + checkable predicate + source-authority</em> extraction record</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/stepped-graph-execution.md">stepped-graph-execution.md</a></p></td>
-<td><p>Pauses and resumes with authority revalidation (SG-01..10)</p></td>
-<td><p>Supports tests of altered requirements between steps; do not duplicate its resume contract</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/rl337/mechaharness/blob/main/docs/guides/user-stories.md">user stories guide</a></p></td>
-<td><p>Generated from suites and stages under tests/fixtures/models; Fangore, Taloneth, Nubble personas</p></td>
-<td><p>Candidate stories below require acceptance fixture selection and specification refinement before normative promotion</p></td>
-</tr>
-</tbody>
-</table>
-<p>This is <strong>partial specification / test coverage</strong>, not an allegation that MechaHarness has no tracing, evaluation or handoff machinery. Existing open draft <a class="reference external" href="https://github.com/rl337/mechaharness/pull/58">PR #58</a> covers resource-scoped grants and memory authority; <a class="reference external" href="https://github.com/rl337/mechaharness/pull/59">PR #59</a> covers prompt-cache attribution. Neither is replaced here.</p>
-</section>
-<section id="candidate-mh-trace-01-separate-harness-fidelity-from-agent-task-success">
-<h2>Candidate MH-TRACE-01: separate harness fidelity from agent/task success<a class="headerlink" href="#candidate-mh-trace-01-separate-harness-fidelity-from-agent-task-success" title="Link to this heading"></a></h2>
-<p><strong>Persona / outcome.</strong> As Taloneth, an ML engineer comparing models and graph recipes, I need each evaluation to report both whether the requested task succeeded and whether the harness faithfully executed its obligations, so that a lucky task result does not hide a transport, context, governance or lifecycle defect.</p>
-<p><strong>Scope.</strong> Extend existing eval-matrix, atomic-evidence, trace-reconciliation and evaluation-outcome acceptance. A new generic evaluator is not required if the existing types can be composed. Preserve the independent evidence stream used for every verdict and record missing/contested observations as unknown.</p>
-<p><strong>Offline acceptance specification (fixtures planned, not created):</strong></p>
-<ol class="arabic simple">
-<li><p><strong>Task passes, harness fails:</strong> simulated tool API discards an error but worker produces a correct file through a fallback. Independent oracle verifies file; harness obligation fails; both results survive in reports and the combined result is not clean.</p></li>
-<li><p><strong>Task fails, harness passes:</strong> valid tool delivery and policy enforcement but wrong output; score agent fail/harness pass. Do not blame infrastructure.</p></li>
-<li><p><strong>Both fail:</strong> executor drops required context and final output is wrong; each judgement backed by distinct refs. Mark causal attribution <em>hypothesis</em> unless trace sequence plus mechanism-specific evidence supports it.</p></li>
-<li><p><strong>Insufficient observation:</strong> missing runtime audit or unreconciled hash prevents a hard harness-pass; no empty trace is interpreted as compliant. Infrastructure/evaluator failure remains unscored rather than task failure.</p></li>
-<li><p><strong>Restart/retry:</strong> one run with two attempts retains attempt IDs; repeated events and escaped errors are not counted twice. Claim evidence points to the exact attempt/observation surface.</p></li>
-<li><p><strong>Cross model/recipe:</strong> compare identical frozen tasks and criteria across two harness fingerprints; report model and harness metrics independently, per-cell coverage, unknown rates and missing evidence, not one opaque rank.</p></li>
-<li><p><strong>Negative controls:</strong> tamper one event digest and omit one required event; require conflict/missing state with inspectable evidence, without changing the user outcome oracle.</p></li>
-</ol>
-<p><strong>Proposed tests:</strong> use Taloneth’s static fixture suite in tests/fixtures/models; add compositional unit tests to existing eval/trace tests; require a pinned task manifest and verifier-only fixtures. For live comparisons keep matched budgets, models, task sources and judge versions, and label non-equivalent runs. No benchmark results are asserted until executed.</p>
-<p><strong>Design questions:</strong> Should a paired result be a view derived from Claim refs, or a new typed record? Is failure attribution a separately reviewed record? Which runtime effects can be independently verified by hosts without vendor-specific adapters? Preserve the current evaluation_outcome failure taxonomy, do not collapse unknown to fail.</p>
-</section>
-<section id="candidate-mh-req-01-preserve-source-authoritative-requirements-across-handoffs">
-<h2>Candidate MH-REQ-01: preserve source-authoritative requirements across handoffs<a class="headerlink" href="#candidate-mh-req-01-preserve-source-authoritative-requirements-across-handoffs" title="Link to this heading"></a></h2>
-<p><strong>Persona / outcome.</strong> As Fangore, an app developer delegating graph work to agents, I need a transferred or compacted requirement to remain linked to the actual trusted request and retain its testable constraints, so that a reviewer cannot be persuaded by a perfectly valid signature on a false requirement.</p>
-<p><strong>Coverage classification.</strong> Partially covered by HandoffRecord goals/exclusions, provenance, source-authority and MH-DOTS approval invariants. The gap is <em>admission of requirements before they enter a signed/checkable manifest</em>, not generic provenance or another signing library.</p>
-<p><strong>Offline acceptance specification:</strong></p>
-<ol class="arabic simple">
-<li><p>The user supplies a requirement and exclusion. The extraction stage records a source ID, exact supporting span/quote, trust class, checkable predicate and explicit uncertainty for each requirement. The handoff presents both a concise summary and these anchored assertions.</p></li>
-<li><p>Retrieved research contains an instruction to remove a user exclusion. Such text is evidence, never promoted into the authoritative requirement list, even if later signed.</p></li>
-<li><p>An attacker changes a requirement <strong>after</strong> manifest creation. Integrity verification rejects the mutated handoff; benign reserialization that preserves canonical semantics remains valid.</p></li>
-<li><p>A malformed or ambiguous source instruction causes an unresolved/ask-human outcome; do not manufacture a predicate or silently weaken it.</p></li>
-<li><p>A downstream reviewer receives a syntactically valid but source-mismatched manifest. Source fidelity check rejects it before the reviewer can approve an effect.</p></li>
-<li><p>Restart/compaction preserves anchors and original authority; revoked or changed instructions trigger new validation rather than reusing prior approval.</p></li>
-<li><p>Positive control: legitimate user-authorized requirement update proceeds, preserves version history and does not trigger permanent false veto.</p></li>
-</ol>
-<p><strong>Design alternatives:</strong> structured source-bound claims plus deterministic verifier; content hashes of immutable original user request; signed manifests for transport integrity; authority-typed envelopes. <strong>Signing is optional</strong> if trusted storage and integrity checks provide equivalent guarantees. Risk is specifically extraction contamination prior to any transport-signature check.</p>
-<p><strong>Implementation investigation:</strong> map current HandoffRecord and context authority envelopes to source anchors; find nearest Fangore story fixture and existing tests for authorization epoch and source provenance; distinguish one-shot handoff from June’s durable application state. Do not add HMAC key lifecycle to MH without an explicit host need.</p>
-</section>
-<section id="adoption-boundaries">
-<h2>Adoption / boundaries<a class="headerlink" href="#adoption-boundaries" title="Link to this heading"></a></h2>
-<p>Stories are <strong>candidate requirements</strong>. Existing canonical MechaHarness user stories are YAML suite stages under tests/fixtures/models and generated docs/guides/user-stories.md. An implementation agent should inspect actual fixture IDs, refine one relevant Fangore and one Taloneth acceptance stage, run the story guide sync commands and offline suite, then separately evaluate live adapters; do not hand-edit the generated guide. This PR does not add untested YAML stages or alter production code.</p>
-<p>No external benchmarks, Docker tasks, signed-manifest attacks or media generators were run. Reassess repo state and upstream releases before adopting.</p>
-</section>
-</section>
-
+<meta http-equiv="refresh" content="0; url=trouble.html#trace-and-requirement-integrity">
+<p>This page has moved to <a href="trouble.html#trace-and-requirement-integrity">the consolidated documentation</a>.</p>
 
            </div>
           </div>

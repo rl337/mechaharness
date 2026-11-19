@@ -19,7 +19,9 @@
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cost" href="cost.html" />
+    <link rel="prev" title="CLI reference" href="cli.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,19 +49,94 @@
 <li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/agent-skills.html">Agent skills for your project</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">HTTP API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="events.html">Event log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/coding-delegate-suites.html">Coding-delegate suites (development graph)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/release-preparation.html">Prepare and publish a release</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/gastronomic-comparison.html">Gastronomic comparison protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/authoring-user-stories.html">Write an acceptance story</a></li>
+</ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="budget.html">Budget (soft / hard spend)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">CLI reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CLI universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="durable-graph-generators.html">Durable graph generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/audited-infer-accept.html">Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/bounded-retry.html">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/change-decomposition.html">Template: change_decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/change-execution.html">Template: change_execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/change-verification.html">Template: change_verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/contract-extraction.html">Template: contract_extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/conversational-tool-loop.html">Conversational tool loop (<code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/decision-plane.html">Typed decision plane (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/development-acceptance.html">Template: development_acceptance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/environment-repair.html">Template: environment_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/failure-diagnosis.html">Template: failure_diagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/fan-out-aggregate.html">Template: fan_out_aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/gastronomic-comparison.html">Template: gastronomic_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/gastronomic-guided-development.html">Template: gastronomic_guided_development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/guided-coding.html">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/independent-review.html">Template: independent_review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/instruction-todo-plan.html">Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/produce-critique-refine.html">Template: produce_critique_refine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/safety-eval.html">Template: safety_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/strategy-revision.html">Template: strategy_revision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/verify-repair.html">Template: verify_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graph-templates/workspace-discovery.html">Template: workspace_discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration-primitives.html">Inspiration primitives (host import guide)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job-lanes.html">Job lanes and JobLaneBroker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="graph-templates.html">Graph templates and Agentic Recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node-components.html">Node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped-graph-execution.html">Stepped graph execution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dependency-injection.html">Dependency injection requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/durable-graph-generators.html">Durable graph generators (driven execution)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dynamic-tool-graph.html">Dynamic tool graph and node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/event-analytics-schema.html">Event analytics schema requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/host-integration.html">Host integration requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/job-lane-broker.html">Job lanes and JobLaneBroker (JL-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/repository-secrets-hygiene.html">Repository secrets and local-config hygiene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/stepped-graph-execution.html">Stepped graph execution (SG-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/ai-assistant-host-friction-inspiration.html">AI assistant project host-friction inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/ai-assistant-host-friction-requirements-map.html">AI assistant project host-friction requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/dev-blog-inspiration.html">Developer Blog Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/durable-graph-generators-inversion-of-control.html">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/durable-graph-generators-requirements-map.html">Durable graph generators requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/eval-research.html">MechaHarness Eval Research Brief</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/fineenvs-mh-mhrl-requirements-map.html">FineEnvs multi-harness RL requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/gastronomic-guided-development.html">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/gastronomic-guided-development-execution-plan.html">Cursor execution plan: Gastronomic guided development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/jev-typed-judgment-inspiration.html">Jev typed-judgment inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/jev-typed-judgment-requirements-map.html">Jev typed-judgment requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html">Multi-Harness RL Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#recommended-architecture-additions">Recommended architecture additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#ownership-boundary-mechaharness-vs-the-ai-assistant-host">Ownership boundary: MechaHarness vs the AI assistant host</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#priority">Priority</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#acceptance-direction-sketch">Acceptance-direction sketch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#attribution">Attribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/openai-dots-agent-safety-inspiration.html">Inspiration: OpenAI Dots, Scoped Execution and Agent Safety</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/openai-dots-agent-safety-requirements-map.html">OpenAI Dots agent safety requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/personal-agent-reliability-inspiration.html">Inspiration: Reliable Personal Agent Execution Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/personal-agent-reliability-requirements-map.html">Personal agent reliability requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/requirements-map.html">Inspiration requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/self-revising-recipe-evolution.html">Inspiration: Evaluation-driven evolution of composed recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/self-revising-recipe-requirements-map.html">Self-revising recipe evolution requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/trouble.html">Trouble research and implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/video-production-audited-infer-migration.html">Video production project → MechaHarness: audited infer-accept migration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/walkinglabs-eval-requirements-map.html">WalkingLabs + eval research requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/walkinglabs-harness-engineering-inspiration.html">WalkingLabs Harness Engineering inspiration for MechaHarness</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
@@ -73,6 +150,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/research_helpers.html">Experimental research reports</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
@@ -274,7 +352,7 @@ judge route — done</p></li>
 <p>When a legacy family has zero stories left, delete its op-dispatch runner.</p>
 </section>
 <section id="recipebind-instantiate-recipe-documentation-surface">
-<h2><code class="docutils literal notranslate"><span class="pre">RecipeBind</span></code> / <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> (documentation surface)<a class="headerlink" href="#recipebind-instantiate-recipe-documentation-surface" title="Link to this heading"></a></h2>
+<span id="recipebind--instantiate_recipe-documentation-surface"></span><h2><code class="docutils literal notranslate"><span class="pre">RecipeBind</span></code> / <code class="docutils literal notranslate"><span class="pre">instantiate_recipe</span></code> (documentation surface)<a class="headerlink" href="#recipebind-instantiate-recipe-documentation-surface" title="Link to this heading"></a></h2>
 <p>Shape stories keep a human-readable bind file under <code class="docutils literal notranslate"><span class="pre">binds/</span></code> and a thin
 scenario that loads it. The bind is part of the user-story documentation: a
 reader should see the recipe id, goal, acceptance, and the soft decisions that
@@ -390,12 +468,57 @@ thin leaf verb for already-scored candidate lists.</p>
 <p><code class="docutils literal notranslate"><span class="pre">tool_lifecycle</span></code> runs a tool-loop or tiny graph with Config-bound
 <code class="docutils literal notranslate"><span class="pre">LifecycleExtension</span></code> instances (no <code class="docutils literal notranslate"><span class="pre">case:</span></code> bag).</p>
 </section>
+<section id="experimental-report-verbs">
+<h2>Experimental report verbs<a class="headerlink" href="#experimental-report-verbs" title="Link to this heading"></a></h2>
+<p>These verbs accept caller-supplied observations and produce offline reports:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">admit_authority</span></code>: <code class="docutils literal notranslate"><span class="pre">decisions</span></code> classifies supplied claim labels; <code class="docutils literal notranslate"><span class="pre">effects</span></code>
+reports exact resource/operation membership in the supplied ledger. <code class="docutils literal notranslate"><span class="pre">ledger_match</span></code>
+records membership only; <code class="docutils literal notranslate"><span class="pre">gate_status</span></code> remains <code class="docutils literal notranslate"><span class="pre">not_evaluated</span></code>. Hosts authenticate sources and
+enforce actual grants independently.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">layered_eval</span></code>: <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_task</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_harness</span></code> repeat the supplied verdicts
+with missing/infrastructure handling. <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_attribution:</span> <span class="pre">caller_asserted</span></code> means
+the caller asserted trace support; this verb does not read causal evidence.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">request_prefix_compare</span></code>: <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_cause:</span> <span class="pre">match</span></code> means selected hashed fields
+matched and the caller reported metric availability. It does not establish
+a provider cache hit. Changed tool names/schemas stay <code class="docutils literal notranslate"><span class="pre">unknown</span></code>.</p></li>
+</ul>
+<p>See <a class="reference internal" href="../api/research_helpers.html"><span class="std std-doc">API contracts</span></a> for executable examples and
+<a class="reference internal" href="../inspiration/trouble.html#implementation-status"><span class="std std-ref">Trouble release status</span></a> for missing
+runtime integrations.</p>
+<section id="diagnostic-input-migration">
+<h3>Diagnostic input migration<a class="headerlink" href="#diagnostic-input-migration" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">repo_topology</span></code> now requires <code class="docutils literal notranslate"><span class="pre">files</span></code> and <code class="docutils literal notranslate"><span class="pre">revision</span></code>, with an optional budget.
+<code class="docutils literal notranslate"><span class="pre">cache_layout_experiment</span></code> requires <code class="docutils literal notranslate"><span class="pre">policy_blocks</span></code>, <code class="docutils literal notranslate"><span class="pre">relevant</span></code>, <code class="docutils literal notranslate"><span class="pre">dynamic</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">enabled</span></code>. <code class="docutils literal notranslate"><span class="pre">context_observation_chain</span></code> requires observations, a requested
+observation id, summary, action sequences, and messages. <code class="docutils literal notranslate"><span class="pre">derived_memory</span></code>
+requires events, an event boundary, and supplied record labels. Empty requests
+fail clearly instead of running a canned demonstration.</p>
+<p><code class="docutils literal notranslate"><span class="pre">evaluator_compose_run</span></code> takes a versioned evaluator identity and typed <code class="docutils literal notranslate"><span class="pre">claims</span></code>;
+its report is caller-supplied evidence. <code class="docutils literal notranslate"><span class="pre">atk_research_reject</span></code> requires a supplied
+<code class="docutils literal notranslate"><span class="pre">final_test</span></code> with passing claims and matching <code class="docutils literal notranslate"><span class="pre">final_test_hypothesis</span></code> plus
+<code class="docutils literal notranslate"><span class="pre">final_test_candidate_digest</span></code> before
+reporting promotion. Missing or mismatched evidence returns a refusal. It does
+not independently authenticate a recorded evaluator result. The response exposes
+<code class="docutils literal notranslate"><span class="pre">candidate_digests</span></code> for binding a result to its candidate change set and frozen
+protocol inputs; reusing a hypothesis label with changed code is refused.</p>
+<p><code class="docutils literal notranslate"><span class="pre">verification_outcome</span></code> requires the caller’s <code class="docutils literal notranslate"><span class="pre">verification_passed</span></code> boolean and
+applies the completion policy to it. It does not run a synthetic passing oracle.</p>
+<p><code class="docutils literal notranslate"><span class="pre">inspect_openai_request</span></code> accepts an endpoint and <code class="docutils literal notranslate"><span class="pre">CompletionRequest</span></code>, plus an
+optional <code class="docutils literal notranslate"><span class="pre">compare_to</span></code> request. It returns only normalized-body digests, omitted
+field names, and <code class="docutils literal notranslate"><span class="pre">provider_cache_observed=false</span></code>. The injected provider policy
+is shared with the actual HTTP adapter. No HTTP request is made by inspection.</p>
+</section>
+</section>
 </section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cli.html" class="btn btn-neutral float-left" title="CLI reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cost.html" class="btn btn-neutral float-right" title="Cost" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

@@ -49,19 +49,94 @@
 <li class="toctree-l1"><a class="reference internal" href="guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/agent-skills.html">Agent skills for your project</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/api.html">HTTP API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/events.html">Event log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/coding-delegate-suites.html">Coding-delegate suites (development graph)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/release-preparation.html">Prepare and publish a release</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/gastronomic-comparison.html">Gastronomic comparison protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/authoring-user-stories.html">Write an acceptance story</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/budget.html">Budget (soft / hard spend)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cli-universe.html">CLI universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/durable-graph-generators.html">Durable graph generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/audited-infer-accept.html">Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/bounded-retry.html">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/change-decomposition.html">Template: change_decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/change-execution.html">Template: change_execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/change-verification.html">Template: change_verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/contract-extraction.html">Template: contract_extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/conversational-tool-loop.html">Conversational tool loop (<code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/decision-plane.html">Typed decision plane (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/development-acceptance.html">Template: development_acceptance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/environment-repair.html">Template: environment_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/failure-diagnosis.html">Template: failure_diagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/fan-out-aggregate.html">Template: fan_out_aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/gastronomic-comparison.html">Template: gastronomic_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/gastronomic-guided-development.html">Template: gastronomic_guided_development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/guided-coding.html">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/independent-review.html">Template: independent_review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/instruction-todo-plan.html">Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/produce-critique-refine.html">Template: produce_critique_refine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/safety-eval.html">Template: safety_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/strategy-revision.html">Template: strategy_revision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/verify-repair.html">Template: verify_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/workspace-discovery.html">Template: workspace_discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/inspiration-primitives.html">Inspiration primitives (host import guide)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/job-lanes.html">Job lanes and JobLaneBroker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/node-components.html">Node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/stepped-graph-execution.html">Stepped graph execution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="requirements/dependency-injection.html">Dependency injection requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/durable-graph-generators.html">Durable graph generators (driven execution)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/dynamic-tool-graph.html">Dynamic tool graph and node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/event-analytics-schema.html">Event analytics schema requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/host-integration.html">Host integration requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/job-lane-broker.html">Job lanes and JobLaneBroker (JL-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/repository-secrets-hygiene.html">Repository secrets and local-config hygiene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/stepped-graph-execution.html">Stepped graph execution (SG-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/ai-assistant-host-friction-inspiration.html">AI assistant project host-friction inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/ai-assistant-host-friction-requirements-map.html">AI assistant project host-friction requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/dev-blog-inspiration.html">Developer Blog Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/durable-graph-generators-inversion-of-control.html">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/durable-graph-generators-requirements-map.html">Durable graph generators requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/eval-research.html">MechaHarness Eval Research Brief</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/fineenvs-mh-mhrl-requirements-map.html">FineEnvs multi-harness RL requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/gastronomic-guided-development.html">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/gastronomic-guided-development-execution-plan.html">Cursor execution plan: Gastronomic guided development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/jev-typed-judgment-inspiration.html">Jev typed-judgment inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/jev-typed-judgment-requirements-map.html">Jev typed-judgment requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html">Multi-Harness RL Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#recommended-architecture-additions">Recommended architecture additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#ownership-boundary-mechaharness-vs-the-ai-assistant-host">Ownership boundary: MechaHarness vs the AI assistant host</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#priority">Priority</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#acceptance-direction-sketch">Acceptance-direction sketch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#attribution">Attribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/openai-dots-agent-safety-inspiration.html">Inspiration: OpenAI Dots, Scoped Execution and Agent Safety</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/openai-dots-agent-safety-requirements-map.html">OpenAI Dots agent safety requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/personal-agent-reliability-inspiration.html">Inspiration: Reliable Personal Agent Execution Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/personal-agent-reliability-requirements-map.html">Personal agent reliability requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/requirements-map.html">Inspiration requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/self-revising-recipe-evolution.html">Inspiration: Evaluation-driven evolution of composed recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/self-revising-recipe-requirements-map.html">Self-revising recipe evolution requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/trouble.html">Trouble research and implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/video-production-audited-infer-migration.html">Video production project → MechaHarness: audited infer-accept migration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/walkinglabs-eval-requirements-map.html">WalkingLabs + eval research requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/walkinglabs-harness-engineering-inspiration.html">WalkingLabs Harness Engineering inspiration for MechaHarness</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a></li>
@@ -75,6 +150,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/access.html">mechaharness.core.access</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/environment.html">mechaharness.core.environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/research_helpers.html">Experimental research reports</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/graph_executor.html">mechaharness.graph_executor</a></li>
@@ -125,6 +201,11 @@
               id="toggle-1" style="display: none" alt="-" /></td>
        <td>
        <code class="xref">mechaharness</code></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="api/research_helpers.html#module-mechaharness.authority_admission"><code class="xref">mechaharness.authority_admission</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -195,6 +276,26 @@
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="api/inference.html#module-mechaharness.inference.base"><code class="xref">mechaharness.inference.base</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="api/inference.html#module-mechaharness.inference.openai_compat"><code class="xref">mechaharness.inference.openai_compat</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="api/inference.html#module-mechaharness.inference.openai_request"><code class="xref">mechaharness.inference.openai_request</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="api/research_helpers.html#module-mechaharness.layered_verdict"><code class="xref">mechaharness.layered_verdict</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="api/research_helpers.html#module-mechaharness.request_prefix"><code class="xref">mechaharness.request_prefix</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>

@@ -8,7 +8,7 @@ never by forking this repo or patching closed enums, maps, or `match` lists.
 
 This page is the normative contract for **host application code** and for
 coding agents working in those repos. Customer-facing Cursor skills that
-encode the same rules live under [`agent-skills/`](../../agent-skills/)
+encode the same rules live under [`agent-skills/`](https://github.com/rl337/mechaharness/tree/main/agent-skills)
 (install guide: [Agent skills for your project](../guides/agent-skills.md)).
 
 ## Ownership boundary

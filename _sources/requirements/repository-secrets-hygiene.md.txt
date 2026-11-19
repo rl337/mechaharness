@@ -75,6 +75,15 @@ or SEC-02 material. Agents following project-docs MUST treat secrets-in-examples
 as a docs defect. CI MAY add scanners later; absence of a scanner does not
 weaken SEC-01..04.
 
+`python scripts/repository_hygiene.py` runs in the shared local/CI checks. It
+rejects known local-artifact paths and recognizable credential, private-key,
+home-path, and private-endpoint patterns in tracked text files. Findings show
+only the category and location. The guard does not read untracked env files,
+follow symlink targets, or inspect historical revisions. It is a preventive
+check with a limited signature set, not a comprehensive secret scanner.
+It scans working-tree content rather than staged blobs and skips NUL-containing
+files, including UTF-16 text and binary-embedded credentials.
+
 ## Related
 
 - [Local OpenAI-compat](../guides/openai-local.md) — loopback examples + local MCP

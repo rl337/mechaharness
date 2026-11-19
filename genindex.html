@@ -46,19 +46,94 @@
 <li class="toctree-l1"><a class="reference internal" href="guides/install.html">Install &amp; quick start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/dependency-injection.html">Dependency injection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/agent-skills.html">Agent skills for your project</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guides/user-stories.html">User stories</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guides/user-story-migration-batches.html">User-story → CLI / <code class="docutils literal notranslate"><span class="pre">user_story</span></code> migration batches</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/api.html">HTTP API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/events.html">Event log</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/coding-delegate-suites.html">Coding-delegate suites (development graph)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/release-preparation.html">Prepare and publish a release</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/gastronomic-comparison.html">Gastronomic comparison protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides/authoring-user-stories.html">Write an acceptance story</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/budget.html">Budget (soft / hard spend)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cli-universe.html">CLI universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/durable-graph-generators.html">Durable graph generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/audited-infer-accept.html">Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/bounded-retry.html">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/change-decomposition.html">Template: change_decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/change-execution.html">Template: change_execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/change-verification.html">Template: change_verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/contract-extraction.html">Template: contract_extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/conversational-tool-loop.html">Conversational tool loop (<code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/decision-plane.html">Typed decision plane (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/development-acceptance.html">Template: development_acceptance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/environment-repair.html">Template: environment_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/failure-diagnosis.html">Template: failure_diagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/fan-out-aggregate.html">Template: fan_out_aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/gastronomic-comparison.html">Template: gastronomic_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/gastronomic-guided-development.html">Template: gastronomic_guided_development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/guided-coding.html">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/independent-review.html">Template: independent_review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/instruction-todo-plan.html">Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/produce-critique-refine.html">Template: produce_critique_refine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/safety-eval.html">Template: safety_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/strategy-revision.html">Template: strategy_revision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/verify-repair.html">Template: verify_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/graph-templates/workspace-discovery.html">Template: workspace_discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/inspiration-primitives.html">Inspiration primitives (host import guide)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/job-lanes.html">Job lanes and JobLaneBroker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/graph-templates.html">Graph templates and Agentic Recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/node-components.html">Node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/stepped-graph-execution.html">Stepped graph execution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="requirements/dependency-injection.html">Dependency injection requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/durable-graph-generators.html">Durable graph generators (driven execution)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/dynamic-tool-graph.html">Dynamic tool graph and node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/event-analytics-schema.html">Event analytics schema requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/host-integration.html">Host integration requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/job-lane-broker.html">Job lanes and JobLaneBroker (JL-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/repository-secrets-hygiene.html">Repository secrets and local-config hygiene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/stepped-graph-execution.html">Stepped graph execution (SG-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/ai-assistant-host-friction-inspiration.html">AI assistant project host-friction inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/ai-assistant-host-friction-requirements-map.html">AI assistant project host-friction requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/dev-blog-inspiration.html">Developer Blog Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/durable-graph-generators-inversion-of-control.html">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/durable-graph-generators-requirements-map.html">Durable graph generators requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/eval-research.html">MechaHarness Eval Research Brief</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/fineenvs-mh-mhrl-requirements-map.html">FineEnvs multi-harness RL requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/gastronomic-guided-development.html">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/gastronomic-guided-development-execution-plan.html">Cursor execution plan: Gastronomic guided development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/jev-typed-judgment-inspiration.html">Jev typed-judgment inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/jev-typed-judgment-requirements-map.html">Jev typed-judgment requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html">Multi-Harness RL Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#recommended-architecture-additions">Recommended architecture additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#ownership-boundary-mechaharness-vs-the-ai-assistant-host">Ownership boundary: MechaHarness vs the AI assistant host</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#priority">Priority</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#acceptance-direction-sketch">Acceptance-direction sketch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/multi-harness-rl-inspiration.html#attribution">Attribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/openai-dots-agent-safety-inspiration.html">Inspiration: OpenAI Dots, Scoped Execution and Agent Safety</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/openai-dots-agent-safety-requirements-map.html">OpenAI Dots agent safety requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/personal-agent-reliability-inspiration.html">Inspiration: Reliable Personal Agent Execution Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/personal-agent-reliability-requirements-map.html">Personal agent reliability requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/requirements-map.html">Inspiration requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/self-revising-recipe-evolution.html">Inspiration: Evaluation-driven evolution of composed recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/self-revising-recipe-requirements-map.html">Self-revising recipe evolution requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/trouble.html">Trouble research and implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/video-production-audited-infer-migration.html">Video production project → MechaHarness: audited infer-accept migration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/walkinglabs-eval-requirements-map.html">WalkingLabs + eval research requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspiration/walkinglabs-harness-engineering-inspiration.html">WalkingLabs Harness Engineering inspiration for MechaHarness</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/mechaharness.html">mechaharness</a></li>
@@ -72,6 +147,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/access.html">mechaharness.core.access</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/environment.html">mechaharness.core.environment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/research_helpers.html">Experimental research reports</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/harness.html">mechaharness.harness.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/tools.html">mechaharness.tools.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/graph_executor.html">mechaharness.graph_executor</a></li>
@@ -133,6 +209,7 @@
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="_">_</h2>
@@ -168,6 +245,12 @@
         <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.__init__">(mechaharness.graph_executor.GraphRunContext method)</a>
 </li>
         <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.__init__">(mechaharness.harness.base.AbstractHarness method)</a>
+</li>
+        <li><a href="api/inference.html#mechaharness.inference.openai_compat.OpenAICompatStrategy.__init__">(mechaharness.inference.openai_compat.OpenAICompatStrategy method)</a>
+</li>
+        <li><a href="api/inference.html#mechaharness.inference.openai_request.OpenAIRequestCapabilities.__init__">(mechaharness.inference.openai_request.OpenAIRequestCapabilities method)</a>
+</li>
+        <li><a href="api/inference.html#mechaharness.inference.openai_request.PreparedOpenAIRequest.__init__">(mechaharness.inference.openai_request.PreparedOpenAIRequest method)</a>
 </li>
         <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.__init__">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
 </li>
@@ -205,7 +288,11 @@
       <li><a href="api/access.html#mechaharness.core.access.AccessPolicy">AccessPolicy (class in mechaharness.core.access)</a>
 </li>
       <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.aclose">aclose() (mechaharness.inference.base.InferenceStrategy method)</a>
+
+      <ul>
+        <li><a href="api/inference.html#mechaharness.inference.openai_compat.OpenAICompatStrategy.aclose">(mechaharness.inference.openai_compat.OpenAICompatStrategy method)</a>
 </li>
+      </ul></li>
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.action">action (mechaharness.external_effect.EffectReconciliation attribute)</a>
 </li>
       <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironment.active_capabilities">active_capabilities() (mechaharness.core.environment.InferenceEnvironment method)</a>
@@ -232,8 +319,14 @@
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CostReport.add">add() (mechaharness.core.access.CostReport method)</a>
 </li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionClaim">AdmissionClaim (class in mechaharness.authority_admission)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionReport">AdmissionReport (class in mechaharness.authority_admission)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.Ability.ADVANCED">ADVANCED (mechaharness.core.access.Ability attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/events.html#mechaharness.core.events.AgentRef.agent_id">agent_id (mechaharness.core.events.AgentRef attribute)</a>
 
       <ul>
@@ -242,8 +335,6 @@
         <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.agent_id">(mechaharness.graph_executor.GraphRunContext attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/events.html#mechaharness.core.events.AgentEnd">AgentEnd (class in mechaharness.core.events)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.AgentRef">AgentRef (class in mechaharness.core.events)</a>
@@ -259,6 +350,8 @@
 </li>
       </ul></li>
       <li><a href="api/events.html#mechaharness.core.events.AgentStart">AgentStart (class in mechaharness.core.events)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.OpenAIRequestCapabilities.allowed_extra_fields">allowed_extra_fields (mechaharness.inference.openai_request.OpenAIRequestCapabilities attribute)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.AccessControl.allows">allows() (mechaharness.core.access.AccessControl method)</a>
 
@@ -314,6 +407,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/access.html#mechaharness.core.access.Ability.BASIC">BASIC (mechaharness.core.access.Ability attribute)</a>
 </li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.PreparedOpenAIRequest.body">body (mechaharness.inference.openai_request.PreparedOpenAIRequest attribute)</a>
+</li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphRunContext.budget">budget (mechaharness.graph_executor.GraphRunContext attribute)</a>
 </li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.budget_level">budget_level (mechaharness.graph_executor.GraphResult attribute)</a>
@@ -338,6 +433,8 @@
         <li><a href="api/access.html#mechaharness.core.access.CostEntry.capabilities">(mechaharness.core.access.CostEntry attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.OpenAIRequestPolicy.capabilities_for">capabilities_for() (mechaharness.inference.openai_request.OpenAIRequestPolicy method)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.Capability">Capability (class in mechaharness.core.access)</a>
 </li>
       <li><a href="api/completer.html#mechaharness.core.completer.Completer.capability_profile">capability_profile() (mechaharness.core.completer.Completer method)</a>
@@ -352,11 +449,15 @@
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile">CapabilityProfile (class in mechaharness.core.access)</a>
 </li>
+      <li><a href="api/research_helpers.html#mechaharness.layered_verdict.LayeredEvaluation.causal_support">causal_support (mechaharness.layered_verdict.LayeredEvaluation attribute)</a>
+</li>
       <li><a href="api/types.html#mechaharness.core.types.ChatMessage">ChatMessage (class in mechaharness.core.types)</a>
 </li>
       <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore">CheckpointStore (class in mechaharness.checkpoint_store)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl.checks">checks (mechaharness.core.access.InMemoryAccessControl attribute)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.request_prefix.classify_prefix_change">classify_prefix_change() (in module mechaharness.request_prefix)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.cli_assertion_classes">cli_assertion_classes() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
@@ -379,14 +480,18 @@
 </li>
         <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.complete">(mechaharness.inference.base.InferenceStrategy method)</a>
 </li>
-      </ul></li>
-      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.COMPLETED">COMPLETED (mechaharness.external_effect.EffectState attribute)</a>
+        <li><a href="api/inference.html#mechaharness.inference.openai_compat.OpenAICompatStrategy.complete">(mechaharness.inference.openai_compat.OpenAICompatStrategy method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.COMPLETED">COMPLETED (mechaharness.external_effect.EffectState attribute)</a>
+</li>
       <li><a href="api/completer.html#mechaharness.core.completer.Completer">Completer (class in mechaharness.core.completer)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.completer_bindings">completer_bindings() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.OpenAIRequestCapabilities.completion_token_field">completion_token_field (mechaharness.inference.openai_request.OpenAIRequestCapabilities attribute)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CostEntry.completion_tokens">completion_tokens (mechaharness.core.access.CostEntry attribute)</a>
 
@@ -448,6 +553,8 @@
         <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphFailurePolicy.decide">(mechaharness.graph_executor.GraphFailurePolicy method)</a>
 </li>
       </ul></li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionReport.decisions">decisions (mechaharness.authority_admission.AdmissionReport attribute)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.default_capability_profile">default_capability_profile() (in module mechaharness.core.access)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.default_event_log">default_event_log() (in module mechaharness.core.events)</a>
@@ -462,6 +569,8 @@
 
       <ul>
         <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.describe">(mechaharness.inference.base.InferenceStrategy method)</a>
+</li>
+        <li><a href="api/inference.html#mechaharness.inference.openai_compat.OpenAICompatStrategy.describe">(mechaharness.inference.openai_compat.OpenAICompatStrategy method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -478,9 +587,13 @@
       </ul></li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.diagnostics">diagnostics (mechaharness.graph_executor.GraphResult attribute)</a>
 </li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.PreparedOpenAIRequest.diagnostics">diagnostics() (mechaharness.inference.openai_request.PreparedOpenAIRequest method)</a>
+</li>
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction.DISPATCH">DISPATCH (mechaharness.external_effect.EffectReconciliationAction attribute)</a>
 </li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.EffectfulGraphNodeRunner.dispatch">dispatch() (mechaharness.graph_executor.EffectfulGraphNodeRunner method)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_compat.domain_request_to_wire">domain_request_to_wire() (in module mechaharness.inference.openai_compat)</a>
 </li>
       <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.durability">durability (mechaharness.checkpoint_store.CheckpointStore attribute)</a>
 
@@ -511,6 +624,8 @@
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliationAction">EffectReconciliationAction (class in mechaharness.external_effect)</a>
 </li>
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord">EffectRecord (class in mechaharness.external_effect)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionReport.effects">effects (mechaharness.authority_admission.AdmissionReport attribute)</a>
 </li>
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState">EffectState (class in mechaharness.external_effect)</a>
 </li>
@@ -563,6 +678,8 @@
       <li><a href="api/events.html#mechaharness.core.events.EventType">EventType (class in mechaharness.core.events)</a>
 </li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.NodeOutcome.evidence">evidence (mechaharness.graph_executor.NodeOutcome attribute)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionReport.evidence_origin">evidence_origin (mechaharness.authority_admission.AdmissionReport attribute)</a>
 </li>
       <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry.execute">execute() (mechaharness.tools.base.ToolRegistry method)</a>
 </li>
@@ -648,6 +765,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionReport.gate_status">gate_status (mechaharness.authority_admission.AdmissionReport attribute)</a>
+</li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunnerRegistry.get">get() (mechaharness.graph_executor.GraphNodeRunnerRegistry method)</a>
 
       <ul>
@@ -754,6 +873,8 @@
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_node_runner_registry">get_node_runner_registry() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
+      <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_openai_request_policy">get_openai_request_policy() (mechaharness.di.MechaHarnessConfig method)</a>
+</li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_operation_registry">get_operation_registry() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.get_rag_retriever">get_rag_retriever() (mechaharness.di.MechaHarnessConfig method)</a>
@@ -840,6 +961,8 @@
         <li><a href="api/graph_executor.html#mechaharness.graph_executor.RejectGraphEscalation.handle">(mechaharness.graph_executor.RejectGraphEscalation method)</a>
 </li>
       </ul></li>
+      <li><a href="api/research_helpers.html#mechaharness.layered_verdict.LayeredEvaluation.harness">harness (mechaharness.layered_verdict.LayeredEvaluation attribute)</a>
+</li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.harness_classes">harness_classes() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
   </ul></td>
@@ -858,8 +981,14 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/types.html#mechaharness.core.types.ToolCall.id">id (mechaharness.core.types.ToolCall attribute)</a>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionClaim.id">id (mechaharness.authority_admission.AdmissionClaim attribute)</a>
+
+      <ul>
+        <li><a href="api/research_helpers.html#mechaharness.authority_admission.ProposedEffect.id">(mechaharness.authority_admission.ProposedEffect attribute)</a>
 </li>
+        <li><a href="api/types.html#mechaharness.core.types.ToolCall.id">(mechaharness.core.types.ToolCall attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/di.html#mechaharness.di.MechaHarnessConfig.include_subagent_tools">include_subagent_tools() (mechaharness.di.MechaHarnessConfig method)</a>
 </li>
       <li><a href="api/events.html#mechaharness.core.events.Inference">Inference (class in mechaharness.core.events)</a>
@@ -874,10 +1003,10 @@
 </li>
       <li><a href="api/environment.html#mechaharness.core.environment.InferenceEnvironmentError">InferenceEnvironmentError</a>
 </li>
-      <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy">InferenceStrategy (class in mechaharness.inference.base)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy">InferenceStrategy (class in mechaharness.inference.base)</a>
+</li>
       <li><a href="api/external_effect.html#mechaharness.external_effect.InjectedProcessCrash">InjectedProcessCrash</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.InMemoryAccessControl">InMemoryAccessControl (class in mechaharness.core.access)</a>
@@ -916,9 +1045,11 @@
         <li><a href="api/events.html#mechaharness.core.events.EventType.key">(mechaharness.core.events.EventType class method)</a>
 </li>
       </ul></li>
-      <li><a href="api/access.html#mechaharness.core.access.Capability.kind">kind (mechaharness.core.access.Capability attribute)</a>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionClaim.kind">kind (mechaharness.authority_admission.AdmissionClaim attribute)</a>
 
       <ul>
+        <li><a href="api/access.html#mechaharness.core.access.Capability.kind">(mechaharness.core.access.Capability attribute)</a>
+</li>
         <li><a href="api/access.html#mechaharness.core.access.CostEntry.kind">(mechaharness.core.access.CostEntry attribute)</a>
 </li>
       </ul></li>
@@ -980,6 +1111,8 @@
         <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.latest_revision">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
 </li>
       </ul></li>
+      <li><a href="api/research_helpers.html#mechaharness.layered_verdict.LayeredEvaluation">LayeredEvaluation (class in mechaharness.layered_verdict)</a>
+</li>
       <li><a href="api/access.html#mechaharness.core.access.Capability.level">level (mechaharness.core.access.Capability attribute)</a>
 </li>
       <li><a href="api/checkpoint_store.html#mechaharness.checkpoint_store.CheckpointStore.list_effects">list_effects() (mechaharness.checkpoint_store.CheckpointStore method)</a>
@@ -1030,6 +1163,13 @@
         <li><a href="api/external_effect.html#mechaharness.external_effect.CrashProbe.maybe_crash">(mechaharness.external_effect.CrashProbe method)</a>
 </li>
         <li><a href="api/external_effect.html#mechaharness.external_effect.NoopCrashProbe.maybe_crash">(mechaharness.external_effect.NoopCrashProbe method)</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.authority_admission
+
+      <ul>
+        <li><a href="api/research_helpers.html#module-mechaharness.authority_admission">module</a>
 </li>
       </ul></li>
       <li>
@@ -1131,6 +1271,34 @@
 </li>
       </ul></li>
       <li>
+    mechaharness.inference.openai_compat
+
+      <ul>
+        <li><a href="api/inference.html#module-mechaharness.inference.openai_compat">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.inference.openai_request
+
+      <ul>
+        <li><a href="api/inference.html#module-mechaharness.inference.openai_request">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.layered_verdict
+
+      <ul>
+        <li><a href="api/research_helpers.html#module-mechaharness.layered_verdict">module</a>
+</li>
+      </ul></li>
+      <li>
+    mechaharness.request_prefix
+
+      <ul>
+        <li><a href="api/research_helpers.html#module-mechaharness.request_prefix">module</a>
+</li>
+      </ul></li>
+      <li>
     mechaharness.sqlite_checkpoint_store
 
       <ul>
@@ -1176,9 +1344,17 @@
         <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.model">(mechaharness.harness.base.HarnessConfig attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/config.html#mechaharness.config.Settings.model_config">model_config (mechaharness.config.Settings attribute)</a>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionClaim.model_config">model_config (mechaharness.authority_admission.AdmissionClaim attribute)</a>
 
       <ul>
+        <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionReport.model_config">(mechaharness.authority_admission.AdmissionReport attribute)</a>
+</li>
+        <li><a href="api/research_helpers.html#mechaharness.authority_admission.ProposedEffect.model_config">(mechaharness.authority_admission.ProposedEffect attribute)</a>
+</li>
+        <li><a href="api/research_helpers.html#mechaharness.authority_admission.ResourceOperation.model_config">(mechaharness.authority_admission.ResourceOperation attribute)</a>
+</li>
+        <li><a href="api/config.html#mechaharness.config.Settings.model_config">(mechaharness.config.Settings attribute)</a>
+</li>
         <li><a href="api/access.html#mechaharness.core.access.AccessPolicy.model_config">(mechaharness.core.access.AccessPolicy attribute)</a>
 </li>
         <li><a href="api/access.html#mechaharness.core.access.Capability.model_config">(mechaharness.core.access.Capability attribute)</a>
@@ -1229,11 +1405,15 @@
 </li>
         <li><a href="api/harness.html#mechaharness.harness.base.HarnessResult.model_config">(mechaharness.harness.base.HarnessResult attribute)</a>
 </li>
+        <li><a href="api/research_helpers.html#mechaharness.layered_verdict.LayeredEvaluation.model_config">(mechaharness.layered_verdict.LayeredEvaluation attribute)</a>
+</li>
       </ul></li>
       <li>
     module
 
       <ul>
+        <li><a href="api/research_helpers.html#module-mechaharness.authority_admission">mechaharness.authority_admission</a>
+</li>
         <li><a href="api/checkpoint_store.html#module-mechaharness.checkpoint_store">mechaharness.checkpoint_store</a>
 </li>
         <li><a href="api/config.html#module-mechaharness.config">mechaharness.config</a>
@@ -1261,6 +1441,14 @@
         <li><a href="api/harness.html#module-mechaharness.harness.base">mechaharness.harness.base</a>
 </li>
         <li><a href="api/inference.html#module-mechaharness.inference.base">mechaharness.inference.base</a>
+</li>
+        <li><a href="api/inference.html#module-mechaharness.inference.openai_compat">mechaharness.inference.openai_compat</a>
+</li>
+        <li><a href="api/inference.html#module-mechaharness.inference.openai_request">mechaharness.inference.openai_request</a>
+</li>
+        <li><a href="api/research_helpers.html#module-mechaharness.layered_verdict">mechaharness.layered_verdict</a>
+</li>
+        <li><a href="api/research_helpers.html#module-mechaharness.request_prefix">mechaharness.request_prefix</a>
 </li>
         <li><a href="api/sqlite_checkpoint_store.html#module-mechaharness.sqlite_checkpoint_store">mechaharness.sqlite_checkpoint_store</a>
 </li>
@@ -1346,6 +1534,8 @@
 </li>
         <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.name">(mechaharness.inference.base.InferenceStrategy attribute)</a>
 </li>
+        <li><a href="api/inference.html#mechaharness.inference.openai_compat.OpenAICompatStrategy.name">(mechaharness.inference.openai_compat.OpenAICompatStrategy attribute)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1389,9 +1579,21 @@
 </li>
       <li><a href="api/types.html#mechaharness.core.types.ToolResult.observed_at">observed_at (mechaharness.core.types.ToolResult attribute)</a>
 </li>
+      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.of">of() (mechaharness.core.access.CompoundPolicy class method)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.PreparedOpenAIRequest.omitted_fields">omitted_fields (mechaharness.inference.openai_request.PreparedOpenAIRequest attribute)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_compat.OpenAICompatStrategy">OpenAICompatStrategy (class in mechaharness.inference.openai_compat)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.of">of() (mechaharness.core.access.CompoundPolicy class method)</a>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.OpenAIRequestCapabilities">OpenAIRequestCapabilities (class in mechaharness.inference.openai_request)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.OpenAIRequestPolicy">OpenAIRequestPolicy (class in mechaharness.inference.openai_request)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.ResourceOperation.operation">operation (mechaharness.authority_admission.ResourceOperation attribute)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.layered_verdict.LayeredEvaluation.outcome">outcome (mechaharness.layered_verdict.LayeredEvaluation attribute)</a>
 </li>
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectReconciliation.outcome_evidence">outcome_evidence (mechaharness.external_effect.EffectReconciliation attribute)</a>
 </li>
@@ -1429,9 +1631,19 @@
       </ul></li>
       <li><a href="api/access.html#mechaharness.core.access.CompoundPolicy.policies">policies (mechaharness.core.access.CompoundPolicy attribute)</a>
 </li>
+      <li><a href="api/config.html#mechaharness.config.Settings.port">port (mechaharness.config.Settings attribute)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionClaim.predicate">predicate (mechaharness.authority_admission.AdmissionClaim attribute)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.request_prefix.prefix_snapshot">prefix_snapshot() (in module mechaharness.request_prefix)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/config.html#mechaharness.config.Settings.port">port (mechaharness.config.Settings attribute)</a>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.OpenAIRequestPolicy.prepare">prepare() (mechaharness.inference.openai_request.OpenAIRequestPolicy method)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_compat.OpenAICompatStrategy.prepare_request">prepare_request() (mechaharness.inference.openai_compat.OpenAICompatStrategy method)</a>
+</li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.PreparedOpenAIRequest">PreparedOpenAIRequest (class in mechaharness.inference.openai_request)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CostAccountant.price_inference">price_inference() (mechaharness.core.access.CostAccountant method)</a>
 
@@ -1459,6 +1671,8 @@
         <li><a href="api/types.html#mechaharness.core.types.Usage.prompt_tokens">(mechaharness.core.types.Usage attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.ProposedEffect">ProposedEffect (class in mechaharness.authority_admission)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1475,6 +1689,10 @@
         <li><a href="api/events.html#mechaharness.core.events.LoggingEventLog.query">(mechaharness.core.events.LoggingEventLog method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionClaim.quote">quote (mechaharness.authority_admission.AdmissionClaim attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1508,6 +1726,8 @@
       <ul>
         <li><a href="api/access.html#mechaharness.core.access.InMemoryCostAccountant.report">(mechaharness.core.access.InMemoryCostAccountant method)</a>
 </li>
+        <li><a href="api/research_helpers.html#mechaharness.layered_verdict.LayeredEvaluation.report">(mechaharness.layered_verdict.LayeredEvaluation method)</a>
+</li>
       </ul></li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.CallableGraphNodeRunner.required_grants">required_grants() (mechaharness.graph_executor.CallableGraphNodeRunner method)</a>
 
@@ -1515,14 +1735,20 @@
         <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphNodeRunner.required_grants">(mechaharness.graph_executor.GraphNodeRunner method)</a>
 </li>
       </ul></li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.ResourceOperation.resource_id">resource_id (mechaharness.authority_admission.ResourceOperation attribute)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.ResourceOperation">ResourceOperation (class in mechaharness.authority_admission)</a>
+</li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphFailureAction.RETRY">RETRY (mechaharness.graph_executor.GraphFailureAction attribute)</a>
 </li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.review_admission">review_admission() (in module mechaharness.authority_admission)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.revision">revision (mechaharness.external_effect.EffectRecord attribute)</a>
 </li>
       <li><a href="api/types.html#mechaharness.core.types.Role">Role (class in mechaharness.core.types)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/types.html#mechaharness.core.types.ChatMessage.role">role (mechaharness.core.types.ChatMessage attribute)</a>
 </li>
       <li><a href="api/mechaharness.html#mechaharness.run">run() (in module mechaharness)</a>
@@ -1583,6 +1809,8 @@
         <li><a href="api/sqlite_checkpoint_store.html#mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore.save_effect">(mechaharness.sqlite_checkpoint_store.SqliteCheckpointStore method)</a>
 </li>
       </ul></li>
+      <li><a href="api/research_helpers.html#mechaharness.layered_verdict.score_layers">score_layers() (in module mechaharness.layered_verdict)</a>
+</li>
       <li><a href="api/config.html#mechaharness.config.Settings">Settings (class in mechaharness.config)</a>
 </li>
       <li><a href="api/factory.html#mechaharness.factory.settings_from_request">settings_from_request() (in module mechaharness.factory)</a>
@@ -1596,6 +1824,8 @@
       <li><a href="api/access.html#mechaharness.core.access.Ability.SIMPLE">SIMPLE (mechaharness.core.access.Ability attribute)</a>
 </li>
       <li><a href="api/types.html#mechaharness.core.types.ToolResult.source">source (mechaharness.core.types.ToolResult attribute)</a>
+</li>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionClaim.source_class">source_class (mechaharness.authority_admission.AdmissionClaim attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1618,7 +1848,11 @@
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.GraphResult.stopped_before">stopped_before (mechaharness.graph_executor.GraphResult attribute)</a>
 </li>
       <li><a href="api/inference.html#mechaharness.inference.base.InferenceStrategy.stream">stream() (mechaharness.inference.base.InferenceStrategy method)</a>
+
+      <ul>
+        <li><a href="api/inference.html#mechaharness.inference.openai_compat.OpenAICompatStrategy.stream">(mechaharness.inference.openai_compat.OpenAICompatStrategy method)</a>
 </li>
+      </ul></li>
       <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.stream_events">stream_events() (mechaharness.harness.base.AbstractHarness method)</a>
 </li>
       <li><a href="api/harness.html#mechaharness.harness.base.HarnessConfig.subagent_tools">subagent_tools (mechaharness.harness.base.HarnessConfig attribute)</a>
@@ -1639,6 +1873,8 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/research_helpers.html#mechaharness.layered_verdict.LayeredEvaluation.task">task (mechaharness.layered_verdict.LayeredEvaluation attribute)</a>
+</li>
       <li><a href="api/config.html#mechaharness.config.Settings.temperature">temperature (mechaharness.config.Settings attribute)</a>
 
       <ul>
@@ -1665,18 +1901,20 @@
 </li>
       <li><a href="api/access.html#mechaharness.core.access.tool_cost_entry">tool_cost_entry() (in module mechaharness.core.access)</a>
 </li>
+      <li><a href="api/inference.html#mechaharness.inference.openai_request.OpenAIRequestCapabilities.tool_reasoning_effort">tool_reasoning_effort (mechaharness.inference.openai_request.OpenAIRequestCapabilities attribute)</a>
+</li>
       <li><a href="api/harness.html#mechaharness.harness.base.AbstractHarness.tool_result_message">tool_result_message() (mechaharness.harness.base.AbstractHarness method)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.CapabilityKind.TOOL_USE">TOOL_USE (mechaharness.core.access.CapabilityKind attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/events.html#mechaharness.core.events.ToolCall">ToolCall (class in mechaharness.core.events)</a>
 
       <ul>
         <li><a href="api/types.html#mechaharness.core.types.ToolCall">(class in mechaharness.core.types)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/types.html#mechaharness.core.types.ToolDefinition">ToolDefinition (class in mechaharness.core.types)</a>
 </li>
       <li><a href="api/tools.html#mechaharness.tools.base.ToolRegistry">ToolRegistry (class in mechaharness.tools.base)</a>
@@ -1715,6 +1953,8 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/research_helpers.html#mechaharness.authority_admission.AdmissionClaim.uncertain">uncertain (mechaharness.authority_admission.AdmissionClaim attribute)</a>
+</li>
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectState.UNCERTAIN">UNCERTAIN (mechaharness.external_effect.EffectState attribute)</a>
 </li>
       <li><a href="api/access.html#mechaharness.core.access.Ability.units">units (mechaharness.core.access.Ability property)</a>
@@ -1725,10 +1965,10 @@
         <li><a href="api/access.html#mechaharness.core.access.CostReport.units">(mechaharness.core.access.CostReport attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile.units">units() (mechaharness.core.access.CapabilityProfile method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/access.html#mechaharness.core.access.CapabilityProfile.units">units() (mechaharness.core.access.CapabilityProfile method)</a>
+</li>
       <li><a href="api/graph_executor.html#mechaharness.graph_executor.RunControl.until">until (mechaharness.graph_executor.RunControl attribute)</a>
 </li>
       <li><a href="api/external_effect.html#mechaharness.external_effect.EffectRecord.updated_at">updated_at (mechaharness.external_effect.EffectRecord attribute)</a>
@@ -1738,6 +1978,14 @@
       <li><a href="api/types.html#mechaharness.core.types.CompletionResponse.usage">usage (mechaharness.core.types.CompletionResponse attribute)</a>
 </li>
       <li><a href="api/types.html#mechaharness.core.types.Role.USER">USER (mechaharness.core.types.Role attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/inference.html#mechaharness.inference.openai_compat.wire_response_to_domain">wire_response_to_domain() (in module mechaharness.inference.openai_compat)</a>
 </li>
   </ul></td>
 </tr></table>
