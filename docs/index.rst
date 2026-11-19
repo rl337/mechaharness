@@ -88,6 +88,7 @@ More guides
 
    guides/coding-delegate-suites
    guides/release-preparation
+   guides/release-refactor-priorities
    guides/gastronomic-comparison
    guides/user-story-*
 

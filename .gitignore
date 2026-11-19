@@ -152,6 +152,9 @@ activemq-data/
 # Local operator secrets / MCP launcher (see .env.example at repo root).
 # Normative: docs/requirements/repository-secrets-hygiene.md (SEC-01..03).
 .env/
+.env
+.env.*
+!.env.example
 .envrc
 .venv
 env/

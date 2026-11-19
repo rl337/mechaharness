@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A tracked-file hygiene check rejects local artifacts and recognizable secrets
+  with redacted findings. Dotenv files stay ignored; `.env.example` stays tracked.
+
 - Cloud OpenAI testing with `OPENAI_API_KEY` fallback and default `gpt-6-luna`.
   Chat Completions maps completion-token limits and keeps internal graph metadata
   out of provider requests. Static stories use memory responses; cloud tests

@@ -141,3 +141,5 @@ Trouble implementation scope and open acceptance gaps:
 [Trouble release status](./inspiration/trouble-release-status.md).
 
 Maintainers: [prepare a release](./guides/release-preparation.md).
+
+Maintainer follow-up: [release refactor priorities](./guides/release-refactor-priorities.md).
