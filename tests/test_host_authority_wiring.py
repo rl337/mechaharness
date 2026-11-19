@@ -92,3 +92,20 @@ def test_host_denial_store_defaults_and_binds() -> None:
 @pytest.mark.parametrize("name", sorted(host_apis.__all__))
 def test_host_apis_catalog_names_resolve(name: str) -> None:
     assert getattr(host_apis, name) is not None
+
+
+def test_denial_store_lifetime_belongs_to_the_injector() -> None:
+    from mechaharness.config import Settings
+    from mechaharness.denial_store import InMemoryDenialStore
+    from mechaharness.di import SettingsConfig
+
+    settings = Settings(inference_backend="mock", harness_family="pass_through")
+    first = get_injector(SettingsConfig(settings))
+    second = get_injector(SettingsConfig(settings))
+    store = first.inject(DenialStore)
+    assert store is first.inject(DenialStore)
+    assert store is first.inject(InMemoryDenialStore)
+    assert store is first.inject(AuthorityGate).denials
+    assert store is not second.inject(DenialStore)
+    store.record("scope", reason="denied")
+    assert second.inject(DenialStore).lookup("scope") is None

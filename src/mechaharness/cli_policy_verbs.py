@@ -14,11 +14,13 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from mechaharness.authority_gate import AuthorityGate
 from mechaharness.budget import BudgetPolicy
 from mechaharness.capability_envelope import CapabilityEnvelope
 from mechaharness.cli_verb import CliVerb
 from mechaharness.core.access import AccessControl, GraphExecute
 from mechaharness.delegation_policy import DefaultDelegationPolicy, DelegationRequest
+from mechaharness.denial_store import DenialStore
 from mechaharness.di import MechaHarnessConfig, get_injector
 from mechaharness.graph import ExecutionGraph, GraphNode, NodeStatus
 from mechaharness.graph_executor import (
@@ -591,18 +593,21 @@ class DenialEquivalenceVerb(CliVerb):
     name = "denial_equivalence"
     params_model = DenialEquivalenceCommand
 
+    def __init__(self, denial_store: DenialStore, authority_gate: AuthorityGate) -> None:
+        self.denials = denial_store
+        self.gate = authority_gate
+
     async def run(self, params: BaseModel, runtime: Any) -> dict[str, Any]:
         del runtime
-        from mechaharness.authority_gate import AuthorityGate
-        from mechaharness.denial_store import InMemoryDenialStore, equivalent_action_digest
+        from mechaharness.denial_store import equivalent_action_digest
         from mechaharness.judgement_policy import Verdict
         from mechaharness.walk_bag import WalkBag, WalkBagRegister
 
         body = DenialEquivalenceCommand.model_validate(params.model_dump())
         bag = WalkBag()
         bag.put(WalkBagRegister.IN, {"denied": body.denied, "retries": body.retries})
-        store = InMemoryDenialStore()
-        gate = AuthorityGate(denials=store)
+        store = self.denials
+        gate = self.gate
         denied = body.denied
         first_digest = equivalent_action_digest(
             denied["effect_class"], denied["target"]
@@ -636,6 +641,7 @@ class DenialEquivalenceVerb(CliVerb):
             action_digest=first_digest,
         )
         out = {
+            "denial_store_shared": gate.denials is store,
             "first": ":".join([first.outcome, *first.reason_codes]),
             "retries": retries,
             "lifted": lifted,

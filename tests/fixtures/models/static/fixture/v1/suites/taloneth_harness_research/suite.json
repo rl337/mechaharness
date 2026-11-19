@@ -122,6 +122,10 @@
     {
       "story": "taloneth_request_prefix",
       "scenario": "280_taloneth_request_prefix"
+    },
+    {
+      "story": "taloneth_wire_request",
+      "scenario": "290_taloneth_wire_request"
     }
   ]
 }

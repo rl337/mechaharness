@@ -374,3 +374,18 @@ Owning stories: `fangore_insp_authority_gate`, `fangore_insp_denial_equivalence`
 
 - [Architecture](../architecture.md) (including host extension)
 - [Install](./install.md)
+
+## Provider normalization and shared denial memory
+
+Override `get_openai_request_policy()` to return an `OpenAIRequestPolicy` class
+or instance. This policy owns provider capability defaults and normalization;
+custom proxies should override `capabilities_for(endpoint, model)` rather than
+add provider switches to Settings. The adapter and `inspect_openai_request` CLI
+verb receive the same bound policy.
+
+`get_denial_store()` may return a class or an instance. Its default is the
+`InMemoryDenialStore` class, bound as one singleton per injector. Resolving
+`DenialStore`, the concrete default, or `AuthorityGate.denials` uses that same
+instance. Independent default injectors have independent denial memory. Passing
+an explicit instance intentionally shares the lifetime selected by the host.
+The Config object no longer caches a mutable denial store.

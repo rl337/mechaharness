@@ -47,7 +47,7 @@ run_check() {
 
 run_check "Repository hygiene" "$PYTHON" scripts/repository_hygiene.py
 
-run_check "Ruff lint" "$RUFF" check src tests scripts/repository_hygiene.py
+run_check "Ruff lint" "$RUFF" check src tests scripts/repository_hygiene.py scripts/release_candidate.py
 
 EXPECTED_MYPY="1.19.1"
 MYPY_VER="$("$MYPY" --version 2>/dev/null | awk '{print $2}')"

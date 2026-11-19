@@ -28,7 +28,7 @@ mechaharness run "Reply with ok." \
 
 `apply_backend_defaults` fills `api_key` from `OPENAI_API_KEY` when
 `MECHA_API_KEY` is unset. Luna tool loops on Chat Completions get
-`reasoning_effort=none` automatically when tools are present. Cloud OpenAI
+`reasoning_effort=none` automatically when tools are present. The injected `OpenAIRequestPolicy` selects provider capabilities. Default cloud OpenAI
 and Luna requests map `max_tokens` to `max_completion_tokens` and omit internal
 runner metadata such as `node_id` from the HTTP body. Explicit `request.extra`
 values take precedence for supported provider fields.
@@ -132,3 +132,13 @@ Legacy `MECHA_DECIDE_*` env names still work as aliases. Host apps typically loa
 those profiles to lane `judge`. See [Judge reference](../reference/judge.md).
 
 Reason-only profiles must fail judge tools with a clear load hint.
+
+## Inspect a request without calling the provider
+
+`OpenAICompatStrategy.prepare_request(request)` returns the normalized body plus
+omitted field names. `prepared.diagnostics()` hashes every transmitted body
+field, including tool descriptions and list order, without including raw prompt
+values. It does not measure provider cache hits or include endpoint/tenant
+routing in its digest. Host proxies can bind a custom policy through
+`get_openai_request_policy()`. The `inspect_openai_request` CLI-universe verb
+uses the same policy for offline comparisons.

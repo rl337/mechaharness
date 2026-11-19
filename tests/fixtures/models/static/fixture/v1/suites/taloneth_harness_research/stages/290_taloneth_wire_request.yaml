@@ -1,0 +1,70 @@
+id: taloneth_wire_request
+suite: taloneth_harness_research
+persona: taloneth
+title: Inspect the provider-normalized request before sending it
+narrative: 'Taloneth starts the CLI host with pass_through and mock. She runs inspect_openai_request
+  with two Luna requests that differ only in a tool''s description. The same injectable policy used
+  by the OpenAI adapter normalizes both bodies. She checks that the body identity changes, internal
+  node_id is omitted, and provider_cache_observed stays false. This walk makes no HTTP call and stores
+  no prompt text in its report.
+
+  '
+implementation: 'InspectOpenAIRequestVerb and OpenAIRequestPolicy reuse domain_request_to_wire and
+  the adapter''s body normalizer. Config owns provider capabilities.
+
+  '
+validation: 'The static CLI walk asserts wire identity and omissions. Tests in test_openai_request_policy.py
+  compare that digest with the actual body sent to an in-memory HTTP client, and cover custom policy
+  injection and endpoint spoofing.
+
+  '
+footnotes:
+- id: insp-cache-wire
+  label: Trouble cache evidence (MH-CACHE-01)
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#request-prefix-caching
+  note: Inspect actual provider-normalized fields; cache metrics remain separate
+kind: user_story
+environment:
+  family: pass_through
+  backend: mock
+  filesystem:
+    type: temp
+steps:
+- do:
+    inspect_openai_request:
+      endpoint: https://api.openai.com/v1
+      request:
+        model: gpt-6-luna
+        messages:
+        - role: user
+          content: Read a file
+        tools:
+        - name: read
+          description: Read one file
+        max_tokens: 32
+        extra:
+          node_id: internal
+      compare_to:
+        model: gpt-6-luna
+        messages:
+        - role: user
+          content: Read a file
+        tools:
+        - name: read
+          description: Read a UTF-8 file
+        max_tokens: 32
+        extra:
+          node_id: internal
+complete:
+  expect:
+  - kind: equals
+    key: body_changed
+    value: true
+  - kind: equals
+    key: provider_cache_observed
+    value: false
+  - kind: equals
+    key: omitted_fields
+    value:
+    - node_id
+cleanup: []

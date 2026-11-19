@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Releases are manually dispatched from a reviewed versioned commit. Validation,
+  archives, and tags use that same SHA; the independent auto-bump workflow is
+  removed. Conflicting tags and existing registry versions fail closed.
+- Diagnostic verbs require supplied topology, layout, observation, and evaluator
+  inputs. Research promotion no longer synthesizes a passing final test.
+- Experimental admission reports use `source_label_accepted`, `ledger_match`, and
+  `ledger_miss` with `gate_status=not_evaluated`. Causal support is labeled
+  `caller_asserted`; consumers should update comparisons with the former labels.
+- Provider normalization is owned by injectable `OpenAIRequestPolicy`. Inspection
+  hashes the full normalized body, including tool descriptions, without a cache
+  hit claim. Denial memory is injector-scoped and shared with its authority gate.
+- Obsolete migration guides and overlapping Trouble notes are consolidated.
+  Published HTML paths redirect; repository source citations use the new paths.
+
 ### Added
 
 - A tracked-file hygiene check rejects local artifacts and recognizable secrets

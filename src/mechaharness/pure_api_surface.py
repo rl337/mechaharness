@@ -17,7 +17,6 @@ from mechaharness.coordination_cost import CoordinationCostMetrics, summarize_co
 from mechaharness.environment_delta import EnvironmentSnapshot, apply_deltas, emit_delta
 from mechaharness.exit_contract import CleanStateContract, evaluate_exit
 from mechaharness.fan_in_policy import FanInPolicy, accept_fan_in
-from mechaharness.graph import GraphNode, VerificationOracle
 from mechaharness.handoff_record import HandoffRecord
 from mechaharness.harness_health import HarnessHealthSnapshot, needs_cleanup
 from mechaharness.loop_health import LoopHealthSignals, should_wind_down
@@ -30,7 +29,6 @@ from mechaharness.rule_promotion import (
     capture_correction,
     promote_soft_to_hard,
 )
-from mechaharness.verification_policy import DefaultVerificationPolicy
 from mechaharness.work_in_progress_policy import WorkInProgressPolicy
 
 
@@ -67,27 +65,20 @@ async def run_sparse_advisor(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_verification_outcome(inputs: dict[str, Any]) -> dict[str, Any]:
-    outcome = OutcomeContract(
-        require_verification=bool(inputs.get("require_verification", True))
-    )
-    before = outcome.evaluate(answer_generated=True, verification_passed=None)
-    policy = DefaultVerificationPolicy()
-    node = GraphNode(id="n", kind="compute")
-
-    def good(_node: GraphNode) -> tuple[bool, dict[str, Any]]:
-        return True, {"ok": True}
-
-    result = policy.verify(
-        node,
-        oracles=[VerificationOracle(name="exec", strength="executable")],
-        verifiers=[good],
-        outcome=outcome,
-        answer_generated=True,
-    )
+    """Apply the completion contract to caller-supplied check results."""
+    if not isinstance(inputs.get("verification_passed"), bool):
+        raise ValueError("verification_passed must be supplied as a boolean check result")
+    outcome = OutcomeContract(require_verification=bool(inputs.get("require_verification", True)))
+    passed = inputs["verification_passed"]
     return {
-        "before_verify_completion": before,
-        "after_verify_completion": result.completion,
-        "verification_passed": result.passed,
+        "before_verify_completion": outcome.evaluate(
+            answer_generated=True, verification_passed=None
+        ),
+        "after_verify_completion": outcome.evaluate(
+            answer_generated=True, verification_passed=passed
+        ),
+        "verification_passed": passed,
+        "evidence_origin": "caller_supplied",
     }
 
 
@@ -238,4 +229,4 @@ PURE_API_HANDLERS: dict[str, Any] = {
 }
 
 
-__all__ = ['PURE_API_HANDLERS', 'PureApiParams']
+__all__ = ["PURE_API_HANDLERS", "PureApiParams"]

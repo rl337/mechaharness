@@ -2,30 +2,24 @@ id: taloneth_layered_eval
 suite: taloneth_harness_research
 persona: taloneth
 title: Score the task and the harness as separate results
-narrative: >
-  Taloneth starts the CLI host with family pass_through and backend mock. She
-  replays four frozen runs of the same "write the file" task and asks for a
-  layered score. In the lucky run the tool API swallowed an error, but a
-  fallback still wrote the correct file: the task passes and the harness fails,
-  so the combined result is not clean. In the wrong run the tools and policy
-  behaved, but the file contents are wrong: the task fails and the harness
-  passes, and that is not called an infrastructure failure. In the blind run
-  there is no runtime audit, so the harness stays unknown instead of passing.
-  In the both-fail run she has no trace that proves the harness defect caused
-  the bad file, so the link is only a hypothesis.
-implementation: >
-  score_layers in mechaharness.layered_verdict, exposed as layered_eval, combines caller-
-  supplied verdicts. This walk checks report semantics; it does not inspect trace artifacts or
-  independently evaluate causality. A host must supply evaluated evidence before using the
-  report.
-validation: >
-  Harness user_story stage 270_taloneth_layered_eval drives layered_eval.
-  Unit cases in tests/test_layered_verdict.py cover an observed causal trace
-  and an infrastructure failure that leaves both layers unscored.
+narrative: Taloneth starts the CLI host with pass_through and mock. She supplies five recorded verdict
+  pairs to layered_eval. A correct file with a harness error is not clean. A wrong file with a healthy
+  harness is a task failure, not infrastructure failure. Missing harness evidence stays unknown. When
+  both fail, the link stays a hypothesis unless the caller asserts support; even then the report says
+  caller_asserted, not independently observed. She checks each reported status and the evidence origin.
+implementation: "score_layers in mechaharness.layered_verdict, exposed as layered_eval, combines caller-\
+  \ supplied verdicts. This walk checks report semantics; it does not inspect trace artifacts or independently\
+  \ evaluate causality. A host must supply evaluated evidence before using the report.\n LayeredEvaluation\
+  \ reuses Claim and EvaluationOutcome. Causal support remains caller_asserted."
+validation: 'Harness user_story stage 270_taloneth_layered_eval drives layered_eval. Unit cases in
+  tests/test_layered_verdict.py cover an observed causal trace and an infrastructure failure that
+  leaves both layers unscored.
+
+  '
 footnotes:
 - id: insp-trace-01
   label: Trouble trace and requirement integrity (MH-TRACE-01)
-  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#trace-and-requirement-integrity
   note: Separate harness fidelity from agent task success
 kind: user_story
 environment:
@@ -53,15 +47,43 @@ steps:
         harness: fail
         harness_observed: true
         trace_supports_cause: false
+      - name: claimed
+        task: fail
+        harness: fail
+        trace_supports_cause: true
 complete:
   expect:
-  - {kind: equals, key: lucky_task, value: pass}
-  - {kind: equals, key: lucky_harness, value: fail}
-  - {kind: equals, key: lucky_clean, value: false}
-  - {kind: equals, key: wrong_task, value: fail}
-  - {kind: equals, key: wrong_harness, value: pass}
-  - {kind: equals, key: wrong_infrastructure, value: false}
-  - {kind: equals, key: blind_harness, value: unknown}
-  - {kind: equals, key: blind_clean, value: false}
-  - {kind: equals, key: both_attribution, value: hypothesis}
+  - kind: equals
+    key: lucky_task
+    value: pass
+  - kind: equals
+    key: lucky_harness
+    value: fail
+  - kind: equals
+    key: lucky_clean
+    value: false
+  - kind: equals
+    key: wrong_task
+    value: fail
+  - kind: equals
+    key: wrong_harness
+    value: pass
+  - kind: equals
+    key: wrong_infrastructure
+    value: false
+  - kind: equals
+    key: blind_harness
+    value: unknown
+  - kind: equals
+    key: blind_clean
+    value: false
+  - kind: equals
+    key: both_attribution
+    value: hypothesis
+  - kind: equals
+    key: claimed_attribution
+    value: caller_asserted
+  - kind: equals
+    key: evidence_origin
+    value: caller_supplied
 cleanup: []

@@ -24,7 +24,7 @@ validation: >
 footnotes:
 - id: insp-cache-01
   label: Trouble prefix-cache regression (MH-CACHE-01)
-  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-prefixwise-cache-regression-2026-11-10.md
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#request-prefix-caching
   note: Attribute avoidable prefix misses without storing prompt text
 kind: user_story
 environment:

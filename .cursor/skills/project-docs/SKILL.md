@@ -110,7 +110,7 @@ and [`node-components`](../node-components/SKILL.md).
 
 When the change is **user-facing acceptance behavior** (harness runs, grants,
 lanes, judge/verdicts, adapters, recipes), defer entirely to the
-[`user-stories`](../user-stories/SKILL.md) skill: edit `story.json` +
+[`user-stories`](../user-stories/SKILL.md) skill: edit canonical
 suite stage YAML (`kind: user_story` / `cli`), keep twin copies identical,
 regenerate `docs/guides/user-stories.md` with
 `python -m tests.stories.commands sync-guide`, and run `--check`. Do **not**
@@ -169,5 +169,5 @@ Before finishing:
 - Agentic Recipes: [`agentic-recipes`](../agentic-recipes/SKILL.md)
 - User stories: [`user-stories`](../user-stories/SKILL.md)
 - Event observability: [`event-observability`](../event-observability/SKILL.md)
-- Downstream consumers: [`../../agent-skills/`](../../agent-skills/),
+- Downstream consumers: [`agent-skills/`](../../../agent-skills/),
   [`docs/guides/agent-skills.md`](../../../docs/guides/agent-skills.md)

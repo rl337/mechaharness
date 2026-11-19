@@ -223,16 +223,42 @@ thin leaf verb for already-scored candidate lists.
 These verbs accept caller-supplied observations and produce offline reports:
 
 - `admit_authority`: `decisions` classifies supplied claim labels; `effects`
-  reports exact resource/operation membership in the supplied ledger. `allow`
-  does not dispatch or authorize an effect. Hosts authenticate sources and
+  reports exact resource/operation membership in the supplied ledger. `ledger_match`
+  records membership only; `gate_status` remains `not_evaluated`. Hosts authenticate sources and
   enforce actual grants independently.
 - `layered_eval`: `<name>_task` and `<name>_harness` repeat the supplied verdicts
-  with missing/infrastructure handling. `<name>_attribution: observed` means
+  with missing/infrastructure handling. `<name>_attribution: caller_asserted` means
   the caller asserted trace support; this verb does not read causal evidence.
 - `request_prefix_compare`: `<name>_cause: match` means selected hashed fields
   matched and the caller reported metric availability. It does not establish
   a provider cache hit. Changed tool names/schemas stay `unknown`.
 
 See [API contracts](../api/research_helpers.rst) for executable examples and
-[Trouble release status](../inspiration/trouble-release-status.md) for missing
+[Trouble release status](../inspiration/trouble.md#implementation-status) for missing
 runtime integrations.
+
+### Diagnostic input migration
+
+`repo_topology` now requires `files` and `revision`, with an optional budget.
+`cache_layout_experiment` requires `policy_blocks`, `relevant`, `dynamic`, and
+`enabled`. `context_observation_chain` requires observations, a requested
+observation id, summary, action sequences, and messages. `derived_memory`
+requires events, an event boundary, and supplied record labels. Empty requests
+fail clearly instead of running a canned demonstration.
+
+`evaluator_compose_run` takes a versioned evaluator identity and typed `claims`;
+its report is caller-supplied evidence. `atk_research_reject` requires a supplied
+`final_test` with passing claims and matching `final_test_hypothesis` plus
+`final_test_candidate_digest` before
+reporting promotion. Missing or mismatched evidence returns a refusal. It does
+not independently authenticate a recorded evaluator result. The response exposes
+`candidate_digests` for binding a result to its candidate change set and frozen
+protocol inputs; reusing a hypothesis label with changed code is refused.
+
+`verification_outcome` requires the caller's `verification_passed` boolean and
+applies the completion policy to it. It does not run a synthetic passing oracle.
+
+`inspect_openai_request` accepts an endpoint and `CompletionRequest`, plus an
+optional `compare_to` request. It returns only normalized-body digests, omitted
+field names, and `provider_cache_observed=false`. The injected provider policy
+is shared with the actual HTTP adapter. No HTTP request is made by inspection.

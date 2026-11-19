@@ -5,8 +5,6 @@ The maintained release instructions are in
 They cover validation, package inspection, versioning, publishing, and the
 current automatic-workflow sequencing gap.
 
-Before the next automated release, review the
-[release refactor priorities](docs/guides/release-refactor-priorities.md).
 
-`REQUIREMENTS.md` is a private local inventory removed from public history;
-keep it gitignored. See [repository hygiene](docs/requirements/repository-secrets-hygiene.md).
+Versions are chosen in a reviewed commit; the manual release workflow validates,
+packages, and tags that exact commit. See the maintained guide for retry rules.

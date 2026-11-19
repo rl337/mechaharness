@@ -1,13 +1,6 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
-    branches:
-      - main
-      - master
   workflow_dispatch:
     inputs:
       publish_target:
@@ -20,19 +13,19 @@ on:
           - testpypi
           - pypi
 
+concurrency:
+  group: mechaharness-release
+  cancel-in-progress: false
+
 permissions:
-  contents: write
-  id-token: write
+  contents: read
 
 jobs:
   package:
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       (github.event.workflow_run.head_branch == 'main' ||
-        github.event.workflow_run.head_branch == 'master'))
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -40,7 +33,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -50,18 +43,25 @@ jobs:
       - name: Install build tools
         run: |
           python -m pip install --upgrade pip
-          pip install build twine
+          pip install -e ".[dev,docs]"
 
-      - name: Read version
+      - name: Fetch release tags
+        run: git fetch origin --tags
+
+      - name: Verify candidate identity
         id: version
-        run: |
-          VERSION=$(grep -E '^version = ' pyproject.toml | sed -E "s/^version = [\"'](.*)[\"']/\1/")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Version: $VERSION"
+        run: python scripts/release_candidate.py --expected-sha "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Validate selected commit
+        env:
+          MECHA_STORY_BACKEND: static
+        run: ./run_checks.sh
 
       - name: Build and check
         run: |
+          python scripts/release_candidate.py --expected-sha "$GITHUB_SHA"
           python -m build --sdist --wheel
+          python scripts/release_candidate.py --expected-sha "$GITHUB_SHA" --dist dist
           twine check dist/*
 
       - name: Upload dist
@@ -77,6 +77,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin --tags
+          python scripts/release_candidate.py --expected-sha "$GITHUB_SHA"
           if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
             echo "created=false" >> "$GITHUB_OUTPUT"
             echo "Tag v${VERSION} already exists"
@@ -87,22 +88,23 @@ jobs:
           fi
 
       - name: GitHub Release
-        if: steps.tag.outputs.created == 'true'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Release v${{ steps.version.outputs.version }}
-          body: |
-            ## Installation
-            ```bash
-            pip install mechaharness==${{ steps.version.outputs.version }}
-            ```
-            Changelog: https://rl337.org/mechaharness/changelog.html
-          files: dist/*
-          draft: false
-          prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          RESPONSE=$(mktemp)
+          STATE=$(mktemp)
+          gh api --include "repos/${GITHUB_REPOSITORY}/releases/tags/v${VERSION}" > "$RESPONSE" || true
+          python scripts/release_candidate.py --expected-sha "$GITHUB_SHA" \
+            --release-response "$RESPONSE" > "$STATE"
+          if grep -qx 'release_state=missing' "$STATE"; then
+            gh release create "v${VERSION}" dist/* --verify-tag \
+              --title "Release v${VERSION}" \
+              --notes "Install mechaharness==${VERSION}. Changelog: https://rl337.org/mechaharness/changelog.html"
+          else
+            echo "Matching published GitHub Release is preserved"
+          fi
 
   publish:
     needs: package
@@ -128,7 +130,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          skip-existing: true
+          skip-existing: false
           attestations: false
 
       - name: Smoke-install from TestPyPI
@@ -161,5 +163,5 @@ jobs:
         if: github.event.inputs.publish_target == 'pypi'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip-existing: true
+          skip-existing: false
           attestations: false

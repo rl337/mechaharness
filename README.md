@@ -2,125 +2,59 @@
 
 ![MechaHarness](docs/logo.png)
 
-Python **agent harness** for hosts that compose inference safely — not a thin
-chat-client wrapper. Founding principles:
+A Python agent harness for local and cloud models, with tool grants, cost
+accounting, event logs, and resumable execution graphs. Provider I/O and agent
+loop policy are separate, configurable components.
 
-1. **Modular via dependency injection** — pyiv ≥ 1.1 `MechaHarnessConfig`;
-   hosts subclass and compose (no hand-wired harnesses / string registries)
-2. **Multi-model / lanes native** — reason, judge, and media lanes;
-   `Completion` / `Judgement` / `Generation` outcomes
-3. **Cost in the object model** — `CostAccountant` on the harness path so runs
-   cannot quietly go AWOL on spend
-4. **EventLog telemetry built in** — queryable lifecycle, inference, tools,
-   cost, and access events on every run
+## Install and try it
 
-Also: deny-by-default grants / `CompoundPolicy`, and host-extendable open
-identity. Docs: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness/)
-
-**Downstream / host agents:** copy Cursor skills from
-[`agent-skills/`](agent-skills/) (see
-[Agent skills for your project](docs/guides/agent-skills.md) and
-[Host integration](docs/requirements/host-integration.md)).
-
-## Install
+Requires Python 3.9+.
 
 ```bash
 pip install mechaharness
+mechaharness run "Hello" --backend mock --family pass_through --model mock
 ```
 
-Requires Python 3.9+. Unreleased `main`:
-
-```bash
-pip install git+https://github.com/rl337/mechaharness.git
-```
-
-## Quick start
-
-```bash
-# List backends / harness families
-mechaharness backends
-mechaharness families
-
-# Local LM Studio (OpenAI-compatible)
-mechaharness run "What is 2+2?" \
-  --backend lmstudio \
-  --family tool_loop \
-  --model local-model
-
-# OpenAI (OPENAI_API_KEY also works when MECHA_API_KEY is unset)
-export MECHA_API_KEY=sk-...
-mechaharness run "Hello" --backend openai --model gpt-6-luna
-
-# HTTP API
-mechaharness serve --port 8080
-curl -s http://127.0.0.1:8080/health
-```
-
-Environment variables use the `MECHA_` prefix (`MECHA_API_KEY`, `MECHA_INFERENCE_BACKEND`, `MECHA_MODEL`, `MECHA_BASE_URL`, …).
-
-## Library usage
-
-Non-DI (OpenAPI-shaped):
+The mock backend needs no API key or GPU. For real inference, see
+[installation](docs/guides/install.md) and
+[OpenAI or local models](docs/guides/openai-local.md).
 
 ```python
 import asyncio
 from mechaharness import RunRequest, run
 
-async def main() -> None:
-    result = await run(RunRequest(prompt="What is 19 + 23?", backend="lmstudio"))
+async def main():
+    result = await run(RunRequest(
+        prompt="Hello", backend="mock", family="pass_through", model="mock"
+    ))
     print(result.final_text)
 
 asyncio.run(main())
 ```
 
-DI (pyiv Config hooks):
+## Integrate with a host
 
-```python
-from mechaharness.di import MechaHarnessConfig, get_injector
-from mechaharness.harness.base import AbstractHarness
-from mechaharness.harness.tool_loop import ToolLoopHarness
-from mechaharness.inference.openai_compat import OpenAICompatStrategy
+- [Dependency injection](docs/guides/dependency-injection.md): bind provider,
+  harness, grants, tools, and policies through `MechaHarnessConfig`.
+- [Durable graph generators](docs/reference/durable-graph-generators.md): start,
+  pause, resume, and inspect long-running work.
+- [Agentic Recipes](docs/reference/graph-templates.md): reusable control graphs.
+- [Host-agent skills](agent-skills/): integration instructions for downstream
+  coding agents.
+- [CLI](docs/reference/cli.md) and [HTTP API](docs/reference/api.md).
 
+Full documentation: [rl337.org/mechaharness](https://rl337.org/mechaharness/).
+Executable acceptance walks: [user stories](docs/guides/user-stories.md).
 
-class MyConfig(MechaHarnessConfig):
-    def get_inference_class(self):
-        return OpenAICompatStrategy
-
-    def get_harness_class(self):
-        return ToolLoopHarness
-
-
-injector = get_injector(MyConfig)
-harness = injector.inject(AbstractHarness)
-```
-
-See [Dependency injection](https://rl337.org/mechaharness/guides/dependency-injection.html).
-
-## Extending
-
-Subclass `InferenceStrategy` (constructor takes `Settings`) and return it from `get_inference_class()`, or merge it into `SettingsConfig.inference_classes()`. Subclass `AbstractHarness` and return it from `get_harness_class()`.
-
-## Development
+## Develop
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev,docs]"
-./run_checks.sh
+pip install -e '.[dev,docs]'
+MECHA_STORY_BACKEND=static ./run_checks.sh
 ```
 
-`run_checks.sh` is what CI runs: ruff, mypy, pytest, Sphinx, and CLI smoke. EventLog + cost without a GPU:
-
-```bash
-mechaharness run "What is 2+2?" --backend mock --family pass_through --model mock --json
-```
-
-## Design notes
-
-| Concern | Pattern | Why |
-|--------|---------|-----|
-| Wiring | pyiv Config hooks | DI-first; hosts inject MechaHarness types |
-| Provider I/O | Strategy | Swap cloud/local without touching agent logic |
-| Agent loop | Template method hierarchy | Share turn accounting; specialize stop/tool rules per model family |
-| Frontends | OpenAPI `RunRequest` / `run()` | Same contract for CLI, HTTP, and non-DI Python |
-| Bindings later | Pydantic + OpenAPI | Types stay serializable; API is the first non-Python client surface |
+See [story authoring](docs/guides/authoring-user-stories.md) and
+[release preparation](docs/guides/release-preparation.md). Operator credentials
+belong in the environment or ignored local files; `.env.example` is a template.

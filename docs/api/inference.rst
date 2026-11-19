@@ -14,3 +14,9 @@ OpenAI-compatible provider
 
 See :doc:`../guides/openai-local` for cloud credentials, Luna request parameters,
 local endpoints, and explicit live-test opt-in.
+
+Request normalization policy
+----------------------------
+
+.. automodule:: mechaharness.inference.openai_request
+   :members:

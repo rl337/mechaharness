@@ -282,9 +282,9 @@ Stories: `taloneth_decision_plane_shadow_compare__candidate_unavailable`, `talon
 
 ### `taloneth_harness_research` — Harness research, ablation, and promotion gates
 
-Persona **taloneth**; execution `parallel`; 28 stage(s).
+Persona **taloneth**; execution `parallel`; 29 stage(s).
 
-Stories: `taloneth_atk_research_reject`, `taloneth_cache_layout_experiment`, `taloneth_insp_component_ablation`, `taloneth_insp_correction_spec_debt`, `taloneth_insp_cross_harness_failure`, `taloneth_insp_eval_claims`, `taloneth_insp_eval_matrix`, `taloneth_insp_evaluation_outcome`, `taloneth_insp_evaluator_compose`, `taloneth_insp_experiment_dimensions`, `taloneth_insp_experiment_lineage`, `taloneth_insp_exposure_discriminative`, `taloneth_insp_gated_objective`, `taloneth_insp_harness_fingerprint`, `taloneth_insp_harness_health`, `taloneth_insp_harness_hypothesis`, `taloneth_insp_learning_export`, `taloneth_insp_objective_policy`, `taloneth_insp_recipe_evolution_loop`, `taloneth_insp_recipe_final_test_gate`, `taloneth_insp_rule_promotion`, `taloneth_insp_run_parity`, `taloneth_insp_safety_eval_recipes`, `taloneth_insp_scaffolding_retire`, `taloneth_insp_scripted_driver_replay`, `taloneth_insp_trial_reliability`, `taloneth_layered_eval`, `taloneth_request_prefix`
+Stories: `taloneth_atk_research_reject`, `taloneth_cache_layout_experiment`, `taloneth_insp_component_ablation`, `taloneth_insp_correction_spec_debt`, `taloneth_insp_cross_harness_failure`, `taloneth_insp_eval_claims`, `taloneth_insp_eval_matrix`, `taloneth_insp_evaluation_outcome`, `taloneth_insp_evaluator_compose`, `taloneth_insp_experiment_dimensions`, `taloneth_insp_experiment_lineage`, `taloneth_insp_exposure_discriminative`, `taloneth_insp_gated_objective`, `taloneth_insp_harness_fingerprint`, `taloneth_insp_harness_health`, `taloneth_insp_harness_hypothesis`, `taloneth_insp_learning_export`, `taloneth_insp_objective_policy`, `taloneth_insp_recipe_evolution_loop`, `taloneth_insp_recipe_final_test_gate`, `taloneth_insp_rule_promotion`, `taloneth_insp_run_parity`, `taloneth_insp_safety_eval_recipes`, `taloneth_insp_scaffolding_retire`, `taloneth_insp_scripted_driver_replay`, `taloneth_insp_trial_reliability`, `taloneth_layered_eval`, `taloneth_request_prefix`, `taloneth_wire_request`
 
 ## Nubble's stories
 
@@ -605,15 +605,13 @@ Nubble starts the CLI host with family `pass_through` and backend `mock`. Within
 
 Harness `user_story` stage `070_nubble_model_affinity.yaml`: environment + graph + steps + complete expects.
 
-### `nubble_repo_topology` — Budget repository topology maps and fall back when stale
+### `nubble_repo_topology` — Index supplied repository sources within a budget
 
-Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble feeds the context compiler a budgeted repository map. When the map is over budget or stale, the system must omit paths honestly and still allow source inspection fallback — not pretend the map is complete.
+Nubble starts the CLI host with pass_through and mock. He supplies two source files and a revision label to repo_topology with a budget of one entry. He checks that a.py is indexed, b.py is explicitly omitted, and revision_origin says caller_supplied. This walk checks budgeted indexing; it does not authenticate the revision or exercise stale-map recovery.
 
 #### Implementation
 
-`RepositoryTopologyProvider` builds budgeted `TopologyView` entries with omissions and invalidation; stale maps fall back to source inspection.
-
-Covers: CTX-08.
+RepoTopologyParams validates supplied files, revision label and budget. RepositoryTopologyProvider.index returns entries and omissions from those actual inputs.
 
 #### Validation
 
@@ -661,13 +659,13 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ## Fangore's stories
 
-### `fangore_admit_authority` — Keep retrieved text and memory from becoming grants
+### `fangore_admit_authority` — Review supplied source labels without authorizing effects
 
-Fangore starts the CLI host with family pass_through and backend mock. His trusted ledger allows an edit of repo:acme/widget and a read of object:X. He wrote "do not email the customer" himself. A fetched page tells the agent to edit repo:evil/other and to ignore that exclusion. Memory claims the revoke of write on object:X was a mistake. A vague user line, "make it better", has no checkable predicate. He runs admit_authority. His own exclusion is admitted. The fetched repo is only a candidate. The fetched instruction and the memory grant are rejected. The vague line asks a human. The widget edit and the object read are allowed. The evil edit and the restored write are denied, because they are not on the ledger.
+Fangore starts the CLI host with family pass_through and backend mock. His trusted ledger allows an edit of repo:acme/widget and a read of object:X. He wrote "do not email the customer" himself. A fetched page tells the agent to edit repo:evil/other and to ignore that exclusion. Memory claims the revoke of write on object:X was a mistake. A vague user line, "make it better", has no checkable predicate. He runs admit_authority. His own exclusion is accepted as a caller source label. The fetched repo is only a candidate. The fetched instruction and the memory grant are rejected. The vague line asks a human. The widget edit and object read match the supplied ledger. The evil edit and restored write miss it. gate_status stays not_evaluated; no effect is authorized by this report.
 
 #### Implementation
 
-review_admission in mechaharness.authority_admission, exposed as admit_authority, compares caller-supplied claim labels and proposed resource/operation pairs against a supplied ledger. It is a standalone report helper: the caller authenticates source labels, verifies quotes and predicates, and enforces actual effects with AuthorityGate. This walk does not exercise effect dispatch or source verification.
+Typed AdmissionClaim, ResourceOperation and AdmissionReport in mechaharness.authority_admission validate inputs. The report exposes ledger_match/ledger_miss and gate_status=not_evaluated; source_label_accepted records the caller label, not verified authority. Hosts still enforce actual effects with AuthorityGate.
 
 #### Validation
 
@@ -675,9 +673,9 @@ Harness user_story stage 150_fangore_admit_authority drives admit_authority. Uni
 
 #### Footnotes
 
-1. [Trouble resource scope (MH-REALM-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-realm-resource-scope-and-memory-safety-2026-11-03.md) — Discovered resources are not grants
-2. [Trouble memory authority (MH-EAL-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-realm-resource-scope-and-memory-safety-2026-11-03.md) — Memory prose is not an authorization token
-3. [Trouble requirement integrity (MH-REQ-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md) — Retrieved text must not enter the authoritative requirement list
+1. [Trouble resource scope (MH-REALM-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#resource-scope-and-memory) — Discovered resources are not grants
+2. [Trouble memory authority (MH-EAL-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#resource-scope-and-memory) — Memory prose is not an authorization token
+3. [Trouble requirement integrity (MH-REQ-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#trace-and-requirement-integrity) — Retrieved text must not enter the authoritative requirement list
 
 ### `fangore_audited_infer_accept` — Expand an audited infer-accept generate and gate spine
 
@@ -1706,13 +1704,11 @@ Stage 060 has no seed or scripted patch. It can only pass after the repaired pac
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. When derived memory is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval rank must not confer authority over approval rules.
+Fangore starts the CLI host with pass_through and mock. He supplies event records and a consolidation boundary to derived_memory, then repeats consolidation to check idempotence. He also supplies a high-ranked rumor and a low-ranked rule. The report filters their caller-provided authority labels, identifies only the rule, and states authority_origin=caller_labels. No rank or consolidation step creates an actual grant.
 
 #### Implementation
 
-`DerivedMemoryStore` / `DerivedMemoryRecord` separate provenance, validity, and retrieval priority. Consolidation is optional and idempotent; `retrieval_candidates` must not elevate non-authoritative rumors.
-
-Covers: CTX-06, CTX-07.
+DerivedMemoryStore.consolidate_from/current/apply/as_of are public APIs. The runner never writes private publication state; supplied authority labels are reported separately from event consolidation.
 
 #### Validation
 
@@ -2703,7 +2699,7 @@ Fangore starts the CLI host with family `pass_through` and backend `mock`. He ru
 
 #### Implementation
 
-`DenialStore` / `InMemoryDenialStore` + `equivalent_action_digest` via product verb `denial_equivalence` (`cli_policy_verbs`); `AuthorityGate` records DENY and consults prior denials. Walk-bag `in`/`out` carry the denied intent and outcomes.
+`DenialStore` / `InMemoryDenialStore` + `equivalent_action_digest` via product verb `denial_equivalence` (`cli_policy_verbs`); `AuthorityGate` records DENY and consults prior denials. Walk-bag `in`/`out` carry the denied intent and outcomes. The product verb injects the same DenialStore and AuthorityGate from Config; defaults are scoped to each injector.
 
 #### Validation
 
@@ -3479,11 +3475,11 @@ Harness `user_story` walks `tool_result_freshness`; expects rejected_ids and pas
 
 ### `fangore_insp_verification_gate` — Keep answer-generated distinct from task-complete
 
-Fangore starts the CLI host with family `pass_through` and backend `mock`. Producing an answer is not the same as finishing the task when verification is required. Accepts inspiration requirement 5[^insp-r05].
+Fangore starts the CLI host with pass_through and mock. He supplies a passing host-check result to verification_outcome and sees complete only after verification is supplied. He repeats with a failed check and sees failed. The evidence is explicitly caller_supplied; this walk exercises the completion policy rather than independently running an oracle.
 
 #### Implementation
 
-`OutcomeContract` in `mechaharness.outcome_contract` distinguishes `answer_generated`, `verified`, `complete`, and `failed`. `DefaultVerificationPolicy` selects the strongest sufficient oracle and gates completion through the outcome contract when `require_verification` is set.
+OutcomeContract.evaluate applies completion policy to the supplied verification_passed result. Actual oracle selection and execution remain the VerificationPolicy seam and its own tests.
 
 #### Validation
 
@@ -3491,7 +3487,7 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 #### Footnotes
 
-[^insp-r05]: [Inspiration requirements (req 5: verification)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification
+1. [Inspiration requirements (req 5: verification)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md) — Req 5 — verification
 
 ### `fangore_insp_wake_reresolve` — Re-resolve linkage when resuming a woken run
 
@@ -4412,7 +4408,7 @@ Taloneth starts the CLI host with family `pass_through` and backend `mock`. A ch
 
 `ResearchLab` / `EvalProtocol` run bounded research: inspect → hypothesis → isolated experiment → ATK-style search → frozen evaluation protocol → promote/rollback. Production evaluators stay protected.
 
-Covers: EXP-01, EXP-02, EXP-03, EXP-04.
+Covers: EXP-01, EXP-02, EXP-03, EXP-04. Final-test evidence is supplied by the caller and bound to the candidate change set and protocol digest; no passing evidence is synthesized.
 
 #### Validation
 
@@ -4422,7 +4418,7 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 [^insp-sr-06-research]: [Self-revising recipe map (MH-SR-06 research loop)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Generic research loop; recipe evolution is taloneth_insp_recipe_evolution_loop
 
-### `taloneth_cache_layout_experiment` — Measure cache-aware prompt layout as an explicit experiment
+### `taloneth_cache_layout_experiment` — Compare enabled and disabled context layout
 
 Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth toggles cache-aware layout on and off. When enabled, stable policy blocks should sit in a stable prefix separate from the dynamic tail; when disabled, everything stays in the dynamic tail with diagnostics.
 
@@ -4578,13 +4574,13 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 [^fineenvs-outcome]: [FineEnvs multi-harness RL — rewards](https://fineenvs-multi-harness-rl.hf.space/?__theme=system#rewards) — MH-MHRL-06
 
-### `taloneth_insp_evaluator_compose` — Run a versioned held-out evaluator to claims
+### `taloneth_insp_evaluator_compose` — Compose supplied evaluator claims with version metadata
 
-Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth wires a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon]. Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: `taloneth_insp_recipe_final_test_gate`[^insp-sr-07-eval].
+Taloneth starts the CLI host with pass_through and mock. She supplies a versioned evaluator identity, a held-out label, and recorded file-check claims to evaluator_compose_run. She checks that passing claims compose to passed while evidence_origin stays caller_supplied. This walk does not execute or authenticate the named evaluator.
 
 #### Implementation
 
-`Evaluator`, `CallableEvaluator`, and `evaluate_claims` in `mechaharness.evaluator` compose deterministic claim producers with version and held_out metadata beside VerificationPolicy.
+EvaluatorResult and Claim in mechaharness.evaluator and eval_evidence preserve the supplied identity and claims. compose_claims and all_passed compute the aggregate; no hardcoded passing grader runs.
 
 #### Validation
 
@@ -4592,9 +4588,9 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 #### Footnotes
 
-[^anth-evals-evaluator]: [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Deterministic then model graders
-[^arxiv-verif-horizon]: [Verification Horizon](https://arxiv.org/abs/2606.26300) — Held-out evaluator versioning
-[^insp-sr-07-eval]: [Self-revising recipe map (MH-SR-07 held_out)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — held_out metadata; final-test gate is taloneth_insp_recipe_final_test_gate
+1. [Anthropic Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) — Deterministic then model graders
+2. [Verification Horizon](https://arxiv.org/abs/2606.26300) — Held-out evaluator versioning
+3. [Self-revising recipe map (MH-SR-07 held_out)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — held_out metadata; final-test gate is taloneth_insp_recipe_final_test_gate
 
 ### `taloneth_insp_experiment_dimensions` — Declare fixed and varying harness experiment dimensions
 
@@ -4876,11 +4872,12 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ### `taloneth_layered_eval` — Score the task and the harness as separate results
 
-Taloneth starts the CLI host with family pass_through and backend mock. She replays four frozen runs of the same "write the file" task and asks for a layered score. In the lucky run the tool API swallowed an error, but a fallback still wrote the correct file: the task passes and the harness fails, so the combined result is not clean. In the wrong run the tools and policy behaved, but the file contents are wrong: the task fails and the harness passes, and that is not called an infrastructure failure. In the blind run there is no runtime audit, so the harness stays unknown instead of passing. In the both-fail run she has no trace that proves the harness defect caused the bad file, so the link is only a hypothesis.
+Taloneth starts the CLI host with pass_through and mock. She supplies five recorded verdict pairs to layered_eval. A correct file with a harness error is not clean. A wrong file with a healthy harness is a task failure, not infrastructure failure. Missing harness evidence stays unknown. When both fail, the link stays a hypothesis unless the caller asserts support; even then the report says caller_asserted, not independently observed. She checks each reported status and the evidence origin.
 
 #### Implementation
 
 score_layers in mechaharness.layered_verdict, exposed as layered_eval, combines caller- supplied verdicts. This walk checks report semantics; it does not inspect trace artifacts or independently evaluate causality. A host must supply evaluated evidence before using the report.
+ LayeredEvaluation reuses Claim and EvaluationOutcome. Causal support remains caller_asserted.
 
 #### Validation
 
@@ -4888,7 +4885,7 @@ Harness user_story stage 270_taloneth_layered_eval drives layered_eval. Unit cas
 
 #### Footnotes
 
-1. [Trouble trace and requirement integrity (MH-TRACE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md) — Separate harness fidelity from agent task success
+1. [Trouble trace and requirement integrity (MH-TRACE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#trace-and-requirement-integrity) — Separate harness fidelity from agent task success
 
 ### `taloneth_offline_decision_export` — Export decision data without leaking future outcomes
 
@@ -4936,7 +4933,7 @@ Harness user_story stage 280_taloneth_request_prefix drives request_prefix_compa
 
 #### Footnotes
 
-1. [Trouble prefix-cache regression (MH-CACHE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-prefixwise-cache-regression-2026-11-10.md) — Attribute avoidable prefix misses without storing prompt text
+1. [Trouble prefix-cache regression (MH-CACHE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#request-prefix-caching) — Attribute avoidable prefix misses without storing prompt text
 
 ### `taloneth_shadow_decision_backends` — Compare decision backends without inventing missing results
 
@@ -4975,3 +4972,19 @@ Taloneth starts the CLI host with family `pass_through` and backend `mock`. Befo
 #### Validation
 
 Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects on declared observation keys.
+
+### `taloneth_wire_request` — Inspect the provider-normalized request before sending it
+
+Taloneth starts the CLI host with pass_through and mock. She runs inspect_openai_request with two Luna requests that differ only in a tool's description. The same injectable policy used by the OpenAI adapter normalizes both bodies. She checks that the body identity changes, internal node_id is omitted, and provider_cache_observed stays false. This walk makes no HTTP call and stores no prompt text in its report.
+
+#### Implementation
+
+InspectOpenAIRequestVerb and OpenAIRequestPolicy reuse domain_request_to_wire and the adapter's body normalizer. Config owns provider capabilities.
+
+#### Validation
+
+The static CLI walk asserts wire identity and omissions. Tests in test_openai_request_policy.py compare that digest with the actual body sent to an in-memory HTTP client, and cover custom policy injection and endpoint spoofing.
+
+#### Footnotes
+
+1. [Trouble cache evidence (MH-CACHE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#request-prefix-caching) — Inspect actual provider-normalized fields; cache metrics remain separate

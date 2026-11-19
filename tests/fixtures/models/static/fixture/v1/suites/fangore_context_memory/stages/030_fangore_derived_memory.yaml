@@ -2,17 +2,16 @@ id: fangore_derived_memory
 suite: fangore_context_memory
 persona: fangore
 title: Rebuild derived memory without letting rank invent authority
-narrative: 'Fangore starts the CLI host with family `pass_through` and backend `mock`. When derived memory
-  is enabled, Fangore needs idempotent consolidation, rebuild from events, and a hard rule: high retrieval
-  rank must not confer authority over approval rules.'
-implementation: '`DerivedMemoryStore` / `DerivedMemoryRecord` separate provenance, validity, and retrieval
-  priority. Consolidation is optional and idempotent; `retrieval_candidates` must not elevate non-authoritative
-  rumors.
-
-
-  Covers: CTX-06, CTX-07.'
-validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
-  on declared observation keys.
+narrative: Fangore starts the CLI host with pass_through and mock. He supplies event records and a
+  consolidation boundary to derived_memory, then repeats consolidation to check idempotence. He also
+  supplies a high-ranked rumor and a low-ranked rule. The report filters their caller-provided authority
+  labels, identifies only the rule, and states authority_origin=caller_labels. No rank or consolidation
+  step creates an actual grant.
+implementation: DerivedMemoryStore.consolidate_from/current/apply/as_of are public APIs. The runner
+  never writes private publication state; supplied authority labels are reported separately from event
+  consolidation.
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard
+  expects on declared observation keys.
 footnotes: []
 kind: user_story
 environment:
@@ -22,11 +21,35 @@ environment:
     type: temp
 steps:
 - do:
-    derived_memory: {}
+    derived_memory:
+      events:
+      - id: e1
+        content: Redis
+      - id: e2
+        content: Dragonfly
+      - id: e3
+        content: Redis
+      up_to: 2
+      records:
+      - id: rumor
+        content: rumor
+        retrieval_rank: 99
+        authority: false
+      - id: rule
+        content: approval-rule
+        retrieval_rank: 0
+        authority: true
 complete:
   expect:
   - kind: 'true'
     key: authority_outranks_popularity
   - kind: 'true'
     key: idempotent
+  - kind: equals
+    key: authoritative_record_ids
+    value:
+    - rule
+  - kind: equals
+    key: authority_origin
+    value: caller_labels
 cleanup: []
