@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.di &mdash; MechaHarness 0.17.0 documentation</title>
+  <title>mechaharness.di &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
+      <script src="../_static/documentation_options.js?v=a8455094"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -571,6 +571,8 @@ Exactly one <code class="docutils literal notranslate"><span class="pre">default
 <dt class="sig sig-object py" id="mechaharness.di.apply_backend_defaults">
 <span class="sig-prename descclassname"><span class="pre">mechaharness.di.</span></span><span class="sig-name descname"><span class="pre">apply_backend_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config.html#mechaharness.config.Settings" title="mechaharness.config.Settings"><span class="pre">mechaharness.config.Settings</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="config.html#mechaharness.config.Settings" title="mechaharness.config.Settings"><span class="pre">mechaharness.config.Settings</span></a></span></span><a class="reference internal" href="../_modules/mechaharness/di.html#apply_backend_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mechaharness.di.apply_backend_defaults" title="Link to this definition"></a></dt>
 <dd><p>Fill <code class="docutils literal notranslate"><span class="pre">base_url</span></code> / <code class="docutils literal notranslate"><span class="pre">api_key</span></code> from the named backend when unset.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">api_key</span></code> is still unset after backend defaults, fall back to the
+conventional <code class="docutils literal notranslate"><span class="pre">OPENAI_API_KEY</span></code> process env (not a Settings field).</p>
 </dd></dl>
 
 <dl class="py function">

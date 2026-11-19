@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gastronomic comparison protocol &mdash; MechaHarness 0.17.0 documentation</title>
+  <title>Gastronomic comparison protocol &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
+      <script src="../_static/documentation_options.js?v=a8455094"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -159,6 +159,13 @@ guidance yields, repeat-failure loops, verified edits</p></li>
 </ul>
 <p>Aggregate with <code class="docutils literal notranslate"><span class="pre">summarize_gastronomic_comparison</span></code>. The summary never sets a
 <code class="docutils literal notranslate"><span class="pre">winner</span></code>; hosts interpret under matched budgets.</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">--budget-json</span></code> to the recording script with the limits actually used by
+the run, for example <code class="docutils literal notranslate"><span class="pre">'{&quot;tokens&quot;:8192,&quot;repair_rounds&quot;:2,&quot;wall_s&quot;:600}'</span></code>.
+The comparison summary requires matching model and budget records across arms.
+Unknown model or budget data leaves <code class="docutils literal notranslate"><span class="pre">comparable_ab</span></code> false. Historical timing
+logs without measured edit or token evidence can still be read; missing counters
+remain null. The recorder counts changed files in verified bursts separately
+from already-satisfied stages.</p>
 </section>
 <section id="offline-vs-live">
 <h2>Offline vs live<a class="headerlink" href="#offline-vs-live" title="Link to this heading"></a></h2>

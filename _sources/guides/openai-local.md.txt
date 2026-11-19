@@ -7,6 +7,39 @@ stay in the host app — MechaHarness only issues chat completions.
 Unlike `vllm` / `lmstudio`, this profile does **not** ship a default
 `base_url`. Set `MECHA_BASE_URL` explicitly for your server.
 
+## Cloud OpenAI (`openai` + Luna)
+
+The `openai` backend is the same Chat Completions client with default
+`base_url` `https://api.openai.com/v1`. Prefer the cheap Luna model for live
+graph tests.
+
+```bash
+export OPENAI_API_KEY=sk-...          # or MECHA_API_KEY
+export MECHA_INFERENCE_BACKEND=openai
+export MECHA_MODEL=gpt-6-luna
+unset MECHA_BASE_URL                  # uses api.openai.com
+
+mechaharness run "Reply with ok." \
+  --backend openai \
+  --family pass_through \
+  --model gpt-6-luna
+```
+
+`apply_backend_defaults` fills `api_key` from `OPENAI_API_KEY` when
+`MECHA_API_KEY` is unset. Luna tool loops on Chat Completions get
+`reasoning_effort=none` automatically when tools are present.
+
+Offline / default pytest uses cassette Memory clients only — operator
+`OPENAI_API_KEY` / `MECHA_BASE_URL` are ignored unless story mode is
+**live** and cloud is explicitly opted in (`MECHA_LIVE_OPENAI=1` or
+`MECHA_INFERENCE_BACKEND=openai`).
+
+```bash
+# Live-eligible stories against cloud Luna (explicit opt-in)
+MECHA_LIVE_OPENAI=1 MECHA_MODEL=gpt-6-luna \
+  pytest -q tests/stories -k nubble_run_cost
+```
+
 ## Backend
 
 ```bash

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stepped graph execution (SG-*) &mdash; MechaHarness 0.17.0 documentation</title>
+  <title>Stepped graph execution (SG-*) &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
+      <script src="../_static/documentation_options.js?v=a8455094"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -209,6 +209,21 @@ caller after a bounded advance while preserving checkpoints.</p>
 <li><p><a class="reference internal" href="job-lane-broker.html"><span class="std std-doc">Job lane broker</span></a> (orthogonal: data observe, not dispatch authority)</p></li>
 <li><p>OpenAI Dots MH-DOTS-02 via <code class="docutils literal notranslate"><span class="pre">fangore_insp_effect_revalidation</span></code></p></li>
 </ul>
+</section>
+<section id="nested-calls-and-result-return">
+<h2>Nested calls and result return<a class="headerlink" href="#nested-calls-and-result-return" title="Link to this heading"></a></h2>
+<p>The executor pushes the root through the same frame loop used for every child.
+A running or paused invocation has a root-to-active run ID path. Stepping into a
+child projects its declared inputs into an independent bag. The waiting parent’s
+checkpoint identifies the child run and the call site. A paused result exposes
+the active path as <code class="docutils literal notranslate"><span class="pre">GraphResult.frame_path</span></code>.</p>
+<p>At completion the executor checkpoints the terminal status, remaining result
+data in the bag, and an empty frame path together. When resuming an entered
+child, the executor can consume that receipt without repeating the child’s
+work. Only a successful child publishes its declared output bindings. Parent
+acceptance nodes still run before the parent returns. The shared budget carries
+accumulated spend across levels and checkpoint reopen. Older checkpoints without
+frame metadata resume through their existing entered-child links.</p>
 </section>
 </section>
 

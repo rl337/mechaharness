@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Install &amp; quick start &mdash; MechaHarness 0.17.0 documentation</title>
+  <title>Install &amp; quick start &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
+      <script src="../_static/documentation_options.js?v=a8455094"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -177,10 +177,17 @@ mechaharness<span class="w"> </span>families
 </section>
 <section id="openai">
 <h3>OpenAI<a class="headerlink" href="#openai" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_API_KEY</span><span class="o">=</span>sk-...
-mechaharness<span class="w"> </span>run<span class="w"> </span><span class="s2">"Hello"</span><span class="w"> </span>--backend<span class="w"> </span>openai<span class="w"> </span>--model<span class="w"> </span>gpt-4o-mini
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">MECHA_API_KEY</span><span class="o">=</span>sk-...<span class="w">   </span><span class="c1"># or OPENAI_API_KEY</span>
+mechaharness<span class="w"> </span>run<span class="w"> </span><span class="s2">"Hello"</span><span class="w"> </span>--backend<span class="w"> </span>openai<span class="w"> </span>--model<span class="w"> </span>gpt-6-luna
 </pre></div>
 </div>
+<p>Cheap live story filter (cloud Luna; explicit opt-in only):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">MECHA_LIVE_OPENAI</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MECHA_MODEL</span><span class="o">=</span>gpt-6-luna<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>pytest<span class="w"> </span>-q<span class="w"> </span>tests/stories<span class="w"> </span>-k<span class="w"> </span>nubble_run_cost
+</pre></div>
+</div>
+<p>Default / static pytest never calls the cloud API (cassettes only). See
+<a class="reference internal" href="openai-local.html"><span class="std std-doc">Local OpenAI-compat</span></a> for the cloud OpenAI section.</p>
 </section>
 <section id="http-api">
 <h3>HTTP API<a class="headerlink" href="#http-api" title="Link to this heading"></a></h3>

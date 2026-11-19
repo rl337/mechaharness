@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coding-delegate suites (development graph) &mdash; MechaHarness 0.17.0 documentation</title>
+  <title>Coding-delegate suites (development graph) &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
+      <script src="../_static/documentation_options.js?v=a8455094"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -140,8 +140,8 @@ provisional mirrors until the same suite passes under
 <td><p>Multi-file package + pytest verify + CLI</p></td>
 </tr>
 <tr class="row-even"><td><p><strong><code class="docutils literal notranslate"><span class="pre">delegate_pkg</span></code></strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">fangore_delegate_*</span></code> (4)</p></td>
-<td><p>List-mode coding, thorough guidance fork, red-green, rename refactor</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fangore_delegate_*</span></code> (6)</p></td>
+<td><p>List-mode coding, guidance, red-green, refactoring, MCP replay and verified reopening</p></td>
 </tr>
 </tbody>
 </table>
@@ -194,7 +194,22 @@ write <code class="docutils literal notranslate"><span class="pre">inc()</span><
 until pytest green under verify/repair.</p></li>
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">fangore_delegate_refactor</span></code></strong> — rename <code class="docutils literal notranslate"><span class="pre">Widget</span></code> → <code class="docutils literal notranslate"><span class="pre">Gadget</span></code> across package,
 tests, README; forbid leftover <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Widget</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">fangore_delegate_mcp_repair</span></code></strong> reproduces a label bug in the refactored package,
+resumes through a rebuilt MCP server and replays the answer. The story applies the
+resulting Git diff to a fresh copy of the starting tree and reruns pytest there.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">fangore_delegate_verified_noop</span></code></strong> reopens that checkpoint, reruns the label and
+Gadget checks and requires an empty change list.</p></li>
 </ol>
+<p>Coding stories can declare <code class="docutils literal notranslate"><span class="pre">environment.filesystem.seed</span></code> for the starting files.
+The host materializes this tree in both static and live runs. For project coding,
+<code class="docutils literal notranslate"><span class="pre">filesystem.contents</span></code> supplies the static Completer’s scripted edits. Stage 050
+keeps the failing test in the seed and the proposed fix in the scripted answer.</p>
+<p>Release-contract stories are grouped by the behavior they exercise. The
+<code class="docutils literal notranslate"><span class="pre">fangore_guided_coding</span></code> stages beginning at 170 cover rollback, overlapping runs,
+path and tool permissions, completion evidence, and bounded repair. The
+<code class="docutils literal notranslate"><span class="pre">fangore_gastronomic_offline_e2e</span></code> stages beginning at 090 cover matched budgets
+and trial accounting. Stage 260 also drives the production MCP host against a dirty Git checkout
+and replays a concurrent resume.</p>
 <p>Authoring: <code class="docutils literal notranslate"><span class="pre">suites/delegate_pkg/suite.yaml</span></code> + <code class="docutils literal notranslate"><span class="pre">stages/*.yaml</span></code> (+ optional
 <code class="docutils literal notranslate"><span class="pre">sources/</span></code> / <code class="docutils literal notranslate"><span class="pre">materialize-stage-files</span></code>).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Static (provisional)</span>

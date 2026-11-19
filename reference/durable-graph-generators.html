@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Durable graph generators &mdash; MechaHarness 0.17.0 documentation</title>
+  <title>Durable graph generators &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
+      <script src="../_static/documentation_options.js?v=a8455094"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -323,6 +323,39 @@ burst (oneshot or todo list with acceptance) + audited gate payload on
 <code class="docutils literal notranslate"><span class="pre">request_guidance</span></code>; the generator yields again and restarts the plan after
 answers. See <a class="reference internal" href="graph-templates/guided-coding.html"><span class="std std-doc">guided coding</span></a> and
 <a class="reference internal" href="graph-templates/instruction-todo-plan.html"><span class="std std-doc">instruction todo plan</span></a>.</p>
+</section>
+<section id="reviewing-a-coding-handoff">
+<h3>Reviewing a coding handoff<a class="headerlink" href="#reviewing-a-coding-handoff" title="Link to this heading"></a></h3>
+<p>Set <code class="docutils literal notranslate"><span class="pre">MECHA_WORKSPACE</span></code> to the source checkout. Set <code class="docutils literal notranslate"><span class="pre">MECHA_GENERATOR_STORE</span></code> to
+a durable location outside it when the source tree must stay byte-for-byte
+unchanged. The project coding MCP host copies the working tree into a private
+directory for each run. In Git repositories it includes tracked edits and
+non-ignored untracked files. Nested repositories and outbound symlinks require
+a different workspace provider. For a plain directory the host starts a private
+Git repository to compute the review diff.</p>
+<ol class="arabic simple">
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">generator_start</span></code> with <code class="docutils literal notranslate"><span class="pre">recipe_id=&quot;guided_coding&quot;</span></code>, a goal and
+<code class="docutils literal notranslate"><span class="pre">inputs.verify_runs</span></code>, for example <code class="docutils literal notranslate"><span class="pre">[{&quot;path&quot;:&quot;tests&quot;,&quot;pytest&quot;:true}]</span></code>.</p></li>
+<li><p>Pass the returned <code class="docutils literal notranslate"><span class="pre">run_id</span></code>, <code class="docutils literal notranslate"><span class="pre">sequence</span></code> (as <code class="docutils literal notranslate"><span class="pre">expected_sequence</span></code>) and
+<code class="docutils literal notranslate"><span class="pre">request_id</span></code> to <code class="docutils literal notranslate"><span class="pre">generator_resume</span></code> with <code class="docutils literal notranslate"><span class="pre">choice_id=&quot;minimal&quot;</span></code>, the same
+controller and an idempotency key. Reuse the key if the response is lost.</p></li>
+<li><p>Read <code class="docutils literal notranslate"><span class="pre">payload.result</span></code>, <code class="docutils literal notranslate"><span class="pre">checks</span></code>, <code class="docutils literal notranslate"><span class="pre">already_satisfied</span></code>, <code class="docutils literal notranslate"><span class="pre">base_revision</span></code>,
+<code class="docutils literal notranslate"><span class="pre">base_tree</span></code>, <code class="docutils literal notranslate"><span class="pre">written_files</span></code> and <code class="docutils literal notranslate"><span class="pre">patch_path</span></code>. Each check records its spec,
+pass state and failures. A run with edits and zero checks reports
+<code class="docutils literal notranslate"><span class="pre">unverified</span></code>. A green preflight reports <code class="docutils literal notranslate"><span class="pre">already_satisfied=true</span></code>.</p></li>
+<li><p>From the original working tree, run <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">apply</span> <span class="pre">--check</span> <span class="pre">/path/to/changes.patch</span></code>.
+Inspect the diff and apply it when ready. The staged patch is relative to
+the original dirty tree. The private checkout and patch stay available in
+the run’s temporary directory for review. Remove that directory after the
+handoff is finished.</p></li>
+</ol>
+<p>The MCP host runs shell and verification commands with a private home, restricted
+filesystem access and networking disabled. macOS uses <code class="docutils literal notranslate"><span class="pre">sandbox-exec</span></code>; Linux
+requires Bubblewrap (<code class="docutils literal notranslate"><span class="pre">bwrap</span></code>) with namespaces enabled. A missing process
+sandbox prevents command execution. Hosts embedding <code class="docutils literal notranslate"><span class="pre">ProjectCodingConfig</span></code>
+directly can supply a trusted workspace. Tool dispatch uses the host’s
+<code class="docutils literal notranslate"><span class="pre">AccessControl</span></code>; push and pull-request operations require both process and
+network grants.</p>
 </section>
 <section id="mcp-progress-stdio-keep-alive">
 <h3>MCP progress (stdio keep-alive)<a class="headerlink" href="#mcp-progress-stdio-keep-alive" title="Link to this heading"></a></h3>

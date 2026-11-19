@@ -44,6 +44,7 @@ MECHA_STORY_BACKEND=live MECHA_STORY_MODEL=systemone/laya \
   MECHA_JUDGE_BASE_URL=http://127.0.0.1:8009 pytest -q tests/stories -k refund_verdict
 
 # Shorthand aliases (still dual-mode stories, not separate skipif modules)
+MECHA_LIVE_OPENAI=1 MECHA_MODEL=gpt-6-luna pytest -q tests/stories -k nubble_run_cost
 MECHA_LIVE_OPENAI_COMPAT=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost
 MECHA_LIVE_QWEN=1 MECHA_BASE_URL=… pytest -q tests/stories -k nubble_run_cost
 MECHA_LIVE_JUDGE=1 pytest -q tests/stories -k 'refund_verdict or systemone_cassette'
@@ -107,21 +108,21 @@ Stories: `fangore_counter_bootstrap`, `fangore_counter_cli`, `fangore_counter_mu
 
 ### `delegate_pkg` — Delegate coding arcs on a shared Widget package
 
-Persona **fangore**; execution `sequential` (ordered); 4 stage(s).
+Persona **fangore**; execution `sequential` (ordered); 6 stage(s).
 
-Stories: `fangore_delegate_guidance_thorough`, `fangore_delegate_list_bootstrap`, `fangore_delegate_red_green`, `fangore_delegate_refactor`
+Stories: `fangore_delegate_guidance_thorough`, `fangore_delegate_list_bootstrap`, `fangore_delegate_mcp_repair`, `fangore_delegate_red_green`, `fangore_delegate_refactor`, `fangore_delegate_verified_noop`
 
 ### `fangore_access_authority` — Grants, capability envelopes, and authority gates
 
-Persona **fangore**; execution `parallel`; 14 stage(s).
+Persona **fangore**; execution `parallel`; 15 stage(s).
 
-Stories: `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_gate_allowed`, `fangore_compound_grants__grant_gate_denied`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`, `fangore_insp_authority_gate`, `fangore_insp_cross_task_isolation`, `fangore_insp_denial_equivalence`, `fangore_insp_evolution_ownership_split`, `fangore_insp_execution_token`, `fangore_insp_isolation_io`, `fangore_insp_risk_autonomy`, `fangore_insp_soft_vs_hard`, `fangore_insp_state_governance`
+Stories: `fangore_admit_authority`, `fangore_capability_envelope_narrow`, `fangore_compound_grants__grant_gate_allowed`, `fangore_compound_grants__grant_gate_denied`, `fangore_human_review_pending`, `fangore_insp_auth_epoch_resume`, `fangore_insp_authority_gate`, `fangore_insp_cross_task_isolation`, `fangore_insp_denial_equivalence`, `fangore_insp_evolution_ownership_split`, `fangore_insp_execution_token`, `fangore_insp_isolation_io`, `fangore_insp_risk_autonomy`, `fangore_insp_soft_vs_hard`, `fangore_insp_state_governance`
 
 ### `fangore_bag_inference_continuity` — Walk bag continuity, ContextSpec inference, snapshot inspect, and judge
 
-Persona **fangore**; execution `parallel`; 6 stage(s).
+Persona **fangore**; execution `parallel`; 8 stage(s).
 
-Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_discovery_hard_nodes`, `fangore_bag_judge_no_tools`, `fangore_bag_snapshot_inspect`, `fangore_bag_subgraph_bindings`
+Stories: `fangore_bag_checkpoint_persist`, `fangore_bag_context_spec_continuity`, `fangore_bag_discovery_hard_nodes`, `fangore_bag_judge_no_tools`, `fangore_bag_snapshot_inspect`, `fangore_bag_subgraph_bindings`, `fangore_inference_frame_return`, `fangore_recursive_return`
 
 ### `fangore_change_decomposition` — ChangePlan decomposition and gastronomic plan tiling
 
@@ -143,9 +144,9 @@ Stories: `fangore_change_verification_host`, `fangore_change_verification_shape`
 
 ### `fangore_context_memory` — Context layers, compaction, and derived memory
 
-Persona **fangore**; execution `parallel`; 6 stage(s).
+Persona **fangore**; execution `parallel`; 8 stage(s).
 
-Stories: `fangore_context_compiler_deficit`, `fangore_context_observation_chain`, `fangore_derived_memory`, `fangore_insp_context_compaction`, `fangore_insp_context_layers`, `fangore_insp_context_provider`
+Stories: `fangore_context_compiler_deficit`, `fangore_context_observation_chain`, `fangore_ctx_attr_evidence_survival`, `fangore_ctx_attr_structured_tool_delivery`, `fangore_derived_memory`, `fangore_insp_context_compaction`, `fangore_insp_context_layers`, `fangore_insp_context_provider`
 
 ### `fangore_contract_extraction` — ChangeContract extraction and gastronomic product tiling
 
@@ -191,9 +192,9 @@ Stories: `fangore_gastronomic_comparison_live_status`, `fangore_gastronomic_comp
 
 ### `fangore_gastronomic_offline_e2e` — Offline gastronomic late-stage e2e to DevelopmentOutcome and trial
 
-Persona **fangore**; execution `parallel`; 2 stage(s).
+Persona **fangore**; execution `parallel`; 4 stage(s).
 
-Stories: `fangore_gastronomic_offline_e2e_completed`, `fangore_gastronomic_offline_e2e_failed`
+Stories: `fangore_delegate_matched_trials`, `fangore_delegate_trial_cost`, `fangore_gastronomic_offline_e2e_completed`, `fangore_gastronomic_offline_e2e_failed`
 
 ### `fangore_graph_executor` — Graph executor, soft points, traversal, and budgets
 
@@ -203,9 +204,9 @@ Stories: `fangore_convergence_ceiling`, `fangore_graph_executor`, `fangore_graph
 
 ### `fangore_guided_coding` — Guided coding recipe and instruction todo plan
 
-Persona **fangore**; execution `parallel`; 16 stage(s).
+Persona **fangore**; execution `parallel`; 26 stage(s).
 
-Stories: `fangore_coding_ci_diagnose`, `fangore_coding_ci_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_static_checks__mypy`, `fangore_coding_static_checks__ruff`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe__helper_run_python`, `fangore_guided_coding_recipe__session`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan__conflict_list_refinement`, `fangore_instruction_todo_plan__explicit_list_mode`, `fangore_instruction_todo_plan__numbered_list`, `fangore_instruction_todo_plan__oneshot_from_goal`, `fangore_instruction_todo_plan__session`
+Stories: `fangore_coding_ci_diagnose`, `fangore_coding_ci_repair`, `fangore_coding_denied_effects`, `fangore_coding_exhausted_repair`, `fangore_coding_git_inspect`, `fangore_coding_git_open_pr`, `fangore_coding_interleaved_restore`, `fangore_coding_missing_provider`, `fangore_coding_no_check`, `fangore_coding_refused_diff`, `fangore_coding_review_patch`, `fangore_coding_run_scoped_recovery`, `fangore_coding_static_checks__mypy`, `fangore_coding_static_checks__ruff`, `fangore_coding_task_specific_repair`, `fangore_coding_verify_boundary`, `fangore_coding_write_guard`, `fangore_guided_coding_recipe__helper_run_python`, `fangore_guided_coding_recipe__session`, `fangore_insp_instruction_gotchas`, `fangore_insp_instruction_scope`, `fangore_instruction_todo_plan__conflict_list_refinement`, `fangore_instruction_todo_plan__explicit_list_mode`, `fangore_instruction_todo_plan__numbered_list`, `fangore_instruction_todo_plan__oneshot_from_goal`, `fangore_instruction_todo_plan__session`
 
 ### `fangore_host_kit` — Host kit, completer flavors, and harness families
 
@@ -281,9 +282,9 @@ Stories: `taloneth_decision_plane_shadow_compare__candidate_unavailable`, `talon
 
 ### `taloneth_harness_research` — Harness research, ablation, and promotion gates
 
-Persona **taloneth**; execution `parallel`; 26 stage(s).
+Persona **taloneth**; execution `parallel`; 28 stage(s).
 
-Stories: `taloneth_atk_research_reject`, `taloneth_cache_layout_experiment`, `taloneth_insp_component_ablation`, `taloneth_insp_correction_spec_debt`, `taloneth_insp_cross_harness_failure`, `taloneth_insp_eval_claims`, `taloneth_insp_eval_matrix`, `taloneth_insp_evaluation_outcome`, `taloneth_insp_evaluator_compose`, `taloneth_insp_experiment_dimensions`, `taloneth_insp_experiment_lineage`, `taloneth_insp_exposure_discriminative`, `taloneth_insp_gated_objective`, `taloneth_insp_harness_fingerprint`, `taloneth_insp_harness_health`, `taloneth_insp_harness_hypothesis`, `taloneth_insp_learning_export`, `taloneth_insp_objective_policy`, `taloneth_insp_recipe_evolution_loop`, `taloneth_insp_recipe_final_test_gate`, `taloneth_insp_rule_promotion`, `taloneth_insp_run_parity`, `taloneth_insp_safety_eval_recipes`, `taloneth_insp_scaffolding_retire`, `taloneth_insp_scripted_driver_replay`, `taloneth_insp_trial_reliability`
+Stories: `taloneth_atk_research_reject`, `taloneth_cache_layout_experiment`, `taloneth_insp_component_ablation`, `taloneth_insp_correction_spec_debt`, `taloneth_insp_cross_harness_failure`, `taloneth_insp_eval_claims`, `taloneth_insp_eval_matrix`, `taloneth_insp_evaluation_outcome`, `taloneth_insp_evaluator_compose`, `taloneth_insp_experiment_dimensions`, `taloneth_insp_experiment_lineage`, `taloneth_insp_exposure_discriminative`, `taloneth_insp_gated_objective`, `taloneth_insp_harness_fingerprint`, `taloneth_insp_harness_health`, `taloneth_insp_harness_hypothesis`, `taloneth_insp_learning_export`, `taloneth_insp_objective_policy`, `taloneth_insp_recipe_evolution_loop`, `taloneth_insp_recipe_final_test_gate`, `taloneth_insp_rule_promotion`, `taloneth_insp_run_parity`, `taloneth_insp_safety_eval_recipes`, `taloneth_insp_scaffolding_retire`, `taloneth_insp_scripted_driver_replay`, `taloneth_insp_trial_reliability`, `taloneth_layered_eval`, `taloneth_request_prefix`
 
 ## Nubble's stories
 
@@ -660,6 +661,24 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 
 ## Fangore's stories
 
+### `fangore_admit_authority` — Keep retrieved text and memory from becoming grants
+
+Fangore starts the CLI host with family pass_through and backend mock. His trusted ledger allows an edit of repo:acme/widget and a read of object:X. He wrote "do not email the customer" himself. A fetched page tells the agent to edit repo:evil/other and to ignore that exclusion. Memory claims the revoke of write on object:X was a mistake. A vague user line, "make it better", has no checkable predicate. He runs admit_authority. His own exclusion is admitted. The fetched repo is only a candidate. The fetched instruction and the memory grant are rejected. The vague line asks a human. The widget edit and the object read are allowed. The evil edit and the restored write are denied, because they are not on the ledger.
+
+#### Implementation
+
+review_admission in mechaharness.authority_admission, exposed as the product verb admit_authority. Resource effects are checked against the host ledger, not against claim text. Builds on CapabilityEnvelope and AuthorityGate; it does not add a signing library.
+
+#### Validation
+
+Harness user_story stage 150_fangore_admit_authority drives admit_authority. Unit cases in tests/test_authority_admission.py cover discovery text, which stays a candidate.
+
+#### Footnotes
+
+1. [Trouble resource scope (MH-REALM-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-realm-resource-scope-and-memory-safety-2026-11-03.md) — Discovered resources are not grants
+2. [Trouble memory authority (MH-EAL-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-realm-resource-scope-and-memory-safety-2026-11-03.md) — Memory prose is not an authorization token
+3. [Trouble requirement integrity (MH-REQ-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md) — Retrieved text must not enter the authoritative requirement list
+
 ### `fangore_audited_infer_accept` — Expand an audited infer-accept generate and gate spine
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`, and works with the `audited_infer_accept` recipe. He wants a generate → freeze criteria → decide → independent QA → deterministic → gate control pattern that a video production host can migrate onto, without shipping Comfy in the library. Soft modality selects text decide/QA kinds; principals for decide and QA differ. Complements `fangore_verify_repair_recipe` (oracle loop) and `fangore_guided_coding_recipe` (which tiles this spine). He walks product steps (instantiate_recipe) and verifies completion from the structured observation expects on this scenario.
@@ -1032,6 +1051,30 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 
 Harness `user_story` scenario `repair.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_repair` against `ci_seed: failing_check`. Asserts `widget.py` contains the repaired function and `.mechaharness/ci_fix.md` cites the failure. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`.
 
+### `fangore_coding_denied_effects` — Keep denied process and publish actions out of a read-only run
+
+Fangore allows repository inspection and guidance. The model asks to run a shell command and open a pull request. He inspects the shell marker and the recording forge for side effects.
+
+#### Implementation
+
+ProjectCodingConfig supplies a read-only grant set to the guided coding host. The story uses RecordingPullRequestCodingGit so a publish attempt stays local.
+
+#### Validation
+
+Submit the tool requests through the generator. Assert that neither side effect occurred.
+
+### `fangore_coding_exhausted_repair` — Stop after the repair budget is exhausted
+
+Fangore requests a fix that still fails its host check after decomposition. He expects a terminal failure with the failing check attached.
+
+#### Implementation
+
+The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+
+#### Validation
+
+Start the real generator, answer its guidance request and inspect the host result.
+
 ### `fangore_coding_git_inspect` — Inspect a feature branch against main with local git tools
 
 Fangore hands guided coding a workspace that already has a feature branch ahead of main. He wants the local agent to inspect status, commit history, and the diff against main using the machine's git, then leave a short inspect note on disk. Complements `fangore_guided_coding_recipe` and `fangore_coding_git_open_pr`.
@@ -1056,6 +1099,78 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 
 Harness `user_story` scenario `open_pr.yaml` in suite `fangore_guided_coding`. Static mode uses `coding_tool_script: git_open_pr`. Live Completer may draft title/body but still uses the mock PR publisher under `local_mock_pr`. Asserts `.mechaharness/pr_url.txt` contains the mock URL. Unit coverage in `tests/test_github_client.py` and `tests/test_coding_git.py`.
 
+### `fangore_coding_interleaved_restore` — Recover a failed edit while a second session is writing
+
+Fangore checkpoints a repository before repair. Another editor changes an existing note and adds an untracked file. Fangore rolls back the failed source edit and reads all three files.
+
+#### Implementation
+
+mechaharness.coding_workspace_checkpoint saves and restores the checkout.
+
+#### Validation
+
+Assert the restored source, newer note content and survival of the added file together.
+
+### `fangore_coding_missing_provider` — Stop a production handoff when inference is unavailable
+
+Fangore starts the project coding host with no inference endpoint or bound model. He expects a failed handoff and checks that a demo file never appeared.
+
+#### Implementation
+
+ProjectCodingConfig binds the local-work Completer used by GeneratorMcpServer.
+
+#### Validation
+
+Use an explicitly empty base URL and a temporary checkout. Inspect the public terminal kind and the actual filesystem.
+
+### `fangore_coding_no_check` — Distinguish an unchecked edit from verified completion
+
+Fangore delegates a note edit without an acceptance command. The driver must disclose that verification is missing.
+
+#### Implementation
+
+The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+
+#### Validation
+
+Start the real generator, answer its guidance request and inspect the host result.
+
+### `fangore_coding_refused_diff` — Report only files whose content actually changed
+
+Fangore attempts a guarded write, then records its refusal in a note. He compares the reported changed files with the one permitted edit.
+
+#### Implementation
+
+The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
+
+#### Validation
+
+Start the real generator, answer its guidance request and inspect the host result.
+
+### `fangore_coding_review_patch` — Review a patch against a dirty checkout after concurrent MCP replay
+
+Fangore has an uncommitted change and an untracked draft. He delegates a fix, reconnects two drivers to the same stored run and submits the same guidance answer from both. He reads the private result, checks that its patch applies against his original dirty checkout and finds his draft intact.
+
+#### Implementation
+
+GeneratorMcpServer and FileGeneratorRunStore drive RepositoryCodingLocalWork with CodingRepositoryIsolation. The story supplies a deterministic Completer.
+
+#### Validation
+
+Require a shared terminal response and one edit round, a matching HEAD, an applicable one-file patch and independent reads of both workspaces.
+
+### `fangore_coding_run_scoped_recovery` — Isolate the checkpoints of overlapping coding runs
+
+Fangore starts a repair. After its first wrong edit lands and before verification, a second driver edits a draft and creates a file. When the repair stops for guidance, Fangore needs the original source and both of the second driver’s changes.
+
+#### Implementation
+
+Two guided_coding runs use separate project coding hosts on one workspace. Their scripted tool calls interleave deterministically at the write and verify boundary.
+
+#### Validation
+
+Require the second run to complete, the first to stop, its broken edit to disappear and both verified draft edits to survive.
+
 ### `fangore_coding_static_checks__mypy` — Diagnose and repair local Ruff and Mypy failures the way CI runs them (mypy)
 
 Fangore's PR checks keep dying on Ruff import order and Mypy untyped defs before pytest even matters. He starts guided coding against a temp workspace that already has a CI-shaped failure log and a broken module, asks the local Completer to read the static-check output (or re-run the same tool), repair the file, and leave a short fix note. Host `verify_runs` re-check with `ruff: true` / `mypy: true` so the story proves the cheap Completer lane can clear the same static gates CI uses. Complements `fangore_coding_ci_diagnose` (forge log lookup) and `fangore_coding_ci_repair` (seeded runtime/pytest repair). This stage covers the `mypy` scenario.
@@ -1079,6 +1194,30 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 #### Validation
 
 Harness `user_story` scenarios `ruff.yaml` and `mypy.yaml` in suite `fangore_guided_coding`. Static mode uses the named coding_tool_scripts. Asserts the repaired module and `.mechaharness/ci_fix.md` cite Ruff I001 or Mypy no-untyped-def, and start inputs include matching `verify_runs`. Live Completer may drive the same tools with `MECHA_STORY_BACKEND=live`. Stage id `fangore_coding_static_checks__ruff` (scenario `ruff`).
+
+### `fangore_coding_task_specific_repair` — Repair a failed package check with evidence from that package
+
+Fangore delegates a counter bug. The first edit is wrong. He runs the package tests, allows one repair and inspects the instruction the host sent to the Completer for that repair.
+
+#### Implementation
+
+ProjectCodingLocalWork runs the independent package checks and composes the repair instruction. A scripted Completer supplies a wrong edit followed by a correction.
+
+#### Validation
+
+Require a real repair brief, a completed run and passing tests. The brief must identify the check without teaching an unrelated calculator API.
+
+### `fangore_coding_verify_boundary` — Reject verification evidence outside the workspace
+
+Fangore submits two checks against a sibling canary, one through a parent path and one through a symlink. Neither check may complete his coding task.
+
+#### Implementation
+
+ProjectCodingConfig and GeneratorMcpServer drive guided_coding host verification.
+
+#### Validation
+
+Submit each path through the public driver and compare terminal results. The canary exists only in the temporary fixture.
 
 ### `fangore_coding_write_guard` — Refuse catastrophic gutting of an existing workspace module
 
@@ -1292,6 +1431,42 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 
 Harness `user_story` scenario `persist.yaml` inside sequential suite `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.
 
+### `fangore_ctx_attr_evidence_survival` — Count produced vs transferred evidence without false transfers
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. Two workers produce identifiable findings; only one is delivered and transferred downstream. The survival report must distinguish produced, delivered, retained, transferred, and persisted counts, refuse to mark a never-produced id as transferred, and expose a narrow transfer yield. Extends context observation telemetry for Trouble MH-CTX-ATTR-02 (S4 transfer boundary).
+
+#### Implementation
+
+`context_evidence_survival` in `mechaharness.context_surface` aggregates unique observation ids per boundary and flags false transfers.
+Covers: MH-CTX-ATTR-02 / TR-20261029-CONTEXT-ATTRITION S4.
+
+#### Validation
+
+Harness `user_story` drives `context_evidence_survival` with deterministic id lists; hard expects on counts, `false_transfer=false`, and transfer yield. Unit coverage in `tests/test_context_attrition_surface.py`.
+
+#### Footnotes
+
+1. [Trouble TR-20261029-CONTEXT-ATTRITION](https://rl337.org/trouble/posts/2115618251023536321.html) — Evidence survival across graph boundaries
+2. [Context Is a Pipeline, Not a Window (arXiv:2610.36114)](https://arxiv.org/abs/2610.36114) — Produced vs delivered vs transferred metrics
+
+### `fangore_ctx_attr_structured_tool_delivery` — Disclose structured tool truncation instead of silent JSON slices
+
+Fangore starts the CLI host with family `pass_through` and backend `mock`. A large structured tool result carries an early noise array and a late required `culprit` finding. Under a tight character budget the model-facing delivery must remain honest — either valid JSON that still contains required fields, or an explicit deficit naming omitted fields — never a prefix-sliced JSON fragment treated as success. Extends `fangore_context_compiler_deficit` / `fangore_insp_context_compaction` for Trouble MH-CTX-ATTR-01 (S1 produced→delivered).
+
+#### Implementation
+
+`context_structured_tool_delivery` in `mechaharness.context_surface` applies distill-style character budgets then fail-closes invalid structured delivery. Authoritative produced payload stays addressable via `observation_id`.
+Covers: MH-CTX-ATTR-01 / TR-20261029-CONTEXT-ATTRITION S1.
+
+#### Validation
+
+Harness `user_story` drives `context_structured_tool_delivery` with a synthetic oversized JSON tool payload; hard expects on deficit disclosure and `silent_truncate=false`. Unit coverage in `tests/test_context_attrition_surface.py`.
+
+#### Footnotes
+
+1. [Trouble TR-20261029-CONTEXT-ATTRITION](https://rl337.org/trouble/posts/2115618251023536321.html) — Context attrition across inference boundaries
+2. [Context Is a Pipeline, Not a Window (arXiv:2610.36114)](https://arxiv.org/abs/2610.36114) — Structured tool-result truncation evidence
+
 ### `fangore_decision_plane_model_policy` — Bind a decision model flavor without baking size into the recipe
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`. He soft-binds `decision_model` on the `decision_plane` recipe without baking a parameter count into the template, runs `run_recipe`, and verifies ask_batch carries the flavor ref. [^rc-dp-size]
@@ -1457,6 +1632,30 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 
 Harness `user_story` scenario `list_bootstrap.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.
 
+### `fangore_delegate_matched_trials` — Compare repeated package trials only under matching budgets
+
+Fangore records a successful repair and a regression for each recipe. He compares the batch at equal budgets, then increases only the second arm’s token ceiling. The summary must reject the second comparison.
+
+#### Implementation
+
+assemble_gastronomic_trial and summarize_gastronomic_comparison aggregate host trial records.
+
+#### Validation
+
+Use the same model, suite and outcomes in both batches. Require two trials, a half-success rate, correct comparability and no automatic winner. Fixture records exercise offline accounting.
+
+### `fangore_delegate_mcp_repair` — Resume a package bug through MCP and replay the answer
+
+Fangore receives an existing Gadget checkout and an issue about singular item labels. He reproduces the failure, restarts the MCP driver at guidance, submits an answer, and repeats that same answer after the edit. He reruns every package test and reads the editor’s draft.
+
+#### Implementation
+
+GeneratorMcpServer, FileGeneratorRunStore and ProjectCodingLocalWork drive the handoff with a file-backed store. Static uses scripted writes. Live uses the configured Completer.
+
+#### Validation
+
+Require red before the handoff and green after applying the actual diff to a fresh copy of the starting tree. Compare response and file versions across replay, and preserve the editor’s draft.
+
 ### `fangore_delegate_red_green` — Add a failing test then implement until pytest is green
 
 Fangore asks the delegate to fix from a red test: pin `double()` in pytest first, then implement until the suite is green under verify_repair — the classic expensive coding handoff.
@@ -1480,6 +1679,30 @@ Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_
 #### Validation
 
 Harness `user_story` scenario `refactor.yaml` inside sequential suite `delegate_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`. Do not treat static/cassette green as proof until live Completer on the suite host has passed.
+
+### `fangore_delegate_trial_cost` — Count verified edits separately from the checks that passed
+
+Fangore records a package repair with three checks and one changed file. He reopens the package, finds the second stage already satisfied, and audits the run’s edits and inference cost.
+
+#### Implementation
+
+trial_from_suite_run reads a manifest and timing stream and returns the host comparison record.
+
+#### Validation
+
+Read the recorded fields from a file-backed fixture. Require one verified edit, one repair and the measured model calls, tool calls and tokens.
+
+### `fangore_delegate_verified_noop` — Reopen the verified package without a second edit
+
+Fangore starts a fresh session against the preceding checkpoint. He asks for the same label fix, runs the full package checks and expects an already-satisfied handoff with an empty change list.
+
+#### Implementation
+
+ProjectCodingLocalWork runs verify_runs on the shared workspace before invoking inference.
+
+#### Validation
+
+Stage 060 has no seed or scripted patch. It can only pass after the repaired package survives the preceding checkpoint.
 
 ### `fangore_derived_memory` — Rebuild derived memory without letting rank invent authority
 
@@ -2255,6 +2478,18 @@ Harness `user_story` walks `human_review_gate` with `expect: human_review` + inj
 
 [^insp-dots-02-review]: [OpenAI Dots map (MH-DOTS-02 approval pending)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Approval interrupt path
 [^insp-dots-04-pending]: [OpenAI Dots map (MH-DOTS-04 ask-human)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — ASK_HUMAN path of independent review
+
+### `fangore_inference_frame_return` — Return an inferred decision through two callers
+
+Fangore sends a project verification result through a planning child to a model in a grandchild. The middle frame publishes the decision to the root. Fangore checks that the decision survived both returns while a private root note stayed intact.
+
+#### Implementation
+
+CliInferRunner writes a parsed model response to the grandchild WalkBag. GraphExecutor projects declared outputs at both returns.
+
+#### Validation
+
+The returned verdict must say pass. Static inference uses a fixture; live inference calls the configured reason model.
 
 ### `fangore_insp_alert_escalation_rules` — Escalate alerts by deterministic once, repeated, and persistent rules
 
@@ -3769,6 +4004,18 @@ Harness `user_story` scenario `recipe_namespace_tile.yaml`: environment + graph 
 [^rc-namespace]: [Recipes requirements (RC-01/04/05/08)](https://github.com/rl337/mechaharness/blob/requirements/recipes-decision-plane/docs/requirements/recipes-and-decision-plane.md) — Namespaced multi-instance tiling
 [^insp-sr-02-tile]: [Self-revising recipe map (MH-SR-02 tile)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/self-revising-recipe-requirements-map.md) — Recipe tiling; registry-only constraint is fangore_insp_registry_only_compose
 
+### `fangore_recursive_return` — Resume a project from its committed grandchild result
+
+Fangore opens a project graph. Each planning step discovers whether its slice needs a smaller child. The worker stops immediately after the grandchild commits its proof. Fangore reopens the SQLite checkpoints, continues the original project, and checks the acceptance result produced by each returning caller.
+
+#### Implementation
+
+GraphExecutor drives root and nested frames through the same call loop.
+
+#### Validation
+
+Three levels enter in order. One leaf runs. Each parent accepts once and private child edits stay scoped.
+
 ### `fangore_refund_verdict` — Keep billing authority in product rules, not the model
 
 Fangore starts the CLI host with family `pass_through` and backend `mock`. A customer was charged twice. Only the billing team may own the ticket. The model may suggest a team, but product policy allows only when the route signal is billing — and a high quality score alone must not override missing completion evidence. He walks product steps (judge_route) and verifies completion from the structured observation expects on this scenario. Related: `fangore_decision_surface_reject`.
@@ -4627,6 +4874,22 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 [^arxiv-taubench]: [τ-bench](https://arxiv.org/abs/2406.12045) — Reliability and end-state verification
 [^arxiv-humaneval]: [Evaluating LLMs Trained on Code](https://arxiv.org/abs/2107.03374) — pass@k definition
 
+### `taloneth_layered_eval` — Score the task and the harness as separate results
+
+Taloneth starts the CLI host with family pass_through and backend mock. She replays four frozen runs of the same "write the file" task and asks for a layered score. In the lucky run the tool API swallowed an error, but a fallback still wrote the correct file: the task passes and the harness fails, so the combined result is not clean. In the wrong run the tools and policy behaved, but the file contents are wrong: the task fails and the harness passes, and that is not called an infrastructure failure. In the blind run there is no runtime audit, so the harness stays unknown instead of passing. In the both-fail run she has no trace that proves the harness defect caused the bad file, so the link is only a hypothesis.
+
+#### Implementation
+
+score_layers in mechaharness.layered_verdict, exposed as the product verb layered_eval. Composes with eval evidence and trace reconciliation; it does not add a new evaluator.
+
+#### Validation
+
+Harness user_story stage 270_taloneth_layered_eval drives layered_eval. Unit cases in tests/test_layered_verdict.py cover an observed causal trace and an infrastructure failure that leaves both layers unscored.
+
+#### Footnotes
+
+1. [Trouble trace and requirement integrity (MH-TRACE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md) — Separate harness fidelity from agent task success
+
 ### `taloneth_offline_decision_export` — Export decision data without leaking future outcomes
 
 Taloneth starts the CLI host with family `pass_through` and backend `mock`. Offline study needs decision-time features without future outcome leakage. Missing labels stay missing.
@@ -4658,6 +4921,22 @@ Harness `user_story` drives product verb(s) with environment `pass_through`/`moc
 #### Footnotes
 
 [^insp-dots-09-replay]: [OpenAI Dots map (MH-DOTS-09 policy replay)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/openai-dots-agent-safety-requirements-map.md) — Policy replay for review audit
+
+### `taloneth_request_prefix` — Name why a request prefix changed, without keeping the prompt
+
+Taloneth starts the CLI host with family pass_through and backend mock. She compares four pairs of otherwise identical inference requests. Shuffling the tool list is an avoidable tool_reserialize miss, and sorting the tools makes the canonical prefix match. Putting a clock reading into the stable policy block is volatile_system. Bumping the policy version is a legitimate policy_change and must not be hidden to save cache. When two requests match but the provider sent no cache counters, the cause stays unknown. None of the reports store the raw prompt.
+
+#### Implementation
+
+prefix_snapshot and classify_prefix_change in mechaharness.request_prefix, exposed as the product verb request_prefix_compare. Extends the existing CTX-09 cache layout; it does not replace compile_cache_aware_layout.
+
+#### Validation
+
+Harness user_story stage 280_taloneth_request_prefix drives request_prefix_compare. Unit cases in tests/test_request_prefix.py cover a dynamic-tail-only change, which is legitimate.
+
+#### Footnotes
+
+1. [Trouble prefix-cache regression (MH-CACHE-01)](https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-prefixwise-cache-regression-2026-11-10.md) — Attribute avoidable prefix misses without storing prompt text
 
 ### `taloneth_shadow_decision_backends` — Compare decision backends without inventing missing results
 

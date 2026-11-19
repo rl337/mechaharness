@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mechaharness.di &mdash; MechaHarness 0.17.0 documentation</title>
+  <title>mechaharness.di &mdash; MechaHarness 0.17.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=7bac4596" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=0c3dd48d"></script>
+      <script src="../../_static/documentation_options.js?v=a8455094"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -129,6 +129,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -329,14 +330,23 @@
 <div class="viewcode-block" id="apply_backend_defaults">
 <a class="viewcode-back" href="../../api/di.html#mechaharness.di.apply_backend_defaults">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">apply_backend_defaults</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">Settings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Settings</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Fill ``base_url`` / ``api_key`` from the named backend when unset."""</span>
+<span class="w">    </span><span class="sd">"""Fill ``base_url`` / ``api_key`` from the named backend when unset.</span>
+
+<span class="sd">    When ``api_key`` is still unset after backend defaults, fall back to the</span>
+<span class="sd">    conventional ``OPENAI_API_KEY`` process env (not a Settings field).</span>
+<span class="sd">    """</span>
     <span class="n">defaults</span> <span class="o">=</span> <span class="n">_INFERENCE_DEFAULTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">inference_backend</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="p">{})</span>
     <span class="n">updates</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">base_url</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">"base_url"</span> <span class="ow">in</span> <span class="n">defaults</span><span class="p">:</span>
         <span class="n">updates</span><span class="p">[</span><span class="s2">"base_url"</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">"base_url"</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">"api_key"</span> <span class="ow">in</span> <span class="n">defaults</span><span class="p">:</span>
         <span class="n">updates</span><span class="p">[</span><span class="s2">"api_key"</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">"api_key"</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="n">updates</span><span class="p">)</span> <span class="k">if</span> <span class="n">updates</span> <span class="k">else</span> <span class="n">settings</span></div>
+    <span class="n">resolved</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="n">updates</span><span class="p">)</span> <span class="k">if</span> <span class="n">updates</span> <span class="k">else</span> <span class="n">settings</span>
+    <span class="k">if</span> <span class="n">resolved</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">openai_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">openai_key</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">resolved</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="p">{</span><span class="s2">"api_key"</span><span class="p">:</span> <span class="n">openai_key</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">resolved</span></div>
 
 
 

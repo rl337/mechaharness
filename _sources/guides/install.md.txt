@@ -76,9 +76,19 @@ mechaharness run "What is 2+2?" \
 ### OpenAI
 
 ```bash
-export MECHA_API_KEY=sk-...
-mechaharness run "Hello" --backend openai --model gpt-4o-mini
+export MECHA_API_KEY=sk-...   # or OPENAI_API_KEY
+mechaharness run "Hello" --backend openai --model gpt-6-luna
 ```
+
+Cheap live story filter (cloud Luna; explicit opt-in only):
+
+```bash
+MECHA_LIVE_OPENAI=1 MECHA_MODEL=gpt-6-luna \
+  pytest -q tests/stories -k nubble_run_cost
+```
+
+Default / static pytest never calls the cloud API (cassettes only). See
+[Local OpenAI-compat](./openai-local.md) for the cloud OpenAI section.
 
 ### HTTP API
 
