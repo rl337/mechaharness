@@ -1,5 +1,9 @@
 # Trouble inspiration: cache-miss attribution and request-shape regression acceptance
 
+**Implementation scope:** the accepted walk exercises a standalone report helper.
+Runtime integration and source-evidence verification remain open; see
+[Trouble release status](./trouble-release-status.md).
+
 **Research date:** 2026-11-10. **Status:** non-normative engineering research. Accepted walk: `taloneth_request_prefix` (MH-CACHE-01), extending CTX-09. **Capability:** TR-20261110-PREFIX-CACHE. **Research domains:** models/inference/efficiency; context/memory/knowledge; verification/evaluation. **Inspiration type:** test/evaluation and implementation improvement. **Owner:** MechaHarness for generic request-shape and evaluation contracts; concrete vLLM/engine instrumentation belongs to the selected inference-provider host, not an invented SparkStation deployment inside this library.
 
 ## Source dossier: motivating failure and concrete mechanism

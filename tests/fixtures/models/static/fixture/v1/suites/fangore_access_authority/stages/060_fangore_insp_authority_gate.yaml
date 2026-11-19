@@ -9,8 +9,9 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
 implementation: '`AuthorityGate.evaluate` composes AccessControl, CapabilityEnvelope, ConsequencePolicy,
   trust, verdict, and approval. Product verb `authority_gate`. Hosts inject the gate via Config when wiring
   it onto graph soft-points later.'
-validation: Harness `user_story` scenario `authority_gate_evaluate.yaml` drives `authority_gate`; expects
-  the decisions matrix.
+validation: >
+  Harness `user_story` stage `060_fangore_insp_authority_gate.yaml` drives `authority_gate`;
+  expects the decisions matrix.
 footnotes:
 - id: insp-pa-02
   label: Personal agent reliability (MH-PA-02)

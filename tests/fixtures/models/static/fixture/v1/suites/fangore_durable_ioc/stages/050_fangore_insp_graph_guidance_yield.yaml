@@ -11,7 +11,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
 implementation: '`GuidanceRequest` / `GuidanceResponse` / `GraphYield` with kind `advice_requested`; `DurableGraphGenerator.resume`
   validates request_id, choice schema, and rejects `requested_authority=final_approval` so ordinary advice
   cannot unlock approval-only mutations.'
-validation: 'Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.'
+validation: >
+  Harness `user_story` stage `050_fangore_insp_graph_guidance_yield.yaml`: environment + graph +
+  steps + complete expects.
 footnotes:
 - id: insp-ioc-02
   label: Durable graph generators (R-IOC-GUIDANCE)

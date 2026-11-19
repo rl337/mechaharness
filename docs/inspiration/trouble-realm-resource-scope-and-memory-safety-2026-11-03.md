@@ -1,5 +1,9 @@
 # Trouble inspiration: task-linked resource authority and memory-safety verification
 
+**Implementation scope:** the accepted walk exercises a standalone report helper.
+Runtime integration and source-evidence verification remain open; see
+[Trouble release status](./trouble-release-status.md).
+
 Status: **source-backed candidate extensions**. Accepted walk: `fangore_admit_authority` (MH-REALM-01 resource binding and MH-EAL-01 memory is not a grant). Not a measured vulnerability. Reviewed: 2026-11-03. Owner: MechaHarness, generic resource authorization, graph/tool boundaries, independent verification. Capability IDs: **TR-20261103-REALM-ASSETS** and **TR-20261103-EAL-MEMORY**.
 
 ## Source map and evidence

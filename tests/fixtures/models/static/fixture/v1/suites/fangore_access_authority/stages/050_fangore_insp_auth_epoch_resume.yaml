@@ -7,8 +7,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   Tracks MH-DOTS-06[^insp-dots-06].
 implementation: '`GraphExecutor.run(resume=True, envelope=...)` returns `failed` with `authorization_epoch_mismatch`.
   Product verb `auth_epoch_resume`; story `environment.authorization_epoch` can stamp Config envelopes.'
-validation: Harness `user_story` scenario `auth_epoch_resume_refuse.yaml` drives `auth_epoch_resume`;
-  expects resume_status failed and error_contains mismatch.
+validation: >
+  Harness `user_story` stage `050_fangore_insp_auth_epoch_resume.yaml` drives
+  `auth_epoch_resume`; expects resume_status failed and error_contains mismatch.
 footnotes:
 - id: insp-dots-06
   label: OpenAI Dots agent safety (MH-DOTS-06)

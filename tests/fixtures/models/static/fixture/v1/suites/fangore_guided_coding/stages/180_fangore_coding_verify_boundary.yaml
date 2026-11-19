@@ -2,8 +2,10 @@ id: fangore_coding_verify_boundary
 suite: fangore_guided_coding
 persona: fangore
 title: Reject verification evidence outside the workspace
-narrative: Fangore submits two checks against a sibling canary, one through a parent path and one through
-  a symlink. Neither check may complete his coding task.
+narrative: >
+  Fangore starts the CLI host with family pass_through and backend mock in a temporary
+  workspace. He submits two checks against a sibling canary, one through a parent path and one
+  through a symlink. Neither check may complete his coding task.
 implementation: ProjectCodingConfig and GeneratorMcpServer drive guided_coding host verification.
 validation: Submit each path through the public driver and compare terminal results. The canary exists
   only in the temporary fixture.

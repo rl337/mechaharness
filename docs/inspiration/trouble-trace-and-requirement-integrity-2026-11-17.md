@@ -1,5 +1,9 @@
 # Trouble inspiration: evidence-layered harness evaluation and requirement-integrity handoffs
 
+**Implementation scope:** the accepted walk exercises a standalone report helper.
+Runtime integration and source-evidence verification remain open; see
+[Trouble release status](./trouble-release-status.md).
+
 > Research and **candidate** acceptance extensions only. This document is not a claim that source benchmarks have been reproduced.
 >
 > Accepted walks: `taloneth_layered_eval` (MH-TRACE-01) and the requirement-admission half of `fangore_admit_authority` (MH-REQ-01).
@@ -73,6 +77,6 @@ This is **partial specification / test coverage**, not an allegation that MechaH
 
 ## Adoption / boundaries
 
-Stories are **candidate requirements**. Existing canonical MechaHarness user stories are YAML suite stages under tests/fixtures/models and generated docs/guides/user-stories.md. An implementation agent should inspect actual fixture IDs, refine one relevant Fangore and one Taloneth acceptance stage, run the story guide sync commands and offline suite, then separately evaluate live adapters; do not hand-edit the generated guide. This PR does not add untested YAML stages or alter production code.
+Stories are **candidate requirements**. Existing canonical MechaHarness user stories are YAML suite stages under tests/fixtures/models and generated docs/guides/user-stories.md. An implementation agent should inspect actual fixture IDs, refine one relevant Fangore and one Taloneth acceptance stage, run the story guide sync commands and offline suite, then separately evaluate live adapters; do not hand-edit the generated guide. The original research note proposed these stages; the accepted offline walks and their remaining runtime gaps are listed in the release-status page.
 
 No external benchmarks, Docker tasks, signed-manifest attacks or media generators were run. Reassess repo state and upstream releases before adopting.

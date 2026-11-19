@@ -2,13 +2,19 @@ id: fangore_counter_persist
 suite: counter_pkg
 persona: fangore
 title: Persist Counter state to a JSON file
-narrative: Fangore asks for durable state on disk so later CLI work can reload counts — still under the
-  same package and pytest gate.
-implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
-  `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`.
-  Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.'
-validation: 'Harness `user_story` scenario `persist.yaml` inside sequential suite `counter_pkg` (ordered).
-  Live eligibility: `environment.local_work: project_coding`.'
+narrative: >
+  Fangore opens the shared counter package workspace in the CLI host with pass_through and mock
+  for static acceptance. He resumes guided_coding to save and reload counts on disk. He runs the
+  package tests and reads the persisted-state implementation so the next CLI stage can reuse the
+  same package contract.
+implementation: >
+  Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
+  `environment.filesystem.type: suite`, and multi-file `coding_writes` offline stubs. Live mode
+  binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and
+  `text_contains` / `text_forbids` with repair.
+validation: >
+  Harness `user_story` stage `030_fangore_counter_persist.yaml` inside sequential suite
+  `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.
 footnotes: []
 kind: user_story
 environment:

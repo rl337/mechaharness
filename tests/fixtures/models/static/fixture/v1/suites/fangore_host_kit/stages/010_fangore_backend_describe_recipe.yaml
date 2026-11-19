@@ -12,8 +12,9 @@ implementation: 'Agentic Recipe catalog id `backend_describe` (`BackendDescribeT
   describe node. `BackendDescribeRunner` calls `InferenceStrategy.describe()` via DI. `CliInstrumentor`
   verb `run_recipe` calls `recipe_runner.run_backend_describe_recipe`. CLI `describe` / `recipes run backend_describe`
   share this path. Soft points: backend (required), model, base_url, api_key, describe_kind.'
-validation: 'Harness `user_story` scenario `describe_mock.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `010_fangore_backend_describe_recipe.yaml`: environment + graph +
+  steps + complete expects.
 footnotes: []
 kind: user_story
 environment:

@@ -1,8 +1,12 @@
 id: taloneth_systemone_cassette
 persona: taloneth
 title: Pin System One adapter behavior to a versioned cassette
-narrative: A new Laya build changes confidence fields. A versioned cassette must fail the story before
-  silent adapter drift ships.
+narrative: >
+  Taloneth starts the CLI host with family pass_through and the versioned SystemOne Laya
+  response cassette. She submits the billing request through the judge adapter and inspects the
+  normalized verdict and confidence fields. The offline walk checks adapter decoding against the
+  recorded response; a real provider schema change must first be recorded and reviewed as a new
+  cassette version.
 implementation: '`SystemOneJudgeProvider` maps System One HTTP JSON onto library judge types and provenance.
   Connection/provider binding uses Config hooks (`get_judge_connection`, `get_judge_provider`). `CliInstrumentor`
   verb `judge_route` runs the cassette through the real provider.

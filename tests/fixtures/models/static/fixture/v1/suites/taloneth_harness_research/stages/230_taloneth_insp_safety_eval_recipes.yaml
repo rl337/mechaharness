@@ -8,8 +8,9 @@ narrative: 'Taloneth starts the CLI host with family `pass_through` and backend 
   Soft points are not evolvable. Related: `taloneth_insp_eval_matrix`. [^insp-dots-08]'
 implementation: Agentic Recipe `safety_eval` via `SafetyEvalTemplate` / `safety_eval_runner` and product
   verb `run_recipe` (`SafetyEvalRecipeAdapter`).
-validation: Harness `user_story` scenario `safety_eval_recipe.yaml` drives `run_recipe`; expects shape
-  keys plus outcome/severity.
+validation: >
+  Harness `user_story` stage `230_taloneth_insp_safety_eval_recipes.yaml` drives `run_recipe`;
+  expects shape keys plus outcome/severity.
 footnotes:
 - id: insp-dots-08
   label: OpenAI Dots agent safety (MH-DOTS-08)

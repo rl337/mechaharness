@@ -8,8 +8,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   invokes a model. [^rvania-decision] [^rc-dp-proj]
 implementation: Agentic Recipe `decision_plane` via `DecisionPlaneTemplate` and `ProjectStateRunner` /
   `project_decision_state`. Product CLI verb `run_recipe` with `DecisionPlaneRecipeAdapter`.
-validation: Harness `user_story` scenario `project_state.yaml` drives `run_recipe` with bind path; hard
-  expects on projection/facts observation keys.
+validation: >
+  Harness `user_story` stage `060_fangore_decision_plane_projection.yaml` drives `run_recipe`
+  with bind path; hard expects on projection/facts observation keys.
 footnotes:
 - id: rvania-decision
   label: Move Routine Decisions Off Your Big Model (rvaniaaaa)

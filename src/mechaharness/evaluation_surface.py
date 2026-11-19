@@ -286,7 +286,7 @@ def run_efficiency_scorecard_build(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_layered_eval(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Flatten paired task/harness scores for one story walk."""
+    """Report supplied verdicts; causal support remains the caller's assertion."""
     report: dict[str, Any] = {}
     for case in inputs.get("cases") or []:
         name = str(case["name"])

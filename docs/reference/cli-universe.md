@@ -217,3 +217,22 @@ thin leaf verb for already-scored candidate lists.
 
 ``tool_lifecycle`` runs a tool-loop or tiny graph with Config-bound
 ``LifecycleExtension`` instances (no ``case:`` bag).
+
+## Experimental report verbs
+
+These verbs accept caller-supplied observations and produce offline reports:
+
+- `admit_authority`: `decisions` classifies supplied claim labels; `effects`
+  reports exact resource/operation membership in the supplied ledger. `allow`
+  does not dispatch or authorize an effect. Hosts authenticate sources and
+  enforce actual grants independently.
+- `layered_eval`: `<name>_task` and `<name>_harness` repeat the supplied verdicts
+  with missing/infrastructure handling. `<name>_attribution: observed` means
+  the caller asserted trace support; this verb does not read causal evidence.
+- `request_prefix_compare`: `<name>_cause: match` means selected hashed fields
+  matched and the caller reported metric availability. It does not establish
+  a provider cache hit. Changed tool names/schemas stay `unknown`.
+
+See [API contracts](../api/research_helpers.rst) for executable examples and
+[Trouble release status](../inspiration/trouble-release-status.md) for missing
+runtime integrations.

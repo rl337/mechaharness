@@ -8,8 +8,9 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
   remain `nubble_insp_environment_linkage`. [^rc-env-repair]'
 implementation: Agentic Recipe `environment_repair` via `EnvironmentRepairTemplate` / `environment_repair_runner`
   and product verb `run_recipe` (`EnvironmentRepairRecipeAdapter`).
-validation: Harness `user_story` scenario `environment_repair_recipe.yaml` drives `run_recipe`; expects
-  environment_ok / repair_attempts plus shape keys.
+validation: >
+  Harness `user_story` stage `040_fangore_environment_repair_recipe.yaml` drives `run_recipe`;
+  expects environment_ok / repair_attempts plus shape keys.
 footnotes:
 - id: rc-env-repair
   label: Recipes requirements (first-wave catalog)

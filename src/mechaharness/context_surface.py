@@ -318,6 +318,7 @@ def run_instruction_scope_metadata(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_admit_authority(inputs: dict[str, Any]) -> dict[str, Any]:
+    """Report supplied labels/ledger membership; never authorize effect dispatch."""
     return review_admission(
         ledger=list(inputs.get("ledger") or []),
         claims=list(inputs.get("claims") or []),
@@ -326,7 +327,7 @@ def run_admit_authority(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_request_prefix_compare(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Compare named request pairs and flatten the miss classification."""
+    """Compare selected request fields offline; no provider cache observation."""
     report: dict[str, Any] = {"raw_prompt_stored": False}
     for pair in inputs.get("pairs") or []:
         name = str(pair["name"])

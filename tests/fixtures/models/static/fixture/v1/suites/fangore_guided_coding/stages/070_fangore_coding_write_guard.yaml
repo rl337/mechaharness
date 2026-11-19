@@ -11,9 +11,11 @@ implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.loc
   applies `CodingWriteGuard` (min retain ratio, Python parse, retain some top-level defs). Static `coding_tool_script:
   write_gutting_attempt` issues the bad write then notes the refusal. `verify_runs` may also use `min_bytes`
   / `python_parses`.'
-validation: Harness `user_story` scenario `refuse_gutting.yaml` in suite `fangore_guided_coding`. Asserts
-  the seeded module still contains its public defs and `.mechaharness/write_guard_note.md` mentions refused/gutting.
-  Unit coverage in `tests/test_coding_write_guard.py`.
+validation: >
+  Harness `user_story` stage `070_fangore_coding_write_guard.yaml` in suite
+  `fangore_guided_coding`. Asserts the seeded module still contains its public defs and
+  `.mechaharness/write_guard_note.md` mentions refused/gutting. Unit coverage in
+  `tests/test_coding_write_guard.py`.
 footnotes: []
 kind: user_story
 environment:

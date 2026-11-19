@@ -9,7 +9,8 @@ another driver) answers short guidance; a local `guided_coding` /
 
 **Live Completer is the gate.** Static `coding_writes` / cassette greens are
 provisional mirrors until the same suite passes under
-`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`.
+`MECHA_STORY_BACKEND=live` + `MECHA_BASE_URL`, or `MECHA_LIVE_OPENAI=1`
+with a cloud key and no local base URL (see [OpenAI setup](./openai-local.md)).
 
 ## Suite map (minimize suites)
 

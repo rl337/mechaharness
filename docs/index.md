@@ -136,3 +136,8 @@ Related: [Dependency injection](./guides/dependency-injection.md),
 7. **DI** — `MechaHarnessConfig` binds interfaces; see [Dependency injection](./guides/dependency-injection.md)
 
 Normalized types in `mechaharness.core.types` are the portable contract for future language bindings.
+
+Trouble implementation scope and open acceptance gaps:
+[Trouble release status](./inspiration/trouble-release-status.md).
+
+Maintainers: [prepare a release](./guides/release-preparation.md).

@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Cloud OpenAI testing with `OPENAI_API_KEY` fallback and default `gpt-6-luna`.
+  Chat Completions maps completion-token limits and keeps internal graph metadata
+  out of provider requests. Static stories use memory responses; cloud tests
+  require explicit live opt-in.
+- Nested graph calls preserve frame return metadata so parents can resume from
+  committed child results. Recursive and inference-frame stories cover returns.
+- Experimental offline reports for claim/ledger review, paired task/harness
+  verdicts, and selected request-prefix fields, with attributed Fangore and
+  Taloneth walks. These helpers consume caller-supplied evidence; source
+  verification, effect dispatch, and provider cache measurement remain host work.
+- Release documentation now includes provider API reference, executable report
+  examples, and an explicit list of remaining Trouble acceptance gaps.
+
+
 - **Verify failure escalate to decompose:** after ``verify_runs`` repair is
   exhausted (or a coding work item fails), ``ProjectCodingLocalWork`` builds
   one consolidated restore-and-finish brief
@@ -252,8 +266,8 @@ live model verification against reason + judge hosts, and pyiv ≥ 1.1.1 (#32,
 
 - **Customer-facing agent skills** under `agent-skills/` (`use-mechaharness`,
   `mechaharness-observability`, `mechaharness.mdc`) plus
-  [Agent skills for your project](docs/guides/agent-skills.md) with GitHub raw
-  links on `main`, and [Host integration requirements](docs/requirements/host-integration.md)
+  [Agent skills for your project](https://rl337.org/mechaharness/guides/agent-skills.html) with GitHub raw
+  links on `main`, and [Host integration requirements](https://rl337.org/mechaharness/requirements/host-integration.html)
   (HOST-01..07). Maintainer requirement: keep them in sync when public host
   APIs / correlators / promote guidance change (see `project-docs` skill).
   Docs index has a **Downstream consumers** section.

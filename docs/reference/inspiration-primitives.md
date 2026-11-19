@@ -3,7 +3,7 @@
 Blessed imports for surfaces promoted from inspiration maps (PA / DOTS / SR /
 WalkingLabs / Jev / FineEnvs). Prefer `mechaharness.host_apis` when present;
 otherwise import the leaf listed below. Inspiration maps under
-[`docs/inspiration/`](../inspiration/) stay proposals until product requirements
+[inspiration index](../index.md) stay proposals until product requirements
 absorb them.
 
 | Leaf / surface | Map IDs | DI Config hook? | Import |

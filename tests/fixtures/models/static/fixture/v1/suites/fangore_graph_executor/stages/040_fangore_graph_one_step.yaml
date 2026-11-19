@@ -7,7 +7,8 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   SG-04/09[^sg-step].
 implementation: '`RunControl(mode=one_step)` on `GraphExecutor.run`; CLI `graph_walk` actions `start`
   / `step` / `continue`.'
-validation: Harness `user_story` scenario `one_step.yaml`.
+validation: >
+  Harness `user_story` stage `040_fangore_graph_one_step.yaml`.
 footnotes:
 - id: sg-step
   label: Stepped graph execution requirements

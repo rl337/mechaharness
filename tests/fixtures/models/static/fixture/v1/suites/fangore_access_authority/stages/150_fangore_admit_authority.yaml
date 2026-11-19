@@ -14,10 +14,11 @@ narrative: >
   The widget edit and the object read are allowed. The evil edit and the
   restored write are denied, because they are not on the ledger.
 implementation: >
-  review_admission in mechaharness.authority_admission, exposed as the product
-  verb admit_authority. Resource effects are checked against the host ledger,
-  not against claim text. Builds on CapabilityEnvelope and AuthorityGate; it
-  does not add a signing library.
+  review_admission in mechaharness.authority_admission, exposed as admit_authority, compares
+  caller-supplied claim labels and proposed resource/operation pairs against a supplied ledger.
+  It is a standalone report helper: the caller authenticates source labels, verifies quotes and
+  predicates, and enforces actual effects with AuthorityGate. This walk does not exercise effect
+  dispatch or source verification.
 validation: >
   Harness user_story stage 150_fangore_admit_authority drives admit_authority.
   Unit cases in tests/test_authority_admission.py cover discovery text, which

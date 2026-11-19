@@ -14,10 +14,12 @@ implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.loc
   Local re-check uses `ProjectCodingLocalWork` `verify_runs` / `run_python` (and host `run_checks.sh`
   when bound) so repair stays on the cheap Completer lane. Soft point `external_guidance` remains the
   human scope gate.'
-validation: 'Harness `user_story` scenario `repair.yaml` in suite `fangore_guided_coding`. Static mode
-  uses `coding_tool_script: ci_repair` against `ci_seed: failing_check`. Asserts `widget.py` contains
-  the repaired function and `.mechaharness/ci_fix.md` cites the failure. Live Completer may drive the
-  same tools with `MECHA_STORY_BACKEND=live`.'
+validation: >
+  Harness `user_story` stage `020_fangore_coding_ci_repair.yaml` in suite
+  `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_repair` against `ci_seed:
+  failing_check`. Asserts `widget.py` contains the repaired function and
+  `.mechaharness/ci_fix.md` cites the failure. Live Completer may drive the same tools with
+  `MECHA_STORY_BACKEND=live`.
 footnotes: []
 kind: user_story
 environment:

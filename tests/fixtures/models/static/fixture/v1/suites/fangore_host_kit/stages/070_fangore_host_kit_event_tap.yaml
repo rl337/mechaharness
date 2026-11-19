@@ -12,8 +12,9 @@ implementation: '`mechaharness.host_kit.host_graph_executor` accepts `event_log=
   / `TappingEventLog` forward emits to a host callback while preserving query. `CliInstrumentor` stamps
   then taps the blessed executor log so consoles see `core:graph_node_start` / `core:graph_node_end` on
   the same path as CLI infer (HF-05).'
-validation: 'Harness `user_story` scenario `tapped_node_lifecycle.yaml`: environment + graph + steps +
-  complete expects.'
+validation: >
+  Harness `user_story` stage `070_fangore_host_kit_event_tap.yaml`: environment + graph + steps
+  + complete expects.
 footnotes:
 - id: ai-asst-hf05-insp
   label: AI assistant host-friction inspiration

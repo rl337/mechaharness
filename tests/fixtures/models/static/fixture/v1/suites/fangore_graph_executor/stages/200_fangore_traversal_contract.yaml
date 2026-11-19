@@ -12,8 +12,9 @@ implementation: '`mechaharness.node_component.traversal_from_events` projects Ev
   types are existing core events (`inference`, `tool_call`, `tool_result`, `turn_start`, …) into `TraversalRecord`
   rows with `parent_node_id` and component ids. Harness emits enrich those payloads with `parent_node_id`
   / `component_id` / `execution_node_id`.'
-validation: 'Harness `user_story` scenario `traversal_contract.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `200_fangore_traversal_contract.yaml`: environment + graph + steps
+  + complete expects.
 footnotes:
 - id: ai-asst-nc-trav
   label: Node components reference

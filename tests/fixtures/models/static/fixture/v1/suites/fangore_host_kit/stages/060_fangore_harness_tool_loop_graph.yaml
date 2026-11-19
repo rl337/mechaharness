@@ -11,8 +11,9 @@ implementation: '`CliInstrumentor` verb `tool_loop` runs `ToolLoopHarness` on th
   The harness emits `turn_start`, `inference`, `tool_call`, and `tool_result` with `parent_node_id` /
   `component_id`. `node_components_for_harness` lists planned components; `traversal_from_events` recovers
   them after the run.'
-validation: 'Harness `user_story` scenario `harness_components.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `060_fangore_harness_tool_loop_graph.yaml`: environment + graph +
+  steps + complete expects.
 footnotes:
 - id: ai-asst-nc-harness
   label: AI assistant host-friction inspiration

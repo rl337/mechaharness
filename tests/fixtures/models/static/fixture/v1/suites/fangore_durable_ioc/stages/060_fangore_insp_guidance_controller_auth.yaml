@@ -10,7 +10,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   [^insp-ioc-07]
 implementation: '`LeaseControllerAuth` / `GeneratorControllerAuth` on resume/cancel; `requested_authority=final_approval`
   raises PermissionError pointing hosts at ApprovalInterrupt.'
-validation: 'Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.'
+validation: >
+  Harness `user_story` stage `060_fangore_insp_guidance_controller_auth.yaml`: environment +
+  graph + steps + complete expects.
 footnotes:
 - id: insp-ioc-07
   label: Durable graph generators (R-IOC-AUTH)

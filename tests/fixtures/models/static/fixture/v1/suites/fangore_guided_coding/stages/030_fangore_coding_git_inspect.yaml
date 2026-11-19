@@ -10,10 +10,12 @@ implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.loc
   (`environment.coding_git: local_mock_pr`) so status/log/diff use real local `git` while forge calls
   stay mockable. Tools `git_status` / `git_log` / `git_diff` come from `build_coding_tool_registry(...,
   coding_git=…)`. Hosts override via `ProjectCodingConfig.get_coding_git()`.'
-validation: 'Harness `user_story` scenario `inspect.yaml` in suite `fangore_guided_coding`. Static mode
-  uses `coding_tool_script: git_inspect` (scripted tool calls against local git). Live mode uses a real
-  Completer with the same `local_mock_pr` binding. Unit tests `tests/test_project_coding.py` cover injectable
-  `CodingGit` fakes and local process git.'
+validation: >
+  Harness `user_story` stage `030_fangore_coding_git_inspect.yaml` in suite
+  `fangore_guided_coding`. Static mode uses `coding_tool_script: git_inspect` (scripted tool
+  calls against local git). Live mode uses a real Completer with the same `local_mock_pr`
+  binding. Unit tests `tests/test_project_coding.py` cover injectable `CodingGit` fakes and
+  local process git.
 footnotes: []
 kind: user_story
 environment:

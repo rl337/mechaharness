@@ -66,14 +66,15 @@ html_context = {
     "version": release,
 }
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-}
+# API pages use local defining-module targets; builds need no remote inventories.
+intersphinx_mapping: dict[str, tuple[str, None]] = {}
 
 htmlhelp_basename = "mechaharnessdoc"
 
 exclude_patterns = [
     "_build",
+    "plans/**",  # local-only planning, never part of the published documentation
+    "adr/**",  # local-only decision notes
     "Thumbs.db",
     ".DS_Store",
     "index.md",  # Sphinx home is index.rst; keep markdown TOC for GitHub browsing
@@ -102,3 +103,6 @@ autodoc_type_aliases = {
     "MechaHarnessConfig": "mechaharness.di.MechaHarnessConfig",
     "SettingsConfig": "mechaharness.di.SettingsConfig",
 }
+
+# Resolve Markdown heading links consistently in the published site.
+myst_heading_anchors = 4

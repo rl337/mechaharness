@@ -15,6 +15,7 @@ graph tests.
 
 ```bash
 export OPENAI_API_KEY=sk-...          # or MECHA_API_KEY
+unset MECHA_API_KEY                   # remove a local placeholder when using OPENAI_API_KEY
 export MECHA_INFERENCE_BACKEND=openai
 export MECHA_MODEL=gpt-6-luna
 unset MECHA_BASE_URL                  # uses api.openai.com
@@ -27,12 +28,17 @@ mechaharness run "Reply with ok." \
 
 `apply_backend_defaults` fills `api_key` from `OPENAI_API_KEY` when
 `MECHA_API_KEY` is unset. Luna tool loops on Chat Completions get
-`reasoning_effort=none` automatically when tools are present.
+`reasoning_effort=none` automatically when tools are present. Cloud OpenAI
+and Luna requests map `max_tokens` to `max_completion_tokens` and omit internal
+runner metadata such as `node_id` from the HTTP body. Explicit `request.extra`
+values take precedence for supported provider fields.
 
 Offline / default pytest uses cassette Memory clients only — operator
-`OPENAI_API_KEY` / `MECHA_BASE_URL` are ignored unless story mode is
-**live** and cloud is explicitly opted in (`MECHA_LIVE_OPENAI=1` or
-`MECHA_INFERENCE_BACKEND=openai`).
+`OPENAI_API_KEY` / `MECHA_BASE_URL` are ignored in **static** mode. To use cloud, select live mode and either set
+`MECHA_LIVE_OPENAI=1` or `MECHA_INFERENCE_BACKEND=openai`. An explicit
+`MECHA_BASE_URL` always takes precedence, including one loaded from the local
+env script; unset it to reach cloud OpenAI. The OpenAI opt-in configures the
+reason lane; judge stories still need their own judge endpoint.
 
 ```bash
 # Live-eligible stories against cloud Luna (explicit opt-in)

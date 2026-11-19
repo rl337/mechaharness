@@ -9,8 +9,9 @@ narrative: Taloneth starts the CLI host with family `pass_through` and backend `
   [^fineenvs-parity]
 implementation: '`compare_parity` / `parity_from_harness_config` in `mechaharness.run_parity` compare
   harness constraint surfaces. `CliInstrumentor` verb `compare_run_parity` exposes the diagnostic.'
-validation: 'Harness `user_story` scenario `parity_mismatch.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `220_taloneth_insp_run_parity.yaml`: environment + graph + steps +
+  complete expects.
 footnotes:
 - id: fineenvs-parity
   label: FineEnvs multi-harness RL — train/eval decline

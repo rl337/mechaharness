@@ -21,7 +21,23 @@ def score_layers(
     infrastructure_failure: bool = False,
     trace_supports_cause: bool = False,
 ) -> dict[str, Any]:
-    """Score one run on two independent layers."""
+    """Combine caller-supplied task and harness verdicts for one run.
+
+    The caller evaluates task success and trace fidelity before calling this
+    helper. Missing harness observations yield ``unknown``; an infrastructure
+    failure leaves both layers ``unscored``. A run is clean only if both pass.
+    ``attribution='observed'`` records the caller's ``trace_supports_cause``
+    assertion when both fail; this helper does not inspect causal evidence.
+
+    Example:
+        >>> lucky = score_layers(task="pass", harness="fail")
+        >>> (lucky["task"], lucky["harness"], lucky["clean"])
+        ('pass', 'fail', False)
+        >>> score_layers(task="pass")["harness"]
+        'unknown'
+        >>> score_layers(task="fail", harness="fail")["attribution"]
+        'hypothesis'
+    """
     if infrastructure_failure:
         return {
             "task": "unscored",

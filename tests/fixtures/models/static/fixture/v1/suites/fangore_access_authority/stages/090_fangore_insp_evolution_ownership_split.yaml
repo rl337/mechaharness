@@ -17,8 +17,9 @@ implementation: '`MechaHarnessConfig.get_recipe_promotion_policy()` (`RecipeProm
   when given the Config-bound hooks it calls `EvolutionCampaignHooks.on_promotion` after (and only after)
   a successful pointer move. Registry validation, evolvable allowlists, and the final-test gate stay in
   the library.'
-validation: 'Harness `user_story` scenario `evolution_ownership_split.yaml`: environment + graph + steps
-  + complete expects.'
+validation: >
+  Harness `user_story` stage `090_fangore_insp_evolution_ownership_split.yaml`: environment +
+  graph + steps + complete expects.
 footnotes:
 - id: insp-sr-09
   label: Self-revising recipe evolution (MH-SR-09)

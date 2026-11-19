@@ -251,7 +251,7 @@ Config hooks: `get_authority_gate()`, `get_denial_store()`,
 `get_evolution_campaign_hooks()`.
 
 Coding agents in **host** repos: install the customer skills from
-[`agent-skills/`](../../agent-skills/)
+[`agent-skills/`](https://github.com/rl337/mechaharness/tree/main/agent-skills)
 ([guide](./agent-skills.md); normative [HOST-01..07](../requirements/host-integration.md)).
 
 ### Host kit (readable GraphExecutor wiring)

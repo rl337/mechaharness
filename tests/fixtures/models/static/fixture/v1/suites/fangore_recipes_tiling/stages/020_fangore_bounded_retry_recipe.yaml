@@ -8,8 +8,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   compose with durable external-effect recovery from TDR crash-window stories. [^rc-bounded-retry]
 implementation: Agentic Recipe `bounded_retry` via `BoundedRetryTemplate` / `bounded_retry_runner` and
   product verb `run_recipe` (`BoundedRetryRecipeAdapter`).
-validation: Harness `user_story` scenario `bounded_retry_recipe.yaml` drives `run_recipe`; expects attempt_count
-  / attempt_succeeded / escalated plus shape keys.
+validation: >
+  Harness `user_story` stage `020_fangore_bounded_retry_recipe.yaml` drives `run_recipe`;
+  expects attempt_count / attempt_succeeded / escalated plus shape keys.
 footnotes:
 - id: rc-bounded-retry
   label: Recipes requirements (bounded retry)

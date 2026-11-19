@@ -9,8 +9,9 @@ narrative: Nubble starts the CLI host with family `pass_through` and backend `mo
 implementation: '`route_at_boundary` and `activate_scoped_policy` in `mechaharness.routing` keep affinity
   inside a coherent work loop; uncalibrated policies do not activate. `CliInstrumentor` verb `check_model_affinity`
   exposes the diagnostic.'
-validation: 'Harness `user_story` scenario `affinity_lane.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `070_nubble_model_affinity.yaml`: environment + graph + steps +
+  complete expects.
 footnotes: []
 kind: user_story
 environment:

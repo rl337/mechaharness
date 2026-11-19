@@ -133,4 +133,4 @@ cassettes; no probe wrapper.
 
 - [User-story migration batches](./user-story-migration-batches.md) (Wave 1–2 checklist; P5+ superseded by groups above)
 - [Instrumentation migration](./user-story-instrumentation-migration.md) (Wave 3 case-bag removal)
-- [Agentic Recipes skill](../../.cursor/skills/agentic-recipes/SKILL.md)
+- [Agentic Recipes skill](https://github.com/rl337/mechaharness/blob/main/.agents/skills/agentic-recipes/SKILL.md)

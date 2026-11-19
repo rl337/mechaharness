@@ -76,24 +76,42 @@ Guides
    guides/install
    guides/dependency-injection
    guides/openai-local
+   guides/agent-skills
    guides/user-stories
-   guides/user-story-migration-batches
-   requirements/recipes-and-decision-plane
-   requirements/transactional-durable-resume
+
+More guides
+-----------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   guides/coding-delegate-suites
+   guides/release-preparation
+   guides/gastronomic-comparison
+   guides/user-story-*
 
 Reference
 ---------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :glob:
 
-   reference/cli
-   reference/api
-   reference/events
-   reference/cost
-   reference/access
-   reference/judge
-   reference/graph-templates
+   reference/*
+
+Maintainer requirements and research
+------------------------------------
+
+These pages describe contracts, acceptance gaps, and their sources. Start with
+installation and the task guides above when integrating MechaHarness in a host.
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   requirements/*
+   inspiration/*
 
 API
 ---
@@ -112,6 +130,7 @@ API
    api/access
    api/environment
    api/inference
+   api/research_helpers
    api/harness
    api/tools
    api/graph_executor

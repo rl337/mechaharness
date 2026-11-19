@@ -4,7 +4,7 @@ MechaHarness ships **customer-facing** Cursor/Codex-style skills and a short
 requirements rule so coding agents in *your* repository use Config DI,
 `host_apis`, recipes, and event correlators correctly.
 
-These live in the GitHub tree under [`agent-skills/`](../../agent-skills/)
+These live in the GitHub tree under [`agent-skills/`](https://github.com/rl337/mechaharness/tree/main/agent-skills)
 (not the maintainer skills under `.cursor/skills/`). **Latest published copies
 are always on** `main` — prefer raw GitHub URLs so you do not pin a stale
 snapshot.

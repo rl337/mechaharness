@@ -330,7 +330,7 @@ otherwise invent a recipe. Do not demote valid persona claims to unit-only._ · 
 
 - [User-story recipe expansion](./user-story-recipe-expansion.md) — Wave 4+ working groups
 - [User-story instrumentation migration](./user-story-instrumentation-migration.md)
-- [`.cursor/skills/user-stories/SKILL.md`](../../.cursor/skills/user-stories/SKILL.md)
+- [`.cursor/skills/user-stories/SKILL.md`](https://github.com/rl337/mechaharness/blob/main/.agents/skills/user-stories/SKILL.md)
 - [`docs/reference/cli-universe.md`](../reference/cli-universe.md)
 - `tests/stories/scenarios/user_story_scenario.py`
 

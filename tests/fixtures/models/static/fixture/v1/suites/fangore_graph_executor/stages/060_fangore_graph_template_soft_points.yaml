@@ -14,8 +14,9 @@ implementation: Agentic Recipes are concrete `GraphTemplate` subclasses in `mech
   `environment_repair`, and `initialize_preflight`. Each declares `SoftPoint`s; `GraphTemplate.instantiate`
   builds via `build` then stamps `template_name`, `template_version`, `template_status`, and optional
   `source_workflow_ref`. Demoted templates refuse instantiate. Bound via `MechaHarnessConfig.get_graph_template_registry()`.
-validation: 'Harness `user_story` scenario `graph_template_soft_points.yaml`: environment + graph + steps
-  + complete expects.'
+validation: >
+  Harness `user_story` stage `060_fangore_graph_template_soft_points.yaml`: environment + graph
+  + steps + complete expects.
 footnotes:
 - id: insp-templates
   label: Inspiration requirements (subgraphs & templates)

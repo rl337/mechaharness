@@ -7,8 +7,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   — accepting WalkingLabs L06 guidance. [^wl-l06-init]
 implementation: Agentic Recipe `initialize_preflight` via `InitializePreflightTemplate` / `initialize_preflight_runner`
   and product verb `run_recipe` (`InitializePreflightRecipeAdapter`).
-validation: Harness `user_story` scenario `initialize_preflight_template.yaml` drives `run_recipe`; expects
-  preflight_ok plus node ids.
+validation: >
+  Harness `user_story` stage `070_fangore_insp_initialize_preflight.yaml` drives `run_recipe`;
+  expects preflight_ok plus node ids.
 footnotes:
 - id: wl-l06-init
   label: WalkingLabs L06 Initialization Phase

@@ -41,3 +41,17 @@ steps:
 - do: {graph_walk: {action: set_live_epoch, live_authorization_epoch: 3}}
 - do: {graph_walk: {action: continue}}
 ```
+
+## Nested call returns
+
+`GraphExecutor` checkpoints each active frame and resumes callers after a child
+commits its return. `GraphResult.frame_path` identifies the root-to-active-frame
+run IDs while paused. `ExecutionGraph.frame_path`, `frame_spent`, and
+`frame_return` persist frame metadata alongside `walk_bag`; legacy checkpoints
+default to an empty path and no return record.
+
+The `fangore_recursive_return` and `fangore_inference_frame_return` acceptance
+stages cover recursive calls and inference results returning through two
+callers in the `fangore_bag_inference_continuity` suite. See the
+[requirements](../requirements/stepped-graph-execution.md) for return and
+resume invariants.

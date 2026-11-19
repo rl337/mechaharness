@@ -11,8 +11,9 @@ implementation: '`GraphTemplateRegistry.composition_violations(graph)` / `assert
   check that a recipe-stamped graph names a stored `name@version` and that an unstamped container graph
   holds only embedded recipe subgraphs, recursively. Free-form nodes and forged versions are reported.
   Hosts call it as a production gate; the executor does not force it.'
-validation: 'Harness `user_story` scenario `registry_only_compose.yaml`: environment + graph + steps +
-  complete expects.'
+validation: >
+  Harness `user_story` stage `040_fangore_insp_registry_only_compose.yaml`: environment + graph
+  + steps + complete expects.
 footnotes:
 - id: insp-sr-02
   label: Self-revising recipe evolution (MH-SR-02)

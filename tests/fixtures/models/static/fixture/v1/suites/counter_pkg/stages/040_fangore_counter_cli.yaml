@@ -2,13 +2,19 @@ id: fangore_counter_cli
 suite: counter_pkg
 persona: fangore
 title: Add a CLI that drives Counter
-narrative: Fangore finishes the delegate arc with a thin CLI over the library — the expensive work stays
-  in the package; the CLI is the operator face.
-implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
-  `environment.workspace: suite`, and multi-file `coding_writes` offline stubs. Live mode binds `completer_as_tool_loop_complete`.
-  Host `verify_runs` include `pytest: true` and `text_contains` / `text_forbids` with repair.'
-validation: 'Harness `user_story` scenario `cli.yaml` inside sequential suite `counter_pkg` (ordered).
-  Live eligibility: `environment.local_work: project_coding`.'
+narrative: >
+  Fangore opens the shared counter package workspace in the CLI host with pass_through and mock
+  for static acceptance. He resumes guided_coding to add a thin command-line entry point over
+  the existing library. He runs the CLI and package tests, checking that persistence and
+  mutation still work.
+implementation: >
+  Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`,
+  `environment.filesystem.type: suite`, and multi-file `coding_writes` offline stubs. Live mode
+  binds `completer_as_tool_loop_complete`. Host `verify_runs` include `pytest: true` and
+  `text_contains` / `text_forbids` with repair.
+validation: >
+  Harness `user_story` stage `040_fangore_counter_cli.yaml` inside sequential suite
+  `counter_pkg` (ordered). Live eligibility: `environment.local_work: project_coding`.
 footnotes: []
 kind: user_story
 environment:

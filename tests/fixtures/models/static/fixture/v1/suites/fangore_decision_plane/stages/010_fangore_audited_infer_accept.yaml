@@ -12,8 +12,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
 implementation: 'Agentic Recipe catalog id `audited_infer_accept` (`AuditedInferAcceptTemplate` + `append_audited_infer_accept`).
   Domain `mechaharness.audited_decision` (`STAGES`, `criteria_hash`, `assert_principals_distinct`, `repair_target`).
   Default node kinds `audited.*`; hosts soft-bind runners (e.g. `host.infer.*`). Migration notes: `docs/inspiration/video-production-audited-infer-migration.md`.'
-validation: 'Harness `user_story` scenario `spine.yaml`: environment + instantiate_recipe expects. Unit
-  tests `tests/test_audited_decision.py`.'
+validation: >
+  Harness `user_story` stage `010_fangore_audited_infer_accept.yaml`: environment +
+  instantiate_recipe expects. Unit tests `tests/test_audited_decision.py`.
 footnotes: []
 kind: user_story
 environment:

@@ -10,7 +10,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   verifies completion from the structured observation expects on this scenario. [^insp-ioc-05]
 implementation: '`GeneratorRunStore` (in-memory shared instance or checkpoint-backed) rehydrates `GeneratorRunRecord.pending_request`
   for a new `DurableGraphGenerator` instance.'
-validation: 'Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.'
+validation: >
+  Harness `user_story` stage `080_fangore_insp_guidance_survive_restart.yaml`: environment +
+  graph + steps + complete expects.
 footnotes:
 - id: insp-ioc-05
   label: Durable graph generators (R-IOC-RESUME)

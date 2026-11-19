@@ -12,9 +12,10 @@ implementation: 'Provider-neutral judge types (`Choice`/`Score`/`Noul` questions
 
 
   Covers: POL-02, JDG-01, JDG-02, JDG-04, VER-02.'
-validation: 'Harness `user_story` scenario `billing_allow.yaml`: environment + graph + steps + complete
-  expects. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider`
-  (cassette-exact token softens; behavioral expects hard).'
+validation: >
+  Harness `user_story` stage `150_fangore_refund_verdict.yaml`: environment + graph + steps +
+  complete expects. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via
+  `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).
 footnotes:
 - id: jev-decisions
   label: Jev decisions in a Pi harness

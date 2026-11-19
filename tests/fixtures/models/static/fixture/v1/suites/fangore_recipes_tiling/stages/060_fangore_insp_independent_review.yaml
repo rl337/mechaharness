@@ -8,8 +8,9 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
   [^insp-r10][^insp-pa-03-review]'
 implementation: Agentic Recipe `independent_review` via `IndependentReviewTemplate` / `independent_review_runner`
   and product verb `run_recipe` (`IndependentReviewRecipeAdapter`).
-validation: Harness `user_story` scenario `independent_review_template.yaml` drives `run_recipe`; expects
-  review_count, omit_producer_reasoning, disagreement_retained.
+validation: >
+  Harness `user_story` stage `060_fangore_insp_independent_review.yaml` drives `run_recipe`;
+  expects review_count, omit_producer_reasoning, disagreement_retained.
 footnotes:
 - id: insp-r10
   label: 'Inspiration requirements (req 10: independent review)'

@@ -9,7 +9,8 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
   `fangore_insp_auth_epoch_resume`. Tracks MH-DOTS-02[^insp-dots-02] via stepped control SG-08[^sg-reval].'
 implementation: '`revalidate_before_effect` on `execute`-phase nodes; `GraphExecutor.live_authorization_epoch`;
   `graph_walk` start/until/set_live_epoch/continue. Observe/prepare phases skip revalidation.'
-validation: Harness `user_story` scenario `effect_revalidation_check.yaml`.
+validation: >
+  Harness `user_story` stage `020_fangore_insp_effect_revalidation.yaml`.
 footnotes:
 - id: insp-dots-02
   label: OpenAI Dots agent safety (MH-DOTS-02)

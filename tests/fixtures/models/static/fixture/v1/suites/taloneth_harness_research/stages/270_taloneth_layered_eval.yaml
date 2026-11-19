@@ -14,9 +14,10 @@ narrative: >
   In the both-fail run she has no trace that proves the harness defect caused
   the bad file, so the link is only a hypothesis.
 implementation: >
-  score_layers in mechaharness.layered_verdict, exposed as the product verb
-  layered_eval. Composes with eval evidence and trace reconciliation; it does
-  not add a new evaluator.
+  score_layers in mechaharness.layered_verdict, exposed as layered_eval, combines caller-
+  supplied verdicts. This walk checks report semantics; it does not inspect trace artifacts or
+  independently evaluate causality. A host must supply evaluated evidence before using the
+  report.
 validation: >
   Harness user_story stage 270_taloneth_layered_eval drives layered_eval.
   Unit cases in tests/test_layered_verdict.py cover an observed causal trace

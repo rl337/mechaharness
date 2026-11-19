@@ -200,7 +200,32 @@ def wire_response_to_domain(wire: OpenAIChatCompletionResponse) -> CompletionRes
 
 
 class OpenAICompatStrategy(InferenceStrategy):
-    """HTTP client for any OpenAI Chat Completions compatible endpoint."""
+    """HTTP client for OpenAI Chat Completions and compatible local endpoints.
+
+    Hosts inject an ``AsyncHttpClient`` and own its lifetime. Settings must
+    contain the resolved endpoint and credentials; ``apply_backend_defaults``
+    resolves ``OPENAI_API_KEY`` for the cloud backend. See the OpenAI setup
+    guide for explicit live-test opt-in and local endpoint configuration.
+
+    Example (in-memory HTTP response; no API credentials or network needed):
+        >>> import asyncio
+        >>> from pyiv.http import MemoryAsyncHttpClient
+        >>> client = MemoryAsyncHttpClient()
+        >>> client.add("POST", "http://example.invalid/v1/chat/completions", json={
+        ...     "id": "demo", "object": "chat.completion", "created": 0,
+        ...     "model": "demo", "choices": [{"index": 0,
+        ...         "message": {"role": "assistant", "content": "ok"},
+        ...         "finish_reason": "stop"}],
+        ... })
+        >>> settings = Settings(model="demo", base_url="http://example.invalid/v1",
+        ...                     api_key=None)
+        >>> strategy = OpenAICompatStrategy(settings, client, timeout=5)
+        >>> request = CompletionRequest(model="demo", messages=[
+        ...     ChatMessage(role=Role.USER, content="hi")])
+        >>> response = asyncio.run(strategy.complete(request))
+        >>> response.message.content
+        'ok'
+    """
 
     name = "openai_compat"
 

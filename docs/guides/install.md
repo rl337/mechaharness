@@ -5,7 +5,8 @@ Get a local environment running and issue a first harness run.
 ## Prerequisites
 
 - Python 3.9+
-- A reachable inference backend (cloud API key or local OpenAI-compatible server)
+- For real inference: a cloud API key or local OpenAI-compatible server.
+  The mock quick start below needs neither.
 
 ## Steps
 
