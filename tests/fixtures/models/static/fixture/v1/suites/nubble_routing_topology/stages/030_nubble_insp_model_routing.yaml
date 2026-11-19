@@ -8,8 +8,9 @@ narrative: Nubble starts the CLI host with family `pass_through` and backend `mo
   observation expects on this scenario. [^insp-r13]
 implementation: '`route_for_capability_needs` in `mechaharness.routing` selects a model class from declared
   needs and available classes. `CliInstrumentor` verb `route_capabilities` exposes the host diagnostic.'
-validation: 'Harness `user_story` scenario `capability_route.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `030_nubble_insp_model_routing.yaml`: environment + graph + steps +
+  complete expects.
 footnotes:
 - id: insp-r13
   label: 'Inspiration requirements (req 13: model routing)'

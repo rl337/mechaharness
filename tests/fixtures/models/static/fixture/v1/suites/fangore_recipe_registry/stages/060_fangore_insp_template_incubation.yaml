@@ -10,8 +10,9 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
 implementation: '`GraphTemplate` is the substrate for Agentic Recipes. `SoftPoint`, `GraphTemplate.stamp`,
   `status` active/deprecated/demoted, and optional `source_workflow_ref` support incubation. This story
   stamps and demotes via the `fan_out_aggregate` catalog entry.'
-validation: 'Harness `user_story` scenario `graph_template_soft_points.yaml`: environment + graph + steps
-  + complete expects.'
+validation: >
+  Harness `user_story` stage `060_fangore_insp_template_incubation.yaml`: environment + graph +
+  steps + complete expects.
 footnotes:
 - id: insp-r19
   label: 'Inspiration requirements (req 19: template incubation)'

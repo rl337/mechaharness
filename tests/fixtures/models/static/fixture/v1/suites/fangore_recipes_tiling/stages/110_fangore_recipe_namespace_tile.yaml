@@ -10,8 +10,9 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
 implementation: '`GraphTemplateParams.instance_key` namespaces node ids on instantiate. `GraphTemplate.tile`
   embeds a recipe graph under a parent node via `SubgraphNodeRunner`. Provenance includes instance id,
   params fingerprint, and logical-to-concrete node map (RC-01, RC-04, RC-05, RC-08).'
-validation: 'Harness `user_story` scenario `recipe_namespace_tile.yaml`: environment + graph + steps +
-  complete expects.'
+validation: >
+  Harness `user_story` stage `110_fangore_recipe_namespace_tile.yaml`: environment + graph +
+  steps + complete expects.
 footnotes:
 - id: rc-namespace
   label: Recipes requirements (RC-01/04/05/08)

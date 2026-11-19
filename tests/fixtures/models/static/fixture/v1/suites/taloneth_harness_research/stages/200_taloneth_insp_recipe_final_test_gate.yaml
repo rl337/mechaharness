@@ -13,8 +13,9 @@ implementation: '`require_held_out_final_test()` and `FinalTestGateError` in `ev
   final_test=...)` enforces it whenever `EvalProtocol.held_out_protected` (the default); `GraphTemplateRegistry.promote_with_final_test()`
   applies it before moving the active pointer and attaches the held-out result as an evaluation. Plain
   `GraphTemplateRegistry.promote()` stays an ungated pointer move for hosts that run their own gate.'
-validation: 'Harness `user_story` scenario `recipe_final_test_gate.yaml`: environment + graph + steps
-  + complete expects.'
+validation: >
+  Harness `user_story` stage `200_taloneth_insp_recipe_final_test_gate.yaml`: environment +
+  graph + steps + complete expects.
 footnotes:
 - id: insp-sr-07
   label: Self-revising recipe evolution (MH-SR-07)

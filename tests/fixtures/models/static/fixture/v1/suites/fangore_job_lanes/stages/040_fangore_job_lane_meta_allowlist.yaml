@@ -5,7 +5,8 @@ title: Lane meta is open only to allowlisted caller lanes
 narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Assets exposes run
   meta only to `billing.settle`. Billing observes meta successfully; a third lane is denied.
 implementation: '`JobLane.meta` `ExposureRule` with `allow_lanes`; `lane_observe` with `meta: true` (JL-06).'
-validation: Harness `user_story` scenario `meta_allowlist.yaml`.
+validation: >
+  Harness `user_story` stage `040_fangore_job_lane_meta_allowlist.yaml`.
 footnotes:
 - id: jl-broker-meta
   label: Job lane broker requirements

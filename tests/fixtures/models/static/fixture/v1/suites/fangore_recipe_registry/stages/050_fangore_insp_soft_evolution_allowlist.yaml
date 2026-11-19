@@ -11,8 +11,9 @@ implementation: '`SoftPoint.evolvable` (default `False`) declares the evolution 
   lists it and `assert_evolution_allowed(changed)` refuses any edit outside it. `produce_critique_refine`
   marks `critique_prompt` and `max_rounds`; `independent_review` marks `reviewer_count`; every other catalog
   soft point stays hard.'
-validation: 'Harness `user_story` scenario `soft_point_evolution_allowlist.yaml`: environment + graph
-  + steps + complete expects.'
+validation: >
+  Harness `user_story` stage `050_fangore_insp_soft_evolution_allowlist.yaml`: environment +
+  graph + steps + complete expects.
 footnotes:
 - id: insp-sr-03
   label: Self-revising recipe evolution (MH-SR-03)

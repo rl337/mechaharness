@@ -9,8 +9,9 @@ narrative: 'Taloneth starts the CLI host with family `pass_through` and backend 
   expects on this scenario.'
 implementation: '`shadow_decision_backends` in `mechaharness.routing` compares backends without inventing
   unavailable results. `CliInstrumentor` verb `shadow_decision_backends` exposes the diagnostic.'
-validation: 'Harness `user_story` scenario `shadow_backends.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `060_taloneth_shadow_decision_backends.yaml`: environment + graph +
+  steps + complete expects.
 footnotes: []
 kind: user_story
 environment:

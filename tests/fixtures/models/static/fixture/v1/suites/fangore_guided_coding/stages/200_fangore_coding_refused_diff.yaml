@@ -2,8 +2,11 @@ id: fangore_coding_refused_diff
 suite: fangore_guided_coding
 persona: fangore
 title: Report only files whose content actually changed
-narrative: Fangore attempts a guarded write, then records its refusal in a note. He compares the reported
-  changed files with the one permitted edit.
+narrative: >
+  Fangore starts the CLI host with family pass_through and backend mock in a temporary
+  workspace. He attempts a guarded write, then records its refusal in a note. He compares the
+  reported changed files with the one permitted edit. He resumes guided_coding and checks that
+  written_files lists only .mechaharness/write_guard_note.md.
 implementation: The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
 validation: Start the real generator, answer its guidance request and inspect the host result.
 footnotes: []

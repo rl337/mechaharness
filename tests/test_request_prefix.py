@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from mechaharness.request_prefix import classify_prefix_change, prefix_snapshot
 
 
@@ -32,3 +34,23 @@ def test_identical_requests_match_when_provider_reports_counters() -> None:
     classified = classify_prefix_change(snap, snap, provider_metrics=True)
     assert classified["cause"] == "match"
     assert classified["legitimate"] is True
+
+
+@pytest.mark.parametrize(
+    "tools,policy_version",
+    [
+        pytest.param([{"name": "write"}], "1", id="changed-name"),
+        pytest.param([
+            {"name": "read", "parameters": {"type": "object", "required": ["path"]}}
+        ], "1", id="changed-schema"),
+        pytest.param([], "1", id="removed-tool"),
+        pytest.param([{"name": "write"}], "2", id="tool-and-policy-change"),
+    ],
+)
+def test_changed_tool_contract_is_never_a_match(tools: list[dict], policy_version: str) -> None:
+    classified = classify_prefix_change(
+        _snap(), _snap(tools=tools, policy_version=policy_version), provider_metrics=True
+    )
+    assert classified["cause"] == "unknown"
+    assert classified["first_changed_block"] == "tools"
+    assert classified["legitimate"] is None

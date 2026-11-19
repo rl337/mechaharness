@@ -9,8 +9,9 @@ narrative: Nubble proves the Anthropic Messages backend is a first-class reason 
 implementation: '`UserStoryScenario.environment.backend=anthropic` builds `AnthropicStrategy` + `MemoryAsyncHttpClient`
   against `response.json` (`/v1/messages`). `cli:infer` / `CliInferRunner` emits `core:inference` with
   usage and priced `core:cost`.'
-validation: 'Harness `user_story` scenario `cassette_infer.yaml`: environment backend anthropic, infer
-  step, complete expects for event_types, text, tokens, cost_units.'
+validation: >
+  Harness `user_story` stage `010_nubble_anthropic_cassette_infer.yaml`: environment backend
+  anthropic, infer step, complete expects for event_types, text, tokens, cost_units.
 footnotes: []
 kind: user_story
 environment:

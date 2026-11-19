@@ -6,8 +6,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   to suspend for durable human approval then resume with an actor provenance stamp.
 implementation: '`suspend_for_approval` / `resume_approval` via product verb `approval_interrupt`. Maps
   to durable advice/approval yields when hosts compose it into graphs later.'
-validation: Harness `user_story` scenario `approval_interrupt_cycle.yaml` drives `approval_interrupt`;
-  expects pending → approved with actor provenance.
+validation: >
+  Harness `user_story` stage `010_fangore_insp_approval_interrupt.yaml` drives
+  `approval_interrupt`; expects pending → approved with actor provenance.
 footnotes: []
 kind: user_story
 environment:

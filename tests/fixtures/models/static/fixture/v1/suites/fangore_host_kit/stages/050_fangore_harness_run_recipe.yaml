@@ -14,8 +14,9 @@ implementation: 'Agentic Recipe catalog id `harness_run` (`HarnessRunTemplate`):
   family, model, system prompt, max turns, and runner kinds. CLI `run` and `recipes run harness_run` share
   this path. Node components under `harness_loop` reuse harness `inference` / `tool_call` / `turn_start`
   kinds.'
-validation: 'Harness `user_story` scenario `catalog_and_run.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `050_fangore_harness_run_recipe.yaml`: environment + graph + steps
+  + complete expects.
 footnotes: []
 kind: user_story
 environment:

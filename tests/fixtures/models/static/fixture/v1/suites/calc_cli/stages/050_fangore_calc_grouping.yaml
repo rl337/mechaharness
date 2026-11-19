@@ -2,16 +2,22 @@ id: fangore_calc_grouping
 suite: calc_cli
 persona: fangore
 title: Add parentheses to override precedence
-narrative: Fangore adds grouping symbols so parentheses override precedence (`(1+2)*3`, `2^(1+1)`) while
-  earlier operator stages still pass.
-implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding`
-  and `environment.workspace: suite`. Static mode uses offline `coding_write` stubs. Live mode (`MECHA_STORY_BACKEND=live`
-  + `MECHA_BASE_URL`) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork`
-  via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert on-disk
-  `calc.py` and CLI stdout for this stage''s grammar plus regressions.'
-validation: 'Harness `user_story` scenario `grouping.yaml` inside sequential suite `calc_cli` (ordered).
-  Live eligibility: `environment.local_work: project_coding`. Suite harness asserts live HTTP POSTs when
-  coding stages run under live backend.'
+narrative: >
+  Fangore continues the shared calculator workspace in the CLI host using pass_through and mock
+  in static mode. He asks guided_coding to add parentheses that override precedence. After the
+  graph completes, he runs (1+2)*3 and 2^(1+1), checks their results, and reruns the earlier
+  operator cases.
+implementation: >
+  Agentic Recipe catalog id `guided_coding` with `environment.local_work: project_coding` and
+  `environment.filesystem.type: suite`. Static mode uses offline `coding_write` stubs. Live mode
+  (`MECHA_STORY_BACKEND=live` with a configured endpoint, or `MECHA_LIVE_OPENAI=1` for cloud
+  OpenAI) ignores stubs and binds a real OpenAI-compat Completer into `ProjectCodingLocalWork`
+  via `completer_as_tool_loop_complete`. Product verbs `workspace_read` / `run_python` assert
+  on-disk `calc.py` and CLI stdout for this stage's grammar plus regressions.
+validation: >
+  Harness `user_story` stage `050_fangore_calc_grouping.yaml` inside sequential suite `calc_cli`
+  (ordered). Live eligibility: `environment.local_work: project_coding`. Suite harness asserts
+  live HTTP POSTs when coding stages run under live backend.
 footnotes: []
 kind: user_story
 environment:

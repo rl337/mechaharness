@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.component_ablation import ComponentAblationExperiment, ablation_delta
 from mechaharness.cross_harness_failure import classify_cross_harness_failure
 from mechaharness.discriminative_value import discriminative_report
 from mechaharness.efficiency_scorecard import build_efficiency_scorecard
-from mechaharness.eval_evidence import Claim, compose_claims
+from mechaharness.eval_evidence import Claim, all_passed, compose_claims
 from mechaharness.eval_matrix import EvalMatrix
 from mechaharness.eval_trial import Trial, pass_at_k, trial_cost_rollup
-from mechaharness.evaluator import CallableEvaluator, EvaluatorResult, evaluate_claims
+from mechaharness.evaluator import EvaluatorResult
 from mechaharness.experiment_dimensions import (
     ExperimentDimensions,
     require_dimension_trace_fields,
@@ -31,6 +31,7 @@ from mechaharness.harness_fingerprint import (
 )
 from mechaharness.layered_verdict import score_layers
 from mechaharness.learning_export import build_learning_export
+from mechaharness.model_input_manifest import content_digest
 from mechaharness.objective_policy import ObjectivePolicy, aggregate_objective
 from mechaharness.research import EvalProtocol, ResearchLab
 from mechaharness.trace_envelope import TraceEnvelope, envelope_complete
@@ -43,33 +44,90 @@ class EvaluationResearchParams(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+class ResearchObservation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    hypothesis: str
+    metric: float
+    change_set: dict[str, Any] = Field(default_factory=dict)
+    safety_ok: bool = True
+    whole_task_cost: float | None = None
+    ablations: dict[str, float] | None = None
+
+
+class ResearchEvaluationParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    task_split: str
+    baseline_metric: float
+    candidates: list[ResearchObservation]
+    final_test: EvaluatorResult | None = None
+    final_test_hypothesis: str | None = None
+    final_test_candidate_digest: str | None = None
+
+    def candidate_digests(self) -> dict[str, str]:
+        return {
+            row.hypothesis: content_digest(
+                {
+                    "hypothesis": row.hypothesis,
+                    "change_set": row.change_set,
+                    "task_split": self.task_split,
+                    "baseline_metric": self.baseline_metric,
+                }
+            )
+            for row in self.candidates
+        }
+
+
+class EvaluatorComposeParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    evaluator_id: str
+    version: str
+    held_out: bool = False
+    claims: list[Claim] = Field(min_length=1)
+
+
 def run_atk_research_reject(inputs: dict[str, Any]) -> dict[str, Any]:
+    """Evaluate supplied research observations; never invent a final-test success."""
+    params = ResearchEvaluationParams.model_validate(inputs)
+    if len({row.hypothesis for row in params.candidates}) != len(params.candidates):
+        raise ValueError("candidate hypotheses must uniquely identify supplied observations")
     lab = ResearchLab(
-        EvalProtocol(task_split=inputs.get("task_split", "story-atk")),
-        baseline_metric=float(inputs.get("baseline_metric", 0.9)),
+        EvalProtocol(task_split=params.task_split), baseline_metric=params.baseline_metric
     )
-    for row in inputs.get("candidates", []):
-        cand = lab.propose(row["hypothesis"], row.get("change_set", {}))
+    for row in params.candidates:
+        cand = lab.propose(row.hypothesis, row.change_set)
         lab.evaluate(
             cand,
-            metric=float(row["metric"]),
-            safety_ok=bool(row.get("safety_ok", True)),
-            whole_task_cost=row.get("whole_task_cost"),
-            ablations=row.get("ablations"),
+            metric=row.metric,
+            safety_ok=row.safety_ok,
+            whole_task_cost=row.whole_task_cost,
+            ablations=row.ablations,
         )
     accepted = [c for c in lab.candidates if c.status.value == "accepted"]
+    refusal = None
     if accepted:
-        lab.promote(
-            accepted[0],
-            final_test=EvaluatorResult(
-                evaluator_id="story:final_test", version="1", held_out=True, passed=True
-            ),
-        )
+        final = params.final_test
+        if final is None:
+            refusal = "missing_final_test"
+        elif (
+            params.final_test_hypothesis != accepted[0].hypothesis
+            or params.final_test_candidate_digest
+            != params.candidate_digests()[accepted[0].hypothesis]
+        ):
+            refusal = "final_test_candidate_mismatch"
+        elif not final.claims or not all_passed(final.claims):
+            refusal = "final_test_claims_not_passed"
+        elif not final.held_out or not final.passed:
+            refusal = "final_test_not_held_out_or_passed"
+        else:
+            lab.promote(accepted[0], final_test=final)
     report = lab.report()
     return {
         "rejected_cheap_nonempty": bool(report.rejected_cheap_failures),
         "promoted_nonempty": bool(report.promoted_id),
         "negative_results_nonempty": bool(report.negative_results),
+        "promotion_refusal": refusal,
+        "evidence_origin": "caller_supplied",
+        "candidate_digests": params.candidate_digests(),
     }
 
 
@@ -115,19 +173,17 @@ def run_eval_claims_compose(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_evaluator_compose_run(inputs: dict[str, Any]) -> dict[str, Any]:
-    ev = CallableEvaluator(
-        lambda subject: [
-            Claim(
-                id="exists",
-                statement="exists",
-                status="pass" if subject.get("exists") else "fail",
-            )
-        ],
-        evaluator_id="story:exists",
-        held_out=bool(inputs.get("held_out")),
+    """Compose supplied claims without pretending to execute an independent grader."""
+    params = EvaluatorComposeParams.model_validate(inputs)
+    result = EvaluatorResult(
+        evaluator_id=params.evaluator_id,
+        version=params.version,
+        held_out=params.held_out,
+        claims=params.claims,
+        counts=compose_claims(params.claims),
+        passed=all_passed(params.claims),
     )
-    result = evaluate_claims(ev, inputs)
-    return {"passed": result.passed, "held_out": result.held_out}
+    return {**result.model_dump(mode="json"), "evidence_origin": "caller_supplied"}
 
 
 def run_trial_reliability_metrics(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -196,9 +252,7 @@ def run_experiment_lineage_resume(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_trace_reconciliation_check(inputs: dict[str, Any]) -> dict[str, Any]:
-    surfaces = [
-        ObservationSurface.model_validate(s) for s in inputs.get("surfaces") or []
-    ]
+    surfaces = [ObservationSurface.model_validate(s) for s in inputs.get("surfaces") or []]
     report = reconcile_traces(surfaces)
     return {"status": report.status, "ok": report.ok}
 
@@ -251,9 +305,7 @@ def run_experiment_dimensions_digest(inputs: dict[str, Any]) -> dict[str, Any]:
 
 def run_gated_objective_evaluate(inputs: dict[str, Any]) -> dict[str, Any]:
     runner = HarnessExperimentRunner()
-    exp = runner.propose(
-        HarnessExperiment(hypothesis="gated", intervention="x", failure_mode="y")
-    )
+    exp = runner.propose(HarnessExperiment(hypothesis="gated", intervention="x", failure_mode="y"))
     policy = ObjectivePolicy.model_validate(inputs["policy"])
     result = runner.evaluate(
         exp,
@@ -286,8 +338,8 @@ def run_efficiency_scorecard_build(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_layered_eval(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Flatten paired task/harness scores for one story walk."""
-    report: dict[str, Any] = {}
+    """Report supplied verdicts; causal support remains the caller's assertion."""
+    report: dict[str, Any] = {"evidence_origin": "caller_supplied"}
     for case in inputs.get("cases") or []:
         name = str(case["name"])
         scored = score_layers(
@@ -330,4 +382,9 @@ EVALUATION_RESEARCH_HANDLERS: dict[str, Any] = {
 }
 
 
-__all__ = ['EVALUATION_RESEARCH_HANDLERS', 'EvaluationResearchParams']
+__all__ = ["EVALUATION_RESEARCH_HANDLERS", "EvaluationResearchParams"]
+
+EVALUATION_PARAMETER_MODELS: dict[str, type[BaseModel]] = {
+    "atk_research_reject": ResearchEvaluationParams,
+    "evaluator_compose_run": EvaluatorComposeParams,
+}

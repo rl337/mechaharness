@@ -8,8 +8,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   [^insp-pa-08-telem]
 implementation: Agentic Recipe `decision_plane` via `build_decision_plane_telemetry` / `DecisionPlaneRecipeAdapter`.
   Product CLI verb `run_recipe`.
-validation: Harness `user_story` scenario `telemetry_fields.yaml` drives `run_recipe`; hard expects on
-  telemetry observation keys.
+validation: >
+  Harness `user_story` stage `090_fangore_decision_plane_telemetry.yaml` drives `run_recipe`;
+  hard expects on telemetry observation keys.
 footnotes:
 - id: rc-dp-telemetry
   label: Recipes requirements DP-08

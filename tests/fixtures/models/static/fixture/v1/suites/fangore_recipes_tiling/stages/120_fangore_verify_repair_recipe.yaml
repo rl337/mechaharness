@@ -8,8 +8,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   for loop helper semantics. [^insp-pa-03-verify]
 implementation: Agentic Recipe `verify_repair` via `VerifyRepairTemplate` / `verify_repair_runner` and
   product verb `run_recipe` (`VerifyRepairRecipeAdapter`).
-validation: Harness `user_story` scenario `verify_repair_recipe.yaml` drives `run_recipe`; expects verification_passed,
-  repair_attempts, final_status plus shape keys.
+validation: >
+  Harness `user_story` stage `120_fangore_verify_repair_recipe.yaml` drives `run_recipe`;
+  expects verification_passed, repair_attempts, final_status plus shape keys.
 footnotes:
 - id: rc-verify-repair
   label: Recipes requirements (verify_repair)

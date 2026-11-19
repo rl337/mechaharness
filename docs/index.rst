@@ -1,70 +1,20 @@
 MechaHarness documentation
 ==========================
 
-MechaHarness is a Python **agent harness** for hosts that must compose
-inference safely — not a thin chat-client wrapper. Provider I/O, agent-loop
-policy, cost accounting, and telemetry are first-class seams so you can swap
-models and policies without rewriting the run path, and so agents cannot
-quietly burn unbounded spend.
+Build model-backed applications with configurable inference providers, agent
+loops, tool grants, cost accounting, event logs, and resumable execution graphs.
+Requires Python 3.9+. This documentation describes version |release|.
 
-.. container:: hero-meta
-
-   .. container:: version-badge
-
-      |release|
-
-   pyiv Config · multi-lane inference · cost + EventLog on every run · Python 3.9+
-
-.. raw:: html
-
-   <div style="margin: 20px 0; padding: 15px; background: #e8f4f8; border-left: 4px solid #0066cc; border-radius: 4px;">
-   <strong>Quick Links:</strong>
-   <a href="https://github.com/rl337/mechaharness" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">GitHub</a>
-   <a href="https://pypi.org/project/mechaharness/" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">PyPI</a>
-   <a href="changelog.html" style="margin-left: 15px; color: #0066cc; text-decoration: none; font-weight: 500;">Changelog</a>
-   </div>
-
-Founding principles
--------------------
-
-1. **Modular through dependency injection.**
-   Wiring is pyiv ``MechaHarnessConfig`` and constructor injection. Hosts
-   subclass Config hooks to bind strategies, harnesses, connections, and
-   providers — they do not fork closed enums or grow string registries.
-   See :doc:`guides/dependency-injection` and :doc:`architecture`.
-
-2. **Multi-model and lanes are native.**
-   Reason, judge, and media (plus host-named lanes) are first-class via
-   ``InferenceEnvironment.active_lane()``. Generative work yields a
-   ``Completion``; closed-world decide yields a ``Judgement``; media yields a
-   ``Generation``. Swap ``InferenceStrategy`` or ``JudgeProvider`` without
-   rewriting the harness loop. See :doc:`reference/judge` and
-   :doc:`architecture`.
-
-3. **Cost lives in the object model.**
-   Ability-scaled units and ``CostAccountant`` sit on the harness path so every
-   inference and tool invocation is priced as it happens. The design goal is to
-   keep agents from going AWOL with unbounded spend — cost is not an optional
-   after-the-fact report. See :doc:`reference/cost`.
-
-4. **Event logging and telemetry are built in.**
-   A queryable ``EventLog`` records agent lifecycle, inference, tools, cost, and
-   access checks (``core:agent_*``, ``core:inference``, ``core:cost``, …) on
-   every run. Telemetry is part of the product surface, not a bolt-on sink.
-   See :doc:`reference/events`.
-
-**Also in the core model:** deny-by-default tool grants and
-``CompoundPolicy`` (:doc:`reference/access`); host-extendable open identity
-for events and grants (:doc:`architecture`); and **Agentic Recipes** —
-reusable control subgraphs on a ``GraphTemplate`` substrate
-(:doc:`reference/graph-templates`).
-
-Installation
-------------
+Start without a provider account:
 
 .. code-block:: bash
 
    pip install mechaharness
+   mechaharness run "Hello" --backend mock --family pass_through --model mock
+
+Use :doc:`guides/install` for a first run, :doc:`guides/openai-local` for cloud
+or local endpoints, and :doc:`guides/dependency-injection` to configure a host.
+See :doc:`architecture` for component ownership and integration boundaries.
 
 Guides
 ------
@@ -76,24 +26,42 @@ Guides
    guides/install
    guides/dependency-injection
    guides/openai-local
+   guides/agent-skills
    guides/user-stories
-   guides/user-story-migration-batches
-   requirements/recipes-and-decision-plane
-   requirements/transactional-durable-resume
+
+More guides
+-----------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   guides/coding-delegate-suites
+   guides/release-preparation
+   guides/gastronomic-comparison
+   guides/authoring-user-stories
 
 Reference
 ---------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :glob:
 
-   reference/cli
-   reference/api
-   reference/events
-   reference/cost
-   reference/access
-   reference/judge
-   reference/graph-templates
+   reference/*
+
+Maintainer requirements and research
+------------------------------------
+
+These pages describe contracts, acceptance gaps, and their sources. Start with
+installation and the task guides above when integrating MechaHarness in a host.
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   requirements/*
+   inspiration/*
 
 API
 ---
@@ -112,6 +80,7 @@ API
    api/access
    api/environment
    api/inference
+   api/research_helpers
    api/harness
    api/tools
    api/graph_executor

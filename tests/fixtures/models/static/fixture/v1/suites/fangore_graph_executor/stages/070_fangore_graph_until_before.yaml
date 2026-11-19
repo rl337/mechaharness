@@ -8,7 +8,8 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
   stepped graph control SG-02/06/09[^sg-until].'
 implementation: '`RunControl(mode=until, stop=before)` on `GraphExecutor.run`; product verb `graph_walk`;
   optional `graph.inline` on user_story YAML.'
-validation: Harness `user_story` scenario `until_before.yaml`.
+validation: >
+  Harness `user_story` stage `070_fangore_graph_until_before.yaml`.
 footnotes:
 - id: sg-until
   label: Stepped graph execution requirements

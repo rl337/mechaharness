@@ -3,17 +3,16 @@ suite: taloneth_harness_research
 persona: taloneth
 title: Reject research candidates that fail verified success
 narrative: 'Taloneth starts the CLI host with family `pass_through` and backend `mock`. A cheap backend
-  fails verified success against a frozen baseline. Research must reject it, keep negative results, and
-  only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: `taloneth_validator_qualification`.
+  fails verified success against a frozen baseline. Research must reject it, keep negative results,
+  and only promote noninferior survivors. Candidates cannot rewrite the evaluator. Related: `taloneth_validator_qualification`.
   Generic research loop for self-revising MH-SR-06; recipe-from-traces: `taloneth_insp_recipe_evolution_loop`[^insp-sr-06-research].'
-implementation: '`ResearchLab` / `EvalProtocol` run bounded research: inspect → hypothesis → isolated
-  experiment → ATK-style search → frozen evaluation protocol → promote/rollback. Production evaluators
-  stay protected.
-
-
-  Covers: EXP-01, EXP-02, EXP-03, EXP-04.'
-validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
-  on declared observation keys.
+implementation: "`ResearchLab` / `EvalProtocol` run bounded research: inspect \u2192 hypothesis \u2192\
+  \ isolated experiment \u2192 ATK-style search \u2192 frozen evaluation protocol \u2192 promote/rollback.\
+  \ Production evaluators stay protected.\n\nCovers: EXP-01, EXP-02, EXP-03, EXP-04. Final-test evidence\
+  \ is supplied by the caller and bound to the candidate change set and protocol digest; no passing\
+  \ evidence is synthesized."
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard
+  expects on declared observation keys.
 footnotes:
 - id: insp-sr-06-research
   label: Self-revising recipe map (MH-SR-06 research loop)
@@ -45,6 +44,19 @@ steps:
         ablations:
           no_ctx09: 0.94
         safety_ok: true
+      final_test_hypothesis: keep rules + qualified tests
+      final_test:
+        evaluator_id: fixture:heldout
+        version: '1'
+        held_out: true
+        passed: true
+        claims:
+        - id: test
+          statement: held-out suite passed
+          status: pass
+          evidence_refs:
+          - artifact:heldout-results
+      final_test_candidate_digest: c76561657bf88c10a73620be25b067b205280d26bbfaccd3c0e3dda102cb9e2f
 complete:
   expect:
   - kind: 'true'

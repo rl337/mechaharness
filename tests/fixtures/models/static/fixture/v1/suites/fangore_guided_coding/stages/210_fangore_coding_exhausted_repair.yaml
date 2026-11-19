@@ -2,8 +2,11 @@ id: fangore_coding_exhausted_repair
 suite: fangore_guided_coding
 persona: fangore
 title: Stop after the repair budget is exhausted
-narrative: Fangore requests a fix that still fails its host check after decomposition. He expects a terminal
-  failure with the failing check attached.
+narrative: >
+  Fangore starts the CLI host with family pass_through and backend mock in a temporary
+  workspace. He requests a fix that still fails its host check after decomposition. He expects a
+  terminal failure with the failing check attached. He starts guided_coding, answers guidance
+  including decomposition, and checks that the terminal result is failed.
 implementation: The guided_coding generator calls ProjectCodingLocalWork and runs independent host checks.
 validation: Start the real generator, answer its guidance request and inspect the host result.
 footnotes: []

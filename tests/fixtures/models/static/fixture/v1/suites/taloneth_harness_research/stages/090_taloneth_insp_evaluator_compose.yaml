@@ -1,15 +1,16 @@
 id: taloneth_insp_evaluator_compose
 suite: taloneth_harness_research
 persona: taloneth
-title: Run a versioned held-out evaluator to claims
-narrative: 'Taloneth starts the CLI host with family `pass_through` and backend `mock`. Taloneth wires
-  a versioned evaluator that can be marked held-out so self-improvement cannot quietly train on the sole
-  promotion signal. Accepts Anthropic eval guidance and Verification Horizon[^anth-evals-evaluator][^arxiv-verif-horizon].
-  Evaluator held_out for self-revising MH-SR-07; mandatory final-test gate: `taloneth_insp_recipe_final_test_gate`[^insp-sr-07-eval].'
-implementation: '`Evaluator`, `CallableEvaluator`, and `evaluate_claims` in `mechaharness.evaluator` compose
-  deterministic claim producers with version and held_out metadata beside VerificationPolicy.'
-validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
-  on declared observation keys.
+title: Compose supplied evaluator claims with version metadata
+narrative: Taloneth starts the CLI host with pass_through and mock. She supplies a versioned evaluator
+  identity, a held-out label, and recorded file-check claims to evaluator_compose_run. She checks
+  that passing claims compose to passed while evidence_origin stays caller_supplied. This walk does
+  not execute or authenticate the named evaluator.
+implementation: EvaluatorResult and Claim in mechaharness.evaluator and eval_evidence preserve the
+  supplied identity and claims. compose_claims and all_passed compute the aggregate; no hardcoded
+  passing grader runs.
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard
+  expects on declared observation keys.
 footnotes:
 - id: anth-evals-evaluator
   label: Anthropic Demystifying evals for AI agents
@@ -32,12 +33,22 @@ environment:
 steps:
 - do:
     evaluator_compose_run:
-      exists: true
+      evaluator_id: fixture:file-check
+      version: '1'
       held_out: true
+      claims:
+      - id: exists
+        statement: file exists
+        status: pass
+        evidence_refs:
+        - artifact:file-check
 complete:
   expect:
   - kind: 'true'
     key: passed
   - kind: 'true'
     key: held_out
+  - kind: equals
+    key: evidence_origin
+    value: caller_supplied
 cleanup: []

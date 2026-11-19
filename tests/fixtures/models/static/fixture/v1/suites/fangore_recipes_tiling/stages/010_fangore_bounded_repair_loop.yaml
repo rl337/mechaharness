@@ -9,8 +9,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
 implementation: Agentic Recipe `verify_repair` via `VerifyRepairTemplate` / `verify_repair_runner` and
   product verb `run_recipe` (`VerifyRepairRecipeAdapter`). Library helper `bounded_repair` remains unit-covered
   for VER-03.
-validation: Harness `user_story` scenario `verify_repair_succeeds.yaml` drives `run_recipe`; hard expects
-  on final_status / repair_attempts.
+validation: >
+  Harness `user_story` stage `010_fangore_bounded_repair_loop.yaml` drives `run_recipe`; hard
+  expects on final_status / repair_attempts.
 footnotes:
 - id: insp-repair
   label: Inspiration requirements (verification loops)

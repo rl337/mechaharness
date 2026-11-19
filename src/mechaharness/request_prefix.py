@@ -1,8 +1,7 @@
-"""Attribute request-prefix changes without storing the prompt text.
+"""Compare selected request fields without storing their prompt text.
 
-Tool order and a clock in the stable policy block are avoidable misses.
-A real policy revision is a legitimate new prefix. When the provider does not
-report cache counters, the miss cause stays ``unknown``.
+The report labels tool-order and policy changes for offline experiments.
+It neither observes the serialized provider request nor measures cache misses.
 """
 
 from __future__ import annotations
@@ -31,7 +30,22 @@ def prefix_snapshot(
     policy_version: str,
     dynamic: str,
 ) -> dict[str, Any]:
-    """Hash the stable blocks. The raw policy and tool schemas are not kept."""
+    """Hash caller-supplied tool, policy, and dynamic blocks.
+
+    Tool fingerprints include only ``name`` and ``parameters`` (missing or empty
+    parameters normalize to an empty dict). Descriptions and provider-specific
+    fields are omitted. Policy text and dynamic text are hashed; policy_version
+    is retained verbatim and must be a nonsensitive identifier. These hashes
+    are diagnostics, not a secrecy guarantee or full wire-request fingerprints.
+
+    Example:
+        >>> snap = prefix_snapshot(tools=[{"name": "read"}], policy="Be concise",
+        ...                        policy_version="1", dynamic="Read a file")
+        >>> sorted(snap)
+        ['dynamic', 'policy', 'policy_version', 'tools_canonical', 'tools_order']
+        >>> snap["policy_version"]
+        '1'
+    """
     ordered = _tools(tools)
     canonical = sorted(ordered, key=lambda tool: tool["name"])
     return {
@@ -49,7 +63,24 @@ def classify_prefix_change(
     *,
     provider_metrics: bool,
 ) -> dict[str, Any]:
-    """Name the first changed block, or ``unknown`` without provider evidence."""
+    """Label a change between two :func:`prefix_snapshot` reports.
+
+    ``provider_metrics`` is caller-supplied availability, not measured telemetry.
+    Identical snapshots yield ``unknown`` without it. ``volatile_system`` means
+    policy text changed without a version bump; the helper cannot tell a clock
+    from a legitimate edit. Labels are heuristic experiment categories, not
+    observed cache-miss causes. Policy-version changes take precedence over
+    tool-order changes. Changed tool names or schemas take priority and yield
+    ``unknown``: their legitimacy cannot be determined by comparing hashes alone.
+
+    Example:
+        >>> snap = prefix_snapshot(tools=[], policy="policy", policy_version="1",
+        ...                        dynamic="task")
+        >>> classify_prefix_change(snap, snap, provider_metrics=False)["cause"]
+        'unknown'
+        >>> classify_prefix_change(snap, snap, provider_metrics=True)["cause"]
+        'match'
+    """
     same_shape = (
         before["tools_order"] == after["tools_order"]
         and before["policy"] == after["policy"]
@@ -59,6 +90,10 @@ def classify_prefix_change(
     if same_shape and not provider_metrics:
         cause = "unknown"
         block = None
+        legitimate = None
+    elif before["tools_canonical"] != after["tools_canonical"]:
+        cause = "unknown"
+        block = "tools"
         legitimate = None
     elif before["policy_version"] != after["policy_version"]:
         cause = "policy_change"

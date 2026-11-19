@@ -14,9 +14,10 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
 implementation: '`SqliteCheckpointStore` + `host_graph_executor` with `ArmedCrashProbe` for coding_job
   effects. Product CLI verb `transactional_resume` (`mechaharness.cli_transactional_resume`). Unit matrix:
   `tests/fixtures/transactional_durable_resume/*.json`.'
-validation: 'Harness `user_story` scenario `crash_after_accept_before_record.yaml` drives product verb
-  `transactional_resume` with `crash_location: after_accept_before_record`; hard expects on declared observation
-  keys.'
+validation: >
+  Harness `user_story` stage `010_fangore_tdr_crash_after_accept_before_record.yaml` drives
+  product verb `transactional_resume` with `crash_location: after_accept_before_record`; hard
+  expects on declared observation keys.
 footnotes: []
 kind: user_story
 environment:

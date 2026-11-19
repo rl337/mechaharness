@@ -167,3 +167,12 @@ Generic skeletons and Agentic Recipes live here; host-specific workflows
 incubate in the client until promotion extracts a reusable recipe.
 Every shipped recipe needs ≥1 owning user story that names the catalog id in
 its `implementation` text.
+
+## Recipe reference pages
+
+```{toctree}
+:maxdepth: 1
+:glob:
+
+graph-templates/*
+```

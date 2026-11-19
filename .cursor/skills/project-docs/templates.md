@@ -94,8 +94,8 @@ primary name. Include a readable tiling example and owning story id(s).
 
 ## Related
 
-- [Graph templates / recipes overview](../graph-templates.md)
-- [Recipes requirements](../../requirements/recipes-and-decision-plane.md)
+- [Graph templates / recipes overview](../../../docs/reference/graph-templates.md)
+- [Recipes requirements](../../../docs/requirements/recipes-and-decision-plane.md)
 ````
 
 ## Architecture section addition

@@ -45,7 +45,9 @@ run_check() {
   fi
 }
 
-run_check "Ruff lint" "$RUFF" check src tests
+run_check "Repository hygiene" "$PYTHON" scripts/repository_hygiene.py
+
+run_check "Ruff lint" "$RUFF" check src tests scripts/repository_hygiene.py scripts/release_candidate.py
 
 EXPECTED_MYPY="1.19.1"
 MYPY_VER="$("$MYPY" --version 2>/dev/null | awk '{print $2}')"
@@ -72,7 +74,7 @@ run_check "Pytest" "$PYTEST" -q \
 run_check "User story coverage" "$PYTHON" scripts/story_coverage.py
 
 if "$PYTHON" -c "import sphinx" 2>/dev/null; then
-  run_check "Sphinx docs" "$PYTHON" -m sphinx -b html -q docs docs/_build/html
+  run_check "Sphinx docs" "$PYTHON" -m sphinx -b html -W --keep-going -q docs docs/_build/html
 else
   echo ""
   echo -e "${YELLOW}⚠ sphinx not installed; skipping docs build (pip install -e '.[docs]')${NC}"

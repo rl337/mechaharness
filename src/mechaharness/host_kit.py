@@ -588,7 +588,7 @@ def host_denial_store(*, denial_store: DenialStore | None = None) -> DenialStore
         def get_harness_class(self) -> type:
             return PassThroughHarness
 
-        def get_denial_store(self) -> DenialStore:
+        def get_denial_store(self) -> DenialStore | type[DenialStore]:
             if bound is not None:
                 return bound
             return super().get_denial_store()
@@ -635,7 +635,7 @@ def host_authority_gate(
         def get_grants(self) -> list[object]:
             return list(grant_list)
 
-        def get_denial_store(self) -> DenialStore:
+        def get_denial_store(self) -> DenialStore | type[DenialStore]:
             if bound is not None:
                 return bound
             return super().get_denial_store()

@@ -2,19 +2,19 @@ id: fangore_insp_verification_gate
 suite: fangore_graph_executor
 persona: fangore
 title: Keep answer-generated distinct from task-complete
-narrative: Fangore starts the CLI host with family `pass_through` and backend `mock`. Producing an answer
-  is not the same as finishing the task when verification is required. Accepts inspiration requirement
-  5[^insp-r05].
-implementation: '`OutcomeContract` in `mechaharness.outcome_contract` distinguishes `answer_generated`,
-  `verified`, `complete`, and `failed`. `DefaultVerificationPolicy` selects the strongest sufficient oracle
-  and gates completion through the outcome contract when `require_verification` is set.'
-validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
-  on declared observation keys.
+narrative: Fangore starts the CLI host with pass_through and mock. He supplies a passing host-check
+  result to verification_outcome and sees complete only after verification is supplied. He repeats
+  with a failed check and sees failed. The evidence is explicitly caller_supplied; this walk exercises
+  the completion policy rather than independently running an oracle.
+implementation: OutcomeContract.evaluate applies completion policy to the supplied verification_passed
+  result. Actual oracle selection and execution remain the VerificationPolicy seam and its own tests.
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard
+  expects on declared observation keys.
 footnotes:
 - id: insp-r05
   label: 'Inspiration requirements (req 5: verification)'
   url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/dev-blog-inspiration.md
-  note: Req 5 — verification
+  note: "Req 5 \u2014 verification"
 kind: user_story
 environment:
   family: pass_through
@@ -25,7 +25,7 @@ steps:
 - do:
     verification_outcome:
       require_verification: true
-complete:
+      verification_passed: true
   expect:
   - kind: equals
     key: before_verify_completion
@@ -35,4 +35,16 @@ complete:
     value: complete
   - kind: 'true'
     key: verification_passed
+- do:
+    verification_outcome:
+      require_verification: true
+      verification_passed: false
+complete:
+  expect:
+  - kind: equals
+    key: after_verify_completion
+    value: failed
+  - kind: equals
+    key: evidence_origin
+    value: caller_supplied
 cleanup: []

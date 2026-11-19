@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from mechaharness.anchor_evidence import AnchorEvidence, AnchorRequirement, anchors_satisfied
 from mechaharness.authority_admission import review_admission
@@ -56,73 +56,110 @@ def run_context_compiler_deficit(inputs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def run_context_observation_chain(_inputs: dict[str, Any]) -> dict[str, Any]:
+class ObservationChainParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    observations: list[ObservationRef]
+    obs_id: str
+    summary: str
+    steps: list[str]
+    allowed_sequences: list[list[str]]
+    messages: list[dict[str, Any]]
+    keep_last: int = Field(default=4, ge=1)
+
+
+class DerivedMemoryParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    events: list[dict[str, Any]]
+    up_to: int = Field(ge=0)
+    records: list[DerivedMemoryRecord]
+
+
+def run_context_observation_chain(inputs: dict[str, Any]) -> dict[str, Any]:
+    params = ObservationChainParams.model_validate(inputs)
     store = ObservationStore()
-    store.put(ObservationRef(tool_name="comfy", content="raw bytes"))
-    flags = CtxFlags(
-        evidence_reduction=True, economic_compaction=True, action_fusion=True
-    )
-    fake = reduce_evidence(store, "obs:missing", summary="lie", flags=flags)
-    fused = fuse_actions(
-        ["edit", "test"], allowed_sequences=[["edit", "test"]], flags=flags
-    )
-    compacted = compact_at_boundary(
-        [{"role": "user", "content": str(i)} for i in range(10)],
-        flags=flags,
-        keep_last=2,
-    )
+    for observation in params.observations:
+        store.put(observation)
+    flags = CtxFlags(evidence_reduction=True, economic_compaction=True, action_fusion=True)
+    receipt = reduce_evidence(store, params.obs_id, summary=params.summary, flags=flags)
+    fused = fuse_actions(params.steps, allowed_sequences=params.allowed_sequences, flags=flags)
+    compacted = compact_at_boundary(params.messages, flags=flags, keep_last=params.keep_last)
     return {
-        "fabricated_receipt": bool(fake.fabricated),
-        "fused": fused == ["edit", "test"],
-        "compacted": len(compacted) < 10,
+        "fabricated_receipt": receipt.fabricated,
+        "fused": fused is not None,
+        "compacted": len(compacted) < len(params.messages),
+        "receipt": receipt.model_dump(mode="json"),
+        "messages": compacted,
     }
 
 
-def run_derived_memory(_inputs: dict[str, Any]) -> dict[str, Any]:
+def run_derived_memory(inputs: dict[str, Any]) -> dict[str, Any]:
+    params = DerivedMemoryParams.model_validate(inputs)
     store = DerivedMemoryStore()
-    events = [
-        {"id": "e1", "content": "Redis"},
-        {"id": "e2", "content": "Dragonfly"},
-        {"id": "e3", "content": "Redis"},
-    ]
-    store.consolidate_from(events, up_to=2)
-    first = len(store.current())
-    store.consolidate_from(events, up_to=2)
-    idempotent = len(store.current()) == first
-    popular = DerivedMemoryRecord(content="rumor", retrieval_rank=99, authority=False)
-    rule = DerivedMemoryRecord(content="approval-rule", retrieval_rank=0, authority=True)
-    store.apply("add", popular)
-    store.apply("add", rule)
-    store._published[popular.id] = popular
-    store._published[rule.id] = rule
-    auth = store.current(authoritative_only=True)
+    store.consolidate_from(params.events, up_to=params.up_to)
+    first = [r.model_dump(mode="json") for r in store.current()]
+    store.consolidate_from(params.events, up_to=params.up_to)
+    idempotent = first == [r.model_dump(mode="json") for r in store.current()]
+    for record in params.records:
+        store.apply("add", record)
+    records = store.as_of("")
+    auth = [r for r in records if r.authority]
     return {
         "authority_outranks_popularity": bool(auth) and all(r.authority for r in auth),
         "idempotent": idempotent,
+        "authoritative_record_ids": [r.id for r in auth],
+        "authority_origin": "caller_labels",
+        "published_count": len(store.current()),
     }
 
 
-def run_repo_topology(_inputs: dict[str, Any]) -> dict[str, Any]:
-    topo = RepositoryTopologyProvider()
-    view = topo.index(
-        revision="r1",
-        files={"a.py": "def foo():\n  pass\n", "b.py": "x"},
-        budget=1,
+class RepoTopologyParams(BaseModel):
+    """Source text and revision label supplied by the caller, not discovered fixtures."""
+
+    model_config = ConfigDict(extra="forbid")
+    files: dict[str, str]
+    revision: str
+    budget: int = Field(default=32, ge=0)
+
+
+class CacheLayoutParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    policy_blocks: list[str]
+    relevant: list[str]
+    dynamic: list[str]
+    enabled: bool
+    policy_version: str = "1"
+
+
+def run_repo_topology(inputs: dict[str, Any]) -> dict[str, Any]:
+    params = RepoTopologyParams.model_validate(inputs)
+    view = RepositoryTopologyProvider().index(
+        revision=params.revision,
+        files=params.files,
+        budget=params.budget,
     )
     return {
         "has_omissions_or_entries": bool(view.entries) or bool(view.omissions),
+        "revision": view.revision,
+        "entries": [entry.model_dump(mode="json") for entry in view.entries],
+        "omissions": view.omissions,
+        "revision_origin": "caller_supplied",
     }
 
 
-def run_cache_layout_experiment(_inputs: dict[str, Any]) -> dict[str, Any]:
+def run_cache_layout_experiment(inputs: dict[str, Any]) -> dict[str, Any]:
+    params = CacheLayoutParams.model_validate(inputs)
     layout = compile_cache_aware_layout(
-        policy_blocks=["policy"],
-        relevant=["ctx"],
-        dynamic=["q"],
-        flags=CtxFlags(cache_aware_layout=True),
-        policy_version="v2",
+        policy_blocks=params.policy_blocks,
+        relevant=params.relevant,
+        dynamic=params.dynamic,
+        flags=CtxFlags(cache_aware_layout=params.enabled),
+        policy_version=params.policy_version,
     )
-    return {"enabled_has_stable_prefix": bool(layout.stable_prefix)}
+    return {
+        "enabled_has_stable_prefix": bool(layout.stable_prefix),
+        "layout": layout.model_dump(mode="json"),
+        "provider_metrics_observed": False,
+    }
 
 
 def run_context_provider_discovery(inputs: dict[str, Any]) -> dict[str, Any]:
@@ -160,9 +197,7 @@ def run_instruction_gotcha_metrics(inputs: dict[str, Any]) -> dict[str, Any]:
 
 def run_context_layers_project(inputs: dict[str, Any]) -> dict[str, Any]:
     shared = GraphSharedState(data=dict(inputs.get("shared") or {}))
-    private = project_node_context(
-        shared, needs=list(inputs.get("needs") or []), node_id="n1"
-    )
+    private = project_node_context(shared, needs=list(inputs.get("needs") or []), node_id="n1")
     private.export_to_shared(shared, dict(inputs.get("exports") or {}))
     return {
         "projected_keys": list(private.data.keys()),
@@ -259,6 +294,7 @@ def run_context_evidence_survival(inputs: dict[str, Any]) -> dict[str, Any]:
     transferred/persisted observation ids. A transferred id that was never
     produced is a false transfer. Yield is unique transferred / unique produced.
     """
+
     def _unique(ids: Any) -> list[str]:
         out: list[str] = []
         seen: set[str] = set()
@@ -318,6 +354,7 @@ def run_instruction_scope_metadata(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_admit_authority(inputs: dict[str, Any]) -> dict[str, Any]:
+    """Report supplied labels/ledger membership; never authorize effect dispatch."""
     return review_admission(
         ledger=list(inputs.get("ledger") or []),
         claims=list(inputs.get("claims") or []),
@@ -326,7 +363,7 @@ def run_admit_authority(inputs: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_request_prefix_compare(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Compare named request pairs and flatten the miss classification."""
+    """Compare selected request fields offline; no provider cache observation."""
     report: dict[str, Any] = {"raw_prompt_stored": False}
     for pair in inputs.get("pairs") or []:
         name = str(pair["name"])
@@ -364,4 +401,11 @@ CONTEXT_MANAGEMENT_HANDLERS: dict[str, Any] = {
 }
 
 
-__all__ = ['CONTEXT_MANAGEMENT_HANDLERS', 'ContextManagementParams']
+__all__ = ["CONTEXT_MANAGEMENT_HANDLERS", "ContextManagementParams"]
+
+CONTEXT_PARAMETER_MODELS: dict[str, type[BaseModel]] = {
+    "repo_topology": RepoTopologyParams,
+    "context_observation_chain": ObservationChainParams,
+    "derived_memory": DerivedMemoryParams,
+    "cache_layout_experiment": CacheLayoutParams,
+}

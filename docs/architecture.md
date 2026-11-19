@@ -1,12 +1,10 @@
 # Architecture
 
-MechaHarness is built on four founding principles — **DI modularity**,
-**native multi-model / lanes**, **cost in the object model**, and **built-in
-EventLog telemetry** — described on the [docs home](./index.md). This page is
-the structural map: provider I/O and agent-loop policy stay separate extension
-axes. Wiring is **pyiv dependency injection first**. OpenAPI (`RunRequest` /
-`run()`) is the non-DI facade, not a second architecture. See
-`.cursor/rules/di-first.mdc`.
+Provider I/O and agent-loop policy are separate extension axes. Hosts bind
+strategies, harnesses, grants, tools, and policies through pyiv Config and
+constructor injection. `RunRequest` / `run()` is the convenience facade over the
+same implementation. Start with the [installation guide](./guides/install.md)
+and [dependency injection](./guides/dependency-injection.md).
 
 For long-running, judgment-bearing graphs, the **durable graph generator** is
 the primary host-facing execution model: external drivers advance durable runs
@@ -284,3 +282,30 @@ non-DI surface shared by CLI, HTTP, and `mechaharness.factory.run`.
 
 CLI and API are thin adapters over `run(RunRequest)`. They must not embed
 provider-specific logic. `run()` builds a `SettingsConfig` and injects.
+
+## Integration boundaries
+
+- Product diagnostics consume supplied inputs; fixture examples live in story
+  YAML. Missing required diagnostic inputs fail validation rather than selecting
+  a canned success case.
+- `Claim` / `Evidence` / `EvaluationOutcome` describe evaluation evidence.
+  `LayeredEvaluation` composes them. Supplied causal support is `caller_asserted`;
+  it never becomes an independently observed result merely by setting a flag.
+- `AdmissionReport` describes supplied source labels and ledger matches.
+  `gate_status=not_evaluated` remains explicit; `AuthorityGate` owns actual
+  authorization. No parallel grant store is introduced.
+- `OpenAIRequestPolicy` owns provider capabilities and wire normalization.
+  `PreparedOpenAIRequest` fingerprints the full normalized body. It is a
+  diagnostic, not a provider cache key or a cache-hit measurement.
+- Denial memory belongs to injector scope. The interface, concrete binding, and
+  authority gate share the same instance within a container. Explicit host
+  instances retain the lifetime chosen by the host.
+- `GraphExecutor` owns frames, budgets, authority, effects, checkpoints, and
+  correlators. Private `_graph_walk_state` helpers handle only graph status
+  transitions and declared bag bindings; they do not copy shared runtime
+  collaborators or implement another execution loop.
+
+Release automation is explicit and validates a pinned candidate commit before
+packaging or tagging; see [release preparation](./guides/release-preparation.md).
+Remaining source-integrity and provider-measurement requirements are tracked in
+[Trouble research](./inspiration/trouble.md#implementation-status).

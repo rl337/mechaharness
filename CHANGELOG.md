@@ -7,7 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Releases are manually dispatched from a reviewed versioned commit. Validation,
+  archives, and tags use that same SHA; the independent auto-bump workflow is
+  removed. Conflicting tags and existing registry versions fail closed.
+- Diagnostic verbs require supplied topology, layout, observation, and evaluator
+  inputs. Research promotion no longer synthesizes a passing final test.
+- Experimental admission reports use `source_label_accepted`, `ledger_match`, and
+  `ledger_miss` with `gate_status=not_evaluated`. Causal support is labeled
+  `caller_asserted`; consumers should update comparisons with the former labels.
+- Provider normalization is owned by injectable `OpenAIRequestPolicy`. Inspection
+  hashes the full normalized body, including tool descriptions, without a cache
+  hit claim. Denial memory is injector-scoped and shared with its authority gate.
+- Obsolete migration guides and overlapping Trouble notes are consolidated.
+  Published HTML paths redirect; repository source citations use the new paths.
+
 ### Added
+
+- A tracked-file hygiene check rejects local artifacts and recognizable secrets
+  with redacted findings. Dotenv files stay ignored; `.env.example` stays tracked.
+
+- Cloud OpenAI testing with `OPENAI_API_KEY` fallback and default `gpt-6-luna`.
+  Chat Completions maps completion-token limits and keeps internal graph metadata
+  out of provider requests. Static stories use memory responses; cloud tests
+  require explicit live opt-in.
+- Nested graph calls preserve frame return metadata so parents can resume from
+  committed child results. Recursive and inference-frame stories cover returns.
+- Experimental offline reports for claim/ledger review, paired task/harness
+  verdicts, and selected request-prefix fields, with attributed Fangore and
+  Taloneth walks. These helpers consume caller-supplied evidence; source
+  verification, effect dispatch, and provider cache measurement remain host work.
+- Release documentation now includes provider API reference, executable report
+  examples, and an explicit list of remaining Trouble acceptance gaps.
+
 
 - **Verify failure escalate to decompose:** after ``verify_runs`` repair is
   exhausted (or a coding work item fails), ``ProjectCodingLocalWork`` builds
@@ -252,8 +285,8 @@ live model verification against reason + judge hosts, and pyiv ≥ 1.1.1 (#32,
 
 - **Customer-facing agent skills** under `agent-skills/` (`use-mechaharness`,
   `mechaharness-observability`, `mechaharness.mdc`) plus
-  [Agent skills for your project](docs/guides/agent-skills.md) with GitHub raw
-  links on `main`, and [Host integration requirements](docs/requirements/host-integration.md)
+  [Agent skills for your project](https://rl337.org/mechaharness/guides/agent-skills.html) with GitHub raw
+  links on `main`, and [Host integration requirements](https://rl337.org/mechaharness/requirements/host-integration.html)
   (HOST-01..07). Maintainer requirement: keep them in sync when public host
   APIs / correlators / promote guidance change (see `project-docs` skill).
   Docs index has a **Downstream consumers** section.

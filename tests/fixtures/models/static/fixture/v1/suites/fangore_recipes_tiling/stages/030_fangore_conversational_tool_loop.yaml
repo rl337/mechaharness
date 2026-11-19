@@ -12,8 +12,9 @@ implementation: Agentic Recipe catalog id `conversational_tool_loop` (`Conversat
   `CliInstrumentor` verb `run_recipe` executes it via `ConversationalToolLoopRunner`, which expands `tools.subgraph`
   with nested `inference` and `tool_call` graph nodes per round. Soft points cover runner kinds, stop/max_iterations,
   message state, inference and tool dispatch. Bounds use existing `StopContract` / repeating fields.
-validation: 'Harness `user_story` scenario `expanded_rounds.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `030_fangore_conversational_tool_loop.yaml`: environment + graph +
+  steps + complete expects.
 footnotes:
 - id: ai-asst-hf07
   label: AI assistant host-friction requirements map

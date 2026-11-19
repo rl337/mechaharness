@@ -14,11 +14,13 @@ implementation: 'Agentic Recipe catalog id `guided_coding` with `environment.loc
   ci_diagnose` calls those tools then writes `.mechaharness/ci_diagnosis.md`. Production binds `HttpGitHubClient`
   via `ProjectCodingConfig.get_github_client()` / `GitHubConnectionConfig` (`MECHA_GITHUB_*` / `GITHUB_TOKEN`).
   Soft point `external_guidance` remains the human scope gate.'
-validation: 'Harness `user_story` scenario `diagnose.yaml` in suite `fangore_guided_coding`. Static mode
-  uses `coding_tool_script: ci_diagnose` against `coding_github: local_mock_ci`. Asserts `.mechaharness/ci_diagnosis.md`
-  cites the failing check, job id, and root-cause markers from the canned log. Live Completer may drive
-  the same tools with `MECHA_STORY_BACKEND=live`. Unit coverage in `tests/test_github_client.py` for `RecordingGitHubClient`
-  and `job_id_from_details_url`.'
+validation: >
+  Harness `user_story` stage `010_fangore_coding_ci_diagnose.yaml` in suite
+  `fangore_guided_coding`. Static mode uses `coding_tool_script: ci_diagnose` against
+  `coding_github: local_mock_ci`. Asserts `.mechaharness/ci_diagnosis.md` cites the failing
+  check, job id, and root-cause markers from the canned log. Live Completer may drive the same
+  tools with `MECHA_STORY_BACKEND=live`. Unit coverage in `tests/test_github_client.py` for
+  `RecordingGitHubClient` and `job_id_from_details_url`.
 footnotes: []
 kind: user_story
 environment:

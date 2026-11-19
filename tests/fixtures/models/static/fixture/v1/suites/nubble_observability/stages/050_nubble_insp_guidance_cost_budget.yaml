@@ -9,7 +9,9 @@ narrative: Nubble starts the CLI host with family `pass_through` and backend `mo
   observation expects on this scenario. [^insp-ioc-08]
 implementation: '`GeneratorCostCounters` on `GeneratorRunRecord` exposed via `inspect().cost` (local_steps,
   guidance_yields, resumes, rejected_resumes).'
-validation: 'Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.'
+validation: >
+  Harness `user_story` stage `050_nubble_insp_guidance_cost_budget.yaml`: environment + graph +
+  steps + complete expects.
 footnotes:
 - id: insp-ioc-08
   label: Durable graph generators (R-IOC-BUDGET)

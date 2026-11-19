@@ -10,8 +10,9 @@ narrative: Fangore starts the CLI host with family `react` and backend `mock`. F
 implementation: '`UserStoryScenario.environment.family` / `tool_loop.family=react` select `ReactHarness`
   via `_CliToolLoopConfig.get_harness_class` (Config DI). Story harness scripts Action/Final Answer turns
   on `ScriptedInference`. Emits the same EventLog inference/tool stream as other families.'
-validation: 'Harness `user_story` scenario `react_tool_round.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `040_fangore_harness_family_react.yaml`: environment + graph +
+  steps + complete expects.
 footnotes: []
 kind: user_story
 environment:

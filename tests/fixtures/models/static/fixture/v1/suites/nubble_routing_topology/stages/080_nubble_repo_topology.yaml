@@ -1,17 +1,15 @@
 id: nubble_repo_topology
 suite: nubble_routing_topology
 persona: nubble
-title: Budget repository topology maps and fall back when stale
-narrative: Nubble starts the CLI host with family `pass_through` and backend `mock`. Nubble feeds the
-  context compiler a budgeted repository map. When the map is over budget or stale, the system must omit
-  paths honestly and still allow source inspection fallback — not pretend the map is complete.
-implementation: '`RepositoryTopologyProvider` builds budgeted `TopologyView` entries with omissions and
-  invalidation; stale maps fall back to source inspection.
-
-
-  Covers: CTX-08.'
-validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard expects
-  on declared observation keys.
+title: Index supplied repository sources within a budget
+narrative: Nubble starts the CLI host with pass_through and mock. He supplies two source files and
+  a revision label to repo_topology with a budget of one entry. He checks that a.py is indexed, b.py
+  is explicitly omitted, and revision_origin says caller_supplied. This walk checks budgeted indexing;
+  it does not authenticate the revision or exercise stale-map recovery.
+implementation: RepoTopologyParams validates supplied files, revision label and budget. RepositoryTopologyProvider.index
+  returns entries and omissions from those actual inputs.
+validation: Harness `user_story` drives product verb(s) with environment `pass_through`/`mock`; hard
+  expects on declared observation keys.
 footnotes: []
 kind: user_story
 environment:
@@ -21,9 +19,21 @@ environment:
     type: temp
 steps:
 - do:
-    repo_topology: {}
+    repo_topology:
+      files:
+        a.py: "def foo():\n  pass\n"
+        b.py: x
+      revision: r1
+      budget: 1
 complete:
   expect:
   - kind: 'true'
     key: has_omissions_or_entries
+  - kind: equals
+    key: omissions
+    value:
+    - b.py
+  - kind: equals
+    key: revision_origin
+    value: caller_supplied
 cleanup: []

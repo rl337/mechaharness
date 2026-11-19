@@ -8,9 +8,11 @@ narrative: 'Fangore starts the CLI host with family `pass_through` and backend `
   answer and confidence floor.'
 implementation: 'Product CLI verb `judge` (`JudgeVerb`): JudgeRequest over source+claim state via injected
   JudgeProvider. Code-owned claim_verified = selected==supported ∧ conf≥floor.'
-validation: 'Harness `user_story` scenario `missing_source.yaml`: judge step + response.json cassette;
-  hard expects on claim_verified / escalate. Live (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same
-  scenario via `SystemOneJudgeProvider` (cassette-exact token softens; behavioral expects hard).'
+validation: >
+  Harness `user_story` stage `060_fangore_jev_citation_missing_source.yaml`: judge step +
+  response.json cassette; hard expects on claim_verified / escalate. Live
+  (`MECHA_STORY_BACKEND=live` + `MECHA_JUDGE_*`): same scenario via `SystemOneJudgeProvider`
+  (cassette-exact token softens; behavioral expects hard).
 footnotes: []
 kind: user_story
 environment:

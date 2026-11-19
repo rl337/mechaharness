@@ -27,6 +27,7 @@ from mechaharness.core.types import (
     Usage,
 )
 from mechaharness.inference.base import InferenceStrategy
+from mechaharness.inference.openai_request import OpenAIRequestPolicy, PreparedOpenAIRequest
 from mechaharness.inference.openai_wire import (
     OpenAIChatCompletionChunk,
     OpenAIChatCompletionRequest,
@@ -129,47 +130,6 @@ def _wire_message_to_domain(message: OpenAIResponseMessage) -> ChatMessage:
     )
 
 
-# Completer ``extra`` keys used by MechaHarness runners — never forward to HTTP.
-_MH_COMPLETION_EXTRA_DENY = frozenset(
-    {
-        "node_id",
-        "script_key",
-        "snapshot_id",
-        "invocation_id",
-        "parent_node_id",
-        "execution_node_id",
-        "run_id",
-    }
-)
-
-# OpenAI Chat Completions params commonly set via ``request.extra``.
-_OPENAI_BODY_EXTRA_ALLOW = frozenset(
-    {
-        "reasoning_effort",
-        "max_completion_tokens",
-        "response_format",
-        "tool_choice",
-        "parallel_tool_calls",
-        "stream_options",
-        "user",
-        "seed",
-        "top_p",
-        "n",
-        "frequency_penalty",
-        "presence_penalty",
-        "logit_bias",
-        "logprobs",
-        "top_logprobs",
-        "modalities",
-        "audio",
-        "prediction",
-        "store",
-        "metadata",
-        "service_tier",
-    }
-)
-
-
 def domain_request_to_wire(
     request: CompletionRequest,
     *,
@@ -200,7 +160,32 @@ def wire_response_to_domain(wire: OpenAIChatCompletionResponse) -> CompletionRes
 
 
 class OpenAICompatStrategy(InferenceStrategy):
-    """HTTP client for any OpenAI Chat Completions compatible endpoint."""
+    """HTTP client for OpenAI Chat Completions and compatible local endpoints.
+
+    Hosts inject an ``AsyncHttpClient`` and own its lifetime. Settings must
+    contain the resolved endpoint and credentials; ``apply_backend_defaults``
+    resolves ``OPENAI_API_KEY`` for the cloud backend. See the OpenAI setup
+    guide for explicit live-test opt-in and local endpoint configuration.
+
+    Example (in-memory HTTP response; no API credentials or network needed):
+        >>> import asyncio
+        >>> from pyiv.http import MemoryAsyncHttpClient
+        >>> client = MemoryAsyncHttpClient()
+        >>> client.add("POST", "http://example.invalid/v1/chat/completions", json={
+        ...     "id": "demo", "object": "chat.completion", "created": 0,
+        ...     "model": "demo", "choices": [{"index": 0,
+        ...         "message": {"role": "assistant", "content": "ok"},
+        ...         "finish_reason": "stop"}],
+        ... })
+        >>> settings = Settings(model="demo", base_url="http://example.invalid/v1",
+        ...                     api_key=None)
+        >>> strategy = OpenAICompatStrategy(settings, client, timeout=5)
+        >>> request = CompletionRequest(model="demo", messages=[
+        ...     ChatMessage(role=Role.USER, content="hi")])
+        >>> response = asyncio.run(strategy.complete(request))
+        >>> response.message.content
+        'ok'
+    """
 
     name = "openai_compat"
 
@@ -208,6 +193,7 @@ class OpenAICompatStrategy(InferenceStrategy):
         self,
         settings: Settings,
         client: AsyncHttpClient,
+        request_policy: OpenAIRequestPolicy | None = None,
         *,
         timeout: float | None = None,
     ) -> None:
@@ -223,6 +209,9 @@ class OpenAICompatStrategy(InferenceStrategy):
 
             raw = os.environ.get("MECHA_HTTP_TIMEOUT_SECONDS")
             self._timeout = float(raw) if raw else 120.0
+        self.request_policy = (
+            request_policy if request_policy is not None else OpenAIRequestPolicy()
+        )
         self._owns_client = False
         self._client = client
 
@@ -245,45 +234,21 @@ class OpenAICompatStrategy(InferenceStrategy):
             "auth": "api_key" if self.api_key else "none",
         }
 
+    def prepare_request(
+        self, request: CompletionRequest, *, stream: bool | None = None
+    ) -> PreparedOpenAIRequest:
+        """Normalize once for transport and fingerprint the same full JSON body."""
+        wire = domain_request_to_wire(request, default_model=self.default_model, stream=stream)
+        return self.request_policy.prepare(
+            wire.model_dump(mode="json", exclude_none=True),
+            request.extra,
+            endpoint=self.base_url,
+        )
+
     def _build_body(
         self, request: CompletionRequest, *, stream: bool | None = None
     ) -> dict[str, Any]:
-        wire = domain_request_to_wire(
-            request, default_model=self.default_model, stream=stream
-        )
-        body = wire.model_dump(mode="json", exclude_none=True)
-        model_id = str(body.get("model") or self.default_model)
-        model_l = model_id.lower()
-        cloud_openai = "api.openai.com" in (self.base_url or "").lower()
-        luna = "luna" in model_l
-        if request.extra:
-            extras = {
-                k: v
-                for k, v in request.extra.items()
-                if k not in _MH_COMPLETION_EXTRA_DENY
-            }
-            # Cloud OpenAI rejects unknown fields; local compat servers often ignore.
-            if luna or cloud_openai:
-                extras = {
-                    k: v for k, v in extras.items() if k in _OPENAI_BODY_EXTRA_ALLOW
-                }
-            body.update(extras)
-        # Luna Chat Completions allows function calling only with
-        # reasoning_effort=none; do not override an explicit extra.
-        if (
-            request.tools
-            and luna
-            and "reasoning_effort" not in body
-        ):
-            body["reasoning_effort"] = "none"
-        # Newer OpenAI models (incl. Luna) reject max_tokens on Chat Completions.
-        if (
-            (luna or cloud_openai)
-            and "max_tokens" in body
-            and "max_completion_tokens" not in body
-        ):
-            body["max_completion_tokens"] = body.pop("max_tokens")
-        return body
+        return self.prepare_request(request, stream=stream).body
 
     async def complete(self, request: CompletionRequest) -> CompletionResponse:
         body = self._build_body(request)
@@ -304,9 +269,7 @@ class OpenAICompatStrategy(InferenceStrategy):
         except InferenceError:
             raise
         except Exception as exc:
-            raise InferenceError(
-                f"Malformed OpenAI-compat response: {resp.text!r}"
-            ) from exc
+            raise InferenceError(f"Malformed OpenAI-compat response: {resp.text!r}") from exc
 
     async def stream(self, request: CompletionRequest) -> AsyncIterator[str]:
         body = self._build_body(request, stream=True)

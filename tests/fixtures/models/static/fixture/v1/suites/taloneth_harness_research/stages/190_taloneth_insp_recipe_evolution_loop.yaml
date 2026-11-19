@@ -15,8 +15,9 @@ implementation: '`recipe_evolution.py`: `RecipeTraceSummary` / `SoftBindingSugge
   picks over `ScoredCandidate` results built from `ObjectivePolicy` / `aggregate_objective` with a deterministic
   tie-break. Pure structure for hosts such as an AI assistant project; evaluation reuses `ResearchLab`
   and the registry final-test gate.'
-validation: 'Harness `user_story` scenario `recipe_evolution_candidates.yaml`: environment + graph + steps
-  + complete expects.'
+validation: >
+  Harness `user_story` stage `190_taloneth_insp_recipe_evolution_loop.yaml`: environment + graph
+  + steps + complete expects.
 footnotes:
 - id: insp-sr-06
   label: Self-revising recipe evolution (MH-SR-06)

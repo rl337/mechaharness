@@ -60,12 +60,12 @@ class LayerCase:
             infrastructure=False,
         ),
         LayerCase(
-            label="both_fail_with_trace_is_observed",
+            label="both_fail_with_trace_is_caller_asserted",
             kwargs={"task": "fail", "harness": "fail", "trace_supports_cause": True},
             task="fail",
             harness="fail",
             clean=False,
-            attribution="observed",
+            attribution="caller_asserted",
             infrastructure=False,
         ),
         LayerCase(

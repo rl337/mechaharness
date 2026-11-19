@@ -14,8 +14,9 @@ implementation: '`mechaharness.node_component.node_components_for` derives `Node
   catalog in `docs/reference/node-components.md` (events, soft points, child_graph, stop_contract, effect_state,
   budget_level). Every component requires `parent_node_id`. Soft points on Agentic Recipes appear as `soft_point`
   components.'
-validation: 'Harness `user_story` scenario `node_components.yaml`: environment + graph + steps + complete
-  expects.'
+validation: >
+  Harness `user_story` stage `190_fangore_node_components.yaml`: environment + graph + steps +
+  complete expects.
 footnotes:
 - id: ai-asst-nc-req
   label: Dynamic tool graph and node components

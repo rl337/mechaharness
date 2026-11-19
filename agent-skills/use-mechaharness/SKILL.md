@@ -107,3 +107,16 @@ Prefer `promote_recipe`. Pass Config-bound `EvolutionCampaignHooks` so
 - DI guide: https://rl337.org/mechaharness/guides/dependency-injection.html
 - Inspiration primitives: `docs/reference/inspiration-primitives.md`
 - Host integration requirements: `docs/requirements/host-integration.md`
+
+## Research report and provider boundaries
+
+- Reuse `Claim`, `Evidence`, and `EvaluationOutcome` for evaluated evidence.
+  `LayeredEvaluation` composes caller-supplied claims; causal flags stay
+  `caller_asserted`.
+- `AdmissionReport` reports `ledger_match`/`ledger_miss` with
+  `gate_status=not_evaluated`. Enforce actual effects through `AuthorityGate`.
+- Override `get_openai_request_policy()` for custom provider normalization.
+  Request-body digests describe transport fields, not cache hits or tenant-safe
+  cache keys.
+- `get_denial_store()` accepts a class or instance. Default denial memory is
+  injector-scoped; do not cache it on Config or call a sibling hook to obtain it.

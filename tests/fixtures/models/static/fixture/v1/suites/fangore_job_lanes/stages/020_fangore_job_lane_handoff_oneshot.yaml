@@ -7,7 +7,8 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   observes the shared ref and is denied the unshared one; a ghost handoff refuses.
 implementation: '`JobLaneBroker.handoff` consumes `HandoffRecord.evidence_refs`; verbs `lane_publish`
   / `lane_handoff` / `lane_observe`.'
-validation: Harness `user_story` scenario `handoff_oneshot.yaml`.
+validation: >
+  Harness `user_story` stage `020_fangore_job_lane_handoff_oneshot.yaml`.
 footnotes:
 - id: jl-broker-handoff
   label: Job lane broker requirements

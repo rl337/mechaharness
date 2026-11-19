@@ -1,138 +1,43 @@
-# MechaHarness docs
+# MechaHarness documentation
 
 ![MechaHarness](./logo.png)
 
-MechaHarness is a Python **agent harness** for hosts that must compose
-inference safely — not a thin chat-client wrapper. Provider I/O, agent-loop
-policy, cost accounting, and telemetry are first-class seams so you can swap
-models and policies without rewriting the run path, and so agents cannot
-quietly burn unbounded spend.
+MechaHarness composes local or cloud inference with agent-loop policy, tool
+grants, cost accounting, event logs, and resumable graphs. The
+[published documentation](https://rl337.org/mechaharness/) includes the generated
+Python API reference.
 
-Published site: [https://rl337.org/mechaharness/](https://rl337.org/mechaharness/)
+## Start here
 
-## Founding principles
+- [Install and run](./guides/install.md)
+- [OpenAI and local model setup](./guides/openai-local.md)
+- [Configure a host with dependency injection](./guides/dependency-injection.md)
+- [Architecture](./architecture.md)
+- [Host-agent skills](./guides/agent-skills.md)
 
-1. **Modular through dependency injection.** Wiring is pyiv
-   `MechaHarnessConfig` and constructor injection. Hosts subclass Config hooks
-   to bind strategies, harnesses, connections, and providers — they do not fork
-   closed enums or grow string registries. See
-   [Dependency injection](./guides/dependency-injection.md) and
-   [Architecture](./architecture.md).
+## Use the library
 
-2. **Multi-model and lanes are native.** Reason, judge, and media (plus
-   host-named lanes) are first-class via `InferenceEnvironment.active_lane()`.
-   Generative work yields a `Completion`; closed-world decide yields a
-   `Judgement`; media yields a `Generation`. Swap `InferenceStrategy` or
-   `JudgeProvider` without rewriting the harness loop. See
-   [Judge](./reference/judge.md) and [Architecture](./architecture.md).
+- [CLI](./reference/cli.md), [HTTP API](./reference/api.md)
+- [Agentic Recipes](./reference/graph-templates.md)
+- [Durable generators](./reference/durable-graph-generators.md),
+  [stepped execution](./reference/stepped-graph-execution.md)
+- [Access](./reference/access.md), [cost](./reference/cost.md),
+  [budget](./reference/budget.md), [events](./reference/events.md)
+- [Judge lane](./reference/judge.md), [job lanes](./reference/job-lanes.md)
+- [Experimental research reports](./api/research_helpers.rst)
 
-3. **Cost lives in the object model.** Ability-scaled units and
-   `CostAccountant` sit on the harness path so every inference and tool
-   invocation is priced as it happens — designed to keep agents from going AWOL
-   with unbounded spend. See [Cost](./reference/cost.md).
+## Acceptance and maintenance
 
-4. **Event logging and telemetry are built in.** A queryable `EventLog` records
-   agent lifecycle, inference, tools, cost, and access checks on every run —
-   telemetry is part of the product surface, not a bolt-on sink. See
-   [Event log](./reference/events.md).
+- [User stories](./guides/user-stories.md)
+- [Author a story](./guides/authoring-user-stories.md)
+- [Coding suites](./guides/coding-delegate-suites.md)
+- [Gastronomic comparison](./guides/gastronomic-comparison.md)
+- [Prepare a release](./guides/release-preparation.md)
+- [Host requirements](./requirements/host-integration.md)
+- [Repository hygiene](./requirements/repository-secrets-hygiene.md)
+- [Inspiration import guide](./reference/inspiration-primitives.md)
+- [Trouble research, attribution, and open requirements](./inspiration/trouble.md)
 
-Also in the core model: deny-by-default grants and `CompoundPolicy`
-([Access control](./reference/access.md)), **job lanes** — pipeline
-identities with brokered run sequences and authorized observe
-([Job lanes](./reference/job-lanes.md)), host-extendable open identity
-for events and grants ([Architecture](./architecture.md)), **Agentic
-Recipes** — reusable control subgraphs on a `GraphTemplate` substrate
-([Graph templates and Agentic Recipes](./reference/graph-templates.md)),
-and **durable graph generators** — the primary host-facing driven-execution
-façade for long-running, judgment-bearing graphs
-([Durable graph generators](./reference/durable-graph-generators.md)).
-
-## Downstream consumers
-
-Hosts that **depend on** MechaHarness (consoles, warehouses, product agents)
-should start here — not in the maintainer `.cursor/skills/` tree.
-
-| Page | Description |
-|------|-------------|
-| [Agent skills for your project](./guides/agent-skills.md) | Install `use-mechaharness` / observability skills + `mechaharness.mdc` from GitHub `main` |
-| [Host integration requirements](./requirements/host-integration.md) | HOST-01..07: Config-first, `host_apis`, promote path, open identity, OBS export |
-| [Repository secrets hygiene](./requirements/repository-secrets-hygiene.md) | SEC-01..05: no auth / personal paths / lab endpoints in git |
-| [`agent-skills/` on GitHub](https://github.com/rl337/mechaharness/tree/main/agent-skills) | Copy-paste skill sources for Cursor/Codex in *your* repo |
-
-Related: [Dependency injection](./guides/dependency-injection.md),
-[Inspiration primitives](./reference/inspiration-primitives.md),
-[Event analytics schema](./requirements/event-analytics-schema.md).
-
-## Contents
-
-| Page | Description |
-|------|-------------|
-| [Architecture](./architecture.md) | Inference Strategy, harness hierarchy, recipes, pyiv Config |
-| [Inspiration requirements map](./inspiration/requirements-map.md) | Blog-inspired reqs → modules → library vs client ownership |
-| [Recipes and decision plane](./requirements/recipes-and-decision-plane.md) | Agentic Recipes (`GraphTemplate` substrate), DP/RT reference recipes |
-| [Dependency injection](./requirements/dependency-injection.md) | Config bind + inject; no getattr caches or `get_*` composition (DI-01..08) |
-| [Dynamic tool graph and node components](./requirements/dynamic-tool-graph.md) | Graph node vs node component; HF-05/07/08; kinds ⊆ existing surfaces |
-| [Durable graph generators](./requirements/durable-graph-generators.md) | Driven yields / guidance IoC (DG-01..13); primary long-run façade |
-| [Transactional durable resume](./requirements/transactional-durable-resume.md) | CheckpointStore, SQLite, effect reconciliation (DR-01..12) |
-| [Stepped graph execution](./requirements/stepped-graph-execution.md) | Pause/continue between nodes; until/before; soft enter (SG-01..10) |
-| [Event analytics schema](./requirements/event-analytics-schema.md) | Near-3NF fact/dim contract for warehouse reconstruction of graph decisions |
-| [Host integration](./requirements/host-integration.md) | Normative contract for apps that consume MechaHarness (HOST-01..07) |
-| [Repository secrets hygiene](./requirements/repository-secrets-hygiene.md) | No auth, personal paths, or lab-private endpoints in git (SEC-01..05) |
-| [Agent skills (downstream)](./guides/agent-skills.md) | Customer-facing Cursor skills for host repos |
-| [Inspiration primitives](./reference/inspiration-primitives.md) | Leaf → map ID → DI? → blessed import |
-| [AI assistant host-friction inspiration](./inspiration/ai-assistant-host-friction-inspiration.md) | AI assistant host HF pack provenance; console consumer vs MH ownership |
-| [AI assistant host-friction requirements map](./inspiration/ai-assistant-host-friction-requirements-map.md) | HF-* → modules → user stories |
-| [WalkingLabs Harness Engineering inspiration](./inspiration/walkinglabs-harness-engineering-inspiration.md) | 50-point source-attributed audit of the online book against current MechaHarness |
-| [Eval research brief](./inspiration/eval-research.md) | Anthropic-inspired research handoff for reusable evaluator/evidence/verdict primitives |
-| [WalkingLabs + eval requirements map](./inspiration/walkinglabs-eval-requirements-map.md) | Backlog IDs → modules → user stories for WalkingLabs P0–P2 and eval substrate |
-| [Multi-harness RL inspiration](./inspiration/multi-harness-rl-inspiration.md) | FineEnvs / Hugging Face multi-harness RL audit → MH-MHRL requirements |
-| [FineEnvs MH-MHRL requirements map](./inspiration/fineenvs-mh-mhrl-requirements-map.md) | MH-MHRL IDs → modules → user stories for evaluation/rollout/capture gaps |
-| [Jev typed-judgment inspiration](./inspiration/jev-typed-judgment-inspiration.md) | Typed decision calls, Jev attribution, MH-JEV foundation + domain packs |
-| [Jev typed-judgment requirements map](./inspiration/jev-typed-judgment-requirements-map.md) | MH-JEV IDs → judge/`decision_plane` modules → user stories |
-| [Personal agent reliability inspiration](./inspiration/personal-agent-reliability-inspiration.md) | Always-on personal agent execution patterns (MH-PA-*) |
-| [Personal agent reliability requirements map](./inspiration/personal-agent-reliability-requirements-map.md) | MH-PA IDs → modules → user stories |
-| [OpenAI Dots agent safety inspiration](./inspiration/openai-dots-agent-safety-inspiration.md) | Scoped execution and agent safety (MH-DOTS-*) |
-| [OpenAI Dots agent safety requirements map](./inspiration/openai-dots-agent-safety-requirements-map.md) | MH-DOTS IDs → modules → user stories |
-| [Self-revising recipe evolution inspiration](./inspiration/self-revising-recipe-evolution.md) | Evaluation-driven recipe evolution (proposal; unverified source) |
-| [Self-revising recipe requirements map](./inspiration/self-revising-recipe-requirements-map.md) | MH-SR IDs → modules → user stories |
-| [Durable graph generators inspiration](./inspiration/durable-graph-generators-inversion-of-control.md) | Frontier/human/scripted drivers, ordered yields, MCP as adapter |
-| [Durable graph generators requirements map](./inspiration/durable-graph-generators-requirements-map.md) | R-IOC / DG IDs → modules → user stories |
-| [Video production audited-infer migration](./inspiration/video-production-audited-infer-migration.md) | Host alias `ideation.infer.accept` → `audited_infer_accept` |
-| [Trouble context attrition](./inspiration/trouble-context-attrition-2026-10-29.md) | Structured tool evidence loss at S1/S4; Fangore MH-CTX-ATTR-01/02 |
-| [Trouble resource scope and memory safety](./inspiration/trouble-realm-resource-scope-and-memory-safety-2026-11-03.md) | MH-REALM-01 / MH-EAL-01; story `fangore_admit_authority` |
-| [Trouble prefix-cache regression](./inspiration/trouble-prefixwise-cache-regression-2026-11-10.md) | MH-CACHE-01; story `taloneth_request_prefix` |
-| [Trouble trace and requirement integrity](./inspiration/trouble-trace-and-requirement-integrity-2026-11-17.md) | MH-TRACE-01 / MH-REQ-01; stories `taloneth_layered_eval`, `fangore_admit_authority` |
-| [Install & quick start](./guides/install.md) | Environment setup and first run |
-| [Local OpenAI-compat (`openai_local`)](./guides/openai-local.md) | Named OpenAI-compat local backend + cloud OpenAI / Luna live tests |
-| [User stories](./guides/user-stories.md) | Persona narratives (Nubble, Fangore, Taloneth) + dual-mode suite |
-| [Gastronomic comparison](./guides/gastronomic-comparison.md) | Fair guided_coding vs gastronomic trial protocol |
-| [User-story migration batches](./guides/user-story-migration-batches.md) | Convert remaining `cli` / probe stories to `user_story` YAML |
-| [User-story instrumentation migration](./guides/user-story-instrumentation-migration.md) | Wave 3: replace case-bag verbs with soft-bind + cassette/live stories |
-| [User-story recipe expansion](./guides/user-story-recipe-expansion.md) | Wave 4+: recipe-first groups G0–G7; re-eval of prior waves |
-| [Dependency injection](./guides/dependency-injection.md) | Config hooks vs OpenAPI `run()` |
-| [CLI reference](./reference/cli.md) | `mechaharness` commands |
-| [HTTP API reference](./reference/api.md) | FastAPI routes |
-| [Event log](./reference/events.md) | Structured `EventLog` emit / query |
-| [Cost](./reference/cost.md) | Ability units, `CostAccountant`, `core:cost` |
-| [Access control](./reference/access.md) | Namespaced grants, `AccessControl`, host recipe-run kwargs |
-| [Job lanes](./reference/job-lanes.md) | `JobLane` / `JobLaneBroker`: run sequences, observe, exposure |
-| [Job lane broker requirements](./requirements/job-lane-broker.md) | JL-01..10: lane bags, selectors, grants, story YAML |
-| [Stepped graph execution](./reference/stepped-graph-execution.md) | `RunControl` / `graph_walk`: until, one_step, soft enter |
-| [Budget](./reference/budget.md) | Soft/hard spend, `BudgetPolicy`, recipe-run ceilings |
-| [Judge](./reference/judge.md) | `judge()`, System One, JudgementPolicy, lanes |
-| [Graph templates and Agentic Recipes](./reference/graph-templates.md) | Recipe catalog + `GraphTemplate` substrate + soft points |
-| [Durable graph generators](./reference/durable-graph-generators.md) | `DurableGraphGenerator` start/resume/inspect; ScriptedDriver |
-| [CLI universe](./reference/cli-universe.md) | Concrete host CLI graph + `CliInstrumentor`; story `kind: cli` |
-| [Node components](./reference/node-components.md) | Sub-node kinds (events/soft points/nest); query + traversal |
-
-## Mental model
-
-1. **Inference Strategy** — pluggable backends (`openai`, `anthropic`, `lmstudio`, `vllm`, `ollama`, …)
-2. **Harness family** — agent-loop policy (`pass_through`, `tool_loop`, `react`, `openai_tools`, `anthropic_tools`)
-3. **Durable graph generator** — primary long-run façade: drivers advance ordered yields over registered recipes
-4. **Execution graph** — `GraphExecutor` walks nodes; generator drives it to the next committed yield
-5. **Agentic Recipes** — reusable control subgraphs (`GraphTemplate` substrate); tile into graphs
-6. **Frontends** — Typer CLI and FastAPI share `RunRequest` / `mechaharness.factory.run`; generator maps to HTTP/CLI/MCP
-7. **DI** — `MechaHarnessConfig` binds interfaces; see [Dependency injection](./guides/dependency-injection.md)
-
-Normalized types in `mechaharness.core.types` are the portable contract for future language bindings.
+The published site groups every requirement and inspiration note separately
+from task-oriented integration guides. Inspiration records source claims;
+current API contracts and acceptance stories define implemented behavior.

@@ -7,8 +7,9 @@ narrative: Fangore starts the CLI host with family `pass_through` and backend `m
   `run_recipe` and verifies production still controls while both outcomes are recorded and disagree. [^rc-dp-shadow]
 implementation: Agentic Recipe `decision_plane` via `ShadowAskRunner` / `compare_shadow_decision` semantics.
   Product CLI verb `run_recipe` with `DecisionPlaneRecipeAdapter`.
-validation: Harness `user_story` scenario `shadow_compare.yaml` drives `run_recipe`; hard expects on production_action
-  / agreement keys.
+validation: >
+  Harness `user_story` stage `080_fangore_decision_plane_shadow.yaml` drives `run_recipe`; hard
+  expects on production_action / agreement keys.
 footnotes:
 - id: rc-dp-shadow
   label: Recipes requirements DP-07

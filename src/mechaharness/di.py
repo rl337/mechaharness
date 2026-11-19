@@ -110,6 +110,7 @@ from mechaharness.inference.base import InferenceStrategy
 from mechaharness.inference.judge import JudgeProvider
 from mechaharness.inference.mock import MockInferenceStrategy
 from mechaharness.inference.openai_compat import OpenAICompatStrategy
+from mechaharness.inference.openai_request import OpenAIRequestPolicy
 from mechaharness.inference.systemone import SystemOneJudgeProvider
 from mechaharness.inference_capture import InferenceCapture, empty_inference_capture
 from mechaharness.job_lane_broker import JobLaneBroker
@@ -400,6 +401,7 @@ class MechaHarnessConfig(Config):
         self._register_binding(Clock, self.get_clock())
         self._register_binding(LoggerFactory, self.get_logger_factory())
         self.register(AsyncHttpClient, AsyncUrllibHttpClient, singleton=True)
+        self._register_binding(OpenAIRequestPolicy, self.get_openai_request_policy())
 
         self.register_instance(Settings, self.get_settings())
         self.register_instance(HarnessConfig, self.get_harness_config())
@@ -433,7 +435,17 @@ class MechaHarnessConfig(Config):
         self._register_binding(
             EvolutionCampaignHooks, self.get_evolution_campaign_hooks()
         )
-        self._register_binding(DenialStore, self.get_denial_store())
+        denial_binding = self.get_denial_store()
+        if isinstance(denial_binding, type):
+            self._register_binding(denial_binding, denial_binding)
+
+            def make_denial_store(injector: Injector) -> DenialStore:
+                return cast(DenialStore, injector.inject(denial_binding))
+
+            self.register(DenialStore, make_denial_store, singleton=True)
+        else:
+            self.register_instance(type(denial_binding), denial_binding)
+            self.register_instance(DenialStore, denial_binding)
         self._register_binding(
             ToolResultFreshnessPolicy, self.get_tool_result_freshness_policy()
         )
@@ -866,16 +878,16 @@ class MechaHarnessConfig(Config):
         """Host-owned evolution campaign seams (default: no-op)."""
         return NoopEvolutionCampaignHooks()
 
-    def get_denial_store(self) -> DenialStore:
+    def get_openai_request_policy(self) -> OpenAIRequestPolicy | type[OpenAIRequestPolicy]:
+        """Provider capabilities/normalization; override for custom OpenAI-compatible servers."""
+        return OpenAIRequestPolicy
+
+    def get_denial_store(self) -> DenialStore | type[DenialStore]:
         """Denial memory shared by the authority gate (default: process-local).
 
         Hosts bind a durable store; the in-memory default is not restart-durable.
         """
-        existing = getattr(self, "_denial_store", None)
-        if existing is None:
-            existing = InMemoryDenialStore()
-            self._denial_store = existing
-        return existing
+        return InMemoryDenialStore
 
     def get_authority_gate(self) -> AuthorityGate | type[AuthorityGate] | None:
         """Optional ``AuthorityGate`` override. ``None`` → inject AccessControl + DenialStore.

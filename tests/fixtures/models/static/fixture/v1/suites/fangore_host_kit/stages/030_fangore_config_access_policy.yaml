@@ -10,8 +10,9 @@ implementation: '`MechaHarnessConfig` hooks (`get_access_policy`, `get_access_co
   bind host permission packs through pyiv injection. Story `environment.access_policy` / `grants` override
   those hooks; product verb `access_check` observes Config-injected `AccessControl`. Hosts also pass grants
   on `run_recipe(...)`.'
-validation: Harness `user_story` scenario `config_access_policy.yaml` drives `access_check` with environment
-  compound policy; expects allows_compound / denies_missing.
+validation: >
+  Harness `user_story` stage `030_fangore_config_access_policy.yaml` drives `access_check` with
+  environment compound policy; expects allows_compound / denies_missing.
 footnotes: []
 kind: user_story
 environment:

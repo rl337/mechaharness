@@ -4,17 +4,19 @@ persona: taloneth
 title: Name why a request prefix changed, without keeping the prompt
 narrative: >
   Taloneth starts the CLI host with family pass_through and backend mock. She
-  compares four pairs of otherwise identical inference requests. Shuffling the
+  compares five pairs of otherwise identical inference requests. Shuffling the
   tool list is an avoidable tool_reserialize miss, and sorting the tools makes
   the canonical prefix match. Putting a clock reading into the stable policy
   block is volatile_system. Bumping the policy version is a legitimate
   policy_change and must not be hidden to save cache. When two requests match
   but the provider sent no cache counters, the cause stays unknown. None of
-  the reports store the raw prompt.
+  the reports store the raw prompt. A changed tool schema stays unknown instead
+  of being mistaken for a matching request.
 implementation: >
-  prefix_snapshot and classify_prefix_change in mechaharness.request_prefix,
-  exposed as the product verb request_prefix_compare. Extends the existing
-  CTX-09 cache layout; it does not replace compile_cache_aware_layout.
+  prefix_snapshot and classify_prefix_change in mechaharness.request_prefix, exposed as
+  request_prefix_compare, compare selected caller-supplied fields offline. Tool hashes include
+  name and parameters only. No adapter integration or provider cache measurement is exercised.
+  The existing CTX-09 layout compiler is unchanged.
 validation: >
   Harness user_story stage 280_taloneth_request_prefix drives
   request_prefix_compare. Unit cases in tests/test_request_prefix.py cover a
@@ -22,7 +24,7 @@ validation: >
 footnotes:
 - id: insp-cache-01
   label: Trouble prefix-cache regression (MH-CACHE-01)
-  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-prefixwise-cache-regression-2026-11-10.md
+  url: https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble.md#request-prefix-caching
   note: Attribute avoidable prefix misses without storing prompt text
 kind: user_story
 environment:
@@ -92,6 +94,20 @@ steps:
           policy: Follow the workspace policy.
           policy_version: "1"
           dynamic: write the file
+      - name: schema
+        provider_metrics: true
+        before:
+          tools: [{name: read}]
+          policy: Follow the workspace policy.
+          policy_version: '1'
+          dynamic: Write the file.
+        after:
+          tools:
+          - name: read
+            parameters: {type: object, required: [path]}
+          policy: Follow the workspace policy.
+          policy_version: '1'
+          dynamic: Write the file.
 complete:
   expect:
   - {kind: equals, key: shuffle_cause, value: tool_reserialize}
@@ -104,4 +120,10 @@ complete:
   - {kind: equals, key: revision_legitimate, value: true}
   - {kind: equals, key: blind_cause, value: unknown}
   - {kind: equals, key: raw_prompt_stored, value: false}
+  - kind: equals
+    key: schema_cause
+    value: unknown
+  - kind: equals
+    key: schema_block
+    value: tools
 cleanup: []

@@ -9,7 +9,9 @@ narrative: Taloneth starts the CLI host with family `pass_through` and backend `
   observation expects on this scenario. [^insp-ioc-04]
 implementation: '`ScriptedDriver` / `durable_generator_host.run_soft_point_session` run start/resume with
   soft-point bindings and `strict_unexpected_advice`.'
-validation: 'Harness `user_story` scenario `session.yaml`: environment + graph + steps + complete expects.'
+validation: >
+  Harness `user_story` stage `250_taloneth_insp_scripted_driver_replay.yaml`: environment +
+  graph + steps + complete expects.
 footnotes:
 - id: insp-ioc-04
   label: Durable graph generators (R-IOC-REPLAY)
