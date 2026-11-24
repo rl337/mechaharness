@@ -1,0 +1,251 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trouble: distinguish coordination from extra inference compute &mdash; MechaHarness 0.18.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Video production project → MechaHarness: audited infer-accept migration" href="video-production-audited-infer-migration.html" />
+    <link rel="prev" title="Trouble research and implementation" href="trouble.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/agent-skills.html">Agent skills for your project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guides/coding-delegate-suites.html">Coding-delegate suites (development graph)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/release-preparation.html">Prepare and publish a release</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/gastronomic-comparison.html">Gastronomic comparison protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/authoring-user-stories.html">Write an acceptance story</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/budget.html">Budget (soft / hard spend)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli-universe.html">CLI universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/durable-graph-generators.html">Durable graph generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/audited-infer-accept.html">Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/bounded-retry.html">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-decomposition.html">Template: change_decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-execution.html">Template: change_execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-verification.html">Template: change_verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/contract-extraction.html">Template: contract_extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/conversational-tool-loop.html">Conversational tool loop (<code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/decision-plane.html">Typed decision plane (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/development-acceptance.html">Template: development_acceptance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/environment-repair.html">Template: environment_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/failure-diagnosis.html">Template: failure_diagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/fan-out-aggregate.html">Template: fan_out_aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-comparison.html">Template: gastronomic_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-guided-development.html">Template: gastronomic_guided_development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/guided-coding.html">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/independent-review.html">Template: independent_review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/instruction-todo-plan.html">Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/produce-critique-refine.html">Template: produce_critique_refine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/safety-eval.html">Template: safety_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/strategy-revision.html">Template: strategy_revision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/verify-repair.html">Template: verify_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/workspace-discovery.html">Template: workspace_discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/inspiration-primitives.html">Inspiration primitives (host import guide)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/job-lanes.html">Job lanes and JobLaneBroker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/node-components.html">Node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/stepped-graph-execution.html">Stepped graph execution</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dependency-injection.html">Dependency injection requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/durable-graph-generators.html">Durable graph generators (driven execution)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/dynamic-tool-graph.html">Dynamic tool graph and node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/event-analytics-schema.html">Event analytics schema requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/host-integration.html">Host integration requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/job-lane-broker.html">Job lanes and JobLaneBroker (JL-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/repository-secrets-hygiene.html">Repository secrets and local-config hygiene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/stepped-graph-execution.html">Stepped graph execution (SG-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements/transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ai-assistant-host-friction-inspiration.html">AI assistant project host-friction inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ai-assistant-host-friction-requirements-map.html">AI assistant project host-friction requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev-blog-inspiration.html">Developer Blog Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="durable-graph-generators-inversion-of-control.html">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="durable-graph-generators-requirements-map.html">Durable graph generators requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eval-research.html">MechaHarness Eval Research Brief</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fineenvs-mh-mhrl-requirements-map.html">FineEnvs multi-harness RL requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gastronomic-guided-development.html">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gastronomic-guided-development-execution-plan.html">Cursor execution plan: Gastronomic guided development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jev-typed-judgment-inspiration.html">Jev typed-judgment inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jev-typed-judgment-requirements-map.html">Jev typed-judgment requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html">Multi-Harness RL Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#recommended-architecture-additions">Recommended architecture additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#ownership-boundary-mechaharness-vs-the-ai-assistant-host">Ownership boundary: MechaHarness vs the AI assistant host</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#priority">Priority</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#acceptance-direction-sketch">Acceptance-direction sketch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-harness-rl-inspiration.html#attribution">Attribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openai-dots-agent-safety-inspiration.html">Inspiration: OpenAI Dots, Scoped Execution and Agent Safety</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openai-dots-agent-safety-requirements-map.html">OpenAI Dots agent safety requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="personal-agent-reliability-inspiration.html">Inspiration: Reliable Personal Agent Execution Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="personal-agent-reliability-requirements-map.html">Personal agent reliability requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements-map.html">Inspiration requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-revising-recipe-evolution.html">Inspiration: Evaluation-driven evolution of composed recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="self-revising-recipe-requirements-map.html">Self-revising recipe evolution requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble.html">Trouble research and implementation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trouble: distinguish coordination from extra inference compute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="video-production-audited-infer-migration.html">Video production project → MechaHarness: audited infer-accept migration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="walkinglabs-eval-requirements-map.html">WalkingLabs + eval research requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="walkinglabs-harness-engineering-inspiration.html">WalkingLabs Harness Engineering inspiration for MechaHarness</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/research_helpers.html">Experimental research reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Trouble: distinguish coordination from extra inference compute</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/inspiration/trouble-compute-parity-2026-11-24.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trouble-distinguish-coordination-from-extra-inference-compute">
+<h1>Trouble: distinguish coordination from extra inference compute<a class="headerlink" href="#trouble-distinguish-coordination-from-extra-inference-compute" title="Link to this heading"></a></h1>
+<p>2026-11-24; TR-20261124-PACE; verification/evaluation/self-improvement; test_evaluation. Candidate acceptance extension, no production features.</p>
+<section id="source-dossier">
+<h2>Source dossier<a class="headerlink" href="#source-dossier" title="Link to this heading"></a></h2>
+<p>Trouble <a class="reference external" href="https://rl337.org/trouble/posts/2123839120854188303.html">20 Nov post 2123839120854188303</a> links <a class="reference external" href="https://github.com/mahmoudsajjadi/pace">PACE repository</a>, <a class="reference external" href="https://arxiv.org/abs/2611.17610v2">paper v2, 22 Nov</a> (original 13 Nov). Read repository README and current paper abstract; repository includes code/pace, evidence contrast tables and reproduction scripts. Source defines greedy single pass, independent sampled baseline, resource-matched/shared ceiling and compute-cost frontier as four progressively more informative comparison classes. Six resource dimensions distinguish reasoning, tokens, cost, latency, sample count and system constraints. A directional comparison credits improvement against a baseline allowed at least the declared resources; an equal-or-cheaper baseline that matches or beats the candidate weakens a coordination claim. Incomparable vectors need explicit treatment, not scalar averaging. The paper’s revised abstract reports 53 of 123 positive greedy comparisons become nonpositive against sampled baselines. Shared-evidence controlled experiment finds no clear advantage of vanilla debate over an equal-token self-consistency frontier; split-evidence debate beats a lower-budget pool but remains below placebo and chance. These are source findings, not universal multi-agent conclusions or locally reproduced benchmarks. Source README and paper revision report slightly different aggregate descriptions; use pinned v2 for numerical claims. Do not import external datasets or executable agents without review.</p>
+</section>
+<section id="repo-audit-and-fit">
+<h2>Repo audit and fit<a class="headerlink" href="#repo-audit-and-fit" title="Link to this heading"></a></h2>
+<p>MechaHarness has <a class="reference download internal" download="" href="../_downloads/86ee60686d76d6e4cf6a9a1b41179351/run_parity.py"><span class="xref download myst">run_parity.py</span></a> (blob a012ba8baa5be99ff94ac4a8ddbf9b080cb597d7) implementing equality over max tokens, turns, sampling, tools, retry/stop, timeout and context limits (MH-MHRL-12; taloneth_insp_run_parity). This is constraint parity, not measured resource dominance. <a class="reference download internal" download="" href="../_downloads/d1af71ad6e29e7305162cd721fdbb142/eval_trial.py"><span class="xref download myst">eval_trial.py</span></a> already distinguishes scored trials and cost/latency, pass&#64;k/pass^k; <a class="reference download internal" download="" href="../_downloads/0e5f9a7de92b975d265d3f0da71a4690/eval_matrix.py"><span class="xref download myst">eval_matrix.py</span></a> MH-MHRL-17 retains model/harness/task-family cell detail. <a class="reference download internal" download="" href="../_downloads/2c77dc4d3d5fe81f77ffcedfdd6d55d9/research.py"><span class="xref download myst">research.py</span></a> EXP-04 frozen protocol, budget, held-out gate and promotion. <a class="reference internal" href="../guides/gastronomic-comparison.html"><span class="std std-doc">gastronomic comparison guide</span></a>, <a class="reference download internal" download="" href="../_downloads/af82eb5bbfe05d7c0fa8c05910b06bdd/gastronomic_comparison.py"><span class="xref download myst">gastronomic_comparison.py</span></a>, and <a class="reference download internal" download="" href="../_downloads/c2619d5ac835ed80d7238f4ae951ee60/test_gastronomic_comparison.py"><span class="xref download myst">tests</span></a> already compare matched budget/model across A/B, preserve token counts and do not auto-declare winner. Existing Fangore story fangore_gastronomic_comparison_trial is the most concrete extension point. No observed generic acceptance for independent sampled arm plus measured directional resource feasibility across coordination variants. Coverage C, not replacement of those APIs. Open PRs #58–60 cover authorization, prefix attribution and harness fidelity, not this comparison; June #29 already proposes matched workflow comparison, can consume the shared generic contract rather than duplicating it. No new June story in this pass.</p>
+</section>
+<section id="mh-pace-01-provisional-amendment-coordination-benefit-at-declared-resource-parity">
+<h2>MH-PACE-01 (provisional amendment): coordination benefit at declared resource parity<a class="headerlink" href="#mh-pace-01-provisional-amendment-coordination-benefit-at-declared-resource-parity" title="Link to this heading"></a></h2>
+<p>As a graph author experimenting with council/debate/fan-out recipes, I want an independent sampled baseline at a declared whole-task resource budget, so added compute is not mistaken for coordination benefit.
+Frozen task manifest, evaluator, base model, accessible evidence, seed panel, token/cost/latency/sample constraints and arm fingerprints. Arm A single pass; B independently sample same evidence and aggregate with a fixed predeclared rule; C communicate under the same resource ceiling; optional frontier of B sample budgets. Count coordinator, critic, repair, aggregation and retries; avoid counting cached tokens as zero resource by default; record actual usage and configured cap separately. Don’t use candidate to choose held-out examples or give it different evidence unless that is an explicitly separate experiment.</p>
+<p>Proposed Fangore and library assertions:</p>
+<ol class="arabic simple">
+<li><p>Synthetic scored fixture A=0.50, B=0.75, C=0.75 at equal actual declared token totals for B/C: improvement over A alone is not evidence of coordination benefit. A/B/C report links and evaluator fingerprint retained. Values illustrative only.</p></li>
+<li><p>Candidate higher success than cheaper B alone: no parity benefit claim unless appropriate resource-matched comparator supports it. Candidate higher success than a baseline using at least its declared resources, all other required constraints comparable, qualifies for a <em>comparison finding</em>, not automatic generalization or promotion. Candidate using more tokens but less elapsed time: declare incomparable in vector dimensions unless protocol explicitly sets shared ceilings or frontier policy. Null usage is unknown, never zero; mismatched units or unmetered provider reasoning need explicit unknown.</p></li>
+<li><p>Independent sampled arm must have no peer communication, fresh contexts and declared aggregation; verify trace edges, not model self-report. Keep aggregation cost. Positive control with complementary evidence is a separate experiment with evidence-access labels, placebo or noncommunication comparator; do not pool with shared-evidence outcomes.</p></li>
+<li><p>Retry, interrupted execution, duplicate run IDs: retain attempt lineage, count incurred compute, no duplicate scored trials. Infrastructure/verifier failure is unscored by existing taxonomy, not successful coordination or zero spend. Freeze held-out split and never auto-promote based on this report alone.</p></li>
+<li><p>Report per-task outcome and per-dimension budget, observed resource vector, comparison eligibility, uncertainty/paired sample counts and trace refs; positive and negative results retained. Existing run parity remains appropriate for strict same-config comparisons. Deterministic mock fixtures for decision logic; opt-in actual model runs only for empirical claims.</p></li>
+</ol>
+</section>
+<section id="implementation-investigation">
+<h2>Implementation investigation<a class="headerlink" href="#implementation-investigation" title="Link to this heading"></a></h2>
+<p>Extend existing eval matrix/research protocol or a small comparison report function, reuse gastronomic trial assembly and budget ledger. Avoid a second task runner. Decide how provider-hidden reasoning tokens, cached vs uncached tokens, parallel wall time, monetary and compute units are represented; PACE dimensions are guidance, not required identical fields. Use actual token counts with documented semantics and missing values; system constraints separate from additive quantities. Inspect current story fixtures and canonical requirements map before promotion, extend Fangore/taloneth as appropriate. June can link its JN-WF-01 to this dossier after adoption. Source experiments and local test suites not run; no native story fixture added or production code changed.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trouble.html" class="btn btn-neutral float-left" title="Trouble research and implementation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="video-production-audited-infer-migration.html" class="btn btn-neutral float-right" title="Video production project → MechaHarness: audited infer-accept migration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

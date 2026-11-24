@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dependency injection requirements &mdash; MechaHarness 0.18.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=7bac4596" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Durable graph generators (driven execution)" href="durable-graph-generators.html" />
+    <link rel="prev" title="Stepped graph execution" href="../reference/stepped-graph-execution.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0066cc" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MechaHarness
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/install.html">Install &amp; quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/dependency-injection.html">Dependency injection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/openai-local.html">Local OpenAI-compat backend (<code class="docutils literal notranslate"><span class="pre">openai_local</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/agent-skills.html">Agent skills for your project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/user-stories.html">User stories</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guides/coding-delegate-suites.html">Coding-delegate suites (development graph)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/release-preparation.html">Prepare and publish a release</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/gastronomic-comparison.html">Gastronomic comparison protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/authoring-user-stories.html">Write an acceptance story</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/access.html">Access control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api.html">HTTP API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/budget.html">Budget (soft / hard spend)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli-universe.html">CLI universe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cost.html">Cost</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/durable-graph-generators.html">Durable graph generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/events.html">Event log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/graph-templates.html">Graph templates and Agentic Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/audited-infer-accept.html">Audited infer-accept (<code class="docutils literal notranslate"><span class="pre">audited_infer_accept</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/bounded-retry.html">Bounded retry (<code class="docutils literal notranslate"><span class="pre">bounded_retry</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-decomposition.html">Template: change_decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-execution.html">Template: change_execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/change-verification.html">Template: change_verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/contract-extraction.html">Template: contract_extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/conversational-tool-loop.html">Conversational tool loop (<code class="docutils literal notranslate"><span class="pre">conversational_tool_loop</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/decision-plane.html">Typed decision plane (<code class="docutils literal notranslate"><span class="pre">decision_plane</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/development-acceptance.html">Template: development_acceptance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/environment-repair.html">Template: environment_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/failure-diagnosis.html">Template: failure_diagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/fan-out-aggregate.html">Template: fan_out_aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-comparison.html">Template: gastronomic_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/gastronomic-guided-development.html">Template: gastronomic_guided_development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/guided-coding.html">Guided coding (<code class="docutils literal notranslate"><span class="pre">guided_coding</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/independent-review.html">Template: independent_review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/instruction-todo-plan.html">Instruction todo plan (<code class="docutils literal notranslate"><span class="pre">instruction_todo_plan</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/produce-critique-refine.html">Template: produce_critique_refine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/safety-eval.html">Template: safety_eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/strategy-revision.html">Template: strategy_revision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/verify-repair.html">Template: verify_repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/graph-templates/workspace-discovery.html">Template: workspace_discovery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/inspiration-primitives.html">Inspiration primitives (host import guide)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/job-lanes.html">Job lanes and JobLaneBroker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/judge.html">Judge (<code class="docutils literal notranslate"><span class="pre">judge()</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/node-components.html">Node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/stepped-graph-execution.html">Stepped graph execution</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dependency injection requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="durable-graph-generators.html">Durable graph generators (driven execution)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynamic-tool-graph.html">Dynamic tool graph and node components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="event-analytics-schema.html">Event analytics schema requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="host-integration.html">Host integration requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="job-lane-broker.html">Job lanes and JobLaneBroker (JL-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipes-and-decision-plane.html">Reusable graph recipes and typed decision-plane requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="repository-secrets-hygiene.html">Repository secrets and local-config hygiene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepped-graph-execution.html">Stepped graph execution (SG-*)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transactional-durable-resume.html">Transactional durable graph resume requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/ai-assistant-host-friction-inspiration.html">AI assistant project host-friction inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/ai-assistant-host-friction-requirements-map.html">AI assistant project host-friction requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/dev-blog-inspiration.html">Developer Blog Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/durable-graph-generators-inversion-of-control.html">Inspiration: Inversion-of-Control Execution via Durable Graph Generators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/durable-graph-generators-requirements-map.html">Durable graph generators requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/eval-research.html">MechaHarness Eval Research Brief</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/fineenvs-mh-mhrl-requirements-map.html">FineEnvs multi-harness RL requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/gastronomic-guided-development.html">Inspiration: Gastronomic Guided Development (alternative to guided_coding)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/gastronomic-guided-development-execution-plan.html">Cursor execution plan: Gastronomic guided development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/jev-typed-judgment-inspiration.html">Jev typed-judgment inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/jev-typed-judgment-requirements-map.html">Jev typed-judgment requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html">Multi-Harness RL Inspiration for MechaHarness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#recommended-architecture-additions">Recommended architecture additions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#ownership-boundary-mechaharness-vs-the-ai-assistant-host">Ownership boundary: MechaHarness vs the AI assistant host</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#priority">Priority</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#acceptance-direction-sketch">Acceptance-direction sketch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/multi-harness-rl-inspiration.html#attribution">Attribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/openai-dots-agent-safety-inspiration.html">Inspiration: OpenAI Dots, Scoped Execution and Agent Safety</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/openai-dots-agent-safety-requirements-map.html">OpenAI Dots agent safety requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/personal-agent-reliability-inspiration.html">Inspiration: Reliable Personal Agent Execution Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/personal-agent-reliability-requirements-map.html">Personal agent reliability requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/requirements-map.html">Inspiration requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/self-revising-recipe-evolution.html">Inspiration: Evaluation-driven evolution of composed recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/self-revising-recipe-requirements-map.html">Self-revising recipe evolution requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/trouble.html">Trouble research and implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/trouble-compute-parity-2026-11-24.html">Trouble: distinguish coordination from extra inference compute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/video-production-audited-infer-migration.html">Video production project → MechaHarness: audited infer-accept migration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/walkinglabs-eval-requirements-map.html">WalkingLabs + eval research requirements map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inspiration/walkinglabs-harness-engineering-inspiration.html">WalkingLabs Harness Engineering inspiration for MechaHarness</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/mechaharness.html">mechaharness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/config.html">mechaharness.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/di.html">mechaharness.di</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/factory.html">mechaharness.factory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/completer.html">mechaharness.core.completer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">mechaharness.core.types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/contract.html">mechaharness.core.contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/events.html">mechaharness.core.events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/access.html">mechaharness.core.access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/environment.html">mechaharness.core.environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/inference.html">mechaharness.inference.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/research_helpers.html">Experimental research reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/harness.html">mechaharness.harness.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/tools.html">mechaharness.tools.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/graph_executor.html">mechaharness.graph_executor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/checkpoint_store.html">mechaharness.checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sqlite_checkpoint_store.html">mechaharness.sqlite_checkpoint_store</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/external_effect.html">mechaharness.external_effect</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0066cc" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MechaHarness</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Dependency injection requirements</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/rl337/mechaharness/blob/main/docs/requirements/dependency-injection.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dependency-injection-requirements">
+<h1>Dependency injection requirements<a class="headerlink" href="#dependency-injection-requirements" title="Link to this heading"></a></h1>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h2>
+<p>MechaHarness is a library hosts compose through pyiv. Shared edges (HTTP,
+environment, filesystem, clock, loggers, judge connection, event log) must be
+<strong>bound on Config and injected</strong>. Lazy attribute caches on Config
+(<code class="docutils literal notranslate"><span class="pre">getattr(self,</span> <span class="pre">&quot;_x&quot;,</span> <span class="pre">None)</span></code> / construct-if-missing) and <strong>Config <code class="docutils literal notranslate"><span class="pre">get_*</span></code>
+composition</strong> (one hook calling another to pull a collaborator) hide missing
+wiring, make tests patch globals, and turn Config into a service locator.</p>
+<p>Normative MUST/SHOULD below apply to library code under <code class="docutils literal notranslate"><span class="pre">src/mechaharness/</span></code>
+and to reference tests. Host apps SHOULD follow the same pattern.</p>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<section id="di-01-config-is-the-binding-surface">
+<h3>DI-01: Config is the binding surface<a class="headerlink" href="#di-01-config-is-the-binding-surface" title="Link to this heading"></a></h3>
+<p>Every shared service MechaHarness constructs for hosts MUST be registered in
+<code class="docutils literal notranslate"><span class="pre">MechaHarnessConfig.configure()</span></code> (or a subclass <code class="docutils literal notranslate"><span class="pre">configure()</span></code> that calls
+<code class="docutils literal notranslate"><span class="pre">super().configure()</span></code> first) via <code class="docutils literal notranslate"><span class="pre">register</span></code> / <code class="docutils literal notranslate"><span class="pre">register_instance</span></code> / map
+multibind helpers.</p>
+<p>Hosts MUST subclass Config (or use <code class="docutils literal notranslate"><span class="pre">run()</span></code> / host kit) rather than
+hand-constructing harness families or stitching services outside the injector.</p>
+</section>
+<section id="di-02-consume-by-injection-fail-if-unbound">
+<h3>DI-02: Consume by injection; fail if unbound<a class="headerlink" href="#di-02-consume-by-injection-fail-if-unbound" title="Link to this heading"></a></h3>
+<p>Dependents MUST receive shared services through constructor injection or
+<code class="docutils literal notranslate"><span class="pre">injector.inject(T)</span></code>.</p>
+<p>If a type is not bound, resolution MUST fail at inject time. Library code MUST
+NOT silently construct a default instance outside <code class="docutils literal notranslate"><span class="pre">configure()</span></code> to paper over a
+missing binding.</p>
+</section>
+<section id="di-03-no-getattr-hasattr-service-caches-on-config">
+<span id="di-03-no-getattrhasattr-service-caches-on-config"></span><h3>DI-03: No getattr/hasattr service caches on Config<a class="headerlink" href="#di-03-no-getattr-hasattr-service-caches-on-config" title="Link to this heading"></a></h3>
+<p>Config MUST NOT memoize injectables with patterns such as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_filesystem"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">existing</span> <span class="o">=</span> <span class="n">RealFilesystem</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_filesystem</span> <span class="o">=</span> <span class="n">existing</span>
+<span class="k">return</span> <span class="n">existing</span>
+</pre></div>
+</div>
+<p>pyiv singleton (or equivalent) registration is the reuse mechanism. Template
+hooks (<code class="docutils literal notranslate"><span class="pre">get_inference_class()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_harness_class()</span></code>, policy/registry hooks)
+MAY return a <strong>class or explicit instance for binding</strong>; they MUST NOT stash
+constructed services on <code class="docutils literal notranslate"><span class="pre">self</span></code> for later <code class="docutils literal notranslate"><span class="pre">get_*</span></code> reuse as a locator.</p>
+</section>
+<section id="di-04-collaborators-come-from-the-injector-not-sibling-get">
+<span id="di-04-collaborators-come-from-the-injector-not-sibling-get_"></span><h3>DI-04: Collaborators come from the injector, not sibling <code class="docutils literal notranslate"><span class="pre">get_*</span></code><a class="headerlink" href="#di-04-collaborators-come-from-the-injector-not-sibling-get" title="Link to this heading"></a></h3>
+<p>Any hook, factory, or type that needs another injectable MUST obtain it via
+constructor injection or <code class="docutils literal notranslate"><span class="pre">injector.inject(T)</span></code>.</p>
+<p>It MUST NOT call sibling Config methods such as <code class="docutils literal notranslate"><span class="pre">self.get_event_log()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">self.get_environment()</span></code>, <code class="docutils literal notranslate"><span class="pre">self.get_datetime_service()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">self.get_logger_factory()</span></code>, <code class="docutils literal notranslate"><span class="pre">self.get_access_control()</span></code>, or similar to supply
+constructor arguments.</p>
+<p>Examples of shapes that MUST be retired (and MUST NOT be added):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Consumer</p></th>
+<th class="head"><p>Forbidden collaborator pull</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_event_log</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self.get_logger_factory()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_access_control</span></code> / <code class="docutils literal notranslate"><span class="pre">get_cost_accountant</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self.get_event_log()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_judge_connection</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self.get_environment()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_checkpoint_store</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self.get_event_log()</span></code>, <code class="docutils literal notranslate"><span class="pre">self.get_datetime_service()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_linkage_resolver</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self.get_node_runner_registry()</span></code>, <code class="docutils literal notranslate"><span class="pre">self.get_access_control()</span></code>, …</p></td>
+</tr>
+</tbody>
+</table>
+<p>Rewrite as registered classes or injector factories whose constructors take
+those types as parameters.</p>
+</section>
+<section id="di-05-settings-stay-slim">
+<h3>DI-05: Settings stay slim<a class="headerlink" href="#di-05-settings-stay-slim" title="Link to this heading"></a></h3>
+<p>Lane- and provider-specific knobs belong on the owning injectable (connection
+config, strategy/provider, host tool module), not as a growing bag on
+<code class="docutils literal notranslate"><span class="pre">Settings</span></code>. Providers (<code class="docutils literal notranslate"><span class="pre">JudgeProvider</span></code>, <code class="docutils literal notranslate"><span class="pre">InferenceStrategy</span></code>, media providers)
+MUST NEVER be Settings attributes. See <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code> and the
+<code class="docutils literal notranslate"><span class="pre">di-config-ownership</span></code> skill.</p>
+</section>
+<section id="di-06-stdlib-and-http-edges-are-first-class-injectables">
+<h3>DI-06: Stdlib and HTTP edges are first-class injectables<a class="headerlink" href="#di-06-stdlib-and-http-edges-are-first-class-injectables" title="Link to this heading"></a></h3>
+<p>At minimum, Config MUST bind (defaults MAY be production implementations):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Interface</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Environment</span></code></p></td>
+<td><p>Process env for <code class="docutils literal notranslate"><span class="pre">from_env</span></code> / operator knobs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code></p></td>
+<td><p>UTC stamps (checkpoints, effects)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Filesystem</span></code></p></td>
+<td><p>Decision JSONL and host paths</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Clock</span></code></p></td>
+<td><p>Monotonic time / sleep coordination</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LoggerFactory</span></code></p></td>
+<td><p>Structured logging for <code class="docutils literal notranslate"><span class="pre">LoggingEventLog</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AsyncHttpClient</span></code></p></td>
+<td><p>Inference and judge HTTP transport</p></td>
+</tr>
+</tbody>
+</table>
+<p>Hosts and tests replace these by rebinding in Config (hooks that change what
+<code class="docutils literal notranslate"><span class="pre">configure()</span></code> registers, <code class="docutils literal notranslate"><span class="pre">register_instance</span></code>, or <code class="docutils literal notranslate"><span class="pre">pyiv.override</span></code>), not by
+monkeypatching <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>, freezing wall clocks, or writing to real disk when
+an injectable exists.</p>
+</section>
+<section id="di-07-tests-prefer-di-doubles-over-global-patches">
+<h3>DI-07: Tests prefer DI doubles over global patches<a class="headerlink" href="#di-07-tests-prefer-di-doubles-over-global-patches" title="Link to this heading"></a></h3>
+<p>Reference and unit tests that exercise env, time, files, HTTP, loggers, model
+runners, backoff/sleep, or effect adapters MUST bind doubles through Config /
+override rather than patching process globals — except where no injectable seam
+exists yet (then add a binding, do not grow patch surface).</p>
+</section>
+<section id="di-08-get-hooks-declare-bindings-only">
+<span id="di-08-get_-hooks-declare-bindings-only"></span><h3>DI-08: <code class="docutils literal notranslate"><span class="pre">get_*</span></code> hooks declare bindings only<a class="headerlink" href="#di-08-get-hooks-declare-bindings-only" title="Link to this heading"></a></h3>
+<p>Remaining <code class="docutils literal notranslate"><span class="pre">get_*</span></code> hooks on Config MUST be limited to declaring <strong>what</strong>
+<code class="docutils literal notranslate"><span class="pre">configure()</span></code> should register (a class, or an explicit host/test instance).
+After registration, the approved read path for that service is injection.
+New library code MUST NOT treat Config hooks as a service locator API.</p>
+</section>
+</section>
+<section id="testing-requirements">
+<h2>Testing requirements<a class="headerlink" href="#testing-requirements" title="Link to this heading"></a></h2>
+<section id="di-test-01-unbound-inject-fails">
+<h3>DI-TEST-01: Unbound inject fails<a class="headerlink" href="#di-test-01-unbound-inject-fails" title="Link to this heading"></a></h3>
+<p>A test MUST show that requesting an unbound injectable raises rather than
+constructing a hidden default.</p>
+</section>
+<section id="di-test-02-overlay-hook-doubles">
+<span id="di-test-02-overlay--hook-doubles"></span><h3>DI-TEST-02: Overlay / hook doubles<a class="headerlink" href="#di-test-02-overlay-hook-doubles" title="Link to this heading"></a></h3>
+<p>A test MUST show Memory/Mock (or equivalent) doubles for at least one stdlib
+edge and HTTP client via Config overlay or hook, without <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> of
+<code class="docutils literal notranslate"><span class="pre">os.environ</span></code> / filesystem / time for that path.</p>
+</section>
+<section id="di-test-03-composed-services-inject-collaborators">
+<h3>DI-TEST-03: Composed services inject collaborators<a class="headerlink" href="#di-test-03-composed-services-inject-collaborators" title="Link to this heading"></a></h3>
+<p>A test MUST prove that at least one composed default (e.g. checkpoint store or
+access control) receives a rebound collaborator (<code class="docutils literal notranslate"><span class="pre">EventLog</span></code>,
+<code class="docutils literal notranslate"><span class="pre">DateTimeService</span></code>, or <code class="docutils literal notranslate"><span class="pre">Environment</span></code>) through the injector when the collaborator
+binding is overridden — without the composed hook calling <code class="docutils literal notranslate"><span class="pre">self.get_*</span></code> for that
+collaborator once the DI-04 rewrite lands.</p>
+</section>
+</section>
+<section id="related">
+<h2>Related<a class="headerlink" href="#related" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Guide: <a class="reference internal" href="../guides/dependency-injection.html"><span class="std std-doc">Dependency injection</span></a></p></li>
+<li><p>Architecture: <a class="reference internal" href="../architecture.html"><span class="std std-doc">Architecture — Dependency injection</span></a></p></li>
+<li><p>Skill: <code class="docutils literal notranslate"><span class="pre">.cursor/skills/di-config-ownership/SKILL.md</span></code></p></li>
+<li><p>Rule: <code class="docutils literal notranslate"><span class="pre">.cursor/rules/di-first.mdc</span></code></p></li>
+<li><p>Recipe tests: <a class="reference internal" href="recipes-and-decision-plane.html"><span class="std std-doc">TEST-02 in recipes and decision plane</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../reference/stepped-graph-execution.html" class="btn btn-neutral float-left" title="Stepped graph execution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="durable-graph-generators.html" class="btn btn-neutral float-right" title="Durable graph generators (driven execution)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Richard Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
